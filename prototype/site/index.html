@@ -1,0 +1,699 @@
+<title>Бюджет на светло</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sofia+Sans:wght@400;500;600;700&family=Sofia+Sans+Condensed:wght@600;700;800&display=swap">
+<style>
+:root{
+  --bg:#F5F7FA; --surface:#FFFFFF; --sunk:#EEF2F6; --ink:#15202B; --muted:#586575; --line:#DAE1E8;
+  --accent:#E3A008; --accent-soft:#FDF3D7; --accent-ink:#7A5300;
+  --data:#2F5D9A; --data-2:#9DB9DD; --data-3:#C9D6E6;
+  --ok:#2E7D4F; --ok-soft:#E3F2E8; --warn:#A8670A; --warn-soft:#FBEFD9; --unk:#8A5A6B; --unk-soft:#F4E8EC;
+  --shadow:0 1px 2px rgba(21,32,43,.06),0 4px 16px rgba(21,32,43,.06);
+  --display:"Sofia Sans Condensed","Sofia Sans","Arial Narrow",system-ui,sans-serif;
+  --body:"Sofia Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0E141B; --surface:#151E28; --sunk:#1B2632; --ink:#E6EDF3; --muted:#9AA8B6; --line:#283543;
+    --accent:#F2B92E; --accent-soft:#3A2F12; --accent-ink:#F5CB64;
+    --data:#7FA8E0; --data-2:#3F6497; --data-3:#2A3D57;
+    --ok:#6CC08F; --ok-soft:#173226; --warn:#E3A94A; --warn-soft:#3A2C12; --unk:#D59AAE; --unk-soft:#3A2230;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 16px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0E141B; --surface:#151E28; --sunk:#1B2632; --ink:#E6EDF3; --muted:#9AA8B6; --line:#283543;
+  --accent:#F2B92E; --accent-soft:#3A2F12; --accent-ink:#F5CB64;
+  --data:#7FA8E0; --data-2:#3F6497; --data-3:#2A3D57;
+  --ok:#6CC08F; --ok-soft:#173226; --warn:#E3A94A; --warn-soft:#3A2C12; --unk:#D59AAE; --unk-soft:#3A2230;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 16px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.num,.tab{font-variant-numeric:tabular-nums}
+h1,h2,h3{font-family:var(--display);line-height:1.1;text-wrap:balance;margin:0}
+h1{font-size:clamp(2rem,4.2vw,2.9rem);font-weight:800;letter-spacing:-.01em}
+h2{font-size:1.45rem;font-weight:700}
+h3{font-size:1.1rem;font-weight:700}
+p{margin:0}
+.muted{color:var(--muted)}
+.eyebrow{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+
+/* shell */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;align-items:center;gap:12px;padding:10px 20px;background:var(--surface);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-family:var(--display);font-weight:800;font-size:1.25rem;letter-spacing:.01em}
+.brand-mark{width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#FFF6D8 0,var(--accent) 55%,#B57A00 100%);box-shadow:0 0 0 4px var(--accent-soft)}
+.demo-pill{font-size:.78rem;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent-ink);white-space:nowrap}
+.spacer{flex:1}
+.src-toggle{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;cursor:pointer;font-size:.88rem;font-weight:600}
+.src-toggle .dot{width:30px;height:18px;border-radius:9px;background:var(--line);position:relative;transition:background .2s}
+.src-toggle .dot::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--surface);transition:transform .2s}
+.src-toggle[aria-pressed="true"] .dot{background:var(--accent)}
+.src-toggle[aria-pressed="true"] .dot::after{transform:translateX(12px)}
+.layout{display:grid;grid-template-columns:250px minmax(0,1fr);max-width:1320px;margin:0 auto}
+.nav{position:sticky;top:57px;align-self:start;height:calc(100vh - 57px);overflow:auto;padding:18px 14px 30px;border-right:1px solid var(--line)}
+.nav a{display:block;text-decoration:none;padding:8px 12px;border-radius:8px;font-weight:500;color:var(--muted);line-height:1.3}
+.nav a:hover{background:var(--sunk);color:var(--ink)}
+.nav a[aria-current="page"]{background:var(--accent-soft);color:var(--ink);font-weight:700}
+.nav .group{margin:14px 12px 6px}
+.nav .phase{font-size:.72rem;font-weight:700;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:0 5px;margin-left:6px;vertical-align:1px}
+main{padding:28px clamp(16px,3vw,40px) 90px;min-width:0}
+.page{max-width:1040px;display:grid;gap:28px}
+.lede{font-size:1.15rem;max-width:62ch}
+.tabbar{display:none}
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr}
+  .nav{display:none}
+  .demo-pill{display:none}
+  .tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px))}
+  .tabbar a{flex:1;text-align:center;text-decoration:none;font-size:.78rem;font-weight:600;color:var(--muted);padding:8px 4px;border-radius:8px}
+  .tabbar a[aria-current="page"]{color:var(--ink);background:var(--accent-soft)}
+  .topbar{padding:10px 16px}
+  .src-toggle span.lbl{display:none}
+}
+
+/* blocks */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;box-shadow:var(--shadow);min-width:0}
+.panel-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+@media (max-width:900px){.grid-3,.grid-4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.grid-3,.grid-2,.grid-4{grid-template-columns:1fr}#expChartWrap{grid-template-columns:1fr!important}}
+.kpi .label{font-size:.9rem;color:var(--muted);font-weight:600}
+.kpi .value{font-family:var(--display);font-weight:800;font-size:2.2rem;line-height:1.05;margin-top:4px;font-variant-numeric:tabular-nums}
+.kpi .value small{font-size:1rem;font-weight:700;margin-left:4px}
+.kpi .sub{font-size:.9rem;color:var(--muted);margin-top:6px}
+.sentence{font-family:var(--display);font-weight:700;font-size:clamp(1.45rem,2.9vw,2.05rem);line-height:1.25;max-width:34ch}
+.sentence b{color:var(--accent-ink);font-weight:800;white-space:nowrap}
+.scope{display:inline-flex;gap:6px;align-items:center;font-size:.8rem;font-weight:600;color:var(--muted);border:1px dashed var(--line);border-radius:6px;padding:2px 8px}
+
+/* progress */
+.prog{display:grid;gap:14px}
+.prog-row{display:grid;grid-template-columns:110px minmax(0,1fr) 70px;gap:12px;align-items:center}
+.bar{position:relative;height:14px;background:var(--sunk);border-radius:7px;overflow:visible}
+.bar > i{position:absolute;inset:0 auto 0 0;background:var(--data);border-radius:7px}
+.bar .mark{position:absolute;top:-6px;bottom:-6px;width:2px;background:var(--accent)}
+.bar .mark span{position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:.72rem;font-weight:700;color:var(--accent-ink);white-space:nowrap}
+.prog-row .pct{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+
+/* question cards */
+.qcards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:900px){.qcards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.qcards{grid-template-columns:1fr}}
+.qcard{display:grid;gap:4px;text-decoration:none;padding:16px;border-radius:10px;border:1px solid var(--line);background:var(--surface);transition:border-color .15s,transform .15s}
+.qcard:hover{border-color:var(--accent);transform:translateY(-1px)}
+.qcard b{font-family:var(--display);font-size:1.15rem}
+.qcard span{font-size:.9rem;color:var(--muted)}
+.qcard.p2{opacity:.6}
+
+/* source badges */
+.src{display:none;margin:-4px 0 12px;font-size:.82rem;line-height:1.35;padding:6px 10px;border-radius:6px;border-left:3px solid}
+body.show-src .src{display:flex;gap:8px;align-items:flex-start}
+.src b{white-space:nowrap}
+.src[data-st="ok"]{background:var(--ok-soft);border-color:var(--ok)}
+.src[data-st="ok"] b{color:var(--ok)}
+.src[data-st="warn"]{background:var(--warn-soft);border-color:var(--warn)}
+.src[data-st="warn"] b{color:var(--warn)}
+.src[data-st="unk"]{background:var(--unk-soft);border-color:var(--unk)}
+.src[data-st="unk"] b{color:var(--unk)}
+.st{display:inline-block;font-size:.75rem;font-weight:700;padding:1px 8px;border-radius:999px;white-space:nowrap}
+.st.ok{background:var(--ok-soft);color:var(--ok)}
+.st.warn{background:var(--warn-soft);color:var(--warn)}
+.st.unk{background:var(--unk-soft);color:var(--unk)}
+
+/* charts & tables */
+.chart{width:100%;height:340px}
+.chart.tall{height:420px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:6px 12px;cursor:pointer;font-size:.88rem;font-weight:600;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.95rem}
+th{text-align:left;font-size:.78rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:8px 10px;border-bottom:1px solid var(--line)}
+td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+td.r,th.r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.sub td:first-child{padding-left:28px;color:var(--muted)}
+.hbar{height:8px;background:var(--sunk);border-radius:4px;margin-top:6px;min-width:60px}
+.hbar i{display:block;height:100%;background:var(--data);border-radius:4px}
+
+/* stacked 100 bar */
+.stack{display:flex;height:48px;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.stack > div{display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;color:#fff;min-width:0;white-space:nowrap;overflow:hidden}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:12px;font-size:.88rem}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:2px;display:inline-block}
+
+details.row{border-bottom:1px solid var(--line);padding:10px 0}
+details.row summary{cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:14px;align-items:baseline;list-style:none;font-weight:600}
+details.row summary::-webkit-details-marker{display:none}
+details.row summary::before{content:"▸";color:var(--muted);margin-right:6px;display:inline-block;transition:transform .15s}
+details.row[open] summary::before{transform:rotate(90deg)}
+details.row .body{padding:8px 0 4px 18px;color:var(--muted);display:grid;gap:4px;max-width:70ch}
+
+/* list rows (ministries) */
+.search{width:100%;max-width:380px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.mlist{display:grid}
+.mrow{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:4px 16px;padding:10px 4px;border-bottom:1px solid var(--line);text-decoration:none;align-items:center}
+.mrow:hover{background:var(--sunk)}
+.mrow .nm{font-weight:600}
+.mrow .amt{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.mrow .hbar{grid-column:1 / -1;margin-top:0}
+.mrow .tag{font-size:.75rem;color:var(--muted);font-weight:600}
+
+/* calculator */
+.calc{display:grid;grid-template-columns:300px minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:900px){.calc{grid-template-columns:1fr}}
+.field{display:grid;gap:6px;margin-bottom:14px}
+.field label{font-weight:600;font-size:.92rem}
+.field input[type="number"]{padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-size:1.1rem;font-variant-numeric:tabular-nums;width:100%}
+.radio{display:grid;gap:6px}
+.radio label{display:flex;gap:8px;align-items:center;font-weight:500}
+.radio label.off{color:var(--muted)}
+.receipt{font-family:var(--body)}
+.receipt .line{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px dashed var(--line)}
+.receipt .line b{font-variant-numeric:tabular-nums}
+.receipt .total{font-family:var(--display);font-size:1.6rem;font-weight:800}
+.share{border:1px solid var(--line);border-radius:12px;padding:18px;background:linear-gradient(135deg,var(--accent-soft),var(--surface) 70%)}
+.share p{font-family:var(--display);font-size:1.3rem;font-weight:700;line-height:1.3}
+
+/* map */
+.mapgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:900px){.mapgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.mapgrid{grid-template-columns:1fr}}
+.mapcard{display:grid;gap:8px;text-decoration:none;border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--surface)}
+.mapcard:hover{border-color:var(--accent)}
+.mapcard .top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.mapcard b{font-family:var(--display);font-size:1.1rem}
+.mapcard .kind{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.mapcard .st-row{display:flex;gap:6px;flex-wrap:wrap}
+ol.qs{margin:0;padding-left:22px;display:grid;gap:8px;max-width:75ch}
+.note{font-size:.88rem;color:var(--muted);max-width:75ch}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 14px;border-radius:0 8px 8px 0;max-width:75ch}
+.p2box{border:1px dashed var(--line);border-radius:12px;padding:24px;background:var(--sunk)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div lang="bg">
+<header class="topbar">
+  <a class="brand" href="#/"><span class="brand-mark" aria-hidden="true"></span>Бюджет на светло</a>
+  <span class="demo-pill">Прототип v1 · реални и примерни данни</span>
+  <span class="spacer"></span>
+  <button class="src-toggle" id="srcToggle" type="button" aria-pressed="false" aria-label="Покажи източниците"><span class="dot" aria-hidden="true"></span><span class="lbl">Покажи източниците</span></button>
+</header>
+<div class="layout">
+  <nav class="nav" id="nav" aria-label="Раздели"></nav>
+  <main id="main" tabindex="-1"></main>
+</div>
+<nav class="tabbar" id="tabbar" aria-label="Основни раздели"></nav>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+<script>
+"use strict";
+const ZDB = [{"art":2,"name":"съдебната власт","rev":66468.0,"exp":762033.0,"items":[]},{"art":3,"name":"Народното събрание","rev":971.5,"exp":63167.0,"items":[]},{"art":4,"name":"Сметната палата","rev":35.8,"exp":23180.5,"items":[]},{"art":5,"name":"Администрацията на президента","rev":null,"exp":6595.1,"items":[]},{"art":6,"name":"Министерския съвет","rev":11071.5,"exp":123662.4,"items":[{"n":"1","name":"Област „Осигуряване дейността и организацията на работата на Министерския съвет“","k":11756.5},{"n":"2","name":"Политика в областта на управлението на средствата от ЕС","k":275.1},{"n":"3","name":"Политика в областта на осъществяването на държавните функции на територията на областите в България","k":27697.7},{"n":"4","name":"Политика в областта на правото на вероизповедание","k":36741.3},{"n":"5","name":"Политика в областта на архивното дело","k":8395.9},{"n":"6","name":"Бюджетна програма „Администрация“","k":18749.9},{"n":"7","name":"Други бюджетни програми (общо), в т.ч.:","k":20046.0},{"n":"7.1","name":"Бюджетна програма „Други дейности и услуги“","k":12067.9},{"n":"7.2","name":"Бюджетна програма „Убежище и бежанци“","k":7978.1}]},{"art":7,"name":"Конституционния съд","rev":null,"exp":5122.5,"items":[]},{"art":8,"name":"Омбудсмана","rev":null,"exp":2632.6,"items":[]},{"art":9,"name":"Министерството на финансите","rev":400054.0,"exp":409151.9,"items":[{"n":"1","name":"Политика в областта на устойчивите и прозрачни публични финанси","k":46687.4},{"n":"2","name":"Политика в областта на ефективното събиране на всички държавни приходи","k":298713.2},{"n":"3","name":"Политика в областта на защитата на обществото и икономиката от финансови измами, контрабанда на стоки, изпиране на пари и финансиране на тероризма","k":40829.0},{"n":"4","name":"Политика в областта на управлението на дълга","k":3531.4},{"n":"5","name":"Бюджетна програма „Администрация“","k":19390.9}]},{"art":10,"name":"Министерството на външните работи","rev":28161.0,"exp":138619.3,"items":[{"n":"1","name":"Политика в областта на активната двустранна и многостранна дипломация","k":136897.0},{"n":"2","name":"Политика в областта на публичната дипломация и публичните дейности в подкрепа на целите на външната политика","k":927.3},{"n":"3","name":"Политика в областта на подкрепата за българските общности и лицата с българско самосъзнание зад граница","k":795.0}]},{"art":11,"name":"Министерството на отбраната","rev":72497.8,"exp":2568607.9,"items":[{"n":"1","name":"Политика в областта на отбранителните способности","k":2476552.2},{"n":"2","name":"Политика в областта на съюзната и международната сигурност","k":92055.7}]},{"art":12,"name":"Министерството на вътрешните работи","rev":215907.4,"exp":2115233.2,"items":[{"n":"1","name":"Политика в областта на противодействието на престъпността и опазването на обществения ред","k":1225550.2},{"n":"2","name":"Политика в областта на защитата на границите и контрол на миграционните процеси","k":325396.0},{"n":"3","name":"Политика в областта на пожарната безопасност и защитата на населението при извънредни ситуации","k":351618.0},{"n":"4","name":"Политика в областта на управлението и развитието на системата на Министерството на вътрешните работи","k":212669.0}]},{"art":13,"name":"Министерството на правосъдието","rev":52575.8,"exp":360030.3,"items":[{"n":"1","name":"Политика в областта на правосъдието","k":126975.3},{"n":"2","name":"Политика в областта на изпълнение на наказанията","k":226043.1},{"n":"3","name":"Бюджетна програма „Администрация“","k":7011.9}]},{"art":14,"name":"Министерството на труда и социалната политика","rev":28404.3,"exp":2112455.5,"items":[{"n":"1","name":"Политика в областта на пазара на труда, свободното движение на работници и трудовата миграция","k":85286.0},{"n":"2","name":"Политика в областта на трудовите отношения","k":18346.4},{"n":"3","name":"Политика в областта на социалното подпомагане и равнопоставеността на жените и мъжете","k":216912.5},{"n":"4","name":"Политика в областта на хората с увреждания","k":1364484.6},{"n":"5","name":"Политика в областта на социалното включване","k":417867.9},{"n":"6","name":"Политика в областта на жизненото равнище, демографското развитие и социалните инвестиции","k":740.8},{"n":"7","name":"Бюджетна програма „Администрация“","k":8817.3}]},{"art":15,"name":"Министерството на здравеопазването","rev":22236.5,"exp":646423.2,"items":[{"n":"1","name":"Политика в областта на промоцията, превенцията и контрола на общественото здраве","k":91268.3},{"n":"2","name":"Политика в областта на диагностиката и лечението","k":506645.0},{"n":"3","name":"Политика в областта на лекарствените продукти и медицинските изделия","k":26084.0},{"n":"4","name":"Бюджетна програма „Администрация“","k":22425.9}]},{"art":16,"name":"Министерството на образованието и науката","rev":4755.0,"exp":758408.4,"items":[{"n":"1","name":"Политика в областта на всеобхватното, достъпно и качествено предучилищно и училищно образование. Учене през целия живот","k":703080.7},{"n":"2","name":"Политика в областта на равен достъп до качествено висше образование и развитие на научния потенциал","k":48541.0},{"n":"3","name":"Бюджетна програма „Администрация“","k":6786.7}]},{"art":17,"name":"Министерството на културата","rev":27676.2,"exp":269051.7,"items":[{"n":"1","name":"Политика в областта на опазване на движимото и недвижимото културно наследство","k":26152.0},{"n":"2","name":"Политика в областта на създаване и популяризиране на съвременно изкуство в страната и в чужбина и достъп до качествено художествено образование","k":238720.7},{"n":"3","name":"Бюджетна програма „Администрация“","k":4179.0}]},{"art":18,"name":"Министерството на околната среда и водите","rev":26221.9,"exp":77774.1,"items":[{"n":"1","name":"Политика в областта на опазването и ползването на компонентите на околната среда","k":28831.9},{"n":"2","name":"Политика в областта на Националната система за мониторинг на околната среда и информационна обезпеченост","k":10853.8},{"n":"3","name":"Други бюджетни програми:","k":19497.9},{"n":"3.1","name":"Бюджетна програма „Дейности по метеорология, хидрология и агрометеорология“","k":19497.9},{"n":"4","name":"Бюджетна програма „Администрация“","k":18590.5}]},{"art":19,"name":"Министерството на икономиката, инвестициите и индустрията","rev":19368.0,"exp":71544.5,"items":[{"n":"1","name":"Политика в областта на устойчивото икономическо развитие и конкурентоспособност","k":58021.3},{"n":"2","name":"Политика в областта на ефективното външноикономическо сътрудничество","k":7704.9},{"n":"3","name":"Бюджетна програма „Администрация“","k":5818.3}]},{"art":20,"name":"Министерството на иновациите и дигиталната трансформация","rev":null,"exp":42188.7,"items":[{"n":"1","name":"Политика в областта на иновациите, технологичното и икономическото развитие","k":14255.6},{"n":"2","name":"Политика в областта на дигиталната трансформация на публичния сектор","k":22252.5},{"n":"3","name":"Бюджетна програма „Администрация“","k":5680.6}]},{"art":21,"name":"Министерството на енергетиката","rev":278192.0,"exp":43267.8,"items":[{"n":"1","name":"Политика в областта на устойчивото и конкурентоспособно енергийно развитие","k":38386.4},{"n":"2","name":"Бюджетна програма „Администрация“","k":4881.4}]},{"art":22,"name":"Министерството на туризма","rev":5314.4,"exp":14462.4,"items":[{"n":"1","name":"Политика в областта на устойчивото развитие на туризма","k":11940.0},{"n":"2","name":"Бюджетна програма „Администрация“","k":2522.4}]},{"art":23,"name":"Министерството на регионалното развитие и благоустройството","rev":722062.3,"exp":1058603.6,"items":[{"n":"1","name":"Политика за интегрирано развитие на регионите за постигане на растеж и подобряване качеството на жизнената среда","k":21080.1},{"n":"2","name":"Политика за подобряване на инвестиционния процес, поддържане, модернизация и изграждане на техническата инфраструктура","k":1017660.8},{"n":"3","name":"Бюджетна програма „Ефективна администрация и координация“","k":19862.7}]},{"art":24,"name":"Министерството на земеделието и храните","rev":132839.9,"exp":200331.6,"items":[{"n":"1","name":"Политика в областта на земеделието и селските райони","k":158038.7},{"n":"2","name":"Политика в областта на рибарството и аквакултурите","k":5193.5},{"n":"3","name":"Политика в областта на съхраняването и увеличаването на горите и дивеча","k":24255.2},{"n":"4","name":"Бюджетна програма „Администрация“","k":12844.2}]},{"art":25,"name":"Министерството на транспорта и съобщенията","rev":73400.6,"exp":571711.9,"items":[{"n":"1","name":"Политика в областта на транспорта","k":504508.7},{"n":"2","name":"Политика в областта на съобщенията и цифровата свързаност","k":49475.2},{"n":"3","name":"Бюджетна програма „Административно обслужване, медицинска и психологическа експертиза“","k":17728.0}]},{"art":26,"name":"Министерството на младежта и спорта","rev":22854.7,"exp":89706.6,"items":[{"n":"1","name":"Политика в областта на спорта за учащи и спорта в свободното време","k":18770.9},{"n":"2","name":"Политика в областта на спорта за високи постижения","k":58442.0},{"n":"3","name":"Политика в областта на привеждането на спортните обекти и съоръжения във вид, отговарящ на съвременните международни стандарти","k":5639.0},{"n":"4","name":"Политика в областта на усвояването и прилагането на добри международни практики за спорта","k":373.3},{"n":"5","name":"Политика в областта на младите хора","k":4288.8},{"n":"6","name":"Бюджетна програма „Администрация“","k":2192.6}]},{"art":27,"name":"Държавната агенция „Национална сигурност“","rev":102.3,"exp":142580.1,"items":[{"n":"1","name":"Политика в областта на защитата на националната сигурност","k":142580.1}]},{"art":29,"name":"Комисията за защита от дискриминация","rev":null,"exp":2349.7,"items":[]},{"art":30,"name":"Комисията за защита на личните данни","rev":357.9,"exp":3346.0,"items":[]},{"art":31,"name":"Комисията за отнемане на незаконно придобитото имущество","rev":20.5,"exp":7865.8,"items":[]},{"art":32,"name":"Националната служба за охрана","rev":180.0,"exp":48891.0,"items":[]},{"art":33,"name":"Държавната агенция „Разузнаване“","rev":null,"exp":35889.5,"items":[]},{"art":34,"name":"Националния статистически институт","rev":485.7,"exp":23427.2,"items":[]},{"art":35,"name":"Комисията за защита на конкуренцията","rev":3681.3,"exp":4725.7,"items":[]},{"art":36,"name":"Комисията за регулиране на съобщенията","rev":27999.7,"exp":12400.3,"items":[]},{"art":37,"name":"Съвета за електронни медии","rev":613.6,"exp":1980.1,"items":[]},{"art":38,"name":"Комисията за енергийно и водно регулиране","rev":11230.0,"exp":8550.9,"items":[]},{"art":39,"name":"Агенцията за ядрено регулиране","rev":8001.8,"exp":7233.7,"items":[]},{"art":40,"name":"Държавната комисия по сигурността на информацията","rev":null,"exp":10714.2,"items":[]},{"art":41,"name":"Държавната агенция „Държавен резерв и военновременни запаси“","rev":1049.2,"exp":78232.2,"items":[{"n":"1","name":"Политика в областта на държавните резерви, военновременните запаси и задължителните запаси от нефт и нефтопродукти (общо), в т.ч.:","k":78232.2},{"n":"1.1","name":"Бюджетна програма „Държавни резерви и военновременни запаси“","k":69928.0},{"n":"1.2","name":"Бюджетна програма „Запаси за извънредни ситуации от нефт и нефтопродукти и целеви запаси от нефтопродукти“","k":8304.2}]},{"art":42,"name":"Комисията за финансов надзор","rev":17926.0,"exp":17926.0,"items":[]},{"art":43,"name":"Комисията за публичен надзор над регистрираните одитори","rev":null,"exp":1465.6,"items":[]},{"art":44,"name":"Централната избирателна комисия","rev":null,"exp":3792.5,"items":[]},{"art":45,"name":"Държавен фонд „Земеделие“","rev":1533.9,"exp":300917.5,"items":[{"n":"1","name":"Политика на Министерството на земеделието и храните в областта на земеделието и селските райони","k":281928.2},{"n":"2","name":"Политика на Министерството на земеделието и храните в областта на рибарството и аквакултурите","k":456.4},{"n":"3","name":"Бюджетна програма „Администрация“","k":18532.9}]},{"art":46,"name":"Националното бюро за контрол на специалните разузнавателни средства","rev":null,"exp":1050.9,"items":[]},{"art":47,"name":"Държавната агенция „Технически операции“","rev":52.2,"exp":76316.0,"items":[{"n":"1","name":"Политика в областта на осигуряването и прилагането на специални разузнавателни средства с цел защита на националната сигурност и опазване на обществения ред","k":76316.0}]}];
+const CGO = {"2025":{"rev":[3.05,5.17,7.86,11.35,14.77,18.4,21.92,24.92,28.33,31.68,35.88,41.0],"exp":[2.99,6.02,9.31,13.06,16.83,20.82,24.71,28.15,31.86,35.38,39.32,44.64]},"2026":{"rev":[3.46,6.44,9.32,12.91,16.03,20.04,24.61],"exp":[3.54,7.34,11.25,15.16,18.91,22.8,27.06]}};
+const DEBT = {"BG":{"2015":25.9,"2016":29.1,"2017":25.1,"2018":22.2,"2019":20.1,"2020":24.5,"2021":23.8,"2022":22.5,"2023":22.9,"2024":23.8,"2025":29.9},"EU27_2020":{"2015":85.1,"2016":84.1,"2017":81.5,"2018":79.5,"2019":77.5,"2020":89.5,"2021":86.7,"2022":82.4,"2023":80.5,"2024":80.7,"2025":81.7}};
+
+const POP = 6.43; // млн. души — за потвърждение с НСИ
+const KFP = { planRev: 49.6, planExp: 56.8, planDef: 7.2, defPctGdp: 5.7,
+  jul: { rev: 26347.4, revPct: 53.1, revYoY: 11.2, tax: 21076.4, taxPct: 54.8, nontax: 3083.8, nontaxPct: 53.3,
+         aid: 2187.2, exp: 28548.8, expPct: 50.3, interest: 649.7, interestPct: 61.3, bal: -2201.4, balPctGdp: 1.8, reserve: 8525.7 } };
+const ELAPSED = 7/12;
+const FUNCTIONS = [
+  { name: "Социално осигуряване, подпомагане и грижи", short: "Социално осигуряване и помощи", v: 19.2, yoy: 10.9, parts: [["Пенсии", 13.6], ["Социални помощи и обезщетения", 3.6], ["Програми за заетост и социални услуги", 2.1]] },
+  { name: "Икономически дейности и услуги", short: "Икономика, транспорт, енергетика", v: 9.8, yoy: 30.4 },
+  { name: "Здравеопазване", short: "Здравеопазване", v: 6.7, yoy: 10.3 },
+  { name: "Отбрана и сигурност", short: "Отбрана и сигурност", v: 6.5, yoy: 6.8 },
+  { name: "Образование", short: "Образование", v: 5.6, yoy: 7.0 },
+  { name: "Общи държавни служби", short: "Администрация", v: 3.0, yoy: 19.3 },
+  { name: "Жилищно строителство, ВиК, околна среда", short: "Жилищно, ВиК, околна среда", v: 2.7, yoy: 29.9 },
+  { name: "Разходи, некласифицирани другаде (основно лихви)", short: "Лихви по дълга", v: 1.1, yoy: 27.6 },
+  { name: "Култура, спорт, почивни дейности", short: "Култура и спорт", v: 1.0, yoy: 24.7 }
+];
+const FUNC_TOTAL = FUNCTIONS.reduce((a, f) => a + f.v, 0);
+const REV_SHARES = [
+  { name: "ДДС", v: 25.8, what: "Данък, включен в цената на почти всичко, което купуваме. Стандартна ставка 20%.", who: "Всеки купувач; фирмите го събират и превеждат." },
+  { name: "Социални и здравни осигуровки", v: 23.4, what: "Вноски за пенсии, болнични, безработица и здравеопазване.", who: "Работещите и работодателите, в дял, определен със закон." },
+  { name: "Неданъчни приходи", v: 11.7, what: "Такси, приходи от собственост, глоби, концесии.", who: "Граждани и фирми, които ползват държавни услуги или имущество." },
+  { name: "Помощи, основно от ЕС", v: 10.9, what: "Средства по европейски програми и Плана за възстановяване.", who: "Идват от бюджета на ЕС срещу изпълнени проекти и реформи." },
+  { name: "Данък върху доходите", v: 9.6, what: "10% плосък данък върху заплати и други доходи.", who: "Всеки, който получава облагаем доход." },
+  { name: "Акцизи", v: 8.0, what: "Горива, тютюн, алкохол, електроенергия.", who: "Купувачите на тези стоки, чрез цената." },
+  { name: "Корпоративен данък", v: 7.1, what: "10% данък върху печалбата на фирмите.", who: "Фирмите, които реализират печалба." },
+  { name: "Други данъци", v: 3.6, what: "Мита, данък върху застрахователните премии и др.", who: "Различни платци." }
+];
+const BAL = { years: ["2024", "2025", "2026", "2027", "2028"], kind: ["отчет", "очаквано", "програма", "прогноза", "прогноза"], bal: [-3.2, -3.5, -7.2, -5.1, -4.3], int: [0.52, 0.74, 1.06, 1.43, 1.79] };
+
+const SRC = {
+  zdb: ["ok", "ЗДБ 2026, ДВ бр. 69 от 31.07.2026 — таблиците по членове (хил. €). Разходите са по държавния бюджет, не по цялата КФП."],
+  kfpJul: ["ok", "МФ, изпълнение на КФП към 31.07.2026 (публикувано 31.08.2026)."],
+  kfpPlan: ["ok", "Годишният план по КФП е изведен от процентите на изпълнение в данните на МФ към 31.07 (26 347,4 млн. € = 53,1%)."],
+  sdmx: ["ok", "SDMX на МФ по стандарта SDDS Plus (през БНБ): операции на централното управление, месечно. 2025 г. е преизчислена в евро по 1,95583."],
+  eurostat: ["ok", "Eurostat, gov_10dd_edpt1: консолидиран брутен дълг на сектор „Държавно управление“, % от БВП."],
+  functions: ["warn", "АСБП 2026–2028, Табл. III-1 (PDF). Числата са взети от wireframe-ите — за проверка при извличането."],
+  revShares: ["warn", "АСБП 2026–2028, Прил. 3 (PDF). Числата са от wireframe-ите — за проверка."],
+  balance: ["warn", "АСБП 2026–2028, Прил. 3: салдо и лихви. За 2026 г. съвпадат с данните на МФ (лихви 649,7 млн. = 61,3% от плана); останалите години са за проверка."],
+  activities: ["unk", "Разходите по ~500 дейности: не открихме публикувана таблица. Нужно е запитване към МФ."],
+  debtStock: ["unk", "Размерът на дълга в евро: регистърът и бюлетините на МФ (Excel/PDF) — предстои извличане и избор на обхват."],
+  components: ["warn", "Съставните бюджети (държавен, НОИ/НЗОК, общини, ВУЗ…): Excel таблиците на МФ по КФП — предстои извличане."],
+  rates: ["warn", "Ставки от 2025 г. (служител 13,78%, данък 10%, работодател 18,92%) — за потвърждение с КСО, ЗБДОО и ЗБНЗОК 2026. МОД 2 300 € от 01.08.2026 (ЗБДОО 2026)."],
+  pop: ["warn", "Население 6,43 млн. — за потвърждение с данните на НСИ."],
+  municipal: ["warn", "МФ, тримесечни финансови данни за общините по чл. 130г ЗПФ (xlsx) и регистър на общинския дълг — фаза 2."],
+  sebra: ["unk", "СЕБРА, индивидуални плащания ≥ 5 000 лв.: централният набор стига до 31.12.2025; 2026 г. — неясно."],
+  program: ["warn", "Разбивката до отделна програма (напр. 1000.01.02) е в програмния бюджет на ведомството — отделен документ на сайта му."]
+};
+const ST_LABEL = { ok: "налично", warn: "за извличане / проверка", unk: "няма данни" };
+function src(key) { const [st, t] = SRC[key]; return `<div class="src" data-st="${st}"><b>${ST_LABEL[st]}</b><span>${t}</span></div>`; }
+function stPill(key) { const st = SRC[key][0]; return `<span class="st ${st}">${ST_LABEL[st]}</span>`; }
+
+const fmt = (n, d = 1) => n.toLocaleString("bg-BG", { minimumFractionDigits: d, maximumFractionDigits: d });
+const fmt0 = n => Math.round(n).toLocaleString("bg-BG");
+const bn = (thousands) => thousands / 1e6; // хил. € → млрд. €
+const mln = (thousands) => thousands / 1e3;
+const perPerson = (bnEur) => Math.round(bnEur * 1e9 / (POP * 1e6) / 10) * 10;
+function money(thousands) {
+  const b = bn(thousands);
+  return b >= 1 ? `${fmt(b, 2)} млрд. €` : `${fmt(mln(thousands), 1)} млн. €`;
+}
+const MONTHS = ["яну", "фев", "мар", "апр", "май", "юни", "юли", "авг", "сеп", "окт", "ное", "дек"];
+
+const ROUTES = [
+  { path: "", q: "Какъв е бюджетът?", label: "Начало", kind: "MVP", render: pHome, data: ["kfpPlan", "kfpJul", "pop"] },
+  { path: "prihodi", q: "Откъде идват парите?", label: "Приходи", kind: "детайл", render: pRevenue, data: ["revShares", "kfpJul"] },
+  { path: "razhodi", q: "Къде отиват парите?", label: "Разходи", kind: "MVP", render: pExpenses, data: ["functions", "activities"] },
+  { path: "vedomstva", q: "Кой харчи?", label: "Ведомства", kind: "детайл", render: pMinistries, data: ["zdb", "program"] },
+  { path: "izpalnenie", q: "Изпълнява ли се планът?", label: "Изпълнение", kind: "MVP", render: pExecution, data: ["kfpJul", "sdmx", "components"] },
+  { path: "danaci", q: "Колко плащам аз?", label: "Моите данъци", kind: "MVP", render: pTaxes, data: ["rates", "functions"] },
+  { path: "dalg", q: "Колко дължим?", label: "Дълг", kind: "детайл", render: pDebt, data: ["eurostat", "balance", "debtStock"] },
+  { path: "obshtini", q: "Моята община", label: "Общини", kind: "фаза 2", render: pMunicipal, data: ["municipal"] },
+  { path: "plashtania", q: "Кой на кого плаща?", label: "Плащания", kind: "фаза 2", render: pPayments, data: ["sebra"] },
+  { path: "danni", q: "Откъде са данните?", label: "Данни и методика", kind: "справка", render: pData, data: [] },
+  { path: "karta", q: "Карта на прототипа", label: "Карта", kind: "справка", render: pMap, data: [] }
+];
+
+let charts = [];
+function disposeCharts() { charts.forEach(c => c.dispose()); charts = []; }
+function css(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+function mkChart(el) { const c = echarts.init(el, null, { renderer: "svg" }); charts.push(c); return c; }
+function baseText() { return { color: css("--muted"), fontFamily: "Sofia Sans, system-ui, sans-serif" }; }
+// Надпис върху цветно поле: тъмно мастило или бяло, което дава по-висок контраст (WCAG 2).
+const DARK_INK = "#15202B";
+function luminance(hex) {
+  let h = hex.replace("#", "");
+  if (h.length === 3) h = h.replace(/./g, "$&$&");
+  const [r, g, b] = [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16) / 255).map(c => c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+function textOn(bg) {
+  if (!/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(bg)) return "#fff";
+  const L = luminance(bg);
+  return (L + 0.05) / (luminance(DARK_INK) + 0.05) > 1.05 / (L + 0.05) ? DARK_INK : "#fff";
+}
+
+function navHtml(active) {
+  const groups = [["Основни въпроси", ["", "razhodi", "izpalnenie", "danaci"]], ["Детайли", ["prihodi", "vedomstva", "dalg"]], ["Фаза 2", ["obshtini", "plashtania"]], ["Справка", ["danni", "karta"]]];
+  return groups.map(([g, ps]) => `<div class="eyebrow group">${g}</div>` + ps.map(p => {
+    const r = ROUTES.find(x => x.path === p);
+    return `<a href="#/${p}" ${active === p ? 'aria-current="page"' : ""}>${r.q}${r.kind === "фаза 2" ? '<span class="phase">фаза 2</span>' : ""}</a>`;
+  }).join("")).join("");
+}
+function tabHtml(active) {
+  const tabs = [["", "Начало"], ["razhodi", "Парите"], ["danaci", "Данъци"], ["karta", "Още"]];
+  return tabs.map(([p, l]) => `<a href="#/${p}" ${active === p || (p === "karta" && !["", "razhodi", "danaci"].includes(active)) ? 'aria-current="page"' : ""}>${l}</a>`).join("");
+}
+
+function route() {
+  const h = location.hash.replace(/^#\/?/, "");
+  const [path, arg] = h.split("/");
+  const r = ROUTES.find(x => x.path === path) || (path === "vedomstvo" ? { path: "vedomstva", render: () => pMinistry(arg) } : ROUTES[0]);
+  disposeCharts();
+  document.getElementById("nav").innerHTML = navHtml(r.path);
+  document.getElementById("tabbar").innerHTML = tabHtml(r.path);
+  const main = document.getElementById("main");
+  main.innerHTML = `<div class="page">${r.render()}</div>`;
+  if (typeof r.after === "function") r.after();
+  if (typeof afterRender === "function") { const f = afterRender; afterRender = null; f(); }
+  window.scrollTo(0, 0);
+}
+let afterRender = null;
+window.addEventListener("hashchange", route);
+window.addEventListener("resize", () => charts.forEach(c => c.resize()));
+new MutationObserver(route).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", route);
+
+const toggle = document.getElementById("srcToggle");
+function setSrc(on) { document.body.classList.toggle("show-src", on); toggle.setAttribute("aria-pressed", String(on)); try { localStorage.setItem("bns-src", on ? "1" : "0"); } catch (e) {} }
+toggle.addEventListener("click", () => setSrc(toggle.getAttribute("aria-pressed") !== "true"));
+try { if (localStorage.getItem("bns-src") === "1") setSrc(true); } catch (e) {}
+
+/* ---------- screens ---------- */
+function pHome() {
+  const r = KFP.planRev, e = KFP.planExp, d = KFP.planDef, j = KFP.jul;
+  afterRender = null;
+  return `
+  <section class="panel" style="padding:28px">
+    ${src("kfpPlan")}
+    <div class="eyebrow">Държавен бюджет 2026 · приет закон · <span class="scope">обхват: цялата държава (КФП)</span></div>
+    <p class="sentence" style="margin-top:14px">През 2026 г. държавата планира да събере <b>${fmt(r)} млрд. €</b> и да похарчи <b>${fmt(e)} млрд. €</b>. Разликата от <b>${fmt(d)} млрд. €</b> се покрива с нов дълг.</p>
+    <p class="muted" style="margin-top:12px;max-width:62ch">Това е бюджетът на цялата държава: министерства, пенсии (НОИ), здравна каса (НЗОК), общини, университети.</p>
+  </section>
+  <section class="grid-3">
+    <div class="panel kpi">${src("pop")}<div class="label">Приходи</div><div class="value">${fmt(r)}<small>млрд. €</small></div><div class="sub">≈ ${fmt0(perPerson(r))} € на човек годишно</div></div>
+    <div class="panel kpi"><div class="label">Разходи</div><div class="value">${fmt(e)}<small>млрд. €</small></div><div class="sub">≈ ${fmt0(perPerson(e))} € на човек годишно</div></div>
+    <div class="panel kpi"><div class="label">Дефицит</div><div class="value">${fmt(d)}<small>млрд. €</small></div><div class="sub">${fmt(KFP.defPctGdp)}% от БВП · ≈ ${fmt0(perPerson(d))} € на човек</div></div>
+  </section>
+  <section class="panel">
+    ${src("kfpJul")}
+    <div class="panel-head"><h2>Изпълнение към 31 юли 2026</h2><a href="#/izpalnenie" class="muted">Месец по месец →</a></div>
+    <div class="prog">
+      ${progRow("Приходи", j.revPct)}
+      ${progRow("Разходи", j.expPct)}
+    </div>
+    <p class="note" style="margin-top:14px">Жълтата черта показва къде би трябвало да сме по календара: изтекли са 58% от годината.</p>
+  </section>
+  <section>
+    <div class="panel-head"><h2>Разгледай бюджета</h2></div>
+    <div class="qcards">
+      ${qcard("prihodi", "Откъде идват парите?", "ДДС и осигуровките носят почти половината.")}
+      ${qcard("razhodi", "Къде отиват парите?", "Всяко трето евро отива за пенсии и помощи.")}
+      ${qcard("vedomstva", "Кой харчи?", "45 бюджета от закона, с политиките им.")}
+      ${qcard("izpalnenie", "Изпълнява ли се планът?", "Нов отчет всеки месец.")}
+      ${qcard("danaci", "Колко плащам аз?", "Лична разписка по заплатата ти.")}
+      ${qcard("dalg", "Колко дължим?", "Дълг към БВП: България и ЕС.")}
+    </div>
+  </section>`;
+}
+function progRow(label, pct) {
+  return `<div class="prog-row"><b>${label}</b><div class="bar" role="img" aria-label="${label}: ${fmt(pct)}% от годишния план"><i style="width:${pct}%"></i><span class="mark" style="left:${ELAPSED * 100}%"><span>58%</span></span></div><span class="pct">${fmt(pct)}%</span></div>`;
+}
+function qcard(p, t, s) { return `<a class="qcard" href="#/${p}"><b>${t}</b><span>${s}</span></a>`; }
+
+function pRevenue() {
+  const colors = ["--data", "--accent", "--data-2", "--ok", "--warn", "--unk", "--data-3", "--muted"].map(css);
+  const bars = REV_SHARES.map((s, i) => `<div style="width:${s.v}%;background:${colors[i]};color:${textOn(colors[i])}" title="${s.name}: ${fmt(s.v)} €">${s.v >= 7 ? fmt(s.v) + " €" : ""}</div>`).join("");
+  const legend = REV_SHARES.map((s, i) => `<span><i style="background:${colors[i]}"></i>${s.name} · ${fmt(s.v)} €</span>`).join("");
+  const j = KFP.jul;
+  const rows = REV_SHARES.map(s => `<details class="row"><summary><span>${s.name}</span><span class="num">${fmt(KFP.planRev * s.v / 100)} млрд. €</span><span class="num muted">${fmt(s.v)}%</span></summary><div class="body"><p><b>Какво е:</b> ${s.what}</p><p><b>Кой го плаща:</b> ${s.who}</p></div></details>`).join("");
+  return `
+  <header style="display:grid;gap:10px"><div class="eyebrow">Приходи 2026 · <span class="scope">КФП · ${fmt(KFP.planRev)} млрд. €</span></div><h1>Откъде идват парите</h1><p class="lede muted">Всяко четвърто евро идва от ДДС, а почти толкова от осигуровките. Преките данъци върху доходи и печалби са под 17%.</p></header>
+  <section class="panel">${src("revShares")}<div class="panel-head"><h2>От всеки 100 € приходи</h2></div><div class="stack" role="img" aria-label="Структура на приходите">${bars}</div><div class="legend">${legend}</div></section>
+  <section class="panel">${src("kfpJul")}<div class="panel-head"><h2>Събрано към 31 юли</h2><span class="muted">при изтекли 58% от годината</span></div>
+    <div class="table-wrap"><table><thead><tr><th>Група</th><th class="r">Събрано</th><th class="r">% от плана</th></tr></thead><tbody>
+    <tr><td>Данъчни и осигурителни приходи</td><td class="r">${fmt(j.tax / 1000, 2)} млрд. €</td><td class="r">${fmt(j.taxPct)}%</td></tr>
+    <tr><td>Неданъчни приходи</td><td class="r">${fmt(j.nontax / 1000, 2)} млрд. €</td><td class="r">${fmt(j.nontaxPct)}%</td></tr>
+    <tr><td>Помощи и дарения (вкл. ЕС)</td><td class="r">${fmt(j.aid / 1000, 2)} млрд. €</td><td class="r muted">—</td></tr>
+    <tr><td><b>Общо</b></td><td class="r"><b>${fmt(j.rev / 1000, 2)} млрд. €</b></td><td class="r"><b>${fmt(j.revPct)}%</b></td></tr>
+    </tbody></table></div></section>
+  <section class="panel"><div class="panel-head"><h2>Всеки източник поотделно</h2><span class="muted">кликни за обяснение</span></div>${rows}</section>`;
+}
+
+let expView = "chart";
+let expSel = 0;
+function pExpenses() {
+  afterRender = drawTreemap;
+  const tableRows = FUNCTIONS.map(f => `<tr><td>${f.name}</td><td class="r">${fmt(f.v)}</td><td class="r">${fmt(f.v / FUNC_TOTAL * 100)}%</td><td class="r">${fmt0(perPerson(f.v))} €</td><td class="r">+${fmt(f.yoy)}%</td></tr>`).join("");
+  return `
+  <header style="display:grid;gap:10px"><div class="eyebrow">Разходи 2026 · <span class="scope">КФП, без вноската в ЕС · ${fmt(FUNC_TOTAL)} млрд. €</span></div><h1>Къде отиват парите</h1><p class="lede muted">Пенсиите и социалните помощи са най-голямото перо: всяко трето евро от разходите на държавата отива там.</p></header>
+  <div class="seg" role="group" aria-label="Изглед"><button type="button" aria-pressed="true">За какво</button><button type="button" onclick="location.hash='#/vedomstva'" aria-pressed="false">Кой харчи</button><button type="button" aria-pressed="false" disabled title="Фаза 2">Вид разход</button></div>
+  <section class="panel">${src("functions")}
+    <div class="panel-head"><h2>По функции</h2><div class="seg" role="group" aria-label="Графика или таблица"><button type="button" id="vChart" aria-pressed="${expView === "chart"}">Графика</button><button type="button" id="vTable" aria-pressed="${expView === "table"}">Таблица</button></div></div>
+    <div class="grid-2" id="expChartWrap" style="grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);${expView === "chart" ? "" : "display:none"}">
+      <div id="treemap" class="chart tall" role="img" aria-label="Разходи по функции, пропорционални на сумата"></div>
+      <div id="fdetail"></div>
+    </div>
+    <div class="table-wrap" id="expTable" style="${expView === "table" ? "" : "display:none"}"><table><thead><tr><th>Функция</th><th class="r">млрд. €</th><th class="r">Дял</th><th class="r">На човек</th><th class="r">Спрямо 2025</th></tr></thead><tbody>${tableRows}</tbody></table></div>
+    <p class="note" style="margin-top:10px">Размерът на всяко поле е пропорционален на сумата. Кликни поле за детайл.</p>
+  </section>`;
+}
+function fDetailHtml(i) {
+  const f = FUNCTIONS[i];
+  const parts = f.parts ? `<div style="display:grid;gap:6px;margin-top:10px">${f.parts.map(([n, v]) => `<div class="receipt"><div class="line"><span>${n}</span><b>${fmt(v)} млрд. €</b></div></div>`).join("")}</div>` : "";
+  return `<div class="eyebrow">Избрана функция</div><h3 style="margin:6px 0 10px">${f.name}</h3>
+   <div class="kpi"><div class="value">${fmt(f.v)}<small>млрд. €</small></div><div class="sub">${fmt(f.v / FUNC_TOTAL * 100)}% от разходите · ≈ ${fmt0(perPerson(f.v))} € на човек · +${fmt(f.yoy)}% спрямо 2025</div></div>
+   ${parts}
+   <div style="margin-top:14px">${src("activities")}<p class="note">Следващо ниво: функция → подфункция → дейност (~500 дейности). ${stPill("activities")}</p></div>`;
+}
+function drawTreemap() {
+  const vc = document.getElementById("vChart"), vt = document.getElementById("vTable");
+  if (vc) { vc.onclick = () => { expView = "chart"; route(); }; vt.onclick = () => { expView = "table"; route(); }; }
+  document.getElementById("fdetail").innerHTML = fDetailHtml(expSel);
+  if (expView !== "chart") return;
+  const el = document.getElementById("treemap");
+  const c = mkChart(el);
+  const pal = [css("--data"), css("--data-2"), css("--accent"), css("--data-3"), css("--ok"), css("--warn"), css("--unk"), css("--muted"), css("--data-2")];
+  const lab = pal.map(textOn);
+  c.setOption({
+    tooltip: { formatter: p => `${p.name}<br><b>${fmt(p.value)} млрд. €</b>` },
+    series: [{ type: "treemap", roam: false, nodeClick: false, breadcrumb: { show: false }, width: "100%", height: "100%", top: 0, left: 0,
+      label: { show: true, formatter: p => `${p.name}\n${fmt(p.value)} млрд. €`, fontFamily: "Sofia Sans Condensed, system-ui", fontWeight: 700, fontSize: 13, color: "#fff", overflow: "break" },
+      itemStyle: { borderColor: css("--surface"), borderWidth: 3, gapWidth: 3 },
+      data: FUNCTIONS.map((f, i) => ({ name: f.short, value: f.v, label: { color: lab[i % pal.length] }, itemStyle: { color: pal[i % pal.length], borderColor: i === expSel ? css("--ink") : css("--surface"), borderWidth: i === expSel ? 3 : 3 } })) }]
+  });
+  // dataIndex в treemap брои и скрития корен (първото поле е 1), затова търсим по име.
+  c.on("click", p => { const k = FUNCTIONS.findIndex(f => f.short === p.name); if (k < 0) return; expSel = k; document.getElementById("fdetail").innerHTML = fDetailHtml(expSel); c.setOption({ series: [{ data: FUNCTIONS.map((f, i) => ({ name: f.short, value: f.v, label: { color: lab[i % pal.length] }, itemStyle: { color: pal[i % pal.length], borderColor: i === expSel ? css("--ink") : css("--surface") } })) }] }); });
+}
+
+let mQuery = "";
+function pMinistries() {
+  afterRender = () => {
+    const inp = document.getElementById("mq");
+    inp.value = mQuery;
+    inp.addEventListener("input", () => { mQuery = inp.value; document.getElementById("mlist").innerHTML = mRows(); });
+  };
+  const total = ZDB.reduce((a, m) => a + (m.exp || 0), 0);
+  return `
+  <header style="display:grid;gap:10px"><div class="eyebrow">Разпоредители 2026 · <span class="scope">държавен бюджет · по ЗДБ 2026</span></div><h1>Кой харчи</h1><p class="lede muted">${ZDB.length} бюджета, приети със закона — от съдебната власт до Държавен фонд „Земеделие“. Заедно планират разходи за ${money(total)}.</p></header>
+  <section class="panel">${src("zdb")}
+    <div class="panel-head"><h2>Всички бюджети по размер</h2><input class="search" id="mq" type="search" placeholder="Търси институция…" aria-label="Търси институция"></div>
+    <div class="mlist" id="mlist">${mRows()}</div>
+    <p class="note" style="margin-top:12px">Бюджетите на НОИ, НЗОК и общините са в отделни закони и не са в този списък. Затова сумата е по-малка от разходите по КФП.</p>
+  </section>`;
+}
+function mRows() {
+  const max = Math.max(...ZDB.map(m => m.exp || 0));
+  const q = mQuery.trim().toLowerCase();
+  return ZDB.filter(m => !q || m.name.toLowerCase().includes(q)).sort((a, b) => (b.exp || 0) - (a.exp || 0)).map(m => `
+    <a class="mrow" href="#/vedomstvo/${m.art}"><span><span class="nm">${cap(m.name)}</span> <span class="tag">чл. ${m.art}${m.items.length ? " · " + m.items.filter(i => !i.n.includes(".")).length + " политики/програми" : ""}</span></span><span class="amt">${money(m.exp || 0)}</span><span class="hbar"><i style="width:${(m.exp || 0) / max * 100}%"></i></span></a>`).join("") || `<p class="muted" style="padding:12px 4px">Няма резултат за „${escapeHtml(mQuery)}“.</p>`;
+}
+function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+function escapeHtml(s) { return s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+function pMinistry(art) {
+  const m = ZDB.find(x => String(x.art) === String(art));
+  if (!m) return `<p>Няма такъв бюджет. <a href="#/vedomstva">Към списъка</a></p>`;
+  const top = m.items.filter(i => !i.n.includes("."));
+  const max = Math.max(...m.items.map(i => i.k), 1);
+  const rows = m.items.map(i => `<tr class="${i.n.includes(".") ? "sub" : ""}"><td>${i.name}<div class="hbar"><i style="width:${i.k / max * 100}%"></i></div></td><td class="r">${money(i.k)}</td><td class="r">${fmt(i.k / m.exp * 100)}%</td></tr>`).join("");
+  const biggest = top.slice().sort((a, b) => b.k - a.k)[0];
+  return `
+  <p><a href="#/vedomstva" class="muted">← Кой харчи</a></p>
+  <header style="display:grid;gap:10px"><div class="eyebrow">Разпоредител · чл. ${m.art} от ЗДБ 2026</div><h1>${cap(m.name)}</h1>
+    <p class="lede">Харчи <b class="num">${money(m.exp)}</b> през 2026 г.${biggest ? ` Най-голямата част (${fmt(biggest.k / m.exp * 100, 0)}%) е за „${biggest.name.replace(/^Политика в областта на /, "").replace(/^Бюджетна програма /, "")}“.` : ""}</p></header>
+  <section class="grid-3">
+    <div class="panel kpi">${src("zdb")}<div class="label">Разходи 2026</div><div class="value">${fmt(bn(m.exp) >= 1 ? bn(m.exp) : mln(m.exp), bn(m.exp) >= 1 ? 2 : 1)}<small>${bn(m.exp) >= 1 ? "млрд. €" : "млн. €"}</small></div><div class="sub">по държавния бюджет</div></div>
+    <div class="panel kpi"><div class="label">Собствени приходи</div><div class="value">${m.rev != null ? fmt(mln(m.rev), 1) : "—"}<small>млн. €</small></div><div class="sub">такси, собственост и др.</div></div>
+    <div class="panel kpi"><div class="label">Политики / програми</div><div class="value">${top.length || "—"}</div><div class="sub">${top.length ? "по закона" : "законът не ги разпределя"}</div></div>
+  </section>
+  <section class="panel">${src("zdb")}
+    <div class="panel-head"><h2>За какво харчи</h2><span class="muted">области на политики и бюджетни програми</span></div>
+    ${m.items.length ? `<div class="table-wrap"><table><thead><tr><th>Политика / програма</th><th class="r">Сума</th><th class="r">Дял</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="p2box"><p>Законът не разпределя разходите на този бюджет по политики. Детайлът е в собствения му бюджет или отчет.</p></div>`}
+  </section>
+  <section class="panel">${src("program")}<div class="panel-head"><h2>Какво постига всяка програма</h2><span class="st warn">фаза 2</span></div><p class="note">Индикаторите за резултат (цел и постигнато) са в програмния бюджет и отчета на ведомството. Тук ще има таблица „цел / постигнато“ по програми и линия на разходите 2022–2028: отчет, закон, прогноза.</p></section>`;
+}
+
+let exMode = "rev";
+function pExecution() {
+  afterRender = drawExecution;
+  const j = KFP.jul;
+  return `
+  <header style="display:grid;gap:10px"><div class="eyebrow">Изпълнение · към 31.07.2026</div><h1>Изпълнява ли се бюджетът?</h1><p class="lede muted">Към 31 юли са събрани ${fmt(j.revPct)}% от планираните приходи и са похарчени ${fmt(j.expPct)}% от разходите, а от годината са изтекли 58%.</p></header>
+  <section class="grid-4">
+    <div class="panel kpi">${src("kfpJul")}<div class="label">Приходи</div><div class="value">${fmt(j.rev / 1000, 2)}<small>млрд. €</small></div><div class="sub">${fmt(j.revPct)}% от плана · +${fmt(j.revYoY)}% г/г</div></div>
+    <div class="panel kpi"><div class="label">Разходи</div><div class="value">${fmt(j.exp / 1000, 2)}<small>млрд. €</small></div><div class="sub">${fmt(j.expPct)}% от плана</div></div>
+    <div class="panel kpi"><div class="label">Дефицит</div><div class="value">${fmt(-j.bal / 1000, 2)}<small>млрд. €</small></div><div class="sub">${fmt(j.balPctGdp)}% от БВП · план ${fmt(KFP.planDef)} млрд.</div></div>
+    <div class="panel kpi"><div class="label">Фискален резерв</div><div class="value">${fmt(j.reserve / 1000, 2)}<small>млрд. €</small></div><div class="sub">към 31.07</div></div>
+  </section>
+  <section class="panel">${src("sdmx")}
+    <div class="panel-head"><h2>Натрупано по месеци: 2026 срещу 2025</h2><div class="seg" role="group" aria-label="Показател"><button type="button" id="exRev" aria-pressed="${exMode === "rev"}">Приходи</button><button type="button" id="exExp" aria-pressed="${exMode === "exp"}">Разходи</button></div></div>
+    <span class="scope">обхват: централно управление, не цялата КФП</span>
+    <div id="exChart" class="chart" role="img" aria-label="Натрупани приходи или разходи по месеци"></div>
+  </section>
+  <section class="panel">${src("components")}
+    <div class="panel-head"><h2>Кой какво събира и харчи</h2><span class="st warn">предстои</span></div>
+    <p class="note">Съставните бюджети и трансферите между тях: държавен бюджет → НОИ/НЗОК, общини, ВУЗ, сметки за средства от ЕС. Данните ги има в Excel таблиците на МФ по КФП; тук ще има таблица и диаграма на потоците.</p>
+  </section>`;
+}
+function drawExecution() {
+  document.getElementById("exRev").onclick = () => { exMode = "rev"; route(); };
+  document.getElementById("exExp").onclick = () => { exMode = "exp"; route(); };
+  const c = mkChart(document.getElementById("exChart"));
+  const t = baseText();
+  c.setOption({
+    grid: { left: 48, right: 20, top: 40, bottom: 36 },
+    legend: { top: 0, left: 0, textStyle: t, data: ["2026", "2025"] },
+    tooltip: { trigger: "axis", valueFormatter: v => v == null ? "—" : `${fmt(v, 2)} млрд. €` },
+    xAxis: { type: "category", data: MONTHS, axisLabel: t, axisLine: { lineStyle: { color: css("--line") } } },
+    yAxis: { type: "value", name: "млрд. €", nameTextStyle: t, axisLabel: t, splitLine: { lineStyle: { color: css("--line") } } },
+    series: [
+      { name: "2026", type: "line", data: CGO["2026"][exMode], symbolSize: 7, lineStyle: { width: 3, color: css("--accent") }, itemStyle: { color: css("--accent") }, areaStyle: { color: css("--accent-soft") } },
+      { name: "2025", type: "line", data: CGO["2025"][exMode], symbolSize: 5, lineStyle: { width: 2, type: "dashed", color: css("--muted") }, itemStyle: { color: css("--muted") } }
+    ]
+  });
+}
+
+let gross = 1500, buys = 800, useVat = false;
+function pTaxes() {
+  afterRender = () => {
+    const g = document.getElementById("gross"), b = document.getElementById("buys"), v = document.getElementById("vat");
+    g.value = gross; b.value = buys; v.checked = useVat; b.disabled = !useVat;
+    const upd = () => { gross = Math.max(0, +g.value || 0); buys = Math.max(0, +b.value || 0); useVat = v.checked; b.disabled = !useVat; document.getElementById("receipt").innerHTML = receiptHtml(); };
+    [g, b, v].forEach(el => el.addEventListener("input", upd));
+    upd();
+  };
+  return `
+  <header style="display:grid;gap:10px"><div class="eyebrow">Лична разписка · бюджет 2026</div><h1>Колко плащам аз и къде отиват парите ми</h1><p class="lede muted">Изчислява се в браузъра ти. Нищо не се записва и не се изпраща.</p></header>
+  <section class="calc">
+    <div class="panel">${src("rates")}
+      <div class="field"><span style="font-weight:600;font-size:.92rem">Как работиш?</span><div class="radio">
+        <label><input type="radio" name="kind" checked> Трудов договор</label>
+        <label class="off"><input type="radio" name="kind" disabled> Самоосигуряващ се (скоро)</label>
+        <label class="off"><input type="radio" name="kind" disabled> Пенсионер (скоро)</label></div></div>
+      <div class="field"><label for="gross">Брутна месечна заплата, €</label><input id="gross" type="number" min="0" step="50" inputmode="decimal"></div>
+      <div class="field"><label style="display:flex;gap:8px;align-items:center"><input id="vat" type="checkbox"> Добави ДДС от покупките</label><label for="buys" class="muted" style="font-weight:500">Месечни покупки без наем, €</label><input id="buys" type="number" min="0" step="50" inputmode="decimal"></div>
+      <p class="note">Ставките са от 2025 г. и се чака потвърждение за 2026. Максималният осигурителен доход е 2 300 € от 1 август 2026.</p>
+    </div>
+    <div id="receipt"></div>
+  </section>`;
+}
+function receiptHtml() {
+  const base = Math.min(gross, 2300);
+  const empC = base * 0.1378, tax = Math.max(0, gross - empC) * 0.10, erC = base * 0.1892;
+  const vat = useVat ? buys * 20 / 120 : 0;
+  const yearly = (empC + tax + erC + vat) * 12;
+  const net = gross - empC - tax;
+  const rows = FUNCTIONS.map(f => { const y = yearly * f.v / FUNC_TOTAL; return `<tr><td>${f.short}</td><td class="r">${fmt0(y)} €</td><td class="r">${fmt(y / 365, 2)} €</td></tr>`; }).join("");
+  const top3 = FUNCTIONS.slice(0, 3).map(f => `${fmt0(f.v / FUNC_TOTAL * 100)} € за ${f.short.toLowerCase()}`).join(", ");
+  return `
+  <div class="panel receipt" style="display:grid;gap:14px">
+    <div><div class="eyebrow">Колко плащаш годишно</div><div class="total num">≈ ${fmt0(yearly)} €</div><p class="muted">преки данъци и осигуровки${useVat ? " + ДДС от покупките" : ""}</p></div>
+    <div>
+      <div class="line"><span>Твоите осигуровки (13,78%)</span><b>${fmt0(empC * 12)} €</b></div>
+      <div class="line"><span>Данък върху дохода (10%)</span><b>${fmt0(tax * 12)} €</b></div>
+      <div class="line"><span>Осигуровки от работодателя (18,92%) — не ги виждаш във фиша</span><b>${fmt0(erC * 12)} €</b></div>
+      ${useVat ? `<div class="line"><span>ДДС в покупките (20%)</span><b>${fmt0(vat * 12)} €</b></div>` : ""}
+      <div class="line"><span>Нето в ръка</span><b>${fmt0(net)} € на месец</b></div>
+    </div>
+    ${src("functions")}
+    <div class="panel-head" style="margin:0"><h3>Къде отиват твоите ${fmt0(yearly)} €</h3></div>
+    <div class="table-wrap"><table><thead><tr><th>Функция</th><th class="r">На година</th><th class="r">На ден</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="callout"><b>За обсъждане:</b> осигуровките отиват основно в НОИ и НЗОК. Разпределяме ли ги по функции, както тук, или ги показваме отделно?</div>
+    <div class="share"><div class="eyebrow">Карта за споделяне · без суми от заплатата</div><p style="margin-top:8px">От всеки 100 € мои данъци: ${top3}.</p></div>
+  </div>`;
+}
+
+function pDebt() {
+  afterRender = drawDebt;
+  const bg25 = DEBT.BG["2025"], eu25 = DEBT.EU27_2020["2025"];
+  return `
+  <header style="display:grid;gap:10px"><div class="eyebrow">Дефицит и дълг</div><h1>Колко дължим?</h1><p class="lede muted">Дефицитът за 2026 г. е ${fmt(KFP.planDef)} млрд. €, двойно повече от 2025 г. Дългът към БВП стигна ${fmt(bg25)}% през 2025 г. Това е под средното за ЕС (${fmt(eu25)}%), но с най-бързия ръст от години.</p></header>
+  <section class="grid-3">
+    <div class="panel kpi">${src("debtStock")}<div class="label">Държавен дълг</div><div class="value muted">— <small>млрд. €</small></div><div class="sub">от регистъра на МФ ${stPill("debtStock")}</div></div>
+    <div class="panel kpi">${src("eurostat")}<div class="label">Дълг към БВП, 2025</div><div class="value">${fmt(bg25)}<small>%</small></div><div class="sub">ЕС: ${fmt(eu25)}% · лимит по правилата на ЕС: 60%</div></div>
+    <div class="panel kpi">${src("balance")}<div class="label">Лихви, 2026</div><div class="value">${fmt(BAL.int[2], 2)}<small>млрд. €</small></div><div class="sub">към 31.07: ${fmt(KFP.jul.interest / 1000, 2)} млрд. (${fmt(KFP.jul.interestPct)}% от плана)</div></div>
+  </section>
+  <section class="panel">${src("eurostat")}<div class="panel-head"><h2>Дълг към БВП: България и ЕС</h2><span class="scope">консолидиран дълг на сектор „Държавно управление“</span></div><div id="debtChart" class="chart" role="img" aria-label="Дълг към БВП на България и средно за ЕС, 2015–2025"></div></section>
+  <section class="grid-2">
+    <div class="panel">${src("balance")}<h3 style="margin-bottom:8px">Бюджетно салдо, млрд. €</h3><div id="balChart" class="chart" style="height:260px" role="img" aria-label="Бюджетно салдо 2024–2028"></div></div>
+    <div class="panel">${src("balance")}<h3 style="margin-bottom:8px">Лихви по дълга, млрд. €</h3><div id="intChart" class="chart" style="height:260px" role="img" aria-label="Лихви по дълга 2024–2028"></div></div>
+  </section>`;
+}
+function drawDebt() {
+  const t = baseText();
+  const years = Object.keys(DEBT.BG).sort();
+  const c = mkChart(document.getElementById("debtChart"));
+  c.setOption({
+    grid: { left: 44, right: 24, top: 40, bottom: 32 },
+    legend: { top: 0, left: 0, textStyle: t, data: ["България", "Средно за ЕС"] },
+    tooltip: { trigger: "axis", valueFormatter: v => `${fmt(v)}%` },
+    xAxis: { type: "category", data: years, axisLabel: t, axisLine: { lineStyle: { color: css("--line") } } },
+    yAxis: { type: "value", max: 100, axisLabel: { ...t, formatter: "{value}%" }, splitLine: { lineStyle: { color: css("--line") } } },
+    series: [
+      { name: "България", type: "line", data: years.map(y => DEBT.BG[y]), symbolSize: 7, lineStyle: { width: 3, color: css("--accent") }, itemStyle: { color: css("--accent") },
+        markLine: { symbol: "none", silent: true, label: { formatter: "лимит 60%", color: css("--muted"), position: "insideEndTop" }, lineStyle: { color: css("--unk"), type: "dashed" }, data: [{ yAxis: 60 }] } },
+      { name: "Средно за ЕС", type: "line", data: years.map(y => DEBT.EU27_2020[y]), symbolSize: 5, lineStyle: { width: 2, color: css("--data") }, itemStyle: { color: css("--data") } }
+    ]
+  });
+  const bar = (id, vals, color, neg) => {
+    const ch = mkChart(document.getElementById(id));
+    ch.setOption({
+      grid: { left: 40, right: 12, top: 24, bottom: 44 },
+      tooltip: { trigger: "axis", valueFormatter: v => `${fmt(v, 2)} млрд. €` },
+      xAxis: { type: "category", data: BAL.years.map((y, i) => `${y}\n${BAL.kind[i]}`), axisLabel: { ...t, fontSize: 11 }, axisLine: { lineStyle: { color: css("--line") } } },
+      yAxis: { type: "value", axisLabel: t, splitLine: { lineStyle: { color: css("--line") } } },
+      series: [{ type: "bar", data: vals.map((v, i) => ({ value: v, itemStyle: { color: i === 2 ? css("--accent") : color, borderRadius: neg ? [0, 0, 4, 4] : [4, 4, 0, 0] } })), barWidth: "52%",
+        label: { show: true, position: neg ? "bottom" : "top", color: css("--ink"), fontWeight: 700, formatter: p => fmt(p.value, neg ? 1 : 2) } }]
+    });
+  };
+  bar("balChart", BAL.bal, css("--data-2"), true);
+  bar("intChart", BAL.int, css("--data-2"), false);
+}
+
+function pMunicipal() {
+  return `
+  <header style="display:grid;gap:10px"><div class="eyebrow">Фаза 2</div><h1>Моята община</h1><p class="lede muted">265 общини, всяка с приходи, разходи и дълг на жител. Търсене по име или по карта.</p></header>
+  <section class="p2box">${src("municipal")}<h2>Какво имаме като данни</h2>
+    <ul style="margin:10px 0 0;padding-left:20px;display:grid;gap:6px;max-width:70ch">
+      <li>Тримесечни финансови данни за всяка община по чл. 130г ЗПФ, от МФ (xlsx) и с анализ ${stPill("municipal")}</li>
+      <li>Централен регистър на общинския дълг, от МФ ${stPill("municipal")}</li>
+      <li>Касовите отчети на отделните общини: пръснати по сайтове и непълни ${stPill("activities")}</li>
+    </ul></section>`;
+}
+function pPayments() {
+  return `
+  <header style="display:grid;gap:10px"><div class="eyebrow">Фаза 2</div><h1>Кой на кого плаща?</h1><p class="lede muted">Плащанията от бюджета до конкретни получатели, свързани с договорите по обществени поръчки.</p></header>
+  <section class="p2box">${src("sebra")}<h2>Какво имаме като данни</h2>
+    <ul style="margin:10px 0 0;padding-left:20px;display:grid;gap:6px;max-width:70ch">
+      <li>СЕБРА, индивидуални плащания ≥ 5 000 лв. (получател, ЕИК, сума, основание): централният набор обхваща 01.07.2022 – 31.12.2025 ${stPill("sebra")}</li>
+      <li>Дневни обобщения на плащанията по институции и видове плащания, от МФ ${stPill("municipal")}</li>
+      <li>Договорите по обществени поръчки от ЦАИС ЕОП (както в СИГМА); по ЕИК „договорено“ може да се сдвои с „платено“ ${stPill("municipal")}</li>
+    </ul></section>`;
+}
+
+function pData() {
+  const keys = Object.keys(SRC);
+  const names = { zdb: "Закон за държавния бюджет 2026", kfpJul: "Изпълнение на КФП (месечно)", kfpPlan: "Годишен план по КФП", sdmx: "SDMX на МФ (SDDS Plus)", eurostat: "Eurostat: дълг към БВП", functions: "Разходи по функции (Табл. III-1)", revShares: "Структура на приходите (Прил. 3)", balance: "Салдо и лихви 2024–2028", activities: "Разходи по ~500 дейности", debtStock: "Размер на държавния дълг", components: "Съставни бюджети", rates: "Данъчни и осигурителни ставки", pop: "Население", municipal: "Данни за общините", sebra: "СЕБРА — плащания по получатели", program: "Програмни бюджети" };
+  const rows = keys.map(k => `<tr><td><b>${names[k]}</b></td><td>${stPill(k)}</td><td class="muted">${SRC[k][1]}</td></tr>`).join("");
+  return `
+  <header style="display:grid;gap:10px"><div class="eyebrow">Справка</div><h1>Откъде са данните</h1><p class="lede muted">Всяко число в прототипа има източник и статус. Включи „Покажи източниците“ горе вдясно, за да ги видиш на всеки екран.</p></header>
+  <section class="panel"><div class="table-wrap"><table><thead><tr><th>Набор</th><th>Статус</th><th>Източник и бележки</th></tr></thead><tbody>${rows}</tbody></table></div></section>
+  <section class="panel"><h2 style="margin-bottom:10px">Капани</h2><ul style="margin:0;padding-left:20px;display:grid;gap:8px;max-width:75ch">
+    <li><b>Евро и лева.</b> От 01.01.2026 всичко е в евро, а историята е в лева. Делим на 1,95583. В SDMX файла на МФ двете валути са смесени под един и същ код.</li>
+    <li><b>Обхват.</b> „Държавен бюджет“ не е същото като КФП. Етикетът за обхвата стои до всяка сума.</li>
+    <li><b>Достъп.</b> data.egov.bg и minfin.bg блокират автоматичния достъп. За автоматично обновяване трябва договорен достъп или собствен архив.</li></ul></section>`;
+}
+
+const OPEN_QS = [
+  "Кой е основният потребител: гражданин, журналист или експерт? От това зависи колко детайл показваме по подразбиране.",
+  "Обхват на MVP: четирите въпроса плюс детайлите — това ли е? Общините остават ли за фаза 2?",
+  "Калкулаторът: осигуровките отиват в НОИ/НЗОК. Разпределяме ли ги по функции, или ги показваме отделно?",
+  "Ставки за 2026 г.: кой ще потвърди осигурителните ставки и праговете от приетите закони?",
+  "Нивото „~500 дейности“: има ли публикуван източник, или е нужно запитване към МФ?",
+  "Дълг: кой обхват показваме като основен — държавния дълг по ЗДД или консолидирания дълг по Маастрихт?",
+  "Визуален език: продължаваме в тази посока, по стила на wireframe-ите, или търсим трета?"
+];
+function pMap() {
+  const cards = ROUTES.filter(r => r.path !== "karta").map(r => `<a class="mapcard" href="#/${r.path}"><div class="top"><b>${r.q}</b><span class="kind">${r.kind}</span></div><span class="muted" style="font-size:.9rem">${r.label}</span><div class="st-row">${r.data.map(k => stPill(k)).join("")}</div></a>`).join("");
+  return `
+  <header style="display:grid;gap:10px"><div class="eyebrow">Справка</div><h1>Карта на прототипа</h1><p class="lede muted">Всички екрани на едно място. Под всеки екран е статусът на данните, от които зависи.</p></header>
+  <section class="mapgrid">${cards}</section>
+  <section class="panel"><h2 style="margin-bottom:12px">Отворени въпроси към групата</h2><ol class="qs">${OPEN_QS.map(q => `<li>${q}</li>`).join("")}</ol></section>
+  <p class="note">Прототип v1, 28.09.2026. Обединява документа за обхвата, wireframe-ите (екрани и бележки) и прототипа с идеи за фаза 2, плюс прегледа на наличните данни.</p>`;
+}
+
+route();
+</script>
