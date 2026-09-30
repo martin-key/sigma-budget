@@ -117,6 +117,7 @@ main{padding:28px clamp(16px,3vw,40px) 90px;min-width:0}
 .src{display:none;margin:-4px 0 12px;font-size:.82rem;line-height:1.35;padding:6px 10px;border-radius:6px;border-left:3px solid}
 body.show-src .src{display:flex;gap:8px;align-items:flex-start}
 .src b{white-space:nowrap}
+.src span{min-width:0;overflow-wrap:anywhere}
 .src[data-st="ok"]{background:var(--ok-soft);border-color:var(--ok)}
 .src[data-st="ok"] b{color:var(--ok)}
 .src[data-st="warn"]{background:var(--warn-soft);border-color:var(--warn)}
@@ -197,13 +198,35 @@ ol.qs{margin:0;padding-left:22px;display:grid;gap:8px;max-width:75ch}
 .note{font-size:.88rem;color:var(--muted);max-width:75ch}
 .callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 14px;border-radius:0 8px 8px 0;max-width:75ch}
 .p2box{border:1px dashed var(--line);border-radius:12px;padding:24px;background:var(--sunk)}
+
+/* разбивка на функциите и „По години“ */
+.crumbs{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;min-height:34px;margin-bottom:8px;font-size:.9rem}
+.crumb{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:5px 10px;cursor:pointer;font-weight:600;font-size:.86rem}
+.crumb:hover{border-color:var(--accent)}
+.crumb-here{font-weight:700}
+.part{padding:8px 0;border-bottom:1px dashed var(--line)}
+.part .line{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+.part .line b{white-space:nowrap;font-variant-numeric:tabular-nums}
+.part .hbar{margin-top:5px}
+.psub{font-size:.82rem;color:var(--muted);margin-top:3px}
+.xbtn{display:inline-flex;gap:6px;align-items:baseline;border:0;background:none;padding:0;cursor:pointer;text-align:left;font-weight:600}
+.xbtn .tw{color:var(--muted);display:inline-block;width:12px}
+.xpad{display:inline-block;padding-left:18px}
+.linkish{border:0;background:none;padding:0;cursor:pointer;text-align:left;font-weight:600;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+.linkish:hover{text-decoration-color:var(--accent)}
+.yr-controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin-bottom:14px}
+.sel{padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-weight:600;max-width:100%}
+.yr-sum{font-size:1.02rem;max-width:70ch}
+table.yr-table{font-size:.88rem}
+table.yr-table th,table.yr-table td{padding:7px 8px}
+tr.on td{background:var(--accent-soft)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
 <div lang="bg">
 <header class="topbar">
   <a class="brand" href="#/"><span class="brand-mark" aria-hidden="true"></span>Бюджет на светло</a>
-  <span class="demo-pill">Прототип v1 · реални и примерни данни</span>
+  <span class="demo-pill">Прототип v2 · реални и примерни данни</span>
   <span class="spacer"></span>
   <button class="src-toggle" id="srcToggle" type="button" aria-pressed="false" aria-label="Покажи източниците"><span class="dot" aria-hidden="true"></span><span class="lbl">Покажи източниците</span></button>
 </header>
@@ -226,18 +249,28 @@ const KFP = { planRev: 49.6, planExp: 56.8, planDef: 7.2, defPctGdp: 5.7,
   jul: { rev: 26347.4, revPct: 53.1, revYoY: 11.2, tax: 21076.4, taxPct: 54.8, nontax: 3083.8, nontaxPct: 53.3,
          aid: 2187.2, exp: 28548.8, expPct: 50.3, interest: 649.7, interestPct: 61.3, bal: -2201.4, balPctGdp: 1.8, reserve: 8525.7 } };
 const ELAPSED = 7/12;
-const FUNCTIONS = [
-  { name: "Социално осигуряване, подпомагане и грижи", short: "Социално осигуряване и помощи", v: 19.2, yoy: 10.9, parts: [["Пенсии", 13.6], ["Социални помощи и обезщетения", 3.6], ["Програми за заетост и социални услуги", 2.1]] },
-  { name: "Икономически дейности и услуги", short: "Икономика, транспорт, енергетика", v: 9.8, yoy: 30.4 },
-  { name: "Здравеопазване", short: "Здравеопазване", v: 6.7, yoy: 10.3 },
-  { name: "Отбрана и сигурност", short: "Отбрана и сигурност", v: 6.5, yoy: 6.8 },
-  { name: "Образование", short: "Образование", v: 5.6, yoy: 7.0 },
-  { name: "Общи държавни служби", short: "Администрация", v: 3.0, yoy: 19.3 },
-  { name: "Жилищно строителство, ВиК, околна среда", short: "Жилищно, ВиК, околна среда", v: 2.7, yoy: 29.9 },
-  { name: "Разходи, некласифицирани другаде (основно лихви)", short: "Лихви по дълга", v: 1.1, yoy: 27.6 },
-  { name: "Култура, спорт, почивни дейности", short: "Култура и спорт", v: 1.0, yoy: 24.7 }
+// АСБП 2026–2028, Табл. III-1 „Разходи по функции по КФП … (без вноска в общия бюджет на ЕС)“, млн. €.
+// Ред: [име, кратко име, 2025 програма, 2026 проект, кодове COFOG за „По години“, подредове [име, кратко име, 2025, 2026]].
+// Код с „-“ отпред се изважда (лихвите GF0107 са в GF01 при COFOG, а при КФП са отделна функция).
+const FUNC_KFP = [
+  ["Социално осигуряване, подпомагане и грижи", "Социално осигуряване и помощи", 17341.9, 19240.7, ["GF10"], [["Пенсии", "Пенсии", 12389.0, 13578.7], ["Социални помощи и обезщетения", "Социални помощи и обезщетения", 3217.4, 3596.8], ["Програми, дейности и служби по социалното осигуряване, подпомагане и заетостта", "Програми за заетост и социални услуги", 1735.6, 2065.2]]],
+  ["Икономически дейности и услуги", "Икономика, транспорт, енергетика", 7533.3, 9823.6, ["GF04"], [["Минно дело, горива и енергия", "Минно дело, горива и енергия", 1613.4, 2801.2], ["Селско стопанство, горско стопанство, лов и риболов", "Селско и горско стопанство, риболов", 1924.9, 1409.4], ["Транспорт и съобщения", "Транспорт и съобщения", 2921.5, 3449.4], ["Промишленост и строителство", "Промишленост и строителство", 2.7, 1.5], ["Туризъм", "Туризъм", 41.4, 41.4], ["Други дейности по икономиката", "Други дейности по икономиката", 1029.4, 2120.6]]],
+  ["Здравеопазване", "Здравеопазване", 6043.8, 6664.4, ["GF07"], []],
+  ["Отбрана и сигурност", "Отбрана и сигурност", 6050.7, 6460.3, ["GF02", "GF03"], [["Отбрана", "Отбрана", 2126.8, 2467.8], ["Полиция, вътрешен ред и сигурност", "Полиция, вътрешен ред и сигурност", 2750.4, 2750.3], ["Съдебна власт", "Съдебна власт", 819.5, 870.6], ["Администрация на затворите", "Администрация на затворите", 222.3, 229.1], ["Защита на населението, управление и дейности при стихийни бедствия и аварии", "Защита при бедствия и аварии", 131.6, 142.4]]],
+  ["Образование", "Образование", 5233.9, 5599.7, ["GF09"], []],
+  ["Общи държавни служби", "Администрация", 2515.8, 3002.6, ["GF01", "-GF0107"], [["Изпълнителни и законодателни органи", "Изпълнителни и законодателни органи", 1963.1, 2335.4], ["Общи служби", "Общи служби", 115.0, 147.8], ["Наука", "Наука", 437.6, 519.5]]],
+  ["Жилищно строителство, благоустройство, комунално стопанство и опазване на околната среда", "Жилищно, ВиК, околна среда", 2086.3, 2710.8, ["GF05", "GF06"], [["Жилищно строителство, благоустройство, комунално стопанство", "Жилищно и комунално стопанство", 1259.2, 1886.4], ["Опазване на околната среда", "Опазване на околната среда", 827.1, 824.4]]],
+  ["Разходи, некласифицирани в другите функции (основно лихви)", "Лихви по дълга", 830.0, 1059.2, ["GF0107"], []],
+  ["Култура, спорт, почивни дейности и религиозно дело", "Култура и спорт", 776.2, 963.7, ["GF08"], [["Почивни дейности", "Почивни дейности", 13.5, 18.2], ["Физическа култура и спорт", "Физическа култура и спорт", 127.9, 162.6], ["Култура", "Култура", 588.7, 732.4], ["Религиозно дело", "Религиозно дело", 46.2, 50.6]]]
 ];
-const FUNC_TOTAL = FUNCTIONS.reduce((a, f) => a + f.v, 0);
+const FUNCTIONS = FUNC_KFP.map(([name, short, m25, m, cofog, parts]) => ({
+  name, short, m25, m, cofog, v: m / 1000, yoy: (m / m25 - 1) * 100,
+  parts: parts.map(([pn, ps, p25, pm]) => ({ name: pn, short: ps, m25: p25, m: pm, yoy: (pm / p25 - 1) * 100 }))
+}));
+const FUNC_TOTAL = FUNCTIONS.reduce((a, f) => a + f.v, 0); // млрд. €
+// Eurostat, gov_10a_exp (COFOG): България, сектор S13, общо разходи (TE), млн. € и % от БВП; обновено 16.09.2026.
+const COFOG = {"years":[2015,2016,2017,2018,2019,2020,2021,2022,2023,2024],"MIO_EUR":{"TOTAL":[18494.9,16952.1,18265.4,20770.0,22343.5,25595.5,29625.6,35541.6,36724.0,41059.6],"GF01":[1753.7,1767.0,1693.3,2057.9,2198.7,2284.2,3532.5,3161.7,3028.9,3075.3],"GF0107":[421.1,430.3,424.4,371.5,343.4,324.8,347.3,333.4,468.6,543.2],"GF02":[597.4,541.7,564.1,649.9,729.8,914.7,1037.6,1305.9,1430.9,1344.5],"GF03":[1279.4,1113.4,1296.9,1378.0,1633.0,1672.7,1988.8,2219.8,2493.1,2914.6],"GF04":[2821.4,1854.3,2174.6,3757.8,3970.0,5235.7,4696.8,7366.2,5444.4,6105.9],"GF05":[356.2,321.8,351.9,393.1,414.6,427.6,547.1,638.4,555.6,639.8],"GF06":[964.5,923.8,812.7,593.3,748.8,465.5,681.0,766.1,1005.2,1067.0],"GF07":[2429.9,2414.3,2547.4,2785.9,2845.5,3600.0,4170.4,4770.2,5098.1,5618.4],"GF08":[551.1,359.5,534.9,451.7,413.1,525.2,662.2,534.1,698.7,747.0],"GF09":[1792.2,1655.2,1852.9,1981.7,2342.2,2418.4,3100.2,3376.3,3908.3,4455.0],"GF10":[5949.1,6001.1,6436.5,6720.5,7047.7,8051.5,9209.1,11403.0,13060.9,15091.9]},"PC_GDP":{"TOTAL":[40.4,34.8,34.8,37.1,36.5,41.4,41.5,41.3,38.9,39.2],"GF01":[3.8,3.6,3.2,3.7,3.6,3.7,5.0,3.7,3.2,2.9],"GF0107":[0.9,0.9,0.8,0.7,0.6,0.5,0.5,0.4,0.5,0.5],"GF02":[1.3,1.1,1.1,1.2,1.2,1.5,1.5,1.5,1.5,1.3],"GF03":[2.8,2.3,2.5,2.5,2.7,2.7,2.8,2.6,2.6,2.8],"GF04":[6.2,3.8,4.1,6.7,6.5,8.5,6.6,8.6,5.8,5.8],"GF05":[0.8,0.7,0.7,0.7,0.7,0.7,0.8,0.7,0.6,0.6],"GF06":[2.1,1.9,1.5,1.1,1.2,0.8,1.0,0.9,1.1,1.0],"GF07":[5.3,5.0,4.9,5.0,4.6,5.8,5.8,5.5,5.4,5.4],"GF08":[1.2,0.7,1.0,0.8,0.7,0.8,0.9,0.6,0.7,0.7],"GF09":[3.9,3.4,3.5,3.5,3.8,3.9,4.3,3.9,4.1,4.3],"GF10":[13.0,12.3,12.3,12.0,11.5,13.0,12.9,13.2,13.8,14.4]}};
+const COFOG_NAMES = { TOTAL: "Общо разходи", GF01: "Общи държавни служби", GF0107: "Операции с държавния дълг (лихви)", GF02: "Отбрана", GF03: "Обществен ред и безопасност", GF04: "Икономически дейности", GF05: "Опазване на околната среда", GF06: "Жилищно строителство и благоустройство", GF07: "Здравеопазване", GF08: "Отдих, култура и религия", GF09: "Образование", GF10: "Социална защита" };
 const REV_SHARES = [
   { name: "ДДС", v: 25.8, what: "Данък, включен в цената на почти всичко, което купуваме. Стандартна ставка 20%.", who: "Всеки купувач; фирмите го събират и превеждат." },
   { name: "Социални и здравни осигуровки", v: 23.4, what: "Вноски за пенсии, болнични, безработица и здравеопазване.", who: "Работещите и работодателите, в дял, определен със закон." },
@@ -253,13 +286,15 @@ const BAL = { years: ["2024", "2025", "2026", "2027", "2028"], kind: ["отче�
 const SRC = {
   zdb: ["ok", "ЗДБ 2026, ДВ бр. 69 от 31.07.2026 — таблиците по членове (хил. €). Разходите са по държавния бюджет, не по цялата КФП."],
   kfpJul: ["ok", "МФ, изпълнение на КФП към 31.07.2026 (публикувано 31.08.2026)."],
-  kfpPlan: ["ok", "Годишният план по КФП е изведен от процентите на изпълнение в данните на МФ към 31.07 (26 347,4 млн. € = 53,1%)."],
+  kfpPlan: ["ok", "Годишният план по КФП е изведен от процентите на изпълнение в данните на МФ към 31.07 (26 347,4 млн. € = 53,1%). Съвпада с АСБП 2026–2028, Табл. 6 „Основни показатели по КФП“: приходи 49 615,3 млн. €, разходи с вноската в ЕС 56 807,2 млн. €, салдо −7 191,9 млн. € (−5,7% от БВП)."],
   sdmx: ["ok", "SDMX на МФ по стандарта SDDS Plus (през БНБ): операции на централното управление, месечно. 2025 г. е преизчислена в евро по 1,95583."],
   eurostat: ["ok", "Eurostat, gov_10dd_edpt1: консолидиран брутен дълг на сектор „Държавно управление“, % от БВП."],
-  functions: ["warn", "АСБП 2026–2028, Табл. III-1 (PDF). Числата са взети от wireframe-ите — за проверка при извличането."],
+  functions: ["ok", "АСБП 2026–2028, Табл. III-1 „Разходи по функции по КФП за периода 2026–2028 г. с разпределен резерв по функции (без вноска в общия бюджет на ЕС)“, млн. €: колони „2026 проект“ и „2025 програма“, с подредовете на всяка функция. Мотиви към законопроекта за държавния бюджет за 2026 г., № 52-602-01-19, внесен на 01.07.2026: parliament.bg/bills/52/52-602-01-19.docx. Приетият закон може да се различава в детайли."],
+  cofog: ["ok", "Eurostat, gov_10a_exp (разходи по функции, COFOG): България, сектор S13 „Държавно управление“, общо разходи (TE), млн. € и % от БВП, 2015–2024 г. (обновено 16.09.2026). ec.europa.eu/eurostat/databrowser/view/gov_10a_exp. Групите на COFOG се различават от функциите по КФП."],
   revShares: ["warn", "АСБП 2026–2028, Прил. 3 (PDF). Числата са от wireframe-ите — за проверка."],
   balance: ["warn", "АСБП 2026–2028, Прил. 3: салдо и лихви. За 2026 г. съвпадат с данните на МФ (лихви 649,7 млн. = 61,3% от плана); останалите години са за проверка."],
-  activities: ["unk", "Разходите по ~500 дейности: не открихме публикувана таблица. Нужно е запитване към МФ."],
+  activities: ["unk", "Разходите по ~400–500 дейности: разбивката я има само в МФ и не е публикувана. Фаза 2 — нужно е запитване към МФ."],
+  kfpMonthly: ["warn", "МФ, месечни данни по КФП (Excel): minfin.bg/bg/statistics/5, колона „КФП“. Приходи = ред 11; разходи = ред 16 „Разходи“ + ред 32 „Вноска в бюджета на ЕС“. Предстои: към 30.09.2026 minfin.bg отказва автоматичния достъп (Cloudflare, HTTP 403), а в уеб архивите няма копия на файловете за 2026 г."],
   debtStock: ["unk", "Размерът на дълга в евро: регистърът и бюлетините на МФ (Excel/PDF) — предстои извличане и избор на обхват."],
   components: ["warn", "Съставните бюджети (държавен, НОИ/НЗОК, общини, ВУЗ…): Excel таблиците на МФ по КФП — предстои извличане."],
   rates: ["warn", "Ставки от 2025 г. (служител 13,78%, данък 10%, работодател 18,92%) — за потвърждение с КСО, ЗБДОО и ЗБНЗОК 2026. МОД 2 300 € от 01.08.2026 (ЗБДОО 2026)."],
@@ -282,13 +317,26 @@ function money(thousands) {
   return b >= 1 ? `${fmt(b, 2)} млрд. €` : `${fmt(mln(thousands), 1)} млн. €`;
 }
 const MONTHS = ["яну", "фев", "мар", "апр", "май", "юни", "юли", "авг", "сеп", "окт", "ное", "дек"];
+const mlnFmt = m => m >= 1000 ? `${fmt(m / 1000, 2)} млрд. €` : `${fmt(m, 1)} млн. €`; // вход в млн. €
+const signPct = x => Math.abs(x) < 0.05 ? "0,0%" : `${x > 0 ? "+" : "−"}${fmt(Math.abs(x))}%`;
+function ppFmt(bnEur) { // € на човек, с точност според размера
+  const x = bnEur * 1e9 / (POP * 1e6);
+  return x >= 100 ? fmt0(Math.round(x / 10) * 10) : x >= 10 ? fmt0(x) : fmt(x, 1);
+}
+// COFOG: сума по кодове; код с „-“ отпред се изважда.
+function cofogSeries(codes, unit) {
+  return COFOG.years.map((y, i) => codes.reduce((a, c) => c[0] === "-" ? a - COFOG[unit][c.slice(1)][i] : a + COFOG[unit][c][i], 0));
+}
+const cofogCodes = codes => codes.map((c, i) => c[0] === "-" ? "− " + c.slice(1) : (i ? "+ " : "") + c).join(" ");
+const cofogText = codes => codes.map((c, i) => c[0] === "-" ? `без ${c.slice(1)} „${COFOG_NAMES[c.slice(1)]}“` : `${i ? "+ " : ""}${c} „${COFOG_NAMES[c]}“`).join(" ");
+function rerender() { const y = window.scrollY; route(); window.scrollTo(0, y); } // смяна на изглед без скок нагоре
 
 const ROUTES = [
   { path: "", q: "Какъв е бюджетът?", label: "Начало", kind: "MVP", render: pHome, data: ["kfpPlan", "kfpJul", "pop"] },
   { path: "prihodi", q: "Откъде идват парите?", label: "Приходи", kind: "детайл", render: pRevenue, data: ["revShares", "kfpJul"] },
-  { path: "razhodi", q: "Къде отиват парите?", label: "Разходи", kind: "MVP", render: pExpenses, data: ["functions", "activities"] },
+  { path: "razhodi", q: "Къде отиват парите?", label: "Разходи", kind: "MVP", render: pExpenses, data: ["functions", "cofog", "activities"] },
   { path: "vedomstva", q: "Кой харчи?", label: "Ведомства", kind: "детайл", render: pMinistries, data: ["zdb", "program"] },
-  { path: "izpalnenie", q: "Изпълнява ли се планът?", label: "Изпълнение", kind: "MVP", render: pExecution, data: ["kfpJul", "sdmx", "components"] },
+  { path: "izpalnenie", q: "Изпълнява ли се планът?", label: "Изпълнение", kind: "MVP", render: pExecution, data: ["kfpJul", "kfpMonthly", "sdmx", "components"] },
   { path: "danaci", q: "Колко плащам аз?", label: "Моите данъци", kind: "MVP", render: pTaxes, data: ["rates", "functions"] },
   { path: "dalg", q: "Колко дължим?", label: "Дълг", kind: "детайл", render: pDebt, data: ["eurostat", "balance", "debtStock"] },
   { path: "obshtini", q: "Моята община", label: "Общини", kind: "фаза 2", render: pMunicipal, data: ["municipal"] },
@@ -413,50 +461,213 @@ function pRevenue() {
   <section class="panel"><div class="panel-head"><h2>Всеки източник поотделно</h2><span class="muted">кликни за обяснение</span></div>${rows}</section>`;
 }
 
-let expView = "chart";
-let expSel = 0;
+let expView = "chart";   // chart | table | years
+let expSel = 0;          // избрана функция (индекс във FUNCTIONS)
+let expOpen = false;     // разгъната ли е избраната функция в графиката
+let yrTotal = false;     // „По години“: всички разходи вместо избраната функция
+let yrUnit = "MIO_EUR";  // MIO_EUR | PC_GDP
+const expRows = new Set(); // разгънати редове в таблицата
+let tmPaint = null;
 function pExpenses() {
-  afterRender = drawTreemap;
-  const tableRows = FUNCTIONS.map(f => `<tr><td>${f.name}</td><td class="r">${fmt(f.v)}</td><td class="r">${fmt(f.v / FUNC_TOTAL * 100)}%</td><td class="r">${fmt0(perPerson(f.v))} €</td><td class="r">+${fmt(f.yoy)}%</td></tr>`).join("");
+  afterRender = drawExpenses;
+  const years = expView === "years";
+  const ys = COFOG.years;
+  const views = [["chart", "Графика"], ["table", "Таблица"], ["years", "По години"]];
+  const seg = `<div class="seg" role="group" aria-label="Изглед на данните">${views.map(([k, l]) => `<button type="button" data-view="${k}" aria-pressed="${expView === k}">${l}</button>`).join("")}</div>`;
+  let body;
+  if (expView === "chart") body = `
+    <div class="grid-2" id="expChartWrap" style="grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)">
+      <div><div class="crumbs" id="crumbs"></div><div id="treemap" class="chart tall" role="img"></div></div>
+      <div id="fdetail"></div>
+    </div>
+    <p class="note" style="margin-top:10px">Размерът на всяко поле е пропорционален на сумата. Кликни функция, за да я разгънеш на редовете ѝ в таблицата по КФП.</p>`;
+  else if (expView === "table") body = `
+    <div class="table-wrap"><table><thead><tr><th>Функция</th><th class="r">Сума</th><th class="r">Дял</th><th class="r">На човек</th><th class="r">Спрямо 2025</th></tr></thead><tbody id="expTbody">${expTableRows()}</tbody></table></div>
+    <p class="note" style="margin-top:10px">Кликни ▸, за да разгънеш функцията на редовете ѝ в таблицата по КФП. „Дял“ е от всички разходи, а „Спрямо 2025“ — спрямо програмата за 2025 г.</p>`;
+  else body = yearsHtml();
   return `
   <header style="display:grid;gap:10px"><div class="eyebrow">Разходи 2026 · <span class="scope">КФП, без вноската в ЕС · ${fmt(FUNC_TOTAL)} млрд. €</span></div><h1>Къде отиват парите</h1><p class="lede muted">Пенсиите и социалните помощи са най-голямото перо: всяко трето евро от разходите на държавата отива там.</p></header>
   <div class="seg" role="group" aria-label="Изглед"><button type="button" aria-pressed="true">За какво</button><button type="button" onclick="location.hash='#/vedomstva'" aria-pressed="false">Кой харчи</button><button type="button" aria-pressed="false" disabled title="Фаза 2">Вид разход</button></div>
-  <section class="panel">${src("functions")}
-    <div class="panel-head"><h2>По функции</h2><div class="seg" role="group" aria-label="Графика или таблица"><button type="button" id="vChart" aria-pressed="${expView === "chart"}">Графика</button><button type="button" id="vTable" aria-pressed="${expView === "table"}">Таблица</button></div></div>
-    <div class="grid-2" id="expChartWrap" style="grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);${expView === "chart" ? "" : "display:none"}">
-      <div id="treemap" class="chart tall" role="img" aria-label="Разходи по функции, пропорционални на сумата"></div>
-      <div id="fdetail"></div>
-    </div>
-    <div class="table-wrap" id="expTable" style="${expView === "table" ? "" : "display:none"}"><table><thead><tr><th>Функция</th><th class="r">млрд. €</th><th class="r">Дял</th><th class="r">На човек</th><th class="r">Спрямо 2025</th></tr></thead><tbody>${tableRows}</tbody></table></div>
-    <p class="note" style="margin-top:10px">Размерът на всяко поле е пропорционален на сумата. Кликни поле за детайл.</p>
+  <section class="panel">${years ? src("cofog") : src("functions")}
+    <div class="panel-head"><h2>${years ? `По години, ${ys[0]}–${ys[ys.length - 1]}` : "По функции"}</h2>${seg}</div>
+    ${body}
   </section>`;
 }
-function fDetailHtml(i) {
-  const f = FUNCTIONS[i];
-  const parts = f.parts ? `<div style="display:grid;gap:6px;margin-top:10px">${f.parts.map(([n, v]) => `<div class="receipt"><div class="line"><span>${n}</span><b>${fmt(v)} млрд. €</b></div></div>`).join("")}</div>` : "";
-  return `<div class="eyebrow">Избрана функция</div><h3 style="margin:6px 0 10px">${f.name}</h3>
-   <div class="kpi"><div class="value">${fmt(f.v)}<small>млрд. €</small></div><div class="sub">${fmt(f.v / FUNC_TOTAL * 100)}% от разходите · ≈ ${fmt0(perPerson(f.v))} € на човек · +${fmt(f.yoy)}% спрямо 2025</div></div>
-   ${parts}
-   <div style="margin-top:14px">${src("activities")}<p class="note">Следващо ниво: функция → подфункция → дейност (~500 дейности). ${stPill("activities")}</p></div>`;
+function drawExpenses() {
+  document.querySelectorAll("[data-view]").forEach(b => { b.onclick = () => { expView = b.dataset.view; rerender(); }; });
+  if (expView === "table") wireExpTable();
+  else if (expView === "years") drawYears();
+  else drawTreemap();
+}
+
+/* Графика: treemap по функции; клик разгъва функцията на подредовете ѝ. */
+const TM_LINE = 16; // височина на ред в надписите на полетата, px
+const tmMeasure = (() => {
+  let cx = null;
+  return s => { cx = cx || document.createElement("canvas").getContext("2d"); cx.font = "700 13px 'Sofia Sans Condensed', system-ui, sans-serif"; return cx.measureText(s).width; };
+})();
+// Побира ли се надписът „име + сума“ в поле w×h, без да се чупят думи?
+function tmLabelFits(name, value, w, h) {
+  const maxW = w - 14, words = name.split(/\s+/);
+  if (Math.max(tmMeasure(value), ...words.map(tmMeasure)) > maxW) return false;
+  const sp = tmMeasure(" ");
+  let lines = 1, cur = 0;
+  for (const wd of words) {
+    const ww = tmMeasure(wd);
+    if (!cur) cur = ww; else if (cur + sp + ww <= maxW) cur += sp + ww; else { lines++; cur = ww; }
+  }
+  return (lines + 1) * TM_LINE <= h - 10;
 }
 function drawTreemap() {
-  const vc = document.getElementById("vChart"), vt = document.getElementById("vTable");
-  if (vc) { vc.onclick = () => { expView = "chart"; route(); }; vt.onclick = () => { expView = "table"; route(); }; }
-  document.getElementById("fdetail").innerHTML = fDetailHtml(expSel);
-  if (expView !== "chart") return;
   const el = document.getElementById("treemap");
   const c = mkChart(el);
   const pal = [css("--data"), css("--data-2"), css("--accent"), css("--data-3"), css("--ok"), css("--warn"), css("--unk"), css("--muted"), css("--data-2")];
-  const lab = pal.map(textOn);
-  c.setOption({
-    tooltip: { formatter: p => `${p.name}<br><b>${fmt(p.value)} млрд. €</b>` },
-    series: [{ type: "treemap", roam: false, nodeClick: false, breadcrumb: { show: false }, width: "100%", height: "100%", top: 0, left: 0,
-      label: { show: true, formatter: p => `${p.name}\n${fmt(p.value)} млрд. €`, fontFamily: "Sofia Sans Condensed, system-ui", fontWeight: 700, fontSize: 13, color: "#fff", overflow: "break" },
-      itemStyle: { borderColor: css("--surface"), borderWidth: 3, gapWidth: 3 },
-      data: FUNCTIONS.map((f, i) => ({ name: f.short, value: f.v, label: { color: lab[i % pal.length] }, itemStyle: { color: pal[i % pal.length], borderColor: i === expSel ? css("--ink") : css("--surface"), borderWidth: i === expSel ? 3 : 3 } })) }]
-  });
+  tmPaint = () => {
+    const f = FUNCTIONS[expSel];
+    const open = expOpen && f.parts.length > 0;
+    const items = open ? f.parts : FUNCTIONS;
+    const valText = x => open ? mlnFmt(x.m) : fmt(x.m / 1000) + " млрд. €";
+    const color = i => open ? pal[expSel % pal.length] : pal[i % pal.length]; // подредовете носят цвета на функцията
+    const data = fit => items.map((x, i) => ({ name: x.short, value: x.m,
+      label: { show: !fit || fit[x.short] !== false, color: textOn(color(i)) },
+      itemStyle: { color: color(i), borderColor: !open && i === expSel ? css("--ink") : css("--surface") } }));
+    c.setOption({
+      tooltip: { formatter: p => { const x = items.find(it => it.short === p.name); return x ? `${x.name}<br><b>${mlnFmt(x.m)}</b>` : ""; } },
+      series: [{ type: "treemap", roam: false, nodeClick: false, breadcrumb: { show: false }, width: "100%", height: "100%", top: 0, left: 0,
+        label: { show: true, formatter: p => { const x = items.find(it => it.short === p.name); return x ? `${x.short}\n${valText(x)}` : p.name; }, fontFamily: "Sofia Sans Condensed, system-ui", fontWeight: 700, fontSize: 13, lineHeight: TM_LINE, overflow: "break", lineOverflow: "truncate" },
+        itemStyle: { borderColor: css("--surface"), borderWidth: 3, gapWidth: 3 },
+        data: data(null) }]
+    }, true);
+    // Втори пас: надпис само в полетата, където се побира цял; иначе думите се чупят на букви.
+    // Сумите на скритите надписи остават в подсказката, в детайла и в таблицата.
+    try {
+      const fit = {};
+      c.getModel().getSeriesByIndex(0).getViewRoot().children.forEach(n => {
+        const x = items.find(it => it.short === n.name), l = n.getLayout();
+        if (x && l) fit[x.short] = tmLabelFits(x.short, valText(x), l.width, l.height);
+      });
+      c.setOption({ series: [{ data: data(fit) }] });
+    } catch (e) { /* без размерите оставяме всички надписи */ }
+    el.setAttribute("aria-label", open ? `${f.name}: подредовете в таблицата по КФП, пропорционални на сумата` : "Разходи по функции, пропорционални на сумата");
+    document.getElementById("crumbs").innerHTML = open
+      ? `<button type="button" class="crumb" id="tmBack">← Всички функции</button><span class="crumb-here">${f.short} · ${fmt(f.v)} млрд. €</span>`
+      : `<span class="muted">Всички функции · ${fmt(FUNC_TOTAL)} млрд. €</span>`;
+    const back = document.getElementById("tmBack");
+    if (back) back.onclick = () => { expOpen = false; tmPaint(); showDetail(); };
+  };
+  tmPaint();
+  showDetail();
+  // Размерите на надписите зависят от шрифта: пренареди, щом се зареди.
+  if (document.fonts && document.fonts.status !== "loaded") document.fonts.ready.then(() => { if (!c.isDisposed()) tmPaint(); });
   // dataIndex в treemap брои и скрития корен (първото поле е 1), затова търсим по име.
-  c.on("click", p => { const k = FUNCTIONS.findIndex(f => f.short === p.name); if (k < 0) return; expSel = k; document.getElementById("fdetail").innerHTML = fDetailHtml(expSel); c.setOption({ series: [{ data: FUNCTIONS.map((f, i) => ({ name: f.short, value: f.v, label: { color: lab[i % pal.length] }, itemStyle: { color: pal[i % pal.length], borderColor: i === expSel ? css("--ink") : css("--surface") } })) }] }); });
+  c.on("click", p => {
+    if (expOpen && FUNCTIONS[expSel].parts.length) return; // под подредовете няма публикувано ниво (фаза 2)
+    const k = FUNCTIONS.findIndex(f => f.short === p.name);
+    if (k < 0) return;
+    expSel = k; yrTotal = false; expOpen = FUNCTIONS[k].parts.length > 0;
+    tmPaint(); showDetail();
+  });
+}
+function showDetail() {
+  const d = document.getElementById("fdetail");
+  if (!d) return;
+  d.innerHTML = fDetailHtml(expSel);
+  const o = document.getElementById("fOpen");
+  if (o) o.onclick = () => { expOpen = !expOpen; tmPaint(); showDetail(); };
+  document.getElementById("fYears").onclick = () => { expView = "years"; yrTotal = false; rerender(); };
+}
+function fDetailHtml(i) {
+  const f = FUNCTIONS[i];
+  const parts = f.parts.length ? `
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px 10px;flex-wrap:wrap;margin:16px 0 2px"><div class="eyebrow">Редове в таблицата по КФП</div><button type="button" class="crumb" id="fOpen">${expOpen ? "Свий графиката" : "Разгъни в графиката"}</button></div>
+    ${f.parts.map(p => `<div class="part"><div class="line"><span>${p.name}</span><b>${mlnFmt(p.m)}</b></div><div class="hbar"><i style="width:${p.m / f.m * 100}%"></i></div><div class="psub">${fmt(p.m / f.m * 100)}% от функцията · ${signPct(p.yoy)} спрямо 2025</div></div>`).join("")}`
+    : `<p class="note" style="margin-top:14px">В таблицата по КФП тази функция няма подредове.${f.cofog[0] === "GF0107" ? " За 2026 г. сумата е равна на лихвите по КФП (АСБП, Табл. 6)." : ""}</p>`;
+  return `<div class="eyebrow">Избрана функция</div><h3 style="margin:6px 0 10px">${f.name}</h3>
+   <div class="kpi"><div class="value">${fmt(f.v)}<small>млрд. €</small></div><div class="sub">${fmt(f.v / FUNC_TOTAL * 100)}% от разходите · ≈ ${ppFmt(f.v)} € на човек · ${signPct(f.yoy)} спрямо програмата за 2025</div></div>
+   ${parts}
+   <p style="margin-top:12px"><button type="button" class="linkish" id="fYears">Виж по години →</button></p>
+   <div style="margin-top:14px">${src("activities")}<p class="note">Следващо ниво — около 400–500 дейности. Тази разбивка я има само в МФ и не е публикувана. <span class="st warn">фаза 2</span></p></div>`;
+}
+
+/* Таблица: функциите се разгъват на подредовете си. */
+function expTableRows() {
+  const row = (x, cls, first) => `<tr class="${cls}">${first}<td class="r">${mlnFmt(x.m)}</td><td class="r">${fmt(x.m / (FUNC_TOTAL * 1000) * 100)}%</td><td class="r">${ppFmt(x.m / 1000)} €</td><td class="r">${signPct(x.yoy)}</td></tr>`;
+  return FUNCTIONS.map((f, i) => {
+    const open = expRows.has(i);
+    const name = f.parts.length
+      ? `<button type="button" class="xbtn" data-row="${i}" aria-expanded="${open}"><span class="tw" aria-hidden="true">${open ? "▾" : "▸"}</span><span>${f.name}</span></button>`
+      : `<span class="xpad">${f.name}</span>`;
+    return row(f, "", `<td>${name}</td>`) + (open ? f.parts.map(p => row(p, "sub", `<td>${p.name}</td>`)).join("") : "");
+  }).join("");
+}
+function wireExpTable() {
+  document.querySelectorAll("[data-row]").forEach(b => { b.onclick = () => {
+    const i = +b.dataset.row;
+    if (expRows.has(i)) expRows.delete(i); else expRows.add(i);
+    expSel = i; yrTotal = false; expOpen = false;
+    document.getElementById("expTbody").innerHTML = expTableRows();
+    wireExpTable();
+    const again = document.querySelector(`[data-row="${i}"]`);
+    if (again) again.focus();
+  }; });
+}
+
+/* По години: Eurostat COFOG за избраната функция + таблица с всички групи. */
+function yearsHtml() {
+  const f = FUNCTIONS[expSel];
+  const codes = yrTotal ? ["TOTAL"] : f.cofog;
+  const pct = yrUnit === "PC_GDP";
+  const vals = cofogSeries(codes, yrUnit);
+  const ys = COFOG.years, n = ys.length - 1;
+  const show = v => pct ? `${fmt(v)}% от БВП` : mlnFmt(v);
+  const d = vals[n] - vals[0];
+  const chg = pct ? (Math.abs(d) < 0.05 ? "без промяна" : `${d > 0 ? "+" : "−"}${fmt(Math.abs(d))} пр.п.`) : signPct((vals[n] / vals[0] - 1) * 100);
+  const label = yrTotal ? "Всички разходи" : f.name;
+  const opts = FUNCTIONS.map((x, i) => `<option value="${i}">${x.short}</option>`).join("") + `<option value="-1">Всички разходи</option>`;
+  const rows = FUNCTIONS.map((x, i) => ({ i, name: x.short, codes: x.cofog })).concat([{ i: -1, name: "Всички разходи", codes: ["TOTAL"] }]);
+  const cell = v => pct ? fmt(v) : fmt0(v);
+  const trs = rows.map(r => {
+    const on = r.i < 0 ? yrTotal : !yrTotal && r.i === expSel;
+    return `<tr class="${on ? "on" : ""}"><td><button type="button" class="linkish" data-yr="${r.i}">${r.name}</button></td><td class="muted" style="white-space:nowrap">${cofogCodes(r.codes)}</td>${cofogSeries(r.codes, yrUnit).map(v => `<td class="r">${cell(v)}</td>`).join("")}</tr>`;
+  }).join("");
+  return `
+    <div class="yr-controls">
+      <label for="yrSel" style="font-weight:600">Функция</label>
+      <select id="yrSel" class="sel">${opts}</select>
+      <div class="seg" role="group" aria-label="Мерна единица"><button type="button" id="uMio" aria-pressed="${!pct}">млн. €</button><button type="button" id="uPct" aria-pressed="${pct}">% от БВП</button></div>
+    </div>
+    <p class="yr-sum"><b>${label}</b>: ${show(vals[0])} през ${ys[0]} г. → <b>${show(vals[n])}</b> през ${ys[n]} г. (${chg}).</p>
+    <p class="note" style="margin-top:4px">По COFOG това е ${cofogText(codes)}.</p>
+    <div id="yrChart" class="chart" role="img" aria-label="${label}: разходи по години, ${ys[0]}–${ys[n]}"></div>
+    <div class="callout" style="margin:6px 0 18px"><b>COFOG не е КФП.</b> Годините са по международната класификация COFOG на Eurostat: сектор „Държавно управление“, на начислена основа. Групите се различават леко от функциите по КФП. Например в COFOG лихвите по дълга са част от „Общи държавни служби“ (GF0107), а тук ги показваме отделно. Затова сумите не съвпадат с тези за 2026 г. Последната налична година е ${ys[n]}.</div>
+    <h3 style="margin-bottom:8px">Всички групи, ${pct ? "% от БВП" : "млн. €"}</h3>
+    <div class="table-wrap"><table class="yr-table"><thead><tr><th>Група</th><th>COFOG</th>${ys.map(y => `<th class="r">${y}</th>`).join("")}</tr></thead><tbody>${trs}</tbody></table></div>`;
+}
+function drawYears() {
+  const sel = document.getElementById("yrSel");
+  sel.value = yrTotal ? "-1" : String(expSel);
+  const pick = k => { if (k < 0) yrTotal = true; else { yrTotal = false; expSel = k; expOpen = false; } rerender(); };
+  sel.onchange = () => pick(+sel.value);
+  document.querySelectorAll("[data-yr]").forEach(b => { b.onclick = () => pick(+b.dataset.yr); });
+  document.getElementById("uMio").onclick = () => { yrUnit = "MIO_EUR"; rerender(); };
+  document.getElementById("uPct").onclick = () => { yrUnit = "PC_GDP"; rerender(); };
+  const pct = yrUnit === "PC_GDP";
+  const vals = cofogSeries(yrTotal ? ["TOTAL"] : FUNCTIONS[expSel].cofog, yrUnit);
+  const last = vals.length - 1;
+  const tip = v => pct ? `${fmt(v)}% от БВП` : `${fmt(v)} млн. €`;
+  const lab = v => pct ? `${fmt(v)}%` : fmt0(v);
+  const t = baseText();
+  const c = mkChart(document.getElementById("yrChart"));
+  c.setOption({
+    grid: { left: 52, right: 24, top: 40, bottom: 32 },
+    tooltip: { trigger: "axis", valueFormatter: v => tip(v) },
+    xAxis: { type: "category", data: COFOG.years.map(String), axisLabel: t, axisLine: { lineStyle: { color: css("--line") } } },
+    yAxis: { type: "value", min: 0, name: pct ? "% от БВП" : "млн. €", nameTextStyle: t, axisLabel: { ...t, formatter: v => pct ? fmt(v, v % 1 ? 1 : 0) : fmt0(v) }, splitLine: { lineStyle: { color: css("--line") } } },
+    series: [{ name: yrTotal ? "Всички разходи" : FUNCTIONS[expSel].short, type: "line", symbolSize: 8,
+      lineStyle: { width: 3, color: css("--accent") }, itemStyle: { color: css("--accent") }, areaStyle: { color: css("--accent-soft") },
+      // надпис само на първата и последната година; стойностите по години са в таблицата отдолу
+      data: vals.map((v, i) => ({ value: v, label: { show: i === 0 || i === last, position: "top", align: i === 0 ? "left" : i === last ? "right" : "center", color: css("--ink"), fontFamily: "Sofia Sans, system-ui, sans-serif", fontWeight: 700, fontSize: 13, formatter: p => lab(p.value) } })) }]
+  });
 }
 
 let mQuery = "";
@@ -518,10 +729,11 @@ function pExecution() {
     <div class="panel kpi"><div class="label">Дефицит</div><div class="value">${fmt(-j.bal / 1000, 2)}<small>млрд. €</small></div><div class="sub">${fmt(j.balPctGdp)}% от БВП · план ${fmt(KFP.planDef)} млрд.</div></div>
     <div class="panel kpi"><div class="label">Фискален резерв</div><div class="value">${fmt(j.reserve / 1000, 2)}<small>млрд. €</small></div><div class="sub">към 31.07</div></div>
   </section>
-  <section class="panel">${src("sdmx")}
+  <section class="panel">${src("sdmx")}${src("kfpMonthly")}
     <div class="panel-head"><h2>Натрупано по месеци: 2026 срещу 2025</h2><div class="seg" role="group" aria-label="Показател"><button type="button" id="exRev" aria-pressed="${exMode === "rev"}">Приходи</button><button type="button" id="exExp" aria-pressed="${exMode === "exp"}">Разходи</button></div></div>
-    <span class="scope">обхват: централно управление, не цялата КФП</span>
-    <div id="exChart" class="chart" role="img" aria-label="Натрупани приходи или разходи по месеци"></div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center"><span class="scope">обхват: централно управление, не цялата КФП</span><span class="st warn">предстои: данни по КФП</span></div>
+    <div class="callout" style="margin:12px 0 4px"><b>Предстои: данни по КФП.</b> Тази графика е за централното управление и затова не съвпада с четирите числа горе, които са за цялата КФП. Ще я сменим с месечните приходи и разходи по КФП от Excel таблиците на МФ (колона „КФП“): приходи — ред 11, разходи — ред 16 плюс вноската в бюджета на ЕС от ред 32. Засега сайтът на МФ не позволява автоматично изтегляне на файловете.</div>
+    <div id="exChart" class="chart" role="img" aria-label="Натрупани приходи или разходи на централното управление по месеци"></div>
   </section>
   <section class="panel">${src("components")}
     <div class="panel-head"><h2>Кой какво събира и харчи</h2><span class="st warn">предстои</span></div>
@@ -529,13 +741,13 @@ function pExecution() {
   </section>`;
 }
 function drawExecution() {
-  document.getElementById("exRev").onclick = () => { exMode = "rev"; route(); };
-  document.getElementById("exExp").onclick = () => { exMode = "exp"; route(); };
+  document.getElementById("exRev").onclick = () => { exMode = "rev"; rerender(); };
+  document.getElementById("exExp").onclick = () => { exMode = "exp"; rerender(); };
   const c = mkChart(document.getElementById("exChart"));
   const t = baseText();
   c.setOption({
     grid: { left: 48, right: 20, top: 40, bottom: 36 },
-    legend: { top: 0, left: 0, textStyle: t, data: ["2026", "2025"] },
+    legend: { top: 0, right: 0, textStyle: t, data: ["2026", "2025"] },
     tooltip: { trigger: "axis", valueFormatter: v => v == null ? "—" : `${fmt(v, 2)} млрд. €` },
     xAxis: { type: "category", data: MONTHS, axisLabel: t, axisLine: { lineStyle: { color: css("--line") } } },
     yAxis: { type: "value", name: "млрд. €", nameTextStyle: t, axisLabel: t, splitLine: { lineStyle: { color: css("--line") } } },
@@ -666,7 +878,7 @@ function pPayments() {
 
 function pData() {
   const keys = Object.keys(SRC);
-  const names = { zdb: "Закон за държавния бюджет 2026", kfpJul: "Изпълнение на КФП (месечно)", kfpPlan: "Годишен план по КФП", sdmx: "SDMX на МФ (SDDS Plus)", eurostat: "Eurostat: дълг към БВП", functions: "Разходи по функции (Табл. III-1)", revShares: "Структура на приходите (Прил. 3)", balance: "Салдо и лихви 2024–2028", activities: "Разходи по ~500 дейности", debtStock: "Размер на държавния дълг", components: "Съставни бюджети", rates: "Данъчни и осигурителни ставки", pop: "Население", municipal: "Данни за общините", sebra: "СЕБРА — плащания по получатели", program: "Програмни бюджети" };
+  const names = { zdb: "Закон за държавния бюджет 2026", kfpJul: "Изпълнение на КФП (месечно)", kfpPlan: "Годишен план по КФП", sdmx: "SDMX на МФ (SDDS Plus)", eurostat: "Eurostat: дълг към БВП", functions: "Разходи по функции (Табл. III-1)", cofog: "Eurostat: разходи по функции (COFOG)", kfpMonthly: "Месечни данни по КФП (Excel на МФ)", revShares: "Структура на приходите (Прил. 3)", balance: "Салдо и лихви 2024–2028", activities: "Разходи по ~400–500 дейности (фаза 2)", debtStock: "Размер на държавния дълг", components: "Съставни бюджети", rates: "Данъчни и осигурителни ставки", pop: "Население", municipal: "Данни за общините", sebra: "СЕБРА — плащания по получатели", program: "Програмни бюджети" };
   const rows = keys.map(k => `<tr><td><b>${names[k]}</b></td><td>${stPill(k)}</td><td class="muted">${SRC[k][1]}</td></tr>`).join("");
   return `
   <header style="display:grid;gap:10px"><div class="eyebrow">Справка</div><h1>Откъде са данните</h1><p class="lede muted">Всяко число в прототипа има източник и статус. Включи „Покажи източниците“ горе вдясно, за да ги видиш на всеки екран.</p></header>
@@ -674,6 +886,7 @@ function pData() {
   <section class="panel"><h2 style="margin-bottom:10px">Капани</h2><ul style="margin:0;padding-left:20px;display:grid;gap:8px;max-width:75ch">
     <li><b>Евро и лева.</b> От 01.01.2026 всичко е в евро, а историята е в лева. Делим на 1,95583. В SDMX файла на МФ двете валути са смесени под един и същ код.</li>
     <li><b>Обхват.</b> „Държавен бюджет“ не е същото като КФП. Етикетът за обхвата стои до всяка сума.</li>
+    <li><b>Функции по КФП и COFOG.</b> Функциите по КФП са национална класификация на касова основа. Изгледът „По години“ ползва COFOG на Eurostat (начислена основа, сектор „Държавно управление“), където някои разходи са групирани другояче. Например лихвите по дълга в COFOG са в „Общи държавни служби“.</li>
     <li><b>Достъп.</b> data.egov.bg и minfin.bg блокират автоматичния достъп. За автоматично обновяване трябва договорен достъп или собствен архив.</li></ul></section>`;
 }
 
@@ -682,7 +895,8 @@ const OPEN_QS = [
   "Обхват на MVP: четирите въпроса плюс детайлите — това ли е? Общините остават ли за фаза 2?",
   "Калкулаторът: осигуровките отиват в НОИ/НЗОК. Разпределяме ли ги по функции, или ги показваме отделно?",
   "Ставки за 2026 г.: кой ще потвърди осигурителните ставки и праговете от приетите закони?",
-  "Нивото „~500 дейности“: има ли публикуван източник, или е нужно запитване към МФ?",
+  "Нивото „~400–500 дейности“ го има само в МФ, затова е фаза 2. Правим ли запитване към МФ?",
+  "Месечните Excel таблици на МФ по КФП: кой може да ги прикачи, докато нямаме автоматичен достъп до minfin.bg?",
   "Дълг: кой обхват показваме като основен — държавния дълг по ЗДД или консолидирания дълг по Маастрихт?",
   "Визуален език: продължаваме в тази посока, по стила на wireframe-ите, или търсим трета?"
 ];
@@ -692,6 +906,7 @@ function pMap() {
   <header style="display:grid;gap:10px"><div class="eyebrow">Справка</div><h1>Карта на прототипа</h1><p class="lede muted">Всички екрани на едно място. Под всеки екран е статусът на данните, от които зависи.</p></header>
   <section class="mapgrid">${cards}</section>
   <section class="panel"><h2 style="margin-bottom:12px">Отворени въпроси към групата</h2><ol class="qs">${OPEN_QS.map(q => `<li>${q}</li>`).join("")}</ol></section>
+  <p class="note">Прототип v2, 30.09.2026: разбивка на функциите по таблицата на КФП (АСБП 2026–2028, Табл. III-1), изглед „По години“ по данни на Eurostat (COFOG) и бележка за месечните данни по КФП.</p>
   <p class="note">Прототип v1, 28.09.2026. Обединява документа за обхвата, wireframe-ите (екрани и бележки) и прототипа с идеи за фаза 2, плюс прегледа на наличните данни.</p>`;
 }
 
