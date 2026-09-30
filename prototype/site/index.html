@@ -233,6 +233,20 @@ details.tbl[open] summary::before{transform:rotate(90deg)}
 details.tbl .table-wrap{margin-top:8px}
 details.tbl td .psub{margin-top:1px}
 tr.plan td{border-bottom:0;border-top:2px solid var(--line)}
+tr.y26 td{border-bottom:0;padding-bottom:2px}
+tr.y25 td{color:var(--muted);padding-top:2px}
+@media (max-width:560px){details.tbl th,details.tbl td{padding-left:5px;padding-right:5px}details.tbl tr>:first-child{padding-left:0}details.tbl tr>:last-child{padding-right:0}}
+/* приходи и разходи една до друга (на тесен екран — една под друга); легенда над графиките */
+.exm{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:18px 28px}
+.exm .psub{margin:2px 0 0}
+.exm .chart{height:280px}
+.lg{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;font-size:.86rem;margin:14px 0 12px}
+.lg span{display:inline-flex;align-items:center;gap:3px}
+.lg i{display:inline-block;width:14px;border-top:3px solid var(--ink)}
+.lg i.d{width:18px;border-top-width:2px;border-top-style:dashed}
+.lg i.sw{width:10px;height:10px;border:0;border-radius:2px;background:var(--muted)}
+.lg i.sw.g{background:transparent;border:1.5px dashed var(--muted)}
+.lg i:last-of-type{margin-right:4px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -258,6 +272,9 @@ const ZDB = [{"art":2,"name":"съдебната власт","rev":66468.0,"exp"
 // Приходи = ред 11; разходи = ред 16 + ред 32 (вноската в бюджета на ЕС); салдо = ред 33.
 const KFP_M = {"asOf":["31.01","28.02","31.03","30.04","31.05","30.06","31.07"],"rev":[3606.8,6845.0,10038.4,14071.1,17357.0,21573.8,26347.4],"exp":[3394.7,7414.0,11567.3,15832.3,19864.5,23990.0,28548.8],"bal":[212.1,-569.1,-1528.9,-1761.1,-2507.4,-2416.2,-2201.4],"files":["2026-EU_funds_0126_BG_WEB.xls","2026-EU_funds_0226_BG_WEB.xls","2026-EU_funds_0326_BG_WEB.xls","2026-EU_funds_0426_BG_WEB.xls","2026-EU_funds_0526_BG_WEB.xls","2026-EU_funds_0626_BG_WEB.xls","2026-EU_funds_0726_BG_WEB_2.xls"]};
 const KFP_PLAN_M = { rev: 49615.3, exp: 56807.2, bal: -7191.9 }; // годишен план по КФП, млн. € (АСБП 2026–2028, Табл. 6)
+// МФ, месечни отчети за изпълнението на КФП, 2025 г. (src/kfp_monthly_2025.json): същите редове и колона, натрупано от 1 януари.
+// Отчетите са в млн. лв.; тук са в млн. €, превърнати по фиксирания курс 1,95583. Декември = изпълнението за цялата 2025 г.
+const KFP_M25 = {"asOf":["31.01","28.02","31.03","30.04","31.05","30.06","31.07","31.08","30.09","31.10","30.11","31.12"],"rev":[3238.4,5625.8,8607.2,12513.6,16115.2,19951.4,23702.5,26925.4,30552.7,34145.2,38558.1,44015.2],"exp":[2950.1,6136.9,9592.4,13492.4,17447.8,21666.1,25890.1,29591.8,33648.9,37514.9,41718.8,47506.4],"bal":[288.3,-511.1,-985.1,-978.7,-1332.6,-1714.7,-2187.6,-2666.4,-3096.2,-3369.6,-3160.7,-3491.3],"files":["2025-EU_funds_0125_BG_WEB.xls","2025-EU_funds_0225_BG_WEB.xls","2025-EU_funds_0325_BG_WEB.xls","2025-EU_funds_0425_BG_WEB.xls","2025-EU_funds_0525_BG_WEB.xls","2025-EU_funds_0625_BG_WEB.xls","2025-EU_funds_0725_BG_WEB.xls","2025-EU_funds_0825_BG_WEB.xls","2025-EU_funds_0925_BG_WEB.xls","2025-EU_funds_1025_BG_WEB.xls","2025-EU_funds_1125_BG_WEB.xls","2025-EU_funds_1225_BG_WEB_4.xls"]};
 const DEBT = {"BG":{"2015":25.9,"2016":29.1,"2017":25.1,"2018":22.2,"2019":20.1,"2020":24.5,"2021":23.8,"2022":22.5,"2023":22.9,"2024":23.8,"2025":29.9},"EU27_2020":{"2015":85.1,"2016":84.1,"2017":81.5,"2018":79.5,"2019":77.5,"2020":89.5,"2021":86.7,"2022":82.4,"2023":80.5,"2024":80.7,"2025":81.7}};
 
 const POP = 6.43; // млн. души — за потвърждение с НСИ
@@ -311,6 +328,7 @@ const SRC = {
   balance: ["warn", "АСБП 2026–2028, Прил. 3: салдо и лихви. За 2026 г. съвпадат с данните на МФ (лихви 649,7 млн. = 61,3% от плана); останалите години са за проверка."],
   activities: ["unk", "Разходите по ~400–500 дейности: разбивката я има само в МФ и не е публикувана. Фаза 2 — нужно е запитване към МФ."],
   kfpMonthly: ["ok", `МФ, „Месечни отчети за изпълнението на КФП“: <a href="https://www.minfin.bg/bg/statistics/5" target="_blank" rel="noopener">https://www.minfin.bg/bg/statistics/5</a>. Файловете за януари–юли 2026 г.: ${KFP_M.files.map(f => `<span style="display:inline-block">${f}</span>`).join(", ")}. Лист „стартова“, колона „Консолидирана фискална програма“, млн.&nbsp;€, натрупано от 1 януари. Приходи = ред 11 „I. Приходи, помощи и дарения“; разходи = ред 16 „II. Разходи“ + ред 32 „IV. Вноска в общия бюджет на ЕС“; салдо = ред 33 „V. Бюджетно салдо“. Подредбата е еднаква и в седемте файла. Годишният план е от АСБП 2026–2028, Табл. 6.`],
+  kfpMonthly25: ["ok", `МФ, „Месечни отчети за изпълнението на КФП“ за януари–декември 2025 г., прикачени от работната група: ${KFP_M25.files.map(f => `<span style="display:inline-block">${f}</span>`).join(", ")}. Същите лист „стартова“, колона „Консолидирана фискална програма“ и редове като за 2026 г.: приходи = ред 11; разходи = ред 16 + ред 32 (вноската в бюджета на ЕС); салдо = ред 33. Отчетите за 2025 г. са в млн.&nbsp;лв. Тук са превърнати в млн.&nbsp;€ по фиксирания курс 1,95583&nbsp;лв. за 1&nbsp;€. Декември е изпълнението за цялата 2025 г.: приходи 44&nbsp;015,2, разходи 47&nbsp;506,4, салдо −3&nbsp;491,3 млн.&nbsp;€. Ориентирът „2025: дял от годишното изпълнение“ е натрупаното до края на всеки месец като процент от тези годишни суми.`],
   debtStock: ["unk", "Размерът на дълга в евро: регистърът и бюлетините на МФ (Excel/PDF) — предстои извличане и избор на обхват."],
   components: ["warn", "Съставните бюджети (държавен, НОИ/НЗОК, общини, ВУЗ…): Excel таблиците на МФ по КФП — предстои извличане."],
   rates: ["warn", "Ставки от 2025 г. (служител 13,78%, данък 10%, работодател 18,92%) — за потвърждение с КСО, ЗБДОО и ЗБНЗОК 2026. МОД 2 300 € от 01.08.2026 (ЗБДОО 2026)."],
@@ -354,7 +372,7 @@ const ROUTES = [
   { path: "prihodi", q: "Откъде идват парите?", label: "Приходи", kind: "детайл", render: pRevenue, data: ["revShares", "kfpJul"] },
   { path: "razhodi", q: "Къде отиват парите?", label: "Разходи", kind: "MVP", render: pExpenses, data: ["functions", "cofog", "activities"] },
   { path: "vedomstva", q: "Кой харчи?", label: "Ведомства", kind: "детайл", render: pMinistries, data: ["zdb", "program"] },
-  { path: "izpalnenie", q: "Изпълнява ли се планът?", label: "Изпълнение", kind: "MVP", render: pExecution, data: ["kfpJul", "kfpMonthly", "kfpPlan", "components"] },
+  { path: "izpalnenie", q: "Изпълнява ли се планът?", label: "Изпълнение", kind: "MVP", render: pExecution, data: ["kfpJul", "kfpMonthly", "kfpMonthly25", "kfpPlan", "components"] },
   { path: "danaci", q: "Колко плащам аз?", label: "Моите данъци", kind: "MVP", render: pTaxes, data: ["rates", "functions"] },
   { path: "dalg", q: "Колко дължим?", label: "Дълг", kind: "детайл", render: pDebt, data: ["eurostat", "balance", "debtStock"] },
   { path: "obshtini", q: "Моята община", label: "Общини", kind: "фаза 2", render: pMunicipal, data: ["municipal"] },
@@ -735,33 +753,49 @@ function pMinistry(art) {
   <section class="panel">${src("program")}<div class="panel-head"><h2>Какво постига всяка програма</h2><span class="st warn">фаза 2</span></div><p class="note">Индикаторите за резултат (цел и постигнато) са в програмния бюджет и отчета на ведомството. Тук ще има таблица „цел / постигнато“ по програми и линия на разходите 2022–2028: отчет, закон, прогноза.</p></section>`;
 }
 
-let exUnit = "pct";   // pct: % от годишния план | eur: млрд. €
+let exUnit = "pct";   // pct: % от годишния план (2026) и дял от годишното изпълнение (2025) | eur: млрд. €
 let exTable = false;  // отворена ли е таблицата по месеци
+const EX_NAME = { rev: "Приходи", exp: "Разходи" };
+const pctPlan = (k, i) => KFP_M[k][i] / KFP_PLAN_M[k] * 100;                           // 2026: % от годишния план
+const share25 = (k, i) => KFP_M25[k][i] / KFP_M25[k][KFP_M25[k].length - 1] * 100;   // 2025: % от цялата година (декември = 100%)
 function pExecution() {
   afterRender = drawExecution;
-  const j = KFP.jul, pct = exUnit === "pct";
-  const pp = (k, i) => fmt(KFP_M[k][i] / KFP_PLAN_M[k] * 100);
-  const rows = KFP_M.asOf.map((d, i) => `<tr><td>${d}</td><td class="r">${fmt(KFP_M.rev[i])}<div class="psub">${pp("rev", i)}%</div></td><td class="r">${fmt(KFP_M.exp[i])}<div class="psub">${pp("exp", i)}%</div></td><td class="r">${sgn(KFP_M.bal[i])}</td></tr>`).join("");
+  const j = KFP.jul, pct = exUnit === "pct", n = KFP_M.rev.length, L = n - 1, D = KFP_M25.rev.length - 1;
+  const yoy = k => (KFP_M[k][L] / KFP_M25[k][L] - 1) * 100;
+  // Под заглавието на всяка графика: последният месец на 2026 г. и същият месец на 2025 г.
+  const sum = k => pct
+    ? `към ${KFP_M.asOf[L]}: <b>${fmt(pctPlan(k, L))}%</b> от плана · 2025: ${fmt(share25(k, L))}% от цялата година`
+    : `към ${KFP_M.asOf[L]}: <b>${fmt(KFP_M[k][L] / 1000, 2)} млрд.&nbsp;€</b> · 2025: ${fmt(KFP_M25[k][L] / 1000, 2)} млрд.&nbsp;€ (${signPct(yoy(k))})`;
+  const lgKey = (c, dash) => `<i class="${dash ? "d" : ""}" style="border-top-color:${c}"></i>`;
+  const legend = `<div class="lg"><span>${lgKey("var(--rev)")}${lgKey("var(--exp)")}2026${pct ? ": % от плана" : ""}</span><span>${lgKey("var(--muted)", true)}2025${pct ? ": дял от годишното изпълнение" : ""}</span>${pct ? "" : `<span>${lgKey("var(--accent)", true)}план за 2026</span>`}</div>`;
+  const panel = k => `<div><h3>${EX_NAME[k]}</h3><p class="psub">${sum(k)}</p>
+      <div id="ex_${k}" class="chart" role="img" aria-label="${EX_NAME[k]} по КФП, натрупано по месеци: 2026 г. ${pct ? "като процент от годишния план" : "в милиарди евро, с годишния план"} и 2025 г. ${pct ? "като дял от изпълнението за цялата година" : "в милиарди евро"}"></div></div>`;
+  const cell = (x, p) => `<td class="r">${fmt(x)}<div class="psub">${fmt(p)}%</div></td>`;
+  const row26 = i => `<tr class="y26"><td>${KFP_M.asOf[i]}.2026</td>${cell(KFP_M.rev[i], pctPlan("rev", i))}${cell(KFP_M.exp[i], pctPlan("exp", i))}<td class="r">${sgn(KFP_M.bal[i])}</td></tr>`;
+  const row25 = i => `<tr class="y25"><td>${KFP_M25.asOf[i]}.2025${i === D ? '<div class="psub">цялата година</div>' : ""}</td>${cell(KFP_M25.rev[i], share25("rev", i))}${cell(KFP_M25.exp[i], share25("exp", i))}<td class="r">${sgn(KFP_M25.bal[i])}</td></tr>`;
+  const rows = KFP_M25.asOf.map((_, i) => (i < n ? row26(i) : "") + row25(i)).join("");
   return `
-  <header style="display:grid;gap:10px"><div class="eyebrow">Изпълнение · към 31.07.2026</div><h1>Изпълнява ли се бюджетът?</h1><p class="lede muted">Към 31 юли са събрани ${fmt(j.revPct)}% от планираните приходи и са похарчени ${fmt(j.expPct)}% от разходите, а от годината са изтекли 58%.</p></header>
+  <header style="display:grid;gap:10px"><div class="eyebrow">Изпълнение · към 31.07.2026</div><h1>Изпълнява ли се бюджетът?</h1><p class="lede muted">Към ${+KFP_M.asOf[L].slice(0, 2)} ${MONTHS_FULL[L]} са събрани ${fmt(pctPlan("rev", L))}% от планираните приходи и са похарчени ${fmt(pctPlan("exp", L))}% от планираните разходи. Година по-рано, до края на ${MONTHS_FULL[L]}, се бяха натрупали ${fmt(share25("rev", L))}% от приходите и ${fmt(share25("exp", L))}% от разходите за цялата 2025&nbsp;г.</p></header>
   <section class="grid-4">
     <div class="panel kpi">${src("kfpJul")}<div class="label">Приходи</div><div class="value">${fmt(j.rev / 1000, 2)}<small>млрд. €</small></div><div class="sub">${fmt(j.revPct)}% от плана · +${fmt(j.revYoY)}% г/г</div></div>
     <div class="panel kpi"><div class="label">Разходи</div><div class="value">${fmt(j.exp / 1000, 2)}<small>млрд. €</small></div><div class="sub">${fmt(j.expPct)}% от плана</div></div>
     <div class="panel kpi"><div class="label">Дефицит</div><div class="value">${fmt(-j.bal / 1000, 2)}<small>млрд. €</small></div><div class="sub">${fmt(j.balPctGdp)}% от БВП · план ${fmt(KFP.planDef)} млрд.</div></div>
     <div class="panel kpi"><div class="label">Фискален резерв</div><div class="value">${fmt(j.reserve / 1000, 2)}<small>млрд. €</small></div><div class="sub">към 31.07</div></div>
   </section>
-  <section class="panel">${src("kfpMonthly")}${src("kfpPlan")}
-    <div class="panel-head"><h2>Месец по месец спрямо плана</h2><div class="seg" role="group" aria-label="Мерна единица"><button type="button" id="exPct" aria-pressed="${pct}">% от плана</button><button type="button" id="exEur" aria-pressed="${!pct}">млрд. €</button></div></div>
+  <section class="panel">${src("kfpMonthly")}${src("kfpMonthly25")}${src("kfpPlan")}
+    <div class="panel-head"><h2>Месец по месец: спрямо плана и 2025 г.</h2><div class="seg" role="group" aria-label="Мерна единица"><button type="button" id="exPct" aria-pressed="${pct}">% от плана</button><button type="button" id="exEur" aria-pressed="${!pct}">млрд. €</button></div></div>
     <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center"><span class="scope">обхват: цялата държава (КФП)</span><span class="scope">натрупано от 1 януари</span></div>
-    <p class="note" style="margin-top:10px">${pct ? "Каква част от годишния план е изпълнена до края на всеки месец. Жълтият пунктир е календарът: каква част от годината е изтекла. Под него значи по-бавно от равномерния темп." : "Сумите от 1 януари до края на всеки месец. Жълтите пунктири са годишните планове за приходите и за разходите."}</p>
-    <div id="exChart" class="chart" role="img" aria-label="${pct ? "Приходи и разходи по КФП като процент от годишния план, натрупано по месеци, януари–юли 2026 г., и изтеклата част от годината" : "Приходи и разходи по КФП в милиарди евро, натрупано по месеци, януари–юли 2026 г., и годишните планове"}"></div>
-    <h3 style="margin:16px 0 6px">Салдо от началото на годината</h3>
-    <p class="note">Под нулата е дефицит. Жълтият пунктир е дефицитът, планиран за цялата година: ${fmt(-KFP_PLAN_M.bal / 1000)}&nbsp;млрд.&nbsp;€.</p>
-    <div id="exBal" class="chart" style="height:240px" role="img" aria-label="Салдо по КФП в милиарди евро, натрупано по месеци, януари–юли 2026 г., и планираният дефицит за годината"></div>
+    <p class="note" style="margin-top:10px">${pct ? "Плътните линии показват каква част от годишния план за 2026 г. е изпълнена до края на всеки месец. Пунктирът „2025: дял от годишното изпълнение“ показва каква част от приходите или разходите за цялата 2025 г. се е натрупала до края на същия месец (декември = 100%) — така се вижда обичайният, неравномерен ход на годината." : "Сумите от 1 януари до края на всеки месец. Плътните линии са 2026 г., пунктирът е 2025 г. (превърната от лева по фиксирания курс 1,95583), а жълтата линия е годишният план за 2026 г."}</p>
+    ${legend}
+    <div class="exm">${panel("rev")}${panel("exp")}</div>
+    <h3 style="margin:24px 0 6px">Салдо от началото на годината</h3>
+    <p class="note">Под нулата е дефицит. Жълтият пунктир е дефицитът, планиран за цялата 2026 г.: ${fmt(-KFP_PLAN_M.bal / 1000)}&nbsp;млрд.&nbsp;€.</p>
+    <div class="lg" style="margin-bottom:4px"><span><i class="sw"></i>2026</span><span><i class="sw g"></i>2025</span></div>
+    <div id="exBal" class="chart" style="height:240px" role="img" aria-label="Салдо по КФП в милиарди евро, натрупано по месеци: 2026 г. до ${MONTHS_FULL[L]}, 2025 г. за цялата година и планираният дефицит за 2026 г."></div>
     <details class="tbl" id="exTbl"${exTable ? " open" : ""}><summary>Таблица по месеци</summary>
       <div class="table-wrap"><table><thead><tr><th>Към</th><th class="r">Приходи</th><th class="r">Разходи</th><th class="r">Салдо</th></tr></thead><tbody>${rows}
         <tr class="plan"><td><b>План 2026</b></td><td class="r"><b>${fmt(KFP_PLAN_M.rev)}</b></td><td class="r"><b>${fmt(KFP_PLAN_M.exp)}</b></td><td class="r"><b>${sgn(KFP_PLAN_M.bal)}</b></td></tr></tbody></table></div>
-      <p class="note" style="margin-top:8px">млн. €, натрупано от 1 януари. Под сумата: процент от годишния план. Разходите включват вноската в бюджета на ЕС.</p>
+      <p class="note" style="margin-top:8px">млн. €, натрупано от 1 януари. Под сумата: за 2026 г. — процент от годишния план; за 2025 г. — дял от изпълнението за цялата година (31.12.2025 = 100%). Сумите за 2025 г. са от лева, превърнати по фиксирания курс 1,95583. Разходите включват вноската в бюджета на ЕС.</p>
     </details>
   </section>
   <section class="panel">${src("components")}
@@ -773,66 +807,73 @@ function drawExecution() {
   document.getElementById("exPct").onclick = () => { exUnit = "pct"; rerender(); };
   document.getElementById("exEur").onclick = () => { exUnit = "eur"; rerender(); };
   document.getElementById("exTbl").ontoggle = e => { exTable = e.target.open; };
-  const t = baseText(), pct = exUnit === "pct", n = KFP_M.rev.length;
-  const ink = css("--ink"), surf = css("--surface"), grid = css("--line"), ref = css("--accent"), refInk = css("--accent-ink");
-  const C = { rev: css("--rev"), exp: css("--exp") }, NAME = { rev: "Приходи", exp: "Разходи" };
+  const t = baseText(), pct = exUnit === "pct", n = KFP_M.rev.length, L = n - 1, D = KFP_M25.rev.length - 1;
+  const ink = css("--ink"), muted = css("--muted"), surf = css("--surface"), grid = css("--line"), ref = css("--accent"), refInk = css("--accent-ink");
+  const C = { rev: css("--rev"), exp: css("--exp") };
   const lab = { fontFamily: "Sofia Sans, system-ui, sans-serif", fontWeight: 700, fontSize: 13 };
   const tip = { confine: true, backgroundColor: surf, borderColor: grid, textStyle: { color: ink, fontFamily: t.fontFamily, fontSize: 13 } };
-  const key = (c, dash) => `<span style="display:inline-block;width:14px;border-top:3px ${dash ? "dashed" : "solid"} ${c};vertical-align:middle;margin-right:6px"></span>`;
+  const key = (c, dash) => `<span style="display:inline-block;width:14px;border-top:${dash ? "2px dashed" : "3px solid"} ${c};vertical-align:middle;margin-right:6px"></span>`;
+  const sw = (c, ghost) => `<span style="display:inline-block;width:10px;height:10px;box-sizing:border-box;border-radius:2px;vertical-align:-1px;margin-right:6px;${ghost ? `border:1.5px dashed ${c}` : `background:${c}`}"></span>`;
   // Ред в подсказката: ключ и име, стойност (водеща), допълнение.
   const tipRow = (k, name, val, extra) => `<tr><td style="padding:2px 10px 0 0">${k}${name}</td><td style="padding:2px 0 0;text-align:right"><b>${val}</b></td><td style="padding:2px 0 0 10px;text-align:right">${extra || ""}</td></tr>`;
-  const tipBox = (head, rows) => `<b>${head}</b>${rows.length ? `<table style="border-collapse:collapse;font-variant-numeric:tabular-nums;margin-top:2px">${rows.join("")}</table>` : ""}`;
-  const noReport = i => `${cap(MONTHS_FULL[i])}: още няма отчет`;
-  const v = (k, i) => pct ? KFP_M[k][i] / KFP_PLAN_M[k] * 100 : KFP_M[k][i] / 1000;
-  const cal = MONTHS.map((_, i) => (i + 1) / 12 * 100); // изтекла част от годината в края на месеца, %
-  const upper = v("rev", n - 1) >= v("exp", n - 1) ? "rev" : "exp"; // чий надпис в последния месец отива отгоре
-  // Приходи и разходи: натрупано, като % от годишния план или в млрд. €.
-  const series = ["rev", "exp"].map(k => ({
-    name: NAME[k], type: "line", z: 3, symbol: "circle", symbolSize: 8,
-    lineStyle: { width: 3, color: C[k] }, itemStyle: { color: C[k], borderColor: surf, borderWidth: 2 },
-    data: KFP_M[k].map((_, i) => ({ value: v(k, i), label: { show: i === n - 1, position: "right", distance: 8, offset: [0, k === upper ? -9 : 9], color: ink, ...lab, formatter: p => pct ? `${fmt(p.value)}%` : fmt(p.value, 2) } })),
-    markLine: pct ? undefined : { symbol: "none", silent: true, lineStyle: { color: ref, type: [6, 4], width: 2 },
-      label: { position: "insideEndTop", color: refInk, ...lab, fontSize: 12, formatter: `план за ${k === "rev" ? "приходите" : "разходите"}: ${fmt(KFP_PLAN_M[k] / 1000)}` },
-      data: [{ yAxis: KFP_PLAN_M[k] / 1000 }] }
-  }));
-  if (pct) series.push({ name: "Календар", type: "line", z: 2, symbol: "none", lineStyle: { width: 2, type: [6, 4], color: ref }, itemStyle: { color: ref },
-    data: cal.map((x, i) => i === n - 1 ? { value: x, symbol: "circle", symbolSize: 7, label: { show: true, position: "top", distance: 8, color: refInk, ...lab, formatter: `${fmt0(x)}%` } } : x) });
-  const c = mkChart(document.getElementById("exChart"));
-  c.setOption({
-    grid: { left: 44, right: 16, top: 44, bottom: 28 },
-    legend: { top: 0, right: 0, textStyle: { ...t, color: ink }, itemWidth: 22, itemHeight: 10, data: series.map(s => s.name) },
-    tooltip: { trigger: "axis", ...tip, formatter: ps => {
-      const i = ps[0].dataIndex;
-      const rows = i < n ? ["rev", "exp"].map(k => {
-        const eur = `${fmt(KFP_M[k][i] / 1000, 2)} млрд. €`, pc = `${fmt(KFP_M[k][i] / KFP_PLAN_M[k] * 100)}%`;
-        return tipRow(key(C[k]), NAME[k], pct ? pc : eur, pct ? eur : `${pc} от плана`);
-      }) : [];
-      if (pct) rows.push(tipRow(key(ref, true), "Календар", `${fmt(cal[i])}%`, "от годината"));
-      return tipBox(i < n ? `Към ${KFP_M.asOf[i]}.2026` : noReport(i), rows);
-    } },
-    xAxis: { type: "category", data: MONTHS, axisLabel: t, axisTick: { show: false }, axisLine: { lineStyle: { color: grid } } },
-    yAxis: { type: "value", min: 0, max: pct ? 100 : 60, interval: pct ? 25 : 20, name: pct ? "" : "млрд. €", nameTextStyle: t,
-      axisLabel: { ...t, formatter: x => pct ? `${x}%` : fmt0(x) }, splitLine: { lineStyle: { color: grid } } },
-    series
+  const tipBox = (head, rows, i) => `<b>${head}</b><table style="border-collapse:collapse;font-variant-numeric:tabular-nums;margin-top:2px">${rows.join("")}</table>${i < n ? "" : `<div style="color:${muted};margin-top:2px">За ${MONTHS_FULL[i]} 2026 г. още няма отчет.</div>`}`;
+  const v26 = (k, i) => pct ? pctPlan(k, i) : KFP_M[k][i] / 1000;
+  const v25 = (k, i) => pct ? share25(k, i) : KFP_M25[k][i] / 1000;
+  const val = x => pct ? `${fmt(x)}%` : `${fmt(x, 2)} млрд. €`;
+  const xAxis = { type: "category", data: MONTHS, axisLabel: t, axisTick: { show: false }, axisLine: { lineStyle: { color: grid } } };
+  // Приходи и разходи — всяко в своя графика, с еднаква скала: 2026 г. (плътно) и 2025 г. (пунктир).
+  ["rev", "exp"].forEach(k => {
+    const down = v25(k, L) > v26(k, L); // пунктирът за 2025 г. минава над последната точка на 2026 г. → надписът ѝ отива под нея
+    mkChart(document.getElementById(`ex_${k}`)).setOption({
+      grid: { left: 40, right: 14, top: 28, bottom: 28 },
+      tooltip: { trigger: "axis", ...tip, formatter: ps => {
+        const i = ps[0].dataIndex, rows = [];
+        if (i < n) rows.push(tipRow(key(C[k]), "2026", val(v26(k, i)), pct ? "от плана" : `${signPct((KFP_M[k][i] / KFP_M25[k][i] - 1) * 100)} г/г`));
+        rows.push(tipRow(key(muted, true), "2025", val(v25(k, i)), pct ? "от цялата година" : ""));
+        return tipBox(`${EX_NAME[k]} към ${KFP_M25.asOf[i]}`, rows, i);
+      } },
+      xAxis,
+      yAxis: { type: "value", min: 0, max: pct ? 100 : 60, interval: pct ? 25 : 20, name: pct ? "" : "млрд. €", nameGap: 10, nameTextStyle: t,
+        axisLabel: { ...t, formatter: x => pct ? `${x}%` : fmt0(x) }, splitLine: { lineStyle: { color: grid } } },
+      series: [
+        { name: "2025", type: "line", z: 2, symbol: "none", lineStyle: { width: 1.5, type: [5, 4], color: muted }, itemStyle: { color: muted },
+          // надписът „2025“ е под пунктира два месеца преди края: линията расте, така че отдолу-вдясно е празно
+          data: KFP_M25[k].map((_, i) => i !== D - 2 ? v25(k, i) : { value: v25(k, i), symbol: "circle", symbolSize: 1,
+            label: { show: true, position: "bottom", align: "left", distance: 7, color: muted, ...lab, fontWeight: 600, fontSize: 12, formatter: "2025" } }) },
+        { name: "2026", type: "line", z: 3, symbol: "circle", symbolSize: 8,
+          lineStyle: { width: 3, color: C[k] }, itemStyle: { color: C[k], borderColor: surf, borderWidth: 2 },
+          data: KFP_M[k].map((_, i) => ({ value: v26(k, i), label: { show: i === L, position: "right", distance: 6, offset: [0, down ? 10 : -10], color: ink, backgroundColor: surf, padding: [1, 3], borderRadius: 3, ...lab, formatter: p => pct ? `${fmt(p.value)}%` : fmt(p.value, 2) } })),
+          markLine: pct ? undefined : { symbol: "none", silent: true, lineStyle: { color: ref, type: [6, 4], width: 2 },
+            label: { position: "insideEndTop", color: refInk, ...lab, fontSize: 12, formatter: `план за 2026: ${fmt(KFP_PLAN_M[k] / 1000)}` },
+            data: [{ yAxis: KFP_PLAN_M[k] / 1000 }] } }
+      ]
+    });
   });
-  // Салдо: натрупано, млрд. €, с планирания дефицит за годината.
-  const b = mkChart(document.getElementById("exBal"));
-  b.setOption({
+  // Салдо: натрупано, млрд. €; 2026 г. (плътни стълбове), 2025 г. (пунктирни) и планираният дефицит за 2026 г.
+  const bar = (x, ghost, label) => ({ value: x / 1000, label,
+    itemStyle: ghost ? { color: "transparent", borderColor: muted, borderWidth: 1.5, borderType: [3, 2], borderRadius: x < 0 ? [0, 0, 4, 4] : [4, 4, 0, 0] }
+                     : { color: muted, borderRadius: x < 0 ? [0, 0, 4, 4] : [4, 4, 0, 0] } });
+  mkChart(document.getElementById("exBal")).setOption({
     grid: { left: 44, right: 16, top: 12, bottom: 28 },
     tooltip: { trigger: "axis", axisPointer: { type: "shadow" }, ...tip, formatter: ps => {
-      const i = ps[0].dataIndex, x = KFP_M.bal[i];
-      return i < n ? tipBox(`Към ${KFP_M.asOf[i]}.2026`, [tipRow("", "Салдо", `${sgn(x / 1000, 2)} млрд. €`, x < 0 ? "дефицит" : "излишък")]) : tipBox(noReport(i), []);
+      const i = ps[0].dataIndex, rows = [];
+      const r = (x, y, ghost) => tipRow(sw(muted, ghost), y, `${sgn(x / 1000, 2)} млрд. €`, x < 0 ? "дефицит" : "излишък");
+      if (i < n) rows.push(r(KFP_M.bal[i], "2026", false));
+      rows.push(r(KFP_M25.bal[i], "2025", true));
+      return tipBox(`Салдо към ${KFP_M25.asOf[i]}`, rows, i);
     } },
-    xAxis: { type: "category", data: MONTHS, axisLabel: t, axisTick: { show: false }, axisLine: { onZero: false, lineStyle: { color: grid } } },
+    xAxis: { ...xAxis, axisLine: { onZero: false, lineStyle: { color: grid } } },
     yAxis: { type: "value", min: -8, max: 2, interval: 2, axisLabel: { ...t, formatter: x => sgn(x, 0) }, splitLine: { lineStyle: { color: grid } } },
-    series: [{ name: "Салдо", type: "bar", barMaxWidth: 24,
-      data: KFP_M.bal.map((x, i) => ({ value: x / 1000, itemStyle: { color: css("--muted"), borderRadius: x < 0 ? [0, 0, 4, 4] : [4, 4, 0, 0] },
-        label: { show: i === n - 1, position: x < 0 ? "bottom" : "top", color: ink, ...lab, formatter: p => sgn(p.value, 2) } })),
-      markLine: { symbol: "none", silent: true, label: { position: "insideEndTop", color: refInk, ...lab, fontSize: 12 },
-        data: [
-          { yAxis: 0, lineStyle: { color: css("--muted"), type: "solid", width: 1 }, label: { show: false } },
-          { yAxis: KFP_PLAN_M.bal / 1000, lineStyle: { color: ref, type: [6, 4], width: 2 }, label: { formatter: `план за годината: ${sgn(KFP_PLAN_M.bal / 1000)}` } }
-        ] } }]
+    series: [
+      { name: "2026", type: "bar", barMaxWidth: 14, barGap: "25%",
+        data: KFP_M.bal.map((x, i) => bar(x, false, { show: i === L, position: x < 0 ? "bottom" : "top", color: ink, ...lab, formatter: p => sgn(p.value, 2) })),
+        markLine: { symbol: "none", silent: true, label: { position: "insideEndTop", color: refInk, ...lab, fontSize: 12 },
+          data: [
+            { yAxis: 0, lineStyle: { color: muted, type: "solid", width: 1 }, label: { show: false } },
+            { yAxis: KFP_PLAN_M.bal / 1000, lineStyle: { color: ref, type: [6, 4], width: 2 }, label: { formatter: `план за 2026: ${sgn(KFP_PLAN_M.bal / 1000)}` } }
+          ] } },
+      { name: "2025", type: "bar", barMaxWidth: 14, data: KFP_M25.bal.map(x => bar(x, true)) }
+    ]
   });
 }
 
@@ -956,7 +997,7 @@ function pPayments() {
 
 function pData() {
   const keys = Object.keys(SRC);
-  const names = { zdb: "Закон за държавния бюджет 2026", kfpJul: "Изпълнение на КФП (месечно)", kfpPlan: "Годишен план по КФП", sdmx: "SDMX на МФ (SDDS Plus)", eurostat: "Eurostat: дълг към БВП", functions: "Разходи по функции (Табл. III-1)", cofog: "Eurostat: разходи по функции (COFOG)", kfpMonthly: "Месечни отчети за изпълнението на КФП (МФ)", revShares: "Структура на приходите (Прил. 3)", balance: "Салдо и лихви 2024–2028", activities: "Разходи по ~400–500 дейности (фаза 2)", debtStock: "Размер на държавния дълг", components: "Съставни бюджети", rates: "Данъчни и осигурителни ставки", pop: "Население", municipal: "Данни за общините", sebra: "СЕБРА — плащания по получатели", program: "Програмни бюджети" };
+  const names = { zdb: "Закон за държавния бюджет 2026", kfpJul: "Изпълнение на КФП (месечно)", kfpPlan: "Годишен план по КФП", sdmx: "SDMX на МФ (SDDS Plus)", eurostat: "Eurostat: дълг към БВП", functions: "Разходи по функции (Табл. III-1)", cofog: "Eurostat: разходи по функции (COFOG)", kfpMonthly: "Месечни отчети за изпълнението на КФП, 2026 г. (МФ)", kfpMonthly25: "Месечни отчети за изпълнението на КФП, 2025 г. (МФ)", revShares: "Структура на приходите (Прил. 3)", balance: "Салдо и лихви 2024–2028", activities: "Разходи по ~400–500 дейности (фаза 2)", debtStock: "Размер на държавния дълг", components: "Съставни бюджети", rates: "Данъчни и осигурителни ставки", pop: "Население", municipal: "Данни за общините", sebra: "СЕБРА — плащания по получатели", program: "Програмни бюджети" };
   const rows = keys.map(k => `<tr><td><b>${names[k]}</b></td><td>${stPill(k)}</td><td class="muted">${SRC[k][1]}</td></tr>`).join("");
   return `
   <header style="display:grid;gap:10px"><div class="eyebrow">Справка</div><h1>Откъде са данните</h1><p class="lede muted">Всяко число в прототипа има източник и статус. Включи „Покажи източниците“ горе вдясно, за да ги видиш на всеки екран.</p></header>
@@ -974,7 +1015,7 @@ const OPEN_QS = [
   "Калкулаторът: осигуровките отиват в НОИ/НЗОК. Разпределяме ли ги по функции, или ги показваме отделно?",
   "Ставки за 2026 г.: кой ще потвърди осигурителните ставки и праговете от приетите закони?",
   "Нивото „~400–500 дейности“ го има само в МФ, затова е фаза 2. Правим ли запитване към МФ?",
-  "Месечните отчети на МФ по КФП за 2026 г. вече са в прототипа. Как да ги взимаме автоматично всеки месец, щом minfin.bg блокира автоматичния достъп? И кой може да прикачи отчетите за 2025 г., за да добавим сравнение с миналата година?",
+  "Месечните отчети на МФ по КФП за 2025 и 2026 г. вече са в прототипа. Как да ги взимаме автоматично всеки месец, щом minfin.bg блокира автоматичния достъп? И да добавим ли 2024 г. и по-ранни години, за да е ориентирът за хода на годината средно за няколко години, а не само 2025 г.?",
   "Дълг: кой обхват показваме като основен — държавния дълг по ЗДД или консолидирания дълг по Маастрихт?",
   "Визуален език: продължаваме в тази посока, по стила на wireframe-ите, или търсим трета?"
 ];
@@ -984,6 +1025,7 @@ function pMap() {
   <header style="display:grid;gap:10px"><div class="eyebrow">Справка</div><h1>Карта на прототипа</h1><p class="lede muted">Всички екрани на едно място. Под всеки екран е статусът на данните, от които зависи.</p></header>
   <section class="mapgrid">${cards}</section>
   <section class="panel"><h2 style="margin-bottom:12px">Отворени въпроси към групата</h2><ol class="qs">${OPEN_QS.map(q => `<li>${q}</li>`).join("")}</ol></section>
+  <p class="note">Прототип v2.2, 30.09.2026: „Изпълнява ли се планът?“ сравнява 2026 г. с месечните отчети на МФ за 2025 г. (превърнати от лева по 1,95583). Вместо линията „календар“ ориентирът е „2025: дял от годишното изпълнение“, а приходите и разходите са в отделни графики.</p>
   <p class="note">Прототип v2.1, 30.09.2026: „Изпълнява ли се планът?“ показва месечното изпълнение на КФП за януари–юли 2026 г. по отчетите на МФ, спрямо годишния план.</p>
   <p class="note">Прототип v2, 30.09.2026: разбивка на функциите по таблицата на КФП (АСБП 2026–2028, Табл. III-1), изглед „По години“ по данни на Eurostat (COFOG) и бележка за месечните данни по КФП.</p>
   <p class="note">Прототип v1, 28.09.2026. Обединява документа за обхвата, wireframe-ите (екрани и бележки) и прототипа с идеи за фаза 2, плюс прегледа на наличните данни.</p>`;
