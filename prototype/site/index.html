@@ -289,6 +289,8 @@ ol.rank .hbar{margin-top:5px}
 .top-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:20px 28px}
 
 /* мерки */
+.mtabs{display:grid;justify-items:end;gap:4px}
+.mtabs .psub{margin:0}
 .mm{display:grid}
 .mm-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:3px 16px;padding:11px 0;border-bottom:1px solid var(--line)}
 .mm-row:last-child{border-bottom:0}
@@ -606,6 +608,7 @@ userSel.addEventListener("change", () => setUserType(userSel.value));
 function setUserType(id) {
   if (!USER_TYPES.some(t => t.id === id)) return;
   userType = id; userSel.value = id;
+  mTab = null; // „Мерки“: новият тип започва от своя раздел по подразбиране
   try { localStorage.setItem("bns-user", id); } catch (e) {}
   rerender();
 }
@@ -1406,7 +1409,7 @@ function drawExecution() {
 }
 
 /* ---------- Мерки в бюджета 2026 ---------- */
-let mTab = null; // intro | esa; null — според типа потребител (експерт: таблиците II-8 и II-9)
+let mTab = null; // intro | esa; null — според типа потребител (експерт: таблиците II-8 и II-9; гражданин и журналист: краткосрочните мерки); setUserType го нулира
 const mTabV = () => mTab || (uType() === "expert" ? "esa" : "intro");
 const mEff = v => `${sgn(v)} млн.&nbsp;€`;
 const pgTag = p => `<span class="pg">с. ${p}</span>`;
@@ -1429,16 +1432,14 @@ function pMeasures() {
   const tab = mTabV();
   const tabs = [["intro", "Мерки за 2026 г."], ["esa", "Табл. II-8 и II-9"]];
   const seg = `<div class="seg" role="group" aria-label="Кой списък">${tabs.map(([k, l]) => `<button type="button" data-mtab="${k}" aria-pressed="${tab === k}">${l}</button>`).join("")}</div>`;
-  const about = tab === "intro"
-    ? "„Мерки за 2026 г.“ е списъкът от въведението на мотивите: краткосрочните мерки за фискална консолидация и ефектът им за 2026 г. Сумите в текста са без знак — приходните мерки носят повече приходи (+), а разходните са спестявания (−)."
-    : "Табл. II-8 и II-9 са по методиката на ЕС: всички дискреционни мерки на начислена основа, като изменение спрямо предходната година за 2026, 2027 и 2028 г. Знакът е като в таблиците: + е повече приходи или повече разходи.";
+  // Без обяснение защо списъците се различават (решение на групата: натоварва страницата); само кратка бележка за основата.
+  const basis = tab === "esa" ? `<span class="psub">на начислена основа</span>` : "";
   return `
   <header style="display:grid;gap:10px"><div class="eyebrow">Законопроект за бюджет 2026 · мотиви (АСБП 2026–2028)</div><h1>Мерки в бюджета 2026</h1>
     <p class="lede muted">Новите приходни и разходни мерки в бюджета и ефектът им според Министерството на финансите.</p></header>
   <div class="callout"><b>Това са числата от законопроекта</b>, внесен на 01.07.2026 г. Приетият закон (ДВ, бр. 69 от 31.07.2026 г.) може да се различава.</div>
   <section class="panel">
-    <div class="panel-head"><h2>Два списъка в мотивите</h2>${seg}</div>
-    <p class="note">${about} Двата списъка се припокриват само отчасти, а някои суми се различават — например за събираемостта на данъците: 200,0 млн. € във въведението и 17,0 млн. € в Табл. II-8.</p>
+    <div class="panel-head" style="margin-bottom:0"><h2>Два списъка в мотивите</h2><div class="mtabs">${seg}${basis}</div></div>
   </section>
   ${tab === "intro" ? measuresIntroHtml() : measuresEsaHtml()}
   <section class="panel">${src("measuresLaws")}
@@ -1731,6 +1732,7 @@ function pMap() {
   <header style="display:grid;gap:10px"><div class="eyebrow">Справка</div><h1>Карта на прототипа</h1><p class="lede muted">Всички екрани на едно място. Под всеки екран е статусът на данните, от които зависи.</p></header>
   <section class="mapgrid">${cards}</section>
   <section class="panel"><h2 style="margin-bottom:12px">Отворени въпроси към групата</h2><ol class="qs">${OPEN_QS.map(q => `<li>${q}</li>`).join("")}</ol></section>
+  <p class="note">Прототип v3.1, 01.10.2026: в „Мерки в бюджета 2026“ експертът започва от дискреционните мерки (Табл. II-8 и II-9, с бележка „на начислена основа“), а гражданинът и журналистът — от краткосрочните мерки; смяната на типа връща раздела по подразбиране. Махнат е обяснителният текст за двата списъка.</p>
   <p class="note">Прототип v3, 01.10.2026: избор на тип потребител (гражданин, журналист, експерт) с различна начална страница; класации „Топ 5“ за разходите, промените спрямо 2025 г., ведомствата и мерките; бутони „Копирай“ (текст с числото и източника) и „Изтегли PNG“ на графиките и ключовите числа; нов екран „Мерки в бюджета 2026“ по мотивите към законопроекта.</p>
   <p class="note">Прототип v2.2, 30.09.2026: „Изпълнява ли се планът?“ сравнява 2026 г. с месечните отчети на МФ за 2025 г. (превърнати от лева по 1,95583). Вместо линията „календар“ ориентирът е „2025: дял от годишното изпълнение“, а приходите и разходите са в отделни графики.</p>
   <p class="note">Прототип v2.1, 30.09.2026: „Изпълнява ли се планът?“ показва месечното изпълнение на КФП за януари–юли 2026 г. по отчетите на МФ, спрямо годишния план.</p>
