@@ -334,13 +334,47 @@ body.show-src .pg{display:inline-block}
 @media (max-width:640px){.mini-calc{grid-template-columns:1fr}}
 @media (max-width:900px){.utype-pick .lbl{display:none}}
 @media (max-width:480px){.topbar{gap:8px}.brand{font-size:1.08rem;gap:8px}.brand-mark{width:22px;height:22px}.utype-pick .sel{font-size:.82rem;padding:5px 4px}.src-toggle{padding:6px 9px}}
+
+/* пътеводител (#/patevoditel): стъпки с номер, бележка, бутон към екрана и „Следва:“; накрая петте проверки */
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.guide-cta{display:inline-flex;flex-wrap:wrap;align-items:center;gap:2px 8px;width:fit-content;max-width:100%;margin-top:2px;padding:7px 14px;border:1px solid var(--accent);border-radius:999px;background:var(--accent-soft);text-decoration:none;font-weight:600;line-height:1.35}
+.guide-cta:hover{background:var(--surface)}
+.guide-cta:focus-visible{border-radius:999px}
+.guide-cta svg{flex:none;color:var(--accent-ink)}
+.guide-cta b{color:var(--accent-ink);font-weight:700}
+.gsub{font-family:var(--display);font-weight:700;font-size:clamp(1.3rem,2.5vw,1.65rem);line-height:1.2}
+.gsteps{list-style:none;margin:0;padding:0;display:grid;gap:18px;max-width:820px}
+.gstep{position:relative;display:grid;gap:12px;scroll-margin-top:76px}
+.gstep:not(:last-child)::after{content:"";position:absolute;left:37px;bottom:-19px;width:2px;height:18px;background:var(--accent)}
+.gstep h2{display:flex;align-items:center;gap:12px;font-size:clamp(1.22rem,2.3vw,1.45rem)}
+.gnum{flex:none;display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--accent);color:#15202B;font-family:var(--display);font-size:1.15rem;font-weight:800;font-variant-numeric:tabular-nums}
+.gstep p,.gcheck p{max-width:70ch}
+.gnote{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-left:3px solid var(--data);border-radius:0 8px 8px 0;background:var(--sunk);font-size:.95rem}
+.gnote svg{flex:none;margin-top:3px;color:var(--data)}
+.gact{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center}
+.gbtn{display:inline-flex;align-items:center;gap:8px;max-width:100%;padding:10px 16px;border:1px solid var(--ink);border-radius:10px;background:var(--ink);color:var(--surface);text-decoration:none;font-weight:700;line-height:1.25}
+.gbtn:hover{background:var(--accent);border-color:var(--accent);color:#15202B}
+.gbtn:focus-visible{border-radius:10px}
+.gfoot{padding-top:12px;border-top:1px dashed var(--line)}
+.gnext{font-weight:600;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+.gnext:hover{text-decoration-color:var(--accent)}
+.gnext .lbl{display:inline-block;color:var(--muted)}
+.gstep:focus-visible,.gcheck:focus-visible{border-radius:12px}
+.gcheck{position:relative;overflow:hidden;display:grid;gap:12px;max-width:820px;border-color:var(--accent);background:linear-gradient(135deg,var(--accent-soft),var(--surface) 70%);scroll-margin-top:76px}
+.gcheck::before{content:"";position:absolute;inset:0 0 auto;height:4px;background:var(--accent)}
+.checks{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.checks li{display:grid;grid-template-columns:24px 6.2em minmax(0,1fr);gap:10px;align-items:center}
+.checks .ck{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;border:1px solid var(--accent);background:var(--surface);color:var(--accent-ink)}
+.gpill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:.88rem;font-weight:600;text-decoration:none}
+.gpill:hover{border-color:var(--accent)}
+.gpill:focus-visible{border-radius:999px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
 <div lang="bg">
 <header class="topbar">
   <a class="brand" href="#/"><span class="brand-mark" aria-hidden="true"></span>Бюджет на светло</a>
-  <span class="demo-pill">Прототип v3.3 · реални данни</span>
+  <span class="demo-pill">Прототип v3.4 · реални данни</span>
   <span class="spacer"></span>
   <label class="utype-pick" for="userSel"><span class="lbl">Изглед за</span><select id="userSel" class="sel" aria-label="Изглед за" title="Подреждаме съдържанието според това кой го чете"></select></label>
   <button class="src-toggle" id="srcToggle" type="button" aria-pressed="false" aria-label="Покажи източниците"><span class="dot" aria-hidden="true"></span><span class="lbl">Покажи източниците</span></button>
@@ -584,6 +618,7 @@ function rerender() { const y = window.scrollY; route(); window.scrollTo(0, y); 
 
 const ROUTES = [
   { path: "", q: "Какъв е бюджетът?", label: "Начало", kind: "MVP", render: pHome, data: ["gdp", "kfpPlan", "capex", "debtStock", "kfpJul"] },
+  { path: "patevoditel", q: "Пътеводител", label: "Разбери бюджета стъпка по стъпка", kind: "въведение", render: pGuide, data: [] },
   { path: "prihodi", q: "Откъде идват парите?", label: "Приходи", kind: "детайл", render: pRevenue, data: ["revShares", "kfpJul"] },
   { path: "razhodi", q: "Къде отиват парите?", label: "Разходи", kind: "MVP", render: pExpenses, data: ["functions", "cofog", "activities"] },
   { path: "vedomstva", q: "Кой харчи?", label: "Ведомства", kind: "детайл", render: pMinistries, data: ["zdb", "program"] },
@@ -617,7 +652,7 @@ function textOn(bg) {
 }
 
 function navHtml(active) {
-  const groups = [["Основни въпроси", ["", "razhodi", "izpalnenie", "danaci"]], ["Детайли", ["merki", "prihodi", "vedomstva", "dalg"]], ["Фаза 2", ["obshtini", "plashtania"]], ["Справка", ["danni", "karta"]]];
+  const groups = [["Започни оттук", ["patevoditel"]], ["Основни въпроси", ["", "razhodi", "izpalnenie", "danaci"]], ["Детайли", ["merki", "prihodi", "vedomstva", "dalg"]], ["Фаза 2", ["obshtini", "plashtania"]], ["Справка", ["danni", "karta"]]];
   return groups.map(([g, ps]) => `<div class="eyebrow group">${g}</div>` + ps.map(p => {
     const r = ROUTES.find(x => x.path === p);
     return `<a href="#/${p}" ${active === p ? 'aria-current="page"' : ""}>${r.q}${r.kind === "фаза 2" ? '<span class="phase">фаза 2</span>' : ""}</a>`;
@@ -628,29 +663,40 @@ function tabHtml(active) {
   return tabs.map(([p, l]) => `<a href="#/${p}" ${active === p || (p === "karta" && !["", "razhodi", "danaci"].includes(active)) ? 'aria-current="page"' : ""}>${l}</a>`).join("");
 }
 
-function route() {
+// nav = true при преход (смяна на адреса или първо зареждане): тогава екранът може да поиска превъртане до свой елемент
+// (scrollTarget — напр. стъпка от пътеводителя, #/patevoditel/3). Прерисуване на място (rerender, смяна на темата) не превърта към него.
+function route(nav) {
   const h = location.hash.replace(/^#\/?/, "");
   const [path, arg] = h.split("/");
   const r = ROUTES.find(x => x.path === path) || (path === "vedomstvo" ? { path: "vedomstva", render: () => pMinistry(arg) } : ROUTES[0]);
+  const same = r.path === lastPath; lastPath = r.path;
   disposeCharts();
   SHARE.clear(); closeSheet();
   document.getElementById("nav").innerHTML = navHtml(r.path);
   document.getElementById("tabbar").innerHTML = tabHtml(r.path);
   const main = document.getElementById("main");
-  main.innerHTML = `<div class="page">${r.render()}</div>`;
+  scrollTarget = null;
+  main.innerHTML = `<div class="page">${r.render(arg)}</div>`;
   if (typeof r.after === "function") r.after();
   if (typeof afterRender === "function") { const f = afterRender; afterRender = null; f(); }
-  window.scrollTo(0, 0);
+  const t = nav && scrollTarget && document.getElementById(scrollTarget);
+  if (!t) { window.scrollTo(0, 0); return; }
+  // в рамките на същия екран — плавно (ако системата не иска по-малко движение), иначе направо; фокусът отива на целта
+  t.scrollIntoView({ block: "start", behavior: same && !matchMedia("(prefers-reduced-motion: reduce)").matches ? "smooth" : "auto" });
+  t.focus({ preventScroll: true });
 }
 let afterRender = null;
+let scrollTarget = null; // id, до който route() да превърти след прерисуването; задава го екранът
+let lastPath = null;     // предишният екран: така route() знае дали преходът е в рамките на същия екран
 let homeExUnit = "pct"; // „Изпълнение към 31 юли“ на началната страница: pct (% от плана) | eur (млрд. €)
-window.addEventListener("hashchange", route);
+window.addEventListener("hashchange", () => route(true));
 window.addEventListener("resize", () => charts.forEach(c => c.resize()));
-new MutationObserver(route).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", route);
+new MutationObserver(() => route()).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => route());
 
 const toggle = document.getElementById("srcToggle");
-function setSrc(on) { document.body.classList.toggle("show-src", on); toggle.setAttribute("aria-pressed", String(on)); try { localStorage.setItem("bns-src", on ? "1" : "0"); } catch (e) {} }
+// Всички превключватели „Покажи източниците“ (горе вдясно и копието му в пътеводителя) следват едно и също състояние.
+function setSrc(on) { document.body.classList.toggle("show-src", on); document.querySelectorAll(".src-toggle").forEach(b => b.setAttribute("aria-pressed", String(on))); try { localStorage.setItem("bns-src", on ? "1" : "0"); } catch (e) {} }
 toggle.addEventListener("click", () => setSrc(toggle.getAttribute("aria-pressed") !== "true"));
 try { if (localStorage.getItem("bns-src") === "1") setSrc(true); } catch (e) {}
 
@@ -680,7 +726,11 @@ const SITE = "https://kindly-prism-ef49.here.now/";
 const pageUrl = () => /^https?:$/.test(location.protocol) ? location.href : SITE + location.hash;
 const ICON = {
   copy: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>',
-  dl: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>'
+  dl: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>',
+  // пътеводителят: компас (входът от началната страница), „i“ (бележката към стъпката), отметка (петте проверки)
+  compass: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m16.24 7.76-2.12 6.36-6.36 2.12 2.12-6.36z"/></svg>',
+  info: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>',
+  check: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>'
 };
 const SHARE = new Map(); // id → { text, chart, title, sub, src, file }; text и title може да са функции (изгледи, които се сменят без прерисуване)
 let shareSeq = 0;
@@ -862,7 +912,8 @@ function pHome() {
 function heroHtml() {
   return `
   <header class="hero" style="display:grid;gap:10px"><h1>Бюджет на светло</h1>
-    <p class="lede">Бюджетът на държавата: откъде идват парите, къде отиват и изпълнява ли се планът — по официални данни.</p></header>`;
+    <p class="lede">Бюджетът на държавата: откъде идват парите, къде отиват и изпълнява ли се планът — по официални данни.</p>
+    <a class="guide-cta" href="#/patevoditel">${ICON.compass}<span>Нов си тук?</span><b>Започни с пътеводителя →</b></a></header>`;
 }
 const bnFmt = m => fmt(m / 1000, m >= 10000 ? 1 : 2); // млн. € → млрд. €: над 10 млрд. с един знак след запетаята, под тях с два
 // Приходи, разходи и дефицит — АСБП, Табл. II-2 (KFP_T22); БВП и капиталови разходи — KPI (Табл. I-2, Прил. 3 и месечният отчет на МФ);
@@ -1068,7 +1119,7 @@ function pRevenue() {
   const j = KFP.jul;
   const rows = REV_SHARES.map(s => `<details class="row"><summary><span>${s.name}</span><span class="num">${fmt(s.m26 / 1000, 2)} млрд. €</span><span class="num muted">${fmt(s.v)}%</span></summary><div class="body"><p><b>Какво е:</b> ${s.what}</p><p><b>Кой го плаща:</b> ${s.who}</p><p><b>Спрямо 2025 г.:</b> ${fmt(s.m25 / 1000, 2)} млрд. € (предварителен отчет), ${signPct((s.m26 / s.m25 - 1) * 100)}.</p></div></details>`).join("");
   return `
-  <header style="display:grid;gap:10px"><div class="eyebrow">Приходи 2026 · <span class="scope">КФП · ${fmt(KFP.planRev)} млрд. €</span></div><h1>Откъде идват парите</h1><p class="lede muted">Всяко четвърто евро идва от ДДС, а почти толкова от осигуровките. Преките данъци върху доходи и печалби са под 17%.</p></header>
+  <header style="display:grid;gap:10px"><div class="eyebrow">Приходи 2026 · <span class="scope">КФП · ${fmt(KFP.planRev)} млрд. €</span></div><h1>Откъде идват парите?</h1><p class="lede muted">Всяко четвърто евро идва от ДДС, а почти толкова от осигуровките. Преките данъци върху доходи и печалби са под 17%.</p></header>
   <section class="panel">${src("revShares")}<div class="panel-head"><h2>От всеки 100 € приходи</h2><span class="muted">${fmt(REV.tot[1] / 1000)} млрд. € по КФП, проект 2026</span></div><div class="stack" role="img" aria-label="Структура на приходите">${bars}</div><div class="legend">${legend}</div>
     <div style="margin-top:12px">${shareBtns({ text: cite(`Бюджет 2026 (КФП, проект): от всеки 100 € приходи ${REV_SHARES.map(s => `${s.name} — ${fmt(s.v)} €`).join(", ")}. Общо приходи: ${fmt(REV.tot[1])} млн. €.`, "revShares") })}</div></section>
   <section class="panel">${src("kfpJul")}<div class="panel-head"><h2>Събрано към 31 юли</h2><span class="muted">при изтекли 58% от годината</span></div>
@@ -1115,7 +1166,7 @@ function pExpenses() {
   else body = yearsHtml();
   const journalist = uType() === "journalist";
   return `
-  <header style="display:grid;gap:10px"><div class="eyebrow">Разходи 2026 · <span class="scope">КФП, без вноската в ЕС · ${fmt(FUNC_TOTAL)} млрд. €</span></div><h1>Къде отиват парите</h1><p class="lede muted">Пенсиите и социалните помощи са най-голямото перо: всяко трето евро от разходите на държавата отива там.</p></header>
+  <header style="display:grid;gap:10px"><div class="eyebrow">Разходи 2026 · <span class="scope">КФП, без вноската в ЕС · ${fmt(FUNC_TOTAL)} млрд. €</span></div><h1>Къде отиват парите?</h1><p class="lede muted">Пенсиите и социалните помощи са най-голямото перо: всяко трето евро от разходите на държавата отива там.</p></header>
   <div class="seg" role="group" aria-label="Изглед"><button type="button" aria-pressed="true">За какво</button><button type="button" onclick="location.hash='#/vedomstva'" aria-pressed="false">Кой харчи</button><button type="button" aria-pressed="false" disabled title="Фаза 2">Вид разход</button></div>
   ${journalist ? topPanel() : ""}
   <section class="panel">${years ? src("cofog") : src("functions")}
@@ -1328,7 +1379,7 @@ function pMinistries() {
   const top5 = ZDB.slice().sort((a, b) => (b.exp || 0) - (a.exp || 0)).slice(0, 5);
   const sum5 = top5.reduce((a, m) => a + m.exp, 0);
   return `
-  <header style="display:grid;gap:10px"><div class="eyebrow">Разпоредители 2026 · <span class="scope">държавен бюджет · по ЗДБ 2026</span></div><h1>Кой харчи</h1><p class="lede muted">${ZDB.length} бюджета, приети със закона — от съдебната власт до Държавен фонд „Земеделие“. Заедно планират разходи за ${money(total)}.</p></header>
+  <header style="display:grid;gap:10px"><div class="eyebrow">Разпоредители 2026 · <span class="scope">държавен бюджет · по ЗДБ 2026</span></div><h1>Кой харчи?</h1><p class="lede muted">${ZDB.length} бюджета, приети със закона — от съдебната власт до Държавен фонд „Земеделие“. Заедно планират разходи за ${money(total)}.</p></header>
   <section class="panel">${src("zdb")}
     <div class="panel-head"><h2>Топ 5 най-големи бюджета</h2></div>
     ${rankList(top5.map(m => ({ name: cap(m.name), m })), x => money(x.m.exp), x => x.m.exp, x => `чл. ${x.m.art} · ${fmt(x.m.exp / total * 100)}% от разходите по закона`)}
@@ -1357,7 +1408,7 @@ function pMinistry(art) {
   const rows = m.items.map(i => `<tr class="${i.n.includes(".") ? "sub" : ""}"><td>${i.name}<div class="hbar"><i style="width:${i.k / max * 100}%"></i></div></td><td class="r">${money(i.k)}</td><td class="r">${fmt(i.k / m.exp * 100)}%</td></tr>`).join("");
   const biggest = top.slice().sort((a, b) => b.k - a.k)[0];
   return `
-  <p><a href="#/vedomstva" class="muted">← Кой харчи</a></p>
+  <p><a href="#/vedomstva" class="muted">← Кой харчи?</a></p>
   <header style="display:grid;gap:10px"><div class="eyebrow">Разпоредител · чл. ${m.art} от ЗДБ 2026</div><h1>${cap(m.name)}</h1>
     <p class="lede">Харчи <b class="num">${money(m.exp)}</b> през 2026 г.${biggest ? ` Най-голямата част (${fmt(biggest.k / m.exp * 100, 0)}%) е за „${biggest.name.replace(/^Политика в областта на /, "").replace(/^Бюджетна програма /, "")}“.` : ""}</p></header>
   <section class="grid-3">
@@ -1412,7 +1463,7 @@ function pExecution() {
   const row25 = i => `<tr class="y25"><td>${KFP_M25.asOf[i]}.2025${i === D ? '<div class="psub">цялата година</div>' : ""}</td>${cell(KFP_M25.rev[i], share25("rev", i))}${cell(KFP_M25.exp[i], share25("exp", i))}<td class="r">${sgn(KFP_M25.bal[i])}</td></tr>`;
   const rows = KFP_M25.asOf.map((_, i) => (i < n ? row26(i) : "") + row25(i)).join("");
   return `
-  <header style="display:grid;gap:10px"><div class="eyebrow">Изпълнение · към 31.07.2026</div><h1>Изпълнява ли се бюджетът?</h1><p class="lede muted">Към ${+KFP_M.asOf[L].slice(0, 2)} ${MONTHS_FULL[L]} са събрани ${fmt(pctPlan("rev", L))}% от планираните приходи и са похарчени ${fmt(pctPlan("exp", L))}% от планираните разходи. Година по-рано, до края на ${MONTHS_FULL[L]}, се бяха натрупали ${fmt(share25("rev", L))}% от приходите и ${fmt(share25("exp", L))}% от разходите за цялата 2025&nbsp;г.</p></header>
+  <header style="display:grid;gap:10px"><div class="eyebrow">Изпълнение · към 31.07.2026</div><h1>Изпълнява ли се планът?</h1><p class="lede muted">Към ${+KFP_M.asOf[L].slice(0, 2)} ${MONTHS_FULL[L]} са събрани ${fmt(pctPlan("rev", L))}% от планираните приходи и са похарчени ${fmt(pctPlan("exp", L))}% от планираните разходи. Година по-рано, до края на ${MONTHS_FULL[L]}, се бяха натрупали ${fmt(share25("rev", L))}% от приходите и ${fmt(share25("exp", L))}% от разходите за цялата 2025&nbsp;г.</p></header>
   <section class="grid-4">
     <div class="panel kpi">${src("kfpJul")}<div class="label">Приходи</div><div class="value">${fmt(j.rev / 1000, 2)}<small>млрд. €</small></div><div class="sub">${fmt(j.revPct)}% от плана · +${fmt(j.revYoY)}% г/г</div>${shareBtns({ text: cite(`Изпълнение на бюджета (КФП) към 31.07.2026: приходи ${fmt(j.rev)} млн. € — ${fmt(j.revPct)}% от годишния план, +${fmt(j.revYoY)}% спрямо година по-рано.`, "kfpJul") })}</div>
     <div class="panel kpi"><div class="label">Разходи</div><div class="value">${fmt(j.exp / 1000, 2)}<small>млрд. €</small></div><div class="sub">${fmt(j.expPct)}% от плана</div>${shareBtns({ text: cite(`Изпълнение на бюджета (КФП) към 31.07.2026: разходи ${fmt(j.exp)} млн. € — ${fmt(j.expPct)}% от годишния план.`, "kfpJul") })}</div>
@@ -1709,7 +1760,7 @@ function pTaxes() {
     upd();
   };
   return `
-  <header style="display:grid;gap:10px"><div class="eyebrow">Лична разписка · бюджет 2026</div><h1>Колко плащам аз и къде отиват парите ми</h1><p class="lede muted">Изчислява се в браузъра ти. Нищо не се записва и не се изпраща.</p></header>
+  <header style="display:grid;gap:10px"><div class="eyebrow">Лична разписка · бюджет 2026</div><h1>Колко плащам аз?</h1><p class="lede muted">Изчислява се в браузъра ти. Нищо не се записва и не се изпраща.</p></header>
   <section class="calc">
     <div class="panel">${src("rates")}
       <div class="field"><span style="font-weight:600;font-size:.92rem">Как работиш?</span><div class="radio">
@@ -1870,12 +1921,98 @@ function pPayments() {
     </ul></section>`;
 }
 
+/* ---------- Пътеводител ---------- */
+// Текстът е на UX в работната група, дословно, 01.10.2026: research/guide/guide_raw.txt.
+// Стъпка: [път на екрана, глаголът от заглавието, името на екрана (същото като в менюто), основен текст, уговорка, „Следва:“ (null при последната)].
+// Петте проверки: изброяването „за кой период е, какво обхваща, …“ е разделено на редове, всеки с етикет.
+const GUIDE = {
+  title: "Разбери бюджета стъпка по стъпка.",
+  intro: "Откъде идват публичните средства, за какво се използват и как решенията за бюджета те засягат? Следвай тази последователност, за да свържеш числата с техния смисъл. Не са ти необходими предварителни познания.",
+  steps: [
+    ["", "Започни с", "Какъв е бюджетът?",
+      "Виж колко средства се планира да бъдат събрани и колко — изразходвани. Когато разходите надвишават приходите, разликата е дефицит.",
+      "Провери годината, обхвата и статуса на показаните данни. Проектът показва предложение, приетият бюджет — одобрен план, а отчетът — какво действително се е случило.",
+      "разбери откъде идват средствата."],
+    ["prihodi", "Отвори", "Откъде идват парите?",
+      "Разгледай основните източници: данъци, осигуровки, неданъчни приходи и помощи. Виж кои осигуряват най-голям дял от общите приходи.",
+      "Разгъни категориите, които не познаваш, за да прочетеш обясненията им. Обърни внимание дали гледаш планирани или вече събрани средства.",
+      "проследи за какво са предвидени парите."],
+    ["razhodi", "Продължи към", "Къде отиват парите?",
+      "Разгледай разпределението между образование, здравеопазване, социално осигуряване и останалите сфери. Избери категория, за да видиш наличната разбивка.",
+      "Използвай графиката за общ поглед, а таблицата — за точните стойности. При сравнение провери дали процентът показва дял от общите разходи или промяна спрямо друга година.",
+      "виж кои решения променят тези приходи и разходи."],
+    ["merki", "Отвори", "Мерки в бюджета 2026",
+      "Разгледай отделно приходните и разходните мерки. За всяка потърси какво се променя, кого засяга, кога започва да действа и какъв бюджетен ефект се очаква.",
+      "Мерките обясняват конкретни промени — те не представляват целия бюджет. Провери дали са предложения или вече приети решения. Посоченото спестяване може да е спрямо определен сценарий, а не непременно намаление спрямо миналата година.",
+      "разбери кои институции управляват средствата."],
+    ["vedomstva", "Продължи към", "Кой харчи?",
+      "Потърси институция и отвори страницата ѝ. Разгледай планираните разходи и разпределението им по политики и програми.",
+      "Бюджетът на едно министерство не е равен на всички публични разходи в съответната сфера. Например бюджетът на Министерството на образованието и науката и общите разходи за образование имат различен обхват.",
+      "провери какво от плана вече е изпълнено."],
+    ["izpalnenie", "Отвори", "Изпълнява ли се планът?",
+      "Виж към коя дата са данните, колко приходи са събрани и колко средства са изразходвани. Сравни ги с годишния план и със същия период на предходната година.",
+      "Приходите и разходите не се разпределят равномерно през годината. По-ниското изпълнение само по себе си не доказва спестяване, проблем или по-добро управление — необходимо е да се разгледат причините.",
+      "постави резултата в контекста на дълга."],
+    ["dalg", "Продължи към", "Колко дължим?",
+      "Разграничи дефицита за определен период от натрупания дълг. Разгледай наличните показатели за дълга, отношението му към размера на икономиката и разходите за лихви.",
+      "При сравнение между години провери кои стойности са отчетени и кои са прогнози. Дефицитът и новопоетият дълг не са взаимозаменяеми показатели.",
+      "свържи общата картина с личния си принос."],
+    ["danaci", "Завърши с", "Колко плащам аз?",
+      "Въведи брутната си месечна заплата и разгледай ориентировъчния резултат. Разграничи личните данъци и осигуровки от вноските на работодателя.",
+      "Прочети допусканията на калкулатора. Разпределението по обществени сфери е илюстрация по бюджетните дялове, а не проследяване на конкретните ти плащания.",
+      null]
+  ],
+  check: { title: "Преди да използваш или споделиш число", lead: "Провери пет неща:",
+    items: [["Период", "за кой период е"], ["Обхват", "какво обхваща"], ["Единица", "в каква единица е"], ["Статус", "какъв е статусът му"], ["Източник", "откъде идва"]],
+    end: "Използвай „Покажи източниците“ или раздела „Откъде са данните?“ за подробности." }
+};
+function pGuide(arg) {
+  afterRender = wireGuide;
+  scrollTarget = arg ? `pv-${arg}` : null; // #/patevoditel/3 → стъпка 3; #/patevoditel/proveri → петте проверки
+  const n = GUIDE.steps.length, C = GUIDE.check, on = document.body.classList.contains("show-src");
+  const steps = GUIDE.steps.map(([to, verb, screen, text, note, next], i) => `
+    <li class="panel gstep" id="pv-${i + 1}" tabindex="-1">
+      <h2><span class="gnum" aria-hidden="true">${i + 1}</span><span><span class="sr-only">Стъпка ${i + 1} от ${n}: </span>${verb} „${screen}“</span></h2>
+      <p>${text}</p>
+      <p class="gnote" role="note">${ICON.info}<span>${note}</span></p>
+      <div class="gact"><a class="gbtn" href="#/${to}" data-gstep="${i + 1}" data-screen="${screen}">Отвори „${screen}“<span aria-hidden="true">→</span></a></div>
+      ${next ? `<div class="gfoot"><a class="gnext" href="#/patevoditel/${i + 2}"><span class="lbl">Следва:</span> ${next} <span aria-hidden="true">↓</span></a></div>` : ""}
+    </li>`).join("");
+  return `
+  <header style="display:grid;gap:10px"><div class="eyebrow">Започни оттук · ${n} стъпки</div><h1>Пътеводител</h1>
+    <p class="gsub">${GUIDE.title}</p><p class="lede muted">${GUIDE.intro}</p></header>
+  <ol class="gsteps">${steps}</ol>
+  <section class="panel gcheck" id="pv-proveri" tabindex="-1" aria-labelledby="pvC">
+    <h2 id="pvC">${C.title}</h2>
+    <p>${C.lead}</p>
+    <ul class="checks">${C.items.map(([k, v]) => `<li><span class="ck">${ICON.check}</span><b>${k}</b><span>${v}</span></li>`).join("")}</ul>
+    <p>${C.end}</p>
+    <div class="gact"><button type="button" class="src-toggle" id="gSrc" aria-pressed="${on}"><span class="dot" aria-hidden="true"></span><span>Покажи източниците</span></button><a class="gpill" href="#/danni">Откъде са данните? <span aria-hidden="true">→</span></a></div>
+  </section>`;
+}
+function wireGuide() {
+  const s = document.getElementById("gSrc");
+  if (s) s.onclick = () => {
+    const on = !document.body.classList.contains("show-src");
+    setSrc(on);
+    toast(on ? "Източниците се показват до числата на всеки екран. Същият превключвател е горе вдясно." : "Източниците са скрити.");
+  };
+}
+// „Отвори“: записваме стъпката в адреса (#/patevoditel/N), за да върне „Назад“ точно на нея.
+// „Следва:“ към стъпката, която вече е в адреса, не сменя hash — тогава превъртаме сами.
+document.addEventListener("click", e => {
+  const a = e.target.closest("a[data-gstep], a.gnext");
+  if (!a || e.button || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+  if (a.dataset.gstep) history.replaceState(history.state, "", `#/patevoditel/${a.dataset.gstep}`);
+  else if (a.getAttribute("href") === location.hash) { e.preventDefault(); route(true); }
+});
+
 function pData() {
   const keys = Object.keys(SRC);
   const names = { zdb: "Закон за държавния бюджет 2026", kfpJul: "Изпълнение на КФП (месечно)", kfpPlan: "Годишен план по КФП", gdp: "БВП за 2026 г. (Табл. I-2)", capex: "Капиталови разходи: план и изпълнение", sdmx: "SDMX на МФ (SDDS Plus)", eurostat: "Eurostat: дълг към БВП", functions: "Разходи по функции (Табл. III-1)", cofog: "Eurostat: разходи по функции (COFOG)", kfpMonthly: "Месечни отчети за изпълнението на КФП, 2026 г. (МФ)", kfpMonthly25: "Месечни отчети за изпълнението на КФП, 2025 г. (МФ)", revShares: "Структура на приходите (Прил. 3)", balance: "Салдо и лихви 2024–2028", activities: "Разходи по ~400–500 дейности", debtStock: "Размер на дълга в евро", components: "Съставни бюджети и трансферите между тях", rates: "Осигуровки и данък по трудов договор, 2026", pop: "Население", municipal: "Общини: тримесечни финансови данни (чл. 130г ЗПФ)", munDebt: "Общини: регистър на общинския дълг", munReports: "Общини: касови отчети на всяка община", munTransfers: "Общини: трансфери от централния бюджет, 2026", sebra: "СЕБРА — плащания по получатели", sebraDaily: "СЕБРА — дневни обобщения по институции", eop: "Договори от ЦАИС ЕОП", program: "Програмни бюджети (политики и програми)", measuresIntro: "Мерки в бюджета 2026: списъкът от въведението", measuresEsa: "Мерки 2026–2028: Табл. II-8 и II-9", measuresLaws: "Промени в други закони (Част VIII)" };
   const rows = keys.map(k => `<tr><td><b>${names[k]}</b></td><td>${stPill(k)}</td><td class="muted">${SRC[k][1]}</td></tr>`).join("");
   return `
-  <header style="display:grid;gap:10px"><div class="eyebrow">Справка</div><h1>Откъде са данните</h1><p class="lede muted">Всяко число в прототипа има източник и статус. Включи „Покажи източниците“ горе вдясно, за да ги видиш на всеки екран.</p></header>
+  <header style="display:grid;gap:10px"><div class="eyebrow">Справка</div><h1>Откъде са данните?</h1><p class="lede muted">Всяко число в прототипа има източник и статус. Включи „Покажи източниците“ горе вдясно, за да ги видиш на всеки екран.</p></header>
   <section class="panel"><div class="table-wrap"><table><thead><tr><th>Набор</th><th>Статус</th><th>Източник и бележки</th></tr></thead><tbody>${rows}</tbody></table></div></section>
   <section class="panel"><h2 style="margin-bottom:10px">Капани</h2><ul style="margin:0;padding-left:20px;display:grid;gap:8px;max-width:75ch">
     <li><b>Евро и лева.</b> От 01.01.2026 всичко е в евро, а историята е в лева. Делим на 1,95583. В SDMX файла на МФ двете валути са смесени под един и същ код.</li>
@@ -1909,6 +2046,7 @@ function pMap() {
   <header style="display:grid;gap:10px"><div class="eyebrow">Справка</div><h1>Карта на прототипа</h1><p class="lede muted">Всички екрани на едно място. Под всеки екран е статусът на данните, от които зависи.</p></header>
   <section class="mapgrid">${cards}</section>
   <section class="panel"><h2 style="margin-bottom:12px">Отворени въпроси към групата</h2><ol class="qs">${OPEN_QS.map(q => `<li>${q}</li>`).join("")}</ol></section>
+  <p class="note">Прототип v3.4, 01.10.2026: нов екран „Пътеводител“ с текста от работната група „Разбери бюджета стъпка по стъпка“. Осемте стъпки водят от „Какъв е бюджетът?“ до „Колко плащам аз?“. Всяка има бутон към своя екран, бележка какво да провериш и „Следва:“ към следващата стъпка. Накрая са петте проверки преди да използваш или споделиш число. Пътеводителят се отваря от началната страница („Нов си тук? Започни с пътеводителя“) и от менюто. Заглавията на екраните вече са същите като в пътеводителя: „Откъде идват парите?“, „Къде отиват парите?“, „Кой харчи?“, „Изпълнява ли се планът?“, „Колко плащам аз?“ и „Откъде са данните?“.</p>
   <p class="note">Прототип v3.3, 01.10.2026: началната страница започва със заглавие и едно изречение какво е платформата, а под тях е лентата „Бюджет 2026 в шест числа“, еднаква за всички типове потребители: БВП (Табл. I-2), приходи, разходи и дефицит (Табл. II-2), капиталовите разходи — план (Прил. 3) и изпълнение към 31 юли (месечният отчет на МФ), и държавният дълг по Закона за държавния дълг (Табл. VI-1). На всяка плочка е източникът, а документът и страницата са в „Покажи източниците“. Лентата замени трите карти „Приходи / Разходи / Дефицит“ и изречението „държавата планира да събере…“, които повтаряха същите числа.</p>
   <p class="note">Прототип v3.2, 01.10.2026: извлечени са наборите, които бяха „за извличане / проверка“. Структурата на приходите е по АСБП 2026–2028, Прил. 3, а калкулаторът е по вноските за 2026 г. (НАП, ЗБДОО и ЗБНЗОК 2026). Населението е към 1 януари 2026 г. (НСИ чрез Eurostat), а дългът е по Закона за държавния дълг и по Маастрихт. В „Изпълнява ли се планът?“ има бюджетите в КФП и трансферите между тях, в „Моята община“ — трансферите за всяка община (ЗДБ, чл. 51), а при ведомствата — политиките и програмите по години за 26 разпоредители. Нов статус „частично“. Каквото още липсва, е в „Откъде са данните“ с причината.</p>
   <p class="note">Прототип v3.1, 01.10.2026: в „Мерки в бюджета 2026“ експертът започва от дискреционните мерки (Табл. II-8 и II-9, с бележка „на начислена основа“), а гражданинът и журналистът — от краткосрочните мерки; смяната на типа връща раздела по подразбиране. Махнат е обяснителният текст за двата списъка.</p>
@@ -1919,5 +2057,5 @@ function pMap() {
   <p class="note">Прототип v1, 28.09.2026. Обединява документа за обхвата, wireframe-ите (екрани и бележки) и прототипа с идеи за фаза 2, плюс прегледа на наличните данни.</p>`;
 }
 
-route();
+route(true);
 </script>
