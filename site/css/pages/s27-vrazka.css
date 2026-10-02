@@ -1,0 +1,50 @@
+/* S27 · Обратна връзка. Tokens only, no dark-mode rules (the tokens carry both themes), every selector scoped to the screen. */
+
+.page[data-route="S27"] .s27-main { display: grid; gap: var(--sp-3); }
+.page[data-route="S27"] .s27-intro { margin: 0 0 var(--sp-4); max-width: 62ch; }
+
+/* the form */
+.page[data-route="S27"] .s27-form { display: grid; gap: var(--sp-4); max-width: 42rem; }
+.page[data-route="S27"] .s27-form .field { min-width: 0; }
+.page[data-route="S27"] .s27-form .field-hint { margin: 0; }
+.page[data-route="S27"] .s27-form .field-error { margin: 0; }
+.page[data-route="S27"] .s27-form .field-error:empty { margin-top: calc(var(--sp-1) * -1); }   /* an empty alert must not leave a gap, but it has to stay in the page to be read out when it fills */
+.page[data-route="S27"] .s27-req,
+.page[data-route="S27"] .s27-opt { margin-left: var(--sp-1); font-size: var(--fs-xs); font-weight: 400; color: var(--muted); }
+.page[data-route="S27"] .s27-textarea { min-height: 8rem; resize: vertical; line-height: 1.5; }
+.page[data-route="S27"] .s27-count { justify-self: end; font-size: var(--fs-xs); color: var(--muted); font-variant-numeric: tabular-nums; }
+.page[data-route="S27"] .s27-pair { display: grid; gap: var(--sp-4); align-items: start; }
+.page[data-route="S27"] .s27-src { margin: 0; padding: var(--sp-1) var(--sp-4); border: 1px solid var(--line); border-radius: var(--r-2); background: var(--sunk); }
+
+/* after sending */
+.page[data-route="S27"] .s27-ok { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--sp-3); max-width: 42rem; padding: var(--sp-4); border-left: 4px solid var(--ok); border-radius: 0 var(--r-2) var(--r-2) 0; background: var(--ok-soft); }
+.page[data-route="S27"] .s27-ok-ic { display: grid; padding-top: 2px; color: var(--ok); }
+.page[data-route="S27"] .s27-ok-main { display: grid; gap: var(--sp-3); min-width: 0; }
+.page[data-route="S27"] .s27-ok-h { margin: 0; font-size: var(--fs-1); }
+.page[data-route="S27"] .s27-ok-note { margin: 0; max-width: 56ch; }
+.page[data-route="S27"] .s27-warn { display: flex; align-items: flex-start; gap: var(--sp-2); margin: 0; padding: var(--sp-2) var(--sp-3); border-left: 4px solid var(--warn); border-radius: 0 var(--r-1) var(--r-1) 0; background: var(--warn-soft); font-size: var(--fs-s); }
+.page[data-route="S27"] .s27-warn svg { flex: none; margin-top: 2px; }
+
+/* what is kept in this browser */
+.page[data-route="S27"] .s27-saved { display: grid; gap: var(--sp-3); padding-top: var(--sp-5); border-top: 1px solid var(--line-strong); }
+.page[data-route="S27"] .s27-saved-note { margin: 0; max-width: 62ch; color: var(--muted); }
+.page[data-route="S27"] .s27-saved-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-2) var(--sp-4); }
+.page[data-route="S27"] .s27-saved-count { margin: 0; font-weight: 700; }
+.page[data-route="S27"] .s27-saved-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-3); }
+.page[data-route="S27"] .s27-saved-item { display: grid; gap: var(--sp-2); padding: var(--sp-3) var(--sp-4); border: 1px solid var(--line); border-radius: var(--r-2); background: var(--surface); }
+.page[data-route="S27"] .s27-saved-head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-3); margin: 0; font-size: var(--fs-s); color: var(--muted); }
+.page[data-route="S27"] .s27-pill { display: inline-block; padding: 1px var(--sp-2); border-radius: var(--r-full); background: var(--data-soft); color: var(--data); font-size: var(--fs-xs); font-weight: 700; }
+.page[data-route="S27"] .s27-saved-text { margin: 0; max-width: 68ch; white-space: pre-line; overflow-wrap: anywhere; }
+.page[data-route="S27"] .s27-saved-meta { margin: 0; font-size: var(--fs-s); color: var(--muted); overflow-wrap: anywhere; }
+.page[data-route="S27"] .s27-saved-empty { margin: 0; padding: var(--sp-4); border: 1px dashed var(--line-strong); border-radius: var(--r-2); color: var(--muted); }
+
+/* three long tab names do not fit in one row on a phone: equal tabs whose names wrap, so none is hidden behind a scroll */
+@media (max-width: 599px) {
+  .page[data-route="S27"] .tab-list [role="tab"] { flex: 1 1 0; justify-content: center; padding-inline: var(--sp-1); font-size: var(--fs-s); line-height: 1.2; text-align: center; white-space: normal; }
+}
+
+@media (min-width: 600px) {
+  .page[data-route="S27"] .s27-pair { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .page[data-route="S27"] .s27-ok { padding: var(--sp-5); }
+  .page[data-route="S27"] .s27-saved-item { padding: var(--sp-3) var(--sp-5); }
+}

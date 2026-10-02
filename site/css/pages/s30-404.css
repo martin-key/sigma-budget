@@ -1,0 +1,15 @@
+/* S30 · Няма такава страница. Tokens only (they carry both themes), every selector scoped to the screen, classes prefixed s30-. */
+.page[data-route="S30"] .s30 { display: grid; gap: var(--sp-5); }
+.page[data-route="S30"] .s30-path { padding: 1px 6px; border: 1px solid var(--line); border-radius: var(--r-1); background: var(--sunk); color: var(--ink); overflow-wrap: anywhere; }
+
+.page[data-route="S30"] .s30-find { display: grid; gap: var(--sp-2); padding: var(--sp-4); border: 1px solid var(--line); border-top: 4px solid var(--accent); border-radius: var(--r-2); background: var(--surface); }
+.page[data-route="S30"] .s30-bar { display: flex; flex-wrap: wrap; gap: var(--sp-3); align-items: stretch; }
+.page[data-route="S30"] .s30-q { flex: 1 1 16rem; min-width: 0; width: auto; -webkit-appearance: none; appearance: none; min-height: 48px; font-size: var(--fs-0); }
+.page[data-route="S30"] .s30-q::-webkit-search-cancel-button,
+.page[data-route="S30"] .s30-q::-webkit-search-decoration { -webkit-appearance: none; display: none; }
+.page[data-route="S30"] .s30-go { flex: none; min-height: 48px; padding-inline: var(--sp-6); font-size: var(--fs-0); }
+@media (max-width: 520px) { .page[data-route="S30"] .s30-go { flex: 1 1 100%; } }
+
+.page[data-route="S30"] .s30-h { margin: 0; font-size: var(--fs-1); }
+.page[data-route="S30"] .s30-links { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-3); grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); }
+.page[data-route="S30"] .s30-links .link-card { height: 100%; }

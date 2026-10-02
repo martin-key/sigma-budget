@@ -1,0 +1,54 @@
+/* S20 · Моята община. Tokens only, no dark-mode rules (the tokens carry both themes), every selector scoped to the screen. */
+
+/* the search card: one field to find a municipality, one to narrow by oblast, one to switch map and list */
+.page[data-route="S20"] .s20-find { display: grid; gap: var(--sp-3); padding: var(--sp-4); border: 1px solid var(--line); border-radius: var(--r-2); background: var(--surface); box-shadow: var(--shadow-1); }
+.page[data-route="S20"] .s20-controls { display: grid; gap: var(--sp-3); }
+.page[data-route="S20"] .s20-controls > .field { min-width: 0; }
+.page[data-route="S20"] .s20-view { display: grid; gap: var(--sp-1); align-content: start; }
+.page[data-route="S20"] .s20-view .seg { justify-self: start; }
+.page[data-route="S20"] .s20-count { margin: 0; color: var(--muted); font-size: var(--fs-s); }
+
+/* shortcuts to the first municipalities found (the map is hard to read for a name): real links, one per row */
+.page[data-route="S20"] .s20-hits-h { margin: 0 0 var(--sp-2); font-weight: 700; font-size: var(--fs-s); }
+.page[data-route="S20"] .s20-hits { display: grid; gap: var(--sp-2); margin: 0; padding: 0; list-style: none; }
+.page[data-route="S20"] .s20-hit { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px var(--sp-3); min-height: 44px; padding: var(--sp-2) var(--sp-3); border: 1px solid var(--line); border-radius: var(--r-1); background: var(--bg); color: var(--ink); text-decoration: none; }
+.page[data-route="S20"] .s20-hit:hover { background: var(--sunk); border-color: var(--line-strong); }
+.page[data-route="S20"] .s20-hit-name { font-weight: 700; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--accent); }
+.page[data-route="S20"] .s20-hit-sub { color: var(--muted); font-size: var(--fs-s); }
+.page[data-route="S20"] .s20-more { margin: 0; padding: var(--sp-1) var(--sp-1) 0; color: var(--muted); font-size: var(--fs-s); }
+.page[data-route="S20"] #s20-none .state { margin-top: var(--sp-1); }
+
+/* the list: the two columns of example numbers are hatched, the real ones are not */
+.page[data-route="S20"] #s20-spisak-wrap table.data thead th:nth-child(n+6),
+.page[data-route="S20"] #s20-spisak-wrap table.data tbody td:nth-child(n+6) {
+  background-image: repeating-linear-gradient(45deg, var(--hatch) 0 1px, transparent 1px var(--hatch-step));
+  border-left: 1px dashed var(--line);
+}
+.page[data-route="S20"] .s20-pending { margin: var(--sp-3) 0 0; }
+
+/* the two rankings sit side by side when there is room */
+.page[data-route="S20"] .s20-pair { display: grid; gap: var(--sp-5); align-items: start; }
+.page[data-route="S20"] .s20-pair > .block { min-width: 0; margin: 0; }
+.page[data-route="S20"] .s20-solo { margin: 0; padding: var(--sp-4); border: 1px dashed var(--line-strong); border-radius: var(--r-1); }
+
+.page[data-route="S20"] .s20-read { max-width: 68ch; }
+.page[data-route="S20"] .s20-fixnote { margin: var(--sp-3) 0 0; max-width: 72ch; }
+
+@media (min-width: 600px) {
+  .page[data-route="S20"] .s20-find { padding: var(--sp-5); }
+  .page[data-route="S20"] .s20-controls { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); align-items: start; }
+  .page[data-route="S20"] .s20-view { grid-column: 1 / -1; }
+}
+@media (min-width: 900px) {
+  .page[data-route="S20"] .s20-controls { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) auto; }
+  .page[data-route="S20"] .s20-view { grid-column: auto; }
+  .page[data-route="S20"] .s20-pair { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (pointer: coarse) {
+  .page[data-route="S20"] .s20-hit { min-height: 48px; }
+}
+@media (forced-colors: active) {
+  .page[data-route="S20"] #s20-spisak-wrap table.data thead th:nth-child(n+6),
+  .page[data-route="S20"] #s20-spisak-wrap table.data tbody td:nth-child(n+6) { background-image: none; border-left: 2px dashed CanvasText; }
+  .page[data-route="S20"] .s20-hit { border-color: CanvasText; }
+}

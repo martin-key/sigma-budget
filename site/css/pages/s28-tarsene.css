@@ -1,0 +1,50 @@
+/* S28 · Търсене. Tokens only (they carry both themes), every selector scoped to the screen, classes prefixed s28-. */
+
+/* the field */
+.page[data-route="S28"] .s28-find { display: grid; gap: var(--sp-3); padding: var(--sp-4); border: 1px solid var(--line); border-top: 4px solid var(--accent); border-radius: var(--r-2); background: var(--surface); }
+.page[data-route="S28"] .s28-form { display: grid; gap: var(--sp-2); }
+.page[data-route="S28"] .s28-form .field-hint { margin: 0; max-width: 62ch; }
+.page[data-route="S28"] .s28-bar { display: flex; flex-wrap: wrap; gap: var(--sp-3); align-items: stretch; }
+.page[data-route="S28"] .s28-wrap { position: relative; flex: 1 1 18rem; min-width: 0; }
+.page[data-route="S28"] .s28-ic { position: absolute; left: 14px; top: 50%; display: grid; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+.page[data-route="S28"] .s28-q { -webkit-appearance: none; appearance: none; min-height: 52px; padding-left: 46px; padding-right: 52px; font-size: var(--fs-1); }
+.page[data-route="S28"] .s28-q::-webkit-search-cancel-button,
+.page[data-route="S28"] .s28-q::-webkit-search-decoration { -webkit-appearance: none; display: none; }
+.page[data-route="S28"] .s28-clear { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); }
+.page[data-route="S28"] .s28-go { flex: none; min-height: 52px; padding-inline: var(--sp-6); font-size: var(--fs-0); }
+@media (max-width: 520px) { .page[data-route="S28"] .s28-go { flex: 1 1 100%; } }
+
+/* the results box (replaced in place while typing) */
+.page[data-route="S28"] .s28-out { display: grid; gap: var(--sp-5); align-content: start; min-height: 12rem; }
+.page[data-route="S28"] .s28-start { display: grid; gap: var(--sp-4); }
+.page[data-route="S28"] .s28-short { margin: 0; font-weight: 700; }
+.page[data-route="S28"] .s28-count { margin: 0; }
+.page[data-route="S28"] .s28-note { display: flex; align-items: flex-start; flex-wrap: wrap; gap: var(--sp-2) var(--sp-3); margin: 0; max-width: 68ch; font-size: var(--fs-s); color: var(--muted); }
+.page[data-route="S28"] .s28-note > span:last-child { flex: 1 1 18rem; }
+
+/* one group */
+.page[data-route="S28"] .s28-grp { display: grid; gap: var(--sp-3); }
+.page[data-route="S28"] .s28-gh { display: flex; align-items: baseline; gap: var(--sp-3); padding-bottom: var(--sp-2); border-bottom: 2px solid var(--line-strong); font-size: var(--fs-1); }
+.page[data-route="S28"] .s28-n { padding: 0 var(--sp-2); border-radius: var(--r-full); background: var(--sunk); color: var(--muted); font-family: var(--font-body); font-size: var(--fs-xs); font-weight: 700; font-variant-numeric: tabular-nums; }
+.page[data-route="S28"] .s28-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-2); }
+.page[data-route="S28"] .s28-more { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-3); margin: 0; color: var(--muted); font-size: var(--fs-s); }
+
+/* one hit: the whole card opens the link (stretched link), focus is drawn around the card */
+.page[data-route="S28"] .s28-hit { position: relative; display: grid; gap: 2px; padding: var(--sp-3) var(--sp-4); border: 1px solid var(--line); border-radius: var(--r-2); background: var(--surface); }
+.page[data-route="S28"] .s28-hit:hover { border-color: var(--data); background: var(--sunk); }
+.page[data-route="S28"] .s28-top { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-1) var(--sp-3); }
+.page[data-route="S28"] .s28-link { font-weight: 700; color: var(--ink); text-decoration: none; overflow-wrap: anywhere; }
+.page[data-route="S28"] .s28-link::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+.page[data-route="S28"] .s28-link:hover { color: var(--data); text-decoration: underline; text-underline-offset: .18em; }
+.page[data-route="S28"] .s28-hit:has(.s28-link:focus-visible) { outline: 3px solid var(--focus); outline-offset: 2px; }
+@supports selector(:has(*)) { .page[data-route="S28"] .s28-link:focus-visible { outline: none; } }
+.page[data-route="S28"] .s28-sub,
+.page[data-route="S28"] .s28-in { margin: 0; font-size: var(--fs-s); color: var(--muted); }
+.page[data-route="S28"] .s28-in { font-size: var(--fs-xs); }
+.page[data-route="S28"] .s28-val { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* the start page */
+.page[data-route="S28"] .s28-quick { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-3); grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
+.page[data-route="S28"] .s28-quick a { display: grid; gap: 2px; height: 100%; padding: var(--sp-3) var(--sp-4); border: 1px solid var(--line); border-radius: var(--r-2); background: var(--surface); color: var(--ink); text-decoration: none; }
+.page[data-route="S28"] .s28-quick a:hover { border-color: var(--data); background: var(--sunk); }
+.page[data-route="S28"] .s28-quick span { font-size: var(--fs-s); color: var(--muted); }
