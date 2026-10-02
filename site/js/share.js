@@ -1,0 +1,312 @@
+// Sharing: registry of shareable blocks + the „Сподели“ menu (copy text, copy link, PNG, CSV, embed code, Web Share).
+// A block registers a spec while its screen renders (ui/block.js does this for you); the router clears the registry on every navigation.
+//   share.register(id, {title, sub, text, source:['kfp'], asOf, status, mock, chart:'chartDomId', table:{columns,rows,statuses?} | ()=>…, embed:true|'routeKey.chartId', embedParams:{code:'1000'}})
+//   shareButton(id)                      the trigger button (the delegated [data-share] handler calls openMenu)
+//   textFor/linkFor/csvFor/embedFor      pure builders (also used by tests)
+//   renderPng(spec,{watermark})          canvas with title, chart and source footer; „ПРИМЕРНИ ДАННИ“ watermark whenever the data is mock
+// Rules that never bend: the copied text always carries the source; a mock block is never exported without saying so
+// (text line, PNG watermark, CSV status column).
+import { html, esc } from './html.js';
+import { icon } from './icons.js';
+import { data } from './data.js';
+import { date, csvCell } from './format.js';
+import { statusLabel } from './ui/status.js';
+import { srcShort } from './ui/source.js';
+import { popover, sheet } from './ui/sheet.js';
+import { toast } from './ui/toast.js';
+
+/* ---------------------------------------------------------------- registry */
+const registry = new Map();
+const resetHooks = new Set();
+let curRoute = null;
+/** called by the router at the start of every render: clears specs and lets registries (charts…) clear theirs */
+export const reset = route => { registry.clear(); curRoute = route || null; resetHooks.forEach(f => { try { f(); } catch (e) { console.error(e); } }); };
+export const onReset = fn => { resetHooks.add(fn); return () => resetHooks.delete(fn); };
+export const register = (id, spec) => { registry.set(id, { id, route: curRoute?.key || null, ...spec }); return id; };
+export const get = id => registry.get(id);
+export const all = () => [...registry.entries()];
+/** the route row of the screen being drawn (ui/block.js and ui/cards.js use its key for „Намерих грешка“ and embeds) */
+export const currentRoute = () => curRoute;
+
+/** mock when flagged, or when the block on screen contains something hatched as mock (a mock chart/table/KPI inside a „real“ block still exports labelled) */
+const MOCK_INSIDE = '[data-mock-fig="true"],[data-mock-table="true"],[data-kpi-mock="true"]';
+export const isMock = spec => !!(spec && (spec.mock || spec.status === 'mock' || (spec.id && typeof document !== 'undefined' && document.getElementById(spec.id)?.querySelector(MOCK_INSIDE))));
+const keysOf = s => (Array.isArray(s) ? s : String(s || '').split(',')).map(x => x.trim()).filter(Boolean);
+const val = x => (typeof x === 'function' ? x() : x);
+
+/* Charts and tables register what they can export (a table twin for CSV); blocks find them in their own DOM at share time.
+   attach(domId, {table:()=>({columns,rows,statuses?}), chart:true}) — cleared with the registry on every navigation. */
+const attached = new Map();
+resetHooks.add(() => attached.clear());
+export const attach = (id, o) => { attached.set(id, o); return id; };
+const blockEl = spec => (spec.id ? document.getElementById(spec.id) : null);
+function attachments(spec) {
+  const root = blockEl(spec);
+  if (!root) return [];
+  return [...root.querySelectorAll('[data-attach]')].map(n => ({ el: n, vis: n.getClientRects().length > 0, ...attached.get(n.dataset.attach) })).filter(a => a.table || a.chart).sort((x, y) => y.vis - x.vis);
+}
+const tableOf = spec => {
+  const t = val(spec.table) ?? attachments(spec).find(a => a.table)?.table();
+  return t && Array.isArray(t.columns) && Array.isArray(t.rows) ? t : null;
+};
+/** the chart container to turn into a PNG: spec.chart (dom id), or the first drawn, visible chart inside the block; chart:false disables */
+const chartEl = spec => {
+  if (spec.chart === false) return null;
+  if (spec.chart) return document.getElementById(spec.chart);
+  const root = blockEl(spec);
+  return root ? [...root.querySelectorAll('.chart[data-ready="1"]')].find(c => c.offsetParent !== null) || null : null;
+};
+const hasChart = spec => { const el = chartEl(spec); return !!(el && window.echarts?.getInstanceByDom(el)); };
+const canPng = spec => hasChart(spec) || !!tableOf(spec);
+
+/** trigger button for a block header */
+export const shareButton = (id, o = {}) => html`<button type="button" class="btn btn-sm btn-quiet share-btn" data-share="${id}" aria-haspopup="dialog" aria-expanded="false">${icon('share', { size: 16 })}<span>${o.label || 'Сподели'}</span></button>`;
+
+/* ---------------------------------------------------------------- builders */
+/** link to this block on the current screen (keeps ?per= and the other state, adds ?to=<block>) */
+export function linkFor(spec) {
+  const u = new URL(location.href);
+  const [path, qs = ''] = (location.hash.replace(/^#/, '') || '/').split('?');
+  const q = new URLSearchParams(qs);
+  q.delete('demo');
+  if (spec?.id) q.set('to', spec.id);
+  u.hash = '#' + path + (q.toString() ? '?' + q : '');
+  return u.href;
+}
+export function sourceLine(spec) {
+  const ks = keysOf(spec.source);
+  if (!ks.length) return '';
+  return `Източник: ${ks.map(srcShort).join('; ')}${spec.asOf ? ` (към ${date(spec.asOf)})` : ''}.`;
+}
+/** the text that „Копирай текст“ puts on the clipboard: claim, source, status, link */
+export function textFor(spec) {
+  const lines = [];
+  if (isMock(spec)) lines.push('ПРИМЕРНИ ДАННИ: стойностите са измислени, не ги цитирай.');
+  lines.push(spec.title);
+  const body = val(spec.text);
+  if (body) lines.push(body);
+  const src = sourceLine(spec);
+  if (src) lines.push(src);
+  if (spec.status && spec.status !== 'real' && spec.status !== 'mock') lines.push(`Статус на данните: ${statusLabel(spec.status)}.`);
+  lines.push(linkFor(spec));
+  return lines.join('\n');
+}
+const csvVal = v => (v == null ? '' : typeof v === 'number' ? (Number.isFinite(v) ? String(v).replace('.', ',') : '') : String(v).replace(/\s*[\r\n]+\s*/g, ' '));   // a cell is one line: a break inside a cell breaks row-by-row tools
+/** CSV: UTF-8 BOM, ";" separator, decimal comma, CRLF; last two columns are „статус“ and „източник“ */
+export function csvFor(spec) {
+  const t = tableOf(spec);
+  if (!t) return '';
+  const src = keysOf(spec.source).map(srcShort).join('; ');
+  const st = i => statusLabel(t.statuses?.[i] || spec.status || (isMock(spec) ? 'mock' : 'real'));
+  const lines = [[...t.columns, 'статус', 'източник'].map(c => csvCell(csvVal(c))).join(';')];
+  t.rows.forEach((r, i) => lines.push([...r.map(csvVal), st(i), src].map(csvCell).join(';')));
+  return '\uFEFF' + lines.join('\r\n') + '\r\n';
+}
+/** hash of the embed view (S29): #/embed/<routeKey>.<chartId>[?per=…&<spec.embedParams>]
+ *  embedParams = the host screen's own address parameters ({code:'1000'} for #/vedomstvo/1000): S29 hands them back to the screen as its params.
+ *  Keys are plain names (never per/demo), values primitives. */
+export function embedHash(spec) {
+  const e = spec.embed, pre = spec.route || 'embed';
+  const key = e === true ? `${pre}.${spec.chart || spec.id}` : typeof e === 'string' && e ? (e.includes('.') ? e : `${pre}.${e}`) : '';
+  if (!key) return '';
+  const q = new URLSearchParams();
+  const per = new URLSearchParams((location.hash.split('?')[1] || '')).get('per');
+  if (per) q.set('per', per);
+  for (const [k, v] of Object.entries(spec.embedParams || {})) {
+    if (/^[A-Za-z][\w-]*$/.test(k) && k !== 'per' && k !== 'demo' && v != null && v !== '' && typeof v !== 'object') q.set(k, String(v));
+  }
+  const qs = q.toString();
+  return `#/embed/${key}${qs ? '?' + qs : ''}`;
+}
+/** iframe code for the embed view (S29) */
+export function embedFor(spec) {
+  const h = embedHash(spec);
+  if (!h) return '';
+  const u = new URL(location.href);
+  u.hash = h;
+  return `<iframe src="${esc(u.href)}" title="${esc(spec.title)}" width="720" height="440" loading="lazy" style="border:0;max-width:100%" referrerpolicy="no-referrer"></iframe>`;
+}
+
+/* ---------------------------------------------------------------- clipboard and downloads */
+export async function copyText(t) {
+  const pol = document.permissionsPolicy || document.featurePolicy;
+  const allowed = !pol || typeof pol.allowsFeature !== 'function' || pol.allowsFeature('clipboard-write');
+  try { if (allowed && navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(t); return true; } } catch { /* denied: fall back */ }
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = t; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none';
+    document.body.appendChild(ta); ta.select();
+    const ok = document.execCommand('copy'); ta.remove();
+    return ok;
+  } catch { return false; }
+}
+/** copy; when the browser refuses, show the text in a sheet to copy by hand */
+export async function copyOrShow(text, doneMsg, title = 'Копирай ръчно', returnFocus) {
+  if (await copyText(text)) { toast(doneMsg); return true; }
+  sheet.open({
+    title, returnFocus,
+    body: html`<p class="small muted">Браузърът не позволи автоматично копиране. Маркирай текста и натисни Ctrl+C (⌘C на Mac).</p><textarea class="sheet-text" readonly rows="6">${text}</textarea>`
+  });
+  const ta = document.querySelector('dialog.sheet textarea');
+  if (ta) { ta.focus(); ta.select(); }
+  return false;
+}
+export function download(blob, name) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name; a.rel = 'noopener'; a.hidden = true;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+const fileName = (spec, ext) => `bns-${[spec.route, spec.id].filter(Boolean).join('-').toLowerCase().replace(/[^a-z0-9._-]+/g, '-')}.${ext}`;
+
+/* ---------------------------------------------------------------- PNG */
+const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const loadImg = src => new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = src; });
+async function fonts() {
+  try { await Promise.all([document.fonts.load('700 22px "Sofia Sans Condensed"'), document.fonts.load('400 13px "Sofia Sans"'), document.fonts.load('700 13px "Sofia Sans"')]); } catch { /* system fonts are fine */ }
+}
+function wrapLines(x, txt, font, maxW) {
+  x.font = font;
+  const out = []; let line = '';
+  for (const wd of String(txt).split(/\s+/)) { const t = line ? line + ' ' + wd : wd; if (line && x.measureText(t).width > maxW) { out.push(line); line = wd; } else line = t; }
+  if (line) out.push(line);
+  return out;
+}
+function fit(x, text, w) {
+  let s = String(text);
+  if (x.measureText(s).width <= w) return s;
+  while (s.length > 1 && x.measureText(s + '…').width > w) s = s.slice(0, -1);
+  return s + '…';
+}
+/** diagonal „ПРИМЕРНИ ДАННИ“ tiles over the whole image */
+function drawWatermark(x, W, H, fam) {
+  x.save();
+  x.globalAlpha = 0.16; x.fillStyle = cssv('--st-mock') || '#8A3F6B'; x.textAlign = 'center'; x.textBaseline = 'middle';
+  x.font = `700 34px ${fam}`;
+  x.translate(W / 2, H / 2); x.rotate(-Math.PI / 7);
+  const stepX = 330, stepY = 120, span = Math.hypot(W, H);
+  for (let r = 0, y = -span; y < span; y += stepY, r++) for (let px = -span + (r % 2 ? stepX / 2 : 0); px < span; px += stepX) x.fillText('ПРИМЕРНИ ДАННИ', px, y);
+  x.restore();
+}
+/** a simple table drawn on canvas (for blocks without a chart) */
+function drawTable(x, t, W, y, pad, fam) {
+  const maxRows = 16, rows = t.rows.slice(0, maxRows), cols = t.columns.length;
+  const inner = W - pad * 2;
+  x.font = `700 13px ${fam}`;
+  const widths = t.columns.map((c, i) => Math.max(x.measureText(c).width, ...rows.map(r => { x.font = `400 13px ${fam}`; return x.measureText(csvVal(r[i])).width; })) + 16);
+  const sum = widths.reduce((a, b) => a + b, 0), k = Math.min(1, inner / sum), ws = widths.map(w => w * k);
+  const slack = Math.max(0, inner - ws.reduce((a, b) => a + b, 0));
+  ws[0] += slack;
+  const draw = (cells, bold, yy) => {
+    let px = pad;
+    cells.forEach((c, i) => { x.font = `${bold ? 700 : 400} 13px ${fam}`; x.textAlign = i === 0 ? 'left' : 'right'; x.fillText(fit(x, c, ws[i] - 12), i === 0 ? px : px + ws[i] - 8, yy); px += ws[i]; });
+  };
+  x.textBaseline = 'top'; x.fillStyle = cssv('--ink');
+  draw(t.columns, true, y);
+  y += 22; x.strokeStyle = cssv('--line-strong'); x.beginPath(); x.moveTo(pad, y - 3); x.lineTo(W - pad, y - 3); x.stroke();
+  rows.forEach(r => { x.fillStyle = cssv('--ink'); draw(r.map(csvVal), false, y); y += 22; x.strokeStyle = cssv('--line'); x.beginPath(); x.moveTo(pad, y - 3); x.lineTo(W - pad, y - 3); x.stroke(); });
+  if (t.rows.length > maxRows) { x.fillStyle = cssv('--muted'); x.textAlign = 'left'; x.font = `400 12px ${fam}`; x.fillText(`… и още ${t.rows.length - maxRows} реда в CSV файла`, pad, y); y += 20; }
+  return y;
+}
+/**
+ * Composes the picture: title, subtitle, chart (or table), source footer.
+ * watermark defaults to „is this block mock?“; the checker calls renderPng(spec,{watermark:false}) to prove the pixels differ.
+ */
+export async function renderPng(spec, { watermark = isMock(spec), pixelRatio = 2 } = {}) {
+  await fonts();
+  const { chartImage } = await import('./charts.js');
+  const el = chartEl(spec);
+  const inst = el && window.echarts?.getInstanceByDom(el);
+  const t = tableOf(spec);
+  let img = null, w = 0, h = 0;
+  if (inst) { const r = chartImage(inst, el, { pixelRatio }); img = await loadImg(r.url); w = r.w; h = r.h; }
+  else if (!t) throw new Error('няма какво да се нарисува');
+  const fB = '"Sofia Sans",system-ui,sans-serif', fD = '"Sofia Sans Condensed","Sofia Sans",system-ui,sans-serif';
+  const pad = 20, W = Math.max(w || 560, 320) + pad * 2, maxW = W - pad * 2;
+  const probe = document.createElement('canvas').getContext('2d');
+  const tl = wrapLines(probe, spec.title || '', `700 22px ${fD}`, maxW);
+  const sl = spec.sub ? wrapLines(probe, spec.sub, `400 13px ${fB}`, maxW) : [];
+  const src = sourceLine(spec);
+  const fl = [...(isMock(spec) ? wrapLines(probe, 'Примерни данни: измислени стойности, не са истински.', `700 12px ${fB}`, maxW) : []), ...(src ? wrapLines(probe, src, `400 12px ${fB}`, maxW) : []), ...wrapLines(probe, 'Бюджет на светло · прототип', `400 12px ${fB}`, maxW)];
+  const bodyH = img ? h : 22 * (Math.min(t.rows.length, 16) + 1) + (t.rows.length > 16 ? 20 : 0);
+  const H = pad + tl.length * 26 + (sl.length ? 4 + sl.length * 18 : 0) + 12 + bodyH + 14 + fl.length * 17 + pad;
+  const c = document.createElement('canvas');
+  c.width = Math.round(W * pixelRatio); c.height = Math.round(H * pixelRatio);
+  const x = c.getContext('2d');
+  x.scale(pixelRatio, pixelRatio); x.textBaseline = 'top';
+  x.fillStyle = cssv('--surface'); x.fillRect(0, 0, W, H);
+  let y = pad;
+  x.fillStyle = cssv('--ink'); x.font = `700 22px ${fD}`; tl.forEach(l => { x.fillText(l, pad, y); y += 26; });
+  if (sl.length) { y += 4; x.fillStyle = cssv('--muted'); x.font = `400 13px ${fB}`; sl.forEach(l => { x.fillText(l, pad, y); y += 18; }); }
+  y += 12;
+  if (img) { x.drawImage(img, pad, y, w, h); y += h; } else y = drawTable(x, t, W, y, pad, fB);
+  y += 14;
+  fl.forEach(l => { const mockLine = l.startsWith('Примерни данни'); x.fillStyle = mockLine ? cssv('--st-mock') : cssv('--muted'); x.font = `${mockLine ? 700 : 400} 12px ${fB}`; x.textAlign = 'left'; x.fillText(l, pad, y); y += 17; });
+  if (watermark) drawWatermark(x, W, H, fD);
+  return c;
+}
+/** test helper: how many pixels differ between the PNG with and without the watermark */
+export async function pngDiff(spec) {
+  const [a, b] = [await renderPng(spec, { watermark: true, pixelRatio: 1 }), await renderPng(spec, { watermark: false, pixelRatio: 1 })];
+  if (a.width !== b.width || a.height !== b.height) return { w: a.width, h: a.height, diff: -1 };
+  const da = a.getContext('2d').getImageData(0, 0, a.width, a.height).data, db = b.getContext('2d').getImageData(0, 0, b.width, b.height).data;
+  let diff = 0;
+  for (let i = 0; i < da.length; i += 4) if (da[i] !== db[i] || da[i + 1] !== db[i + 1] || da[i + 2] !== db[i + 2]) diff++;
+  return { w: a.width, h: a.height, diff, mock: isMock(spec) };
+}
+
+/* ---------------------------------------------------------------- the menu */
+function menuItems(spec) {
+  const items = [
+    { act: 'copy-text', ic: 'copy', label: 'Копирай текст', desc: 'Числото, източникът и връзката.' },
+    { act: 'copy-link', ic: 'link', label: 'Копирай връзка', desc: 'Връзка, която отваря точно този блок.' }
+  ];
+  if (canPng(spec)) items.push({ act: 'png', ic: 'image', label: 'Изтегли PNG', desc: isMock(spec) ? 'Картинка с воден знак „примерни данни“.' : 'Картинка със заглавие и източник.' });
+  if (tableOf(spec)) items.push({ act: 'csv', ic: 'table', label: 'Изтегли CSV', desc: 'За Excel; с колони „статус“ и „източник“.' });
+  if (spec.embed) items.push({ act: 'embed', ic: 'code', label: 'Код за вграждане', desc: 'HTML за друг уебсайт.' });
+  if (typeof navigator.share === 'function') items.push({ act: 'share', ic: 'share', label: 'Сподели…', desc: 'През приложение на устройството.' });
+  return items;
+}
+async function run(act, spec, anchor) {
+  try {
+    if (act === 'copy-text') await copyOrShow(textFor(spec), 'Копирано: текст с числото и източника.', 'Копирай ръчно', anchor);
+    else if (act === 'copy-link') await copyOrShow(linkFor(spec), 'Връзката е копирана.', 'Копирай ръчно', anchor);
+    else if (act === 'csv') { download(new Blob([csvFor(spec)], { type: 'text/csv;charset=utf-8' }), fileName(spec, 'csv')); toast('CSV файлът се изтегля.'); }
+    else if (act === 'png') {
+      toast('Подготвям картинката…');
+      const c = await renderPng(spec);
+      await new Promise((ok, no) => c.toBlob(b => { if (!b) return no(new Error('toBlob')); download(b, fileName(spec, 'png')); ok(); }, 'image/png'));
+      toast(isMock(spec) ? 'PNG е изтеглен, с воден знак „примерни данни“.' : 'PNG е изтеглен.');
+    } else if (act === 'embed') {
+      const code = embedFor(spec);
+      sheet.open({
+        title: 'Код за вграждане', returnFocus: anchor,
+        body: html`<p class="small muted">Постави този код в HTML на друга страница. Графиката се показва с източника си${isMock(spec) ? ' и с белег „примерни данни“' : ''}.</p><textarea class="sheet-text" readonly rows="5" data-embed-code>${code}</textarea><p class="state-act"><button type="button" class="btn btn-primary" data-copy-embed>Копирай кода</button> <a class="btn" href="${embedHash(spec)}">Виж вградения изглед</a></p>`
+      });
+      const dlg = document.querySelector('dialog.sheet');
+      dlg?.querySelector('[data-copy-embed]')?.addEventListener('click', () => copyOrShow(code, 'Кодът е копиран.', 'Копирай ръчно'));
+      dlg?.querySelector('textarea')?.select();
+    } else if (act === 'share') {
+      await navigator.share({ title: spec.title, text: val(spec.text) || spec.title, url: linkFor(spec) });
+    }
+  } catch (e) {
+    if (e?.name === 'AbortError') return;
+    console.error(e);
+    toast('Не успяхме. Опитай пак или копирай текста.', { kind: 'bad' });
+  }
+}
+export function openMenu(anchor, id) {
+  const spec = get(id);
+  if (!spec) { toast('Този блок не може да се споделя.'); return null; }
+  const body = html`<ul class="share-menu">${menuItems(spec).map(i => html`<li><button type="button" class="share-item" data-act="${i.act}">${icon(i.ic, { size: 20 })}<span class="share-txt"><span class="share-label">${i.label}</span><span class="share-desc">${i.desc}</span></span></button></li>`)}</ul>${isMock(spec) ? html`<p class="small muted share-note">Този блок е с примерни данни: във всичко, което споделяш, пише „примерни данни“.</p>` : ''}`;
+  const pop = popover.open(anchor, { title: 'Сподели', body, label: 'Споделяне', align: 'end' });
+  pop.el.addEventListener('click', e => {
+    const b = e.target.closest('[data-act]');
+    if (!b) return;
+    const act = b.dataset.act;
+    pop.close();
+    run(act, spec, anchor);
+  });
+  return pop;
+}

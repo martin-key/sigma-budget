@@ -1,0 +1,111 @@
+/* Figures, legends, chart canvases, treemap list/map switch, sankey fallback. Colours come from tokens (charts.js resolves them for ECharts). */
+
+.fig{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--sp-2);min-width:0}   /* one explicit track: an opened chart-twin table wider than the figure scrolls inside .table-wrap instead of widening the page */
+.fig-cap{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px var(--sp-3)}
+.fig-title{font:700 var(--fs-0)/1.3 var(--font-body)}
+.fig-sub{color:var(--muted);font-size:var(--fs-s)}
+.fig-mock{margin-left:auto}
+
+.fig-legend{display:flex;flex-wrap:wrap;gap:var(--sp-1) var(--sp-2);list-style:none;margin:0;padding:0}
+.fig-legend .lg{display:inline-flex;align-items:center;gap:var(--sp-2);min-height:32px;padding:2px 12px 2px 8px;border:1px solid var(--line);border-radius:var(--r-full);background:var(--surface);color:var(--ink);font-size:var(--fs-s)}
+.fig-legend .lg:hover{background:var(--sunk)}
+.fig-legend .sw{flex:none;width:12px;height:12px;border-radius:3px;box-shadow:inset 0 0 0 1px rgb(0 0 0/.12)}
+.fig-legend .lg[aria-pressed="false"]{color:var(--muted);background:var(--sunk)}
+.fig-legend .lg[aria-pressed="false"] .sw{opacity:.3}
+.fig-legend .lg[aria-pressed="false"] .lg-name{text-decoration:line-through}
+@media (pointer:coarse){.fig-legend .lg{min-height:44px}}
+
+.chart{width:100%;min-width:0;max-width:100%;overflow:hidden;border-radius:var(--r-1)}
+.chart[data-ready="0"]{background:linear-gradient(90deg,var(--sunk),var(--bg),var(--sunk));background-size:200% 100%;animation:chart-load 1.4s linear infinite}
+@keyframes chart-load{to{background-position:-200% 0}}
+.chart svg{display:block}
+.fig-fail{padding:var(--sp-4);border:1px dashed var(--line-strong);border-radius:var(--r-1);color:var(--muted)}
+.fig-table{margin-top:var(--sp-1)}
+.fig-table .table-wrap{border-radius:var(--r-1)}
+
+/* treemap: map or list; the list is the accessible alternative and the default on phones */
+.tmap{display:grid;gap:var(--sp-3);min-width:0}
+.tmap-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--sp-2)}
+.tmap-bar .seg{margin-left:auto}
+.tmap[data-view="list"] .tmap-map{display:none}
+.tmap[data-view="map"] .tmap-list{display:none}
+.tmap-list,.tmap-map{min-width:0}
+.tmap-note{margin:0;color:var(--muted);font-size:var(--fs-s)}
+
+/* sankey (ui/sankey.js): the diagram is for wide screens; phones get the same flows as a grouped list (the table twin stays a normal disclosure) */
+.sankey{display:grid;gap:var(--sp-3);min-width:0}
+.sankey-fallback{display:none;min-width:0}
+.sankey-flat .sankey-fallback{display:block}
+@media (max-width:599px){
+  .sankey{display:flex;flex-direction:column}
+  .sankey>.fig{display:contents}                 /* caption, then the list, then the table twin */
+  .sankey .chart,.sankey .fig-legend{display:none}
+  .sankey .fig-cap{order:0}
+  .sankey-fallback{display:block;order:1}
+  .sankey .fig-table{order:2}
+}
+.sk-list{gap:var(--sp-5)}
+.sk-to{gap:var(--sp-2)}
+.sk-from{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-3);margin:0 0 var(--sp-2);padding-bottom:var(--sp-1);border-bottom:1px solid var(--line);font-weight:700}
+.sk-name{min-width:0;overflow-wrap:anywhere}
+.sk-sum{font-variant-numeric:tabular-nums;white-space:nowrap}
+.sk-pending{font-weight:400;color:var(--st-pending)}
+.sk-arrow{margin-right:6px;color:var(--muted)}
+
+@media print{
+  .fig-legend .lg{border:0}
+  .chart{break-inside:avoid}
+  .fig-table{display:none}
+}
+@media (forced-colors:active){
+  .fig-legend .sw{forced-color-adjust:none}
+}
+
+/* ── added by G4 ── choropleth map (js/ui/map.js): regions are links, the ramp is the data colour mixed into the surface, dotted = no data, hatched = mock */
+.map{--map-0:var(--data-soft);--map-1:var(--data-3);--map-2:var(--data-2);--map-3:var(--data);--map-4:var(--data-hover)}
+@supports (color:color-mix(in srgb,red,blue)){
+  .map{--map-0:color-mix(in srgb,var(--data) 14%,var(--surface));--map-1:color-mix(in srgb,var(--data) 34%,var(--surface));--map-2:color-mix(in srgb,var(--data) 56%,var(--surface));--map-3:color-mix(in srgb,var(--data) 78%,var(--surface));--map-4:var(--data)}
+}
+.map-b0{fill:var(--map-0);background-color:var(--map-0)}
+.map-b1{fill:var(--map-1);background-color:var(--map-1)}
+.map-b2{fill:var(--map-2);background-color:var(--map-2)}
+.map-b3{fill:var(--map-3);background-color:var(--map-3)}
+.map-b4{fill:var(--map-4);background-color:var(--map-4)}
+.map-stage{min-width:0}
+.map-svg{display:block;width:100%;height:auto;max-height:min(72vh,640px);fill-rule:evenodd;forced-color-adjust:none}
+.map-regs path,.map-ctxs path{stroke:var(--surface);stroke-width:.7px;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+.map-ctx{fill:var(--sunk)}
+.map-nd-bg{fill:var(--sunk)}
+.map-nd-dot{fill:var(--faint)}
+.map-hatch-line{stroke:var(--st-mock);stroke-opacity:.6}
+.map-svg .map-hatch{stroke:none;pointer-events:none}
+.map-r{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.map-live .map-r:focus{outline:none}
+.map-off{opacity:.2;pointer-events:none;cursor:default}
+.map-ovl path{fill:none;pointer-events:none;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+/* two-tone outline (surface halo + ink ring) keeps 3:1 against every class of the ramp; the selected region is dashed so it never reads as the hovered one */
+.map-ovl path.map-ovl-halo{stroke:var(--surface);stroke-width:6px}
+.map-ovl path.map-ovl-hl.map-ovl-ring{stroke:var(--ink);stroke-width:2.5px}
+.map-ovl path.map-ovl-sel.map-ovl-ring{stroke:var(--ink);stroke-width:2.5px;stroke-dasharray:7 4}
+.map-info{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px var(--sp-3);min-height:2.75rem;padding:var(--sp-2) var(--sp-3);border:1px solid var(--line);border-radius:var(--r-1);background:var(--sunk);color:var(--ink);font-size:var(--fs-s)}
+.map-info-name{font-weight:700;font-size:var(--fs-0)}
+.map-info-sub{color:var(--muted)}
+.map-info-open{margin-left:auto;font-weight:600}
+@media (pointer:coarse){.map-info-open{display:inline-flex;align-items:center;min-height:44px}}
+.map-legend{display:grid;gap:var(--sp-1)}
+.map-legend-title{margin:0;color:var(--muted);font-size:var(--fs-s)}
+.map-legend-note{margin:0;color:var(--muted);font-size:var(--fs-s)}
+.map-legend-list{gap:var(--sp-1) var(--sp-4)}
+.map-lg{display:inline-flex;flex-wrap:wrap;align-items:center;gap:2px var(--sp-2);color:var(--ink);font-size:var(--fs-s)}
+.fig-legend .map-sw{width:20px;height:12px;border-radius:3px}
+.map-n{color:var(--muted)}
+.map-nd-sw{background-color:var(--sunk);background-image:radial-gradient(circle,var(--faint) 1px,transparent 1.5px);background-size:5px 5px}
+.fig-legend .map-sw[data-mock="true"]{background-color:var(--map-2);background-image:repeating-linear-gradient(45deg,var(--st-mock) 0 1.5px,transparent 1.5px 6px)}
+@media (forced-colors:active){
+  .map-sw{forced-color-adjust:none}
+  .map-regs path,.map-ctxs path{stroke:Canvas}
+  .map-ovl path.map-ovl-halo{stroke:Canvas}
+  .map-ovl path.map-ovl-hl.map-ovl-ring{stroke:Highlight}
+  .map-ovl path.map-ovl-sel.map-ovl-ring{stroke:CanvasText}
+  .map-info{border-color:CanvasText}
+}
