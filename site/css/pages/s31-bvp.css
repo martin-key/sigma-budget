@@ -1,0 +1,17 @@
+/* S31 · БВП: колко расте икономиката? Tokens only, no dark-mode rules (the tokens carry both themes), every selector scoped to the screen. */
+
+/* the year switch of the screen (the shell shows no period line here) */
+.page[data-route="S31"] .s31-controls { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-3); }
+.page[data-route="S31"] .s31-controls-label { font-weight: 700; font-size: var(--fs-s); }
+.page[data-route="S31"] .s31-howto { max-width: 68ch; flex-basis: 100%; margin: 0; }
+
+/* six tiles of the year lay out as 3 + 3 (or 2 x 3), never 4 + 2 */
+.page[data-route="S31"] #s31-kpis .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); }
+
+/* plain sentences under the charts and in the blocks (the spacing between them comes from .stack) */
+.page[data-route="S31"] .s31-note,
+.page[data-route="S31"] .s31-links { max-width: 68ch; }
+
+@media (min-width: 900px) {
+  .page[data-route="S31"] .s31-howto { flex-basis: auto; flex: 1 1 24rem; }
+}

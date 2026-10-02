@@ -1,0 +1,75 @@
+/* S32 · Моят бюджет. Tokens only, no dark-mode rules (the tokens carry both themes), every selector scoped to the screen.
+   Do not put `margin: 0` on the paragraphs and rows inside a block: the spacing between them comes from .block-body and .stack. */
+
+/* the restore offer: drawn by the script only when something usable is saved in this browser */
+.page[data-route="S32"] .s32-offer-btns { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: var(--sp-2); }
+
+/* layout. Below 1200px one column in the reading order (plan, controls, result, chart, changes), plus a slim copy of the result that sticks
+   under the top bar while the controls are on screen and the full result is not. From 1200px the controls are on the left and the result sticks on the right. */
+.page[data-route="S32"] .s32-layout { display: block; }
+.page[data-route="S32"] .s32-layout > .s32-side,
+.page[data-route="S32"] .s32-layout > .s32-after { margin-top: var(--sp-5); }
+.page[data-route="S32"] .s32-main,
+.page[data-route="S32"] .s32-after { display: grid; gap: var(--sp-5); min-width: 0; }
+.page[data-route="S32"] .s32-side { min-width: 0; }
+/* a focused slider must not hide under the top bar and the slim result */
+.page[data-route="S32"] .s32-main input { scroll-margin-top: calc(var(--topbar-h, 3.5rem) + 6rem); }
+
+/* the slim copy: a sticky box of no height that carries an absolutely placed bar, so showing it never moves the page */
+.page[data-route="S32"] .s32-mini { position: sticky; top: calc(var(--topbar-h, 3.5rem) + var(--sp-1)); z-index: 30; height: 0; }
+.page[data-route="S32"] .s32-mini-in { position: absolute; inset: 0 0 auto 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--sp-3); padding: var(--sp-2) var(--sp-3); border: 1px solid var(--line-strong); border-radius: var(--r-2); background: var(--surface); box-shadow: var(--shadow-2); opacity: 0; visibility: hidden; transition: opacity var(--t-fast); }
+.page[data-route="S32"] .s32-mini.is-on .s32-mini-in { opacity: 1; visibility: visible; }
+.page[data-route="S32"] .s32-mini-k { font-weight: 700; }
+.page[data-route="S32"] .s32-mini-v { font-family: var(--font-head); font-size: var(--fs-1); font-weight: 700; font-variant-numeric: tabular-nums; }
+.page[data-route="S32"] .s32-mini-s { font-size: var(--fs-s); color: var(--muted); }
+
+/* sliders: one column of controls, two on a tablet */
+.page[data-route="S32"] .s32-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); gap: var(--sp-5) var(--sp-5); }
+.page[data-route="S32"] .s32-ctl { display: grid; gap: var(--sp-1); align-content: start; min-width: 0; }
+.page[data-route="S32"] .s32-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0 var(--sp-3); }
+.page[data-route="S32"] .s32-label { font-weight: 700; }
+.page[data-route="S32"] .s32-val { font-size: var(--fs-s); font-variant-numeric: tabular-nums; color: var(--muted); }
+.page[data-route="S32"] .s32-ctl[data-changed="true"] .s32-val { color: var(--ink); font-weight: 700; }
+.page[data-route="S32"] .s32-base { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 var(--sp-3); font-size: var(--fs-s); font-variant-numeric: tabular-nums; color: var(--muted); }
+.page[data-route="S32"] .s32-range { -webkit-appearance: none; appearance: none; width: 100%; min-height: 44px; margin: 0; background: transparent; cursor: pointer; }
+.page[data-route="S32"] .s32-range::-webkit-slider-runnable-track { box-sizing: border-box; height: 10px; border: 1px solid var(--line-strong); border-radius: var(--r-full); background: linear-gradient(var(--line-strong), var(--line-strong)) center / 2px 100% no-repeat, var(--sunk); }
+.page[data-route="S32"] .s32-range::-moz-range-track { box-sizing: border-box; height: 10px; border: 1px solid var(--line-strong); border-radius: var(--r-full); background: linear-gradient(var(--line-strong), var(--line-strong)) center / 2px 100% no-repeat, var(--sunk); }
+.page[data-route="S32"] .s32-range::-webkit-slider-thumb { -webkit-appearance: none; box-sizing: border-box; width: 26px; height: 26px; margin-top: -9px; border: 3px solid var(--surface); border-radius: 50%; background: var(--data); box-shadow: 0 0 0 1px var(--data); }
+.page[data-route="S32"] .s32-range::-moz-range-thumb { box-sizing: border-box; width: 26px; height: 26px; border: 3px solid var(--surface); border-radius: 50%; background: var(--data); box-shadow: 0 0 0 1px var(--data); }
+.page[data-route="S32"] .s32-range:focus-visible { outline: none; }
+.page[data-route="S32"] .s32-range:focus-visible::-webkit-slider-thumb { outline: 3px solid var(--focus); outline-offset: 2px; }
+.page[data-route="S32"] .s32-range:focus-visible::-moz-range-thumb { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+/* fixed lines, plain notes and the list of limits */
+.page[data-route="S32"] .s32-fixed,
+.page[data-route="S32"] .s32-says,
+.page[data-route="S32"] .s32-note { max-width: 68ch; }
+.page[data-route="S32"] .s32-limits { display: grid; gap: var(--sp-1); padding-left: var(--sp-4); list-style: disc; max-width: 68ch; }
+
+/* the result */
+.page[data-route="S32"] .s32-rows { display: grid; gap: var(--sp-3); }
+.page[data-route="S32"] .s32-row { display: grid; gap: 2px; padding-bottom: var(--sp-3); border-bottom: 1px solid var(--line); }
+.page[data-route="S32"] .s32-row:last-child { padding-bottom: 0; border-bottom: 0; }
+.page[data-route="S32"] .s32-row dt { font-size: var(--fs-s); font-weight: 700; color: var(--muted); }
+.page[data-route="S32"] .s32-row dd { display: grid; gap: 2px; margin: 0; }
+.page[data-route="S32"] .s32-big { font-family: var(--font-head); font-size: var(--fs-3); font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.page[data-route="S32"] .s32-sub { display: flex; flex-wrap: wrap; gap: 0 var(--sp-3); font-size: var(--fs-s); color: var(--muted); }
+.page[data-route="S32"] .s32-actions { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.page[data-route="S32"] .s32-msg { min-height: 1.4em; font-size: var(--fs-s); }
+
+@media (min-width: 1200px) {
+  .page[data-route="S32"] .s32-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(19rem, 22rem); gap: var(--sp-5); align-items: stretch; }
+  .page[data-route="S32"] .s32-layout > .s32-side,
+  .page[data-route="S32"] .s32-layout > .s32-after { margin-top: 0; }
+  .page[data-route="S32"] .s32-main { grid-column: 1; grid-row: 1; }
+  .page[data-route="S32"] .s32-after { grid-column: 1; grid-row: 2; }
+  .page[data-route="S32"] .s32-side { grid-column: 2; grid-row: 1 / span 2; }
+  .page[data-route="S32"] .s32-mini { display: none; }
+  .page[data-route="S32"] .s32-side > .block { position: sticky; top: calc(var(--topbar-h, 3.5rem) + var(--sp-3)); max-height: calc(100vh - var(--topbar-h, 3.5rem) - var(--sp-5)); overflow-y: auto; }
+}
+
+@media (forced-colors: active) {
+  .page[data-route="S32"] .s32-range::-webkit-slider-runnable-track,
+  .page[data-route="S32"] .s32-range::-moz-range-track { border-color: ButtonText; }
+  .page[data-route="S32"] .s32-mini-in { border-color: ButtonText; }
+}
