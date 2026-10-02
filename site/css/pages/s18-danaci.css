@@ -1,0 +1,77 @@
+/* S18 Колко плащам аз? (G3). Tokens only, mobile first, no dark-mode rules (tokens carry the theme). */
+
+.page[data-route="S18"] .s18-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-5); align-items: start; }
+.page[data-route="S18"] .s18-in,
+.page[data-route="S18"] .s18-out { min-width: 0; }
+.page[data-route="S18"] .s18-out > * + * { margin-top: var(--sp-5); }
+@media (min-width: 1200px) {
+  .page[data-route="S18"] .s18-layout { grid-template-columns: minmax(17rem, 20rem) minmax(0, 1fr); }
+}
+
+/* groups and the segmented controls: the shared .seg is a single pill row; here the options may wrap */
+.page[data-route="S18"] .s18-group,
+.page[data-route="S18"] .s18-split { display: grid; gap: var(--sp-1); }
+.page[data-route="S18"] .s18-seg { display: flex; flex-wrap: wrap; justify-content: stretch; overflow: visible; border-radius: var(--r-3); }
+.page[data-route="S18"] .s18-seg .seg-opt { flex: 1 1 auto; }
+.page[data-route="S18"] .s18-seg .seg-opt label { width: 100%; justify-content: center; min-height: 44px; white-space: normal; text-align: center; border-radius: var(--r-2); }
+
+/* money field with a euro sign inside */
+.page[data-route="S18"] .s18-money { position: relative; display: block; }
+.page[data-route="S18"] .s18-money .input { padding-inline-end: 2.5rem; font-variant-numeric: tabular-nums; }
+.page[data-route="S18"] .s18-cur { position: absolute; inset-block: 0; inset-inline-end: var(--sp-3); display: flex; align-items: center; color: var(--muted); font-weight: 700; pointer-events: none; }
+
+/* slider (convenience; the text field is the source of truth) */
+.page[data-route="S18"] .s18-slider-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 var(--sp-3); align-items: center; }
+.page[data-route="S18"] .s18-slider-label { grid-column: 1 / -1; font-weight: 700; }
+.page[data-route="S18"] .s18-slider-val { min-width: 5.5rem; text-align: end; color: var(--muted); font-variant-numeric: tabular-nums; }
+.page[data-route="S18"] .s18-slider { --s18-fill: 0%; -webkit-appearance: none; appearance: none; width: 100%; min-height: 44px; margin: 0; background: transparent; cursor: pointer; }
+.page[data-route="S18"] .s18-slider::-webkit-slider-runnable-track { box-sizing: border-box; height: 10px; border: 1px solid var(--line-strong); border-radius: var(--r-full); background: linear-gradient(to right, var(--data) var(--s18-fill), var(--sunk) var(--s18-fill)); }
+.page[data-route="S18"] .s18-slider::-moz-range-track { box-sizing: border-box; height: 10px; border: 1px solid var(--line-strong); border-radius: var(--r-full); background: var(--sunk); }
+.page[data-route="S18"] .s18-slider::-moz-range-progress { height: 8px; border-radius: var(--r-full); background: var(--data); }
+.page[data-route="S18"] .s18-slider::-webkit-slider-thumb { -webkit-appearance: none; box-sizing: border-box; width: 26px; height: 26px; margin-top: -9px; border: 3px solid var(--surface); border-radius: 50%; background: var(--data); box-shadow: 0 0 0 1px var(--data); }
+.page[data-route="S18"] .s18-slider::-moz-range-thumb { box-sizing: border-box; width: 26px; height: 26px; border: 3px solid var(--surface); border-radius: 50%; background: var(--data); box-shadow: 0 0 0 1px var(--data); }
+.page[data-route="S18"] .s18-slider:focus-visible { outline: none; }
+.page[data-route="S18"] .s18-slider:focus-visible::-webkit-slider-thumb { outline: 3px solid var(--focus); outline-offset: 2px; }
+.page[data-route="S18"] .s18-slider:focus-visible::-moz-range-thumb { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+.page[data-route="S18"] .s18-ind-fields { display: grid; gap: var(--sp-4); margin-top: var(--sp-4); }
+
+/* result */
+.page[data-route="S18"] #s18-view > * + * { margin-top: var(--sp-4); }
+.page[data-route="S18"] #s18-view > .s18-h3 { margin-top: var(--sp-5); }
+.page[data-route="S18"] #s18-receipt-view > * + * { margin-top: var(--sp-4); }
+.page[data-route="S18"] #s18-receipt-view > .s18-h3 { margin-top: var(--sp-5); }
+.page[data-route="S18"] .s18-basis { color: var(--muted); font-size: var(--fs-s); }
+.page[data-route="S18"] .s18-out .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); }
+.page[data-route="S18"] .s18-muted { color: var(--muted); }
+
+.page[data-route="S18"] .s18-bar { display: flex; height: 22px; overflow: hidden; border: 1px solid var(--line-strong); border-radius: var(--r-full); background: var(--sunk); }
+.page[data-route="S18"] .s18-bar-seg { display: block; height: 100%; min-width: 0; }
+.page[data-route="S18"] .s18-bar-seg + .s18-bar-seg { border-inline-start: 2px solid var(--surface); }
+.page[data-route="S18"] .s18-legend { display: grid; gap: var(--sp-2); margin: 0; padding: 0; list-style: none; }
+.page[data-route="S18"] .s18-legend li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--sp-2); align-items: baseline; }
+.page[data-route="S18"] .s18-sw { display: inline-block; width: 14px; height: 14px; align-self: center; border-radius: 3px; }
+.page[data-route="S18"] .s18-lg-val { text-align: end; font-variant-numeric: tabular-nums; }
+
+@media (forced-colors: active) {
+  .page[data-route="S18"] .s18-bar-seg,
+  .page[data-route="S18"] .s18-sw { forced-color-adjust: none; }
+  .page[data-route="S18"] .s18-slider::-webkit-slider-runnable-track,
+  .page[data-route="S18"] .s18-slider::-moz-range-track { border-color: ButtonText; }
+}
+
+/* the inputs column is narrow: let the disclosure's badge drop below its title instead of squeezing the title */
+.page[data-route="S18"] .s18-in .disc > summary { flex-wrap: wrap; row-gap: var(--sp-1); }
+
+/* one-line result next to the inputs: only where the full result sits far below (single column) */
+.page[data-route="S18"] .s18-quick { margin: 0; padding: var(--sp-2) var(--sp-3); border-radius: var(--r-2); background: var(--sunk); }
+.page[data-route="S18"] .s18-quick:empty { display: none; }
+@media (min-width: 1200px) {
+  .page[data-route="S18"] .s18-quick { display: none; }
+}
+
+/* narrow screens: the share column of the receipt tables is the least important one (it stays in the CSV export) */
+@media (max-width: 479px) {
+  .page[data-route="S18"] #s18-receipt-table :is(th, td):nth-child(4),
+  .page[data-route="S18"] #s18-tax-table :is(th, td):nth-child(4) { display: none; }
+}

@@ -1,0 +1,108 @@
+/* S04 · Бюджетът за 5 минути. Tokens only, no dark-mode rules (the tokens carry both themes), every selector scoped to the screen.
+   Seven scenes, each a block: a steps strip, the text, then the picture. The pictures are plain bars, a waffle and three cards;
+   hatch is not used here (it means „примерни данни“ everywhere else): a dashed outline means „not a fact yet“ — a deficit, a ceiling, an indicative sum.
+   Motion is done by the module (Web Animations) and only when the visitor has not asked for less of it, so nothing here moves. */
+
+.page[data-route="S04"] .s04 { display: grid; gap: var(--sp-5); min-width: 0; }
+
+/* the opening */
+.page[data-route="S04"] .s04-top { display: grid; gap: var(--sp-2); }
+.page[data-route="S04"] .s04-lead { max-width: 62ch; }
+.page[data-route="S04"] .s04-basis { max-width: 68ch; font-size: var(--fs-s); color: var(--muted); }
+
+/* the seven scenes as a row of links: jumps to the block, no reload */
+.page[data-route="S04"] .s04-nav ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.page[data-route="S04"] .s04-nav a { display: inline-flex; align-items: center; gap: var(--sp-2); min-height: 36px; padding: 2px var(--sp-3) 2px var(--sp-1); border: 1px solid var(--line); border-radius: var(--r-full); background: var(--surface); color: var(--ink); font-size: var(--fs-s); text-decoration: none; transition: border-color var(--t-fast), background var(--t-fast); }
+.page[data-route="S04"] .s04-nav a:hover { border-color: var(--data); background: var(--data-soft); color: var(--ink); text-decoration: none; }
+.page[data-route="S04"] .s04-nav-n { display: grid; place-items: center; flex: none; width: 1.75rem; height: 1.75rem; border-radius: var(--r-full); background: var(--data-soft); color: var(--data); font-weight: 700; font-variant-numeric: tabular-nums; }
+.page[data-route="S04"] .s04-nav a:hover .s04-nav-n { background: var(--surface); }
+@media (pointer: coarse) {
+  .page[data-route="S04"] .s04-nav a { min-height: 44px; }
+}
+
+/* a scene */
+.page[data-route="S04"] .s04-steps { max-width: 18rem; }
+.page[data-route="S04"] .s04-scene { display: grid; gap: var(--sp-4); min-width: 0; }
+.page[data-route="S04"] .s04-text { display: grid; gap: var(--sp-3); align-content: start; min-width: 0; }
+.page[data-route="S04"] .s04-text p { max-width: 62ch; line-height: 1.55; }
+.page[data-route="S04"] .s04-text strong { font-variant-numeric: tabular-nums; }
+.page[data-route="S04"] .s04-vis { min-width: 0; }
+.page[data-route="S04"] .s04-go { font-size: var(--fs-s); }
+.page[data-route="S04"] .s04-go a { font-weight: 600; }
+
+/* the picture and its words */
+.page[data-route="S04"] .s04-fig { display: grid; gap: var(--sp-3); min-width: 0; max-width: 46rem; margin: 0; }
+.page[data-route="S04"] .s04-cap { max-width: 62ch; font-size: var(--fs-s); color: var(--muted); }
+.page[data-route="S04"] .s04-bars { display: grid; gap: var(--sp-4); }
+.page[data-route="S04"] .s04-group { display: grid; gap: var(--sp-3); }
+.page[data-route="S04"] .s04-group + .s04-group { padding-top: var(--sp-3); border-top: 1px solid var(--line); }
+.page[data-route="S04"] .s04-group-t { margin: 0; font: 700 var(--fs-s)/1.3 var(--font-body); color: var(--muted); }
+
+/* a bar: the label and the value are text, the track is only the picture of them */
+.page[data-route="S04"] .s04-bar { --bar: var(--data); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px var(--sp-3); align-items: baseline; }
+.page[data-route="S04"] .s04-bar[data-kind="rev"] { --bar: var(--rev); }
+.page[data-route="S04"] .s04-bar[data-kind="exp"] { --bar: var(--exp); }
+.page[data-route="S04"] .s04-bar-l { min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+.page[data-route="S04"] .s04-bar-l small { display: block; font-size: var(--fs-xs); font-weight: 400; color: var(--muted); }
+.page[data-route="S04"] .s04-bar-v { max-width: 100%; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+.page[data-route="S04"] .s04-bar-p { display: block; font-size: var(--fs-s); font-weight: 400; color: var(--muted); }
+.page[data-route="S04"] .s04-track { position: relative; grid-column: 1 / -1; height: 12px; margin-top: 4px; border-radius: var(--r-full); background: var(--sunk); }
+.page[data-route="S04"] .s04-fill,
+.page[data-route="S04"] .s04-gap { position: absolute; top: 0; bottom: 0; left: var(--off, 0%); width: var(--w); box-sizing: border-box; border-radius: var(--r-full); transform-origin: left center; }
+.page[data-route="S04"] .s04-fill { background: var(--bar); }
+.page[data-route="S04"] .s04-fill[data-dash] { background: transparent; border: 2px dashed var(--bar); }
+.page[data-route="S04"] .s04-gap { border: 2px dashed var(--bar); border-left-width: 0; border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.page[data-route="S04"] .s04-tick { position: absolute; top: -4px; bottom: -4px; left: var(--at); width: 2px; margin-left: -1px; border-radius: 1px; background: var(--ink); box-shadow: 0 0 0 1px var(--surface); }
+
+/* scene 2: 100 squares, then the same thing as a list (the list is what is read, the squares are what is seen) */
+.page[data-route="S04"] .s04-fig-waffle { gap: var(--sp-4); }
+.page[data-route="S04"] .s04-waffle { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 3px; width: 100%; max-width: 20rem; }
+.page[data-route="S04"] .s04-cell { aspect-ratio: 1; border-radius: 3px; background: var(--series-other); }
+.page[data-route="S04"] .s04-cell[data-g="1"] { background: var(--series-1); }
+.page[data-route="S04"] .s04-cell[data-g="2"] { background: var(--series-2); }
+.page[data-route="S04"] .s04-cell[data-g="3"] { background: var(--series-3); }
+.page[data-route="S04"] .s04-cell[data-g="4"] { background: var(--series-4); }
+.page[data-route="S04"] .s04-cell[data-g="5"] { background: var(--series-5); }
+.page[data-route="S04"] .s04-cell[data-g="6"] { background: var(--series-6); }
+.page[data-route="S04"] .s04-cell[data-g="7"] { background: var(--series-7); }
+.page[data-route="S04"] .s04-legend { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-2); }
+.page[data-route="S04"] .s04-legend li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--sp-3); align-items: baseline; padding-bottom: var(--sp-2); border-bottom: 1px solid var(--line); }
+.page[data-route="S04"] .s04-legend li:last-child { padding-bottom: 0; border-bottom: 0; }
+.page[data-route="S04"] .s04-sw { align-self: center; width: 12px; height: 12px; border-radius: 3px; background: var(--series-other); }
+.page[data-route="S04"] .s04-sw[data-g="1"] { background: var(--series-1); }
+.page[data-route="S04"] .s04-sw[data-g="2"] { background: var(--series-2); }
+.page[data-route="S04"] .s04-sw[data-g="3"] { background: var(--series-3); }
+.page[data-route="S04"] .s04-sw[data-g="4"] { background: var(--series-4); }
+.page[data-route="S04"] .s04-sw[data-g="5"] { background: var(--series-5); }
+.page[data-route="S04"] .s04-sw[data-g="6"] { background: var(--series-6); }
+.page[data-route="S04"] .s04-sw[data-g="7"] { background: var(--series-7); }
+.page[data-route="S04"] .s04-lg-n { min-width: 0; overflow-wrap: anywhere; }
+.page[data-route="S04"] .s04-lg-v { display: grid; justify-items: end; text-align: right; font-variant-numeric: tabular-nums; }
+.page[data-route="S04"] .s04-lg-a { font-size: var(--fs-xs); color: var(--muted); }
+
+/* scene 4: three cards, one after the other; the middle one is dashed because it is a ceiling, not a forecast */
+.page[data-route="S04"] .s04-chain { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-5); }
+.page[data-route="S04"] .s04-card { position: relative; display: grid; gap: var(--sp-1); align-content: start; min-width: 0; padding: var(--sp-3) var(--sp-4); border: 1px solid var(--line); border-radius: var(--r-2); background: var(--surface); }
+.page[data-route="S04"] .s04-card[data-ceiling] { border: 2px dashed var(--line-strong); background: var(--sunk); }
+.page[data-route="S04"] .s04-card-k { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-1) var(--sp-2); font-size: var(--fs-s); color: var(--muted); }
+.page[data-route="S04"] .s04-card-v { font: 700 var(--fs-2)/1.2 var(--font-head); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.page[data-route="S04"] .s04-card-s { font-size: var(--fs-s); color: var(--muted); }
+/* the connector between two cards: a short line and an arrowhead, both drawn here (down on a phone, across on a wide screen) */
+.page[data-route="S04"] .s04-card + .s04-card::before { content: ""; position: absolute; left: var(--sp-5); bottom: 100%; height: var(--sp-5); border-left: 2px solid var(--line-strong); }
+.page[data-route="S04"] .s04-card + .s04-card::after { content: ""; position: absolute; left: var(--sp-5); bottom: calc(100% - 1px); width: 9px; height: 9px; margin-left: -5px; border-right: 2px solid var(--line-strong); border-bottom: 2px solid var(--line-strong); transform: translateY(-1px) rotate(45deg); transform-origin: 70% 70%; }
+
+/* scene 7: the way on */
+.page[data-route="S04"] .s04-cta { max-width: 32rem; border-color: var(--data); background: var(--data-soft); }
+.page[data-route="S04"] .s04-cta:hover { background: var(--surface); }
+
+@media (min-width: 600px) {
+  .page[data-route="S04"] .s04-fig-waffle { grid-template-columns: minmax(0, 15rem) minmax(0, 1fr); align-items: start; column-gap: var(--sp-5); }
+  .page[data-route="S04"] .s04-fig-waffle .s04-cap { grid-column: 1 / -1; }
+}
+
+@media (min-width: 1200px) {
+  .page[data-route="S04"] .s04-chain { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-6); }
+  .page[data-route="S04"] .s04-fig-chain { max-width: none; }
+  .page[data-route="S04"] .s04-card + .s04-card::before { left: auto; right: 100%; bottom: auto; top: 50%; width: var(--sp-6); height: 0; border-left: 0; border-top: 2px solid var(--line-strong); }
+  .page[data-route="S04"] .s04-card + .s04-card::after { left: auto; right: calc(100% - 1px); bottom: auto; top: 50%; margin: -5px 0 0; transform: translateX(1px) rotate(-45deg); transform-origin: 70% 70%; }
+}

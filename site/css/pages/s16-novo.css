@@ -1,0 +1,70 @@
+/* S16 Какво ново? (G3). Tokens only, mobile first, no dark-mode rules (tokens carry the theme). */
+
+/* the five sentences of the latest monthly report */
+.page[data-route="S16"] .s16-five { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); margin: 0 0 var(--sp-4); padding-inline-start: 1.5em; max-width: 62ch; font-size: var(--fs-0); }
+@media (min-width: 600px) {
+  .page[data-route="S16"] .s16-five { font-size: var(--fs-1); }
+}
+.page[data-route="S16"] .s16-five li::marker { color: var(--muted); font-weight: 700; }
+.page[data-route="S16"] .s16-more { margin: 0; }
+.page[data-route="S16"] .s16-where { color: var(--muted); font-size: var(--fs-s); }
+
+/* a short plain lead and the small notes under a field or a list */
+.page[data-route="S16"] .s16-lead { max-width: 62ch; margin: 0; }
+.page[data-route="S16"] .s16-note { max-width: 62ch; margin: 0; color: var(--muted); font-size: var(--fs-s); }
+.page[data-route="S16"] .s16-open { margin: 0; }
+
+/* the chronology: the filter row, the line about what is shown, one group per month */
+.page[data-route="S16"] .s16-chips { margin: 0; }
+.page[data-route="S16"] .s16-shown { margin: 0; color: var(--muted); font-size: var(--fs-s); }
+.page[data-route="S16"] .s16-groups { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-6); margin-top: var(--sp-2); }
+.page[data-route="S16"] .s16-month { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-4); min-width: 0; }
+.page[data-route="S16"] .s16-month-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--sp-3); margin: 0; font-size: var(--fs-1); }
+.page[data-route="S16"] .s16-month-n { color: var(--muted); font: 400 var(--fs-s) / 1.4 var(--font-body); }
+
+/* the RSS address and its copy button side by side when there is room */
+.page[data-route="S16"] .s16-rss { max-width: 46rem; }
+.page[data-route="S16"] .s16-rss-row { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.page[data-route="S16"] .s16-rss-row .input { flex: 1 1 16rem; width: auto; min-width: 0; }
+.page[data-route="S16"] .s16-rss-row .btn { flex: 0 0 auto; }
+
+/* the subscription form: one column, readable width */
+.page[data-route="S16"] .s16-form { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-4); max-width: 40rem; margin-top: var(--sp-3); }
+.page[data-route="S16"] .s16-form .field { min-width: 0; }
+.page[data-route="S16"] .s16-seg { display: flex; flex-wrap: wrap; justify-content: stretch; overflow: visible; border-radius: var(--r-3); }
+.page[data-route="S16"] .s16-seg .seg-opt { flex: 1 1 auto; }
+.page[data-route="S16"] .s16-seg .seg-opt label { width: 100%; justify-content: center; min-height: 44px; white-space: normal; text-align: center; border-radius: var(--r-2); }
+
+/* the topics: a labelled group of switches, two columns when there is room */
+.page[data-route="S16"] .s16-topics { display: grid; gap: var(--sp-1); min-width: 0; margin: 0; padding: 0; border: 0; }
+.page[data-route="S16"] .s16-topics legend { padding: 0; margin-bottom: var(--sp-1); }
+.page[data-route="S16"] .s16-topic-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-1) var(--sp-5); }
+@media (min-width: 640px) {
+  .page[data-route="S16"] .s16-topic-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.page[data-route="S16"] .s16-topics[data-bad] .toggle-box,
+.page[data-route="S16"] .s16-consent .toggle input[aria-invalid="true"] + .toggle-box { border-color: var(--bad); box-shadow: 0 0 0 1px var(--bad); }
+
+/* the thank-you box that replaces the form */
+.page[data-route="S16"] .s16-ok { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--sp-3); max-width: 42rem; margin-top: var(--sp-3); padding: var(--sp-4); border-left: 4px solid var(--ok); border-radius: 0 var(--r-2) var(--r-2) 0; background: var(--ok-soft); }
+.page[data-route="S16"] .s16-ok-ic { display: grid; padding-top: 2px; color: var(--ok); }
+.page[data-route="S16"] .s16-ok-main { display: grid; gap: var(--sp-3); min-width: 0; }
+.page[data-route="S16"] .s16-ok-main p { margin: 0; }
+.page[data-route="S16"] .s16-ok-h { margin: 0; font-size: var(--fs-1); }
+@media (max-width: 599px) {
+  .page[data-route="S16"] .s16-ok { padding: var(--sp-4) var(--sp-3); }
+}
+
+/* the two blocks that end the page lay their parts out in one column with an even gap */
+.page[data-route="S16"] #s16-b-rss .block-body,
+.page[data-route="S16"] #s16-b-subscribe .block-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); align-content: start; }
+.page[data-route="S16"] #s16-b-subscribe .s16-form { margin-top: 0; }
+.page[data-route="S16"] #s16-b-subscribe .s16-ok { margin-top: 0; }
+/* touch-sized buttons of my own (the shared .btn is a little lower) */
+.page[data-route="S16"] .s16-rss-row .btn,
+.page[data-route="S16"] .s16-form .btn,
+.page[data-route="S16"] .s16-ok .btn { min-height: 44px; }
+
+/* the chronology block: the filter, the line about what is shown and the list sit in one column with an even gap */
+.page[data-route="S16"] #s16-b-feed .block-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); align-content: start; }
+.page[data-route="S16"] #s16-b-feed .s16-groups { margin-top: var(--sp-3); }
