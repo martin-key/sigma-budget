@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Бюджет на светло</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; font-src 'self'; base-uri 'self'; form-action 'none'; object-src 'none'">
+<meta name="description" content="Прототип на портал за прозрачност на държавния бюджет: откъде идват парите, за какво отиват и как се изпълнява планът. Част от данните са примерни и са ясно отбелязани.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#2F5D9A">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.json">
+<link rel="alternate" type="application/rss+xml" title="Бюджет на светло: какво ново" href="data/feed.xml">
+<link rel="preload" href="vendor/fonts/sofia-sans-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="vendor/fonts/sofia-sans-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="vendor/fonts/sofia-sans-condensed-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/charts.css">
+<script src="js/theme-boot.js"></script>
+<script type="module" src="js/main.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Към съдържанието</a>
+<div class="mockbar" id="mockbar" role="region" aria-label="Забележка за прототипа" hidden></div>
+<div class="offline-banner" id="offline" role="status" hidden></div>
+<header class="topbar" id="topbar"></header>
+<div class="shell">
+  <nav class="sidenav" id="sidenav" aria-label="Основна навигация"></nav>
+  <main class="main" id="main" tabindex="-1">
+    <div class="view" id="view" aria-busy="true"><p class="boot-note">Зареждане…</p></div>
+  </main>
+</div>
+<footer class="footer" id="footer"></footer>
+<nav class="tabbar" id="tabbar" aria-label="Бърза навигация"></nav>
+<div class="sr-only" id="live" role="status" aria-live="polite" aria-atomic="true"></div>
+<div class="toasts" id="toasts" aria-live="polite" aria-atomic="false"></div>
+<noscript><p class="noscript">Този сайт показва данни и графики с JavaScript. Включи го в браузъра си, за да го разгледаш. Файловете с данни са отворени и са в папка <code>data/</code>.</p></noscript>
+</body>
+</html>

@@ -1,0 +1,69 @@
+/* Reset, typography, focus, utilities. No component styles here. */
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-padding-top:calc(var(--topbar-h) + 16px);scroll-padding-bottom:calc(var(--tabbar-h) + 16px)}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font:400 var(--fs-0)/var(--lh-body) var(--font-body);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-wrap:break-word}
+h1,h2,h3,h4{margin:0;font-family:var(--font-head);font-weight:700;line-height:var(--lh-tight);letter-spacing:.005em;text-wrap:balance}
+h1{font-size:var(--fs-5)}h2{font-size:var(--fs-2)}h3{font-size:var(--fs-1)}h4{font-size:var(--fs-0)}
+p,ul,ol,dl,figure,blockquote{margin:0}
+ul,ol{padding-left:1.25em}
+img,svg,canvas{max-width:100%}
+svg{flex:none}
+a{color:var(--data);text-decoration-thickness:1px;text-underline-offset:.18em}
+a:hover{color:var(--data-hover);text-decoration-thickness:2px}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+button:disabled{cursor:not-allowed}
+strong,b{font-weight:700}
+small{font-size:var(--fs-s)}
+hr{border:0;border-top:1px solid var(--line);margin:var(--sp-5) 0}
+code,kbd,samp{font-family:var(--font-mono);font-size:.9em}
+kbd{display:inline-block;min-width:1.6em;padding:0 .4em;text-align:center;border:1px solid var(--line-strong);border-bottom-width:2px;border-radius:6px;background:var(--surface);color:var(--muted);line-height:1.45}
+mark{background:var(--accent-soft);color:inherit;border-radius:3px;padding:0 .1em}
+::selection{background:var(--data-3);color:var(--ink)}
+
+/* focus: always visible for keyboard; the h1 only receives programmatic focus after navigation */
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:4px}
+:focus:not(:focus-visible){outline:none}
+[tabindex="-1"]:focus{outline:none}
+.hl{animation:hl 2.4s var(--ease)}
+@keyframes hl{0%,60%{background:var(--accent-soft);box-shadow:0 0 0 6px var(--accent-soft)}100%{background:transparent;box-shadow:0 0 0 6px transparent}}
+
+/* utilities */
+.sr-only{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
+.skip-link{position:fixed;left:var(--sp-3);top:var(--sp-3);z-index:200;padding:var(--sp-2) var(--sp-4);background:var(--ink);color:var(--bg);border-radius:var(--r-1);font-weight:700;transform:translateY(-200%)}
+.skip-link:focus{transform:none}
+[hidden]{display:none!important}
+.num{font-variant-numeric:tabular-nums}
+.nowrap{white-space:nowrap}
+.muted{color:var(--muted)}
+.small{font-size:var(--fs-s)}
+.stack>*+*{margin-top:var(--sp-4)}
+.stack-lg>*+*{margin-top:var(--sp-6)}
+.cluster{display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-2)}
+.cluster-lg{gap:var(--sp-4)}
+.spread{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--sp-2) var(--sp-4)}
+.grid{display:grid;gap:var(--sp-4);grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr))}
+.grid-2{display:grid;gap:var(--sp-4);grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid-3{display:grid;gap:var(--sp-4);grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:899px){.grid-3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:599px){.grid-2,.grid-3{grid-template-columns:minmax(0,1fr)}}
+.prose{max-width:68ch}
+.prose>*+*{margin-top:var(--sp-3)}
+
+/* mock hatching, the one visual that says "примерни данни": 45 degree hatch in the status colour */
+.hatch,[data-mock="true"]{background-image:repeating-linear-gradient(45deg,var(--hatch) 0 2px,transparent 2px var(--hatch-step))}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
+@media (forced-colors:active){
+  :focus-visible{outline-color:Highlight}
+  .hatch,[data-mock="true"]{background-image:none;border:1px dashed CanvasText}
+}
+@media print{
+  body{background:#fff;color:#000}
+  .topbar,.sidenav,.tabbar,.mockbar,.share-row,.skip-link,.toasts,.next,.footer .links{display:none!important}
+  .shell{display:block}
+  a{color:inherit}
+}

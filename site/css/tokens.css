@@ -1,0 +1,111 @@
+/* Design tokens + light/dark themes.
+   Light = bare :root. Dark = the same roles, re-stepped (contrast checked: see mock/tmp/contrast.py).
+   Dark is applied twice on purpose: by the OS setting (unless the viewer pinned light) and by the explicit switch. */
+
+@font-face{font-family:"Sofia Sans";font-style:normal;font-weight:400;font-display:swap;src:url(../vendor/fonts/sofia-sans-400.woff2) format("woff2")}
+@font-face{font-family:"Sofia Sans";font-style:normal;font-weight:700;font-display:swap;src:url(../vendor/fonts/sofia-sans-700.woff2) format("woff2")}
+@font-face{font-family:"Sofia Sans Condensed";font-style:normal;font-weight:700;font-display:swap;src:url(../vendor/fonts/sofia-sans-condensed-700.woff2) format("woff2")}
+
+:root{
+  color-scheme:light;
+
+  /* type */
+  --font-body:"Sofia Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --font-head:"Sofia Sans Condensed","Sofia Sans","Arial Narrow",system-ui,sans-serif;
+  --font-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  --fs-xs:.78rem; --fs-s:.875rem; --fs-0:1rem; --fs-1:1.2rem; --fs-2:1.44rem; --fs-3:1.728rem; --fs-4:2.074rem; --fs-5:2.488rem; --fs-6:2.986rem;
+  --lh-tight:1.15; --lh-body:1.5;
+
+  /* space, radii, shadows, motion */
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px; --sp-7:48px;
+  --r-1:8px; --r-2:12px; --r-3:16px; --r-full:999px;
+  --shadow-1:0 1px 2px rgb(21 32 43/.06),0 2px 8px rgb(21 32 43/.06);
+  --shadow-2:0 8px 28px rgb(21 32 43/.16),0 2px 8px rgb(21 32 43/.08);
+  --t-fast:150ms; --t-med:250ms; --ease:cubic-bezier(.2,.7,.2,1);
+
+  /* layout */
+  --nav-w:250px; --content-w:1040px; --topbar-h:56px; --tabbar-h:60px; --gutter:24px;
+
+  /* surfaces and ink */
+  --bg:#F5F7FA; --surface:#FFFFFF; --sunk:#EEF2F6; --overlay:rgb(14 22 31/.55);
+  --ink:#15202B; --muted:#586575; --faint:#7B8794;
+  --line:#DAE1E8; --line-strong:#7F8C9A;
+
+  /* brand: blue for data, warm yellow accent (accent = non-text only; text on it is --on-accent) */
+  --data:#2F5D9A; --data-hover:#244B7E; --data-soft:#E6EEF8; --data-2:#9DB9DD; --data-3:#C9D6E6; --on-data:#FFFFFF;
+  --accent:#E3A008; --accent-soft:#FDF3D7; --accent-ink:#7A5300; --on-accent:#15202B;
+  --focus:#1B4F9C;
+
+  /* revenue / expenditure pair */
+  --rev:#2F5D9A; --exp:#C4532C;
+
+  /* categorical series: documented dataviz palette (slots 1-8), neutrals for "other" */
+  --series-1:#2a78d6; --series-2:#eb6834; --series-3:#1baf7a; --series-4:#eda100;
+  --series-5:#e87ba4; --series-6:#008300; --series-7:#4a3aa7; --series-8:#e34948;
+  --series-other:#818E9B; --series-other-2:#5E6B79;
+  --series-ring:var(--surface);
+
+  /* semantics (always with icon + words, never colour alone) */
+  --ok:#2B7449; --ok-soft:#E3F2E8; --warn:#8F5A00; --warn-soft:#FBEFD9; --bad:#B3261E; --bad-soft:#FBE9E7;
+
+  /* data status */
+  --st-real:#2B7449;     --st-real-soft:#E3F2E8;
+  --st-partial:#2F5D9A;  --st-partial-soft:#E4ECF7;
+  --st-pending:#586575;  --st-pending-soft:#EEF2F6;
+  --st-mock:#8A3F6B;     --st-mock-soft:#F6E9F0;
+  --st-forecast:#3E5F8F; --st-forecast-soft:#EAF0F8;
+  --hatch:rgb(138 63 107/.28);
+  --hatch-step:7px;
+}
+
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --shadow-1:0 1px 2px rgb(0 0 0/.4),0 2px 8px rgb(0 0 0/.3);
+    --shadow-2:0 8px 28px rgb(0 0 0/.55),0 2px 8px rgb(0 0 0/.4);
+    --bg:#0E141B; --surface:#151E28; --sunk:#1B2632; --overlay:rgb(0 0 0/.62);
+    --ink:#E6EDF3; --muted:#9AA8B6; --faint:#76869A;
+    --line:#283543; --line-strong:#66798C;
+    --data:#7FA8E0; --data-hover:#A3C0EA; --data-soft:#18283B; --data-2:#3F6497; --data-3:#2A3D57; --on-data:#0E141B;
+    --accent:#F2B92E; --accent-soft:#3A2F12; --accent-ink:#F5CB64; --on-accent:#15202B;
+    --focus:#FFD166;
+    --rev:#5B8FDB; --exp:#D96C45;
+    --series-1:#3987e5; --series-2:#d95926; --series-3:#199e70; --series-4:#c98500;
+    --series-5:#d55181; --series-6:#008300; --series-7:#9085e9; --series-8:#e66767;
+    --series-other:#7D8A98; --series-other-2:#A5B0BC;
+    --ok:#6CC08F; --ok-soft:#173226; --warn:#E3A94A; --warn-soft:#3A2C12; --bad:#FF8F88; --bad-soft:#3E1E1C;
+    --st-real:#6CC08F;     --st-real-soft:#173226;
+    --st-partial:#8DB3E6;  --st-partial-soft:#18283B;
+    --st-pending:#9AA8B6;  --st-pending-soft:#1B2632;
+    --st-mock:#D59AAE;     --st-mock-soft:#3A2230;
+    --st-forecast:#9DBAE6; --st-forecast-soft:#1A2A40;
+    --hatch:rgb(213 154 174/.32);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --shadow-1:0 1px 2px rgb(0 0 0/.4),0 2px 8px rgb(0 0 0/.3);
+  --shadow-2:0 8px 28px rgb(0 0 0/.55),0 2px 8px rgb(0 0 0/.4);
+  --bg:#0E141B; --surface:#151E28; --sunk:#1B2632; --overlay:rgb(0 0 0/.62);
+  --ink:#E6EDF3; --muted:#9AA8B6; --faint:#76869A;
+  --line:#283543; --line-strong:#66798C;
+  --data:#7FA8E0; --data-hover:#A3C0EA; --data-soft:#18283B; --data-2:#3F6497; --data-3:#2A3D57; --on-data:#0E141B;
+  --accent:#F2B92E; --accent-soft:#3A2F12; --accent-ink:#F5CB64; --on-accent:#15202B;
+  --focus:#FFD166;
+  --rev:#5B8FDB; --exp:#D96C45;
+  --series-1:#3987e5; --series-2:#d95926; --series-3:#199e70; --series-4:#c98500;
+  --series-5:#d55181; --series-6:#008300; --series-7:#9085e9; --series-8:#e66767;
+  --series-other:#7D8A98; --series-other-2:#A5B0BC;
+  --ok:#6CC08F; --ok-soft:#173226; --warn:#E3A94A; --warn-soft:#3A2C12; --bad:#FF8F88; --bad-soft:#3E1E1C;
+  --st-real:#6CC08F;     --st-real-soft:#173226;
+  --st-partial:#8DB3E6;  --st-partial-soft:#18283B;
+  --st-pending:#9AA8B6;  --st-pending-soft:#1B2632;
+  --st-mock:#D59AAE;     --st-mock-soft:#3A2230;
+  --st-forecast:#9DBAE6; --st-forecast-soft:#1A2A40;
+  --hatch:rgb(213 154 174/.32);
+}
+
+/* 17 px base on phones (plan 6.4); every rem-based size follows. */
+html{font-size:100%}
+@media (max-width:599px){html{font-size:106.25%}:root{--gutter:16px}}
+@media (prefers-reduced-motion:reduce){:root{--t-fast:0ms;--t-med:0ms}}

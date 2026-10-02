@@ -1,0 +1,72 @@
+// Global view state. Preferences persist in localStorage (always in try/catch, in-memory fallback);
+// the banner dismissal lives in sessionStorage. Changing a key notifies subscribers; the router re-renders
+// the current screen for period / userType / unit / perPerson / leva / onlyReal.
+export const PERIODS = [
+  { key: '2024.report', year: 2024, status: 'report', vintage: 'actual', label: '2024 · Отчет', desc: 'Отчетени данни' },
+  { key: '2025.report', year: 2025, status: 'report', vintage: 'prelim', label: '2025 · Отчет', desc: 'Предварителен отчет' },
+  { key: '2026.draft', year: 2026, status: 'draft', vintage: 'plan', label: '2026 · Проект', desc: 'Проектът, внесен от Министерския съвет' },
+  { key: '2026.law', year: 2026, status: 'law', vintage: 'plan', label: '2026 · Закон', desc: 'Приетият Закон за държавния бюджет' },
+  { key: '2027.forecast', year: 2027, status: 'forecast', vintage: 'forecast', label: '2027 · Прогноза', desc: 'Средносрочна прогноза' },
+  { key: '2028.forecast', year: 2028, status: 'forecast', vintage: 'forecast', label: '2028 · Прогноза', desc: 'Средносрочна прогноза' }
+];
+export const USER_TYPES = [
+  { id: 'citizen', label: 'Гражданин', hint: 'Колко плащам и за какво отиват парите.' },
+  { id: 'journalist', label: 'Журналист', hint: 'Какво се променя спрямо 2025 г. и кои са най-големите промени.' },
+  { id: 'expert', label: 'Експерт', hint: 'Изпълнение по месеци, таблици и източници.' }
+];
+export const SCOPES = {
+  kfp: { label: 'КФП', long: 'Консолидирана фискална програма', gl: 'kfp' },
+  nat: { label: 'Национален бюджет', long: 'Национален бюджет, без европейските средства', gl: null },
+  eu: { label: 'Европейски средства', long: 'Средствата от ЕС, включени в КФП', gl: null },
+  zdd: { label: 'ЗДД', long: 'Държавен дълг по Закона за държавния дълг', gl: 'darzhaven-dalg' },
+  maastricht: { label: 'Маастрихт', long: 'Дълг на сектор „Държавно управление“ по методиката на Маастрихт', gl: 'sektor-darzhavno-upravlenie' }
+};
+export const DEFAULT_PERIOD = '2026.law';
+const KEY = 'bns.prefs.v1';
+const DEFAULTS = { period: DEFAULT_PERIOD, userType: 'citizen', theme: 'auto', scope: 'kfp', unit: 'eur', perPerson: false, leva: false, onlyReal: false, sources: false, guide: { step: 0 } };
+const VALID = {
+  period: v => PERIODS.some(p => p.key === v),
+  userType: v => USER_TYPES.some(t => t.id === v),
+  theme: v => ['auto', 'light', 'dark'].includes(v),
+  scope: v => typeof v === 'string' && Object.hasOwn(SCOPES, v),          // own keys only: 'constructor' / 'toString' are not scopes
+  unit: v => v === 'eur' || v === 'pct',
+  perPerson: v => typeof v === 'boolean', leva: v => typeof v === 'boolean', onlyReal: v => typeof v === 'boolean', sources: v => typeof v === 'boolean',
+  guide: v => v && Number.isInteger(v.step) && v.step >= 0 && v.step <= 8
+};
+const PERSIST = ['userType', 'theme', 'scope', 'unit', 'perPerson', 'leva', 'onlyReal', 'sources', 'guide'];   // period lives in the URL (?per=)
+
+/** safe storage accessors: never throw, return null/false when blocked */
+export const safe = {
+  get(store, k) { try { return window[store].getItem(k); } catch { return null; } },
+  set(store, k, v) { try { window[store].setItem(k, v); return true; } catch { return false; } },
+  del(store, k) { try { window[store].removeItem(k); } catch { /* blocked */ } }
+};
+const state = { ...DEFAULTS };
+try {
+  const saved = JSON.parse(safe.get('localStorage', KEY) || '{}');
+  for (const k of PERSIST) if (Object.hasOwn(saved, k) && VALID[k](saved[k])) state[k] = saved[k];
+} catch { /* corrupt JSON: keep defaults */ }
+const subs = new Set();
+
+export const store = {
+  PERIODS, USER_TYPES, SCOPES,
+  get: k => state[k],
+  set(k, v) {
+    if (!Object.hasOwn(VALID, k) || !VALID[k](v)) return false;
+    if (JSON.stringify(state[k]) === JSON.stringify(v)) return false;
+    state[k] = v;
+    if (PERSIST.includes(k)) safe.set('localStorage', KEY, JSON.stringify(Object.fromEntries(PERSIST.map(x => [x, state[x]]))));
+    subs.forEach(f => { try { f(k, v); } catch (e) { console.error(e); } });
+    return true;
+  },
+  /** subscribe(fn(key, value)) -> unsubscribe */
+  subscribe(fn) { subs.add(fn); return () => subs.delete(fn); },
+  get period() { return PERIODS.find(p => p.key === state.period) || PERIODS[3]; },
+  get userTypeInfo() { return USER_TYPES.find(t => t.id === state.userType) || USER_TYPES[0]; },
+  snapshot: () => ({ ...state }),
+  /** the share link of a view carries the period only when it is not the default */
+  periodParam: () => (state.period === DEFAULT_PERIOD ? undefined : state.period),
+  periodByKey: k => PERIODS.find(p => p.key === k),
+  bannerDismissed: () => safe.get('sessionStorage', 'bns.banner') === '1',
+  dismissBanner: () => safe.set('sessionStorage', 'bns.banner', '1')
+};
