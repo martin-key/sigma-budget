@@ -1,0 +1,32 @@
+/* S19 Класации и сравнения (G3). Tokens only, mobile first, no dark-mode rules (the tokens carry both themes), every selector scoped to the screen. */
+
+.page[data-route="S19"] .s19-head { margin: 0 0 var(--sp-4); }
+
+/* the blocks of one tab: one column, a steady gap */
+.page[data-route="S19"] .s19-stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-5); }
+.page[data-route="S19"] .s19-stack > * { min-width: 0; margin: 0; }
+
+/* two rankings side by side when there is room */
+.page[data-route="S19"] .s19-pair { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-5); align-items: start; }
+.page[data-route="S19"] .s19-pair > .block { min-width: 0; margin: 0; }
+
+/* the controls card: category and two years (with a swap button) on the years tab, the count on the top tab */
+.page[data-route="S19"] .s19-controls { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); align-items: end; padding: var(--sp-4); border: 1px solid var(--line); border-radius: var(--r-2); background: var(--surface); }
+.page[data-route="S19"] .s19-controls .field { min-width: 0; }
+.page[data-route="S19"] .s19-swap { justify-self: start; min-height: 44px; }
+.page[data-route="S19"] .s19-ctl { display: grid; gap: var(--sp-1); justify-items: start; }
+.page[data-route="S19"] .s19-ctl-l { font-weight: 700; font-size: var(--fs-s); }
+
+/* the sentences above the years table and the leva addendum under a number */
+.page[data-route="S19"] .s19-sum { margin: 0; max-width: 70ch; }
+.page[data-route="S19"] .s19-lev { display: block; color: var(--muted); font-size: var(--fs-s); font-weight: 400; white-space: nowrap; }
+
+@media (min-width: 700px) {
+  .page[data-route="S19"] .s19-controls:not(.s19-controls-top) { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) auto minmax(0, 1fr); }
+}
+@media (min-width: 900px) {
+  .page[data-route="S19"] .s19-pair { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (forced-colors: active) {
+  .page[data-route="S19"] .s19-controls { border-color: CanvasText; }
+}

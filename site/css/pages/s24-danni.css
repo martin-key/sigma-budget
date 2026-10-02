@@ -1,0 +1,139 @@
+/* S24 · Откъде са данните? Tokens only (they carry both themes), no dark-mode rules, every selector scoped to the screen, classes prefixed s24-. */
+
+/* the blocks: a long reference page, each block set off by a thin rule */
+.page[data-route="S24"] .s24-block { display: grid; gap: var(--sp-3); align-content: start; padding-top: var(--sp-5); border-top: 1px solid var(--line); }
+.page[data-route="S24"] .s24-block p { max-width: 68ch; }
+.page[data-route="S24"] .s24-block code { padding: 0 var(--sp-1); border-radius: var(--r-1); background: var(--sunk); overflow-wrap: anywhere; }
+.page[data-route="S24"] .s24-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-2) var(--sp-3); }
+.page[data-route="S24"] .s24-head > h2 { margin: 0; }
+.page[data-route="S24"] .s24-lead,
+.page[data-route="S24"] .s24-lead2,
+.page[data-route="S24"] .s24-foot,
+.page[data-route="S24"] .s24-seen { margin: 0; }
+.page[data-route="S24"] .s24-block > .s24-foot { display: flex; max-width: none; }
+.page[data-route="S24"] .s24-h3 { margin: 0; font-size: var(--fs-1); overflow-wrap: anywhere; }
+.page[data-route="S24"] .small.muted { margin: 0; }
+
+/* the table of contents: real links that carry the filters */
+.page[data-route="S24"] .s24-toc-list { list-style: none; margin: 0; padding: 0; }
+
+/* the filters */
+.page[data-route="S24"] .s24-find { display: grid; gap: var(--sp-3); padding: var(--sp-4); border: 1px solid var(--line); border-top: 4px solid var(--accent); border-radius: var(--r-2); background: var(--surface); }
+.page[data-route="S24"] .s24-find .field-hint { margin: 0; max-width: 62ch; }
+.page[data-route="S24"] .s24-wrap { position: relative; min-width: 0; }
+.page[data-route="S24"] .s24-ic { position: absolute; left: 14px; top: 50%; display: grid; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+.page[data-route="S24"] .s24-q { -webkit-appearance: none; appearance: none; min-height: 52px; padding-left: 46px; padding-right: 52px; font-size: var(--fs-1); }
+.page[data-route="S24"] .s24-q::-webkit-search-cancel-button,
+.page[data-route="S24"] .s24-q::-webkit-search-decoration { -webkit-appearance: none; display: none; }
+.page[data-route="S24"] .s24-clear { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); }
+.page[data-route="S24"] .s24-selects { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); }
+.page[data-route="S24"] .s24-status { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-3); }
+.page[data-route="S24"] .s24-status > .field-label { flex: 1 1 100%; }
+.page[data-route="S24"] .link-btn,
+.page[data-route="S24"] .s24-count .link-btn { display: inline-flex; align-items: center; min-height: 24px; }
+.page[data-route="S24"] .s24-block .s24-count { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-1) var(--sp-3); margin: 0; max-width: none; color: var(--muted); font-size: var(--fs-s); }
+.page[data-route="S24"] .s24-block .s24-dl { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); margin: 0; max-width: none; }
+
+/* the groups and the rows */
+.page[data-route="S24"] .s24-groups { display: grid; gap: var(--sp-5); margin-top: var(--sp-2); }
+.page[data-route="S24"] .s24-group { display: grid; gap: var(--sp-3); }
+.page[data-route="S24"] .s24-gh { display: flex; align-items: baseline; gap: var(--sp-3); padding-bottom: var(--sp-2); border-bottom: 2px solid var(--line-strong); font-size: var(--fs-1); }
+.page[data-route="S24"] .s24-n { padding: 0 var(--sp-2); border-radius: var(--r-full); background: var(--sunk); color: var(--muted); font-family: var(--font-body); font-size: var(--fs-xs); font-weight: 700; font-variant-numeric: tabular-nums; }
+.page[data-route="S24"] .s24-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-3); }
+.page[data-route="S24"] .s24-row { position: relative; display: grid; gap: var(--sp-2); align-content: start; min-width: 0; padding: var(--sp-3) var(--sp-4); border: 1px solid var(--line); border-radius: var(--r-2); background: var(--surface); overflow: hidden; }
+.page[data-route="S24"] .s24-row-top { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-1) var(--sp-3); min-width: 0; }
+.page[data-route="S24"] .s24-link { display: inline-block; min-height: 24px; font-weight: 700; font-size: var(--fs-1); overflow-wrap: anywhere; }
+.page[data-route="S24"] .s24-row-desc { margin: 0; max-width: 72ch; font-size: var(--fs-s); color: var(--muted); }
+.page[data-route="S24"] .s24-get { justify-self: start; }
+
+/* example data: the same hatch as everywhere says so, as a strip on the left edge; waited-for data: dashed, as the „Предстои“ pill is */
+.page[data-route="S24"] .s24-row[data-st="mock"] { padding-left: calc(var(--sp-4) + 8px); }
+.page[data-route="S24"] .s24-row[data-st="mock"]::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 8px; background-image: repeating-linear-gradient(45deg, var(--hatch) 0 2px, transparent 2px var(--hatch-step)); border-right: 1px solid var(--line); }
+.page[data-route="S24"] .s24-row[data-st="pending"] { border-style: dashed; border-color: var(--line-strong); background: var(--sunk); }
+@media (forced-colors: active) {
+  .page[data-route="S24"] .s24-row[data-st="mock"]::before { width: 0; background-image: none; border-right: 4px dashed CanvasText; }
+}
+
+/* the facts of one set, of one row, of one file: label and value */
+.page[data-route="S24"] .s24-meta { display: grid; gap: var(--sp-2); margin: 0; }
+.page[data-route="S24"] .s24-m { display: grid; grid-template-columns: minmax(0, 1fr); align-items: baseline; }
+.page[data-route="S24"] .s24-m > dt { color: var(--muted); font-size: var(--fs-s); font-weight: 700; }
+.page[data-route="S24"] .s24-m > dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.page[data-route="S24"] .s24-st { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--sp-1) var(--sp-2); }
+
+/* a row is a small data sheet: label above value, in cells (two across on a phone; a waited-for set keeps label and value side by side) */
+.page[data-route="S24"] .s24-row:not([data-st="pending"]) > .s24-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-2) var(--sp-3); padding-top: var(--sp-2); border-top: 1px solid var(--line); }
+.page[data-route="S24"] .s24-row:not([data-st="pending"]) .s24-m { grid-template-columns: minmax(0, 1fr); gap: 0; }
+.page[data-route="S24"] .s24-row:not([data-st="pending"]) .s24-m > dt { font-size: var(--fs-xs); }
+.page[data-route="S24"] .s24-row .s24-m-wide { grid-column: 1 / -1; }
+
+/* the traps and the methodology: cards */
+.page[data-route="S24"] .s24-items { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); align-items: start; }
+.page[data-route="S24"] .s24-item,
+.page[data-route="S24"] .s24-src { display: grid; gap: var(--sp-2); align-content: start; min-width: 0; padding: var(--sp-4); border: 1px solid var(--line); border-radius: var(--r-2); background: var(--surface); }
+.page[data-route="S24"] .s24-item > p,
+.page[data-route="S24"] .s24-src > p { margin: 0; }
+.page[data-route="S24"] .s24-rel { display: grid; gap: var(--sp-1); }
+.page[data-route="S24"] .s24-rel-l { margin: 0; color: var(--muted); font-size: var(--fs-s); font-weight: 700; }
+.page[data-route="S24"] .s24-rel-list { margin: 0; padding-left: 1.25em; display: grid; gap: 2px; }
+.page[data-route="S24"] .s24-rel-list a { display: inline-block; min-height: 24px; overflow-wrap: anywhere; }
+.page[data-route="S24"] .s24-ev { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-2); }
+.page[data-route="S24"] .s24-ev li { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
+.page[data-route="S24"] .s24-ev-s { color: var(--muted); font-size: var(--fs-s); }
+
+/* the sources */
+.page[data-route="S24"] .s24-srclist { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); align-items: start; }
+.page[data-route="S24"] .s24-src-m { color: var(--muted); font-size: var(--fs-s); }
+
+/* the files and their checksums */
+.page[data-route="S24"] .s24-files { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-3); }
+.page[data-route="S24"] .s24-file { display: grid; gap: var(--sp-2); min-width: 0; padding: var(--sp-3); border: 1px solid var(--line); border-radius: var(--r-2); background: var(--surface); }
+.page[data-route="S24"] .s24-file-t { margin: 0; font-weight: 700; overflow-wrap: anywhere; }
+.page[data-route="S24"] .s24-sha { font-size: var(--fs-xs); overflow-wrap: anywhere; word-break: break-all; user-select: all; }
+
+/* the passport: sources of one set */
+.page[data-route="S24"] .s24-facts { padding: var(--sp-1) var(--sp-4); border: 1px solid var(--line); border-radius: var(--r-2); background: var(--surface); }
+.page[data-route="S24"] .s24-srcs { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-3); }
+.page[data-route="S24"] .s24-srcs li { display: grid; gap: 2px; min-width: 0; }
+.page[data-route="S24"] .s24-srcs-t { font-weight: 700; }
+.page[data-route="S24"] .s24-srcs-m,
+.page[data-route="S24"] .s24-srcs-n { font-size: var(--fs-s); color: var(--muted); }
+
+/* download and cite */
+.page[data-route="S24"] .s24-addr { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-1) var(--sp-3); margin: 0; }
+.page[data-route="S24"] .s24-addr-l { color: var(--muted); font-size: var(--fs-s); font-weight: 700; }
+.page[data-route="S24"] .s24-addr code { padding: var(--sp-1) var(--sp-2); font-size: var(--fs-s); user-select: all; }
+.page[data-route="S24"] .s24-cite { margin: 0; padding: var(--sp-3) var(--sp-4); border-left: 4px solid var(--accent); border-radius: var(--r-2); background: var(--sunk); overflow-wrap: anywhere; }
+.page[data-route="S24"] .s24-wait { margin: 0; padding-left: 1.25em; display: grid; gap: var(--sp-1); }
+.page[data-route="S24"] .s24-parts { list-style: none; margin: 0; padding: 0; display: grid; }
+.page[data-route="S24"] .s24-part { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "n b" "s b"; gap: 0 var(--sp-3); align-items: center; padding: var(--sp-2) 0; border-bottom: 1px solid var(--line); }
+.page[data-route="S24"] .s24-part:last-child { border-bottom: 0; }
+.page[data-route="S24"] .s24-part-n { grid-area: n; min-width: 0; overflow-wrap: anywhere; }
+.page[data-route="S24"] .s24-part-s { grid-area: s; color: var(--muted); font-size: var(--fs-s); }
+.page[data-route="S24"] .s24-part > .btn { grid-area: b; }
+
+@media (min-width: 600px) {
+  .page[data-route="S24"] .s24-find { padding: var(--sp-5); }
+  .page[data-route="S24"] .s24-selects { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3) var(--sp-4); }
+  .page[data-route="S24"] .s24-row { padding: var(--sp-4) var(--sp-5); }
+  .page[data-route="S24"] .s24-row[data-st="mock"] { padding-left: calc(var(--sp-5) + 8px); }
+
+  /* a row: the download sits at the top right */
+  .page[data-route="S24"] .s24-row { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "top get" "desc desc" "meta meta"; column-gap: 0; align-items: start; }
+  .page[data-route="S24"] .s24-row-top { grid-area: top; }
+  .page[data-route="S24"] .s24-row-desc { grid-area: desc; }
+  .page[data-route="S24"] .s24-row > .s24-meta { grid-area: meta; }
+  .page[data-route="S24"] .s24-row > .s24-get { grid-area: get; margin-left: var(--sp-3); }
+  .page[data-route="S24"] .s24-row:not([data-st="pending"]) > .s24-meta { grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr)); gap: var(--sp-2) var(--sp-4); }
+  .page[data-route="S24"] .s24-row .s24-m-wide { grid-column: span 2; }
+
+  .page[data-route="S24"] .s24-m { grid-template-columns: minmax(7rem, 11rem) minmax(0, 1fr); gap: var(--sp-1) var(--sp-3); }
+  .page[data-route="S24"] .s24-part { grid-template-columns: minmax(0, 1fr) 6rem auto; grid-template-areas: "n s b"; }
+  .page[data-route="S24"] .s24-part-s { text-align: end; }
+}
+
+@media (min-width: 900px) {
+  .page[data-route="S24"] .s24-items,
+  .page[data-route="S24"] .s24-srclist { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-4); }
+  .page[data-route="S24"] .s24-files { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

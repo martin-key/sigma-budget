@@ -1,0 +1,54 @@
+/* S10 · Кой харчи? Tokens only, no dark-mode rules (the tokens carry both themes), every selector scoped to the screen. Mobile first. */
+
+/* the search card: a field to find a spender, a sort, a view switch, then the group chips and the count line */
+.page[data-route="S10"] .s10-find { display: grid; gap: var(--sp-3); padding: var(--sp-4); border: 1px solid var(--line); border-radius: var(--r-2); background: var(--surface); box-shadow: var(--shadow-1); }
+.page[data-route="S10"] .s10-controls { display: grid; gap: var(--sp-3); }
+.page[data-route="S10"] .s10-controls > .field { min-width: 0; }
+.page[data-route="S10"] .s10-view { display: grid; gap: var(--sp-1); align-content: start; }
+.page[data-route="S10"] .s10-view .seg { justify-self: start; max-width: 100%; }
+.page[data-route="S10"] .s10-count { margin: 0; color: var(--muted); font-size: var(--fs-s); max-width: 72ch; }
+
+/* the lists */
+.page[data-route="S10"] .s10-list { margin-top: var(--sp-4); }
+.page[data-route="S10"] .s10-list .state { margin-top: var(--sp-1); }
+.page[data-route="S10"] .s10-notes { display: grid; gap: var(--sp-2); max-width: 72ch; margin-top: var(--sp-4); }
+.page[data-route="S10"] .s10-notes p { margin: 0; }
+.page[data-route="S10"] .s10-more { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-3); margin: var(--sp-4) 0 0; }
+.page[data-route="S10"] .s10-more .small { margin: 0; }
+.page[data-route="S10"] .s10-top { max-width: 72ch; margin: var(--sp-3) 0 0; }
+.page[data-route="S10"] .s10-intro { max-width: 72ch; margin-bottom: var(--sp-4); }
+.page[data-route="S10"] .s10-intro p { margin: 0 0 var(--sp-2); }
+.page[data-route="S10"] .s10-pending { margin: var(--sp-3) 0 0; padding-left: var(--sp-5); }
+
+/* the table: a second muted line under the name and under a converted amount */
+.page[data-route="S10"] .s10-cell-sub { display: block; margin-top: 2px; color: var(--muted); font-size: var(--fs-xs); font-weight: 400; line-height: 1.4; }
+.page[data-route="S10"] .s10-lev { display: block; color: var(--muted); font-size: var(--fs-xs); font-weight: 400; white-space: nowrap; }
+
+/* the table has seven columns: the headers may wrap so that it fits the content column without a sideways scroll */
+.page[data-route="S10"] #s10-v-tablica thead th { white-space: normal; }
+.page[data-route="S10"] #s10-v-tablica tbody th { min-width: 13rem; }
+
+/* the scope chip of this screen has a note: let it wrap on a narrow screen instead of widening the page */
+.page[data-route="S10"] .block-tags .scope { max-width: 100%; white-space: normal; border-radius: var(--r-2); }
+
+/* „проект ≠ закон“: a small warning pill, the words are repeated in text for a screen reader */
+.page[data-route="S10"] .s10-tag { display: inline-block; padding: 0 var(--sp-2); border: 1px solid var(--warn); border-radius: var(--r-full); background: var(--warn-soft); color: var(--warn); font-size: var(--fs-xs); font-weight: 700; line-height: 1.5; white-space: nowrap; vertical-align: baseline; }
+
+@media (min-width: 600px) {
+  .page[data-route="S10"] .s10-find { padding: var(--sp-5); }
+  .page[data-route="S10"] .s10-controls { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); align-items: start; }
+  .page[data-route="S10"] .s10-view { grid-column: 1 / -1; }
+}
+@media (min-width: 900px) {
+  .page[data-route="S10"] .s10-controls { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) auto; }
+  .page[data-route="S10"] .s10-view { grid-column: auto; }
+  .page[data-route="S10"] .s10-controls-p { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.2fr) minmax(0, 1fr); }
+  .page[data-route="S10"] .s10-controls-p .s10-view { grid-column: 1 / -1; }
+}
+@media (pointer: coarse) {
+  .page[data-route="S10"] .s10-more .btn { min-height: 48px; }
+}
+@media (forced-colors: active) {
+  .page[data-route="S10"] .s10-find { border-color: CanvasText; }
+  .page[data-route="S10"] .s10-tag { border-color: CanvasText; background: Canvas; color: CanvasText; }
+}
