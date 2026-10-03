@@ -1,28 +1,29 @@
-/* Reset, typography, focus, utilities. No component styles here. */
+/* Reset, typography, focus, utilities. No component styles here. Visual language v2: Onest, tight bold headings, ink links, lime selection. */
 *,*::before,*::after{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-padding-top:calc(var(--topbar-h) + 16px);scroll-padding-bottom:calc(var(--tabbar-h) + 16px)}
 body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font:400 var(--fs-0)/var(--lh-body) var(--font-body);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-wrap:break-word}
-h1,h2,h3,h4{margin:0;font-family:var(--font-head);font-weight:700;line-height:var(--lh-tight);letter-spacing:.005em;text-wrap:balance}
-h1{font-size:var(--fs-5)}h2{font-size:var(--fs-2)}h3{font-size:var(--fs-1)}h4{font-size:var(--fs-0)}
+h1,h2,h3,h4{margin:0;font-family:var(--font-head);font-weight:650;line-height:var(--lh-tight);letter-spacing:var(--track-head);text-wrap:balance}
+h1{font-size:var(--fs-h1);font-weight:700;letter-spacing:var(--track-display);line-height:1.04}h2{font-size:var(--fs-2)}h3{font-size:var(--fs-1);letter-spacing:-.015em}h4{font-size:var(--fs-0);letter-spacing:-.01em}
 p,ul,ol,dl,figure,blockquote{margin:0}
 ul,ol{padding-left:1.25em}
 img,svg,canvas{max-width:100%}
 svg{flex:none}
-a{color:var(--data);text-decoration-thickness:1px;text-underline-offset:.18em}
+a{color:var(--data);text-decoration-thickness:1px;text-underline-offset:.2em}
 a:hover{color:var(--data-hover);text-decoration-thickness:2px}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 button:disabled{cursor:not-allowed}
-strong,b{font-weight:700}
+strong,b{font-weight:650}
 small{font-size:var(--fs-s)}
 hr{border:0;border-top:1px solid var(--line);margin:var(--sp-5) 0}
 code,kbd,samp{font-family:var(--font-mono);font-size:.9em}
 kbd{display:inline-block;min-width:1.6em;padding:0 .4em;text-align:center;border:1px solid var(--line-strong);border-bottom-width:2px;border-radius:6px;background:var(--surface);color:var(--muted);line-height:1.45}
 mark{background:var(--accent-soft);color:inherit;border-radius:3px;padding:0 .1em}
-::selection{background:var(--data-3);color:var(--ink)}
+::selection{background:var(--accent);color:var(--on-accent)}
 
 /* focus: always visible for keyboard; the h1 only receives programmatic focus after navigation */
-:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:4px}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+:where(a:not([class])):focus-visible{border-radius:4px}
 :focus:not(:focus-visible){outline:none}
 [tabindex="-1"]:focus{outline:none}
 .hl{animation:hl 2.4s var(--ease)}

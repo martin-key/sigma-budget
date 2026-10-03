@@ -28,7 +28,7 @@ const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n)
 export function tokens() {
   return {
     ink: cssv('--ink'), muted: cssv('--muted'), faint: cssv('--faint'), line: cssv('--line'), lineStrong: cssv('--line-strong'),
-    surface: cssv('--surface'), sunk: cssv('--sunk'), bg: cssv('--bg'), data: cssv('--data'), onData: cssv('--on-data'),
+    surface: cssv('--surface'), card: cssv('--card'), sunk: cssv('--sunk'), bg: cssv('--bg'), data: cssv('--data'), onData: cssv('--on-data'),
     stMock: cssv('--st-mock'), exp: cssv('--exp'), rev: cssv('--rev'),
     series: [1, 2, 3, 4, 5, 6, 7, 8].map(i => cssv(`--series-${i}`)), other: cssv('--series-other'), other2: cssv('--series-other-2'),
     font: cssv('--font-body'), head: cssv('--font-head')
@@ -82,19 +82,19 @@ function base(spec, tk) {
     aria: { enabled: true, label: { enabled: false }, decal: { show: false } },
     legend: { show: false },
     tooltip: {
-      confine: true, backgroundColor: tk.surface, borderColor: tk.lineStrong, borderWidth: 1, padding: [8, 10],
+      confine: true, backgroundColor: tk.surface, borderColor: tk.line, borderWidth: 1, padding: [10, 12],
       textStyle: { color: tk.ink, fontSize: 13, fontFamily: tk.font },
-      extraCssText: 'box-shadow:0 8px 28px rgba(0,0,0,.18);border-radius:10px;max-width:min(320px,86vw);white-space:normal'
+      extraCssText: 'box-shadow:0 10px 30px rgba(18,20,18,.14);border-radius:14px;max-width:min(320px,86vw);white-space:normal'
     }
   };
 }
-const mark = (c, hatch) => `<span style="display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;background:${c};${hatch ? 'outline:1px solid ' + c : ''}"></span>`;
+const mark = (c, hatch) => `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;background:${c};${hatch ? 'outline:1px solid ' + c : ''}"></span>`;
 
 /* Text measured with the real font (canvas). ECharts' own `overflow:'truncate'` estimates every non-ASCII letter as one full-width CJK glyph
    (zrender truncateText/estimateLength), so Cyrillic labels are cut at about HALF the room they have; labels with a known width go through fitText(). */
 let measure = null;
 export const textPx = (text, font) => { measure ||= document.createElement('canvas').getContext('2d'); measure.font = font; return measure.measureText(String(text)).width; };
-/** `text`, cut with an ellipsis so that it is at most maxPx wide in `font` (CSS font shorthand, e.g. '13px "Sofia Sans"') */
+/** `text`, cut with an ellipsis so that it is at most maxPx wide in `font` (CSS font shorthand, e.g. '13px "Onest"') */
 export function fitText(text, maxPx, font) {
   const t = String(text);
   if (textPx(t, font) <= maxPx) return t;
@@ -136,7 +136,7 @@ function cartesian(spec, tk, env) {
       const line = (data, dashed) => ({
         ...common, data, type: 'line', symbol: 'circle', symbolSize: narrow ? 6 : 8, smooth: false, connectNulls: false, showSymbol: true,
         color, lineStyle: { width: 2.5, type: dashed ? 'dashed' : 'solid' },
-        itemStyle: { color, borderColor: tk.surface, borderWidth: 2 },
+        itemStyle: { color, borderColor: tk.card, borderWidth: 2 },
         areaStyle: spec.area ? { color, opacity: 0.12 } : undefined,
         stack: stacked ? 'total' : undefined
       });
@@ -156,7 +156,7 @@ function cartesian(spec, tk, env) {
     return [{
       ...common, type: 'bar', color, barMaxWidth: horiz ? 22 : 36, barGap: '12%',
       stack: stacked ? 'total' : undefined,
-      itemStyle: { color, borderRadius: stacked ? 0 : horiz ? [0, 4, 4, 0] : [4, 4, 0, 0], borderColor: stacked ? tk.surface : undefined, borderWidth: stacked ? 1 : 0, decal: mockAll ? decal(tk) : undefined },
+      itemStyle: { color, borderRadius: stacked ? 0 : horiz ? [0, 6, 6, 0] : [6, 6, 0, 0], borderColor: stacked ? tk.card : undefined, borderWidth: stacked ? 1 : 0, decal: mockAll ? decal(tk) : undefined },
       label: spec.labels ? { show: true, position: stacked ? 'inside' : horiz ? 'right' : 'top', color: stacked ? textOn(color) : tk.ink, fontSize: 12, formatter: p => fmt(p.value) } : undefined   // inside a segment: the text colour follows the FILL, outside it sits on the surface
     }];
   });
@@ -223,12 +223,12 @@ function donut(spec, tk, env) {
   const total = items.reduce((a, d) => a + (d.value || 0), 0);
   const data = items.map(d => {
     const mock = !!(spec.mock || d.mock);
-    return { name: d.name, value: d.value, itemStyle: { color: d.c, borderColor: tk.surface, borderWidth: 2, decal: mock ? decal(tk) : undefined } };
+    return { name: d.name, value: d.value, itemStyle: { color: d.c, borderColor: tk.card, borderWidth: 2, decal: mock ? decal(tk) : undefined } };
   });
   return {
     title: spec.center === false ? undefined : {
       text: spec.center?.text ?? fmt(total), subtext: spec.center?.sub ?? spec.unit ?? '', left: 'center', top: '40%',
-      textStyle: { color: tk.ink, fontFamily: tk.head, fontWeight: 700, fontSize: env.width < 360 ? 22 : 28 }, subtextStyle: { color: tk.muted, fontSize: 12, fontFamily: tk.font }, itemGap: 2
+      textStyle: { color: tk.ink, fontFamily: tk.head, fontWeight: 650, fontSize: env.width < 360 ? 22 : 28 }, subtextStyle: { color: tk.muted, fontSize: 12, fontFamily: tk.font }, itemGap: 2
     },
     tooltip: {
       trigger: 'item', formatter: p => `<div>${mark(p.color, !!p.data.itemStyle?.decal)}${esc(p.name)}</div><b style="font-variant-numeric:tabular-nums">${esc(fmt(p.value))}${spec.unit ? ' ' + esc(spec.unit) : ''}</b> · ${esc(num(p.percent, 1))}%`
@@ -253,7 +253,7 @@ function treemap(spec, tk) {
       type: 'treemap', roam: false, nodeClick: false, breadcrumb: { show: false }, left: 0, right: 0, top: 0, bottom: 0, squareRatio: 1.1,
       label: { show: true, overflow: 'truncate', fontFamily: tk.font, fontSize: 13, fontWeight: 700, formatter: p => `${p.name}\n${fmt(p.value)}`, position: 'insideTopLeft', padding: 6 },
       upperLabel: { show: false, height: 24, overflow: 'truncate', fontFamily: tk.font, fontSize: 13, fontWeight: 700, padding: [0, 6], formatter: p => `${p.name}  ${fmt(p.value)}` },
-      itemStyle: { borderColor: tk.surface, borderWidth: 2, gapWidth: 2, borderRadius: 4 },
+      itemStyle: { borderColor: tk.card, borderWidth: 2, gapWidth: 2, borderRadius: 6 },
       emphasis: { itemStyle: { borderColor: tk.ink, borderWidth: 2 } },
       data
     }]
@@ -265,7 +265,7 @@ function sankey(spec, tk, env) {
   const nodes = (spec.nodes || []).map((n, i) => {
     const o = typeof n === 'string' ? { name: n } : n;
     const mock = !!(spec.mock || o.mock);
-    return { name: o.name, itemStyle: { color: colorOf(spec, o, i, tk), borderColor: tk.surface, decal: mock ? decal(tk) : undefined } };
+    return { name: o.name, itemStyle: { color: colorOf(spec, o, i, tk), borderColor: tk.card, decal: mock ? decal(tk) : undefined } };
   });
   // room on the right for the labels of the last column: the longest end-node name, at most 38% of the width; a longer label is cut with an ellipsis
   const ends = (spec.nodes || []).map(n => (typeof n === 'string' ? n : n.name)).filter(n => !(spec.links || []).some(l => l.source === n));

@@ -164,7 +164,7 @@ const fileName = (spec, ext) => `bns-${[spec.route, spec.id].filter(Boolean).joi
 const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const loadImg = src => new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = src; });
 async function fonts() {
-  try { await Promise.all([document.fonts.load('700 22px "Sofia Sans Condensed"'), document.fonts.load('400 13px "Sofia Sans"'), document.fonts.load('700 13px "Sofia Sans"')]); } catch { /* system fonts are fine */ }
+  try { await Promise.all([document.fonts.load('700 22px "Onest"'), document.fonts.load('400 13px "Onest"'), document.fonts.load('700 13px "Onest"')]); } catch { /* system fonts are fine */ }
 }
 function wrapLines(x, txt, font, maxW) {
   x.font = font;
@@ -222,7 +222,7 @@ export async function renderPng(spec, { watermark = isMock(spec), pixelRatio = 2
   let img = null, w = 0, h = 0;
   if (inst) { const r = chartImage(inst, el, { pixelRatio }); img = await loadImg(r.url); w = r.w; h = r.h; }
   else if (!t) throw new Error('няма какво да се нарисува');
-  const fB = '"Sofia Sans",system-ui,sans-serif', fD = '"Sofia Sans Condensed","Sofia Sans",system-ui,sans-serif';
+  const fB = '"Onest",system-ui,sans-serif', fD = '"Onest",system-ui,sans-serif';
   const pad = 20, W = Math.max(w || 560, 320) + pad * 2, maxW = W - pad * 2;
   const probe = document.createElement('canvas').getContext('2d');
   const tl = wrapLines(probe, spec.title || '', `700 22px ${fD}`, maxW);

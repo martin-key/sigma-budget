@@ -20,7 +20,7 @@
 .page[data-route="S32"] .s32-mini-in { position: absolute; inset: 0 0 auto 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--sp-3); padding: var(--sp-2) var(--sp-3); border: 1px solid var(--line-strong); border-radius: var(--r-2); background: var(--surface); box-shadow: var(--shadow-2); opacity: 0; visibility: hidden; transition: opacity var(--t-fast); }
 .page[data-route="S32"] .s32-mini.is-on .s32-mini-in { opacity: 1; visibility: visible; }
 .page[data-route="S32"] .s32-mini-k { font-weight: 700; }
-.page[data-route="S32"] .s32-mini-v { font-family: var(--font-head); font-size: var(--fs-1); font-weight: 700; font-variant-numeric: tabular-nums; }
+.page[data-route="S32"] .s32-mini-v { font-family: var(--font-head); font-size: var(--fs-1); font-weight: 700; font-variant-numeric: proportional-nums; }
 .page[data-route="S32"] .s32-mini-s { font-size: var(--fs-s); color: var(--muted); }
 
 /* sliders: one column of controls, two on a tablet */
@@ -52,7 +52,7 @@
 .page[data-route="S32"] .s32-row:last-child { padding-bottom: 0; border-bottom: 0; }
 .page[data-route="S32"] .s32-row dt { font-size: var(--fs-s); font-weight: 700; color: var(--muted); }
 .page[data-route="S32"] .s32-row dd { display: grid; gap: 2px; margin: 0; }
-.page[data-route="S32"] .s32-big { font-family: var(--font-head); font-size: var(--fs-3); font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.page[data-route="S32"] .s32-big { font-family: var(--font-head); font-size: var(--fs-3); font-weight: 700; line-height: 1.1; font-variant-numeric: proportional-nums; }
 .page[data-route="S32"] .s32-sub { display: flex; flex-wrap: wrap; gap: 0 var(--sp-3); font-size: var(--fs-s); color: var(--muted); }
 .page[data-route="S32"] .s32-actions { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
 .page[data-route="S32"] .s32-msg { min-height: 1.4em; font-size: var(--fs-s); }

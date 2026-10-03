@@ -396,10 +396,10 @@ export function render(ctx) {
 
 /* ---------------------------------------------------------------- the picture (PNG) */
 const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-/** the vendored Sofia Sans must be loaded before the canvas can use it; if it fails the system font stands in */
+/** the vendored Onest must be loaded before the canvas can use it; if it fails the system font stands in */
 async function loadFonts() {
   try {
-    await Promise.all([document.fonts.load('700 22px "Sofia Sans Condensed"'), document.fonts.load('400 13px "Sofia Sans"'), document.fonts.load('700 13px "Sofia Sans"')]);
+    await Promise.all([document.fonts.load('700 22px "Onest"'), document.fonts.load('400 13px "Onest"'), document.fonts.load('700 13px "Onest"')]);
   } catch { /* system font */ }
 }
 /** `text` cut with an ellipsis so that it fits `maxW` in the font that is set on the context */
@@ -423,7 +423,7 @@ async function card(f, r) {
   x.scale(dpr, dpr);
   x.textBaseline = 'top';
   const ink = cssv('--ink') || '#111111', muted = cssv('--muted') || '#555555', rule = cssv('--line-strong') || '#999999', accent = cssv('--data') || '#1a6b4a';
-  const fB = '"Sofia Sans",system-ui,sans-serif', fD = '"Sofia Sans Condensed","Sofia Sans",system-ui,sans-serif';
+  const fB = '"Onest",system-ui,sans-serif', fD = '"Onest",system-ui,sans-serif';
   const say = (text, px, y, o = {}) => {
     x.font = `${o.w || 400} ${px}px ${o.d ? fD : fB}`;
     x.fillStyle = o.c || ink;

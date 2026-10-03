@@ -44,17 +44,20 @@ const ASK = [
   ['S24', 'database', 'Откъде са данните?', 'Източници, методика и изтегляне.']
 ];
 
-/** the guide link, the big search and the quick chips */
+/** the entrance, as two cards side by side: the guide link (the dark one), then the big search with its quick chips.
+ *  The reading order stays guide → search; the words of the guide link are the same, only split into spans for the type. */
 function intro(ctx) {
   return html`<section class="s01-intro" aria-label="Начало">
-    <p class="s01-guide"><a class="btn btn-primary" href="${ctx.href('S02')}">${icon('compass', { size: 18 })}<span>Нов си тук? Започни с пътеводителя →</span></a></p>
+    <p class="s01-guide"><a class="s01-guide-link" href="${ctx.href('S02')}">${icon('compass', { size: 22 })}<span class="s01-guide-text"><span class="s01-guide-q">Нов си тук?</span> <span class="s01-guide-a">Започни с пътеводителя</span> <span class="s01-guide-go" aria-hidden="true">→</span></span></a></p>
     <form class="s01-find" role="search" aria-label="Търсене в бюджета">
       <label class="field-label" for="s01-q">Търси в бюджета</label>
-      <div class="s01-bar">
-        <input class="input s01-q" id="s01-q" name="q" type="search" maxlength="${MAX_QUERY}" placeholder="Търси: ДДС, МВР, Пловдив…" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="search">
-        <button type="submit" class="btn btn-primary s01-go">Търси</button>
+      <div class="s01-find-main">
+        <div class="s01-bar">
+          <input class="input s01-q" id="s01-q" name="q" type="search" maxlength="${MAX_QUERY}" placeholder="Търси: ДДС, МВР, Пловдив…" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="search">
+          <button type="submit" class="btn btn-primary s01-go">Търси</button>
+        </div>
+        ${chips({ label: 'Често търсено', items: QUICK.map(t => ({ label: t, href: ctx.href('S28', {}, { q: t }) })) })}
       </div>
-      ${chips({ label: 'Често търсено', items: QUICK.map(t => ({ label: t, href: ctx.href('S28', {}, { q: t }) })) })}
     </form></section>`;
 }
 
@@ -340,8 +343,17 @@ function dataLinks(ctx) {
   });
 }
 
-/** the blocks after „Кой си ти?“ for each reader: each is f(ctx, core) → html */
-const BY_TYPE = { citizen: [calc, strip, top5, merki, izp], journalist: [vs, growth, novo, izpvs], expert: [pera, fns, dataLinks] };
+/** the blocks after „Кой си ти?“ for each reader, in reading order: each is f(ctx, core) → html.
+ *  A block on its own is full width; a list inside the list is one row of columns, each column a stack of blocks (read down the first column, then the next),
+ *  so a short card never has to wait for a tall one. The order of the blocks is the same as before. */
+const BY_TYPE = {
+  citizen: [[[calc, strip], [top5, merki]], izp],
+  journalist: [vs, [[growth], [novo]], izpvs],
+  expert: [pera, fns, dataLinks]
+};
+const layout = (ctx, core, part) => Array.isArray(part)
+  ? html`<div class="s01-cols">${part.map(col => html`<div class="s01-col">${col.map(f => f(ctx, core))}</div>`)}</div>`
+  : part(ctx, core);
 
 /** „Разгледай бюджета“: one question card per screen */
 function explore(ctx) {
@@ -352,14 +364,30 @@ function explore(ctx) {
 }
 
 export function render(ctx) {
-  const lede = html`<strong>Бюджет на светло</strong> показва държавния бюджет за 2026 г. с прости думи: <a href="${ctx.href('S06')}">откъде идват парите</a>, <a href="${ctx.href('S07')}">за какво се харчат</a> и <a href="${ctx.href('S15')}">как се изпълнява планът</a>.`;
+  const lede = html`<strong>Бюджет на светло</strong> показва държавния бюджет за <span class="nowrap">2026 г.</span> с прости думи: <a href="${ctx.href('S06')}">откъде идват парите</a>, <a href="${ctx.href('S07')}">за какво се харчат</a> и <a href="${ctx.href('S15')}">как се изпълнява планът</a>.`;
   const core = ctx.data?.core;
   if (!core?.kpis) return { lede, body: html`${intro(ctx)}${pendingState({ title: 'Основните числа не са налични', text: 'Файлът с основните числа не се зареди. Опитай да презаредиш страницата.' })}${explore(ctx)}` };
-  const parts = (BY_TYPE[ctx.store.get('userType')] || BY_TYPE.citizen).map(f => f(ctx, core));
-  return { lede, body: html`${intro(ctx)}${six(ctx, core)}${who(ctx)}${parts}${explore(ctx)}` };
+  const parts = (BY_TYPE[ctx.store.get('userType')] || BY_TYPE.citizen).map(part => layout(ctx, core, part));
+  return { lede, body: html`${intro(ctx)}${six(ctx, core)}${who(ctx)}<div class="s01-grid">${parts}</div>${explore(ctx)}` };
+}
+
+/** the headline in two tones: the router builds the frame and its one h1; here the same words are only split into two spans (the second one in grey),
+ *  so the text, the id and the focus target stay as they are. Safe to run again; without the words it finds, the plain headline stays. */
+function twoTone() {
+  try {
+    const h = document.getElementById('page-title');
+    if (!h || h.querySelector('.s01-t1')) return;
+    const text = h.textContent, cut = text.indexOf('на достъпен език');
+    if (cut <= 0) return;
+    const a = document.createElement('span'), b = document.createElement('span');
+    a.className = 's01-t1'; a.textContent = text.slice(0, cut);
+    b.className = 's01-t2'; b.textContent = text.slice(cut);
+    h.replaceChildren(a, b);
+  } catch { /* the plain headline reads just as well */ }
 }
 
 export function mount(root, ctx) {
+  twoTone();
   const off = [], on = (el, ev, fn) => { if (el) { el.addEventListener(ev, fn); off.push(() => el.removeEventListener(ev, fn)); } };
   on(root.querySelector('.s01-find'), 'submit', e => {
     e.preventDefault();

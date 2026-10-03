@@ -85,7 +85,7 @@
 .page[data-route="S04"] .s04-card { position: relative; display: grid; gap: var(--sp-1); align-content: start; min-width: 0; padding: var(--sp-3) var(--sp-4); border: 1px solid var(--line); border-radius: var(--r-2); background: var(--surface); }
 .page[data-route="S04"] .s04-card[data-ceiling] { border: 2px dashed var(--line-strong); background: var(--sunk); }
 .page[data-route="S04"] .s04-card-k { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-1) var(--sp-2); font-size: var(--fs-s); color: var(--muted); }
-.page[data-route="S04"] .s04-card-v { font: 700 var(--fs-2)/1.2 var(--font-head); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.page[data-route="S04"] .s04-card-v { font: 700 var(--fs-2)/1.2 var(--font-head); font-variant-numeric: proportional-nums; overflow-wrap: anywhere; }
 .page[data-route="S04"] .s04-card-s { font-size: var(--fs-s); color: var(--muted); }
 /* the connector between two cards: a short line and an arrowhead, both drawn here (down on a phone, across on a wide screen) */
 .page[data-route="S04"] .s04-card + .s04-card::before { content: ""; position: absolute; left: var(--sp-5); bottom: 100%; height: var(--sp-5); border-left: 2px solid var(--line-strong); }
