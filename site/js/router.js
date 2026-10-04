@@ -410,6 +410,7 @@ async function render(kind) {
     if (seq !== navSeq) { for (const f of own) { try { f(); } catch (e) { console.error(e); } } return; }
     cleanups.push(...own);
     if (article.querySelector('[data-gl-scan]')) import('./glossary.js').then(m => m.scan?.(article)).catch(e => console.error('[glossary] scan failed', e));
+    await import('./ui/png.js').then(m => m.scan?.(article)).catch(e => console.error('[png] scan failed', e));   // „PNG“ button on every statistic
     if (kind === 'pop' || query.to || kind === 'load') applyScroll();
     article.dataset.ready = '1';
   })();

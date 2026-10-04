@@ -479,3 +479,10 @@ h4.block-title{font-size:var(--fs-0)}
   .link-card:hover .link-card-go{background:Highlight;color:HighlightText}
   .next-go,.link-card-ic{border:1px solid CanvasText}
 }
+
+/* ---- „PNG“ button (ui/png.js): in the header of every block that holds a statistic; under a loose statistic (a bar) ---- */
+.png-btn svg{flex:none}
+.png-btn[aria-busy="true"]{opacity:.6;cursor:progress}
+.png-bar{position:relative;z-index:2;display:flex;justify-content:flex-end;margin-top:var(--sp-2)}   /* above a card's stretched link */
+.s05-card>.png-bar{margin:var(--sp-1) calc(-1 * var(--sp-2)) 0 0}
+@media print{.png-btn,.png-bar{display:none}}

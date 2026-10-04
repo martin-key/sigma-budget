@@ -57,7 +57,11 @@ const chartEl = spec => {
   return root ? [...root.querySelectorAll('.chart[data-ready="1"]')].find(c => c.offsetParent !== null) || null : null;
 };
 const hasChart = spec => { const el = chartEl(spec); return !!(el && window.echarts?.getInstanceByDom(el)); };
-const canPng = spec => hasChart(spec) || !!tableOf(spec);
+/** what ui/png.js can draw from the DOM: charts, rankings, KPI tiles, progress bars, maps, data tables, the home and revenue strips, the 5-minute scenes */
+export const STAT_SEL = '.chart,.rank,.kpi,.prog,.map-svg,table.data,.s01-strip,.s06-strip,.s04-fig';
+export const statNodes = root => (root ? [...root.querySelectorAll(STAT_SEL)].filter(n => !n.closest('details.fig-table')) : []);
+const hasStat = spec => { const el = blockEl(spec); return !!(el && statNodes(el).length); };
+const canPng = spec => hasChart(spec) || !!tableOf(spec) || hasStat(spec);
 
 /** trigger button for a block header */
 export const shareButton = (id, o = {}) => html`<button type="button" class="btn btn-sm btn-quiet share-btn" data-share="${id}" aria-haspopup="dialog" aria-expanded="false">${icon('share', { size: 16 })}<span>${o.label || 'Сподели'}</span></button>`;
@@ -215,6 +219,8 @@ function drawTable(x, t, W, y, pad, fam) {
  */
 export async function renderPng(spec, { watermark = isMock(spec), pixelRatio = 2 } = {}) {
   await fonts();
+  const viaDom = await import('./ui/png.js').then(m => m.canvasFor(spec, { watermark, pixelRatio })).catch(e => { console.error('[png]', e); return null; });
+  if (viaDom) return viaDom;
   const { chartImage } = await import('./charts.js');
   const el = chartEl(spec);
   const inst = el && window.echarts?.getInstanceByDom(el);
@@ -310,3 +316,5 @@ export function openMenu(anchor, id) {
   });
   return pop;
 }
+/** for ui/png.js: the visible „PNG“ buttons run the same download as the menu item */
+export { fileName, run as runAct, drawWatermark, wrapLines };

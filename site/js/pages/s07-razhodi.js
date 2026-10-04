@@ -330,7 +330,7 @@ function fnMap(ctx, fm, key = 'funkcii', paneOf = fnPane) {
   const sel = selOf(ctx, fm.ranked);
   const tm = treemapList({
     id: `s07-map-${key}`, label: T.map, unit: 'num', unitLabel: u.unit, d: u.d, fmt: fmtFor(ctx, u, hist),
-    categoryLabel: T.cat, sort: 'desc', shares: true, items: mapItems(u, fm.items, NEST && !hist)
+    categoryLabel: T.cat, sort: 'desc', shares: true, pie: true, items: mapItems(u, fm.items, NEST && !hist)
   });
   return html`<div class="s07-split" data-key="${key}"><div class="s07-main">${tm}</div>${side(key, fm.ranked, sel, (x, hidden) => paneOf(ctx, fm, x, hidden))}</div>`;
 }
@@ -388,7 +388,7 @@ function stackSpec(ctx, fm, o) {
     unit: u.unit, d: u.d, fmt: u.fmt, option: u.option(false),
     categories: fm.cats, categoryLabel: 'Година',
     series: order.map(x => ({ name: x.label, color: x.c, data: x.mln.map((v, i) => u.conv(v, x.pg[i])) })),
-    labels: false, legend: true, height: 360,
+    labels: false, legend: true, height: 360, views: ['bars', 'line'],
     desc: `Наслагани колони по години (${span}). Точните числа са в таблицата под графиката.`
   };
   spec.table = oneLine(spec, fm.flat);

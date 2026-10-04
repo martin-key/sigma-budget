@@ -12,6 +12,7 @@ import { kpi, kpiGrid } from '../ui/kpi.js';
 import { mapFigure, filterMap } from '../ui/map.js';
 import { dataTable } from '../ui/table.js';
 import { ranklist } from '../ui/ranklist.js';
+import { chart } from '../ui/chart.js';
 import { seg } from '../ui/seg.js';
 import { field, textInput, selectInput } from '../ui/forms.js';
 import { emptyState, mockNote, mockHidden, pendingState } from '../ui/states.js';
@@ -151,6 +152,27 @@ function moneyBlock(md, ctx) {
   });
 }
 
+/** the four kinds of main transfer add up to „Основни трансфери общо“ above: as a pie, as bars or as a table */
+function kindsBlock(md, ctx) {
+  const a = md.aggPool;
+  const kinds = M.TYPES.filter(t => t.inTotal).map(t => ({ ...t, khil: a.sum[t.key] }));
+  if (kinds.some(x => !ok(x.khil) || x.khil < 0) || !(a.sum.total > 0)) return '';
+  const k = md.lv ? EUR_RATE : 1, unit = md.lv ? 'млн. лв.' : 'млн. €';
+  const mln = v => Math.round(((v * k) / 1000) * 1000) / 1000;
+  const spec = {
+    id: 's20-ch-vidove', type: 'donut', title: 'Основни трансфери по видове', sub: `В ${unit}${md.oblast ? `, област ${md.oblastName}` : ', цялата страна'}.`,
+    unit, d: 1, fmt: v => num(v, 1), categoryLabel: 'Вид трансфер', legendValues: true, height: 300,
+    data: kinds.map(x => ({ name: x.label, value: mln(x.khil) })),
+    views: ['pie', 'bars', 'table'], valueName: 'Основни трансфери', axis: v => num(v, 0),
+    desc: `Кръгова графика: ${kinds.map(x => `${x.label} ${num(mln(x.khil), 1)} ${unit}`).join('; ')}.`
+  };
+  return block({
+    id: 's20-vidove', title: 'За какво са основните трансфери', scope: 'nat', status: 'real', source: ['zdb'], asOf: md.asOf,
+    sub: `Четирите вида основни трансфери по закона за 2026 г. Заедно са сумата по-горе.${md.oblast ? ` Показана е област ${md.oblastName}.` : ''} Другите целеви трансфери са отделно и не са в нея.`,
+    body: chart(spec)
+  });
+}
+
 function mapBlock(md, ctx, q) {
   const items = md.all.map(m => ({ id: m.id, label: m.name, sub: `област ${m.region}`, value: M.pcOf(m), group: String(m.regionId ?? m.region), href: ctx.href('obshtina', { code: m.id }) }));
   return block({
@@ -248,7 +270,7 @@ export function render(ctx) {
   if (!md.ok) return pendingState({ title: 'Списъкът на общините предстои', text: 'Данните за общините още не са заредени.' });
   const q = clean(ctx.query.q);
   const live = liveParts(md, ctx, q);
-  return html`${findCard(md, ctx, q, live)}${moneyBlock(md, ctx)}${md.view === 'map' ? mapBlock(md, ctx, q) : listBlock(md, ctx, q)}${rankBlocks(md, ctx)}${readBlock(md)}`;
+  return html`${findCard(md, ctx, q, live)}${moneyBlock(md, ctx)}${kindsBlock(md, ctx)}${md.view === 'map' ? mapBlock(md, ctx, q) : listBlock(md, ctx, q)}${rankBlocks(md, ctx)}${readBlock(md)}`;
 }
 
 /* ---------------------------------------------------------------- behaviour: the search filters the map and the list in place */

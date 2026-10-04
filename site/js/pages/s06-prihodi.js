@@ -176,6 +176,7 @@ function sourcesChartSpec(ctx, m) {
     categories: items.map(x => x.short), categoryLabel: 'Източник',
     series: [{ name: `Приходи, ${yr(m.year)}`, data: items.map(x => u.conv(x.val, x.pgSel)), color: '--rev' }],
     labels: true, legend: false, labelWidth: 'auto', labelOverflow: 'break', height: Math.max(328, items.length * 44 + 40),
+    views: ['bars', 'pie', 'table'], partColors: items.map(x => x.ed.c), pieHeight: 340,   // the shares of one whole: the kinds of revenue add up to all revenue
     desc: `Хоризонтални ленти за ${yr(m.year)}: ${items.map(x => `${x.short} ${u.fmt(u.conv(x.val, x.pgSel))} ${u.unit}`).join('; ')}.`
   };
 }
@@ -202,9 +203,10 @@ function yearsChartSpec(ctx, m) {
   const span = `${m.years[0]}–${m.years[m.years.length - 1]}`;
   const spec = {
     id: 's06-by-year', type: 'line', title: `Приходи по видове, ${span}`,
-    sub: `В ${u.unit}.${m.firstForecast > 0 ? ' Прекъснатата линия е прогноза.' : ''}`,
+    sub: `В ${u.unit}.`,
     unit: u.unit, d: u.d, fmt: u.fmt, option: u.option(false),
     categories: m.cats, categoryLabel: 'Година',
+    views: ['line', 'bars'], stackBars: true,   // the eight kinds add up to all revenue, so stacked columns are honest
     series: m.ranked.map(x => ({ name: x.short, color: x.ed.c, data: x.mln.map((v, i) => u.conv(v, x.pg[i])), ...(m.firstForecast > 0 ? { dashFrom: m.firstForecast } : {}) })),
     labels: false, height: 340,
     desc: `Линии за осемте източника по години (${span}). Точните числа са в таблицата под графиката.`

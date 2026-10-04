@@ -142,6 +142,7 @@ function yearsBlock(ctx, M) {
     unit: u.unit, d: u.d, fmt: u.fmt, option: u.option(false),
     categories: cats, categoryLabel: 'Година', series: [{ name: 'Разходи', color: '--exp', data }],
     labels: true, legend: false, height: 320, interval: 0,   // four two-line labels always fit: show every one of them, also at 400 px
+    views: ['bars', 'line'],
     desc: `Колони по години (${span}). Точните числа са в таблицата под графиката.`,
     table: {
       columns: [

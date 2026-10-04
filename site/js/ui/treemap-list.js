@@ -3,8 +3,11 @@
 //   treemapList({id, title, sub, label, desc, unit, fmt, d, unitLabel, categoryLabel, sort, shares, view, query, mock, height, items:[…]})
 // - `items`: the ranklist shape {label (or name), sub, value, href, mock, status, pctGdp, children, id}. The list shows every row (a row without a number is
 //   „Предстои“); the map draws only rows with a positive number and says how many it left out.
-// - `view:'list'|'map'` forces a view, anything else = by screen width (and it follows a resize until the visitor chooses). `query:'view'` mirrors the
-//   visitor's choice into `?view=…` (pass `view: ctx.query.view` so a shared link opens the same view). The switch never re-renders the screen.
+// - `view:'list'|'map'|'pie'` forces a view, anything else = by screen width (and it follows a resize until the visitor chooses). `query:'view'` mirrors the
+//   visitor's choice into `?view=…` (pass `view: ctx.query.view` so a shared link opens the same view). The switch never re-renders the screen; the choice is
+//   kept while the screen is open, so a unit switch (which re-renders it) does not throw it away.
+// - `pie: true` adds a third view «Кръгова» (a donut of the positive top-level rows with a legend that carries the value and the share of each part; the tail
+//   beyond 8 slices is folded into «Други»). Only for rows that add up to a whole; `pieHeight` sets its height.
 // - `unit` ('mln' default | 'pct' | 'num'), `fmt`, `d`, `unitLabel`, `categoryLabel`, `shares` (default true), `sort` ('desc' default; `false` keeps your order)
 //   go to the list (see ranklist.js). The map prints the raw numbers with the same unit text: million euro, so the „на човек“, „% от БВП“ and „лв.“
 //   switches change the list only.
@@ -24,6 +27,8 @@ import { num } from '../format.js';
 const ok = v => typeof v === 'number' && Number.isFinite(v);
 const REG = new Map();                 // id -> normalised items, for the map's click handler
 share.onReset(() => REG.clear());
+const chosen = new Map();              // `${screen}:${id}` -> the visitor's choice of view; outlives the re-render of a unit switch
+const keyOf = id => `${share.currentRoute()?.key ?? ''}:${id}`;
 
 const norm = it => ({ ...it, label: it.label ?? it.name, children: it.children?.filter(c => c && (c.label ?? c.name) != null).map(norm) });
 const isMock = it => it.mock === true || it.status === 'mock';
@@ -49,8 +54,11 @@ export function treemapList(o = {}) {
   }
 
   const wide = typeof matchMedia === 'function' && !matchMedia('(max-width: 599px)').matches;
-  const forced = o.view === 'list' || o.view === 'map';
-  const view = data.length ? (forced ? o.view : wide ? 'map' : 'list') : 'list';
+  const pieOn = o.pie === true && data.length >= 2;
+  const ck = keyOf(o.id), saved = chosen.get(ck);
+  const allowed = v => v === 'list' || v === 'map' || (v === 'pie' && pieOn);
+  const forced = allowed(o.view) ? o.view : allowed(saved) ? saved : null;
+  const view = data.length ? (forced || (wide ? 'map' : 'list')) : 'list';
   const name = o.label ?? o.title;
 
   const list = ranklist({
@@ -65,15 +73,20 @@ export function treemapList(o = {}) {
   });
   const control = seg({
     name: `${o.id}-view`, label: 'Начин на показване', value: view, norender: true, query: o.query || undefined,
-    options: [{ value: 'list', label: 'Списък', icon: 'list' }, { value: 'map', label: 'Карта', icon: 'grid' }]
+    options: [{ value: 'list', label: 'Списък', icon: 'list' }, { value: 'map', label: 'Карта', icon: 'grid' }, ...(pieOn ? [{ value: 'pie', label: 'Кръгова', icon: 'pieChart' }] : [])]
   });
+  const pie = pieOn ? chart({
+    id: `${o.id}-pie`, type: 'donut', label: name || 'Разпределение', unit: unitText, d: o.d, fmt, height: o.pieHeight || 300, legendValues: true, categoryLabel: o.categoryLabel,
+    mock: o.mock === true, data: data.map(({ name: n, value, mock }) => ({ name: n, value, mock }))
+  }) : '';
   const cap = o.title || o.sub
     ? html`<p class="fig-cap">${o.title ? html`<span class="fig-title">${o.title}</span>` : ''}${o.sub ? html`<span class="fig-sub">${o.sub}</span>` : ''}</p>`
     : '';
-  return html`<div class="${cx('tmap', o.cls)}" id="${o.id}" data-ui="treemap-list" data-view="${view}"${forced ? raw(' data-explicit="1"') : ''}>
+  return html`<div class="${cx('tmap', o.cls)}" id="${o.id}" data-ui="treemap-list" data-view="${view}" data-ck="${ck}"${forced ? raw(' data-explicit="1"') : ''}>
     <div class="tmap-bar">${cap}${control}</div>
     <div class="tmap-list">${list}</div>
     <div class="tmap-map">${map}${left ? html`<p class="tmap-note">На картата няма ${num(left, 0)} ${left === 1 ? 'ред' : 'реда'} без положително число. ${left === 1 ? 'Той е' : 'Те са'} в списъка.</p>` : ''}</div>
+    ${pieOn ? html`<div class="tmap-pie">${pie}${left ? html`<p class="tmap-note">На кръговата графика няма ${num(left, 0)} ${left === 1 ? 'ред' : 'реда'} без положително число. ${left === 1 ? 'Той е' : 'Те са'} в списъка.</p>` : ''}</div>` : ''}
   </div>`;
 }
 
@@ -84,6 +97,7 @@ export function mount(el, ctx) {
     const r = e.target;
     if (!(r instanceof HTMLInputElement) || r.type !== 'radio' || !r.checked || !radios.includes(r)) return;
     el.dataset.explicit = '1';
+    if (el.dataset.ck) chosen.set(el.dataset.ck, r.value);
     set(r.value);
   };
   el.addEventListener('change', onChange);

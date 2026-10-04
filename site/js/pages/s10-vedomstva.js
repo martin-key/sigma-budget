@@ -9,7 +9,7 @@
 // Everything the visitor can change is a pure function of ctx and the model, so render() and mount() draw the very same markup.
 import { html } from '../html.js';
 import { num, pct, delta, money, khil, date, plural, DASH, NBSP, EUR_RATE } from '../format.js';
-import { amount, moneyCol } from '../view.js';
+import { amount, moneyCol, chartUnit } from '../view.js';
 import { norm, lat } from '../searchlib.js';
 import { tabs } from '../ui/tabs.js';
 import { block } from '../ui/block.js';
@@ -18,6 +18,7 @@ import { chips } from '../ui/chips.js';
 import { seg } from '../ui/seg.js';
 import { field, textInput, selectInput } from '../ui/forms.js';
 import { ranklist } from '../ui/ranklist.js';
+import { chart } from '../ui/chart.js';
 import { dataTable } from '../ui/table.js';
 import { callout } from '../ui/cards.js';
 import { emptyState, errorState, pendingState } from '../ui/states.js';
@@ -512,6 +513,31 @@ function overview(md, pm, ctx) {
   });
 }
 
+/** how the sum splits: the seven biggest budgets and all the others together, as bars, a pie or a table (the parts add up to „Разходи общо“ above) */
+function sharesBlock(md, ctx) {
+  const order = [...md.items].sort((a, b) => b.mln - a.mln || bg(a.name, b.name));
+  if (order.length < 5 || !(md.total > 0)) return '';
+  const top = order.slice(0, 7), rest = order.slice(7);
+  const restMln = rest.reduce((s, m) => s + m.mln, 0);
+  const name = m => (m.name.length > 50 && m.short ? m.short : m.name);
+  const parts = [...top.map(m => ({ name: name(m), mln: m.mln, pg: m.pctGdp })), { name: `Останалите ${num(rest.length, 0)} ведомства`, mln: restMln, pg: md.gdpMln ? (restMln / md.gdpMln) * 100 : null }];
+  const u = chartUnit(ctx, { pct: true, max: Math.max(...parts.map(p => p.mln)) });
+  const spec = {
+    id: 's10-ch-delove', type: 'barh', title: 'Най-големите бюджети и останалите', sub: `В ${u.unit}.`,
+    unit: u.unit, d: u.d, fmt: u.fmt, option: u.option(true),
+    categories: parts.map(p => p.name), categoryLabel: 'Ведомство', series: [{ name: 'Разходи на ведомството', data: parts.map(p => u.conv(p.mln, p.pg)), color: '--exp' }],
+    labels: true, legend: false, labelWidth: 'auto', labelOverflow: 'break', height: parts.length * 44 + 40,
+    views: ['bars', 'pie', 'table'], partColors: [...top.map((_, i) => i + 1), 'other'], pieHeight: 340,
+    desc: `Хоризонтални ленти: ${parts.map(p => `${p.name} ${u.fmt(u.conv(p.mln, p.pg))} ${u.unit}`).join('; ')}.`
+  };
+  return block({
+    id: 's10-delove', title: 'Кой взема най-голям дял', status: 'real', source: md.doc.meta?.source ?? SOURCE_V, asOf: md.asOf,
+    scope: { key: 'zdb-vedomstva', label: 'Бюджети на ведомствата', note: 'не е целият бюджет' },
+    sub: 'Седемте най-големи бюджета и всички останали ведомства заедно. Заедно правят сбора по-горе.',
+    body: chart(spec)
+  });
+}
+
 function vFind(md, ctx, q, p) {
   const chipItems = [{ label: 'Всички', count: md.items.length, query: 'vid=', pressed: !md.vid }, ...md.groups.map(g => ({ label: g.label, count: g.count, query: `vid=${g.key}`, pressed: md.vid === g.key }))];
   return html`<div class="s10-find" role="search" aria-label="Търсене и филтри на ведомствата">
@@ -530,6 +556,7 @@ function vPanel(md, pm, ctx) {
   const p = vParts(md, ctx, q);
   return html`${unitSwitch(ctx, { name: 's10-unit', note: '„% от БВП“ е спрямо планирания БВП за 2026 г.' })}
     ${overview(md, pm, ctx)}
+    ${sharesBlock(md, ctx)}
     ${block({
       id: 's10-spisak', title: 'Всички ведомства', status: 'real', source: md.doc.meta?.source ?? SOURCE_V, asOf: md.asOf,
       scope: { key: 'zdb-vedomstva', label: 'Бюджети на ведомствата', note: 'не е целият бюджет' },

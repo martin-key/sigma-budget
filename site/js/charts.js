@@ -121,13 +121,15 @@ function cartesian(spec, tk, env) {
   const series = spec.series.flatMap((s, i) => {
     const color = colorOf(spec, s, i, tk);
     const mockAll = !!(s.mock || spec.mock);
-    const items = s.data.map(v => {
+    const fc = !mockAll && !s.dashed && s.dashFrom != null ? Math.floor(Number(s.dashFrom)) : NaN;   // first forecast point; bars draw it paler with a dashed outline
+    const items = s.data.map((v, j) => {
       const it = isObj(v) ? v : { value: v };
       const mock = mockAll || it.mock;
       const o = { value: it.value };
       if (kind === 'line') {
         if (mock) o.itemStyle = { color: tk.surface, borderColor: color, borderWidth: 2 };
       } else if (mock) o.itemStyle = { color, decal: decal(tk), borderColor: color, borderWidth: 1 };
+      else if (fc > 0 && j >= fc) o.itemStyle = stacked ? { color, opacity: 0.5, borderColor: tk.card, borderWidth: 1 } : { color, opacity: 0.5, borderColor: color, borderWidth: 1, borderType: 'dashed' };
       if (it.label) o.name = it.label;
       return o;
     });
@@ -173,19 +175,22 @@ function cartesian(spec, tk, env) {
   // spec.interval overrides it (0 = every label, n = skip n between two labels, 'auto' = ECharts' own rule); hideOverlap stays on as a safety net.
   let interval = spec.interval;
   if (!horiz && interval == null) {
-    const widest = Math.ceil(Math.max(0, ...cats.map(c => textPx(c, `12px ${tk.font}`))));
+    const widest = Math.ceil(Math.max(0, ...cats.flatMap(c => c.split('\n')).map(c => textPx(c, `12px ${tk.font}`))));   // a two-line label (« 2025\nПрограма ») is as wide as its longer line
     const slot = Math.max(1, env.width - 24 - 48) / Math.max(1, cats.length);   // grid margins + a value-axis label column
     interval = Math.max(0, Math.ceil((widest + 8) / slot) - 1);
   }
   const catAxis = {
     type: 'category', data: cats, inverse: horiz, axisTick: { show: false }, axisLine: { lineStyle: { color: tk.lineStrong } },
     axisLabel: horiz
-      ? (wrap ? { color: tk.ink, fontSize: 13, width: labelWidth, overflow: spec.labelOverflow } : { color: tk.ink, fontSize: 13, formatter: v => fitText(v, labelWidth, labelFont) })
-      : { color: tk.muted, fontSize: 12, hideOverlap: true, interval, rotate: 0 }
-  };
+      ? (wrap ? { color: tk.ink, fontSize: 13, fontFamily: tk.font, align: 'right', width: labelWidth, overflow: spec.labelOverflow } : { color: tk.ink, fontSize: 13, fontFamily: tk.font, formatter: v => fitText(v, labelWidth, labelFont) })
+      : { color: tk.muted, fontSize: 12, fontFamily: tk.font, hideOverlap: true, interval, rotate: 0 }
+  };   // fontFamily is set on the label itself: containLabel sizes the label column from the label MODEL, which does not inherit the global textStyle (it fell back to sans-serif, ~4% narrower than Onest, so long names were clipped)
+  // a horizontal value axis in a narrow chart: as many steps as its width carries (widest label + 16 px per tick), else « 1 000 2 000 3 000 » run together
+  const peak = Math.max(0, ...spec.series.flatMap(s => s.data.map(v => Math.abs(Number(isObj(v) ? v.value : v)) || 0)));
+  const valSteps = Math.max(2, Math.min(5, Math.floor((env.width - labelWidth - 52) / (textPx(fmt(peak), `12px ${tk.font}`) + 16)) - 1));
   const valAxis = {
-    type: 'value', min: spec.min, max: spec.max,
-    axisLabel: { color: tk.muted, fontSize: 12, formatter: v => fmt(v) },
+    type: 'value', min: spec.min, max: spec.max, splitNumber: horiz && narrow ? valSteps : undefined,
+    axisLabel: { color: tk.muted, fontSize: 12, fontFamily: tk.font, formatter: v => fmt(v) },
     splitLine: { lineStyle: { color: tk.line } }, axisLine: { show: false }, axisTick: { show: false }
   };
   return {
@@ -214,10 +219,12 @@ function cartesian(spec, tk, env) {
   };
 }
 
+/** where a pie folds its tail into «Други»: after 8 slices, but never a tail of one */
+export const tailAt = n => (n > 9 ? 8 : n);
 function donut(spec, tk, env) {
   const fmt = defaultFmt(spec);
   const src = spec.data || [];
-  const keep = src.slice(0, 8), rest = src.slice(8);
+  const cut = tailAt(src.length), keep = src.slice(0, cut), rest = src.slice(cut);
   const items = keep.map((d, i) => ({ ...d, c: colorOf(spec, d, i, tk) }));
   if (rest.length) items.push({ name: 'Други', value: rest.reduce((a, d) => a + (d.value || 0), 0), c: tk.other, mock: rest.some(d => d.mock) });
   const total = items.reduce((a, d) => a + (d.value || 0), 0);
