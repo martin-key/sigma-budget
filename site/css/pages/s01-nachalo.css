@@ -1,7 +1,8 @@
 /* S01 · Държавният бюджет на достъпен език · visual language v2.
-   A new wireframe for the front door; the blocks, their order and every word are the same as before:
-     headline (two tones) → two entrance cards side by side (the dark guide card, the search card) → the six numbers as one open grid with hairlines →
-     „Кой си ти?“ as three selectable cards → the reader's blocks as a two-column grid of soft cards → the questions as a quiet two-column list.
+   The front door, top to bottom:
+     headline (two tones) → four action cards (what a visitor comes to do) → two entrance cards side by side (the dark guide card, the search card) →
+     the six numbers as one open grid with hairlines → the questions as a quiet two-column list (directly under the six numbers) →
+     „Кой си ти?“ as three selectable cards → the reader's blocks as a two-column grid of soft cards.
    Tokens only, no dark-mode rules (the tokens carry both themes), every selector scoped to the screen. */
 
 /* ── the headline: big, tight, two tones (the second part is wrapped in .s01-t2 by mount()) ── */
@@ -14,8 +15,30 @@
 .page[data-route="S01"] .page-body > * + * { margin-top: var(--sp-7); }
 .page[data-route="S01"] .page-body > .s01-intro + #s01-six { margin-top: var(--sp-5); }
 
+/* ── „Какво искаш да направиш?“: four big soft cards above the search; 2 × 2 on a phone, four across on a wide screen.
+      A lime icon chip and an arrow ring on the first line, the verb in capitals, then the promise in plain words. ── */
+.page[data-route="S01"] .page-body > .s01-actions + .s01-intro { margin-top: var(--sp-5); }
+.page[data-route="S01"] .s01-act-h { margin: 0 0 var(--sp-4); font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2.2rem); line-height: 1.1; letter-spacing: var(--track-head); }
+.page[data-route="S01"] .s01-act-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
+.page[data-route="S01"] .s01-act-list > li { display: flex; min-width: 0; }
+.page[data-route="S01"] .s01-act { flex: 1; display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; padding: var(--sp-4) var(--sp-3) var(--sp-4) var(--sp-4); border: 2px solid transparent; border-radius: var(--r-3); background: var(--card); color: var(--ink); text-decoration: none; transition: background var(--t-fast), border-color var(--t-fast); }
+.page[data-route="S01"] .s01-act:hover { border-color: var(--ink); background: var(--sunk); color: var(--ink); text-decoration: none; }
+.page[data-route="S01"] .s01-act-top { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); margin-bottom: var(--sp-3); }
+.page[data-route="S01"] .s01-act-ic { display: grid; place-items: center; box-sizing: content-box; flex: none; width: 22px; height: 22px; padding: 10px; border-radius: 50%; background: var(--accent); color: var(--on-accent); }
+.page[data-route="S01"] .s01-act-go { display: grid; place-items: center; flex: none; width: 34px; height: 34px; border: 1px solid var(--line-strong); border-radius: 50%; font-size: 1.1rem; line-height: 1; transition: background var(--t-fast), border-color var(--t-fast), color var(--t-fast), transform var(--t-fast); }
+.page[data-route="S01"] .s01-act:hover .s01-act-go { border-color: var(--accent); background: var(--accent); color: var(--on-accent); transform: translateX(2px); }
+.page[data-route="S01"] .s01-act-verb { font: 700 var(--fs-0)/1.15 var(--font-head); letter-spacing: .04em; text-transform: uppercase; }
+.page[data-route="S01"] .s01-act-text { color: var(--muted); font-size: var(--fs-s); line-height: 1.35; }
+@media (min-width: 900px) {
+  .page[data-route="S01"] .s01-act-list { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .page[data-route="S01"] .s01-act { gap: var(--sp-2); min-height: 12rem; padding: var(--sp-5); }
+  .page[data-route="S01"] .s01-act-top { margin-bottom: var(--sp-5); }
+  .page[data-route="S01"] .s01-act-verb { font-size: var(--fs-1); }
+  .page[data-route="S01"] .s01-act-text { font-size: var(--fs-0); line-height: 1.4; }
+}
+
 /* ── the entrance: the guide card (dark) and the search card (soft grey) ── */
-.page[data-route="S01"] .s01-intro { display: grid; gap: var(--sp-3); }
+.page[data-route="S01"] .s01-intro { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); }
 .page[data-route="S01"] .s01-guide { display: flex; margin: 0; }
 .page[data-route="S01"] .s01-guide-link { flex: 1; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "ic q go" "ic a go"; align-items: center; column-gap: var(--sp-4); padding: var(--sp-4) var(--sp-4) var(--sp-4) var(--sp-5); border: 1px solid transparent; border-radius: var(--r-4); background: var(--inv); color: var(--on-inv); text-decoration: none; transition: background var(--t-fast); }
 .page[data-route="S01"] .s01-guide-link:hover { color: var(--on-inv); text-decoration: none; }
@@ -28,13 +51,25 @@
 
 .page[data-route="S01"] .s01-find { display: flex; flex-direction: column; justify-content: space-between; gap: var(--sp-5); padding: var(--sp-5); border-radius: var(--r-4); background: var(--card); }
 .page[data-route="S01"] .s01-find .field-label { font: 650 var(--fs-2)/1.1 var(--font-head); letter-spacing: var(--track-head); }
-.page[data-route="S01"] .s01-find-main { display: grid; gap: var(--sp-4); }
+.page[data-route="S01"] .s01-find-main { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-4); }
 .page[data-route="S01"] .s01-bar { display: flex; flex-wrap: wrap; gap: var(--sp-2); align-items: stretch; }
 .page[data-route="S01"] .s01-q { flex: 1 1 14rem; min-width: 0; width: auto; -webkit-appearance: none; appearance: none; min-height: 52px; padding-inline: var(--sp-5); border-radius: var(--r-full); font-size: var(--fs-0); }
 .page[data-route="S01"] .s01-q::-webkit-search-cancel-button,
 .page[data-route="S01"] .s01-q::-webkit-search-decoration { -webkit-appearance: none; display: none; }
 .page[data-route="S01"] .s01-go { flex: none; min-height: 52px; padding-inline: var(--sp-6); font-size: var(--fs-0); }
-@media (max-width: 520px) { .page[data-route="S01"] .s01-go { flex: 1 1 100%; } }
+.page[data-route="S01"] .s01-go-ic { display: none; }
+/* on a phone the search is one compact row: a label of the size of a card title, the field and a round search button side by side (both 46 px, above the 44 px touch size);
+   the word „Търси“ stays in the button for screen readers */
+@media (max-width: 600px) {
+  .page[data-route="S01"] .s01-find { gap: var(--sp-3); padding: var(--sp-4); border-radius: var(--r-3); }
+  .page[data-route="S01"] .s01-find .field-label { font-size: var(--fs-1); }
+  .page[data-route="S01"] .s01-find-main { gap: var(--sp-3); }
+  .page[data-route="S01"] .s01-bar { flex-wrap: nowrap; }
+  .page[data-route="S01"] .s01-q { flex: 1 1 0; min-height: 46px; padding-inline: var(--sp-4); }
+  .page[data-route="S01"] .s01-go { width: 46px; min-height: 46px; padding: 0; }
+  .page[data-route="S01"] .s01-go-ic { display: grid; place-items: center; }
+  .page[data-route="S01"] .s01-go-t { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+}
 @media (min-width: 1100px) {
   .page[data-route="S01"] .s01-intro { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--sp-4); }
   .page[data-route="S01"] .s01-guide-link { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "ic go" ". ." "q q" "a a"; grid-template-rows: auto 1fr auto auto; align-items: start; min-height: 15rem; padding: var(--sp-6); }

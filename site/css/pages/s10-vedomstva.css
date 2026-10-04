@@ -29,7 +29,7 @@
 .page[data-route="S10"] #s10-v-tablica tbody th { min-width: 13rem; }
 
 /* the scope chip of this screen has a note: let it wrap on a narrow screen instead of widening the page */
-.page[data-route="S10"] .block-tags .scope { max-width: 100%; white-space: normal; border-radius: var(--r-2); }
+.page[data-route="S10"] .block-tags .scope { display: inline-block; max-width: 100%; white-space: normal; border-radius: var(--r-2); }
 
 /* „проект ≠ закон“: a small warning pill, the words are repeated in text for a screen reader */
 .page[data-route="S10"] .s10-tag { display: inline-block; padding: 0 var(--sp-2); border: 1px solid var(--warn); border-radius: var(--r-full); background: var(--warn-soft); color: var(--warn); font-size: var(--fs-xs); font-weight: 700; line-height: 1.5; white-space: nowrap; vertical-align: baseline; }

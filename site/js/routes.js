@@ -14,6 +14,7 @@ export const GUIDE_STEPS = 8;
 const R = (id, key, pattern, file, title, group, icon, o = {}) => ({ id, key, pattern, file, title, group, icon, step: null, next: ['S01'], parent: null, phase: 1, nav: true, samples: [], desc: '', periods: 'all', ...o });
 export const ROUTES = [
   R('S01', 'start', '/', 's01-nachalo', 'Държавният бюджет на достъпен език', 'start', 'home', { step: 1, next: ['S06'], desc: 'Шест числа за бюджета и откъде да започнеш.' }),
+  R('S33', 'deystvie', '/deystvie', 's33-deystvie', 'Какво искаш да направиш?', 'start', 'grid', { next: [], periods: 'none', samples: ['#/deystvie?tab=otkrij', '#/deystvie?tab=prosledi', '#/deystvie?tab=sravni', '#/deystvie?tab=proveri'], desc: 'Открий, проследи, сравни или провери: избери действие и филтри и виж отговора.' }),
   R('S32', 'moyat-byudzhet', '/moyat-byudzhet', 's32-moyat-byudzhet', 'Моят бюджет', 'start', 'sliders', { next: ['S06', 'S07'], periods: 'none', samples: ['#/moyat-byudzhet'], desc: 'Промени приходите и разходите от плана за 2026 г. и виж какво става с дефицита.' }),
   R('S02', 'patevoditel', '/patevoditel/:step([1-8])?', 's02-patevoditel', 'Пътеводител', 'start', 'compass', { next: ['S01'], samples: ['#/patevoditel', '#/patevoditel/3'], desc: 'Осем стъпки от първото число до собствените ти данъци.', periods: 'none' }),
   R('S03', 'rechnik', '/rechnik/:term?', 's03-rechnik', 'Речник', 'start', 'book', { next: ['S02', 'S01'], samples: ['#/rechnik', '#/rechnik/dds'], desc: 'Думите от бюджетния език, обяснени просто.', periods: 'none' }),

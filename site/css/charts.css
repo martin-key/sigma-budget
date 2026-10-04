@@ -24,12 +24,34 @@
 .fig-table{margin-top:var(--sp-1)}
 .fig-table .table-wrap{border-radius:var(--r-2)}
 
+/* view switch (ui/chart.js, opt-in `views`): Стълбове / Кръгова / Таблица or Линия / Стълбове; the figure carries data-view */
+.fig-views{display:flex;min-width:0}
+.fig-views .seg{max-width:100%}
+@media (max-width:440px){.fig-seg .seg-opt label{gap:5px;padding:4px 11px}}
+@media (max-width:340px){.fig-seg .seg-opt label{padding:4px 8px}.fig-seg .seg-opt label svg{display:none}}
+.fig-note{display:none;margin:0}
+.fig[data-view="line"] .fig-note[data-for="line"],.fig[data-view="bars"] .fig-note[data-for="bars"]{display:inline}
+.fig[data-view="pie"] .fig-note[data-for="pie"]{display:block;color:var(--muted);font-size:var(--fs-s)}
+.fig[data-view="table"] .chart,.fig[data-view="table"] .fig-legend{display:none}
+.fig[data-view="table"] .fig-table>summary{display:none}
+.fig[data-view="table"] .fig-table{margin-top:0}
+/* a pie has no axis to read the numbers from: its legend is a list with the value and the share of each part */
+.fig-legend-val{display:grid;grid-template-columns:repeat(auto-fit,minmax(max(17rem,calc(50% - var(--sp-3) / 2)),1fr));gap:var(--sp-1) var(--sp-3)}   /* one or two columns, by the room the figure itself has (not by the window) */
+.fig-legend-val .lg{width:100%;justify-content:flex-start;border-radius:var(--r-2);min-height:40px}
+.fig-legend-val .lg-name{min-width:0;overflow-wrap:anywhere;text-align:start}
+.fig-legend-val .lg-val{display:inline-flex;align-items:baseline;gap:var(--sp-2);margin-left:auto;padding-left:var(--sp-2);white-space:nowrap;font-variant-numeric:tabular-nums}
+.fig-legend-val .lg-pct{color:var(--muted);min-width:3.4em;text-align:end}
+.fig-legend-val .lg[aria-pressed="false"] .lg-val{text-decoration:line-through}
+
 /* treemap: map or list; the list is the accessible alternative and the default on phones */
 .tmap{display:grid;gap:var(--sp-3);min-width:0}
 .tmap-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--sp-2)}
 .tmap-bar .seg{margin-left:auto}
 .tmap[data-view="list"] .tmap-map{display:none}
 .tmap[data-view="map"] .tmap-list{display:none}
+.tmap-pie{min-width:0}
+.tmap[data-view="list"] .tmap-pie,.tmap[data-view="map"] .tmap-pie{display:none}
+.tmap[data-view="pie"] .tmap-list,.tmap[data-view="pie"] .tmap-map{display:none}
 .tmap-list,.tmap-map{min-width:0}
 .tmap-note{margin:0;color:var(--muted);font-size:var(--fs-s)}
 

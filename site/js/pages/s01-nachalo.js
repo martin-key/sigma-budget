@@ -1,6 +1,7 @@
 // S01 · Държавният бюджет на достъпен език · #/ · step 1 of 8 · next S06 · periods all
-// The front door: what the site is, a search, the six headline numbers of the 2026 budget and a way into every other screen.
+// The front door: what the site is, four things to do, a search, the six headline numbers of the 2026 budget with the questions under them, and a way into every other screen.
 // A lean composition of existing components. Every number comes from core.json (kpis); none is typed in.
+//   four actions        → S33 (#/deystvie?tab=otkrij|prosledi|sravni|proveri), one work area each
 //   search              → S28 (#/tarsene?q=)         „Кой си ти?“ → store.userType, which orders the blocks below (citizen / journalist / expert)
 //   no `periods` export: the six numbers are always the 2026 budget; a note says so when another period is selected
 import { html } from '../html.js';
@@ -44,6 +45,21 @@ const ASK = [
   ['S24', 'database', 'Откъде са данните?', 'Източници, методика и изтегляне.']
 ];
 
+/** the four things a visitor comes to do: [tab of S33, icon, the verb, the one-line promise]. S33 holds the same four (a page module does not import another one) */
+const DO = [
+  ['otkrij', 'search', 'Открий', 'Намери конкретна тема, данък, институция или програма.'],
+  ['prosledi', 'transfer', 'Проследи', 'Покажи ми откъде идват и къде отиват парите.'],
+  ['sravni', 'scale', 'Сравни', 'Постави числото в контекст.'],
+  ['proveri', 'database', 'Провери', 'Покажи ми оригиналните данни и методологията.']
+];
+
+/** „Какво искаш да направиш?“: four big cards above the search, each a link to its work area. The verb is written as it is said; the capitals are CSS only. */
+function actions(ctx) {
+  return html`<section class="s01-actions" aria-labelledby="s01-act-h">
+    <h2 class="s01-act-h" id="s01-act-h">Какво искаш да направиш?</h2>
+    <ul class="s01-act-list">${DO.map(([tab, ic, verb, promise]) => html`<li><a class="s01-act" href="${ctx.href('S33', {}, { tab })}"><span class="s01-act-top"><span class="s01-act-ic" aria-hidden="true">${icon(ic, { size: 22 })}</span><span class="s01-act-go" aria-hidden="true">→</span></span><span class="s01-act-verb">${verb}</span><span class="s01-act-text">${promise}</span></a></li>`)}</ul></section>`;
+}
+
 /** the entrance, as two cards side by side: the guide link (the dark one), then the big search with its quick chips.
  *  The reading order stays guide → search; the words of the guide link are the same, only split into spans for the type. */
 function intro(ctx) {
@@ -54,7 +70,7 @@ function intro(ctx) {
       <div class="s01-find-main">
         <div class="s01-bar">
           <input class="input s01-q" id="s01-q" name="q" type="search" maxlength="${MAX_QUERY}" placeholder="Търси: ДДС, МВР, Пловдив…" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="search">
-          <button type="submit" class="btn btn-primary s01-go">Търси</button>
+          <button type="submit" class="btn btn-primary s01-go"><span class="s01-go-ic" aria-hidden="true">${icon('search', { size: 20 })}</span><span class="s01-go-t">Търси</span></button>
         </div>
         ${chips({ label: 'Често търсено', items: QUICK.map(t => ({ label: t, href: ctx.href('S28', {}, { q: t }) })) })}
       </div>
@@ -366,9 +382,9 @@ function explore(ctx) {
 export function render(ctx) {
   const lede = html`<strong>Бюджет на светло</strong> показва държавния бюджет за <span class="nowrap">2026 г.</span> с прости думи: <a href="${ctx.href('S06')}">откъде идват парите</a>, <a href="${ctx.href('S07')}">за какво се харчат</a> и <a href="${ctx.href('S15')}">как се изпълнява планът</a>.`;
   const core = ctx.data?.core;
-  if (!core?.kpis) return { lede, body: html`${intro(ctx)}${pendingState({ title: 'Основните числа не са налични', text: 'Файлът с основните числа не се зареди. Опитай да презаредиш страницата.' })}${explore(ctx)}` };
+  if (!core?.kpis) return { lede, body: html`${actions(ctx)}${intro(ctx)}${pendingState({ title: 'Основните числа не са налични', text: 'Файлът с основните числа не се зареди. Опитай да презаредиш страницата.' })}${explore(ctx)}` };
   const parts = (BY_TYPE[ctx.store.get('userType')] || BY_TYPE.citizen).map(part => layout(ctx, core, part));
-  return { lede, body: html`${intro(ctx)}${six(ctx, core)}${who(ctx)}<div class="s01-grid">${parts}</div>${explore(ctx)}` };
+  return { lede, body: html`${actions(ctx)}${intro(ctx)}${six(ctx, core)}${explore(ctx)}${who(ctx)}<div class="s01-grid">${parts}</div>` };
 }
 
 /** the headline in two tones: the router builds the frame and its one h1; here the same words are only split into two spans (the second one in grey),

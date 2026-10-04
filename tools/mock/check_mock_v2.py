@@ -46,6 +46,8 @@ there is no failure (warnings never fail the run, unless --strict); 1 = failures
     embed     every embed address found by `share` loads at 720x440 in the bare layout: chart ready, source line, brand link.
     gloss     glossary popover (open, Escape, focus return) and the term screen.
     tabs      tab keyboard model, ?tab= mirrored in the URL and restored on reload.
+    png       (FB3) every statistic has a PNG button; a click downloads a real, wide, non-blank bns-<screen>-<block>.png.
+    views     (FB3) the view switch of charts and treemap-lists (bars / pie / line / table): switches in place, draws inside its box, keyboard.
     theme     the colour themes: the three dark token blocks agree, the dark theme differs from the light one and stays readable
               (contrast), no flash of the wrong theme on first paint, a pinned theme beats the OS and "auto" follows it, corrupt or
               blocked storage is survived, the pressed state of the theme buttons, charts repaint on a switch (also the ones in
@@ -104,7 +106,7 @@ CELLS = {
 QUICK_CELLS = ['1280-light', '400-light']
 DEMOS = ['loading', 'empty', 'error', 'pending']                     # the body is replaced by a state component
 OFFLINE_DEMO = 'offline'                                             # the real screen + the offline banner
-FAMILIES = ['base', 'demo', 'period', 'user', 'prefs', 'tour', 'to', 'chrome', 'share', 'embed', 'gloss', 'tabs', 'theme', 'selftest']
+FAMILIES = ['base', 'demo', 'period', 'user', 'prefs', 'tour', 'to', 'chrome', 'share', 'embed', 'gloss', 'tabs', 'png', 'views', 'theme', 'selftest']
 DEFAULT_OFF = set()                                                  # families that run only when asked for (none now)
 STUB_TEXT = 'Този екран предстои да бъде изграден в прототипа'
 PREFS_KEY = 'bns.prefs.v1'
@@ -2017,11 +2019,12 @@ SHARE_LIST_JS = r"""async () => {
     let ce = null;
     if (s.chart !== false) ce = s.chart ? document.getElementById(s.chart) : (el ? [...el.querySelectorAll('.chart[data-ready="1"]')].find(c => c.offsetParent !== null) : null);
     const hasChart = !!(ce && window.echarts && window.echarts.getInstanceByDom(ce));
+    const hasStat = !!(el && sh.statNodes && sh.statNodes(el).length);          // FB3: ui/png.js also draws rankings, KPI tiles, progress bars, maps and strips
     let csv = '', csvErr = '', text = '', link = '', embed = '', embedHash = '', textErr = '';
     try { csv = sh.csvFor(s); } catch (e) { csvErr = String(e); }
     try { text = sh.textFor(s); link = sh.linkFor(s); embed = sh.embedFor(s); embedHash = sh.embedHash(s); } catch (e) { textErr = String(e); }
     out.push({ id, route: s.route || '', title: s.title || '', source: [].concat(s.source || []).filter(Boolean), status: s.status || '', mock: sh.isMock(s),
-      el: !!el, btn: !!btn, btnVisible: !!btn && btn.getClientRects().length > 0, hasChart, csv: csv.slice(0, 80000), csvErr, text, link, embed, embedHash, textErr });
+      el: !!el, btn: !!btn, btnVisible: !!btn && btn.getClientRects().length > 0, hasChart, hasStat, csv: csv.slice(0, 80000), csvErr, text, link, embed, embedHash, textErr });
   }
   return { specs: out, orphans: [...new Set([...document.querySelectorAll('[data-share]')].map(b => b.dataset.share).filter(id => !sh.get(id)))],
            labels: Object.values(st.STATUS).map(x => x.label) };
@@ -2151,7 +2154,7 @@ def share_menu(page, sid, F):
 
 def expected_acts(s):
     acts = ['copy-text', 'copy-link']
-    if s['hasChart'] or s['csv']:
+    if s['hasChart'] or s['csv'] or s.get('hasStat'):
         acts.append('png')
     if s['csv']:
         acts.append('csv')
@@ -2164,7 +2167,7 @@ def menu_sane(info, s, cell, F, W):
     sid = s['id']
     got = [a for a in info['acts'] if a != 'share']
     if got != expected_acts(s):
-        F('share-menu', f'{sid}: the menu offers {got}, expected {expected_acts(s)} (chart drawn: {s["hasChart"]}, table: {bool(s["csv"])}, embed: {bool(s["embed"])})')
+        F('share-menu', f'{sid}: the menu offers {got}, expected {expected_acts(s)} (chart drawn: {s["hasChart"]}, table: {bool(s["csv"])}, statistic: {bool(s.get("hasStat"))}, embed: {bool(s["embed"])})')
     if not info['inside']:
         F('share-focus', f'{sid}: the keyboard focus is not inside the share menu after it opened')
     if not info['modal'] and info['exp'] != 'true':                         # a modal sheet makes the page behind inert: only a popover must keep its button's state in sync
@@ -2325,15 +2328,16 @@ def job_share(w, j):
     specs, labels = L['specs'], L['labels']
     for oid in L['orphans']:
         F('share-orphan', f'the „Сподели“ button of "{oid}" has no registered spec (a click only says „Този блок не може да се споделя“)')
-    seen_png = 0
+    seen_png = seen_stat = 0
     for s in specs:
         share_pure(s, labels, F, W)
         if not s['el']:
             F('share-no-element', f'{s["id"]} is registered for sharing, but no element with that id is on the screen (its ?to= link would lead nowhere)')
         elif not s['btn']:
             W('share-no-button', f'{s["id"]} is registered for sharing, but has no „Сподели“ button on the screen')
-        if (s['hasChart'] or s['csv']) and seen_png < 6:
-            seen_png += 1
+        stat_only = bool(s.get('hasStat')) and not (s['hasChart'] or s['csv'])                  # FB3: a ranking / KPI / strip block is drawn by ui/png.js too
+        if ((s['hasChart'] or s['csv']) and seen_png < 6) or (stat_only and seen_stat < 2):
+            seen_png, seen_stat = seen_png + (0 if stat_only else 1), seen_stat + (1 if stat_only else 0)
             r = page.evaluate(SHARE_PNG_JS, s['id'])
             if r.get('err'):
                 F('share-png', f'{s["id"]}: building the PNG failed: {r["err"][:140]}')
@@ -2899,9 +2903,10 @@ TABS_STATE_JS = r"""(id) => {
 TABS_CHARTS_JS = r"""(id) => {
   const t = document.getElementById(id), p = t && t.querySelector(':scope > [role="tabpanel"]:not([hidden])');
   if (!p) return [];
-  return [...p.querySelectorAll('.chart')].map(c => { const s = c.querySelector('svg'), r = c.getBoundingClientRect(); return { id: c.id, ready: c.dataset.ready, w: Math.round(r.width), sw: s ? Math.round(s.getBoundingClientRect().width) : 0 }; });
+  // FB3: a chart inside a view that is switched off (treemap-list list/map/pie, the chart view switch) has no layout box; it is drawn when its view is chosen, so it is not part of "the tab is shown"
+  return [...p.querySelectorAll('.chart')].filter(c => c.getClientRects().length > 0).map(c => { const s = c.querySelector('svg'), r = c.getBoundingClientRect(); return { id: c.id, ready: c.dataset.ready, w: Math.round(r.width), sw: s ? Math.round(s.getBoundingClientRect().width) : 0 }; });
 }"""
-TABS_SETTLED_JS = r"""(id) => { const t = document.getElementById(id), p = t && t.querySelector(':scope > [role="tabpanel"]:not([hidden])'); return !p || [...p.querySelectorAll('.chart')].every(c => c.dataset.ready === '1' || c.dataset.ready === 'err'); }"""
+TABS_SETTLED_JS = r"""(id) => { const t = document.getElementById(id), p = t && t.querySelector(':scope > [role="tabpanel"]:not([hidden])'); return !p || [...p.querySelectorAll('.chart')].filter(c => c.getClientRects().length > 0).every(c => c.dataset.ready === '1' || c.dataset.ready === 'err'); }"""
 
 
 def tabs_check(w, page, cell, route, h, t, F, W):
@@ -3053,6 +3058,222 @@ def plan_tabs(args, d, routes, cells):
         return []
     return [dict(kind='tabs', route=r['id'], cell=pick_cell(cells, k), hash=r['samples'][0], hashes=r['samples'][:1] if args.quick else r['samples'])
             for k, r in enumerate(routes) if not r.get('bare') and r['id'] != 'S30']
+
+
+# ======================================================================================= png + views (FB3)
+# png    every block that holds a statistic (share.statNodes: chart, ranking, KPI tiles, progress bars, map, data table, the home / revenue strips,
+#        the 5-minute scenes) has a „PNG“ button, in its header or in a bar under a loose statistic; the buttons are named in Bulgarian and unique;
+#        a click downloads a real, wide, non-blank PNG called bns-<screen>-<block>.png.
+# views  every chart with a view switch (figure[data-views]) and every treemap-list with the „Кръгова“ view: the radios switch the picture in place,
+#        the chart is drawn inside its box in every view, text inside it does not leave the box, the table view opens the data table, the arrow keys
+#        move the choice, and the page never scrolls sideways.
+PNG_SCAN_JS = r"""async () => {
+  const sh = await import('./js/share.js');
+  const art = document.querySelector('#view article.page');
+  if (!art) return null;
+  const bare = art.classList.contains('page-bare') || art.dataset.key === 'api';          // S25 (reference tables) and the bare embed view carry no buttons
+  const nodes = sh.statNodes(art), seen = new Set(), uncovered = [];
+  for (const n of nodes) {
+    const block = n.closest('section.block');
+    let host = block, ok = false;
+    if (block) ok = !!block.querySelector(':scope > .block-head .png-btn');
+    else { host = n.closest('[data-png-host]'); ok = !!host && !!(host.querySelector('.png-btn') || (host.nextElementSibling && host.nextElementSibling.querySelector('.png-btn'))); }
+    const name = `${n.tagName.toLowerCase()}.${String(n.className && n.className.baseVal !== undefined ? n.className.baseVal : n.className).split(' ')[0]} in ${host ? (host.id || host.tagName.toLowerCase()) : 'no block'}`;
+    if (!ok && !seen.has(name)) { seen.add(name); uncovered.push(name); }
+  }
+  const btns = [...art.querySelectorAll('.png-btn')].map(b => { const r = b.getBoundingClientRect(); return { key: b.dataset.png || '', label: b.getAttribute('aria-label') || '', vis: b.getClientRects().length > 0, type: b.type, txt: b.textContent.trim(), w: Math.round(r.width), h: Math.round(r.height) }; });
+  const keys = btns.map(b => b.key);
+  return { bare, nodes: nodes.length, uncovered, btns, dup: [...new Set(keys.filter((k, i) => keys.indexOf(k) !== i))] };
+}"""
+
+PNG_PIXELS_JS = r"""async (b64) => {
+  const img = new Image();
+  await new Promise((ok, no) => { img.onload = ok; img.onerror = no; img.src = 'data:image/png;base64,' + b64; });
+  const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+  const g = c.getContext('2d', { willReadFrequently: true }); g.drawImage(img, 0, 0);
+  const d = g.getImageData(0, 0, c.width, c.height).data, bg = [d[0], d[1], d[2]];
+  let non = 0;
+  for (let i = 0; i < d.length; i += 4) if (Math.abs(d[i] - bg[0]) + Math.abs(d[i + 1] - bg[1]) + Math.abs(d[i + 2] - bg[2]) > 24) non++;
+  return { w: c.width, h: c.height, non, tot: d.length / 4 };
+}"""
+
+
+@job('png')
+def job_png(w, j):
+    import base64
+    import struct
+    cell, route, h = j['cell'], j['route'], j['hash']
+    o = w.open(cell, h)
+    if not o.ok:
+        return collect(o, route, cell, h) + [fail('timeout', o.why, route=route, cell=cell, url=h)], {}
+    page, fs = o.page, []
+    F = lambda code, m: fs.append(fail(code, m, route=route, cell=cell, url=h))                       # noqa: E731
+    r = page.evaluate(PNG_SCAN_JS)
+    downloads = 0
+    if r and not r['bare']:
+        if r['uncovered']:
+            F('png-missing', f'{len(r["uncovered"])} statistic(s) without a „PNG“ button: {"; ".join(r["uncovered"][:4])}')
+        for b in r['btns']:
+            if not b['label'].startswith('Изтегли PNG: ') or len(b['label']) < 16:
+                F('png-name', f'the PNG button of "{b["key"]}" is named "{b["label"]}" (expected „Изтегли PNG: <block title>“)')
+            if b['type'] != 'button' or b['txt'] != 'PNG':
+                F('png-name', f'the PNG button of "{b["key"]}" is type "{b["type"]}" with text "{b["txt"]}" (expected a button that says PNG)')
+        if r['dup']:
+            F('png-key', f'two PNG buttons share the block id {r["dup"]}')
+        vis = [b for b in r['btns'] if b['vis']]
+        for b in ([vis[0], vis[-1]] if len(vis) > 1 else vis):
+            sel = f'.png-btn[data-png="{b["key"]}"] >> visible=true'
+            name, data_, err = download_via(page, sel)
+            downloads += 1
+            if err:
+                F('png-download', f'{b["key"]}: the „PNG“ button produced no download ({err})')
+                continue
+            if not re.fullmatch(r'bns-[a-z0-9._-]+\.png', name):
+                F('png-download', f'{b["key"]}: the PNG file is called "{name}" (expected bns-<screen>-<block>.png)')
+            if data_[:8] != b'\x89PNG\r\n\x1a\n':
+                F('png-download', f'{b["key"]}: the downloaded "{name}" is not a PNG file (first bytes {data_[:8]!r})')
+                continue
+            wpx, hpx = struct.unpack('>II', data_[16:24])
+            if wpx < 800 or hpx < 160:
+                F('png-download', f'{b["key"]}: the PNG is {wpx}x{hpx} px (expected at least 800 px wide)')
+            px = page.evaluate(PNG_PIXELS_JS, base64.b64encode(data_).decode())
+            if px['non'] / max(1, px['tot']) < 0.004:
+                F('png-blank', f'{b["key"]}: the PNG has {px["non"]} non-background pixels: it is blank')
+            if 'Не успяхме' in toast_text(page):
+                F('png-download', f'{b["key"]}: the app reported that making the PNG failed')
+    fs += collect(o, route, cell, h)
+    return fs, {'png': len(r['btns']) if r else 0, 'dl': downloads}
+
+
+@planner
+def plan_png(args, d, routes, cells):
+    if not wants(args, 'png'):
+        return []
+    return [dict(kind='png', route=r['id'], cell=pick_cell(cells, k), hash=r['samples'][0])
+            for k, r in enumerate(routes) if not r.get('bare') and r['id'] != 'S30' and r['samples']]
+
+
+VIEWS_FIND_JS = r"""() => [...document.querySelectorAll('#view figure.fig[data-views], #view .tmap[data-ui="treemap-list"]')]
+  .filter(e => e.getClientRects().length > 0 && !e.closest('[hidden]'))
+  .map(e => {
+    const fig = e.matches('figure'), radios = [...e.querySelectorAll(fig ? '.fig-views input[type="radio"]' : '.tmap-bar input[type="radio"]')];
+    const grp = radios[0] && radios[0].closest('[role="radiogroup"]');
+    return { id: e.id, kind: fig ? 'fig' : 'tmap', name: radios[0] ? radios[0].name : '', views: radios.map(r => r.value), group: !!(grp && grp.getAttribute('aria-label')),
+             labels: radios.map(r => { const l = document.querySelector(`label[for="${r.id}"]`); return l ? l.textContent.trim() : ''; }) };
+  })
+  .filter(x => x.kind === 'fig' || x.views.includes('pie'))"""
+
+VIEWS_STATE_JS = r"""(a) => {
+  const el = document.getElementById(a.id);
+  if (!el) return { gone: true };
+  const radios = [...el.querySelectorAll(a.kind === 'fig' ? '.fig-views input[type="radio"]' : '.tmap-bar input[type="radio"]')];
+  const box = a.kind === 'fig' ? el.querySelector('.chart') : [...el.querySelectorAll('.chart')].find(c => c.getClientRects().length > 0) || null;
+  const r = box ? box.getBoundingClientRect() : null, svg = box ? box.querySelector('svg') : null, sr = svg ? svg.getBoundingClientRect() : null;
+  const out = [];
+  if (box && r && r.width) for (const t of box.querySelectorAll('svg text')) { const b = t.getBoundingClientRect(); if (b.width && (b.left < r.left - 2 || b.right > r.right + 2)) out.push((t.textContent || '').trim().slice(0, 24)); }
+  const tbl = el.querySelector('details.fig-table'), lst = el.querySelector('.tmap-list');
+  return { view: el.dataset.view || '', listVis: !!lst && lst.getClientRects().length > 0, checked: radios.filter(x => x.checked).map(x => x.value), ready: box ? box.dataset.ready : null, vis: !!box && box.getClientRects().length > 0,
+           bw: r ? Math.round(r.width) : 0, sw: sr ? Math.round(sr.width) : 0, out: out.slice(0, 4), tableOpen: tbl ? tbl.open : null,
+           sx: document.documentElement.scrollWidth, vw: innerWidth, fx: el.scrollWidth > el.clientWidth + 1 };
+}"""
+
+
+VIEWS_IS_JS = r"""(a) => { const el = document.getElementById(a.id); return !!el && el.dataset.view === a.v; }"""
+
+
+def views_check(page, f, F, W):
+    who = f'{f["kind"] == "fig" and "chart" or "treemap-list"} {f["id"]}'
+    if len(f['views']) < 2:
+        F('views-count', f'{who}: the view switch offers {f["views"]} (at least two views make a switch)')
+        return 0
+    if not f['group']:
+        F('views-name', f'{who}: the view switch has no accessible name (aria-label on the radio group)')
+    if any(not x for x in f['labels']):
+        F('views-name', f'{who}: a view option has no visible label ({f["labels"]})')
+    done = 0
+    for v in f['views']:
+        # the radio itself lies over its label (as a real tap does), so the click goes to the input
+        page.click(f'input[name="{f["name"]}"][value="{v}"]', timeout=4000)
+        if not wait_for(page, VIEWS_IS_JS, {'id': f['id'], 'v': v}, timeout=3000):
+            F('views-switch', f'{who}: choosing "{v}" leaves data-view at "{page.evaluate(VIEWS_STATE_JS, f).get("view")}"')
+            continue
+        if v != 'table':
+            wait_for(page, "(a) => { const el = document.getElementById(a.id); const c = a.kind === 'fig' ? el.querySelector('.chart') : [...el.querySelectorAll('.chart')].find(x => x.getClientRects().length > 0); return !!c && (c.dataset.ready === '1' || c.dataset.ready === 'err'); }", f, timeout=3500)
+            page.wait_for_timeout(120)
+        st = page.evaluate(VIEWS_STATE_JS, f)
+        done += 1
+        if st.get('gone'):
+            F('views-switch', f'{who}: the figure disappeared after choosing "{v}"')
+            break
+        if st['checked'] != [v]:
+            F('views-switch', f'{who}: after choosing "{v}" the checked radio is {st["checked"]}')
+        if v == 'table':
+            if st['tableOpen'] is False:
+                F('views-table', f'{who}: the table view does not open the data table')
+        elif f['kind'] == 'tmap' and v == 'list':
+            if not st['listVis']:
+                F('views-chart', f'{who}: the "list" view shows no list')
+        else:
+            if st['ready'] == 'err':
+                F('views-chart', f'{who}: the "{v}" view failed to draw')
+            elif not st['vis'] or st['ready'] != '1' or st['sw'] <= 0 or st['sw'] > st['bw'] + 1:
+                F('views-chart', f'{who}: the "{v}" view is not drawn properly (visible: {st["vis"]}, ready: {st["ready"]}, svg {st["sw"]}px in a {st["bw"]}px box)')
+            if st['out']:
+                F('views-overflow', f'{who}: in the "{v}" view text leaves the chart box: {st["out"]}')
+        if st['sx'] > st['vw'] + 1 or st['fx']:
+            F('views-overflow', f'{who}: the "{v}" view makes the page scroll sideways (page {st["sx"]}px in {st["vw"]}px, figure overflow: {st["fx"]})')
+    # the arrow keys move the choice (native radio behaviour must survive the switch)
+    cur = page.evaluate(VIEWS_STATE_JS, f)
+    if not cur.get('gone') and cur['checked'] and len(cur['checked']) == 1:
+        i = f['views'].index(cur['checked'][0]) if cur['checked'][0] in f['views'] else -1
+        if i >= 0:
+            nxt = f['views'][(i + 1) % len(f['views'])]
+            try:
+                page.focus(f'input[name="{f["name"]}"][value="{cur["checked"][0]}"]')
+                page.keyboard.press('ArrowRight')
+                if not wait_for(page, VIEWS_IS_JS, {'id': f['id'], 'v': nxt}, timeout=3000):
+                    F('views-key', f'{who}: the ArrowRight key does not move the view from "{cur["checked"][0]}" to "{nxt}"')
+            except Exception as e:                                                                    # noqa: BLE001
+                F('views-key', f'{who}: the view switch cannot be reached with the keyboard ({str(e).splitlines()[0][:100]})')
+    return done
+
+
+@job('views')
+def job_views(w, j):
+    cell, route = j['cell'], j['route']
+    fs, switches = [], 0
+    for h in j['hashes']:
+        o = w.open(cell, h)
+        if not o.ok:
+            fs += collect(o, route, cell, h) + [fail('timeout', o.why, route=route, cell=cell, url=h)]
+            continue
+        F = lambda code, m, h=h: fs.append(fail(code, m, route=route, cell=cell, url=h))                  # noqa: E731
+        W = lambda code, m, h=h: fs.append(warn(code, m, route=route, cell=cell, url=h))                  # noqa: E731
+        found = o.page.evaluate(VIEWS_FIND_JS)
+        for f in found[:4]:
+            switches += 1
+            try:
+                views_check(o.page, f, F, W)
+            except Exception as e:                                                                    # noqa: BLE001
+                F('views-switch', f'{f["id"]}: the view switch could not be driven ({str(e).splitlines()[0][:140]})')
+        fs += collect(o, route, cell, h)
+    return fs, {'views': switches}
+
+
+@planner
+def plan_views(args, d, routes, cells):
+    if not wants(args, 'views'):
+        return []
+    jobs = []
+    for r in routes:
+        if r.get('bare') or r['id'] == 'S30' or not r['samples']:
+            continue
+        hashes = r['samples'][:1] if args.quick else r['samples']
+        if args.quick:
+            hashes = hashes + [s for s in r['samples'][1:] if 'tab=prosledi' in s]               # the S33 view switch lives on its second area
+        for c in cells:
+            jobs.append(dict(kind='views', route=r['id'], cell=c, hash=hashes[0], hashes=hashes))
+    return jobs
 
 
 # ================================================================================================= theme: light / dark / auto

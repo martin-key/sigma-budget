@@ -1,0 +1,164 @@
+/* S33 · Какво искаш да направиш? Four small work areas on tabs: ОТКРИЙ, ПРОСЛЕДИ, СРАВНИ, ПРОВЕРИ.
+   Visual language v2: soft cards, one lime accent, large radii, the tab row is four cards with the chosen one dark.
+   Tokens only (they carry both themes), no dark-mode rules, every selector scoped to the screen, classes prefixed s33-. */
+
+/* ── the four tabs as four cards: a lime icon chip over the verb; the chosen card is dark ── */
+.page[data-route="S33"] .s33-tabs > .tab-list { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-2); overflow: visible; border-bottom: 0; }
+.page[data-route="S33"] .s33-tabs .tab-list [role="tab"] {
+  flex-direction: column; justify-content: center; gap: var(--sp-2); min-width: 0; min-height: 88px; padding: var(--sp-3) 2px;
+  border: 2px solid transparent; border-radius: var(--r-3); background: var(--card); color: var(--ink); text-align: center; white-space: normal;
+  transition: background var(--t-fast), border-color var(--t-fast), color var(--t-fast);
+}
+.page[data-route="S33"] .s33-tabs .tab-list [role="tab"]:hover { background: var(--sunk); color: var(--ink); }
+.page[data-route="S33"] .s33-tabs .tab-list [role="tab"][aria-selected="true"] { border-color: var(--ink); background: var(--inv); color: var(--on-inv); }
+.page[data-route="S33"] .s33-tabs .tab-list [role="tab"][aria-selected="true"]::after { content: none; }
+.page[data-route="S33"] .s33-tabs .tab-list [role="tab"]:focus-visible { outline-offset: 2px; }
+.page[data-route="S33"] .s33-tab-ic { display: grid; place-items: center; box-sizing: content-box; width: 22px; height: 22px; padding: 9px; border-radius: 50%; background: var(--accent); color: var(--on-accent); }
+.page[data-route="S33"] .s33-tab-t { max-width: 100%; font: 700 .7rem/1.15 var(--font-head); letter-spacing: .03em; text-transform: uppercase; overflow-wrap: normal; }
+.page[data-route="S33"] .s33-tabs > .tab-panel { padding-top: var(--sp-6); }
+@media (max-width: 399px) {
+  .page[data-route="S33"] .s33-tabs > .tab-list { gap: var(--sp-1); }
+  .page[data-route="S33"] .s33-tab-t { font-size: .66rem; letter-spacing: .02em; }
+}
+@media (max-width: 340px) {
+  .page[data-route="S33"] .s33-tabs .tab-list [role="tab"] { padding-inline: 0; }
+  .page[data-route="S33"] .s33-tab-t { font-size: .6rem; letter-spacing: .01em; }
+}
+@media (min-width: 440px) {
+  .page[data-route="S33"] .s33-tab-t { font-size: .78rem; letter-spacing: .05em; }
+}
+@media (min-width: 700px) {
+  .page[data-route="S33"] .s33-tabs > .tab-list { gap: var(--sp-3); }
+  .page[data-route="S33"] .s33-tabs .tab-list [role="tab"] { flex-direction: row; justify-content: flex-start; gap: var(--sp-3); min-height: 76px; padding: var(--sp-3) var(--sp-4); text-align: left; }
+  .page[data-route="S33"] .s33-tab-t { font-size: .9rem; }
+}
+
+/* ── one work area: the promise, a line of help, the filters, the answer, the ways on ── */
+.page[data-route="S33"] .s33-panel > * + * { margin-top: var(--sp-5); }
+.page[data-route="S33"] .s33-panel > .s33-ph + .s33-pl { margin-top: var(--sp-1); }
+.page[data-route="S33"] .s33-ph { max-width: 34ch; font-size: clamp(1.5rem, 1.1rem + 1.5vw, 2.25rem); line-height: 1.08; letter-spacing: var(--track-head); }
+.page[data-route="S33"] .s33-pl { max-width: 60ch; color: var(--muted); }
+
+/* the filters sit in one soft card; a control keeps its visible label above it */
+.page[data-route="S33"] .s33-filters { display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--sp-4) var(--sp-6); padding: var(--sp-4); border-radius: var(--r-4); background: var(--card); }
+.page[data-route="S33"] .s33-filters > .field { flex: 1 1 15rem; min-width: 0; max-width: 26rem; }
+.page[data-route="S33"] .s33-filters > .s33-f { flex: 0 1 auto; max-width: 100%; }
+.page[data-route="S33"] .s33-f .field-label { color: var(--muted); font-size: var(--fs-s); font-weight: 700; }
+.page[data-route="S33"] .s33-filters .field-label { font-size: var(--fs-s); }
+.page[data-route="S33"] .s33-filters .seg { background: var(--surface); }
+.page[data-route="S33"] .s33-filters .select select { background-color: var(--surface); }
+@media (max-width: 599px) {
+  .page[data-route="S33"] .s33-filters { padding: var(--sp-4) var(--sp-3); }
+  .page[data-route="S33"] .s33-filters > .field,
+  .page[data-route="S33"] .s33-filters > .s33-f { flex: 1 1 100%; max-width: none; }
+  .page[data-route="S33"] .s33-filters .seg { display: flex; width: 100%; }
+  .page[data-route="S33"] .s33-filters .seg-opt { flex: 1 1 0; min-width: 0; }
+  .page[data-route="S33"] .s33-filters .seg-opt label { width: 100%; justify-content: center; padding-inline: 4px; text-align: center; white-space: normal; line-height: 1.15; }
+}
+@media (min-width: 900px) { .page[data-route="S33"] .s33-filters { padding: var(--sp-5); } }
+
+/* ── the ways on: cards to the screens that explain the answer ── */
+.page[data-route="S33"] .s33-go { display: grid; gap: var(--sp-2); }
+.page[data-route="S33"] .s33-gh { display: flex; align-items: baseline; gap: var(--sp-3); padding-bottom: var(--sp-2); border-bottom: 2px solid var(--line-strong); font-size: var(--fs-1); }
+.page[data-route="S33"] .s33-n { padding: 0 var(--sp-2); border-radius: var(--r-full); background: var(--sunk); color: var(--muted); font-family: var(--font-body); font-size: var(--fs-xs); font-weight: 700; font-variant-numeric: tabular-nums; }
+/* open rows between hairlines (the same pattern as „Разгледай бюджета“ on the front page), two columns on a wide screen */
+.page[data-route="S33"] .s33-go > .s33-gh { padding-bottom: 0; border-bottom: 0; }
+.page[data-route="S33"] .s33-cards { grid-template-columns: minmax(0, 1fr); gap: 0 var(--sp-7); }
+.page[data-route="S33"] .s33-cards .link-card { gap: var(--sp-4); padding: var(--sp-4) 0; border: 0; border-top: 1px solid var(--line); border-radius: 0; background: none; }
+.page[data-route="S33"] .s33-cards .link-card:hover { border-top-color: var(--ink); }
+.page[data-route="S33"] .s33-cards .link-card-ic { width: 44px; height: 44px; background: var(--card); color: var(--ink); transition: background var(--t-fast); }
+.page[data-route="S33"] .s33-cards .link-card:hover .link-card-ic { background: var(--accent); }
+.page[data-route="S33"] .s33-cards .link-card-go { background: var(--card); }
+@media (min-width: 900px) { .page[data-route="S33"] .s33-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* ── ОТКРИЙ: the field, the kinds, the results (in place while typing) ── */
+.page[data-route="S33"] .s33-o { display: grid; gap: var(--sp-5); }
+.page[data-route="S33"] .s33-find { display: grid; gap: var(--sp-4); }
+.page[data-route="S33"] .s33-form { display: grid; gap: var(--sp-2); }
+.page[data-route="S33"] .s33-form .field-label { font: 650 var(--fs-1)/1.2 var(--font-head); letter-spacing: var(--track-head); color: var(--ink); }
+.page[data-route="S33"] .s33-form .field-hint { margin: 0; max-width: 62ch; }
+.page[data-route="S33"] .s33-wrap { position: relative; min-width: 0; }
+.page[data-route="S33"] .s33-ic { position: absolute; left: 16px; top: 50%; display: grid; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+.page[data-route="S33"] .s33-q { -webkit-appearance: none; appearance: none; min-height: 52px; padding-left: 46px; padding-right: 52px; border-radius: var(--r-full); font-size: var(--fs-0); }
+.page[data-route="S33"] .s33-q::-webkit-search-cancel-button,
+.page[data-route="S33"] .s33-q::-webkit-search-decoration { -webkit-appearance: none; display: none; }
+.page[data-route="S33"] .s33-clear { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); }
+.page[data-route="S33"] .s33-ty { display: grid; gap: var(--sp-1); min-width: 0; }
+.page[data-route="S33"] .s33-ty .chip { background: var(--surface); }
+.page[data-route="S33"] .s33-ty .chip[aria-pressed="true"] { background: var(--data); border-color: var(--data); }
+
+.page[data-route="S33"] .s33-res { display: grid; gap: var(--sp-5); align-content: start; min-height: 10rem; }
+.page[data-route="S33"] .s33-start { display: grid; gap: var(--sp-4); }
+.page[data-route="S33"] .s33-short { margin: 0; font-weight: 700; }
+.page[data-route="S33"] .s33-count { margin: 0; }
+.page[data-route="S33"] .s33-hint2 { margin: 0; color: var(--muted); max-width: 62ch; }
+.page[data-route="S33"] .s33-note { display: flex; align-items: flex-start; flex-wrap: wrap; gap: var(--sp-2) var(--sp-3); margin: 0; max-width: 68ch; font-size: var(--fs-s); color: var(--muted); }
+.page[data-route="S33"] .s33-note > span:last-child { flex: 1 1 18rem; }
+.page[data-route="S33"] .s33-grp { display: grid; gap: var(--sp-3); }
+.page[data-route="S33"] .s33-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-2); }
+.page[data-route="S33"] .s33-more { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-3); margin: 0; color: var(--muted); font-size: var(--fs-s); }
+
+/* one hit: the whole card opens the link (stretched link), the focus ring goes around the card */
+.page[data-route="S33"] .s33-hit { position: relative; display: grid; gap: 2px; padding: var(--sp-3) var(--sp-4); border: 1px solid transparent; border-radius: var(--r-3); background: var(--card); }
+.page[data-route="S33"] .s33-hit:hover { border-color: var(--data); background: var(--sunk); }
+.page[data-route="S33"] .s33-hit[data-mock="true"] { padding-left: calc(var(--sp-4) + 8px); overflow: hidden; }
+.page[data-route="S33"] .s33-hit[data-mock="true"]::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 8px; background-image: repeating-linear-gradient(45deg, var(--hatch) 0 2px, transparent 2px var(--hatch-step)); border-right: 1px solid var(--line); }
+.page[data-route="S33"] .s33-top { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-1) var(--sp-3); }
+.page[data-route="S33"] .s33-link { font-weight: 700; color: var(--ink); text-decoration: none; overflow-wrap: anywhere; }
+.page[data-route="S33"] .s33-link::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+.page[data-route="S33"] .s33-link:hover { color: var(--data); text-decoration: underline; text-underline-offset: .18em; }
+.page[data-route="S33"] .s33-hit:has(.s33-link:focus-visible) { outline: 3px solid var(--focus); outline-offset: 2px; }
+@supports selector(:has(*)) { .page[data-route="S33"] .s33-link:focus-visible { outline: none; } }
+.page[data-route="S33"] .s33-sub,
+.page[data-route="S33"] .s33-in { margin: 0; font-size: var(--fs-s); color: var(--muted); }
+.page[data-route="S33"] .s33-in { font-size: var(--fs-xs); }
+.page[data-route="S33"] .s33-val { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
+@media (min-width: 900px) {
+  .page[data-route="S33"] .s33-list:not(.s33-sets) { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
+}
+
+/* ── ПРОВЕРИ: one dataset is a small sheet: name, state, what it is, the facts, the file and the API ── */
+.page[data-route="S33"] .s33-sets { gap: var(--sp-3); }
+.page[data-route="S33"] .s33-row { position: relative; display: grid; gap: var(--sp-2); align-content: start; min-width: 0; padding: var(--sp-4); border: 1px solid var(--line); border-radius: var(--r-3); background: var(--surface); overflow: hidden; }
+.page[data-route="S33"] .s33-row-top { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-1) var(--sp-3); min-width: 0; }
+.page[data-route="S33"] .s33-rlink { display: inline-block; min-height: 24px; font: 650 var(--fs-1)/1.2 var(--font-head); letter-spacing: var(--track-head); overflow-wrap: anywhere; }
+.page[data-route="S33"] .s33-row-desc { margin: 0; max-width: 72ch; font-size: var(--fs-s); color: var(--muted); }
+.page[data-route="S33"] .s33-meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-2) var(--sp-3); margin: 0; padding-top: var(--sp-3); border-top: 1px solid var(--line); }
+.page[data-route="S33"] .s33-m { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; min-width: 0; align-content: start; }
+.page[data-route="S33"] .s33-m > dt { color: var(--muted); font-size: var(--fs-xs); font-weight: 700; }
+.page[data-route="S33"] .s33-m > dd { margin: 0; min-width: 0; font-size: var(--fs-s); overflow-wrap: anywhere; }
+.page[data-route="S33"] .s33-m-wide { grid-column: 1 / -1; }
+.page[data-route="S33"] .s33-acts { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.page[data-route="S33"] .s33-row[data-st="mock"] { padding-left: calc(var(--sp-4) + 8px); }
+.page[data-route="S33"] .s33-row[data-st="mock"]::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 8px; background-image: repeating-linear-gradient(45deg, var(--hatch) 0 2px, transparent 2px var(--hatch-step)); border-right: 1px solid var(--line); }
+.page[data-route="S33"] .s33-row[data-st="pending"] { border-style: dashed; border-color: var(--line-strong); background: var(--sunk); }
+.page[data-route="S33"] .s33-row[data-st="pending"] .s33-meta { grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 600px) {
+  .page[data-route="S33"] .s33-row { padding: var(--sp-4) var(--sp-5); }
+  .page[data-route="S33"] .s33-row[data-st="mock"] { padding-left: calc(var(--sp-5) + 8px); }
+  .page[data-route="S33"] .s33-meta { grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: var(--sp-2) var(--sp-4); }
+  .page[data-route="S33"] .s33-m-wide { grid-column: span 2; }
+  .page[data-route="S33"] .s33-row[data-st="pending"] .s33-m { grid-template-columns: minmax(7rem, 11rem) minmax(0, 1fr); gap: var(--sp-1) var(--sp-3); }
+  .page[data-route="S33"] .s33-row[data-st="pending"] .s33-m-wide { grid-column: 1 / -1; }
+}
+@media (forced-colors: active) {
+  .page[data-route="S33"] .s33-row[data-st="mock"]::before,
+  .page[data-route="S33"] .s33-hit[data-mock="true"]::before { width: 0; background-image: none; border-right: 4px dashed CanvasText; }
+  .page[data-route="S33"] .s33-tabs .tab-list [role="tab"][aria-selected="true"] { border-color: Highlight; }
+}
+
+/* the notes: how the numbers are made, what to watch for */
+.page[data-route="S33"] .s33-two { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-5) var(--sp-6); }
+.page[data-route="S33"] .s33-h4 { margin: 0 0 var(--sp-2); font: 650 var(--fs-0)/1.25 var(--font-head); letter-spacing: var(--track-head); }
+.page[data-route="S33"] .s33-ml { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-3); }
+.page[data-route="S33"] .s33-mi { display: grid; gap: 2px; padding-bottom: var(--sp-3); border-bottom: 1px solid var(--line); }
+.page[data-route="S33"] .s33-mi:last-child { padding-bottom: 0; border-bottom: 0; }
+.page[data-route="S33"] .s33-mlink { display: inline-block; min-height: 24px; font-weight: 700; overflow-wrap: anywhere; }
+.page[data-route="S33"] .s33-mi p { margin: 0; max-width: 62ch; font-size: var(--fs-s); color: var(--muted); }
+@media (min-width: 900px) { .page[data-route="S33"] .s33-two { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* ── ПРОСЛЕДИ on a phone: the flow is a list; a source with one way on is one line with its sum, only the budget lists where the money goes ── */
+@media (max-width: 599px) {
+  .page[data-route="S33"] #s33-flow .sk-to:has(> li:only-child) { display: none; }
+  .page[data-route="S33"] #s33-flow .sk-from { border-bottom-color: var(--line); }
+}
