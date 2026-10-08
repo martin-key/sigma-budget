@@ -24,7 +24,7 @@
 /* mock data: a watermark over the plot (the hatch and the badge of the figure stay). The box clips, the text inside is the one that is rotated:
    a rotated box would stick out of the frame and give the page a horizontal scrollbar */
 .page[data-route="S29"] .s29-wm { position: absolute; inset: 0; display: grid; place-items: center; overflow: hidden; pointer-events: none; user-select: none; }
-.page[data-route="S29"] .s29-wm span { white-space: nowrap; font: 800 clamp(1.25rem, 7vw, 3.2rem) / 1 var(--font-head); letter-spacing: .12em; text-transform: uppercase;
+.page[data-route="S29"] .s29-wm span { white-space: nowrap; font: 800 clamp(var(--fs-1), 7vw, var(--fs-5)) / 1 var(--font-head); letter-spacing: .12em; text-transform: uppercase;
   color: var(--st-mock); opacity: .17; transform: rotate(-14deg); }
 
 /* source, status, link to the site */

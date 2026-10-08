@@ -53,18 +53,17 @@ const DO = [
   ['proveri', 'database', 'Провери', 'Покажи ми оригиналните данни и методологията.']
 ];
 
-/** „Какво искаш да направиш?“: four big cards above the search, each a link to its work area. The verb is written as it is said; the capitals are CSS only. */
+/** „Какво искаш да направиш?“: four small tiles above the search, each a link to its work area: the verb with its icon, then the promise in plain words. */
 function actions(ctx) {
   return html`<section class="s01-actions" aria-labelledby="s01-act-h">
     <h2 class="s01-act-h" id="s01-act-h">Какво искаш да направиш?</h2>
-    <ul class="s01-act-list">${DO.map(([tab, ic, verb, promise]) => html`<li><a class="s01-act" href="${ctx.href('S33', {}, { tab })}"><span class="s01-act-top"><span class="s01-act-ic" aria-hidden="true">${icon(ic, { size: 22 })}</span><span class="s01-act-go" aria-hidden="true">→</span></span><span class="s01-act-verb">${verb}</span><span class="s01-act-text">${promise}</span></a></li>`)}</ul></section>`;
+    <ul class="s01-act-list">${DO.map(([tab, ic, verb, promise]) => html`<li><a class="s01-act" href="${ctx.href('S33', {}, { tab })}"><span class="s01-act-head">${icon(ic, { size: 20 })}<span class="s01-act-verb">${verb}</span><span class="s01-act-go" aria-hidden="true">→</span></span><span class="s01-act-text">${promise}</span></a></li>`)}</ul></section>`;
 }
 
-/** the entrance, as two cards side by side: the guide link (the dark one), then the big search with its quick chips.
- *  The reading order stays guide → search; the words of the guide link are the same, only split into spans for the type. */
+/** the entrance: a slim row for the guide, then the search with its quick chips. The reading order stays guide → search. */
 function intro(ctx) {
   return html`<section class="s01-intro" aria-label="Начало">
-    <p class="s01-guide"><a class="s01-guide-link" href="${ctx.href('S02')}">${icon('compass', { size: 22 })}<span class="s01-guide-text"><span class="s01-guide-q">Нов си тук?</span> <span class="s01-guide-a">Започни с пътеводителя</span> <span class="s01-guide-go" aria-hidden="true">→</span></span></a></p>
+    <p class="s01-guide"><a class="s01-guide-link" href="${ctx.href('S02')}">${icon('compass', { size: 20 })}<span class="s01-guide-text"><strong>Нов си тук?</strong> Започни с пътеводителя</span><span class="s01-guide-go" aria-hidden="true">→</span></a></p>
     <form class="s01-find" role="search" aria-label="Търсене в бюджета">
       <label class="field-label" for="s01-q">Търси в бюджета</label>
       <div class="s01-find-main">
@@ -77,7 +76,7 @@ function intro(ctx) {
     </form></section>`;
 }
 
-/** „Бюджет 2026 в шест числа“: plan and execution from core.kpis. Each tile has its icon, a plain name with the plain question the number answers,
+/** „Бюджет 2026 в шест числа“: plan and execution from core.kpis. Each tile has a plain name with the plain question the number answers,
  *  scope, status, source and a link to its screen. The tense follows the numbers: the plan is „ще събере“, what is done so far stays in the line under the number. */
 function six(ctx, core) {
   const k = core.kpis || {}, gdp = k.gdp?.mln, rev = k.revenue || {}, exp = k.expenditure || {}, bal = k.balance || {}, cap = k.capex || {}, debt = k.debt || {};
@@ -86,7 +85,7 @@ function six(ctx, core) {
   const dp = n => (inPct ? n : dd(n));                                 // …but a share of БВП keeps its decimals even when „на човек“ is on
   const dm = date(k.asOf).slice(0, 5);
   // the label: the plain name, then the question it answers (the hidden colon keeps the link text readable aloud)
-  const lab = (name, ic, ask) => html`${icon(ic, { size: 18 })}<span class="s01-k-text"><span class="s01-k-name">${name}</span><span class="sr-only">: </span><span class="s01-k-ask">${ask}</span></span>`;
+  const lab = (name, ask) => html`<span class="s01-k-text"><span class="s01-k-name">${name}</span><span class="sr-only">: </span><span class="s01-k-ask">${ask}</span></span>`;
   const real = { scope: KFP, status: 'real', source: ['zdb', 'kfp'], asOf: k.asOf };       // the first tile keeps the glossary link of „КФП“
   const other = ctx.period?.year !== 2026 ? ' Числата са за бюджета за 2026 г., независимо от избрания период.' : '';
   const defMln = ok(bal.planMln) ? Math.abs(bal.planMln) : null, defNow = ok(bal.execMln) ? ` Към ${dm} ${bal.execMln < 0 ? 'дефицитът' : 'излишъкът'} е ${mlrd(Math.abs(bal.execMln))}.` : '';
@@ -94,17 +93,17 @@ function six(ctx, core) {
     id: 's01-six', title: 'Бюджет 2026 в шест числа', status: false, share: false,
     sub: `Планът за 2026 г. на консолидираната фискална програма (КФП) и колко от него е изпълнено към ${date(k.asOf)}.${other}`,
     body: kpiGrid([
-      kpi({ id: 's01-k-gdp', label: lab('БВП', 'barChart', 'Колко стойност създава икономиката за година?'), mln: gdp, d: dd(1), status: 'forecast', source: ['asbp'],
+      kpi({ id: 's01-k-gdp', label: lab('БВП', 'Колко стойност създава икономиката за година?'), mln: gdp, d: dd(1), status: 'forecast', source: ['asbp'],
         sub: 'Прогноза за 2026 г. Не е сумата в държавната каса.', href: ctx.href('S31') }),
-      kpi({ ...real, scope: 'kfp', id: 's01-k-rev', label: lab('Приходи', 'trendingUp', 'Колко ще събере държавата?'), mln: rev.planMln, pctGdp: ratio(rev.planMln, gdp), d: dp(1),
+      kpi({ ...real, scope: 'kfp', id: 's01-k-rev', label: lab('Приходи', 'Колко ще събере държавата?'), mln: rev.planMln, pctGdp: ratio(rev.planMln, gdp), d: dp(1),
         sub: `Събрани към ${dm}: ${mlrd(rev.execMln, 1)} (${pct(rev.execPct, 1)} от плана)`, href: ctx.href('S06') }),
-      kpi({ ...real, id: 's01-k-exp', label: lab('Разходи', 'pieChart', 'Колко ще похарчи държавата?'), mln: exp.planMln, pctGdp: ratio(exp.planMln, gdp), d: dp(1),
+      kpi({ ...real, id: 's01-k-exp', label: lab('Разходи', 'Колко ще похарчи държавата?'), mln: exp.planMln, pctGdp: ratio(exp.planMln, gdp), d: dp(1),
         sub: `Изразходвани към ${dm}: ${mlrd(exp.execMln, 1)} (${pct(exp.execPct, 1)} от плана)`, href: ctx.href('S07') }),
-      kpi({ ...real, id: 's01-k-bal', label: lab('Дефицит', 'scale', 'Колко повече ще похарчи държавата, отколкото ще събере?'), mln: defMln, pctGdp: ratio(defMln, gdp), d: dp(1),
+      kpi({ ...real, id: 's01-k-bal', label: lab('Дефицит', 'Колко повече ще похарчи държавата, отколкото ще събере?'), mln: defMln, pctGdp: ratio(defMln, gdp), d: dp(1),
         sub: `${inPct ? `${mlrd(defMln)} по плана.` : `${pct(ratio(defMln, gdp), 1)} от БВП по плана.`}${defNow}`, href: ctx.href('S17') }),
-      kpi({ ...real, id: 's01-k-cap', label: lab('Капиталови разходи', 'hardHat', 'Колко ще похарчи държавата за сгради, пътища и друго, което трае дълго?'), mln: cap.planMln, pctGdp: cap.pctGdp, d: dp(2),
+      kpi({ ...real, id: 's01-k-cap', label: lab('Капиталови разходи', 'Колко ще похарчи държавата за сгради, пътища и друго, което трае дълго?'), mln: cap.planMln, pctGdp: cap.pctGdp, d: dp(2),
         sub: `Към ${dm}: ${mlrd(cap.execMln)} (${pct(cap.execPct, 1)} от плана)`, href: ctx.href('S15') }),
-      kpi({ id: 's01-k-debt', label: lab('Държавен дълг', 'banknote', 'Колко дължи държавата?'), mln: debt.zddMln, pctGdp: debt.pctGdp, d: dp(1), scope: 'zdd', status: 'forecast', source: ['asbp'],
+      kpi({ id: 's01-k-debt', label: lab('Държавен дълг', 'Колко дължи държавата?'), mln: debt.zddMln, pctGdp: debt.pctGdp, d: dp(1), scope: 'zdd', status: 'forecast', source: ['asbp'],
         sub: `В края на 2026 г. (прогноза), вътрешен и външен дълг заедно: ${inPct ? mlrd(debt.zddMln) : `${pct(debt.pctGdp, 1)} от БВП`}.`, href: ctx.href('S17') })
     ], { label: 'Бюджет 2026 в шест числа' })
   });
@@ -214,7 +213,7 @@ function merki(ctx) {
 /* ── citizen: „Как върви изпълнението“ ── three bars from the headline numbers (plan done so far), against the share of the year that has passed */
 function izp(ctx, core) {
   const k = core.kpis, gone = ratio(k.month, 12);
-  const bar = (id, label, e) => progress({ id, label, value: e.execPct, text: `${pct(e.execPct, 1)} от плана` });
+  const bar = (id, label, e) => progress({ id, label, value: e.execPct, text: `${pct(e.execPct, 1)} от плана (${mlrd(e.execMln, 1)} от ${mlrd(e.planMln, 1)})` });
   return block({
     id: 's01-izp', title: 'Как върви изпълнението', scope: KFP, status: 'real', source: ['kfp'], asOf: k.asOf, share: false,
     sub: `Към ${date(k.asOf)} е изминала ${pct(gone, 1)} от годината (${num(k.month, 0)} от 12 месеца). Толкова е времето; разходите и приходите не са равномерни през годината.`,
@@ -387,23 +386,7 @@ export function render(ctx) {
   return { lede, body: html`${actions(ctx)}${intro(ctx)}${six(ctx, core)}${explore(ctx)}${who(ctx)}<div class="s01-grid">${parts}</div>` };
 }
 
-/** the headline in two tones: the router builds the frame and its one h1; here the same words are only split into two spans (the second one in grey),
- *  so the text, the id and the focus target stay as they are. Safe to run again; without the words it finds, the plain headline stays. */
-function twoTone() {
-  try {
-    const h = document.getElementById('page-title');
-    if (!h || h.querySelector('.s01-t1')) return;
-    const text = h.textContent, cut = text.indexOf('на достъпен език');
-    if (cut <= 0) return;
-    const a = document.createElement('span'), b = document.createElement('span');
-    a.className = 's01-t1'; a.textContent = text.slice(0, cut);
-    b.className = 's01-t2'; b.textContent = text.slice(cut);
-    h.replaceChildren(a, b);
-  } catch { /* the plain headline reads just as well */ }
-}
-
 export function mount(root, ctx) {
-  twoTone();
   const off = [], on = (el, ev, fn) => { if (el) { el.addEventListener(ev, fn); off.push(() => el.removeEventListener(ev, fn)); } };
   on(root.querySelector('.s01-find'), 'submit', e => {
     e.preventDefault();

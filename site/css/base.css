@@ -16,14 +16,14 @@ button:disabled{cursor:not-allowed}
 strong,b{font-weight:650}
 small{font-size:var(--fs-s)}
 hr{border:0;border-top:1px solid var(--line);margin:var(--sp-5) 0}
-code,kbd,samp{font-family:var(--font-mono);font-size:.9em}
-kbd{display:inline-block;min-width:1.6em;padding:0 .4em;text-align:center;border:1px solid var(--line-strong);border-bottom-width:2px;border-radius:6px;background:var(--surface);color:var(--muted);line-height:1.45}
-mark{background:var(--accent-soft);color:inherit;border-radius:3px;padding:0 .1em}
+code,kbd,samp{font-family:var(--font-mono);font-size:var(--fs-s)}
+kbd{display:inline-block;min-width:1.6em;padding:0 .4em;text-align:center;border:1px solid var(--line-strong);border-bottom-width:2px;border-radius:var(--r-1);background:var(--surface);color:var(--muted);line-height:1.45}
+mark{background:var(--accent-soft);color:inherit;border-radius:var(--r-1);padding:0 .1em}
 ::selection{background:var(--accent);color:var(--on-accent)}
 
 /* focus: always visible for keyboard; the h1 only receives programmatic focus after navigation */
 :focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-:where(a:not([class])):focus-visible{border-radius:4px}
+:where(a:not([class])):focus-visible{border-radius:var(--r-1)}
 :focus:not(:focus-visible){outline:none}
 [tabindex="-1"]:focus{outline:none}
 .hl{animation:hl 2.4s var(--ease)}

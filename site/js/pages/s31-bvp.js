@@ -64,7 +64,7 @@ const tip = (f, text) => ps => {
   const rows = [].concat(ps).filter(p => ok(p.value)).filter(p => { if (seen.has(p.seriesName)) return false; seen.add(p.seriesName); return true; });
   if (!rows.length) return '';
   const i = rows[0].dataIndex;
-  const sw = c => `<span style="display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;background:${esc(c)}"></span>`;
+  const sw = c => `<span style="display:inline-block;width:10px;height:10px;border-radius:var(--r-1);margin-right:6px;background:${esc(c)}"></span>`;
   return `<div style="font-weight:700;margin-bottom:4px">${esc(`${yr(f.years[i])} · ${LONG[f.kinds[i]]}`)}</div>`
     + rows.map(p => `<div style="display:flex;gap:12px;justify-content:space-between;align-items:center"><span>${sw(p.color)}${esc(p.seriesName)}</span><b style="font-variant-numeric:tabular-nums">${esc(text(p.value))}</b></div>`).join('');
 };

@@ -52,12 +52,12 @@
 .page[data-route="S04"] .s04-fill { background: var(--bar); }
 .page[data-route="S04"] .s04-fill[data-dash] { background: transparent; border: 2px dashed var(--bar); }
 .page[data-route="S04"] .s04-gap { border: 2px dashed var(--bar); border-left-width: 0; border-top-left-radius: 0; border-bottom-left-radius: 0; }
-.page[data-route="S04"] .s04-tick { position: absolute; top: -4px; bottom: -4px; left: var(--at); width: 2px; margin-left: -1px; border-radius: 1px; background: var(--ink); box-shadow: 0 0 0 1px var(--surface); }
+.page[data-route="S04"] .s04-tick { position: absolute; top: -4px; bottom: -4px; left: var(--at); width: 2px; margin-left: -1px; border-radius: 0; background: var(--ink); box-shadow: 0 0 0 1px var(--surface); }
 
 /* scene 2: 100 squares, then the same thing as a list (the list is what is read, the squares are what is seen) */
 .page[data-route="S04"] .s04-fig-waffle { gap: var(--sp-4); }
 .page[data-route="S04"] .s04-waffle { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 3px; width: 100%; max-width: 20rem; }
-.page[data-route="S04"] .s04-cell { aspect-ratio: 1; border-radius: 3px; background: var(--series-other); }
+.page[data-route="S04"] .s04-cell { aspect-ratio: 1; border-radius: var(--r-1); background: var(--series-other); }
 .page[data-route="S04"] .s04-cell[data-g="1"] { background: var(--series-1); }
 .page[data-route="S04"] .s04-cell[data-g="2"] { background: var(--series-2); }
 .page[data-route="S04"] .s04-cell[data-g="3"] { background: var(--series-3); }
@@ -68,7 +68,7 @@
 .page[data-route="S04"] .s04-legend { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-2); }
 .page[data-route="S04"] .s04-legend li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--sp-3); align-items: baseline; padding-bottom: var(--sp-2); border-bottom: 1px solid var(--line); }
 .page[data-route="S04"] .s04-legend li:last-child { padding-bottom: 0; border-bottom: 0; }
-.page[data-route="S04"] .s04-sw { align-self: center; width: 12px; height: 12px; border-radius: 3px; background: var(--series-other); }
+.page[data-route="S04"] .s04-sw { align-self: center; width: 12px; height: 12px; border-radius: var(--r-1); background: var(--series-other); }
 .page[data-route="S04"] .s04-sw[data-g="1"] { background: var(--series-1); }
 .page[data-route="S04"] .s04-sw[data-g="2"] { background: var(--series-2); }
 .page[data-route="S04"] .s04-sw[data-g="3"] { background: var(--series-3); }

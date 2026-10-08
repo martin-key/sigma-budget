@@ -50,7 +50,7 @@
 .page[data-route="S18"] .s18-bar-seg + .s18-bar-seg { border-inline-start: 2px solid var(--surface); }
 .page[data-route="S18"] .s18-legend { display: grid; gap: var(--sp-2); margin: 0; padding: 0; list-style: none; }
 .page[data-route="S18"] .s18-legend li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--sp-2); align-items: baseline; }
-.page[data-route="S18"] .s18-sw { display: inline-block; width: 14px; height: 14px; align-self: center; border-radius: 3px; }
+.page[data-route="S18"] .s18-sw { display: inline-block; width: 14px; height: 14px; align-self: center; border-radius: var(--r-1); }
 .page[data-route="S18"] .s18-lg-val { text-align: end; font-variant-numeric: tabular-nums; }
 
 @media (forced-colors: active) {

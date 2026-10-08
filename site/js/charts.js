@@ -88,7 +88,7 @@ function base(spec, tk) {
     }
   };
 }
-const mark = (c, hatch) => `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;background:${c};${hatch ? 'outline:1px solid ' + c : ''}"></span>`;
+const mark = (c, hatch) => `<span style="display:inline-block;width:10px;height:10px;border-radius:var(--r-1);margin-right:6px;background:${c};${hatch ? 'outline:1px solid ' + c : ''}"></span>`;
 
 /* Text measured with the real font (canvas). ECharts' own `overflow:'truncate'` estimates every non-ASCII letter as one full-width CJK glyph
    (zrender truncateText/estimateLength), so Cyrillic labels are cut at about HALF the room they have; labels with a known width go through fitText(). */

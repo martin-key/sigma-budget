@@ -204,7 +204,7 @@ const axisNum = v => { if (!ok(v)) return DASH; for (let k = 0; k < 3; k++) if (
 const unitTxt = (u, v) => (!ok(v) ? DASH : u.kind === 'pct' ? `${pct(v, u.d)} от БВП` : `${u.fmt(v)}${NBSP}${u.unit}`);
 /** which population stands behind „на човек“ */
 const personNote = (u, M) => (u.kind === 'person' && M.popDate ? ` „На човек“ е при населението към ${dateG(M.popDate)} за всички години.` : '');
-const sw = c => `<span style="display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;background:${esc(c)}"></span>`;
+const sw = c => `<span style="display:inline-block;width:10px;height:10px;border-radius:var(--r-1);margin-right:6px;background:${esc(c)}"></span>`;
 const rowTip = (c, name, text) => `<div style="display:flex;gap:12px;justify-content:space-between;align-items:center"><span>${sw(c)}${esc(name)}</span><b style="font-variant-numeric:tabular-nums">${esc(text)}</b></div>`;
 /** tooltip: a heading from head(i), one row per non-empty series, and the printed total from total(i) when there is one */
 const tipOf = (head, u, total, totalLabel = 'Общо') => ps => {
