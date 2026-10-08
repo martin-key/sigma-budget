@@ -3,8 +3,8 @@
 /* tabs are real links (chips): a little air below them */
 .page[data-route="S15"] .s15-tabs { margin-bottom: var(--sp-4); }
 
-/* the controls band: month, scope, unit or threshold; the shared .seg is a single pill row, here the options may wrap */
-.page[data-route="S15"] .s15-controls { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--sp-3) var(--sp-5); margin-bottom: var(--sp-5); padding: var(--sp-3) var(--sp-4); border: 1px solid var(--line); border-radius: var(--r-3); background: var(--surface); }
+/* the controls row (no frame): month, scope, unit or threshold; the shared .seg is a single pill row, here the options may wrap */
+.page[data-route="S15"] .s15-controls { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--sp-3) var(--sp-5); margin-bottom: var(--sp-5); }
 .page[data-route="S15"] .s15-controls .field { min-width: 0; max-width: 100%; }
 .page[data-route="S15"] .s15-controls .field:first-child { flex: 1 1 11rem; max-width: 16rem; }
 .page[data-route="S15"] .s15-seg { display: flex; flex-wrap: wrap; justify-content: stretch; overflow: visible; border-radius: var(--r-3); }

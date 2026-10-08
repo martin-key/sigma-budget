@@ -1,61 +1,51 @@
 /* S33 · Какво искаш да направиш? Four small work areas on tabs: ОТКРИЙ, ПРОСЛЕДИ, СРАВНИ, ПРОВЕРИ.
-   Visual language v2: soft cards, one lime accent, large radii, the tab row is four cards with the chosen one dark.
+   Trial v3: calm and institutional — the tab row is the shared underlined tab list, the filters are plain controls on the page, one lime accent for the action.
    Tokens only (they carry both themes), no dark-mode rules, every selector scoped to the screen, classes prefixed s33-. */
 
-/* ── the four tabs as four cards: a lime icon chip over the verb; the chosen card is dark ── */
-.page[data-route="S33"] .s33-tabs > .tab-list { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-2); overflow: visible; border-bottom: 0; }
-.page[data-route="S33"] .s33-tabs .tab-list [role="tab"] {
-  flex-direction: column; justify-content: center; gap: var(--sp-2); min-width: 0; min-height: 88px; padding: var(--sp-3) 2px;
-  border: 2px solid transparent; border-radius: var(--r-3); background: var(--card); color: var(--ink); text-align: center; white-space: normal;
-  transition: background var(--t-fast), border-color var(--t-fast), color var(--t-fast);
+/* ── compact head: the tabs and the promise heading below say what this screen is for, so the small label and the intro line above them are for screen readers only; the tabs follow the title closely ── */
+.page[data-route="S33"] > .eyebrow,
+.page[data-route="S33"] > .lede { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
+.page[data-route="S33"] .page-body { margin-top: var(--sp-4); }
+
+/* ── the four actions as compact tabs: the shared underlined tab list; a small plain icon before the verb on a wide screen, four equal tabs on a phone ── */
+.page[data-route="S33"] .s33-tab-ic { display: none; color: var(--muted); }
+.page[data-route="S33"] .s33-tabs .tab-list [role="tab"][aria-selected="true"] .s33-tab-ic { color: var(--ink); }
+.page[data-route="S33"] .s33-tabs > .tab-panel { padding-top: var(--sp-5); }
+@media (max-width: 599px) {
+  .page[data-route="S33"] .s33-tabs .tab-list [role="tab"] { flex: 1 1 0; justify-content: center; min-width: 0; padding-inline: 2px; }
 }
-.page[data-route="S33"] .s33-tabs .tab-list [role="tab"]:hover { background: var(--sunk); color: var(--ink); }
-.page[data-route="S33"] .s33-tabs .tab-list [role="tab"][aria-selected="true"] { border-color: var(--ink); background: var(--inv); color: var(--on-inv); }
-.page[data-route="S33"] .s33-tabs .tab-list [role="tab"][aria-selected="true"]::after { content: none; }
-.page[data-route="S33"] .s33-tabs .tab-list [role="tab"]:focus-visible { outline-offset: 2px; }
-.page[data-route="S33"] .s33-tab-ic { display: grid; place-items: center; box-sizing: content-box; width: 22px; height: 22px; padding: 9px; border-radius: 50%; background: var(--accent); color: var(--on-accent); }
-.page[data-route="S33"] .s33-tab-t { max-width: 100%; font: 700 .7rem/1.15 var(--font-head); letter-spacing: .03em; text-transform: uppercase; overflow-wrap: normal; }
-.page[data-route="S33"] .s33-tabs > .tab-panel { padding-top: var(--sp-6); }
-@media (max-width: 399px) {
-  .page[data-route="S33"] .s33-tabs > .tab-list { gap: var(--sp-1); }
-  .page[data-route="S33"] .s33-tab-t { font-size: .66rem; letter-spacing: .02em; }
-}
-@media (max-width: 340px) {
-  .page[data-route="S33"] .s33-tabs .tab-list [role="tab"] { padding-inline: 0; }
-  .page[data-route="S33"] .s33-tab-t { font-size: .6rem; letter-spacing: .01em; }
-}
-@media (min-width: 440px) {
-  .page[data-route="S33"] .s33-tab-t { font-size: .78rem; letter-spacing: .05em; }
-}
-@media (min-width: 700px) {
-  .page[data-route="S33"] .s33-tabs > .tab-list { gap: var(--sp-3); }
-  .page[data-route="S33"] .s33-tabs .tab-list [role="tab"] { flex-direction: row; justify-content: flex-start; gap: var(--sp-3); min-height: 76px; padding: var(--sp-3) var(--sp-4); text-align: left; }
-  .page[data-route="S33"] .s33-tab-t { font-size: .9rem; }
+@media (min-width: 600px) {
+  .page[data-route="S33"] .s33-tab-ic { display: inline-grid; }
 }
 
 /* ── one work area: the promise, a line of help, the filters, the answer, the ways on ── */
-.page[data-route="S33"] .s33-panel > * + * { margin-top: var(--sp-5); }
+.page[data-route="S33"] .s33-panel > * + * { margin-top: var(--sp-4); }
 .page[data-route="S33"] .s33-panel > .s33-ph + .s33-pl { margin-top: var(--sp-1); }
-.page[data-route="S33"] .s33-ph { max-width: 34ch; font-size: clamp(1.5rem, 1.1rem + 1.5vw, 2.25rem); line-height: 1.08; letter-spacing: var(--track-head); }
+.page[data-route="S33"] .s33-ph { max-width: none; font-size: var(--fs-1); line-height: 1.25; letter-spacing: var(--track-head); }
 .page[data-route="S33"] .s33-pl { max-width: 60ch; color: var(--muted); }
 
-/* the filters sit in one soft card; a control keeps its visible label above it */
-.page[data-route="S33"] .s33-filters { display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--sp-4) var(--sp-6); padding: var(--sp-4); border-radius: var(--r-4); background: var(--card); }
+/* the filters are plain rows on the page, not a card of their own; a control keeps its visible label: above it on a phone, before it on a ПРОСЛЕДИ row from 600 px */
+.page[data-route="S33"] .s33-filters { display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--sp-3) var(--sp-6); }
 .page[data-route="S33"] .s33-filters > .field { flex: 1 1 15rem; min-width: 0; max-width: 26rem; }
 .page[data-route="S33"] .s33-filters > .s33-f { flex: 0 1 auto; max-width: 100%; }
-.page[data-route="S33"] .s33-f .field-label { color: var(--muted); font-size: var(--fs-s); font-weight: 700; }
-.page[data-route="S33"] .s33-filters .field-label { font-size: var(--fs-s); }
-.page[data-route="S33"] .s33-filters .seg { background: var(--surface); }
-.page[data-route="S33"] .s33-filters .select select { background-color: var(--surface); }
+.page[data-route="S33"] .s33-filters .field-label { color: var(--muted); font-size: var(--fs-s); font-weight: 700; }
 @media (max-width: 599px) {
-  .page[data-route="S33"] .s33-filters { padding: var(--sp-4) var(--sp-3); }
   .page[data-route="S33"] .s33-filters > .field,
   .page[data-route="S33"] .s33-filters > .s33-f { flex: 1 1 100%; max-width: none; }
   .page[data-route="S33"] .s33-filters .seg { display: flex; width: 100%; }
   .page[data-route="S33"] .s33-filters .seg-opt { flex: 1 1 0; min-width: 0; }
   .page[data-route="S33"] .s33-filters .seg-opt label { width: 100%; justify-content: center; padding-inline: 4px; text-align: center; white-space: normal; line-height: 1.15; }
 }
-@media (min-width: 900px) { .page[data-route="S33"] .s33-filters { padding: var(--sp-5); } }
+/* ПРОВЕРИ on a phone: the topic on a row of its own, the source and the period side by side (the period is only as wide as a year, the source gets the rest, so that no closed select ends in an ellipsis), the status chips on a row of their own */
+@media (max-width: 599px) {
+  .page[data-route="S33"] .s33-filters-v { display: grid; grid-template-columns: minmax(0, 1fr) minmax(6rem, auto); gap: var(--sp-3); }
+  .page[data-route="S33"] .s33-filters-v > .field:first-child,
+  .page[data-route="S33"] .s33-filters-v > .s33-f { grid-column: 1 / -1; }
+  .page[data-route="S33"] .s33-filters-v > .field:not(:first-child) .select select { padding-left: 10px; padding-right: 26px; background-position: calc(100% - 15px) 50%, calc(100% - 10px) 50%; }
+}
+@media (min-width: 600px) {
+  .page[data-route="S33"] .s33-filters-row > .s33-f { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-1) var(--sp-3); }
+}
 
 /* ── the ways on: cards to the screens that explain the answer ── */
 .page[data-route="S33"] .s33-go { display: grid; gap: var(--sp-2); }
@@ -117,29 +107,47 @@
   .page[data-route="S33"] .s33-list:not(.s33-sets) { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
 }
 
-/* ── ПРОВЕРИ: one dataset is a small sheet: name, state, what it is, the facts, the file and the API ── */
-.page[data-route="S33"] .s33-sets { gap: var(--sp-3); }
-.page[data-route="S33"] .s33-row { position: relative; display: grid; gap: var(--sp-2); align-content: start; min-width: 0; padding: var(--sp-4); border: 1px solid var(--line); border-radius: var(--r-3); background: var(--surface); overflow: hidden; }
-.page[data-route="S33"] .s33-row-top { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-1) var(--sp-3); min-width: 0; }
-.page[data-route="S33"] .s33-rlink { display: inline-block; min-height: 24px; font: 650 var(--fs-1)/1.2 var(--font-head); letter-spacing: var(--track-head); overflow-wrap: anywhere; }
+/* ── ПРОВЕРИ: the catalogue as compact rows — name and state, period and source on one line, the file at hand; the rest unfolds on the row ── */
+.page[data-route="S33"] .s33-sets { gap: 0; }
+.page[data-route="S33"] .s33-row { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 2px var(--sp-4); min-width: 0; padding: var(--sp-3) 0; border-top: 1px solid var(--line); }
+.page[data-route="S33"] .s33-row:first-child { border-top: 0; padding-top: 0; }
+.page[data-route="S33"] .s33-row-top { grid-column: 1; grid-row: 1; display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-1) var(--sp-3); min-width: 0; }
+.page[data-route="S33"] .s33-rlink { display: inline-block; min-height: 24px; font: 700 var(--fs-0)/1.25 var(--font-head); overflow-wrap: anywhere; }
+.page[data-route="S33"] .s33-meta.s33-line { grid-column: 1; grid-row: 2; display: flex; flex-wrap: wrap; gap: 0 var(--sp-4); padding: 0; border: 0; }
+.page[data-route="S33"] .s33-meta.s33-line .s33-m { display: block; }
+.page[data-route="S33"] .s33-meta.s33-line .s33-m > dt,
+.page[data-route="S33"] .s33-meta.s33-line .s33-m > dd { display: inline; }
+.page[data-route="S33"] .s33-meta.s33-line .s33-m > dt::after { content: ": "; }
+.page[data-route="S33"] .s33-get { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
+.page[data-route="S33"] .s33-det { grid-column: 1 / -1; grid-row: 3; }
+.page[data-route="S33"] .s33-det.disc { border: 0; border-radius: 0; background: none; }
+.page[data-route="S33"] .s33-det > summary { min-height: 32px; padding: 0; gap: var(--sp-2); justify-content: flex-start; color: var(--data); font-size: var(--fs-s); font-weight: 700; }
+.page[data-route="S33"] .s33-det > summary::after { margin-left: 0; }
+.page[data-route="S33"] .s33-det > summary:hover { background: none; text-decoration: underline; text-underline-offset: .18em; }
+.page[data-route="S33"] .s33-det .disc-body { display: grid; gap: var(--sp-3); padding: var(--sp-2) 0 var(--sp-1); }
+.page[data-route="S33"] .s33-det .disc-body > * + * { margin-top: 0; }
 .page[data-route="S33"] .s33-row-desc { margin: 0; max-width: 72ch; font-size: var(--fs-s); color: var(--muted); }
 .page[data-route="S33"] .s33-meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-2) var(--sp-3); margin: 0; padding-top: var(--sp-3); border-top: 1px solid var(--line); }
+.page[data-route="S33"] .s33-det .s33-meta { padding-top: 0; border-top: 0; }
 .page[data-route="S33"] .s33-m { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; min-width: 0; align-content: start; }
-.page[data-route="S33"] .s33-m > dt { color: var(--muted); font-size: var(--fs-xs); font-weight: 700; }
+.page[data-route="S33"] .s33-m > dt { color: var(--muted); font-size: var(--fs-s); font-weight: 700; }
 .page[data-route="S33"] .s33-m > dd { margin: 0; min-width: 0; font-size: var(--fs-s); overflow-wrap: anywhere; }
 .page[data-route="S33"] .s33-m-wide { grid-column: 1 / -1; }
-.page[data-route="S33"] .s33-acts { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
-.page[data-route="S33"] .s33-row[data-st="mock"] { padding-left: calc(var(--sp-4) + 8px); }
+.page[data-route="S33"] .s33-acts { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin: 0; }
+.page[data-route="S33"] .s33-row[data-st="mock"] { padding-left: calc(var(--sp-3) + 8px); }
+.page[data-route="S33"] .s33-row[data-st="mock"]:first-child { padding-top: var(--sp-3); }
 .page[data-route="S33"] .s33-row[data-st="mock"]::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 8px; background-image: repeating-linear-gradient(45deg, var(--hatch) 0 2px, transparent 2px var(--hatch-step)); border-right: 1px solid var(--line); }
-.page[data-route="S33"] .s33-row[data-st="pending"] { border-style: dashed; border-color: var(--line-strong); background: var(--sunk); }
-.page[data-route="S33"] .s33-row[data-st="pending"] .s33-meta { grid-template-columns: minmax(0, 1fr); }
+.page[data-route="S33"] .s33-row[data-st="pending"] { border-top-style: dashed; border-top-color: var(--line-strong); }
+.page[data-route="S33"] .s33-row[data-st="pending"] .s33-rlink { color: var(--muted); }
+@media (pointer: coarse) { .page[data-route="S33"] .s33-det > summary { min-height: 44px; } }
+@media (max-width: 599px) {
+  .page[data-route="S33"] .s33-row { grid-template-columns: minmax(0, 1fr); }
+  .page[data-route="S33"] .s33-get { grid-column: 1; grid-row: 3; justify-self: start; margin-top: var(--sp-2); }
+  .page[data-route="S33"] .s33-det { grid-row: 4; }
+}
 @media (min-width: 600px) {
-  .page[data-route="S33"] .s33-row { padding: var(--sp-4) var(--sp-5); }
-  .page[data-route="S33"] .s33-row[data-st="mock"] { padding-left: calc(var(--sp-5) + 8px); }
   .page[data-route="S33"] .s33-meta { grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: var(--sp-2) var(--sp-4); }
   .page[data-route="S33"] .s33-m-wide { grid-column: span 2; }
-  .page[data-route="S33"] .s33-row[data-st="pending"] .s33-m { grid-template-columns: minmax(7rem, 11rem) minmax(0, 1fr); gap: var(--sp-1) var(--sp-3); }
-  .page[data-route="S33"] .s33-row[data-st="pending"] .s33-m-wide { grid-column: 1 / -1; }
 }
 @media (forced-colors: active) {
   .page[data-route="S33"] .s33-row[data-st="mock"]::before,
@@ -148,8 +156,12 @@
 }
 
 /* the notes: how the numbers are made, what to watch for */
-.page[data-route="S33"] .s33-two { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-5) var(--sp-6); }
-.page[data-route="S33"] .s33-h4 { margin: 0 0 var(--sp-2); font: 650 var(--fs-0)/1.25 var(--font-head); letter-spacing: var(--track-head); }
+.page[data-route="S33"] .s33-two { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 var(--sp-6); }
+/* a group of notes is a plain disclosure: a hairline above it, no card of its own inside the block */
+.page[data-route="S33"] .s33-ndet.disc { border: 0; border-top: 1px solid var(--line); border-radius: 0; background: none; }
+.page[data-route="S33"] .s33-ndet > summary { padding: var(--sp-2) 0; font: 650 var(--fs-0)/1.25 var(--font-head); letter-spacing: var(--track-head); }
+.page[data-route="S33"] .s33-ndet > summary:hover { background: none; text-decoration: underline; text-underline-offset: .18em; }
+.page[data-route="S33"] .s33-ndet .disc-body { padding: var(--sp-1) 0 var(--sp-3); }
 .page[data-route="S33"] .s33-ml { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-3); }
 .page[data-route="S33"] .s33-mi { display: grid; gap: 2px; padding-bottom: var(--sp-3); border-bottom: 1px solid var(--line); }
 .page[data-route="S33"] .s33-mi:last-child { padding-bottom: 0; border-bottom: 0; }

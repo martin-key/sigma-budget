@@ -24,6 +24,7 @@ import { chart } from '../ui/chart.js';
 import { sankey } from '../ui/sankey.js';
 import { linkCard, ext } from '../ui/cards.js';
 import { emptyState, pendingState, errorState, mockHidden } from '../ui/states.js';
+import { disclosure } from '../ui/disclosure.js';
 import { STATUS, statusPill } from '../ui/status.js';
 import { srcShort } from '../ui/source.js';
 import * as C from '../catalog.js';
@@ -198,7 +199,7 @@ function viewO(ix, q, vid, o) {
   if (!res.hits.length) {
     return {
       types, n: 0, say: `Няма резултати за „${q}“`,
-      body: html`${emptyState({ title: `${res.hidden ? 'Няма реални резултати за' : 'Няма резултат за'} „${q}“`, text: 'Опитай с по-кратка дума, с друго изписване (може и с латински букви) или с някое от тези:' })}${more}${hiddenNote}${full}${note}`
+      body: html`${emptyState({ title: `${res.hidden ? 'Няма официални резултати за' : 'Няма резултат за'} „${q}“`, text: 'Опитай с по-кратка дума, с друго изписване (може и с латински букви) или с някое от тези:' })}${more}${hiddenNote}${full}${note}`
     };
   }
   const pick = kind ? res.hits.filter(e => T.tag.get(e) === kind) : res.hits;
@@ -432,10 +433,10 @@ function panelP(ctx) {
   const want = defaultMer();
   const mer = oneOf(String(ctx.query.mer ?? ''), mers.map(m => m[0]), mers.some(m => m[0] === want) ? want : 'mln');
 
-  const filters = html`<div class="s33-filters" data-gl-skip>
+  const filters = html`<div class="s33-filters s33-filters-row" data-gl-skip>
     ${views.length > 1 ? segField({ name: 's33-gled', label: 'Какво да покажа', vis: 'Покажи', value: gled, query: 'gled', options: views.map(v => ({ value: v, label: GLED[v] })) }) : ''}
-    ${chipField({ label: 'Година', vis: 'За година', items: yrs.map((yy, i) => ({ label: String(yy), count: SHORT[vint?.[i]] || '', query: `god=${yy}`, pressed: yy === y })) })}
     ${segField({ name: 's33-mer', label: 'Единици', vis: 'Покажи в', value: mer, query: 'mer', options: mers.map(([value, label]) => ({ value, label })) })}
+    ${chipField({ label: 'Година', vis: 'За година', items: yrs.map((yy, i) => ({ label: String(yy), count: SHORT[vint?.[i]] || '', query: `god=${yy}`, pressed: yy === y })) })}
   </div>`;
   const result = gled === 'prihodi' ? revenueBlock(ctx, rev, y, mer, persons)
     : gled === 'razhodi' ? spendBlock(ctx, ex, y, mer, persons)
@@ -577,7 +578,7 @@ const isMulti = set => !set.file && set.parts.length > 0;
 const fileInfo = set => [fmtOf(set), isMulti(set) ? plural(set.parts.length, 'файл', 'файла') : '', C.sizeLabel(set.bytes)].filter(Boolean).join(' · ');
 const srcLink = (k, M) => { const s = M.src(k); return s.url ? ext(s.url, srcShort(k)) : srcShort(k); };
 const publishers = (set, M) => uniq(set.source.map(k => (M.src(k).publisher || '').replace(/;\s*/g, ', ')).filter(Boolean)).join(', ');
-const metaDl = rows => html`<dl class="s33-meta">${rows.filter(r => r && r.v != null && r.v !== '' && r.v !== false).map(r => html`<div class="s33-m${r.wide ? ' s33-m-wide' : ''}"><dt>${r.k}</dt><dd>${r.v}</dd></div>`)}</dl>`;
+const metaDl = (rows, cls = '') => html`<dl class="s33-meta${cls ? ` ${cls}` : ''}">${rows.filter(r => r && r.v != null && r.v !== '' && r.v !== false).map(r => html`<div class="s33-m${r.wide ? ' s33-m-wide' : ''}"><dt>${r.k}</dt><dd>${r.v}</dd></div>`)}</dl>`;
 /** the first sentence of a paragraph of the catalogue (not cut at an abbreviation: at least twenty letters first) */
 function firstSentence(text) {
   const t = String(text ?? '').replace(/\s+/g, ' ').trim();
@@ -600,32 +601,38 @@ function rowV(set, M) {
   const how = notes.length
     ? joinL(notes.slice(0, 2).map(([k, t]) => html`<a href="${noteHref(k, t)}">${t.title}</a>`), '; ')
     : html`<a href="${routeHref('danni', {}, { to: 's24-method' })}">Как подреждаме и показваме числата</a>`;
+  // the row itself: period and source on one line; everything else unfolds
+  const from = pend ? set.expected || publishers(set, M) : set.mock ? 'няма, стойностите са измислени' : set.source.length ? src(set.source) : '';
+  const line = [{ k: 'Период', v: C.periodLabel(set.period) }, { k: pend ? 'Ще дойдат от' : 'Източник', v: from }];
   const rows = pend
-    ? [{ k: 'Откъде ще дойдат', v: set.expected || publishers(set, M) }, { k: 'Засяга', v: set.screenRoutes.length ? joinL(set.screenRoutes.map(r => html`<a href="${routeHref(r.key)}">${r.title}</a>`)) : '' }]
+    ? [{ k: 'Засяга', v: set.screenRoutes.length ? joinL(set.screenRoutes.map(r => html`<a href="${routeHref(r.key)}">${r.title}</a>`)) : '', wide: true }]
     : [
-      set.mock ? { k: 'Източник', v: 'Няма: стойностите са измислени', wide: true } : { k: set.source.length > 1 ? 'Източници' : 'Източник', v: set.source.length ? src(set.source) : '', wide: true },
       set.mock && real.length ? { k: 'Свързан с данни от', v: src(real), wide: true } : null,
-      { k: 'Период', v: C.periodLabel(set.period) },
       { k: set.mock ? 'Създадени на' : 'Данни към', v: set.asOf ? date(set.asOf) : '' },
       { k: 'Единица', v: set.unit },
       { k: 'Формат', v: fileInfo(set) },
       { k: 'Методика', v: how, wide: true }
     ];
   const get = set.file
-    ? html`<a class="btn btn-sm" href="${set.file}" download="${C.dlName(set)}">${icon('download', { size: 16 })}<span>Свали ${fmtOf(set)}</span><span class="sr-only"> – ${set.title}</span></a>`
+    ? html`<a class="btn btn-sm s33-get" href="${set.file}" download="${C.dlName(set)}">${icon('download', { size: 16 })}<span>Свали ${fmtOf(set)}</span><span class="sr-only"> – ${set.title}</span></a>`
     : isMulti(set)
-      ? html`<a class="btn btn-sm" href="${routeHref('danni', { set: set.slug }, { to: 's24-d-get' })}">${icon('download', { size: 16 })}<span>Виж и свали ${plural(set.parts.length, 'файл', 'файла')}</span><span class="sr-only"> – ${set.title}</span></a>`
+      ? html`<a class="btn btn-sm s33-get" href="${routeHref('danni', { set: set.slug }, { to: 's24-d-get' })}">${icon('download', { size: 16 })}<span>Виж и свали ${plural(set.parts.length, 'файл', 'файла')}</span><span class="sr-only"> – ${set.title}</span></a>`
       : '';
-  const acts = pend ? '' : html`<div class="s33-acts">${get}<a class="btn btn-sm" href="${routeHref('api', {}, { set: set.slug, to: 's25-read' })}">${icon('code', { size: 16 })}<span>Как да го четеш с код</span><span class="sr-only"> – ${set.title}</span></a></div>`;
+  const code = pend ? '' : html`<p class="s33-acts"><a class="btn btn-sm" href="${routeHref('api', {}, { set: set.slug, to: 's25-read' })}">${icon('code', { size: 16 })}<span>Как да го четеш с код</span><span class="sr-only"> – ${set.title}</span></a></p>`;
+  const more = html`${set.desc ? html`<p class="s33-row-desc">${C.rich(set.desc, M)}</p>` : ''}${metaDl(rows)}${code}`;
   return html`<li class="s33-row" data-st="${set.status}">
     <div class="s33-row-top"><a class="s33-rlink" href="${routeHref('danni', { set: set.slug })}">${set.title}</a>${statusPill(set.status)}</div>
-    ${set.desc ? html`<p class="s33-row-desc">${C.rich(set.desc, M)}</p>` : ''}
-    ${metaDl(rows)}
-    ${acts}</li>`;
+    ${metaDl(line, 's33-line')}
+    ${get}
+    ${disclosure({ id: `s33-v-d-${set.slug}`, cls: 's33-det', title: html`Подробности<span class="sr-only"> – ${set.title}</span>`, body: more })}</li>`;
 }
 
 /** a methodology note or a trap: its name (a link to the full text) and its first sentence */
 const noteItem = (kind, t, M) => html`<li class="s33-mi"><a class="s33-mlink" href="${noteHref(kind, t)}">${t.title}</a><p>${C.rich(firstSentence(t.paras[0]), M)}</p></li>`;
+// a group of notes is a disclosure: open from 600 px up (two columns), closed on a phone, where the two lists would fill the end of the page
+const noteGroup = (id, title, list, kind, M) => list.length
+  ? disclosure({ id, title, meta: plural(list.length, 'бележка', 'бележки'), cls: 's33-ndet', open: matchMedia('(min-width: 600px)').matches, body: html`<ul class="s33-ml" role="list">${list.map(t => noteItem(kind, t, M))}</ul>` })
+  : '';
 
 function panelV(ctx) {
   const a = ACTIONS[3];
@@ -633,23 +640,29 @@ function panelV(ctx) {
   if (!M.sets.length) return html`<div class="s33-panel" data-area="proveri">${head(a)}${pendingState({ title: 'Каталогът на наборите не е наличен', text: 'Опитай пак по-късно.', source: ['wg'] })}</div>`;
   // the catalogue filter reads the search text too (?q=), which belongs to ОТКРИЙ here: leave it out
   const f = C.readFilter({ status: ctx.query.status, ekran: ctx.query.ekran, izvor: ctx.query.izvor }, M);
+  // the period filter: the sets whose period includes the chosen year (FB4, point 5)
+  const years = C.periodYears(M), godina = years.includes(Number(ctx.query.godina)) ? Number(ctx.query.godina) : 0;
+  const ok = (s, skip) => C.passes(s, f, skip) && (!godina || C.coversYear(s, godina));
+  const active = f.active || !!godina;
   const sets = M.groups.flatMap(g => g.sets);
-  const vis = sets.filter(s => C.passes(s, f)), visSet = new Set(vis);
+  const vis = sets.filter(s => ok(s)), visSet = new Set(vis);
   const statusN = {};
   let allN = 0;
-  for (const s of sets) if (C.passes(s, f, ['status'])) { allN++; statusN[s.status] = (statusN[s.status] || 0) + 1; }
+  for (const s of sets) if (ok(s, ['status'])) { allN++; statusN[s.status] = (statusN[s.status] || 0) + 1; }
   const wide = ctx.query.mnogo === '1' || vis.length <= SHOW;
   const shown = wide ? vis : vis.slice(0, SHOW);
 
-  const screens = [{ value: '', label: 'Всички теми' }, ...M.screens.map(s => ({ value: s.key, label: s.title }))];
-  const sources = [{ value: '', label: 'Всички източници' }, ...M.sourceKeys.map(k => ({ value: k, label: srcShort(k) }))];
+  // the home page's own title is too long for a phone-width select: it goes by its menu name here (the value is unchanged)
+  const screens = [{ value: '', label: 'Всички теми' }, ...M.screens.map(s => ({ value: s.key, label: s.id === 'S01' ? 'Начало' : s.title }))];
+  const sources = [{ value: '', label: 'Всички' }, ...M.sourceKeys.map(k => ({ value: k, label: srcShort(k) }))];
   const statusItems = [
     { label: 'Всички', count: allN, query: 'status=', pressed: !f.status },
     ...C.STATUSES.filter(st => M.counts[st] > 0).map(st => ({ label: STATUS[st].label, count: statusN[st] || 0, query: `status=${st}`, pressed: f.status === st }))
   ];
-  const filters = html`<div class="s33-filters" data-gl-skip>
+  const filters = html`<div class="s33-filters s33-filters-v" data-gl-skip>
     ${field({ id: 's33-v-ekran', label: 'Тема', control: selectInput({ id: 's33-v-ekran', name: 'ekran', query: 'ekran', value: f.ekran, options: screens }) })}
     ${field({ id: 's33-v-izvor', label: 'Източник', control: selectInput({ id: 's33-v-izvor', name: 'izvor', query: 'izvor', value: f.izvor, options: sources }) })}
+    ${field({ id: 's33-v-godina', label: 'Период', control: selectInput({ id: 's33-v-godina', name: 'godina', query: 'godina', value: godina ? String(godina) : '', options: [{ value: '', label: 'Всички' }, ...years.map(y => ({ value: String(y), label: `${y} г.` }))] }) })}
     ${chipField({ label: 'Статус на данните', vis: 'Статус', items: statusItems })}
   </div>`;
 
@@ -657,20 +670,18 @@ function panelV(ctx) {
   const list = vis.length
     ? html`<ul class="s33-list s33-sets" role="list">${shown.map(s => rowV(s, M))}</ul>
       ${vis.length > SHOW ? html`<p class="s33-more"><button type="button" class="btn btn-sm" id="s33-v-more" data-query="mnogo=${wide ? '' : '1'}">${wide ? `Покажи само първите ${SHOW}` : `Покажи всички ${vis.length}`}</button></p>` : ''}`
-    : emptyState({ title: 'Няма набор, който да отговаря на избраното', text: 'Опитай с друга тема или друг източник.', action: { label: 'Изчисти филтрите', href: reset } });
+    : emptyState({ title: 'Няма набор, който да отговаря на избраното', text: 'Опитай с друга тема, друг източник или друг период.', action: { label: 'Изчисти филтрите', href: reset } });
   const count = vis.length
-    ? `Показани: ${num(shown.length, 0)} от ${plural(vis.length, 'набор', 'набора')}${f.active ? ` (всичко в каталога: ${num(M.sets.length, 0)})` : ''}.`
+    ? `Показани: ${num(shown.length, 0)} от ${plural(vis.length, 'набор', 'набора')}${active ? ` (всичко в каталога: ${num(M.sets.length, 0)})` : ''}.`
     : `Няма показани набори (всичко в каталога: ${num(M.sets.length, 0)}).`;
   const result = block({ id: 's33-v-nabori', title: 'Наборите данни зад числата', level: 3, sub: count, body: list });
 
-  const rel = list => (f.active ? list.filter(t => t.related.some(s => visSet.has(s))) : list);
+  const rel = list => (active ? list.filter(t => t.related.some(s => visSet.has(s))) : list);
   const methods = rel(M.methods), traps = rel(M.traps);
   const notes = methods.length || traps.length ? block({
     id: 's33-v-metodika', title: 'Методика и капани', level: 3,
-    sub: f.active ? 'Бележките, които засягат избраните набори.' : 'Как са подредени числата и на какво да внимаваш, когато ги четеш.',
-    body: html`<div class="s33-two">
-      ${methods.length ? html`<div><h4 class="s33-h4">Как смятаме</h4><ul class="s33-ml" role="list">${methods.map(t => noteItem('m', t, M))}</ul></div>` : ''}
-      ${traps.length ? html`<div><h4 class="s33-h4">На какво да внимаваш</h4><ul class="s33-ml" role="list">${traps.map(t => noteItem('t', t, M))}</ul></div>` : ''}</div>`
+    sub: active ? 'Бележките, които засягат избраните набори.' : 'Как са подредени числата и на какво да внимаваш, когато ги четеш.',
+    body: html`<div class="s33-two">${noteGroup('s33-v-metodi', 'Как смятаме', methods, 'm', M)}${noteGroup('s33-v-kapani', 'На какво да внимаваш', traps, 't', M)}</div>`
   }) : '';
 
   const carry = { status: f.status || null, ekran: f.ekran || null, izvor: f.izvor || null, to: 's24-sets' };
@@ -679,7 +690,7 @@ function panelV(ctx) {
 
 /* ================================================================ the page */
 const KEYS = ACTIONS.map(a => a.key);
-const tabLabel = a => html`<span class="s33-tab-ic" aria-hidden="true">${icon(a.icon, { size: 22 })}</span><span class="s33-tab-t">${a.verb}</span>`;
+const tabLabel = a => html`<span class="s33-tab-ic" aria-hidden="true">${icon(a.icon, { size: 18 })}</span><span class="s33-tab-t">${a.verb}</span>`;
 
 export async function render(ctx) {
   const ix = await getIndex();                                                    // never rejects: without the index ОТКРИЙ still has the screens and the glossary

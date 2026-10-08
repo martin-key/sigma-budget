@@ -1,156 +1,117 @@
-/* S01 · Държавният бюджет на достъпен език · visual language v2.
-   The front door, top to bottom:
-     headline (two tones) → four action cards (what a visitor comes to do) → two entrance cards side by side (the dark guide card, the search card) →
-     the six numbers as one open grid with hairlines → the questions as a quiet two-column list (directly under the six numbers) →
-     „Кой си ти?“ as three selectable cards → the reader's blocks as a two-column grid of soft cards.
-   Tokens only, no dark-mode rules (the tokens carry both themes), every selector scoped to the screen. */
+/* S01 · Държавният бюджет на достъпен език · compact front door (trial v3).
+   Top to bottom: the headline → four small action tiles → a slim guide row and the search → the six numbers as small tiles →
+   „Кой си ти?“ and the questions as plain rows → the reader's blocks.
+   One level of frames: grey tiles on the white page, no cards inside cards, no icon discs, no pills. Colour is for the state of a control or the meaning of a number.
+   Tokens only (five sizes, two radii), no dark-mode rules (the tokens carry both themes), every selector scoped to the screen. */
 
-/* ── the headline: big, tight, two tones (the second part is wrapped in .s01-t2 by mount()) ── */
-.page[data-route="S01"] .eyebrow { margin-bottom: var(--sp-5); }
-.page[data-route="S01"] .page-title { margin-bottom: var(--sp-5); font-size: clamp(2.25rem, .9rem + 5.6vw, 5rem); font-weight: 700; line-height: .98; letter-spacing: var(--track-display); }
-.page[data-route="S01"] .s01-t2 { display: block; color: var(--faint); }
-.page[data-route="S01"] .lede { max-width: 42ch; font-size: clamp(1.1rem, 1rem + .45vw, 1.35rem); line-height: 1.45; }
+/* ── the head: the large title (inner pages have a compact one), a plain small eyebrow, the lede at body size ── */
+.page[data-route="S01"] .page-title { font-size: var(--fs-h1); margin-bottom: var(--sp-4); }
+.page[data-route="S01"] .lede { max-width: 60ch; font-size: var(--fs-0); line-height: 1.45; }
 .page[data-route="S01"] .lede strong { color: var(--ink); }
-.page[data-route="S01"] .page-body { margin-top: var(--sp-7); }
-.page[data-route="S01"] .page-body > * + * { margin-top: var(--sp-7); }
-.page[data-route="S01"] .page-body > .s01-intro + #s01-six { margin-top: var(--sp-5); }
+.page[data-route="S01"] .page-body { margin-top: var(--sp-5); }
+.page[data-route="S01"] .page-body > * + * { margin-top: var(--sp-5); }
 
-/* ── „Какво искаш да направиш?“: four big soft cards above the search; 2 × 2 on a phone, four across on a wide screen.
-      A lime icon chip and an arrow ring on the first line, the verb in capitals, then the promise in plain words. ── */
-.page[data-route="S01"] .page-body > .s01-actions + .s01-intro { margin-top: var(--sp-5); }
-.page[data-route="S01"] .s01-act-h { margin: 0 0 var(--sp-4); font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2.2rem); line-height: 1.1; letter-spacing: var(--track-head); }
-.page[data-route="S01"] .s01-act-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
+/* ── „Какво искаш да направиш?“: four small tiles above the search, 2 × 2 on a phone and four across on a wide screen ── */
+.page[data-route="S01"] .s01-act-h { margin: 0 0 var(--sp-3); font-size: var(--fs-1); line-height: 1.2; letter-spacing: var(--track-head); }
+.page[data-route="S01"] .s01-act-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-2); }
 .page[data-route="S01"] .s01-act-list > li { display: flex; min-width: 0; }
-.page[data-route="S01"] .s01-act { flex: 1; display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; padding: var(--sp-4) var(--sp-3) var(--sp-4) var(--sp-4); border: 2px solid transparent; border-radius: var(--r-3); background: var(--card); color: var(--ink); text-decoration: none; transition: background var(--t-fast), border-color var(--t-fast); }
+.page[data-route="S01"] .s01-act { position: relative; flex: 1; display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; padding: var(--sp-3); border: 1px solid transparent; border-radius: var(--r-1); background: var(--card); color: var(--ink); text-decoration: none; transition: background var(--t-fast), border-color var(--t-fast); }
 .page[data-route="S01"] .s01-act:hover { border-color: var(--ink); background: var(--sunk); color: var(--ink); text-decoration: none; }
-.page[data-route="S01"] .s01-act-top { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); margin-bottom: var(--sp-3); }
-.page[data-route="S01"] .s01-act-ic { display: grid; place-items: center; box-sizing: content-box; flex: none; width: 22px; height: 22px; padding: 10px; border-radius: 50%; background: var(--accent); color: var(--on-accent); }
-.page[data-route="S01"] .s01-act-go { display: grid; place-items: center; flex: none; width: 34px; height: 34px; border: 1px solid var(--line-strong); border-radius: 50%; font-size: 1.1rem; line-height: 1; transition: background var(--t-fast), border-color var(--t-fast), color var(--t-fast), transform var(--t-fast); }
-.page[data-route="S01"] .s01-act:hover .s01-act-go { border-color: var(--accent); background: var(--accent); color: var(--on-accent); transform: translateX(2px); }
-.page[data-route="S01"] .s01-act-verb { font: 700 var(--fs-0)/1.15 var(--font-head); letter-spacing: .04em; text-transform: uppercase; }
+.page[data-route="S01"] .s01-act-head { display: flex; align-items: center; gap: var(--sp-2); }
+.page[data-route="S01"] .s01-act-verb { flex: 1; min-width: 0; font: 700 var(--fs-0)/1.2 var(--font-head); }
+.page[data-route="S01"] .s01-act-go { color: var(--muted); }
 .page[data-route="S01"] .s01-act-text { color: var(--muted); font-size: var(--fs-s); line-height: 1.35; }
+/* on a phone a tile is the verb alone (a 44 px target); the one-line promise stays in the link for screen readers and shows from 600 px up */
+@media (max-width: 599px) {
+  .page[data-route="S01"] .s01-act { justify-content: center; min-height: 48px; }
+  .page[data-route="S01"] .s01-act-text { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+}
 @media (min-width: 900px) {
-  .page[data-route="S01"] .s01-act-list { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .page[data-route="S01"] .s01-act { gap: var(--sp-2); min-height: 12rem; padding: var(--sp-5); }
-  .page[data-route="S01"] .s01-act-top { margin-bottom: var(--sp-5); }
-  .page[data-route="S01"] .s01-act-verb { font-size: var(--fs-1); }
-  .page[data-route="S01"] .s01-act-text { font-size: var(--fs-0); line-height: 1.4; }
+  .page[data-route="S01"] .s01-act-list { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-3); }
+  .page[data-route="S01"] .s01-act { padding: var(--sp-4); }
 }
 
-/* ── the entrance: the guide card (dark) and the search card (soft grey) ── */
-.page[data-route="S01"] .s01-intro { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); }
+/* ── the entrance: a slim guide row, then the search (a field, a button, quick chips) ── */
+.page[data-route="S01"] .s01-intro { display: grid; gap: var(--sp-3); max-width: 44rem; }
 .page[data-route="S01"] .s01-guide { display: flex; margin: 0; }
-.page[data-route="S01"] .s01-guide-link { flex: 1; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "ic q go" "ic a go"; align-items: center; column-gap: var(--sp-4); padding: var(--sp-4) var(--sp-4) var(--sp-4) var(--sp-5); border: 1px solid transparent; border-radius: var(--r-4); background: var(--inv); color: var(--on-inv); text-decoration: none; transition: background var(--t-fast); }
-.page[data-route="S01"] .s01-guide-link:hover { color: var(--on-inv); text-decoration: none; }
-.page[data-route="S01"] .s01-guide-link .ic { grid-area: ic; box-sizing: content-box; padding: 13px; border-radius: 50%; background: var(--accent); color: var(--on-accent); }
-.page[data-route="S01"] .s01-guide-text { display: contents; }
-.page[data-route="S01"] .s01-guide-q { grid-area: q; align-self: end; font: 650 var(--fs-2)/1.1 var(--font-head); letter-spacing: var(--track-head); }
-.page[data-route="S01"] .s01-guide-a { grid-area: a; align-self: start; color: var(--on-inv-2); }
-.page[data-route="S01"] .s01-guide-go { grid-area: go; display: grid; place-items: center; width: 48px; height: 48px; border: 1px solid var(--on-inv-2); border-radius: 50%; font-size: 1.25rem; line-height: 1; transition: background var(--t-fast), border-color var(--t-fast), color var(--t-fast), transform var(--t-fast); }
-.page[data-route="S01"] .s01-guide-link:hover .s01-guide-go { border-color: var(--accent); background: var(--accent); color: var(--on-accent); transform: translateX(3px); }
+.page[data-route="S01"] .s01-guide-link { flex: 1; display: flex; align-items: center; gap: var(--sp-2); min-height: 44px; padding: var(--sp-1) var(--sp-3); border: 1px solid transparent; border-radius: var(--r-1); background: var(--card); color: var(--ink); text-decoration: none; transition: background var(--t-fast), border-color var(--t-fast); }
+.page[data-route="S01"] .s01-guide-link:hover { border-color: var(--ink); background: var(--sunk); color: var(--ink); text-decoration: none; }
+.page[data-route="S01"] .s01-guide-text { flex: 1; min-width: 0; }
+.page[data-route="S01"] .s01-guide-go { color: var(--muted); }
 
-.page[data-route="S01"] .s01-find { display: flex; flex-direction: column; justify-content: space-between; gap: var(--sp-5); padding: var(--sp-5); border-radius: var(--r-4); background: var(--card); }
-.page[data-route="S01"] .s01-find .field-label { font: 650 var(--fs-2)/1.1 var(--font-head); letter-spacing: var(--track-head); }
-.page[data-route="S01"] .s01-find-main { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-4); }
-.page[data-route="S01"] .s01-bar { display: flex; flex-wrap: wrap; gap: var(--sp-2); align-items: stretch; }
-.page[data-route="S01"] .s01-q { flex: 1 1 14rem; min-width: 0; width: auto; -webkit-appearance: none; appearance: none; min-height: 52px; padding-inline: var(--sp-5); border-radius: var(--r-full); font-size: var(--fs-0); }
+.page[data-route="S01"] .s01-find { display: grid; gap: var(--sp-1); }
+.page[data-route="S01"] .s01-find .field-label { font: 650 var(--fs-s)/1.3 var(--font-body); }
+.page[data-route="S01"] .s01-find-main { display: grid; gap: var(--sp-2); }
+.page[data-route="S01"] .s01-bar { display: flex; gap: var(--sp-2); align-items: stretch; }
+.page[data-route="S01"] .s01-q { flex: 1 1 0; min-width: 0; width: auto; -webkit-appearance: none; appearance: none; min-height: 44px; padding-inline: var(--sp-3); font-size: var(--fs-0); }
 .page[data-route="S01"] .s01-q::-webkit-search-cancel-button,
 .page[data-route="S01"] .s01-q::-webkit-search-decoration { -webkit-appearance: none; display: none; }
-.page[data-route="S01"] .s01-go { flex: none; min-height: 52px; padding-inline: var(--sp-6); font-size: var(--fs-0); }
+.page[data-route="S01"] .s01-go { flex: none; min-height: 44px; padding-inline: var(--sp-4); }
 .page[data-route="S01"] .s01-go-ic { display: none; }
-/* on a phone the search is one compact row: a label of the size of a card title, the field and a round search button side by side (both 46 px, above the 44 px touch size);
-   the word „Търси“ stays in the button for screen readers */
+/* on a phone the button is the icon alone (44 px square); the word „Търси“ stays in it for screen readers */
 @media (max-width: 600px) {
-  .page[data-route="S01"] .s01-find { gap: var(--sp-3); padding: var(--sp-4); border-radius: var(--r-3); }
-  .page[data-route="S01"] .s01-find .field-label { font-size: var(--fs-1); }
-  .page[data-route="S01"] .s01-find-main { gap: var(--sp-3); }
-  .page[data-route="S01"] .s01-bar { flex-wrap: nowrap; }
-  .page[data-route="S01"] .s01-q { flex: 1 1 0; min-height: 46px; padding-inline: var(--sp-4); }
-  .page[data-route="S01"] .s01-go { width: 46px; min-height: 46px; padding: 0; }
+  .page[data-route="S01"] .s01-go { width: 44px; padding: 0; }
   .page[data-route="S01"] .s01-go-ic { display: grid; place-items: center; }
   .page[data-route="S01"] .s01-go-t { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
 }
-@media (min-width: 1100px) {
-  .page[data-route="S01"] .s01-intro { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--sp-4); }
-  .page[data-route="S01"] .s01-guide-link { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "ic go" ". ." "q q" "a a"; grid-template-rows: auto 1fr auto auto; align-items: start; min-height: 15rem; padding: var(--sp-6); }
-  .page[data-route="S01"] .s01-guide-q { align-self: end; margin-top: var(--sp-6); font-size: var(--fs-3); }
-  .page[data-route="S01"] .s01-guide-a { margin-top: var(--sp-1); font-size: var(--fs-1); line-height: 1.3; }
-  .page[data-route="S01"] .s01-find { padding: var(--sp-6); }
-}
 
-/* ── the six numbers: one soft card, an open grid with hairlines, a lime icon chip before each plain name and question ── */
-.page[data-route="S01"] #s01-six { --pad: var(--sp-5); gap: var(--sp-2); }
-.page[data-route="S01"] #s01-six .block-title { flex-basis: 100%; font-size: clamp(1.7rem, 1.2rem + 1.6vw, 2.6rem); line-height: 1.05; letter-spacing: var(--track-head); }
+/* ── the six numbers: an open block (no card around it), the tiles are the only frames ── */
+.page[data-route="S01"] #s01-six { --pad: 0; gap: var(--sp-1); padding: 0; border-radius: 0; background: none; }
 .page[data-route="S01"] #s01-six .block-sub { max-width: 64ch; margin-top: 0; }
-.page[data-route="S01"] #s01-six .block-body { margin-top: var(--sp-4); }
-.page[data-route="S01"] #s01-six .kpi-grid { grid-template-columns: minmax(0, 1fr); gap: 1px; overflow: hidden; border-radius: var(--r-3); background: var(--line); }
-.page[data-route="S01"] #s01-six .kpi { gap: var(--sp-2); padding: var(--sp-5); border-radius: 0; background: var(--card); }
-@media (hover: hover) { .page[data-route="S01"] #s01-six .kpi:has(.kpi-label a:hover) { border-color: transparent; background: var(--surface); } }
+.page[data-route="S01"] #s01-six .block-body { margin-top: var(--sp-3); }
+.page[data-route="S01"] #s01-six .kpi-grid { grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); }
+.page[data-route="S01"] #s01-six .kpi { gap: var(--sp-1); padding: var(--sp-3) var(--sp-4); border-radius: var(--r-1); background: var(--card); }
+@media (hover: hover) { .page[data-route="S01"] #s01-six .kpi:has(.kpi-label a:hover) { border-color: var(--ink); background: var(--sunk); } }
 .page[data-route="S01"] #s01-six .kpi-label { font-size: var(--fs-s); }
-.page[data-route="S01"] #s01-six .kpi-label a { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: start; gap: var(--sp-3); }
-.page[data-route="S01"] #s01-six .kpi-label .ic { box-sizing: content-box; flex: none; padding: 11px; border-radius: 50%; background: var(--accent); color: var(--on-accent); }
 .page[data-route="S01"] #s01-six .s01-k-text { display: grid; gap: 2px; min-width: 0; }
-.page[data-route="S01"] #s01-six .s01-k-name { font: 650 var(--fs-1)/1.2 var(--font-head); letter-spacing: var(--track-head); color: var(--ink); }
+.page[data-route="S01"] #s01-six .s01-k-name { font: 650 var(--fs-0)/1.2 var(--font-head); color: var(--ink); }
 .page[data-route="S01"] #s01-six .s01-k-ask { font-weight: 400; color: var(--muted); }
-.page[data-route="S01"] #s01-six .kpi-value { margin-top: var(--sp-2); }
-.page[data-route="S01"] #s01-six .kpi-num { font-size: clamp(2.6rem, 2rem + 1.6vw, 3.4rem); }
-/* the label, the number, the line under it and the chips sit on the same lines across a row of tiles (a tile is four rows of the grid) */
+.page[data-route="S01"] #s01-six .kpi-num { font-size: var(--fs-3); }
+/* the name, the number, the line under it and the chips sit on the same lines across a row of tiles (a tile is four rows of the grid) */
 @supports (grid-template-rows: subgrid) {
-  .page[data-route="S01"] #s01-six .kpi { grid-row: span 4; grid-template-rows: subgrid; row-gap: var(--sp-2); align-content: stretch; }
-}
-/* on a phone the tiles are plain rows between hairlines, flush with the card's text (the card keeps a smaller padding) */
-@media (max-width: 639px) {
-  .page[data-route="S01"] #s01-six { --pad: var(--sp-4); }
-  .page[data-route="S01"] #s01-six .kpi-grid { overflow: visible; border-radius: 0; }
-  .page[data-route="S01"] #s01-six .kpi { padding-inline: 0; overflow: visible; }
+  .page[data-route="S01"] #s01-six .kpi { grid-row: span 4; grid-template-rows: subgrid; row-gap: var(--sp-1); align-content: stretch; }
 }
 @media (min-width: 640px) { .page[data-route="S01"] #s01-six .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (min-width: 1100px) { .page[data-route="S01"] #s01-six { --pad: var(--sp-6); } }
-@media (min-width: 1200px) { .page[data-route="S01"] #s01-six .kpi-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1200px) {
+  .page[data-route="S01"] #s01-six .kpi-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .page[data-route="S01"] #s01-six .kpi-num { font-size: var(--fs-5); }
+}
 
-/* ── „Кой си ти?“: three selectable cards (the shell's own visible native radios, the whole card is the label) ── */
+/* ── „Кой си ти?“: three selectable tiles (the shell's own visible native radios, the whole tile is the label) ── */
 .page[data-route="S01"] #s01-who { --pad: 0; gap: var(--sp-1); padding: 0; border-radius: 0; background: none; }
-.page[data-route="S01"] #s01-who .block-title,
-.page[data-route="S01"] #s01-explore .block-title { font-size: clamp(1.6rem, 1.2rem + 1.2vw, 2.2rem); line-height: 1.1; letter-spacing: var(--track-head); }
 .page[data-route="S01"] #s01-who .block-body { margin-top: var(--sp-3); }
 .page[data-route="S01"] #s01-who .opt-list { grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); }
-.page[data-route="S01"] #s01-who .opt { gap: var(--sp-3); padding: var(--sp-4) var(--sp-5); border: 2px solid transparent; border-radius: var(--r-3); background: var(--card); transition: background var(--t-fast), border-color var(--t-fast); }
+.page[data-route="S01"] #s01-who .opt { gap: var(--sp-3); padding: var(--sp-3) var(--sp-4); border: 1px solid transparent; border-radius: var(--r-1); background: var(--card); transition: background var(--t-fast), border-color var(--t-fast); }
 .page[data-route="S01"] #s01-who .opt:hover { background: var(--sunk); }
 .page[data-route="S01"] #s01-who .opt:has(input:checked) { border-color: var(--ink); background: var(--data-soft); }
 .page[data-route="S01"] #s01-who .opt input { width: 22px; height: 22px; margin: 1px 0 0; }
-.page[data-route="S01"] #s01-who .opt-label { font: 650 var(--fs-1)/1.2 var(--font-head); letter-spacing: var(--track-head); }
+.page[data-route="S01"] #s01-who .opt-label { font: 650 var(--fs-0)/1.2 var(--font-head); }
 .page[data-route="S01"] #s01-who .opt-desc { margin-top: 2px; }
-@media (min-width: 700px) { .page[data-route="S01"] #s01-who .opt-list { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-3); } }
+@media (min-width: 700px) { .page[data-route="S01"] #s01-who .opt-list { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
 /* ── the reader's blocks: the wide ones (tables, the lead, the bars) are full width; the others come as a row of two columns on a wide screen.
-      Each column is its own stack, so a short card never waits for a tall one; the last card of a column takes the rest of the height (its footer stays at the bottom) ── */
-.page[data-route="S01"] .s01-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-4); }
+      Each column is its own stack, so a short block never waits for a tall one; the last block of a column takes the rest of the height (its footer stays at the bottom) ── */
+.page[data-route="S01"] .s01-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); }
 .page[data-route="S01"] .s01-grid:empty { display: none; }
-.page[data-route="S01"] .s01-cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-4); }
-.page[data-route="S01"] .s01-col { display: flex; flex-direction: column; gap: var(--sp-4); min-width: 0; }
+.page[data-route="S01"] .s01-cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); }
+.page[data-route="S01"] .s01-col { display: flex; flex-direction: column; gap: var(--sp-3); min-width: 0; }
 @media (min-width: 1100px) {
   .page[data-route="S01"] .s01-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .page[data-route="S01"] .s01-grid .block { --pad: var(--sp-6); }
   .page[data-route="S01"] .s01-col > .block:last-child { flex: 1; display: flex; flex-direction: column; }
   .page[data-route="S01"] .s01-col > .block:last-child > .block-body { flex: 1; }
-  /* in a half-width card the head reads: the title with the source button on its right, the scope and status chips on a line of their own under it */
-  .page[data-route="S01"] .s01-col .block-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "t u" "g g"; align-items: start; gap: 0 var(--sp-3); }
-  .page[data-route="S01"] .s01-col .block-title { grid-area: t; }
-  .page[data-route="S01"] .s01-col .block-tools { grid-area: u; margin: 0 calc(-1 * var(--sp-2)) 0 0; }
-  .page[data-route="S01"] .s01-col .block-tags { grid-area: g; margin-top: var(--sp-2); }
-  .page[data-route="S01"] #s01-izp .s01-prog { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-6); max-width: none; }
+  .page[data-route="S01"] #s01-izp .s01-prog { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-5); max-width: none; }
   .page[data-route="S01"] .s01-grid .s01-legend { grid-template-columns: minmax(0, 1fr); }
   .page[data-route="S01"] .s01-grid .s01-calc { max-width: none; }
 }
 
 /* the mini calculator */
-.page[data-route="S01"] .s01-calc { display: grid; gap: var(--sp-4); max-width: 40rem; }
+.page[data-route="S01"] .s01-calc { display: grid; gap: var(--sp-3); max-width: 40rem; }
 .page[data-route="S01"] #s01-gross { width: 100%; max-width: 16rem; }
 .page[data-route="S01"] #s01-calc-out { display: grid; gap: var(--sp-3); }
 .page[data-route="S01"] #s01-calc-out p { margin: 0; max-width: 68ch; }
 
 /* „от всеки 100 €“: the strip and its legend (the same pattern as S06) */
-.page[data-route="S01"] .s01-strip { display: flex; gap: 2px; height: 2.25rem; border-radius: var(--r-full); overflow: hidden; background: var(--sunk); }
+.page[data-route="S01"] .s01-strip { display: flex; gap: 2px; height: 2rem; border-radius: var(--r-1); overflow: hidden; background: var(--sunk); }
 .page[data-route="S01"] .s01-seg { flex-basis: 0; flex-shrink: 1; min-width: 2px; background: var(--c, var(--series-other)); }
 .page[data-route="S01"] [data-c="1"] { --c: var(--series-1); }
 .page[data-route="S01"] [data-c="2"] { --c: var(--series-2); }
@@ -166,37 +127,36 @@
 .page[data-route="S01"] .s01-sw { width: .875rem; height: .875rem; border-radius: var(--r-1); background: var(--c, var(--series-other)); }
 .page[data-route="S01"] .s01-leg-name { display: inline-flex; align-items: center; min-height: 2.75rem; overflow-wrap: anywhere; }
 .page[data-route="S01"] .s01-leg-v { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; }
-@media (min-width: 600px) {
-  .page[data-route="S01"] .s01-strip { height: 2.75rem; }
-  .page[data-route="S01"] .s01-legend { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
+@media (min-width: 600px) { .page[data-route="S01"] .s01-legend { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .page[data-route="S01"] .s01-more { margin: var(--sp-3) 0 0; }
 
-/* the measures list and the progress bars */
+/* the measures list and the progress bars (the text of a bar is the percentage and the euros: it may drop under the name on a narrow screen) */
 .page[data-route="S01"] .s01-meas { list-style: none; margin: var(--sp-3) 0 0; padding: 0; display: grid; gap: var(--sp-3); }
 .page[data-route="S01"] .s01-meas li { display: grid; gap: var(--sp-1); padding-bottom: var(--sp-3); border-bottom: 1px solid var(--line); }
 .page[data-route="S01"] .s01-meas a { font-weight: 700; overflow-wrap: anywhere; }
 .page[data-route="S01"] .s01-meas span { color: var(--muted); max-width: 68ch; }
-.page[data-route="S01"] .s01-prog { display: grid; gap: var(--sp-4); max-width: 40rem; }
+.page[data-route="S01"] .s01-prog { display: grid; gap: var(--sp-3); max-width: 40rem; }
+.page[data-route="S01"] .s01-prog .prog-top { flex-wrap: wrap; gap: 0 var(--sp-3); }
+.page[data-route="S01"] .s01-prog .prog-text { margin-left: auto; text-align: right; }
 
 /* the journalist blocks: one lead sentence, the news list */
 .page[data-route="S01"] .s01-lead { margin: 0; font-size: var(--fs-1); max-width: 60ch; }
-.page[data-route="S01"] .s01-news { list-style: none; margin: 0 0 var(--sp-4); padding: 0; display: grid; gap: var(--sp-3); }
+.page[data-route="S01"] .s01-news { list-style: none; margin: 0 0 var(--sp-3); padding: 0; display: grid; gap: var(--sp-3); }
 .page[data-route="S01"] .s01-news li { display: grid; gap: var(--sp-1); padding-bottom: var(--sp-3); border-bottom: 1px solid var(--line); }
 .page[data-route="S01"] .s01-news a { font-weight: 700; overflow-wrap: anywhere; }
 
-/* ── „Разгледай бюджета“: open rows on the page, two columns on a wide screen; a quiet chip per question, lime only on hover ── */
+/* ── „Разгледай бюджета“: plain rows on the page, two columns on a wide screen; a small icon, the question, one line ── */
 .page[data-route="S01"] #s01-explore { --pad: 0; gap: var(--sp-1); padding: 0; border-radius: 0; background: none; }
-.page[data-route="S01"] #s01-explore .block-body { margin-top: var(--sp-4); }
-.page[data-route="S01"] #s01-explore .grid { grid-template-columns: minmax(0, 1fr); gap: 0 var(--sp-7); }
-.page[data-route="S01"] #s01-explore .link-card { gap: var(--sp-4); padding: var(--sp-4) 0; border: 0; border-top: 1px solid var(--line); border-radius: 0; background: none; }
+.page[data-route="S01"] #s01-explore .block-body { margin-top: var(--sp-3); }
+.page[data-route="S01"] #s01-explore .grid { grid-template-columns: minmax(0, 1fr); gap: 0 var(--sp-6); }
+.page[data-route="S01"] #s01-explore .link-card { gap: var(--sp-3); padding: var(--sp-2) 0; border: 0; border-top: 1px solid var(--line); border-radius: 0; background: none; }
 .page[data-route="S01"] #s01-explore .link-card:hover { border-top-color: var(--ink); }
-.page[data-route="S01"] #s01-explore .link-card-ic { width: 44px; height: 44px; background: var(--card); color: var(--ink); transition: background var(--t-fast); }
-.page[data-route="S01"] #s01-explore .link-card:hover .link-card-ic { background: var(--accent); }
-.page[data-route="S01"] #s01-explore .link-card-title { font-size: var(--fs-1); }
-@media (min-width: 1100px) { .page[data-route="S01"] #s01-explore .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.page[data-route="S01"] #s01-explore .link-card-ic { width: auto; height: auto; background: none; color: var(--muted); }
+.page[data-route="S01"] #s01-explore .link-card-title { font-size: var(--fs-0); }
+.page[data-route="S01"] #s01-explore .link-card-text { font-size: var(--fs-s); }
+@media (min-width: 900px) { .page[data-route="S01"] #s01-explore .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
 @media (forced-colors: active) {
-  .page[data-route="S01"] .s01-guide-link { border-color: LinkText; }
+  .page[data-route="S01"] .s01-guide-link, .page[data-route="S01"] .s01-act { border-color: LinkText; }
   .page[data-route="S01"] #s01-who .opt:has(input:checked) { border-color: Highlight; }
 }

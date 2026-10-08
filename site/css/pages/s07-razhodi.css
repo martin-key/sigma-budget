@@ -1,7 +1,7 @@
 /* S07 · Къде отиват парите? Tokens only, no dark-mode rules (the tokens carry both themes), every selector scoped to the screen. */
 
 /* the three cuts are the same expenditure: one sentence says how they relate */
-.page[data-route="S07"] .s07-intro { max-width: 68ch; margin: 0; }
+.page[data-route="S07"] .s07-intro { max-width: 68ch; }
 
 /* map (or table) on the left, the panel of the chosen item on the right; on phones the panel goes under the map */
 .page[data-route="S07"] .s07-split { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-5); align-items: start; }
