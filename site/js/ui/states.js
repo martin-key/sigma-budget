@@ -68,5 +68,5 @@ export function offlineNote(asOf) {
 export const mockBadge = (text = 'Примерни данни') => html`<span class="mock-badge">${icon('hatch', { size: 14 })}<span>${text}</span></span>`;
 /** a note under a mock block: badge + why (the why is the dataset's own `why` text); {badge:false} drops the badge when a status pill already says it */
 export const mockNote = (text, o = {}) => html`<p class="mock-note" data-state="mock">${o.badge === false ? icon('hatch', { size: 14 }) : mockBadge()}<span class="small">${text || 'Стойностите са измислени и показват само как ще изглежда екранът.'}</span></p>`;
-/** what stands in for a hidden mock block / tile while „Само реални данни“ is on, with a way back */
+/** what stands in for a hidden mock block / tile while „Само официални данни“ is on, with a way back */
 export const mockHidden = (text) => html`<p class="mock-hidden" data-state="mock-hidden">${icon('hatch', { size: 16 })}<span>${text || 'Скрит е блок с примерни данни.'}</span> <button type="button" class="link-btn" data-action="show-mock">Покажи</button></p>`;

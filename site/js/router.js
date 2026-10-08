@@ -149,12 +149,22 @@ function supportsPeriod(route, mod) {
   const p = periodsFor(route, mod);
   return p === 'all' || p === 'none' || !Array.isArray(p) || p.includes(store.get('period'));
 }
+/* „Стъпка N от 8“ is shown only while the visitor moves along the guide: the run starts on the guide (S02) and goes on while the next
+   screen is the same step or a neighbour; any other screen, a page load and a shared link are not in the guide (then: group name, breadcrumb, „Следва“) */
+let guideRun = false, guideAt = 0;
+function trackGuide(route, kind) {
+  if (kind === 'rerender') return;
+  const st = stepOf(route);
+  if (route.id === 'S02') { guideRun = true; guideAt = 0; return; }
+  guideRun = !!st && guideRun && (!guideAt || Math.abs(st - guideAt) <= 1);
+  guideAt = guideRun ? st : 0;
+}
 function nextTarget(id) {
   const r = byId[id];
   if (!r) return null;
   if (r.id === 'S01') return { kicker: 'Начало', title: 'Към началото', text: '', href: routeHref('S01') };
   const st = stepOf(r);
-  return { kicker: st ? `Стъпка ${st} от ${GUIDE_STEPS}` : groupLabel(r.group), title: r.title, text: r.desc, href: routeHref(r.id) };
+  return { kicker: st && guideRun ? `Стъпка ${st} от ${GUIDE_STEPS}` : groupLabel(r.group), title: r.title, text: r.desc, href: routeHref(r.id) };
 }
 function buildNext(route, mod, ctx) {
   if (route.bare) return '';
@@ -173,13 +183,13 @@ function defaultCrumbs(route, title) {
 function eyebrowFor(route) {
   if (route.bare) return '';
   const st = stepOf(route);
-  if (st) return `Стъпка ${st} от ${GUIDE_STEPS}`;
+  if (st && guideRun) return `Стъпка ${st} от ${GUIDE_STEPS}`;
   return route.group === 'util' ? '' : groupLabel(route.group);
 }
-function contextFor(route, ctx, extra) {
+function contextFor(route, ctx, extra, own) {
   if (route.bare) return '';
   const parts = [];
-  if (route.periods !== 'none') parts.push(html`<span class="ctx-period"><strong>${ctx.period.label}</strong> <span class="muted">· ${ctx.period.desc}</span></span>`);
+  if (route.periods !== 'none' && !own) parts.push(html`<span class="ctx-period"><strong>${ctx.period.label}</strong> <span class="muted">· ${ctx.period.desc}</span></span>`);
   if (extra) parts.push(extra);
   if (!parts.length) return '';
   return html`<div class="context">${parts.map((p, i) => html`${i ? html`<span class="sep" aria-hidden="true">|</span>` : ''}${p}`)}</div>`;
@@ -235,7 +245,7 @@ async function build(route, params, query, o) {
     ...base, view: 'ready', mod, ctx, title,
     eyebrow: parts.eyebrow ?? eyebrowFor(route),
     lede: parts.lede ?? (mod.lede ? safeCall(mod.lede, ctx, route.desc) : route.desc),
-    context: contextFor(route, ctx, parts.context),
+    context: contextFor(route, ctx, parts.context, parts.ownContext),
     body: toHtml(parts.body),
     crumbs: pageCrumbs ? [{ label: 'Начало', href: routeHref('S01') }, ...pageCrumbs] : defaultCrumbs(route, title),
     next: buildNext(route, mod, ctx)
@@ -355,6 +365,7 @@ async function render(kind) {
   const keepY = kind === 'rerender' ? window.scrollY : 0;
   runCleanups();
   share.reset(route);
+  trackGuide(route, kind);
   curK = k;
 
   applying = true;
@@ -447,7 +458,7 @@ function onStore(key) {
       unit: v === 'pct' ? 'Показваме в проценти' : 'Показваме в евро',
       perPerson: `На човек: ${v ? 'включено' : 'изключено'}`,
       leva: `Сумите и в лева: ${v ? 'включено' : 'изключено'}`,
-      onlyReal: `Само реални данни: ${v ? 'включено' : 'изключено'}`
+      onlyReal: `Само официални данни: ${v ? 'включено' : 'изключено'}`
     }[key];
     if (msg) announce(msg);
   }, 0);

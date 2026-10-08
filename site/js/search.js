@@ -83,7 +83,7 @@ export function openPalette(opener, o = {}) {
     const shown = res.hits.slice(0, MAX_SHOWN);
     const hiddenNote = res.hidden ? html`<p class="pal-note">${hiddenText(res.hidden)} <button type="button" class="link-btn" data-pal-show-mock>Покажи</button></p>` : '';
     if (!shown.length) {
-      body.innerHTML = html`<div class="pal-hint"><p>${res.hidden ? 'Няма реални резултати за' : 'Няма резултат за'} „${q.trim()}“.</p><p class="small">Опитай с по-кратка дума, с друго изписване или с някое от тези:</p>${chipRow(POPULAR, 'Примерни търсения')}</div>${hiddenNote}${noIndex}`.s;
+      body.innerHTML = html`<div class="pal-hint"><p>${res.hidden ? 'Няма официални резултати за' : 'Няма резултат за'} „${q.trim()}“.</p><p class="small">Опитай с по-кратка дума, с друго изписване или с някое от тези:</p>${chipRow(POPULAR, 'Примерни търсения')}</div>${hiddenNote}${noIndex}`.s;
       options = []; setActive(-1); input.setAttribute('aria-expanded', 'false'); input.removeAttribute('aria-controls');
       say(`Няма резултати за „${q.trim()}“`);
       return;

@@ -3,7 +3,7 @@
 //   callout({kind:'info|warn|bad|ok', title, body, icon})      a boxed note (role="note")
 //   facts([{k, v}])                                            a <dl class="facts"> of label/value pairs
 //   ext(url, label)                                            external link: new tab, icon, „(в нов раздел)“ for screen readers
-//   reportLink({block, val, src, type, label})                 „Намерих грешка“ -> #/vrazka?type=…&from=<screen>&block=…
+//   reportLink({block, val, src, type, label})                 „Намерих грешка“ -> #/vrazka?type=…&from=<screen>&block=…  (reportHref = the address only)
 import { html, cx } from '../html.js';
 import { icon } from '../icons.js';
 import { href as routeHref } from '../routes.js';
@@ -32,9 +32,11 @@ export function ext(url, label) {
   return html`<a class="ext" href="${url}" target="_blank" rel="noopener noreferrer">${label ?? url}${icon('external', { size: 14 })}<span class="sr-only"> (в нов раздел)</span></a>`;
 }
 
-/** the screen the visitor is on is passed along so the feedback form can say where the report came from */
-export function reportLink(o = {}) {
+/** address of the feedback form for one block; the screen the visitor is on is passed along so the form can say where the report came from */
+export function reportHref(o = {}) {
   const from = share.currentRoute()?.key || '';
-  const q = { type: o.type || 'error', from: from || null, block: o.block || null, val: o.val ?? null, src: o.src || null };
-  return html`<a class="report-link" href="${routeHref('vrazka', {}, q)}">${icon('flag', { size: 14 })}<span>${o.label || 'Намерих грешка'}</span></a>`;
+  return routeHref('vrazka', {}, { type: o.type || 'error', from: from || null, block: o.block || null, val: o.val ?? null, src: o.src || null });
+}
+export function reportLink(o = {}) {
+  return html`<a class="report-link" href="${reportHref(o)}">${icon('flag', { size: 14 })}<span>${o.label || 'Намерих грешка'}</span></a>`;
 }

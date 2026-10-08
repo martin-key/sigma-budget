@@ -90,7 +90,7 @@ function realBlock(M) {
   return block({
     id: 's09-funkciya', title: `Функция „${M.name}“ в бюджета`, scope: 'kfp', status: periodStatus(ctx), source: ['asbp'], asOf: ctx.data?.expenditure?.meta?.asOf,
     body: html`${kpiGrid(tiles, { label: `Основни числа за функция „${M.name}“` })}
-      ${sumsMatch(M) ? html`<p class="s09-text">Общата сума за функцията е реална. Групите и дейностите по-долу са примерни, но сборът им е точно равен на нея.</p>` : ''}`,
+      ${sumsMatch(M) ? html`<p class="s09-text">Общата сума за функцията е официална. Групите и дейностите по-долу са примерни, но сборът им е точно равен на нея.</p>` : ''}`,
     foot: html`<p>Числата за функцията са от мотивите към проекта на бюджета. Приетият закон може да се различава от проекта: какво е променено, виж в „<a href="${ctx.href('S14')}">Как се прие бюджетът?</a>“.</p>`
   });
 }
@@ -121,11 +121,11 @@ function tableBlock(M, C) {
   const table = dataTable({
     id: 's09-t-vsichki', caption: `Всички дейности във функция „${M.name}“`, sortable: true, sortBy: 'a1', dir: 'desc', status: 'mock',
     columns: columns(M, C, true), rows: rowsOf(M, C, M.items, it => gname[it.group]),
-    total: { label: 'Общо за функцията (реално)', values: { a0: C.raw(F.totalMln?.[0]), a1: C.raw(F.totalMln?.[1]), mln: F.totalMln, chg: F.growthPct, share: 100 } }
+    total: { label: 'Общо за функцията (официално)', values: { a0: C.raw(F.totalMln?.[0]), a1: C.raw(F.totalMln?.[1]), mln: F.totalMln, chg: F.growthPct, share: 100 } }
   });
   return block({
     id: 's09-tablitsa', title: 'Всички дейности в една таблица', scope: NOGL, mock: true, why: M.items[0]?.why ?? F.why, source: A.meta.source, asOf: A.meta.asOf,
-    sub: 'Натисни заглавие на колона, за да подредиш таблицата. Редът „Общо“ е реалната сума, а редовете над него са примерни.',
+    sub: 'Натисни заглавие на колона, за да подредиш таблицата. Редът „Общо“ е официалната сума, а редовете над него са примерни.',
     body: html`${table}<p class="s09-note">Колоната „${M.yl[0]}“ е програмата за ${M.years[0] ?? ''} г., както е отпечатана в таблицата към проекта на бюджета, а не отчетът за годината. Промяната е спрямо нея.</p>`
   });
 }
@@ -161,7 +161,7 @@ export function render(ctx) {
   const C = moneyCol(ctx, { d: 1 });                  // the tables stay in млн. € (or € на човек, and the leva addendum): „% от БВП“ is for the headline total only
   return {
     ...head,
-    lede: `Разходите за ${M.name.toLowerCase()} през ${M.years[1] ?? ''} г., разделени на групи и отделни дейности. Реална е само общата сума, останалото е примерно.`,
+    lede: `Разходите за ${M.name.toLowerCase()} през ${M.years[1] ?? ''} г., разделени на групи и отделни дейности. Официална е само общата сума, останалото е примерно.`,
     context: 'Консолидирана фискална програма (КФП): разходи по функции · дейностите са примерни',
     body: html`${banner(M)}
       ${unitSwitch(ctx, { name: 's09-unit', note: `„% от БВП“ е за общата сума за функцията, спрямо планирания БВП за ${M.years[1] ?? ''} г. Таблиците с дейности остават в милиони евро.` })}

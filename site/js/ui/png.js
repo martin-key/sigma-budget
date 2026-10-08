@@ -1,5 +1,6 @@
-// PNG download for every statistic: a visible „PNG“ button in the header of every block that holds one, and the picture composer behind it.
-//   scan(root)                                 adds the button to each block with a statistic (chart, ranking, KPI tiles, progress bars, map, data table,
+// PNG download for every statistic: the „Изтегли PNG“ item of the block menu (share.js), a visible „PNG“ button in the header of a block that has no
+// menu, and the picture composer behind both.
+//   scan(root)                                 adds the button to each menu-less block with a statistic (chart, ranking, KPI tiles, progress bars, map, data table,
 //                                              the home-page strips, the 5-minute scenes) and a small bar under a loose statistic that sits outside a block;
 //                                              one delegated click handler downloads the picture (file name bns-<route>-<block>.png)
 //   canvasFor(spec, {watermark, pixelRatio})   the picture: title, scope / period line, the block as it looks on screen, „Примерни данни“ line and
@@ -32,7 +33,7 @@ function makeButton(key, title) {
 }
 function blockButton(block) {
   const head = block.querySelector(':scope > .block-head');
-  if (!head || head.querySelector('.png-btn')) return 0;
+  if (!head || head.querySelector('.png-btn, [data-share]')) return 0;   // a block with the menu offers PNG there
   let tools = head.querySelector(':scope > .block-tools');
   if (!tools) { tools = document.createElement('div'); tools.className = 'block-tools'; head.append(tools); }
   tools.append(makeButton(block.id, text(head.querySelector('.block-title')) || 'блок'));
@@ -102,7 +103,7 @@ function specFor(el) {
 function metaOf(el) {
   const parts = [];
   const tags = el.querySelector(':scope > .block-head > .block-tags');
-  if (tags) [...tags.children].forEach(c => { const t = text(c); if (t) parts.push(t); });
+  if (tags) [...tags.children].forEach(c => { if (c.matches('.src-btn, .block-asof')) return; const t = text(c); if (t) parts.push(t); });
   const tab = el.querySelector('.tab-list [role="tab"][aria-selected="true"]');
   if (tab) parts.push(text(tab));
   const per = text(document.querySelector('.ctx-period strong'));

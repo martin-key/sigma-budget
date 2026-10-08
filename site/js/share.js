@@ -1,6 +1,6 @@
-// Sharing: registry of shareable blocks + the „Сподели“ menu (copy text, copy link, PNG, CSV, embed code, Web Share).
+// Sharing: registry of shareable blocks + the ONE block menu „Сподели“ (copy text, copy link, PNG, CSV, embed code, Web Share, „Намерих грешка“).
 // A block registers a spec while its screen renders (ui/block.js does this for you); the router clears the registry on every navigation.
-//   share.register(id, {title, sub, text, source:['kfp'], asOf, status, mock, chart:'chartDomId', table:{columns,rows,statuses?} | ()=>…, embed:true|'routeKey.chartId', embedParams:{code:'1000'}})
+//   share.register(id, {title, sub, text, source:['kfp'], asOf, status, mock, chart:'chartDomId', table:{columns,rows,statuses?} | ()=>…, embed:true|'routeKey.chartId', embedParams:{code:'1000'}, report:'#/vrazka?…'})
 //   shareButton(id)                      the trigger button (the delegated [data-share] handler calls openMenu)
 //   textFor/linkFor/csvFor/embedFor      pure builders (also used by tests)
 //   renderPng(spec,{watermark})          canvas with title, chart and source footer; „ПРИМЕРНИ ДАННИ“ watermark whenever the data is mock
@@ -64,7 +64,10 @@ const hasStat = spec => { const el = blockEl(spec); return !!(el && statNodes(el
 const canPng = spec => hasChart(spec) || !!tableOf(spec) || hasStat(spec);
 
 /** trigger button for a block header */
-export const shareButton = (id, o = {}) => html`<button type="button" class="btn btn-sm btn-quiet share-btn" data-share="${id}" aria-haspopup="dialog" aria-expanded="false">${icon('share', { size: 16 })}<span>${o.label || 'Сподели'}</span></button>`;
+export const shareButton = (id, o = {}) => {
+  const label = o.label || 'Сподели', t = registry.get(id)?.title;
+  return html`<button type="button" class="btn btn-sm btn-quiet share-btn" data-share="${id}"${t ? html` aria-label="${label}: ${t}"` : ''} aria-haspopup="dialog" aria-expanded="false">${icon('share', { size: 16 })}<span>${label}</span></button>`;
+};
 
 /* ---------------------------------------------------------------- builders */
 /** link to this block on the current screen (keeps ?per= and the other state, adds ?to=<block>) */
@@ -272,6 +275,7 @@ function menuItems(spec) {
   if (tableOf(spec)) items.push({ act: 'csv', ic: 'table', label: 'Изтегли CSV', desc: 'За Excel; с колони „статус“ и „източник“.' });
   if (spec.embed) items.push({ act: 'embed', ic: 'code', label: 'Код за вграждане', desc: 'HTML за друг уебсайт.' });
   if (typeof navigator.share === 'function') items.push({ act: 'share', ic: 'share', label: 'Сподели…', desc: 'През приложение на устройството.' });
+  if (spec.report) items.push({ act: 'report', ic: 'flag', label: 'Намерих грешка', desc: 'Съобщи за грешка или неточност точно в този блок.', href: spec.report, sep: true });
   return items;
 }
 async function run(act, spec, anchor) {
@@ -305,16 +309,18 @@ async function run(act, spec, anchor) {
 export function openMenu(anchor, id) {
   const spec = get(id);
   if (!spec) { toast('Този блок не може да се споделя.'); return null; }
-  const body = html`<ul class="share-menu">${menuItems(spec).map(i => html`<li><button type="button" class="share-item" data-act="${i.act}">${icon(i.ic, { size: 20 })}<span class="share-txt"><span class="share-label">${i.label}</span><span class="share-desc">${i.desc}</span></span></button></li>`)}</ul>${isMock(spec) ? html`<p class="small muted share-note">Този блок е с примерни данни: във всичко, което споделяш, пише „примерни данни“.</p>` : ''}`;
+  const inner = i => html`${icon(i.ic, { size: 20 })}<span class="share-txt"><span class="share-label">${i.label}</span><span class="share-desc">${i.desc}</span></span>`;
+  const body = html`<ul class="share-menu">${menuItems(spec).map(i => html`<li${i.sep ? html` class="share-sep"` : ''}>${i.href ? html`<a class="share-item" href="${i.href}" data-act="${i.act}">${inner(i)}</a>` : html`<button type="button" class="share-item" data-act="${i.act}">${inner(i)}</button>`}</li>`)}</ul>${isMock(spec) ? html`<p class="small muted share-note">Този блок е с примерни данни: във всичко, което споделяш, пише „примерни данни“.</p>` : ''}`;
   const pop = popover.open(anchor, { title: 'Сподели', body, label: 'Споделяне', align: 'end' });
   pop.el.addEventListener('click', e => {
     const b = e.target.closest('[data-act]');
     if (!b) return;
     const act = b.dataset.act;
+    if (act === 'report') return;                      // a real link: the popover closes itself and the router opens the form for this block
     pop.close();
     run(act, spec, anchor);
   });
   return pop;
 }
-/** for ui/png.js: the visible „PNG“ buttons run the same download as the menu item */
+/** for ui/png.js: the loose „PNG“ buttons (blocks without the menu) run the same download as the menu item */
 export { fileName, run as runAct, drawWatermark, wrapLines };

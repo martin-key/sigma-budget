@@ -24,7 +24,7 @@ export const styles = ['s12-merki'];
 const TABS = ['short', 'discretionary', 'laws'];
 const YEARS = ['2026', '2027', '2028'];
 const SOURCE = ['asbp', 'bill'];
-const REAL_LABEL = 'Реални данни, по законопроекта';
+const REAL_LABEL = 'Официални данни, по законопроекта';
 const KIND = { revenue: 'Приходна мярка', expenditure: 'Разходна мярка', law: 'Промяна в закон' };
 const NO_SUM = 'Без посочена сума';
 const MLN = `${NBSP}млн.${NBSP}€`;
@@ -54,7 +54,7 @@ function model(ctx) {
   const label = new Map(arr(L && L.items).map(i => [i.id, i]));
   const personas = arr(L && L.meta && L.meta.personas).filter(p => p && p.label).map(p => ({ ...p, slug: slugOf(p.label) }));
   const hasLabels = label.size > 0 && personas.length > 0;
-  const showLabels = hasLabels && !ctx.store.get('onlyReal');                 // editorial labels are mock: „Само реални данни“ hides them
+  const showLabels = hasLabels && !ctx.store.get('onlyReal');                 // editorial labels are mock: „Само официални данни“ hides them
   const persona = showLabels ? personas.find(p => p.slug === String(ctx.query.koy || '')) || null : null;
   const rel = new Map(items.map(i => [i.id, new Set()]));                     // „related“ read both ways
   for (const i of items) for (const r of arr(i.related)) if (byId.has(r)) { rel.get(i.id).add(r); rel.get(r).add(i.id); }
@@ -212,7 +212,7 @@ function filterBlock(ctx, M) {
   if (!M.hasLabels) {
     return block({
       id: 's12-filter', title: 'Как ме засяга', status: 'pending',
-      body: pendingState({ title: 'Как ме засяга', text: 'Редакционните етикети (кого засяга мярката, кой плаща и кой печели) още не са заредени. Списъците и числата по-долу са реални.' })
+      body: pendingState({ title: 'Как ме засяга', text: 'Редакционните етикети (кого засяга мярката, кой плаща и кой печели) още не са заредени. Списъците и числата по-долу са официални.' })
     });
   }
   const p = M.persona;

@@ -6,16 +6,16 @@ import { icon } from '../icons.js';
 import { sheet } from './sheet.js';
 
 export const STATUS = {
-  real:     { label: 'Реални данни',    icon: 'checkCircle', text: 'Взети от официален източник. Показваме откъде са и към коя дата.' },
-  partial:  { label: 'Частични данни',  icon: 'partial',     text: 'Част от показателя е реална, друга част още липсва или е изчислена. Бележката до числото казва коя.' },
+  real:     { label: 'Официални данни', icon: 'checkCircle', text: 'Взети от официален източник. Показваме откъде са и към коя дата.' },
+  partial:  { label: 'Частични данни',  icon: 'partial',     text: 'Част от показателя е официална, друга част още липсва или е изчислена. Бележката до числото казва коя.' },
   forecast: { label: 'Прогноза',        icon: 'forecast',    text: 'Официална оценка за бъдещи години. Това не е отчет и може да се промени.' },
   mock:     { label: 'Примерни данни',  icon: 'hatch',       text: 'Измислени стойности, които показват как ще изглежда екранът. Не са истински и не бива да се цитират. Белязани са със щриховка ▨.' },
-  pending:  { label: 'Предстои',        icon: 'dashed',      text: 'Данните съществуват при издателя, но още не са извлечени. Не показваме число, докато няма реално.' }
+  pending:  { label: 'Предстои',        icon: 'dashed',      text: 'Данните съществуват при издателя, но още не са извлечени. Не показваме число, докато няма официални данни.' }
 };
 const ORDER = ['real', 'partial', 'forecast', 'mock', 'pending'];
 export const statusLabel = s => (STATUS[s] || STATUS.pending).label;
 
-/** statusPill('real') -> <span class="st" data-st="real">✓ Реални данни</span> */
+/** statusPill('real') -> <span class="st" data-st="real">✓ Официални данни</span> */
 export function statusPill(status, o = {}) {
   const key = status in STATUS ? status : 'pending';
   const s = STATUS[key];

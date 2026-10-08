@@ -58,7 +58,7 @@ function view(ix, q, g, o) {
   if (!res.hits.length) {
     return {
       n: 0, say: `Няма резултати за „${q}“`,
-      html: html`${emptyState({ title: `${res.hidden ? 'Няма реални резултати за' : 'Няма резултат за'} „${q}“`, text: 'Опитай с по-кратка дума, с друго изписване (може и с латински букви) или с някое от тези:' })}${suggest}${hiddenNote}${note}`
+      html: html`${emptyState({ title: `${res.hidden ? 'Няма официални резултати за' : 'Няма резултат за'} „${q}“`, text: 'Опитай с по-кратка дума, с друго изписване (може и с латински букви) или с някое от тези:' })}${suggest}${hiddenNote}${note}`
     };
   }
 

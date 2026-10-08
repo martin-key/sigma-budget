@@ -2,7 +2,7 @@
 // Data, only through `needs`:
 //   municipalities          D19, REAL   the main transfers of the 2026 state budget law to each municipality (хил. €), inhabitants, € per person
 //   geo/obshtini            D20, REAL   the outlines for the map (optional: without it the screen is the list and says so)
-//   mock/municipal-finance  M03, MOCK   own revenue and debt per municipality (optional: hatched „примерни“ columns, left out under „Само реални данни“)
+//   mock/municipal-finance  M03, MOCK   own revenue and debt per municipality (optional: hatched „примерни“ columns, left out under „Само официални данни“)
 // The map, the list and the two rankings show the same numbers; € per person is the figure of the data (muni.pcOf), never typed.
 // The search box filters in place (a re-render would drop the caret and rebuild the map); its text is kept in ?q= with history.replaceState.
 // Oblast, view and sort are ordinary re-renders (?oblast= ?view= ?sort= ?dir=). Everything that depends on the visitor's input is a pure function of ctx.
@@ -227,7 +227,7 @@ function listBlock(md, ctx, q) {
       : html`<p class="s20-pending small muted">Предстои: собствени приходи и дълг на общините (примерни данни).</p>`;
   return block({
     id: 's20-karta', title: 'Общините в списък', scope: 'nat', source: ['zdb', 'gisco'], asOf: md.asOf,
-    status: showFin ? 'partial' : 'real', statusLabel: showFin ? 'Реални и примерни данни' : undefined,
+    status: showFin ? 'partial' : 'real', statusLabel: showFin ? 'Официални и примерни данни' : undefined,
     sub: 'Основни трансфери за 2026 г. Натисни заглавие на колона, за да подредиш списъка.',
     body: html`${md.hasGeo ? '' : html`<p class="fig-fail" role="note">Картата не се зареди. Същите данни има в списъка.</p>`}${table}${finNote}${fixFoot(md)}`
   });

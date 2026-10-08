@@ -253,7 +253,7 @@ export function kpisBlock(M) {
     kpi({ label: kind, mln: fin(bal.c) ? Math.abs(bal.c) : null, delta: fin(balDelta) ? { value: balDelta, unit: '%', d: 1, label: vs } : undefined, sub: fin(balShare) ? `${pct(balShare, 1)} от ${planWord} за годината` : undefined }),
   ];
   return block({
-    id: 's15-kpi', level: 2, title: `Накратко към ${date(M.asOf)} г.`, scope: M.scope, source: sourcesOf(M), asOf: M.asOf,
+    id: 's15-kpi', level: 2, title: 'Накратко', scope: M.scope, source: sourcesOf(M), asOf: M.asOf,
     sub: M.Y === 2026 ? 'Числата са натрупани от началото на годината.' : 'Числата са натрупани от началото на годината; за 2025 г. няма годишен план за сравнение.',
     share: { text: summaryText(M) },
     body: kpiGrid(items, { label: 'Основни числа' }),
@@ -266,7 +266,7 @@ export function rhythmCallout(M) {
   const body = html`
     <p>Към ${monthName(M.m)} са изразходвани ${pct(f.share, 1)} от годишния план. По същото време на 2025 г. вече са били изразходвани ${pct(f.pace, 1)} от разходите за цялата година.</p>
     <p>Приходите и разходите не се разпределят равномерно по месеци (${gl('sezonnost', 'сезонност')}). Затова сравняваме не с „една дванайсета на месец“, а с дела, достигнат по същото време на 2025 г.</p>
-    <p>Планът за разходите през 2026 г. е с ${num(f.planGrowth, 1)}% по-голям от реалните разходи през цялата 2025 г. Към ${monthName(M.m)} са похарчени с ${num(f.yoy, 1)}% ${f.yoy >= 0 ? 'повече' : 'по-малко'} пари, отколкото към ${monthName(M.m)} 2025 г.${f.lower && f.moreMoney ? ' Затова по-малкият дял от плана не е същото като по-малко похарчени пари.' : ''}</p>`;
+    <p>Планът за разходите през 2026 г. е с ${num(f.planGrowth, 1)}% по-голям от отчетените разходи през цялата 2025 г. Към ${monthName(M.m)} са похарчени с ${num(f.yoy, 1)}% ${f.yoy >= 0 ? 'повече' : 'по-малко'} пари, отколкото към ${monthName(M.m)} 2025 г.${f.lower && f.moreMoney ? ' Затова по-малкият дял от плана не е същото като по-малко похарчени пари.' : ''}</p>`;
   return callout({ kind: 'info', title: 'Как да четем дела от плана', body, id: 's15-rhythm' });
 }
 
@@ -433,7 +433,7 @@ export function peraView(M) {
   return out;
 }
 
-/* ------------------------------------------------------------------ Бюджети: плана по съставни бюджети (D07), националният бюджет и средствата от ЕС (реални) */
+/* ------------------------------------------------------------------ Бюджети: плана по съставни бюджети (D07), националният бюджет и средствата от ЕС (официални данни) */
 const khilToMln = v => (fin(v) ? v / 1000 : null);
 
 /** components.json (D07) is optional: its own shape is read as it is (budgets.state … other, sankey, notes); what is missing is skipped, never invented */
@@ -663,13 +663,21 @@ export const embeds = {
   's15-balance': embedOf(balanceChartSpec),
 };
 
+/** one line that says what the numbers are: a report, against which plan, for which scope, in which unit */
+export function contextLine(M) {
+  const against = M.Y === 2026 ? `спрямо плана по Закона за ${M.Y}` : 'предварителен, без план за сравнение';
+  const scope = M.tab === 'byudzheti' ? 'по съставни бюджети' : SCOPE_NAME[M.scope];
+  const unit = M.tab === 'obsho' && M.unit === 'pct' ? 'млрд. € и % от плана' : 'млрд. €';
+  return html`<span class="ctx-period"><strong>${M.notYet ? 'Последен отчет' : 'Отчет'} към ${date(M.asOf)}</strong> <span class="muted">· ${against} · ${scope} · ${unit}</span></span>`;
+}
+
 export function render(ctx) {
   const M = model(ctx);
   const y25 = M.Y === 2025
     ? callout({ kind: 'info', title: 'Показана е 2025 г.', body: html`<p>За 2025 г. екранът показва само отчета: без годишен план и без сравнение с предходна година.</p>`, id: 's15-y25' })
     : '';
   const body = M.notYet ? notYetFrame(M) : M.tab === 'pera' ? peraView(M) : M.tab === 'byudzheti' ? byudzhetiView(M) : obshoView(M);
-  return html`${tabNav(M)}${controls(M)}${y25}${body}${methodDisclosure(M)}`;
+  return { body: html`${tabNav(M)}${controls(M)}${y25}${body}${methodDisclosure(M)}`, context: contextLine(M), ownContext: true };
 }
 
 export function mount(root, ctx) {

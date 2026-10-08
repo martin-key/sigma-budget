@@ -197,8 +197,8 @@ function indirectBlock(st, c, env) {
   const A = env.assum;
   const on = !!st.ind && !!A;
   const body = html`
-    <p>В цените на стоките има вграден ${gl('dds', 'ДДС')} и ${gl('aktsiz', 'акциз')}. Тук можеш да добавиш ориентировъчна оценка. Тя е по примерни допускания, затова е отделена от реалните ставки.</p>
-    ${A ? mockNote('Ставките на ДДС и акциза са реални. Цените и дялът на облагаемите покупки са допускания, а не данни, затова оценката е ориентировъчна.') : ''}
+    <p>В цените на стоките има вграден ${gl('dds', 'ДДС')} и ${gl('aktsiz', 'акциз')}. Тук можеш да добавиш ориентировъчна оценка. Тя е по примерни допускания, затова е отделена от официалните ставки.</p>
+    ${A ? mockNote('Ставките на ДДС и акциза са официални. Цените и дялът на облагаемите покупки са допускания, а не данни, затова оценката е ориентировъчна.') : ''}
     ${toggle({ id: 's18-ind', label: 'Добави косвените данъци към сметката', checked: on, attrs: raw(` aria-controls="s18-ind-fields"${A ? '' : ' disabled'}`) })}
     ${A ? '' : html`<p class="field-hint">Допусканията за косвените данъци още не са заредени.</p>`}
     <div id="s18-ind-fields" class="s18-ind-fields"${on ? '' : raw(' hidden')}>
@@ -481,7 +481,7 @@ export function render(ctx) {
         <div class="s18-in">${inputsBlock(st, c, env)}</div>
         <div class="s18-out">
           ${block({
-            id: 's18-result', title: 'Твоята сметка', status: 'real', statusLabel: 'Реални ставки', source: ['nap', 'zbdoo', 'zbnzok'], asOf: env.rates?.meta?.asOf, share: false, report: false,
+            id: 's18-result', title: 'Твоята сметка', status: 'real', statusLabel: 'Официални ставки', source: ['nap', 'zbdoo', 'zbnzok'], asOf: env.rates?.meta?.asOf, share: false, report: false,
             body: html`<p id="s18-live" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p><div id="s18-view">${resultMarkup(c, st, env)}</div>`,
           })}
           ${receiptBlock(st, c, env, ctx)}

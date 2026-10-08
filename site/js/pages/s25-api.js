@@ -80,7 +80,7 @@ function filesBlock(M, waiting) {
 const META_FIELDS = [
   ['id', 'Номер на набора в каталога, например D01.'],
   ['title', 'Име на набора.'],
-  ['status', 'Статус на данните: real (реални), partial (частични), forecast (прогнозни), mock (примерни) или pending (предстоящи).'],
+  ['status', 'Статус на данните: real (официални), partial (частични), forecast (прогнозни), mock (примерни) или pending (предстоящи).'],
   ['source', 'Ключове на източниците. Какво е всеки от тях е описано в „Откъде са данните?“.'],
   ['sourceNote', 'С думи: как са взети и подредени числата.'],
   ['asOf', 'Към коя дата са данните.'],
@@ -129,9 +129,9 @@ const snippet = (id, label, text) => html`<div class="s25-snip" data-gl-skip>
 function mockFacts(meta, M) {
   const real = list(meta?.realFields), model = list(meta?.modelFields), rules = list(meta?.constrainedBy);
   const rows = [
-    real.length ? { k: 'Реални полета', v: html`${real.map((x, i) => html`${i ? ' ' : ''}${code(x)}`)}` } : null,
+    real.length ? { k: 'Официални полета', v: html`${real.map((x, i) => html`${i ? ' ' : ''}${code(x)}`)}` } : null,
     model.length ? { k: 'Измислени полета', v: html`${model.map((x, i) => html`${i ? ' ' : ''}${code(x)}`)}` } : null,
-    rules.length ? { k: 'Как е вързан с реалните данни', v: html`<ul class="s25-list">${rules.map(r => html`<li>${C.rich(r, M)}</li>`)}</ul>` } : null,
+    rules.length ? { k: 'Как е вързан с официалните данни', v: html`<ul class="s25-list">${rules.map(r => html`<li>${C.rich(r, M)}</li>`)}</ul>` } : null,
     meta?.seed != null ? { k: 'Начално число на генератора', v: code(String(meta.seed)) } : null
   ].filter(Boolean);
   return rows.length ? html`<h3 class="s25-h3">Какво е измислено</h3>${facts(rows, { cls: 's25-facts' })}` : '';
@@ -238,7 +238,7 @@ function licenceBlock() {
     <p>Какво знаем днес:</p>
     <ul class="s25-list">
       <li>Числата са на първичните източници, а всеки източник има свои условия. Виж ги в <a href="${href('danni', {}, { to: 's24-sources' })}">„Откъде са данните?“</a>.</li>
-      <li>Всеки реален набор има готово цитиране в паспорта си.</li>
+      <li>Всеки официален набор има готово цитиране в паспорта си.</li>
       <li>Примерните набори са измислени и не се цитират като действителни.</li>
     </ul>`, { scan: true });
 }

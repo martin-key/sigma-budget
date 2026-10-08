@@ -18,6 +18,7 @@
 //   loadMeta(set, {signal})   async -> {meta, state}   the `meta` block of the set's own file (notes, notice) for a detail view. Reads the cache first, fetches
 //                             only a small JSON file (< 120 KB) through data.load, never passes `demo`; state: 'ok' | 'skip' | 'pending' | 'error'; an abort is rethrown
 //   periodLabel(p) · sizeLabel(bytes) · paras(text) · idPart(s) · cleanQ(text) · kindLabel(kind) · accessLabel(access, hasUrl)
+//   yearSpan(p) · periodYears(M) · coversYear(set, y)   the years a period reaches ([2024, 2028]), the years any set covers (newest first), and whether a set covers a year (FB4: the „Период“ filter of ПРОВЕРИ)
 //   rich(text, M)             text from the catalogue -> SafeHtml: escaped, with `code`, „slug“ (a set of the catalogue) and P01..P07 (a pending set) as links or <code>
 import { ROUTES, byId, href as routeHref } from './routes.js';
 import { esc, raw } from './html.js';
@@ -85,6 +86,19 @@ export function periodLabel(p) {
   const two = s.split(/\s*…\s*|\s*\.\.\.\s*/).filter(Boolean);
   return two.length === 2 ? `${point(two[0])} – ${point(two[1])}` : point(s);
 }
+/** the first and the last year a period reaches: '2024–2028' -> [2024, 2028] · '2025-01 … 2026-07' -> [2025, 2026] · '2026' -> [2026, 2026] · no period -> null */
+export function yearSpan(p) {
+  const text = p && typeof p === 'object' ? `${str(p.from)} ${str(p.to)}` : str(p);
+  const ys = (text.match(/\b(?:19|20)\d{2}\b/g) || []).map(Number);
+  return ys.length ? [Math.min(...ys), Math.max(...ys)] : null;
+}
+/** the years at least one set covers, newest first (the options of the „Период“ filter) */
+export function periodYears(M) {
+  const ys = new Set();
+  for (const s of M.sets) { const sp = yearSpan(s.period); if (sp) for (let y = sp[0]; y <= sp[1]; y++) ys.add(y); }
+  return [...ys].sort((a, b) => b - a);
+}
+export function coversYear(set, y) { const sp = yearSpan(set.period); return !!sp && sp[0] <= y && y <= sp[1]; }
 /** 9025 -> '8,8 КБ' · 5655187 -> '5,4 МБ' (no-break space before the unit) */
 export function sizeLabel(bytes) {
   if (!isNum(bytes) || bytes < 0) return '';

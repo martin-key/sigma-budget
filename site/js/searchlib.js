@@ -3,7 +3,7 @@
 //   data/search-index.json (DATA_SPEC 3.21)  +  the screens of the route table  +  the glossary terms (only until the index has its own).
 //
 //   parse(raw)                 -> toks     a query as words with variants ([] when there is nothing to search for; several words also carry .phrase)
-//   run(entries, toks, {onlyReal}) -> {hits, hidden, fuzzy}   best first; `hidden` = mock hits left out by „Само реални данни“; `fuzzy` = no exact match, these are near misses
+//   run(entries, toks, {onlyReal}) -> {hits, hidden, fuzzy}   best first; `hidden` = mock hits left out by „Само официални данни“; `fuzzy` = no exact match, these are near misses
 //   mark(title, toks)          -> SafeHtml the title with the matched words in <mark>
 //   getIndex()                 -> Promise<{entries, hasIndex, groups}>   never rejects; the index file is optional (pending = screens + terms only)
 //   screenOf(href)             -> route | null   the screen a result opens (for „→ Екран“)
@@ -137,7 +137,7 @@ const mag = v => {
   return Number.isFinite(n) ? n : 0;
 };
 
-/** the hits for a query, best first. `fuzzy` = nothing matched exactly, so these are the near misses (the page says so). `hidden` = mock hits left out by „Само реални данни“. */
+/** the hits for a query, best first. `fuzzy` = nothing matched exactly, so these are the near misses (the page says so). `hidden` = mock hits left out by „Само официални данни“. */
 export function run(entries, toks, o = {}) {
   let hits = [], hidden = 0, fuzzy = false;
   const pass = f => {

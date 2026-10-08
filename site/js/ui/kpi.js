@@ -3,7 +3,7 @@
 //   kpi({label, value, unit, d, mln, pctGdp, delta, sub, scope, status, mock, source, asOf, gl, href, id})
 //   kpiGrid([kpi(…), kpi(…)], {label, cls})
 // `mln` (money in млн. €) goes through view.amountParts, so „% от БВП“, „на човек“ and „и в лева“ apply; `value` is printed as given.
-// While „Само реални данни“ is on, a mock tile renders nothing and kpiGrid adds ONE note saying how many tiles are hidden.
+// While „Само официални данни“ is on, a mock tile renders nothing and kpiGrid adds ONE note saying how many tiles are hidden.
 import { html, raw, SafeHtml, cx, esc, plain } from '../html.js';
 import { store } from '../store.js';
 import { num, pct, pp, delta as pctDelta, arrow, NBSP } from '../format.js';

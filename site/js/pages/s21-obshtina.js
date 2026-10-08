@@ -2,7 +2,7 @@
 // Data, only through `needs`:
 //   municipalities          D19, REAL   the main transfers of the 2026 state budget law to each municipality (хил. €), inhabitants, € per person
 //   geo/obshtini            D20, REAL   the outlines for the locator map (optional: without it the screen simply has no map)
-//   mock/municipal-finance  M03, MOCK   own revenue, expenditure, debt and the first two quarters (optional: one hatched block, left out under „Само реални данни“)
+//   mock/municipal-finance  M03, MOCK   own revenue, expenditure, debt and the first two quarters (optional: one hatched block, left out under „Само официални данни“)
 // One municipality, found by its code (case does not matter); an unknown code is ctx.notFound(). The page is a pure function of ctx:
 // nothing is typed in, every number comes from the data or from a sum, an average or a rank of it (muni.js).
 // Groups for the comparison: the oblast (all its municipalities, the one itself included, so the figure is the one of S20), the ten municipalities
