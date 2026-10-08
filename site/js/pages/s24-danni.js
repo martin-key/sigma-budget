@@ -35,9 +35,9 @@ const metaList = rows => html`<dl class="s24-meta">${rows.filter(r => r && r.v !
 const pageUrl = hash => { try { const u = new URL(document.baseURI); u.hash = ''; u.search = ''; return u.href + hash; } catch { return hash; } };
 const httpText = code => (code === 403 ? 'отказан достъп (403)' : code === 404 ? 'не е намерен (404)' : code === 200 ? 'отговаря (200)' : code ? `отговор ${code}` : '');
 
-const ADJ = { real: ['реален', 'реални'], partial: ['частичен', 'частични'], forecast: ['прогнозен', 'прогнозни'], mock: ['примерен', 'примерни'], pending: ['предстоящ', 'предстоящи'] };
+const ADJ = { real: ['официален', 'официални'], partial: ['частичен', 'частични'], forecast: ['прогнозен', 'прогнозни'], mock: ['примерен', 'примерни'], pending: ['предстоящ', 'предстоящи'] };
 const bgList = a => (a.length < 2 ? a.join('') : `${a.slice(0, -1).join(', ')} и ${a[a.length - 1]}`);
-/** '22 реални, 7 примерни и 7 предстоящи' */
+/** '22 официални, 7 примерни и 7 предстоящи' */
 const breakdown = M => bgList(C.STATUSES.filter(st => M.counts[st] > 0).map(st => `${num(M.counts[st], 0)} ${ADJ[st][M.counts[st] === 1 ? 0 : 1]}`));
 const countText = L => `Показани: ${num(L.n, 0)} от ${plural(L.total, 'набор', 'набора')}`;
 
@@ -129,7 +129,7 @@ function row(set, M, shown) {
 /* ---------------------------------------------------------------- the list: filters, groups, sections */
 function filterBar(M, f, L) {
   const screens = [{ value: '', label: 'Всички екрани' }, ...M.screens.map(s => ({ value: s.key, label: s.title }))];
-  const sources = [{ value: '', label: 'Всички източници' }, ...M.sourceKeys.map(k => ({ value: k, label: srcShort(k) }))];
+  const sources = [{ value: '', label: 'Всички' }, ...M.sourceKeys.map(k => ({ value: k, label: srcShort(k) }))];
   const items = [
     { label: 'Всички', count: L.allN, query: 'status=', pressed: !f.status },
     ...C.STATUSES.filter(st => M.counts[st] > 0).map(st => ({ label: STATUS[st].label, count: L.statusN[st] || 0, query: `status=${st}`, pressed: f.status === st }))
@@ -306,7 +306,7 @@ function passportRows(set, M) {
   return [
     { k: 'Статус', v: html`<span class="s24-st">${statusPill(set.status)}<span>${(STATUS[set.status] || STATUS.pending).text}</span></span>` },
     set.mock ? { k: 'Откъде са стойностите', v: 'Няма източник: стойностите са измислени за прототипа.' } : null,
-    real.length ? { k: pend ? 'Откъде ще дойдат' : set.mock ? 'Свързан с реални данни от' : real.length > 1 ? 'Източници' : 'Източник', v: srcBlock(real, M) } : null,
+    real.length ? { k: pend ? 'Откъде ще дойдат' : set.mock ? 'Свързан с официални данни от' : real.length > 1 ? 'Източници' : 'Източник', v: srcBlock(real, M) } : null,
     pend && set.expected ? { k: 'Къде да ги видиш', v: set.expected } : null,
     { k: 'Период', v: C.periodLabel(set.period) },
     { k: set.mock ? 'Създадени на' : 'Данни към', v: set.asOf ? date(set.asOf) : '' },
@@ -375,7 +375,7 @@ async function detailView(ctx, M, set) {
 
   const sections = [];
   if (pend) {
-    sections.push(pendingState({ title: set.title, text: `Данните съществуват при ${publishers(set, M) || 'издателя'}, но още не са извлечени. Не показваме число, докато няма реално.` }));
+    sections.push(pendingState({ title: set.title, text: `Данните съществуват при ${publishers(set, M) || 'издателя'}, но още не са извлечени. Не показваме число, докато няма официални данни.` }));
   } else if (set.mock) {
     sections.push(callout({ kind: 'warn', title: 'Примерни данни: не ги цитирай', body: html`<p>${notice || 'Стойностите са измислени и показват само как ще изглежда екранът.'}</p>` }));
   }

@@ -1,15 +1,25 @@
 /* S10 · Кой харчи? Tokens only, no dark-mode rules (the tokens carry both themes), every selector scoped to the screen. Mobile first. */
 
-/* the search card: a field to find a spender, a sort, a view switch, then the group chips and the count line */
-.page[data-route="S10"] .s10-find { display: grid; gap: var(--sp-3); padding: var(--sp-4); border: 1px solid var(--line); border-radius: var(--r-2); background: var(--surface); box-shadow: var(--shadow-1); }
+/* the search row: a field to find a spender, a sort, a view switch, then the group chips and the count line; plain rows inside the block, no card of their own */
+.page[data-route="S10"] .s10-find { display: grid; gap: var(--sp-2); }
 .page[data-route="S10"] .s10-controls { display: grid; gap: var(--sp-3); }
 .page[data-route="S10"] .s10-controls > .field { min-width: 0; }
+/* the search field: its hint stays on the label's line when it fits and drops under the label when it does not (a phone); the order of the markup is unchanged */
+.page[data-route="S10"] .s10-controls > .field:first-child { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-1) var(--sp-2); }
+.page[data-route="S10"] .s10-controls > .field:first-child > .field-hint { flex: 1 1 auto; margin: 0; }
+.page[data-route="S10"] .s10-controls > .field:first-child > .input { flex: 1 0 100%; }
 .page[data-route="S10"] .s10-view { display: grid; gap: var(--sp-1); align-content: start; }
 .page[data-route="S10"] .s10-view .seg { justify-self: start; max-width: 100%; }
 .page[data-route="S10"] .s10-count { margin: 0; color: var(--muted); font-size: var(--fs-s); max-width: 72ch; }
 
+/* the one usage tip of „Всички ведомства“ stands in the block-menu slot; the slot takes no box of its own so that the tip and „Сподели“ place themselves in the head grid:
+   a line under the meta line on a narrower screen, and from 1280 px on the title row between the title and „Сподели“ (see the media query below) */
+.page[data-route="S10"] #s10-spisak .block-tools { display: contents; }
+.page[data-route="S10"] #s10-spisak .block-tools > .share-btn { grid-column: 2; grid-row: 1; margin-right: calc(-1 * var(--sp-2)); }
+.page[data-route="S10"] #s10-spisak .s10-tip { grid-column: 1 / -1; grid-row: 3; margin: 0; color: var(--muted); font-size: var(--fs-s); }
+
 /* the lists */
-.page[data-route="S10"] .s10-list { margin-top: var(--sp-4); }
+.page[data-route="S10"] .s10-list { margin-top: var(--sp-3); }
 .page[data-route="S10"] .s10-list .state { margin-top: var(--sp-1); }
 .page[data-route="S10"] .s10-notes { display: grid; gap: var(--sp-2); max-width: 72ch; margin-top: var(--sp-4); }
 .page[data-route="S10"] .s10-notes p { margin: 0; }
@@ -35,20 +45,33 @@
 .page[data-route="S10"] .s10-tag { display: inline-block; padding: 0 var(--sp-2); border: 1px solid var(--warn); border-radius: var(--r-full); background: var(--warn-soft); color: var(--warn); font-size: var(--fs-xs); font-weight: 700; line-height: 1.5; white-space: nowrap; vertical-align: baseline; }
 
 @media (min-width: 600px) {
-  .page[data-route="S10"] .s10-find { padding: var(--sp-5); }
-  .page[data-route="S10"] .s10-controls { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); align-items: start; }
+  .page[data-route="S10"] .s10-controls { grid-template-columns: minmax(0, 1.6fr) minmax(13.25rem, 1fr); align-items: start; }
   .page[data-route="S10"] .s10-view { grid-column: 1 / -1; }
 }
 @media (min-width: 900px) {
-  .page[data-route="S10"] .s10-controls { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) auto; }
-  .page[data-route="S10"] .s10-view { grid-column: auto; }
   .page[data-route="S10"] .s10-controls-p { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.2fr) minmax(0, 1fr); }
   .page[data-route="S10"] .s10-controls-p .s10-view { grid-column: 1 / -1; }
+}
+/* search, sort and view switch share one row once the sort select can keep its longest label (13.25rem) beside a usable search field */
+@media (min-width: 1100px) {
+  .page[data-route="S10"] .s10-controls:not(.s10-controls-p) { grid-template-columns: minmax(0, 1.5fr) minmax(13.25rem, 1fr) auto; }
+  .page[data-route="S10"] .s10-controls:not(.s10-controls-p) .s10-view { grid-column: auto; }
+}
+/* a wide screen (the full 928 px column): the unit switch sits on the tabs row, to the right of the two tabs, instead of a row of its own;
+   „Всички ведомства“ keeps its tip on the title row and its group chips on one row, so that the first rows of the list are on the first screen */
+@media (min-width: 1280px) {
+  .page[data-route="S10"] .tabs { position: relative; }
+  .page[data-route="S10"] .tab-panel > .unit-switch { position: absolute; top: 0; right: 0; max-width: calc(100% - 21rem); }
+  .page[data-route="S10"] #s10-spisak .block-head { grid-template-columns: auto minmax(0, 1fr) auto; column-gap: var(--sp-4); }
+  .page[data-route="S10"] #s10-spisak .block-title,
+  .page[data-route="S10"] #s10-spisak .s10-tip { align-self: baseline; }
+  .page[data-route="S10"] #s10-spisak .s10-tip { grid-column: 2; grid-row: 1; }
+  .page[data-route="S10"] #s10-spisak .block-tools > .share-btn { grid-column: 3; }
+  .page[data-route="S10"] .s10-find .chip { padding-inline: var(--sp-3); }
 }
 @media (pointer: coarse) {
   .page[data-route="S10"] .s10-more .btn { min-height: 48px; }
 }
 @media (forced-colors: active) {
-  .page[data-route="S10"] .s10-find { border-color: CanvasText; }
   .page[data-route="S10"] .s10-tag { border-color: CanvasText; background: Canvas; color: CanvasText; }
 }

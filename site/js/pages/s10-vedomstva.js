@@ -12,6 +12,7 @@ import { num, pct, delta, money, khil, date, plural, DASH, NBSP, EUR_RATE } from
 import { amount, moneyCol, chartUnit } from '../view.js';
 import { norm, lat } from '../searchlib.js';
 import { tabs } from '../ui/tabs.js';
+import { disclosure } from '../ui/disclosure.js';
 import { block } from '../ui/block.js';
 import { kpi, kpiGrid } from '../ui/kpi.js';
 import { chips } from '../ui/chips.js';
@@ -57,8 +58,8 @@ const groupOf = kind => (GROUPS.find(g => g.kinds.includes(kind)) ?? GROUPS[GROU
 
 const SORT_V = [
   { value: 'razmer', label: 'Най-голям разход' },
-  { value: 'rast', label: 'Най-голям ръст спрямо 2025 г.' },
-  { value: 'spad', label: 'Най-голям спад спрямо 2025 г.' },
+  { value: 'rast', label: 'Най-голям ръст' },
+  { value: 'spad', label: 'Най-голям спад' },
   { value: 'ime', label: 'По азбучен ред' }
 ];
 const SORT_P = [{ value: 'razmer', label: 'Най-голяма сума' }, ...SORT_V.slice(1)];
@@ -542,7 +543,7 @@ function vFind(md, ctx, q, p) {
   const chipItems = [{ label: 'Всички', count: md.items.length, query: 'vid=', pressed: !md.vid }, ...md.groups.map(g => ({ label: g.label, count: g.count, query: `vid=${g.key}`, pressed: md.vid === g.key }))];
   return html`<div class="s10-find" role="search" aria-label="Търсене и филтри на ведомствата">
     <div class="s10-controls">
-      ${field({ id: 's10-q', label: 'Намери ведомство', hint: 'Име, съкращение като „МВР“ или код като „1300“.', control: textInput({ id: 's10-q', name: 'q', value: q, type: 'search', autocomplete: 'off', inputmode: 'search', hint: true }) })}
+      ${field({ id: 's10-q', label: 'Намери ведомство', hint: 'Име, „МВР“ или код „1300“.', control: textInput({ id: 's10-q', name: 'q', value: q, type: 'search', autocomplete: 'off', inputmode: 'search', hint: true }) })}
       ${field({ id: 's10-sort', label: 'Подреди по', control: selectInput({ id: 's10-sort', name: 'podredba', value: md.sort, options: SORT_V, query: 'podredba' }) })}
       <div class="field s10-view"><span class="field-label" aria-hidden="true">Покажи като</span>${seg({ name: 's10-view', label: 'Покажи като', value: md.view, query: 'izgled', options: [{ value: 'lenti', label: 'Ленти', icon: 'barChart' }, { value: 'tablica', label: 'Таблица', icon: 'table' }] })}</div>
     </div>
@@ -555,15 +556,15 @@ function vPanel(md, pm, ctx) {
   const q = clean(ctx.query.q);
   const p = vParts(md, ctx, q);
   return html`${unitSwitch(ctx, { name: 's10-unit', note: '„% от БВП“ е спрямо планирания БВП за 2026 г.' })}
-    ${overview(md, pm, ctx)}
-    ${sharesBlock(md, ctx)}
     ${block({
       id: 's10-spisak', title: 'Всички ведомства', status: 'real', source: md.doc.meta?.source ?? SOURCE_V, asOf: md.asOf,
       scope: { key: 'zdb-vedomstva', label: 'Бюджети на ведомствата', note: 'не е целият бюджет' },
-      sub: 'Колко харчи всяко ведомство през 2026 г. Натисни ведомство, за да видиш политиките и програмите му.',
-      share: { table: () => exportV(md, ctx) },
+      tools: html`<p class="s10-tip">Натисни ведомство, за да видиш политиките и програмите му.</p>`,
+      share: { table: () => exportV(md, ctx), text: 'Колко харчи всяко ведомство през 2026 г.' },
       body: html`${vFind(md, ctx, q, p)}<div id="s10-v-list" class="s10-list">${p.body}</div><div id="s10-v-notes" class="s10-notes small muted"${p.notes.s ? '' : html` hidden`}>${p.notes}</div>`
-    })}`;
+    })}
+    ${overview(md, pm, ctx)}
+    ${sharesBlock(md, ctx)}`;
 }
 
 function pFind(pm, ctx, q, p) {
@@ -608,14 +609,14 @@ function pPanel(md, pm, ctx) {
   const nValid = md.items.filter(m => m.progCount !== null && !m.progDiffers).length;
   const diffList = listNames(md.items.filter(m => m.progDiffers).map(plainName));
   return html`${block({
-    id: 's10-programi', title: 'Програмите на ведомствата', status: 'partial', statusLabel: 'Реални данни, част предстои', source: SOURCE_P, asOf: pm.asOf,
+    id: 's10-programi', title: 'Програмите на ведомствата', status: 'partial', statusLabel: 'Официални данни, част предстои', source: SOURCE_P, asOf: pm.asOf,
     scope: { key: 'prb-programi', label: 'Програмни бюджети', note: 'без ЕС и други средства' },
     sub: 'Всяка програма има име, код и сума за 2026 г. Натисни програма, за да видиш повече на страницата на ведомството.',
     share: { table: () => exportP(pm, ctx) },
-    body: html`<div class="s10-intro">
+    body: html`<div class="s10-intro">${disclosure({ id: 's10-p-intro', title: 'Какво е бюджетна програма', body: html`
       <p>${gl('byudzhetna-programa', 'Бюджетната програма')} показва за какво точно харчи парите си едно ведомство. Програмите се събират в политики. Сумите тук са по бюджета на самото ведомство за 2026 г., без европейските и другите средства.</p>
       <p>За ${num(nValid, 0)} от ${num(pm.kBudgets, 0)} ведомства сборът на програмите е равен на бюджета им по закона.${diffList ? ` Изключение са ${diffList}: техните програмни бюджети са от проекта на закона и се различават от приетия закон.` : ''}</p>
-    </div>
+    ` })}</div>
     ${pFind(pm, ctx, q, p)}<div id="s10-p-list" class="s10-list">${p.body}</div><div id="s10-p-notes" class="s10-notes small muted"${p.notes.s ? '' : html` hidden`}>${p.notes}</div>`
   })}${pendingBlock(md, pm)}`;
 }
@@ -626,10 +627,11 @@ export function render(ctx) {
   if (!md.ok) return pendingState({ title: 'Бюджетите на ведомствата предстоят', text: 'Данните за ведомствата още не са заредени.' });
   const pm = pModel(md, ctx);
   const tab = pick(ctx.query.tab, TABS, 'vedomstva');
-  const ctxLine = `Бюджетите на ведомствата са по закона към ${date(md.asOf)} г.${pm?.asOf ? ` Програмите са по проекта на закона от ${date(pm.asOf)} г.` : ''}`;
+  const ctxLine = html`<span class="ctx-period"><strong>${ctx.period.label}</strong> <span class="muted">· Бюджетите на ведомствата са по закона към ${date(md.asOf)} г.${pm?.asOf ? ` Програмите са по проекта на закона от ${date(pm.asOf)} г.` : ''}</span></span>`;
   return {
     lede: 'Министерствата и другите органи харчат парите от държавния бюджет за 2026 г. Тук виждаш колко харчи всеки, как се променя това спрямо 2025 г. и за какви програми отиват парите.',
     context: ctxLine,
+    ownContext: true,
     body: tabs({
       id: 's10-tabs', label: 'Ведомства или програми', query: 'tab', active: tab,
       tabs: [
