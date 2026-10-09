@@ -44,13 +44,34 @@ function rowsHtml(s) {
   })}</tr>`)}`;
 }
 
-/** the table as plain values: used by the CSV export and by figure twins */
+/** what a cell reads on screen as plain text: tags and icons dropped, entities decoded, screen-reader-only parts left out, no-break spaces kept;
+ *  a <small> or <br> starts a new line ("\n"): the sub-line under a name or a number */
+const ENT = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: '\u00a0', thinsp: '\u2009', mdash: '\u2014', ndash: '\u2013', minus: '\u2212', hellip: '\u2026', laquo: '\u00ab', raquo: '\u00bb', middot: '\u00b7', times: '\u00d7', shy: '', '#39': "'" };
+export function screenText(h) {
+  return String(h instanceof SafeHtml ? h.s : h ?? '')
+    .replace(/<!--[\s\S]*?-->|<svg\b[\s\S]*?<\/svg>|<span\b[^>]*\bsr-only\b[^>]*>(?:(?!<\/span>)[\s\S])*<\/span>/g, '')
+    .replace(/[ \t\r\n\f]+/g, ' ')
+    .replace(/<\/?(?:br|p|div|li|ul|ol|small|tr|td|th|dt|dd)\b[^>]*>/gi, '\uE000')
+    .replace(/<[^>]*>/g, '')
+    .replace(/&(?:#x([0-9a-f]+)|#(\d+)|(\w+));/gi, (m, hx, dc, nm) => (hx ? String.fromCodePoint(parseInt(hx, 16)) : dc ? String.fromCodePoint(+dc) : ENT[nm] ?? m))
+    .replace(/[ \t\r\n\f]+/g, ' ').replace(/ ?(?:\uE000 ?)+/g, '\n').replace(/^[ \n]+|[ \n]+$/g, '');
+}
+
+/** the table as plain values: used by the CSV export and by figure twins.
+ *  Also carries what the screen shows: `shown` (cell texts as printed), `total` (the total row as texts, when the table has one),
+ *  `heads` (header texts), `aligns` ('start' | 'end' per column). The PNG export reads these; the CSV keeps the raw `rows`. */
 export function tableData(s) {
-  return {
+  const list = sorted(s), rows = s.rows || [];
+  const out = {
     columns: s.columns.map(unitLabel),
-    rows: sorted(s).map(r => s.columns.map(c => { const v = r[c.key]; return v instanceof SafeHtml ? v.s.replace(/<[^>]*>/g, '') : v ?? ''; })),
-    statuses: sorted(s).map(r => (r._mock ? 'mock' : r._status))
+    heads: s.columns.map(c => { const t = x => (x instanceof SafeHtml ? screenText(x) : String(x ?? '')); return c.unit ? `${t(c.label)}, ${t(c.unit)}` : t(c.label); }),
+    rows: list.map(r => s.columns.map(c => { const v = r[c.key]; return v instanceof SafeHtml ? v.s.replace(/<[^>]*>/g, '') : v ?? ''; })),
+    statuses: list.map(r => (r._mock ? 'mock' : r._status)),
+    shown: list.map(r => s.columns.map(c => screenText(cell(c, r)))),
+    aligns: s.aligns || s.columns.map(c => alignOf(c, rows))
   };
+  if (s.total) out.total = [screenText(s.total.label || 'Общо'), ...s.columns.slice(1).map(c => (s.total.values && s.total.values[c.key] != null ? screenText(cell(c, s.total.values)) : DASH))];
+  return out;
 }
 
 export function dataTable(o) {
