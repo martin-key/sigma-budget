@@ -192,7 +192,7 @@ function contextFor(route, ctx, extra, own) {
   if (route.periods !== 'none' && !own) parts.push(html`<span class="ctx-period"><strong>${ctx.period.label}</strong> <span class="muted">· ${ctx.period.desc}</span></span>`);
   if (extra) parts.push(extra);
   if (!parts.length) return '';
-  return html`<div class="context">${parts.map((p, i) => html`${i ? html`<span class="sep" aria-hidden="true">|</span>` : ''}${p}`)}</div>`;
+  return html`<div class="context">${parts.map(p => html`<span class="ctx-part">${p}</span>`)}</div>`;   // v4: the divider between parts is drawn by CSS and is clipped at the start of a wrapped line, so it never dangles
 }
 const toHtml = v => (v instanceof SafeHtml ? v : html`${v}`);
 const safeCall = (fn, ctx, fallback) => { try { const v = fn(ctx); return v ?? fallback; } catch (e) { if (e instanceof NotFound) throw e; console.error(e); return fallback; } };
@@ -252,12 +252,23 @@ async function build(route, params, query, o) {
   };
 }
 
+/* v4 (СИГМА): one italic crimson word in the heading, as СИГМА's „Къде отиват <em>парите</em> на държавата?“. Only for the route's own static
+   title and only where it reads naturally (the list below); a title a page sets itself stays plain, and document.title is always plain. */
+const ACCENT = { S01: 'бюджет', S33: 'направиш', S32: 'бюджет', S04: 'минути', S06: 'парите', S07: 'парите', S10: 'харчи', S12: 'бюджета', S13: 'вървим',
+  S31: 'икономиката', S14: 'бюджетът', S15: 'планът', S16: 'ново', S17: 'дължим', S18: 'аз', S19: 'сравнения', S20: 'община', S22: 'проекти', S23: 'плаща',
+  S24: 'данните', S25: 'данни', S26: 'проекта', S27: 'връзка', S30: 'страница' };
+function titleHtml(vm) {
+  const t = vm.title, w = ACCENT[vm.route.id];
+  if (typeof t !== 'string' || t !== vm.route.title || !w) return t;
+  const i = t.lastIndexOf(w);
+  return i < 0 ? t : html`${t.slice(0, i)}<em>${w}</em>${t.slice(i + w.length)}`;
+}
 function frameHtml(vm) {
   const { route } = vm;
   return html`<article class="page${route.bare ? ' page-bare' : ''}" data-route="${route.id}" data-key="${route.key}" data-view="${vm.view}" data-ready="0" aria-labelledby="page-title">
     ${route.bare ? '' : breadcrumbs(vm.crumbs || [])}
     ${vm.eyebrow ? html`<p class="eyebrow">${vm.eyebrow}</p>` : ''}
-    <h1 class="page-title" id="page-title" tabindex="-1">${vm.title}</h1>
+    <h1 class="page-title" id="page-title" tabindex="-1">${titleHtml(vm)}</h1>
     ${vm.lede && !route.bare ? html`<p class="lede">${vm.lede}</p>` : ''}
     ${vm.context || ''}
     <div class="page-body" data-fk="body">${vm.body}</div>

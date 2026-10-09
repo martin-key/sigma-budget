@@ -1,28 +1,32 @@
 /* Figures, legends, chart canvases, treemap list/map switch, sankey fallback. Colours come from tokens (charts.js resolves them for ECharts).
-   Visual language v2: monochrome ink with one lime accent for emphasis; legend pills are white on the grey block cards. */
+   v4 (СИГМА visual language): restrained charts — ink first, warm greys, crimson only for what matters, hairline grid, mono ticks;
+   legends are square swatches with plain labels (СИГМА .hbar-legend), toggles keep a visible 1px frame. */
 
 .fig{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--sp-2);min-width:0}   /* one explicit track: an opened chart-twin table wider than the figure scrolls inside .table-wrap instead of widening the page */
 .fig-cap{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px var(--sp-3)}
-.fig-title{font:650 var(--fs-0)/1.3 var(--font-body)}
-.fig-sub{color:var(--muted);font-size:var(--fs-s)}
+.fig-title{font:400 var(--fs-1)/1.25 var(--font-serif);letter-spacing:-.01em}
+.fig-sub{color:var(--ink-soft);font:400 var(--fs-xs)/1.4 var(--font-mono);letter-spacing:.04em}
 .fig-mock{margin-left:auto}
 
 .fig-legend{display:flex;flex-wrap:wrap;gap:var(--sp-1) var(--sp-2);list-style:none;margin:0;padding:0}
-.fig-legend .lg{display:inline-flex;align-items:center;gap:var(--sp-2);min-height:34px;padding:2px 14px 2px 10px;border:1px solid var(--line);border-radius:var(--r-full);background:var(--surface);color:var(--ink);font-size:var(--fs-s)}
-.fig-legend .lg:hover{background:var(--sunk)}
-.fig-legend .sw{flex:none;width:12px;height:12px;border-radius:var(--r-1);box-shadow:inset 0 0 0 1px rgb(0 0 0/.12)}
-.fig-legend .lg[aria-pressed="false"]{color:var(--muted);background:var(--sunk)}
+.fig-legend .lg{display:inline-flex;align-items:center;gap:var(--sp-2);min-height:32px;padding:2px 10px 2px 8px;border:1px solid var(--rule);border-radius:0;background:var(--paper);color:var(--ink);font-size:var(--fs-s)}
+button.lg,.fig-legend button.lg{border-color:var(--ink-soft)}
+.fig-legend .lg:hover{background:var(--paper-warm)}
+.fig-legend .sw{flex:none;width:11px;height:11px;border-radius:0;box-shadow:inset 0 0 0 1px rgb(0 0 0/.18)}
+.fig-legend .lg[aria-pressed="false"]{color:var(--ink-mid);background:var(--paper-warm)}
 .fig-legend .lg[aria-pressed="false"] .sw{opacity:.3}
 .fig-legend .lg[aria-pressed="false"] .lg-name{text-decoration:line-through}
-@media (pointer:coarse){.fig-legend .lg{min-height:44px}}
+@media (pointer:coarse),(max-width:640px){.fig-legend .lg{min-height:44px}}
 
-.chart{width:100%;min-width:0;max-width:100%;overflow:hidden;border-radius:var(--r-1)}
-.chart[data-ready="0"]{background:linear-gradient(90deg,var(--sunk),var(--bg),var(--sunk));background-size:200% 100%;animation:chart-load 1.4s linear infinite}
+.chart{width:100%;min-width:0;max-width:100%;overflow:hidden;border-radius:0}
+.chart[data-ready="0"]{background:linear-gradient(90deg,var(--paper-warm),var(--paper),var(--paper-warm));background-size:200% 100%;animation:chart-load 1.4s linear infinite}
 @keyframes chart-load{to{background-position:-200% 0}}
 .chart svg{display:block}
-.fig-fail{padding:var(--sp-4);border:1px dashed var(--line-strong);border-radius:var(--r-2);color:var(--muted)}
+.fig-fail{padding:var(--sp-4);border:1px dashed var(--ink-soft);border-radius:0;color:var(--ink-mid)}
 .fig-table{margin-top:var(--sp-1)}
-.fig-table .table-wrap{border-radius:var(--r-2)}
+.fig-table .table-wrap{border-radius:0}
+.fig-table>summary .disc-title{color:var(--ink-mid);font:500 var(--fs-xs)/1.3 var(--font-mono);letter-spacing:.08em;text-transform:uppercase}
+.fig-table>summary:hover .disc-title{color:var(--crimson)}
 
 /* view switch (ui/chart.js, opt-in `views`): Стълбове / Кръгова / Таблица or Линия / Стълбове; the figure carries data-view */
 .fig-views{display:flex;min-width:0}
@@ -31,16 +35,18 @@
 @media (max-width:340px){.fig-seg .seg-opt label{padding:4px 8px}.fig-seg .seg-opt label svg{display:none}}
 .fig-note{display:none;margin:0}
 .fig[data-view="line"] .fig-note[data-for="line"],.fig[data-view="bars"] .fig-note[data-for="bars"]{display:inline}
-.fig[data-view="pie"] .fig-note[data-for="pie"]{display:block;color:var(--muted);font-size:var(--fs-s)}
+.fig[data-view="pie"] .fig-note[data-for="pie"]{display:block;color:var(--ink-mid);font-size:var(--fs-s)}
 .fig[data-view="table"] .chart,.fig[data-view="table"] .fig-legend{display:none}
 .fig[data-view="table"] .fig-table>summary{display:none}
 .fig[data-view="table"] .fig-table{margin-top:0}
 /* a pie has no axis to read the numbers from: its legend is a list with the value and the share of each part */
 .fig-legend-val{display:grid;grid-template-columns:repeat(auto-fit,minmax(max(17rem,calc(50% - var(--sp-3) / 2)),1fr));gap:var(--sp-1) var(--sp-3)}   /* one or two columns, by the room the figure itself has (not by the window) */
-.fig-legend-val .lg{width:100%;justify-content:flex-start;border-radius:var(--r-2);min-height:40px}
+.fig-legend-val .lg{width:100%;justify-content:flex-start;border-radius:0;min-height:40px;border-width:0 0 1px;border-color:var(--rule-soft);padding-inline:2px}
+.fig-legend-val button.lg{border-color:var(--rule-soft)}
+.fig-legend-val{border-top:1px solid var(--ink)}
 .fig-legend-val .lg-name{min-width:0;overflow-wrap:anywhere;text-align:start}
-.fig-legend-val .lg-val{display:inline-flex;align-items:baseline;gap:var(--sp-2);margin-left:auto;padding-left:var(--sp-2);white-space:nowrap;font-variant-numeric:tabular-nums}
-.fig-legend-val .lg-pct{color:var(--muted);min-width:3.4em;text-align:end}
+.fig-legend-val .lg-val{display:inline-flex;align-items:baseline;gap:var(--sp-2);margin-left:auto;padding-left:var(--sp-2);white-space:nowrap;font:500 .8125rem/1.3 var(--font-mono);font-variant-numeric:tabular-nums}
+.fig-legend-val .lg-pct{color:var(--ink-soft);min-width:3.4em;text-align:end}
 .fig-legend-val .lg[aria-pressed="false"] .lg-val{text-decoration:line-through}
 
 /* treemap: map or list; the list is the accessible alternative and the default on phones */
@@ -53,7 +59,7 @@
 .tmap[data-view="list"] .tmap-pie,.tmap[data-view="map"] .tmap-pie{display:none}
 .tmap[data-view="pie"] .tmap-list,.tmap[data-view="pie"] .tmap-map{display:none}
 .tmap-list,.tmap-map{min-width:0}
-.tmap-note{margin:0;color:var(--muted);font-size:var(--fs-s)}
+.tmap-note{margin:0;color:var(--ink-mid);font-size:var(--fs-s)}
 
 /* sankey (ui/sankey.js): the diagram is for wide screens; phones get the same flows as a grouped list (the table twin stays a normal disclosure) */
 .sankey{display:grid;gap:var(--sp-3);min-width:0}
@@ -69,11 +75,11 @@
 }
 .sk-list{gap:var(--sp-5)}
 .sk-to{gap:var(--sp-2)}
-.sk-from{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-3);margin:0 0 var(--sp-2);padding-bottom:var(--sp-1);border-bottom:1px solid var(--line-strong);font-weight:650}
+.sk-from{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-3);margin:0 0 var(--sp-2);padding-bottom:var(--sp-1);border-bottom:1px solid var(--ink);font:400 var(--fs-1)/1.25 var(--font-serif)}
 .sk-name{min-width:0;overflow-wrap:anywhere}
-.sk-sum{font-variant-numeric:tabular-nums;white-space:nowrap}
+.sk-sum{font:500 .8125rem/1.3 var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
 .sk-pending{font-weight:400;color:var(--st-pending)}
-.sk-arrow{margin-right:6px;color:var(--muted)}
+.sk-arrow{margin-right:6px;color:var(--ink-soft)}
 
 @media print{
   .fig-legend .lg{border:0}
@@ -110,18 +116,18 @@
 .map-ovl path.map-ovl-halo{stroke:var(--surface);stroke-width:6px}
 .map-ovl path.map-ovl-hl.map-ovl-ring{stroke:var(--ink);stroke-width:2.5px}
 .map-ovl path.map-ovl-sel.map-ovl-ring{stroke:var(--ink);stroke-width:2.5px;stroke-dasharray:7 4}
-.map-info{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px var(--sp-3);min-height:2.75rem;padding:var(--sp-2) var(--sp-4);border:1px solid var(--line);border-radius:var(--r-2);background:var(--surface);color:var(--ink);font-size:var(--fs-s)}
-.map-info-name{font-weight:650;font-size:var(--fs-0)}
-.map-info-sub{color:var(--muted)}
+.map-info{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px var(--sp-3);min-height:2.75rem;padding:var(--sp-2) 0;border:0;border-top:1px solid var(--ink);border-bottom:1px solid var(--rule-soft);border-radius:0;background:none;color:var(--ink);font-size:var(--fs-s)}
+.map-info-name{font:400 var(--fs-1)/1.2 var(--font-serif)}
+.map-info-sub{color:var(--ink-mid)}
 .map-info-open{margin-left:auto;font-weight:600}
 @media (pointer:coarse){.map-info-open{display:inline-flex;align-items:center;min-height:44px}}
 .map-legend{display:grid;gap:var(--sp-1)}
-.map-legend-title{margin:0;color:var(--muted);font-size:var(--fs-s)}
-.map-legend-note{margin:0;color:var(--muted);font-size:var(--fs-s)}
+.map-legend-title{margin:0;color:var(--ink-soft);font:500 var(--fs-xs)/1.4 var(--font-mono);letter-spacing:.1em;text-transform:uppercase}
+.map-legend-note{margin:0;color:var(--ink-mid);font-size:var(--fs-s)}
 .map-legend-list{gap:var(--sp-1) var(--sp-4)}
 .map-lg{display:inline-flex;flex-wrap:wrap;align-items:center;gap:2px var(--sp-2);color:var(--ink);font-size:var(--fs-s)}
-.fig-legend .map-sw{width:20px;height:12px;border-radius:var(--r-1)}
-.map-n{color:var(--muted)}
+.fig-legend .map-sw{width:20px;height:12px;border-radius:0}
+.map-n{color:var(--ink-soft)}
 .map-nd-sw{background-color:var(--sunk);background-image:radial-gradient(circle,var(--faint) 1px,transparent 1.5px);background-size:5px 5px}
 .fig-legend .map-sw[data-mock="true"]{background-color:var(--map-2);background-image:repeating-linear-gradient(45deg,var(--st-mock) 0 1.5px,transparent 1.5px 6px)}
 @media (forced-colors:active){

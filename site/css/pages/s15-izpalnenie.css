@@ -1,45 +1,47 @@
-/* S15 Изпълнява ли се планът? (G3). Tokens only, mobile first, no dark-mode rules (tokens carry the theme). */
+/* S15 Изпълнява ли се планът? (G3). v4 (СИГМА visual language): an unframed controls row with mono labels, wrapping segments as a
+   grid of square cells, mono red-flag tags, the two cumulative charts as ruled columns. Tokens only, light only, mobile first. */
 
 /* tabs are real links (chips): a little air below them */
-.page[data-route="S15"] .s15-tabs { margin-bottom: var(--sp-4); }
+.page[data-route="S15"] .s15-tabs { margin-bottom: var(--sp-5); }
 
-/* the controls row (no frame): month, scope, unit or threshold; the shared .seg is a single pill row, here the options may wrap */
-.page[data-route="S15"] .s15-controls { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--sp-3) var(--sp-5); margin-bottom: var(--sp-5); }
+/* the controls row (no frame): month, scope, unit or threshold; here the segment options may wrap, so each is its own square cell */
+.page[data-route="S15"] .s15-controls { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--sp-4) var(--sp-6); margin-bottom: var(--sp-6); }
 .page[data-route="S15"] .s15-controls .field { min-width: 0; max-width: 100%; }
 .page[data-route="S15"] .s15-controls .field:first-child { flex: 1 1 11rem; max-width: 16rem; }
-.page[data-route="S15"] .s15-seg { display: flex; flex-wrap: wrap; justify-content: stretch; overflow: visible; border-radius: var(--r-3); }
-.page[data-route="S15"] .s15-seg .seg-opt { flex: 1 1 auto; }
-.page[data-route="S15"] .s15-seg .seg-opt label { width: 100%; justify-content: center; min-height: 44px; white-space: normal; text-align: center; border-radius: var(--r-2); }
+.page[data-route="S15"] .s15-seg { display: flex; flex-wrap: wrap; justify-content: stretch; overflow: visible; padding: 0 1px 1px 0; border: 0; border-radius: 0; background: none; }
+.page[data-route="S15"] .s15-seg .seg-opt { flex: 1 1 auto; margin: 0 -1px -1px 0; border: 1px solid var(--ink-soft); }
+.page[data-route="S15"] .s15-seg .seg-opt + .seg-opt { border-left: 1px solid var(--ink-soft); }
+.page[data-route="S15"] .s15-seg .seg-opt label { width: 100%; justify-content: center; min-height: 44px; white-space: normal; text-align: center; border-radius: 0; }
 
 /* the plain-language lead above the tables and on the „Бюджети“ tab */
-.page[data-route="S15"] .s15-lead { max-width: 70ch; margin-bottom: var(--sp-5); }
+.page[data-route="S15"] .s15-lead { max-width: 70ch; margin-bottom: var(--sp-6); }
 .page[data-route="S15"] .s15-lead p + p { margin-top: var(--sp-2); }
 
-/* the two cumulative charts side by side when there is room */
-.page[data-route="S15"] .s15-pair { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-5); margin-bottom: var(--sp-5); }
+/* the two cumulative charts side by side when there is room: two ruled columns, 48 px apart (СИГМА .two-col) */
+.page[data-route="S15"] .s15-pair { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-7); margin-bottom: var(--sp-7); }
 .page[data-route="S15"] .s15-pair > * { min-width: 0; margin-bottom: 0; }
 @media (min-width: 1100px) {
   .page[data-route="S15"] .s15-pair { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
-/* the flag: an icon and a word (never colour alone), the signed gap under it */
-.page[data-route="S15"] .s15-flag { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; border: 1px solid currentColor; border-radius: var(--r-full); font-weight: 700; white-space: nowrap; }
-.page[data-route="S15"] .s15-flag[data-flag="down"] { background: var(--warn-soft); color: var(--warn); }
-.page[data-route="S15"] .s15-flag[data-flag="up"] { background: var(--data-soft); color: var(--data); }
-.page[data-route="S15"] .s15-diff { display: block; margin-top: 2px; color: var(--muted); font-size: var(--fs-xs); font-weight: 400; white-space: nowrap; }
+/* the flag: an icon and a word (never colour alone), a square mono tag; behind the plan = the crimson flag; the signed gap under it */
+.page[data-route="S15"] .s15-flag { display: inline-flex; align-items: center; gap: 4px; padding: 0 6px; border: 1px solid currentColor; border-radius: 0; font: 500 var(--fs-xs)/1.6 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+.page[data-route="S15"] .s15-flag[data-flag="down"] { background: var(--crimson-tint); color: var(--crimson); }
+.page[data-route="S15"] .s15-flag[data-flag="up"] { background: var(--paper-warm); color: var(--ink); }
+.page[data-route="S15"] .s15-diff { display: block; margin-top: 2px; color: var(--ink-mid); font: 400 var(--fs-xs)/1.4 var(--font-mono); white-space: nowrap; }
 
 /* second small line in a cell: the share of the plan, the amount in leva */
 .page[data-route="S15"] .s15-sub,
-.page[data-route="S15"] .s15-lev { display: block; color: var(--muted); font-size: var(--fs-xs); font-weight: 400; }
+.page[data-route="S15"] .s15-lev { display: block; color: var(--ink-mid); font-size: var(--fs-xs); font-weight: 400; }
 
-/* wide tables scroll inside their own box; the first column stays in view */
+/* wide tables scroll inside their own box; the first column stays in view (a hairline marks its edge) */
 .page[data-route="S15"] table.data th,
 .page[data-route="S15"] table.data td { min-width: 0; }
 .page[data-route="S15"] table.data thead th { white-space: normal; }
-.page[data-route="S15"] table.data tbody th[scope="row"] { position: sticky; inset-inline-start: 0; z-index: 1; min-width: 11rem; background: var(--surface); box-shadow: 1px 0 0 var(--line); }
-.page[data-route="S15"] table.data thead th:first-child { position: sticky; inset-inline-start: 0; z-index: 2; box-shadow: 1px 0 0 var(--line); }
-.page[data-route="S15"] table.data tbody tr:hover > th[scope="row"] { background: var(--sunk); }
-.page[data-route="S15"] table.data tfoot th { position: sticky; inset-inline-start: 0; z-index: 1; box-shadow: 1px 0 0 var(--line); }
+.page[data-route="S15"] table.data tbody th[scope="row"] { position: sticky; inset-inline-start: 0; z-index: 1; min-width: 11rem; background: var(--paper); box-shadow: 1px 0 0 var(--rule-soft); }
+.page[data-route="S15"] table.data thead th:first-child { position: sticky; inset-inline-start: 0; z-index: 2; background: var(--paper); box-shadow: 1px 0 0 var(--rule-soft); }
+.page[data-route="S15"] table.data tbody tr:hover > th[scope="row"] { background: var(--paper-warm); }
+.page[data-route="S15"] table.data tfoot th { position: sticky; inset-inline-start: 0; z-index: 1; background: var(--paper); box-shadow: 1px 0 0 var(--rule-soft); }
 @media (max-width: 599px) {
   .page[data-route="S15"] table.data tbody th[scope="row"] { min-width: 7rem; }
 }
@@ -53,14 +55,16 @@
 }
 
 /* definition list under the budgets table: the name, then what is inside its numbers */
-.page[data-route="S15"] .s15-minor { margin: var(--sp-4) 0 var(--sp-2); font-size: var(--fs-0); }
-.page[data-route="S15"] .s15-defs { display: grid; gap: var(--sp-3); margin: 0; max-width: 70ch; }
-.page[data-route="S15"] .s15-defs dt { font-weight: 700; }
-.page[data-route="S15"] .s15-defs dd { margin: 0; color: var(--muted); }
+.page[data-route="S15"] .s15-minor { margin: var(--sp-5) 0 var(--sp-2); font: 400 var(--fs-1)/1.25 var(--font-serif); letter-spacing: -.01em; }
+.page[data-route="S15"] .s15-defs { display: grid; gap: 0; margin: 0; max-width: 70ch; border-top: 1px solid var(--ink); }
+.page[data-route="S15"] .s15-defs dt { padding-top: var(--sp-3); font-weight: 600; }
+.page[data-route="S15"] .s15-defs dd { margin: 0; padding: 2px 0 var(--sp-3); border-bottom: 1px solid var(--rule-soft); color: var(--ink-mid); }
 
 /* the method note */
 .page[data-route="S15"] .s15-method { display: grid; gap: var(--sp-2); margin: 0; padding-inline-start: 1.25em; }
+.page[data-route="S15"] .s15-method li::marker { color: var(--ink-soft); font-family: var(--font-mono); }
 
 @media (forced-colors: active) {
   .page[data-route="S15"] .s15-flag { forced-color-adjust: none; border-color: ButtonText; background: Canvas; color: CanvasText; }
+  .page[data-route="S15"] .s15-seg .seg-opt { border-color: ButtonText; }
 }

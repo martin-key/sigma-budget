@@ -1,4 +1,6 @@
-/* S12 · Мерки в бюджета 2026. Tokens only, no dark-mode rules (the tokens carry both themes), every selector scoped to the screen. */
+/* S12 · Мерки в бюджета 2026. v4 (СИГМА visual language): measures as ruled tiles (a 2px rule on top, teal for revenue, ink for
+   expenditure; the kind also in words), serif names, mono labels, hairline rows; the editorial part keeps its crimson hatch strip.
+   Tokens only, light only, every selector scoped to the screen. */
 
 /* short text blocks: one comfortable line length */
 .page[data-route="S12"] .s12-intro,
@@ -6,72 +8,79 @@
 .page[data-route="S12"] .s12-filtered,
 .page[data-route="S12"] .s12-persona { max-width: 68ch; }
 .page[data-route="S12"] .s12-howto { padding-left: var(--sp-5); display: grid; gap: var(--sp-2); max-width: 68ch; }
-.page[data-route="S12"] .s12-howto li::marker { color: var(--data); }
-.page[data-route="S12"] .s12-count { color: var(--muted); font-weight: 700; white-space: nowrap; }
+.page[data-route="S12"] .s12-howto li::marker { color: var(--ink-soft); font-family: var(--font-mono); }
+.page[data-route="S12"] .s12-count { color: var(--ink); font-weight: 600; white-space: nowrap; }
 
-/* the measure cards */
-.page[data-route="S12"] .s12-cards { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-4); align-items: start; }
-.page[data-route="S12"] .s12-card { display: flex; flex-direction: column; gap: var(--sp-3); min-width: 0; padding: var(--sp-4); border: 1px solid var(--line); border-top: 4px solid var(--line-strong); border-radius: var(--r-2); background: var(--surface); }
+/* the measure tiles: no box, a 2px rule on top (teal = revenue, ink = expenditure), two columns from 900 px */
+.page[data-route="S12"] .s12-cards { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-6) var(--sp-7); align-items: start; }
+.page[data-route="S12"] .s12-card { display: flex; flex-direction: column; gap: var(--sp-3); min-width: 0; padding: var(--sp-4) 0 var(--sp-2); border: 0; border-top: 2px solid var(--ink-soft); border-radius: 0; background: none; }
 .page[data-route="S12"] .s12-card[data-kind="revenue"] { border-top-color: var(--rev); }
 .page[data-route="S12"] .s12-card[data-kind="expenditure"] { border-top-color: var(--exp); }
-.page[data-route="S12"] .s12-kind { font-size: var(--fs-s); font-weight: 700; color: var(--muted); }
-.page[data-route="S12"] .s12-name { font-family: var(--font-head); font-weight: 700; font-size: var(--fs-1); line-height: var(--lh-tight); overflow-wrap: anywhere; }
-.page[data-route="S12"] .s12-name a { color: var(--ink); }
-.page[data-route="S12"] .s12-name a:hover { color: var(--data); }
+.page[data-route="S12"] .s12-kind { font: 500 var(--fs-xs)/1.3 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-mid); }
+.page[data-route="S12"] .s12-card[data-kind="revenue"] .s12-kind { color: var(--rev); }
+.page[data-route="S12"] .s12-name { font: 400 var(--fs-h3)/1.2 var(--font-serif); letter-spacing: -.01em; overflow-wrap: anywhere; }
+.page[data-route="S12"] .s12-name a { color: var(--ink); text-decoration: none; }
+.page[data-route="S12"] .s12-name a:hover { color: var(--crimson); text-decoration: underline; text-decoration-thickness: 1px; }
 .page[data-route="S12"] .s12-text { overflow-wrap: anywhere; max-width: 68ch; }
 
-/* the effect of a short-list measure */
-.page[data-route="S12"] .s12-eff { font-weight: 700; font-size: var(--fs-1); }
-.page[data-route="S12"] .s12-eff-words { color: var(--muted); }
-.page[data-route="S12"] .s12-eff-kind { display: block; margin-top: var(--sp-1); font-size: var(--fs-s); color: var(--muted); }
+/* the effect of a short-list measure: a serif figure */
+.page[data-route="S12"] .s12-eff { font: 400 1.375rem/1.2 var(--font-serif); font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+.page[data-route="S12"] .s12-eff-words { color: var(--ink-mid); font: 400 var(--fs-s)/1.4 var(--font-sans); letter-spacing: 0; }
+.page[data-route="S12"] .s12-eff-kind { display: block; margin-top: var(--sp-1); font: 400 var(--fs-s)/1.4 var(--font-sans); color: var(--ink-mid); }
 .page[data-route="S12"] .s12-phrase { font-style: italic; }
 
-/* 2026 / 2027 / 2028 of a discretionary measure */
+/* 2026 / 2027 / 2028 of a discretionary measure: three hairline cells */
 .page[data-route="S12"] .s12-years-box { display: grid; gap: var(--sp-2); }
-.page[data-route="S12"] .s12-years-h { font-size: var(--fs-s); font-weight: 700; color: var(--muted); }
-.page[data-route="S12"] .s12-years { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-2); }
-.page[data-route="S12"] .s12-years > div { display: grid; gap: var(--sp-1); align-content: start; min-width: 0; padding: var(--sp-2); border-radius: var(--r-1); background: var(--sunk); }
-.page[data-route="S12"] .s12-years dt { font-size: var(--fs-xs); font-weight: 700; color: var(--muted); }
-.page[data-route="S12"] .s12-years dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
-.page[data-route="S12"] .s12-lev { display: block; font-size: var(--fs-xs); font-weight: 400; color: var(--muted); }
+.page[data-route="S12"] .s12-years-h { font: 500 var(--fs-xs)/1.3 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); }
+.page[data-route="S12"] .s12-years { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 var(--sp-4); }
+.page[data-route="S12"] .s12-years > div { display: grid; gap: var(--sp-1); align-content: start; min-width: 0; padding: var(--sp-2) 0 0; border: 0; border-top: 1px solid var(--rule); border-radius: 0; background: none; }
+.page[data-route="S12"] .s12-years dt { font: 500 var(--fs-xs)/1.3 var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); }
+.page[data-route="S12"] .s12-years dd { margin: 0; font: 500 .875rem/1.35 var(--font-mono); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.page[data-route="S12"] .s12-lev { display: block; font: 400 var(--fs-xs)/1.4 var(--font-mono); color: var(--ink-mid); }
 
 /* the facts of a card are compact; on the measure page the default rows are kept */
 .page[data-route="S12"] .s12-balance { list-style: none; padding: 0; display: grid; gap: var(--sp-1); }
 
-/* the editorial part: a narrow hatched strip and a visible badge, never hatch under the words */
-.page[data-route="S12"] .s12-edit { position: relative; display: grid; gap: var(--sp-2); padding: var(--sp-3) var(--sp-3) var(--sp-3) var(--sp-5); border-radius: var(--r-1); background: var(--sunk); }
-.page[data-route="S12"] .s12-edit-strip { position: absolute; top: 0; bottom: 0; left: 0; width: var(--sp-2); border-radius: var(--r-1) 0 0 var(--r-1); background-color: var(--st-mock-soft); }
+/* the editorial part: a warm well with the narrow crimson hatch strip and a visible flag, never hatch under the words */
+.page[data-route="S12"] .s12-edit { position: relative; display: grid; gap: var(--sp-2); padding: var(--sp-3) var(--sp-3) var(--sp-3) var(--sp-5); border-radius: 0; background: var(--paper-warm); }
+.page[data-route="S12"] .s12-edit-strip { position: absolute; top: 0; bottom: 0; left: 0; width: var(--sp-2); border-radius: 0; background-color: var(--st-mock-soft); }
 .page[data-route="S12"] .s12-edit-head { display: flex; flex-wrap: wrap; gap: var(--sp-2); align-items: center; }
 .page[data-route="S12"] .s12-edit-list { display: grid; gap: var(--sp-2); }
 .page[data-route="S12"] .s12-edit-list > div { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-1); }
-.page[data-route="S12"] .s12-edit-list dt { font-size: var(--fs-s); font-weight: 700; color: var(--muted); }
+.page[data-route="S12"] .s12-edit-list dt { font: 500 var(--fs-xs)/1.5 var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mid); }
 .page[data-route="S12"] .s12-edit-list dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
 .page[data-route="S12"] .s12-tags { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: var(--sp-1); }
-.page[data-route="S12"] .s12-tags li { padding: 0 var(--sp-2); border: 1px solid var(--line-strong); border-radius: var(--r-full); background: var(--surface); font-size: var(--fs-s); }
+.page[data-route="S12"] .s12-tags li { padding: 0 6px; border: 1px solid var(--ink-soft); border-radius: 0; background: var(--paper); font: 500 var(--fs-xs)/1.6 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; }
 
-/* the quote of a measure */
-.page[data-route="S12"] .s12-quote { padding-top: var(--sp-2); border-top: 1px solid var(--line); }
-.page[data-route="S12"] .s12-quote > summary { cursor: pointer; padding: var(--sp-1) 0; font-size: var(--fs-s); font-weight: 700; }
+/* the quote of a measure: a hairline, a mono +/– toggle, the quoted text behind a 4px rule */
+.page[data-route="S12"] .s12-quote { padding-top: var(--sp-1); border-top: 1px solid var(--rule-soft); }
+.page[data-route="S12"] .s12-quote > summary { display: flex; align-items: center; gap: var(--sp-2); min-height: 36px; padding: var(--sp-1) 0; cursor: pointer; list-style: none; font: 500 var(--fs-xs)/1.3 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mid); }
+.page[data-route="S12"] .s12-quote > summary::-webkit-details-marker { display: none; }
+.page[data-route="S12"] .s12-quote > summary::before { content: "+"; flex: none; width: 1em; font: 400 1rem/1 var(--font-mono); color: var(--ink-soft); }
+.page[data-route="S12"] .s12-quote[open] > summary::before { content: "\2013"; }
+.page[data-route="S12"] .s12-quote > summary:hover { color: var(--crimson); }
 .page[data-route="S12"] .s12-quote-text,
 .page[data-route="S12"] .s12-quote-full,
-.page[data-route="S12"] .s12-ev blockquote { padding: var(--sp-3) var(--sp-4); border-left: 3px solid var(--line-strong); border-radius: 0 var(--r-1) var(--r-1) 0; background: var(--sunk); overflow-wrap: anywhere; }
+.page[data-route="S12"] .s12-ev blockquote { padding: var(--sp-2) var(--sp-4); border-left: 4px solid var(--rule); border-radius: 0; background: none; color: var(--ink-mid); overflow-wrap: anywhere; }
 .page[data-route="S12"] .s12-quote-text { margin-top: var(--sp-2); font-size: var(--fs-s); }
 .page[data-route="S12"] .s12-evidence { display: grid; gap: var(--sp-3); }
-.page[data-route="S12"] .s12-evidence-h { font-weight: 700; }
+.page[data-route="S12"] .s12-evidence-h { font: 500 var(--fs-xs)/1.3 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); }
 .page[data-route="S12"] .s12-ev { display: grid; gap: var(--sp-1); }
-.page[data-route="S12"] .s12-ev figcaption { font-size: var(--fs-s); color: var(--muted); }
+.page[data-route="S12"] .s12-ev figcaption { font: 400 var(--fs-xs)/1.5 var(--font-mono); letter-spacing: .02em; color: var(--ink-soft); }
 .page[data-route="S12"] .s12-ev blockquote { font-size: var(--fs-s); }
 
 /* empty list for a group of readers */
 .page[data-route="S12"] .s12-empty > * + * { margin-top: var(--sp-3); }
 .page[data-route="S12"] .s12-empty-acts { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
 
+@media (max-width: 640px), (pointer: coarse) {
+  .page[data-route="S12"] .s12-quote > summary { min-height: 44px; }
+}
 @media (min-width: 600px) {
-  .page[data-route="S12"] .s12-facts .facts-row { grid-template-columns: minmax(7rem, 9rem) minmax(0, 1fr); padding: var(--sp-1) 0; }
-  .page[data-route="S12"] .s12-edit-list > div { grid-template-columns: 7rem minmax(0, 1fr); gap: var(--sp-3); }
+  .page[data-route="S12"] .s12-facts .facts-row { grid-template-columns: minmax(9rem, 10.5rem) minmax(0, 1fr); padding: var(--sp-2) 0; }
+  .page[data-route="S12"] .s12-edit-list > div { grid-template-columns: 8rem minmax(0, 1fr); gap: var(--sp-3); }
 }
 
 @media (min-width: 900px) {
   .page[data-route="S12"] .s12-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .page[data-route="S12"] .s12-card { padding: var(--sp-5); }
 }

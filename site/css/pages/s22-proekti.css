@@ -1,87 +1,91 @@
-/* S22 · Големите проекти. Tokens only, no dark-mode rules (the tokens carry both themes), every selector scoped to the screen. */
+/* S22 · Големите проекти. v4 (СИГМА visual language): the filters as a bar between two hairlines, the projects as ruled tiles (an ink
+   rule, the crimson hatch strip of example data under it), serif names and figures, square mono state tags (icon + word).
+   Tokens only, light only, every selector scoped to the screen. */
 
 /* the inside of a block: its parts one under the other, evenly spaced (the frame spaces the blocks, not what is inside them) */
-.page[data-route="S22"] .s22-stack { display: grid; gap: var(--sp-4); min-width: 0; }
+.page[data-route="S22"] .s22-stack { display: grid; gap: var(--sp-5); min-width: 0; }
 .page[data-route="S22"] .s22-stack > * { min-width: 0; margin: 0; }
 .page[data-route="S22"] .s22-stack > .callout { margin: 0; }
+@media (min-width: 600px) { .page[data-route="S22"] .s22-stack > .kpi-grid { margin-inline: -24px; } }
 .page[data-route="S22"] .s22-read { max-width: 68ch; }
 .page[data-route="S22"] .s22-links { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-3); }
 
-/* the filters: one card, the five controls in a flowing grid, the count and the two buttons under them */
-.page[data-route="S22"] .s22-find { display: grid; gap: var(--sp-3); padding: var(--sp-4); border: 1px solid var(--line); border-radius: var(--r-2); background: var(--surface); box-shadow: var(--shadow-1); }
-.page[data-route="S22"] .s22-controls { display: grid; gap: var(--sp-3); grid-template-columns: repeat(auto-fit, minmax(min(100%, 11.5rem), 1fr)); }
+/* the filters: a bar between two hairlines, the five controls in a flowing grid, the count and the two buttons under them */
+.page[data-route="S22"] .s22-find { display: grid; gap: var(--sp-4); padding: var(--sp-4) 0; border: 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); border-radius: 0; background: none; box-shadow: none; }
+.page[data-route="S22"] .s22-controls { display: grid; gap: var(--sp-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 11.5rem), 1fr)); }
 .page[data-route="S22"] .s22-controls > * { min-width: 0; }
 .page[data-route="S22"] .s22-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-2) var(--sp-3); }
-.page[data-route="S22"] .s22-count { margin: 0; color: var(--muted); font-size: var(--fs-s); }
+.page[data-route="S22"] .s22-count { margin: 0; color: var(--ink-mid); font: 400 var(--fs-xs)/1.5 var(--font-mono); letter-spacing: .04em; }
 .page[data-route="S22"] .s22-actions { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
 
-/* the cards of the projects: one column on a phone, two side by side on a wide screen */
-.page[data-route="S22"] .s22-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-4); }
+/* the project tiles: one column on a phone, two ruled columns (48 px apart) on a wide screen */
+.page[data-route="S22"] .s22-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-7); }
 .page[data-route="S22"] .s22-list > li { min-width: 0; display: grid; }
-.page[data-route="S22"] .s22-card { position: relative; overflow: hidden; display: flex; flex-direction: column; gap: var(--sp-3); min-width: 0; padding: calc(var(--sp-4) + 6px) var(--sp-4) var(--sp-4); border: 1px solid var(--line); border-radius: var(--r-2); background: var(--surface); box-shadow: var(--shadow-1); }
+.page[data-route="S22"] .s22-card { position: relative; overflow: hidden; display: flex; flex-direction: column; gap: var(--sp-3); min-width: 0; padding: calc(var(--sp-4) + 6px) 0 var(--sp-2); border: 0; border-top: 1px solid var(--ink); border-radius: 0; background: none; box-shadow: none; }
 .page[data-route="S22"] .s22-card > * { min-width: 0; margin: 0; }
-/* two cards side by side are as tall as the taller one: the folded part and the foot sit at the bottom of both */
+/* two tiles side by side are as tall as the taller one: the folded part and the foot sit at the bottom of both */
 .page[data-route="S22"] .s22-card > .disc { margin-top: auto; }
-/* the hatched strip on top of a card says: these are example data (the badge in the row below says it in words) */
+/* the hatched strip under the rule of a tile says: these are example data (the flag in the row below says it in words) */
 .page[data-route="S22"] .s22-strip { position: absolute; left: 0; right: 0; top: 0; height: 6px; background-color: var(--st-mock-soft); }
-.page[data-route="S22"] .s22-name { font-family: var(--font-head); font-size: var(--fs-1); font-weight: 700; line-height: 1.3; overflow-wrap: anywhere; }
+.page[data-route="S22"] .s22-name { font: 400 var(--fs-h3)/1.2 var(--font-serif); letter-spacing: -.01em; overflow-wrap: anywhere; }
 .page[data-route="S22"] .s22-name a { color: var(--ink); text-decoration: none; }
-.page[data-route="S22"] .s22-name a:hover { text-decoration: underline; }
+.page[data-route="S22"] .s22-name a:hover { color: var(--crimson); text-decoration: underline; text-decoration-thickness: 1px; }
 .page[data-route="S22"] .s22-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-3); margin: 0; }
-.page[data-route="S22"] .s22-region { color: var(--muted); font-size: var(--fs-s); }
-/* the card repeats the badge of the block in the row above; the bar needs no second one inside the card */
+.page[data-route="S22"] .s22-region { color: var(--ink-soft); font: 500 var(--fs-xs)/1.4 var(--font-mono); letter-spacing: .1em; text-transform: uppercase; }
+/* the tile repeats the flag of the block in the row above; the bar needs no second one inside the tile */
 .page[data-route="S22"] .s22-card .prog-mock { display: none; }
 
-/* the state of the project: a pill that always carries an icon and the word, never the colour alone */
-.page[data-route="S22"] .s22-st { display: inline-flex; align-items: center; gap: 6px; padding: 1px 10px 1px 8px; border: 1px solid currentColor; border-radius: var(--r-full); font: 700 var(--fs-xs)/1.6 var(--font-body); white-space: nowrap; color: var(--data); background: var(--data-soft); }
+/* the state of the project: a square mono tag that always carries an icon and the word, never the colour alone; late = the crimson flag */
+.page[data-route="S22"] .s22-st { display: inline-flex; align-items: center; gap: 5px; padding: 1px 7px; border: 1px solid currentColor; border-radius: 0; font: 500 var(--fs-xs)/1.5 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; color: var(--ink); background: var(--paper-warm); }
 .page[data-route="S22"] .s22-st[data-s22-state="planned"] { color: var(--st-pending); background: var(--st-pending-soft); border-style: dashed; }
-.page[data-route="S22"] .s22-st[data-s22-state="late"] { color: var(--warn); background: var(--warn-soft); }
-.page[data-route="S22"] .s22-st[data-s22-state="done"] { color: var(--ok); background: var(--ok-soft); }
+.page[data-route="S22"] .s22-st[data-s22-state="late"] { color: var(--crimson); background: var(--crimson-tint); }
+.page[data-route="S22"] .s22-st[data-s22-state="done"] { color: var(--pos); background: var(--paper); }
 
-/* the four numbers of a card */
+/* the four numbers of a tile: hairline cells, mono labels, serif figures */
 .page[data-route="S22"] .s22-nums { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3) var(--sp-4); margin: 0; }
-.page[data-route="S22"] .s22-nums > div { min-width: 0; }
-.page[data-route="S22"] .s22-nums dt { margin: 0; color: var(--muted); font-size: var(--fs-xs); line-height: 1.4; }
-.page[data-route="S22"] .s22-nums dd { margin: 2px 0 0; font-weight: 700; font-variant-numeric: tabular-nums; }
-.page[data-route="S22"] .s22-unit { font-weight: 400; color: var(--muted); font-size: var(--fs-s); }
-.page[data-route="S22"] .s22-lev { font-weight: 400; color: var(--muted); font-size: var(--fs-xs); }
+.page[data-route="S22"] .s22-nums > div { min-width: 0; padding-top: var(--sp-2); border-top: 1px solid var(--rule); }
+.page[data-route="S22"] .s22-nums dt { margin: 0; color: var(--ink-soft); font: 500 var(--fs-xs)/1.4 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; }
+.page[data-route="S22"] .s22-nums dd { margin: 4px 0 0; font: 400 1.375rem/1.15 var(--font-serif); letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+.page[data-route="S22"] .s22-unit { font: 400 var(--fs-s)/1.3 var(--font-sans); letter-spacing: 0; color: var(--ink-mid); }
+.page[data-route="S22"] .s22-lev { font: 400 var(--fs-xs)/1.4 var(--font-sans); letter-spacing: 0; color: var(--ink-mid); }
 .page[data-route="S22"] .s22-nums .s22-lev { display: block; }
 
 /* the sentence about where the project stands, the expected result */
 .page[data-route="S22"] .s22-state { max-width: 68ch; }
-.page[data-route="S22"] .s22-card[data-s22-state="late"] .s22-state { padding-left: var(--sp-3); border-left: 3px solid var(--warn); }
+.page[data-route="S22"] .s22-card[data-s22-state="late"] .s22-state { padding-left: var(--sp-4); border-left: 4px solid var(--crimson); }
 .page[data-route="S22"] .s22-result { max-width: 68ch; }
 
 /* inside the folded „Етапи и финансиране“ */
 .page[data-route="S22"] .s22-det { display: grid; gap: var(--sp-2); }
-.page[data-route="S22"] .s22-det-h { margin: var(--sp-2) 0 0; font-weight: 700; font-size: var(--fs-s); }
+.page[data-route="S22"] .s22-det-h { margin: var(--sp-3) 0 0; font: 500 var(--fs-xs)/1.3 var(--font-mono); letter-spacing: var(--track-mono); text-transform: uppercase; color: var(--ink-soft); }
 .page[data-route="S22"] .s22-det-h:first-child { margin-top: 0; }
 .page[data-route="S22"] .s22-stages,
 .page[data-route="S22"] .s22-fin { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-2); }
 .page[data-route="S22"] .s22-stages li,
-.page[data-route="S22"] .s22-fin li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px var(--sp-3); padding-bottom: var(--sp-2); border-bottom: 1px solid var(--line); }
+.page[data-route="S22"] .s22-fin li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px var(--sp-3); padding-bottom: var(--sp-2); border-bottom: 1px solid var(--rule-soft); }
 .page[data-route="S22"] .s22-stages li:last-child,
 .page[data-route="S22"] .s22-fin li:last-child { padding-bottom: 0; border-bottom: 0; }
 .page[data-route="S22"] .s22-stage-name,
-.page[data-route="S22"] .s22-fin-name { font-weight: 700; }
+.page[data-route="S22"] .s22-fin-name { font-weight: 600; }
 .page[data-route="S22"] .s22-stage-state,
-.page[data-route="S22"] .s22-fin-val { color: var(--muted); font-size: var(--fs-s); }
-.page[data-route="S22"] .s22-late-flag { display: inline-flex; align-items: center; gap: 4px; margin-left: var(--sp-2); color: var(--ink); font-weight: 700; }
-.page[data-route="S22"] .s22-late-flag svg { color: var(--warn); }
+.page[data-route="S22"] .s22-fin-val { color: var(--ink-mid); font-size: var(--fs-s); }
+.page[data-route="S22"] .s22-fin-val { font-family: var(--font-mono); font-size: .8125rem; }
+.page[data-route="S22"] .s22-late-flag { display: inline-flex; align-items: center; gap: 4px; margin-left: var(--sp-2); color: var(--crimson); font-weight: 600; }
+.page[data-route="S22"] .s22-late-flag svg { color: var(--crimson); }
 .page[data-route="S22"] .s22-fin-share { white-space: nowrap; }
 
-/* the foot of a card: the link to the page of the project and the button that copies it */
+/* the foot of a tile: the link to the page of the project and the button that copies it */
 .page[data-route="S22"] .s22-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-2) var(--sp-3); }
-.page[data-route="S22"] .s22-more { font-weight: 700; }
+.page[data-route="S22"] .s22-more { font-weight: 600; }
 
 @media (min-width: 600px) {
   /* the sort control has the longest option text: from two columns up it takes the room of two filters */
   .page[data-route="S22"] .s22-sortcell { grid-column: span 2; }
-  .page[data-route="S22"] .s22-find { padding: var(--sp-5); }
-  .page[data-route="S22"] .s22-card { padding: calc(var(--sp-5) + 6px) var(--sp-5) var(--sp-5); }
+  .page[data-route="S22"] .s22-find { padding: var(--sp-5) 0; }
+  .page[data-route="S22"] .s22-card { padding: calc(var(--sp-5) + 6px) 0 var(--sp-2); }
   .page[data-route="S22"] .s22-nums { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
-/* two cards side by side: each is narrower again, so the numbers go back to two by two */
+/* two tiles side by side: each is narrower again, so the numbers go back to two by two */
 @media (min-width: 900px) {
   .page[data-route="S22"] .s22-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .page[data-route="S22"] .s22-nums { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -98,4 +102,5 @@
   .page[data-route="S22"] .s22-st { border-color: CanvasText; color: CanvasText; background: Canvas; }
   .page[data-route="S22"] .s22-card[data-s22-state="late"] .s22-state { border-left-color: CanvasText; }
   .page[data-route="S22"] .s22-late-flag svg { color: CanvasText; }
+  .page[data-route="S22"] .s22-find { border-color: CanvasText; }
 }

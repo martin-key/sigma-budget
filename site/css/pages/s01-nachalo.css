@@ -1,117 +1,129 @@
-/* S01 · Държавният бюджет на достъпен език · compact front door (trial v3).
-   Top to bottom: the headline → four small action tiles → a slim guide row and the search → the six numbers as small tiles →
-   „Кой си ти?“ and the questions as plain rows → the reader's blocks.
-   One level of frames: grey tiles on the white page, no cards inside cards, no icon discs, no pills. Colour is for the state of a control or the meaning of a number.
-   Tokens only (five sizes, two radii), no dark-mode rules (the tokens carry both themes), every selector scoped to the screen. */
+/* S01 · Държавният бюджет на достъпен език · front door, v4 (СИГМА visual language).
+   Top to bottom: the editorial head → four action tiles under one ink rule (СИГМА .tiles) → a ruled guide row and the hero search (crimson
+   prompt, underlined serif field, square ink button) → the six numbers as a stats band → the questions as hairline rows → „Кой си ти?“ →
+   the reader's blocks in two ruled columns. Tokens only, light only, every selector scoped to the screen. */
 
-/* ── the head: the large title (inner pages have a compact one), a plain small eyebrow, the lede at body size ── */
-.page[data-route="S01"] .page-title { font-size: var(--fs-h1); margin-bottom: var(--sp-4); }
-.page[data-route="S01"] .lede { max-width: 60ch; font-size: var(--fs-0); line-height: 1.45; }
-.page[data-route="S01"] .lede strong { color: var(--ink); }
-.page[data-route="S01"] .page-body { margin-top: var(--sp-5); }
-.page[data-route="S01"] .page-body > * + * { margin-top: var(--sp-5); }
+/* ── the head: the shared editorial header; the lede a touch larger on the front door ── */
+.page[data-route="S01"] .lede strong { color: var(--ink); font-weight: 600; }
+.page[data-route="S01"] .page-body { margin-top: var(--sp-7); }
+.page[data-route="S01"] .page-body > * + * { margin-top: var(--sp-8); }
+@media (max-width: 599px) { .page[data-route="S01"] .page-body > * + * { margin-top: var(--sp-7); } }
 
-/* ── „Какво искаш да направиш?“: four small tiles above the search, 2 × 2 on a phone and four across on a wide screen ── */
-.page[data-route="S01"] .s01-act-h { margin: 0 0 var(--sp-3); font-size: var(--fs-1); line-height: 1.2; letter-spacing: var(--track-head); }
-.page[data-route="S01"] .s01-act-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-2); }
-.page[data-route="S01"] .s01-act-list > li { display: flex; min-width: 0; }
-.page[data-route="S01"] .s01-act { position: relative; flex: 1; display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; padding: var(--sp-3); border: 1px solid transparent; border-radius: var(--r-1); background: var(--card); color: var(--ink); text-decoration: none; transition: background var(--t-fast), border-color var(--t-fast); }
-.page[data-route="S01"] .s01-act:hover { border-color: var(--ink); background: var(--sunk); color: var(--ink); text-decoration: none; }
+/* ── „Какво искаш да направиш?“: four tiles under one ink rule, hairline dividers; 2 × 2 below 900 px, the verb alone on a phone ── */
+.page[data-route="S01"] .s01-act-h { margin: 0 0 var(--sp-4); font: 400 var(--fs-block)/1.15 var(--font-serif); letter-spacing: var(--track-head); }
+.page[data-route="S01"] .s01-act-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--rule); }
+.page[data-route="S01"] .s01-act-list > li { display: flex; min-width: 0; border-right: 1px solid var(--rule); }
+.page[data-route="S01"] .s01-act-list > li:nth-child(2n) { border-right: 0; }
+.page[data-route="S01"] .s01-act-list > li:nth-child(-n+2) { border-bottom: 1px solid var(--rule); }
+.page[data-route="S01"] .s01-act { position: relative; flex: 1; display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; padding: var(--sp-4) var(--sp-4) var(--sp-5); border: 0; border-radius: 0; background: none; color: var(--ink); text-decoration: none; transition: background var(--t-fast); }
+.page[data-route="S01"] .s01-act-list > li:nth-child(2n+1) .s01-act { padding-left: 0; }
+.page[data-route="S01"] .s01-act:hover { background: var(--paper-warm); color: var(--ink); text-decoration: none; }
 .page[data-route="S01"] .s01-act-head { display: flex; align-items: center; gap: var(--sp-2); }
-.page[data-route="S01"] .s01-act-verb { flex: 1; min-width: 0; font: 700 var(--fs-0)/1.2 var(--font-head); }
-.page[data-route="S01"] .s01-act-go { color: var(--muted); }
-.page[data-route="S01"] .s01-act-text { color: var(--muted); font-size: var(--fs-s); line-height: 1.35; }
-/* on a phone a tile is the verb alone (a 44 px target); the one-line promise stays in the link for screen readers and shows from 600 px up */
+.page[data-route="S01"] .s01-act-head svg { color: var(--ink-mid); }
+.page[data-route="S01"] .s01-act-verb { flex: 1; min-width: 0; font: 400 var(--fs-h3)/1.15 var(--font-serif); letter-spacing: -.01em; }
+.page[data-route="S01"] .s01-act:hover .s01-act-verb { color: var(--crimson); }
+.page[data-route="S01"] .s01-act-go { color: var(--ink); transition: transform var(--t-fast), color var(--t-fast); }
+.page[data-route="S01"] .s01-act:hover .s01-act-go { color: var(--crimson); transform: translateX(3px); }
+.page[data-route="S01"] .s01-act-text { color: var(--ink-mid); font-size: var(--fs-s); line-height: 1.45; }
+/* on a phone a tile is the verb alone (a 48 px target); the one-line promise stays in the link for screen readers and shows from 600 px up */
 @media (max-width: 599px) {
-  .page[data-route="S01"] .s01-act { justify-content: center; min-height: 48px; }
+  .page[data-route="S01"] .s01-act { justify-content: center; min-height: 56px; padding: var(--sp-3); }
+  .page[data-route="S01"] .s01-act-verb { font-size: 1.25rem; }
   .page[data-route="S01"] .s01-act-text { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
 }
 @media (min-width: 900px) {
-  .page[data-route="S01"] .s01-act-list { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-3); }
-  .page[data-route="S01"] .s01-act { padding: var(--sp-4); }
+  .page[data-route="S01"] .s01-act-list { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .page[data-route="S01"] .s01-act-list > li:nth-child(n) { border-right: 1px solid var(--rule); border-bottom: 0; }
+  .page[data-route="S01"] .s01-act-list > li:nth-child(4n) { border-right: 0; }
+  .page[data-route="S01"] .s01-act-list > li:nth-child(n) .s01-act { padding-left: var(--sp-5); }
+  .page[data-route="S01"] .s01-act-list > li:nth-child(4n+1) .s01-act { padding-left: 0; }
 }
 
-/* ── the entrance: a slim guide row, then the search (a field, a button, quick chips) ── */
-.page[data-route="S01"] .s01-intro { display: grid; gap: var(--sp-3); max-width: 44rem; }
+/* ── the entrance: a ruled guide row, then the hero search (СИГМА .smart-search--hero) ── */
+.page[data-route="S01"] .s01-intro { display: grid; gap: var(--sp-6); max-width: 54rem; }
 .page[data-route="S01"] .s01-guide { display: flex; margin: 0; }
-.page[data-route="S01"] .s01-guide-link { flex: 1; display: flex; align-items: center; gap: var(--sp-2); min-height: 44px; padding: var(--sp-1) var(--sp-3); border: 1px solid transparent; border-radius: var(--r-1); background: var(--card); color: var(--ink); text-decoration: none; transition: background var(--t-fast), border-color var(--t-fast); }
-.page[data-route="S01"] .s01-guide-link:hover { border-color: var(--ink); background: var(--sunk); color: var(--ink); text-decoration: none; }
+.page[data-route="S01"] .s01-guide-link { flex: 1; display: flex; align-items: center; gap: var(--sp-3); min-height: 48px; padding: var(--sp-2) var(--sp-4); border: 0; border-left: 4px solid var(--ink); border-radius: 0; background: none; color: var(--ink-mid); text-decoration: none; transition: background var(--t-fast); }
+.page[data-route="S01"] .s01-guide-link strong { color: var(--ink); }
+.page[data-route="S01"] .s01-guide-link:hover { background: var(--paper-warm); color: var(--ink); text-decoration: none; }
+.page[data-route="S01"] .s01-guide-link:hover strong { color: var(--crimson); }
 .page[data-route="S01"] .s01-guide-text { flex: 1; min-width: 0; }
-.page[data-route="S01"] .s01-guide-go { color: var(--muted); }
+.page[data-route="S01"] .s01-guide-link svg { color: var(--ink-mid); }
+.page[data-route="S01"] .s01-guide-go { color: var(--ink); }
 
-.page[data-route="S01"] .s01-find { display: grid; gap: var(--sp-1); }
-.page[data-route="S01"] .s01-find .field-label { font: 650 var(--fs-s)/1.3 var(--font-body); }
-.page[data-route="S01"] .s01-find-main { display: grid; gap: var(--sp-2); }
-.page[data-route="S01"] .s01-bar { display: flex; gap: var(--sp-2); align-items: stretch; }
-.page[data-route="S01"] .s01-q { flex: 1 1 0; min-width: 0; width: auto; -webkit-appearance: none; appearance: none; min-height: 44px; padding-inline: var(--sp-3); font-size: var(--fs-0); }
+.page[data-route="S01"] .s01-find { display: grid; gap: var(--sp-3); }
+.page[data-route="S01"] .s01-find .field-label { color: var(--crimson); letter-spacing: .16em; }
+.page[data-route="S01"] .s01-find-main { display: grid; gap: var(--sp-4); }
+.page[data-route="S01"] .s01-bar { display: flex; gap: var(--sp-4); align-items: flex-end; }
+.page[data-route="S01"] .s01-bar::before { content: "›"; flex: none; align-self: flex-end; margin-bottom: 8px; color: var(--crimson); font: 400 1.75rem/1 var(--font-serif); }
+.page[data-route="S01"] .s01-q { flex: 1 1 0; min-width: 0; width: auto; -webkit-appearance: none; appearance: none; min-height: 48px; padding: 0 0 4px; border: 0; border-bottom: 1px solid var(--ink); border-radius: 0; background: none; font: 400 1.5rem/1.2 var(--font-serif); letter-spacing: -.01em; }
+.page[data-route="S01"] .s01-q:hover { border-color: var(--ink); }
+.page[data-route="S01"] .s01-q::placeholder { color: var(--ink-soft); font-style: italic; }
 .page[data-route="S01"] .s01-q::-webkit-search-cancel-button,
 .page[data-route="S01"] .s01-q::-webkit-search-decoration { -webkit-appearance: none; display: none; }
-.page[data-route="S01"] .s01-go { flex: none; min-height: 44px; padding-inline: var(--sp-4); }
+.page[data-route="S01"] .s01-go { flex: none; min-height: 44px; padding-inline: var(--sp-5); }
 .page[data-route="S01"] .s01-go-ic { display: none; }
 /* on a phone the button is the icon alone (44 px square); the word „Търси“ stays in it for screen readers */
 @media (max-width: 600px) {
+  .page[data-route="S01"] .s01-bar { gap: var(--sp-2); }
+  .page[data-route="S01"] .s01-bar::before { font-size: 1.375rem; margin-bottom: 10px; }
+  .page[data-route="S01"] .s01-q { font-size: 1.125rem; }
   .page[data-route="S01"] .s01-go { width: 44px; padding: 0; }
   .page[data-route="S01"] .s01-go-ic { display: grid; place-items: center; }
   .page[data-route="S01"] .s01-go-t { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
 }
 
-/* ── the six numbers: an open block (no card around it), the tiles are the only frames ── */
-.page[data-route="S01"] #s01-six { --pad: 0; gap: var(--sp-1); padding: 0; border-radius: 0; background: none; }
-.page[data-route="S01"] #s01-six .block-sub { max-width: 64ch; margin-top: 0; }
-.page[data-route="S01"] #s01-six .block-body { margin-top: var(--sp-3); }
-.page[data-route="S01"] #s01-six .kpi-grid { grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); }
-.page[data-route="S01"] #s01-six .kpi { gap: var(--sp-1); padding: var(--sp-3) var(--sp-4); border-radius: var(--r-1); background: var(--card); }
-@media (hover: hover) { .page[data-route="S01"] #s01-six .kpi:has(.kpi-label a:hover) { border-color: var(--ink); background: var(--sunk); } }
-.page[data-route="S01"] #s01-six .kpi-label { font-size: var(--fs-s); }
-.page[data-route="S01"] #s01-six .s01-k-text { display: grid; gap: 2px; min-width: 0; }
-.page[data-route="S01"] #s01-six .s01-k-name { font: 650 var(--fs-0)/1.2 var(--font-head); color: var(--ink); }
-.page[data-route="S01"] #s01-six .s01-k-ask { font-weight: 400; color: var(--muted); }
-.page[data-route="S01"] #s01-six .kpi-num { font-size: var(--fs-3); }
-/* the name, the number, the line under it and the chips sit on the same lines across a row of tiles (a tile is four rows of the grid) */
-@supports (grid-template-rows: subgrid) {
-  .page[data-route="S01"] #s01-six .kpi { grid-row: span 4; grid-template-rows: subgrid; row-gap: var(--sp-1); align-content: stretch; }
+/* ── the six numbers: a stats band (ink rules, hairline dividers, serif numerals, mono name, the question in plain words) ── */
+.page[data-route="S01"] #s01-six .block-sub { max-width: 64ch; }
+.page[data-route="S01"] #s01-six .block-body { margin-top: var(--sp-2); }
+.page[data-route="S01"] #s01-six .kpi-grid { grid-template-columns: minmax(0, 1fr); }
+.page[data-route="S01"] #s01-six .kpi-label { margin-top: var(--sp-3); }
+.page[data-route="S01"] #s01-six .s01-k-text { display: grid; gap: 4px; min-width: 0; }
+.page[data-route="S01"] #s01-six .s01-k-name { color: var(--ink); }
+.page[data-route="S01"] #s01-six .s01-k-ask { font: 400 var(--fs-s)/1.4 var(--font-sans); letter-spacing: 0; text-transform: none; color: var(--ink-mid); }
+.page[data-route="S01"] #s01-six .kpi:has(.kpi-label a:hover) .s01-k-name { color: var(--crimson); }
+.page[data-route="S01"] #s01-six .kpi-num { font-size: clamp(2rem, 3.4vw, 2.75rem); }
+@media (max-width: 599px) {
+  .page[data-route="S01"] #s01-six .kpi-grid { grid-template-columns: minmax(0, 1fr); }
+  .page[data-route="S01"] #s01-six .kpi-grid > .kpi { padding-left: 0; padding-right: 0; }
+  .page[data-route="S01"] #s01-six .kpi-grid > .kpi:nth-child(odd):last-child { grid-column: auto; }
 }
 @media (min-width: 640px) { .page[data-route="S01"] #s01-six .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (min-width: 1200px) {
-  .page[data-route="S01"] #s01-six .kpi-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .page[data-route="S01"] #s01-six .kpi-num { font-size: var(--fs-5); }
-}
+@media (min-width: 1100px) { .page[data-route="S01"] #s01-six .kpi-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
-/* ── „Кой си ти?“: three selectable tiles (the shell's own visible native radios, the whole tile is the label) ── */
-.page[data-route="S01"] #s01-who { --pad: 0; gap: var(--sp-1); padding: 0; border-radius: 0; background: none; }
-.page[data-route="S01"] #s01-who .block-body { margin-top: var(--sp-3); }
-.page[data-route="S01"] #s01-who .opt-list { grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); }
-.page[data-route="S01"] #s01-who .opt { gap: var(--sp-3); padding: var(--sp-3) var(--sp-4); border: 1px solid transparent; border-radius: var(--r-1); background: var(--card); transition: background var(--t-fast), border-color var(--t-fast); }
-.page[data-route="S01"] #s01-who .opt:hover { background: var(--sunk); }
-.page[data-route="S01"] #s01-who .opt:has(input:checked) { border-color: var(--ink); background: var(--data-soft); }
-.page[data-route="S01"] #s01-who .opt input { width: 22px; height: 22px; margin: 1px 0 0; }
-.page[data-route="S01"] #s01-who .opt-label { font: 650 var(--fs-0)/1.2 var(--font-head); }
-.page[data-route="S01"] #s01-who .opt-desc { margin-top: 2px; }
+/* ── „Кой си ти?“: three choices, square 1px frames; the chosen one gets the ink frame and the warm ground ── */
+.page[data-route="S01"] #s01-who .block-body { margin-top: var(--sp-2); }
+.page[data-route="S01"] #s01-who .opt-list { grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); }
+.page[data-route="S01"] #s01-who .opt { gap: var(--sp-3); padding: var(--sp-3) var(--sp-4); border: 1px solid var(--ink-soft); border-radius: 0; background: var(--paper); transition: background var(--t-fast), border-color var(--t-fast); }
+.page[data-route="S01"] #s01-who .opt:hover { border-color: var(--ink); background: var(--paper-warm); }
+.page[data-route="S01"] #s01-who .opt:has(input:checked) { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); background: var(--paper-warm); }
+.page[data-route="S01"] #s01-who .opt input { width: 24px; height: 24px; margin: 0; accent-color: var(--crimson); }
+.page[data-route="S01"] #s01-who .opt-label { font: 400 var(--fs-1)/1.2 var(--font-serif); }
+.page[data-route="S01"] #s01-who .opt-desc { margin-top: 4px; }
 @media (min-width: 700px) { .page[data-route="S01"] #s01-who .opt-list { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
-/* ── the reader's blocks: the wide ones (tables, the lead, the bars) are full width; the others come as a row of two columns on a wide screen.
-      Each column is its own stack, so a short block never waits for a tall one; the last block of a column takes the rest of the height (its footer stays at the bottom) ── */
-.page[data-route="S01"] .s01-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); }
+/* ── the reader's blocks: full-width ones, then two ruled columns on a wide screen (СИГМА .two-col: 48 px gap) ── */
+.page[data-route="S01"] .s01-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-8); }
 .page[data-route="S01"] .s01-grid:empty { display: none; }
-.page[data-route="S01"] .s01-cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); }
-.page[data-route="S01"] .s01-col { display: flex; flex-direction: column; gap: var(--sp-3); min-width: 0; }
+.page[data-route="S01"] .s01-cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-8) var(--sp-7); }
+.page[data-route="S01"] .s01-col { display: flex; flex-direction: column; gap: var(--sp-8); min-width: 0; }
+@media (max-width: 599px) { .page[data-route="S01"] .s01-grid, .page[data-route="S01"] .s01-col { gap: var(--sp-7); } .page[data-route="S01"] .s01-cols { row-gap: var(--sp-7); } }
 @media (min-width: 1100px) {
   .page[data-route="S01"] .s01-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .page[data-route="S01"] .s01-col > .block:last-child { flex: 1; display: flex; flex-direction: column; }
   .page[data-route="S01"] .s01-col > .block:last-child > .block-body { flex: 1; }
-  .page[data-route="S01"] #s01-izp .s01-prog { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-5); max-width: none; }
+  .page[data-route="S01"] #s01-izp .s01-prog { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-6); max-width: none; }
   .page[data-route="S01"] .s01-grid .s01-legend { grid-template-columns: minmax(0, 1fr); }
   .page[data-route="S01"] .s01-grid .s01-calc { max-width: none; }
 }
 
 /* the mini calculator */
-.page[data-route="S01"] .s01-calc { display: grid; gap: var(--sp-3); max-width: 40rem; }
+.page[data-route="S01"] .s01-calc { display: grid; gap: var(--sp-4); max-width: 40rem; }
 .page[data-route="S01"] #s01-gross { width: 100%; max-width: 16rem; }
 .page[data-route="S01"] #s01-calc-out { display: grid; gap: var(--sp-3); }
 .page[data-route="S01"] #s01-calc-out p { margin: 0; max-width: 68ch; }
 
-/* „от всеки 100 €“: the strip and its legend (the same pattern as S06) */
-.page[data-route="S01"] .s01-strip { display: flex; gap: 2px; height: 2rem; border-radius: var(--r-1); overflow: hidden; background: var(--sunk); }
+/* „от всеки 100 €“: the strip (square segments, paper gaps) and its legend rows (the same pattern as S06) */
+.page[data-route="S01"] .s01-strip { display: flex; gap: 2px; height: 1.75rem; border-radius: 0; overflow: hidden; background: var(--paper); }
 .page[data-route="S01"] .s01-seg { flex-basis: 0; flex-shrink: 1; min-width: 2px; background: var(--c, var(--series-other)); }
 .page[data-route="S01"] [data-c="1"] { --c: var(--series-1); }
 .page[data-route="S01"] [data-c="2"] { --c: var(--series-2); }
@@ -122,41 +134,41 @@
 .page[data-route="S01"] [data-c="7"] { --c: var(--series-7); }
 .page[data-route="S01"] [data-c="8"] { --c: var(--series-8); }
 .page[data-route="S01"] [data-c="other"] { --c: var(--series-other); }
-.page[data-route="S01"] .s01-legend { list-style: none; margin: var(--sp-3) 0 0; padding: 0; display: grid; gap: var(--sp-1) var(--sp-6); grid-template-columns: minmax(0, 1fr); }
-.page[data-route="S01"] .s01-legend li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--sp-2); min-height: 2.75rem; border-bottom: 1px solid var(--line); }
-.page[data-route="S01"] .s01-sw { width: .875rem; height: .875rem; border-radius: var(--r-1); background: var(--c, var(--series-other)); }
+.page[data-route="S01"] .s01-legend { list-style: none; margin: var(--sp-4) 0 0; padding: 0; display: grid; gap: 0 var(--sp-7); grid-template-columns: minmax(0, 1fr); border-top: 1px solid var(--ink); }
+.page[data-route="S01"] .s01-legend li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--sp-3); min-height: 2.75rem; border-bottom: 1px solid var(--rule-soft); }
+.page[data-route="S01"] .s01-sw { width: .75rem; height: .75rem; border-radius: 0; background: var(--c, var(--series-other)); box-shadow: inset 0 0 0 1px rgb(0 0 0/.15); }
 .page[data-route="S01"] .s01-leg-name { display: inline-flex; align-items: center; min-height: 2.75rem; overflow-wrap: anywhere; }
-.page[data-route="S01"] .s01-leg-v { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; }
+.page[data-route="S01"] .s01-leg-v { font: 500 .875rem/1.3 var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; }
 @media (min-width: 600px) { .page[data-route="S01"] .s01-legend { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-.page[data-route="S01"] .s01-more { margin: var(--sp-3) 0 0; }
+.page[data-route="S01"] .s01-more { margin: var(--sp-4) 0 0; }
 
 /* the measures list and the progress bars (the text of a bar is the percentage and the euros: it may drop under the name on a narrow screen) */
-.page[data-route="S01"] .s01-meas { list-style: none; margin: var(--sp-3) 0 0; padding: 0; display: grid; gap: var(--sp-3); }
-.page[data-route="S01"] .s01-meas li { display: grid; gap: var(--sp-1); padding-bottom: var(--sp-3); border-bottom: 1px solid var(--line); }
-.page[data-route="S01"] .s01-meas a { font-weight: 700; overflow-wrap: anywhere; }
-.page[data-route="S01"] .s01-meas span { color: var(--muted); max-width: 68ch; }
-.page[data-route="S01"] .s01-prog { display: grid; gap: var(--sp-3); max-width: 40rem; }
+.page[data-route="S01"] .s01-meas { list-style: none; margin: var(--sp-3) 0 0; padding: 0; display: grid; gap: 0; border-top: 1px solid var(--rule); }
+.page[data-route="S01"] .s01-meas li { display: grid; gap: var(--sp-1); padding: var(--sp-3) 0; border-bottom: 1px solid var(--rule-soft); }
+.page[data-route="S01"] .s01-meas a { font: 400 var(--fs-1)/1.25 var(--font-serif); overflow-wrap: anywhere; }
+.page[data-route="S01"] .s01-meas span { color: var(--ink-mid); max-width: 68ch; }
+.page[data-route="S01"] .s01-prog { display: grid; gap: var(--sp-4); max-width: 40rem; }
 .page[data-route="S01"] .s01-prog .prog-top { flex-wrap: wrap; gap: 0 var(--sp-3); }
 .page[data-route="S01"] .s01-prog .prog-text { margin-left: auto; text-align: right; }
 
 /* the journalist blocks: one lead sentence, the news list */
-.page[data-route="S01"] .s01-lead { margin: 0; font-size: var(--fs-1); max-width: 60ch; }
-.page[data-route="S01"] .s01-news { list-style: none; margin: 0 0 var(--sp-3); padding: 0; display: grid; gap: var(--sp-3); }
-.page[data-route="S01"] .s01-news li { display: grid; gap: var(--sp-1); padding-bottom: var(--sp-3); border-bottom: 1px solid var(--line); }
-.page[data-route="S01"] .s01-news a { font-weight: 700; overflow-wrap: anywhere; }
+.page[data-route="S01"] .s01-lead { margin: 0; font: 400 var(--fs-h3)/1.3 var(--font-serif); max-width: 60ch; }
+.page[data-route="S01"] .s01-news { list-style: none; margin: 0 0 var(--sp-3); padding: 0; display: grid; gap: 0; border-top: 1px solid var(--rule); }
+.page[data-route="S01"] .s01-news li { display: grid; gap: var(--sp-1); padding: var(--sp-3) 0; border-bottom: 1px solid var(--rule-soft); }
+.page[data-route="S01"] .s01-news a { font: 400 var(--fs-1)/1.25 var(--font-serif); overflow-wrap: anywhere; }
 
-/* ── „Разгледай бюджета“: plain rows on the page, two columns on a wide screen; a small icon, the question, one line ── */
-.page[data-route="S01"] #s01-explore { --pad: 0; gap: var(--sp-1); padding: 0; border-radius: 0; background: none; }
-.page[data-route="S01"] #s01-explore .block-body { margin-top: var(--sp-3); }
-.page[data-route="S01"] #s01-explore .grid { grid-template-columns: minmax(0, 1fr); gap: 0 var(--sp-6); }
-.page[data-route="S01"] #s01-explore .link-card { gap: var(--sp-3); padding: var(--sp-2) 0; border: 0; border-top: 1px solid var(--line); border-radius: 0; background: none; }
-.page[data-route="S01"] #s01-explore .link-card:hover { border-top-color: var(--ink); }
-.page[data-route="S01"] #s01-explore .link-card-ic { width: auto; height: auto; background: none; color: var(--muted); }
-.page[data-route="S01"] #s01-explore .link-card-title { font-size: var(--fs-0); }
+/* ── „Разгледай бюджета“: hairline rows, two columns on a wide screen; the question in serif, one line under it ── */
+.page[data-route="S01"] #s01-explore .block-body { margin-top: var(--sp-2); }
+.page[data-route="S01"] #s01-explore .grid { grid-template-columns: minmax(0, 1fr); gap: 0 var(--sp-7); }
+.page[data-route="S01"] #s01-explore .link-card { gap: var(--sp-3); align-items: center; padding: var(--sp-3) 0; border: 0; border-top: 1px solid var(--rule-soft); border-radius: 0; background: none; }
+.page[data-route="S01"] #s01-explore .link-card:hover { background: var(--paper-warm); }
+.page[data-route="S01"] #s01-explore .link-card-ic { width: auto; height: auto; border: 0; background: none; color: var(--ink-mid); }
+.page[data-route="S01"] #s01-explore .link-card-title { font-size: 1.125rem; }
 .page[data-route="S01"] #s01-explore .link-card-text { font-size: var(--fs-s); }
+.page[data-route="S01"] #s01-explore .link-card-go { margin-top: 0; }
 @media (min-width: 900px) { .page[data-route="S01"] #s01-explore .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
 @media (forced-colors: active) {
   .page[data-route="S01"] .s01-guide-link, .page[data-route="S01"] .s01-act { border-color: LinkText; }
-  .page[data-route="S01"] #s01-who .opt:has(input:checked) { border-color: Highlight; }
+  .page[data-route="S01"] #s01-who .opt:has(input:checked) { border-color: Highlight; box-shadow: inset 0 0 0 1px Highlight; }
 }

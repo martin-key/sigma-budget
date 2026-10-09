@@ -1,37 +1,37 @@
-/* S23 · Кой на кого плаща? Tokens only, no dark-mode rules (the tokens carry both themes), every selector scoped to the screen. */
+/* S23 · Кой на кого плаща? v4 (СИГМА visual language): ruled blocks, the recipient search as a filter bar between two ink rules
+   (mono label, square field, square ink button), mono figures. Tokens only, light only, every selector scoped to the screen. */
 
 /* the inside of a block: its parts one under the other, evenly spaced (the frame spaces the blocks, not what is inside them) */
 .page[data-route="S23"] .s23-stack { display: grid; gap: var(--sp-4); min-width: 0; }
 .page[data-route="S23"] .s23-stack > * { min-width: 0; margin: 0; }
 .page[data-route="S23"] .s23-stack > .callout { margin: 0; }
 .page[data-route="S23"] .s23-read { max-width: 68ch; }
-.page[data-route="S23"] .s23-h3 { margin: var(--sp-2) 0 0; font-family: var(--font-head); font-size: var(--fs-1); font-weight: 700; line-height: 1.3; }
+.page[data-route="S23"] .s23-h3 { margin: var(--sp-2) 0 0; font: 400 var(--fs-1)/1.25 var(--font-serif); letter-spacing: -.01em; }
 .page[data-route="S23"] .s23-h3:first-child { margin-top: 0; }
 .page[data-route="S23"] .s23-links { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-3); }
 .page[data-route="S23"] .s23-list { margin: 0; padding-left: var(--sp-5); display: grid; gap: var(--sp-2); max-width: 68ch; }
 .page[data-route="S23"] .s23-quote { overflow-wrap: anywhere; }
 
-/* the search of the recipients: one card, the field and the button on one row (stacked on a phone), the count and the buttons under it */
-.page[data-route="S23"] .s23-find { display: grid; gap: var(--sp-3); padding: var(--sp-4); border: 1px solid var(--line); border-radius: var(--r-2); background: var(--surface); box-shadow: var(--shadow-1); }
+/* the search of the recipients: a filter bar (ink rules above and below, no box), the field and the button on one row (stacked on a phone), the count and the buttons under it */
+.page[data-route="S23"] .s23-find { display: grid; gap: var(--sp-3); padding: var(--sp-4) 0; border: 0; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); border-radius: 0; background: none; box-shadow: none; }
 .page[data-route="S23"] .s23-row { display: grid; gap: var(--sp-3); align-items: end; }
 .page[data-route="S23"] .s23-row > * { min-width: 0; }
 .page[data-route="S23"] .s23-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-2) var(--sp-3); }
-.page[data-route="S23"] .s23-count { margin: 0; color: var(--muted); font-size: var(--fs-s); }
+.page[data-route="S23"] .s23-count { margin: 0; color: var(--ink-soft); font: 400 var(--fs-xs)/1.5 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; }
 .page[data-route="S23"] .s23-actions { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
 
 /* a filter above a chart: one control, as wide as its longest option needs */
 .page[data-route="S23"] .s23-pick { max-width: 22rem; }
 
 /* the ЕИК: digits that line up */
-.page[data-route="S23"] .s23-eik { font-variant-numeric: tabular-nums; white-space: nowrap; }
-.page[data-route="S23"] .s23-sub { color: var(--muted); font-size: var(--fs-s); }
+.page[data-route="S23"] .s23-eik { font-family: var(--font-mono); font-size: .92em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.page[data-route="S23"] .s23-sub { color: var(--ink-mid); font-size: var(--fs-s); }
 
 @media (min-width: 600px) {
-  .page[data-route="S23"] .s23-find { padding: var(--sp-5); }
   /* the field takes the room, the „Търси“ button keeps its own width */
   .page[data-route="S23"] .s23-row { grid-template-columns: minmax(0, 1fr) auto; }
 }
-@media (pointer: coarse) {
+@media (pointer: coarse), (max-width: 640px) {
   .page[data-route="S23"] .s23-actions .btn,
   .page[data-route="S23"] .s23-links .btn,
   .page[data-route="S23"] .s23-row .btn { min-height: 44px; }

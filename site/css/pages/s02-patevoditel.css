@@ -1,53 +1,58 @@
-/* S02 · Пътеводител. Tokens only, no dark-mode rules (the tokens carry both themes), every selector scoped to the screen. */
+/* S02 · Пътеводител. v4 (СИГМА visual language): no cards — ruled blocks, square step markers, ink callouts; tokens only, light only,
+   every selector scoped to the screen. */
 
-/* progress card */
-.page[data-route="S02"] .s02-resume { display: grid; gap: var(--sp-3); padding: var(--sp-4); border: 1px solid var(--line); border-radius: var(--r-2); background: var(--surface); }
-.page[data-route="S02"] .s02-resume-h { font-size: var(--fs-1); }
-.page[data-route="S02"] .s02-resume-text { margin: 0; }
+/* progress: a ruled block (ink rule on top), no frame */
+.page[data-route="S02"] .s02-resume { display: grid; gap: var(--sp-3); padding: var(--sp-4) 0 0; border: 0; border-top: 1px solid var(--ink); border-radius: 0; background: none; }
+.page[data-route="S02"] .s02-resume-h { font: 400 var(--fs-h3)/1.2 var(--font-serif); letter-spacing: var(--track-head); }
+.page[data-route="S02"] .s02-resume-text { margin: 0; color: var(--ink-mid); }
 
-/* the eight steps */
-.page[data-route="S02"] .s02-list > h2 { margin-bottom: var(--sp-4); }
+/* the eight steps: a numbered list with a hairline thread (СИГМА's numbered contents) */
+.page[data-route="S02"] .s02-list > h2 { margin-bottom: var(--sp-5); padding-bottom: var(--sp-4); border-bottom: 1px solid var(--ink); font-size: var(--fs-block); }
 .page[data-route="S02"] .s02-steps { --s02-n: 36px; list-style: none; margin: 0; padding: 0; }
-.page[data-route="S02"] .s02-step { position: relative; display: grid; grid-template-columns: var(--s02-n) minmax(0, 1fr); column-gap: var(--sp-3); padding-bottom: var(--sp-6); }
+.page[data-route="S02"] .s02-step { position: relative; display: grid; grid-template-columns: var(--s02-n) minmax(0, 1fr); column-gap: var(--sp-4); padding-bottom: var(--sp-7); }
 .page[data-route="S02"] .s02-step:last-child { padding-bottom: 0; }
-/* the thread between the circles */
-.page[data-route="S02"] .s02-step::before { content: ""; position: absolute; left: calc(var(--s02-n) / 2 - 1px); top: calc(var(--s02-n) + var(--sp-2)); bottom: var(--sp-2); width: 2px; background: var(--line); }
+/* the thread between the markers */
+.page[data-route="S02"] .s02-step::before { content: ""; position: absolute; left: calc(var(--s02-n) / 2); top: calc(var(--s02-n) + var(--sp-2)); bottom: var(--sp-2); width: 1px; background: var(--rule); }
 .page[data-route="S02"] .s02-step:last-child::before { display: none; }
 
-.page[data-route="S02"] .s02-num { position: relative; z-index: 1; display: grid; place-items: center; width: var(--s02-n); height: var(--s02-n); border: 2px solid var(--data); border-radius: var(--r-full); background: var(--surface); color: var(--data); font-family: var(--font-head); font-weight: 700; font-size: var(--fs-1); line-height: 1; }
-.page[data-route="S02"] .is-done .s02-num { background: var(--data); color: var(--on-data); }
-.page[data-route="S02"] .is-current .s02-num { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+/* the step number: a square, mono figure; done = ink, current = crimson (the one that matters) */
+.page[data-route="S02"] .s02-num { position: relative; z-index: 1; display: grid; place-items: center; width: var(--s02-n); height: var(--s02-n); border: 1px solid var(--ink); border-radius: 0; background: var(--paper); color: var(--ink); font: 500 .9375rem/1 var(--font-mono); font-variant-numeric: tabular-nums; }
+.page[data-route="S02"] .is-done .s02-num { background: var(--ink); color: var(--paper); }
+.page[data-route="S02"] .is-current .s02-num { background: var(--crimson); border-color: var(--crimson); color: var(--paper); }
 
-.page[data-route="S02"] .s02-main { min-width: 0; padding-top: 2px; }
-.page[data-route="S02"] .s02-title { font-size: var(--fs-1); }
-.page[data-route="S02"] .s02-tag { display: inline-block; margin-top: var(--sp-2); padding: 2px var(--sp-3); border-radius: var(--r-full); background: var(--data-soft); color: var(--data); font-size: var(--fs-xs); font-weight: 700; }
+.page[data-route="S02"] .s02-main { min-width: 0; padding-top: 4px; }
+.page[data-route="S02"] .s02-title { font: 400 var(--fs-h3)/1.2 var(--font-serif); letter-spacing: var(--track-head); }
+.page[data-route="S02"] .s02-tag { display: inline-block; margin-top: var(--sp-2); padding: 1px 7px; border: 1px solid var(--ink-soft); border-radius: 0; background: var(--paper); color: var(--ink-mid); font: 500 var(--fs-xs)/1.5 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; }
 .page[data-route="S02"] .s02-intro { margin-top: var(--sp-2); max-width: 68ch; }
 
-.page[data-route="S02"] .s02-note { margin-top: var(--sp-3); max-width: 68ch; padding: var(--sp-3) var(--sp-4); background: var(--sunk); border-left: 4px solid var(--accent); border-radius: 0 var(--r-1) var(--r-1) 0; }
-.page[data-route="S02"] .s02-note-label { margin: 0 0 2px; font-size: var(--fs-xs); font-weight: 700; color: var(--muted); }
+/* „На какво да внимаваш“: the СИГМА callout — a 4px ink rule on the left, no fill */
+.page[data-route="S02"] .s02-note { margin-top: var(--sp-4); max-width: 68ch; padding: var(--sp-3) var(--sp-5); background: none; border-left: 4px solid var(--ink); border-radius: 0; color: var(--ink-mid); }
+.page[data-route="S02"] .s02-note-label { margin: 0 0 4px; font: 500 var(--fs-xs)/1.3 var(--font-mono); letter-spacing: var(--track-mono); text-transform: uppercase; color: var(--ink-soft); }
 .page[data-route="S02"] .s02-note-text { margin: 0; }
 
 .page[data-route="S02"] .s02-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-3); margin-top: var(--sp-4); }
-.page[data-route="S02"] .s02-next { margin-top: var(--sp-3); font-size: var(--fs-s); color: var(--muted); }
-.page[data-route="S02"] .s02-next-link { font-weight: 700; }
+.page[data-route="S02"] .s02-next { margin-top: var(--sp-3); font-size: var(--fs-s); color: var(--ink-mid); }
+.page[data-route="S02"] .s02-next-link { font-weight: 600; }
 
-/* the five checks */
-.page[data-route="S02"] .s02-checks { padding: var(--sp-4); border: 1px solid var(--line); border-top: 4px solid var(--accent); border-radius: var(--r-2); background: var(--surface); }
-.page[data-route="S02"] .s02-checks-heading { margin-top: var(--sp-2); font-family: var(--font-head); font-weight: 700; font-size: var(--fs-1); line-height: var(--lh-tight); }
-.page[data-route="S02"] .s02-checks-lead { margin-top: var(--sp-3); }
-.page[data-route="S02"] .s02-checks-list { list-style: none; margin: var(--sp-3) 0 0; padding: 0; display: grid; gap: var(--sp-3); grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); }
-.page[data-route="S02"] .s02-check { display: grid; justify-items: start; gap: 2px; padding: var(--sp-3) var(--sp-4); border-radius: var(--r-1); background: var(--sunk); }
-.page[data-route="S02"] .s02-check-n { display: grid; place-items: center; width: 24px; height: 24px; margin-bottom: var(--sp-1); border-radius: var(--r-full); background: var(--data); color: var(--on-data); font-size: var(--fs-xs); font-weight: 700; }
-.page[data-route="S02"] .s02-check-short { font-family: var(--font-head); font-weight: 700; font-size: var(--fs-1); line-height: var(--lh-tight); }
-.page[data-route="S02"] .s02-check-text { color: var(--muted); }
-.page[data-route="S02"] .s02-checks-end { margin-top: var(--sp-4); max-width: 68ch; }
+/* the five checks: a ruled block; the checks are tiles under ink rules, mono numbers in ink squares */
+.page[data-route="S02"] .s02-checks { padding: var(--sp-5) 0 0; border: 0; border-top: 1px solid var(--ink); border-radius: 0; background: none; }
+.page[data-route="S02"] .s02-checks > h2 { margin: 0; font: 500 var(--fs-xs)/1.3 var(--font-mono); letter-spacing: .16em; text-transform: uppercase; color: var(--crimson); }   /* the title is the kicker (СИГМА tile .kicker); the heading line under it is the display text */
+.page[data-route="S02"] .s02-checks-heading { margin-top: var(--sp-2); font: 400 var(--fs-block)/1.15 var(--font-serif); letter-spacing: var(--track-head); }
+.page[data-route="S02"] .s02-checks-lead { margin-top: var(--sp-3); color: var(--ink-mid); }
+.page[data-route="S02"] .s02-checks-list { list-style: none; margin: var(--sp-4) 0 0; padding: 0; display: grid; gap: var(--sp-4) var(--sp-5); grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); }
+.page[data-route="S02"] .s02-check { display: grid; justify-items: start; gap: 4px; padding: var(--sp-3) 0 0; border-top: 1px solid var(--ink); border-radius: 0; background: none; }
+.page[data-route="S02"] .s02-check-n { display: grid; place-items: center; width: 24px; height: 24px; margin-bottom: var(--sp-1); border-radius: 0; background: var(--ink); color: var(--paper); font: 500 var(--fs-xs)/1 var(--font-mono); }
+.page[data-route="S02"] .s02-check-short { font: 400 var(--fs-1)/1.2 var(--font-serif); letter-spacing: -.01em; }
+.page[data-route="S02"] .s02-check-text { color: var(--ink-mid); font-size: var(--fs-s); }
+.page[data-route="S02"] .s02-checks-end { margin-top: var(--sp-5); max-width: 68ch; }
 .page[data-route="S02"] .s02-checks .toggle { margin-top: var(--sp-3); }
 
-.page[data-route="S02"] .s02-credit { margin-top: var(--sp-6); }
+.page[data-route="S02"] .s02-credit { margin-top: var(--sp-6); font: 400 var(--fs-xs)/1.5 var(--font-mono); letter-spacing: .04em; color: var(--ink-soft); }
 
 @media (min-width: 600px) {
-  .page[data-route="S02"] .s02-resume { padding: var(--sp-5); }
-  .page[data-route="S02"] .s02-steps { --s02-n: 44px; }
-  .page[data-route="S02"] .s02-step { column-gap: var(--sp-4); }
-  .page[data-route="S02"] .s02-checks { padding: var(--sp-5); }
+  .page[data-route="S02"] .s02-steps { --s02-n: 40px; }
+  .page[data-route="S02"] .s02-step { column-gap: var(--sp-5); }
+}
+@media (forced-colors: active) {
+  .page[data-route="S02"] .is-current .s02-num { background: Highlight; border-color: Highlight; color: HighlightText; forced-color-adjust: none; }
 }

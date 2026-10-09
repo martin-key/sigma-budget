@@ -1,8 +1,9 @@
 /* S29 · Вграден изглед. The frame is bare (layout.css hides the chrome); everything is sized to fill an <iframe> (the code from the share menu is 720 x 440).
    The page is exactly one viewport high, a flex column: title / plot (takes what is left, scrolls only if it really cannot fit) / source line.
-   Tokens only (they carry both themes), every selector scoped to the screen, classes prefixed s29-. */
+   v4 (СИГМА visual language): a serif title, a mono source line under a hairline, the serif wordmark as the link back. Tokens only, light only,
+   every selector scoped to the screen, classes prefixed s29-. */
 .page[data-route="S29"] { display: flex; flex-direction: column; gap: var(--sp-2); height: calc(100vh - 2 * var(--sp-3)); height: calc(100dvh - 2 * var(--sp-3)); min-height: 0; }
-.page[data-route="S29"] .page-title { flex: none; margin: 0; font-size: var(--fs-1); line-height: var(--lh-tight); }
+.page[data-route="S29"] .page-title { flex: none; max-width: none; margin: 0; font-size: var(--fs-h3); line-height: var(--lh-tight); }
 .page[data-route="S29"] .page-body { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; margin-top: 0; }
 .page[data-route="S29"] .s29-embed { flex: 1 1 auto; display: flex; flex-direction: column; gap: var(--sp-2); min-height: 0; }
 
@@ -16,7 +17,7 @@
 /* compact parts: the legend loses its pill borders, the data table disclosure its height (a frame is small; the toggles stay >= 28 px, 36 px for a finger) */
 .page[data-route="S29"] .fig-legend { gap: 0 var(--sp-3); }
 .page[data-route="S29"] .fig-legend .lg { min-height: 28px; padding: 0 var(--sp-1); border: 0; background: none; }
-.page[data-route="S29"] .fig-legend .lg:hover { background: var(--sunk); }
+.page[data-route="S29"] .fig-legend .lg:hover { background: var(--paper-warm); }
 .page[data-route="S29"] .fig-table { margin-top: 0; }
 .page[data-route="S29"] .fig-table > summary { min-height: 36px; padding: var(--sp-1) var(--sp-3); }
 @media (pointer: coarse) { .page[data-route="S29"] .fig-legend .lg { min-height: 36px; } }
@@ -24,12 +25,12 @@
 /* mock data: a watermark over the plot (the hatch and the badge of the figure stay). The box clips, the text inside is the one that is rotated:
    a rotated box would stick out of the frame and give the page a horizontal scrollbar */
 .page[data-route="S29"] .s29-wm { position: absolute; inset: 0; display: grid; place-items: center; overflow: hidden; pointer-events: none; user-select: none; }
-.page[data-route="S29"] .s29-wm span { white-space: nowrap; font: 800 clamp(var(--fs-1), 7vw, var(--fs-5)) / 1 var(--font-head); letter-spacing: .12em; text-transform: uppercase;
+.page[data-route="S29"] .s29-wm span { white-space: nowrap; font: 500 clamp(1.25rem, 6vw, 2.75rem) / 1 var(--font-mono); letter-spacing: .14em; text-transform: uppercase;
   color: var(--st-mock); opacity: .17; transform: rotate(-14deg); }
 
 /* source, status, link to the site */
-.page[data-route="S29"] .s29-foot { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-1) var(--sp-3); padding-top: var(--sp-2); border-top: 1px solid var(--line); font-size: var(--fs-s); color: var(--muted); }
+.page[data-route="S29"] .s29-foot { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-1) var(--sp-3); padding-top: var(--sp-2); border-top: 1px solid var(--ink); font: 400 var(--fs-xs)/1.5 var(--font-mono); letter-spacing: .04em; color: var(--ink-soft); }
 .page[data-route="S29"] .s29-src { flex: 1 1 14rem; min-width: 0; margin: 0; overflow-wrap: anywhere; }
 .page[data-route="S29"] .s29-src:empty { display: none; }
-.page[data-route="S29"] .s29-brand { display: inline-flex; align-items: center; gap: var(--sp-1); min-height: 28px; font-weight: 700; color: var(--accent-ink); text-decoration: none; }
-.page[data-route="S29"] .s29-brand:hover { text-decoration: underline; text-underline-offset: .18em; }
+.page[data-route="S29"] .s29-brand { display: inline-flex; align-items: center; gap: var(--sp-1); min-height: 28px; font: 400 1rem/1.2 var(--font-serif); letter-spacing: -.01em; color: var(--ink); text-decoration: none; }
+.page[data-route="S29"] .s29-brand:hover { color: var(--crimson); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
