@@ -3,13 +3,13 @@
 //   share.register(id, {title, sub, text, source:['kfp'], asOf, status, mock, chart:'chartDomId', table:{columns,rows,statuses?} | ()=>…, embed:true|'routeKey.chartId', embedParams:{code:'1000'}})
 //   shareButton(id)                      the trigger button (the delegated [data-share] handler calls openMenu)
 //   textFor/linkFor/csvFor/embedFor      pure builders (also used by tests)
-//   renderPng(spec,{watermark})          canvas with title, chart and source footer; „ПРИМЕРНИ ДАННИ“ watermark whenever the data is mock
+//   renderPng(spec,{watermark,pixelRatio}) canvas with title, the figure in view (chart, drawn map or ranked list, else the tables as printed on screen) and source footer, about 1200+ px wide; „ПРИМЕРНИ ДАННИ“ watermark whenever the data is mock
 // Rules that never bend: the copied text always carries the source; a mock block is never exported without saying so
 // (text line, PNG watermark, CSV status column).
 import { html, esc } from './html.js';
 import { icon } from './icons.js';
 import { data } from './data.js';
-import { date, csvCell } from './format.js';
+import { date, csvCell, num, DASH } from './format.js';
 import { statusLabel } from './ui/status.js';
 import { srcShort } from './ui/source.js';
 import { popover, sheet } from './ui/sheet.js';
@@ -35,29 +35,50 @@ const keysOf = s => (Array.isArray(s) ? s : String(s || '').split(',')).map(x =>
 const val = x => (typeof x === 'function' ? x() : x);
 
 /* Charts and tables register what they can export (a table twin for CSV); blocks find them in their own DOM at share time.
-   attach(domId, {table:()=>({columns,rows,statuses?}), chart:true}) — cleared with the registry on every navigation. */
+   attach(domId, {table:()=>({columns,rows,statuses?}), chart:true, draw:kit=>({w,h,paint(x,X,Y,pr)})|null}) — cleared with the registry on every navigation.
+   `draw` is the picture of a figure that is not an ECharts chart (a map, a ranked list): PNG paints it instead of dumping the table; it sees only what is visible. */
 const attached = new Map();
 resetHooks.add(() => attached.clear());
 export const attach = (id, o) => { attached.set(id, o); return id; };
 const blockEl = spec => (spec.id ? document.getElementById(spec.id) : null);
+/** inside a closed <details> (its summary stays in view): Chromium still gives such content boxes, so getClientRects() alone says "visible" */
+const closedIn = n => { for (let d = n.closest('details'); d; d = d.parentElement?.closest('details')) if (!d.open && !d.querySelector(':scope > summary')?.contains(n)) return true; return false; };
+/** really in view on the screen: has boxes and is not inside a closed disclosure */
+const shown = n => n.getClientRects().length > 0 && !closedIn(n);
 function attachments(spec) {
   const root = blockEl(spec);
   if (!root) return [];
-  return [...root.querySelectorAll('[data-attach]')].map(n => ({ el: n, vis: n.getClientRects().length > 0, ...attached.get(n.dataset.attach) })).filter(a => a.table || a.chart).sort((x, y) => y.vis - x.vis);
+  return [...root.querySelectorAll('[data-attach]')].map(n => ({ el: n, vis: n.getClientRects().length > 0, on: shown(n), ...attached.get(n.dataset.attach) })).filter(a => a.table || a.chart || a.draw).sort((x, y) => y.vis - x.vis);
 }
 const tableOf = spec => {
   const t = val(spec.table) ?? attachments(spec).find(a => a.table)?.table();
   return t && Array.isArray(t.columns) && Array.isArray(t.rows) ? t : null;
 };
-/** the chart container to turn into a PNG: spec.chart (dom id), or the first drawn, visible chart inside the block; chart:false disables */
+/** the chart container to turn into a PNG: spec.chart (dom id) when visible, or the first drawn, visible chart inside the block; chart:false disables */
 const chartEl = spec => {
   if (spec.chart === false) return null;
-  if (spec.chart) return document.getElementById(spec.chart);
+  if (spec.chart) { const e = document.getElementById(spec.chart); return e && e.getClientRects().length ? e : null; }   // a hidden chart has no picture
   const root = blockEl(spec);
-  return root ? [...root.querySelectorAll('.chart[data-ready="1"]')].find(c => c.offsetParent !== null) || null : null;
+  const cs = root ? [...root.querySelectorAll('.chart[data-ready="1"]')].filter(c => c.offsetParent !== null) : [];
+  return cs.find(c => !closedIn(c)) || cs[0] || null;       // a chart in view first; one inside a closed disclosure only when no other is drawn
 };
 const hasChart = spec => { const el = chartEl(spec); return !!(el && window.echarts?.getInstanceByDom(el)); };
-const canPng = spec => hasChart(spec) || !!tableOf(spec);
+/** the picture a visible figure of this block paints for itself (map, ranked list), else null */
+const drawOf = spec => attachments(spec).find(a => a.draw && a.on)?.draw || null;
+/** the text of an element as read on screen (no icons, no screen-reader-only parts; no-break spaces kept) */
+const textOf = n => { const c = n.cloneNode(true); c.querySelectorAll('.sr-only,svg').forEach(e => e.remove()); return c.textContent.replace(/[ \t\r\n\f]+/g, ' ').trim(); };
+/** the tables a PNG prints, each with the title of its disclosure: those in view (open disclosures count), none in view: all of the block's, else its own */
+function pngTables(spec) {
+  const ok = t => t && Array.isArray(t.columns) && Array.isArray(t.rows);
+  const tabs = attachments(spec).filter(a => a.table && a.vis), seen = tabs.filter(a => a.on);
+  const out = (seen.length ? seen : tabs).map(a => {
+    const sum = a.el.closest('details')?.querySelector(':scope > summary'), tt = sum && !sum.contains(a.el) ? sum.querySelector('.disc-title') || sum : null, mt = tt && sum.querySelector('.disc-meta');
+    return { t: a.table(), text: tt ? textOf(tt) : '', meta: mt ? textOf(mt) : '' };
+  }).filter(o => ok(o.t));
+  const own = tableOf(spec);
+  return out.length ? out : ok(own) ? [{ t: own, text: '', meta: '' }] : [];
+}
+const canPng = spec => hasChart(spec) || !!drawOf(spec) || !!tableOf(spec);
 
 /** trigger button for a block header */
 export const shareButton = (id, o = {}) => html`<button type="button" class="btn btn-sm btn-quiet share-btn" data-share="${id}" aria-haspopup="dialog" aria-expanded="false">${icon('share', { size: 16 })}<span>${o.label || 'Сподели'}</span></button>`;
@@ -166,18 +187,54 @@ const loadImg = src => new Promise((ok, no) => { const i = new Image(); i.onload
 async function fonts() {
   try { await Promise.all([document.fonts.load('700 22px "Sofia Sans Condensed"'), document.fonts.load('400 13px "Sofia Sans"'), document.fonts.load('700 13px "Sofia Sans"')]); } catch { /* system fonts are fine */ }
 }
+const FB = '"Sofia Sans",system-ui,sans-serif', FD = '"Sofia Sans Condensed","Sofia Sans",system-ui,sans-serif';
+/** off-screen canvas that sits in the page with lang="bg" while text is drawn, so every browser shapes the Bulgarian letterforms as the page does */
+function pageCanvas() {
+  const c = document.createElement('canvas');
+  c.lang = 'bg'; c.setAttribute('aria-hidden', 'true');
+  c.style.cssText = 'position:fixed;left:-20000px;top:0;width:1px;height:1px;pointer-events:none';
+  document.body.appendChild(c);
+  return c;
+}
+function ctxOf(c) {
+  const x = c.getContext('2d');
+  try { x.lang = 'bg'; } catch { /* engines without ctx.lang use the canvas element's lang */ }
+  x.textBaseline = 'top';
+  return x;
+}
+/** line breaks only at plain spaces (no-break spaces keep a number whole); a word wider than the line is split by characters, never cut off */
 function wrapLines(x, txt, font, maxW) {
   x.font = font;
-  const out = []; let line = '';
-  for (const wd of String(txt).split(/\s+/)) { const t = line ? line + ' ' + wd : wd; if (line && x.measureText(t).width > maxW) { out.push(line); line = wd; } else line = t; }
+  const wd = s => x.measureText(s).width, out = [];
+  let line = '';
+  for (let word of String(txt).split(/[ \t\r\n]+/)) {
+    if (!word) continue;
+    const t = line ? line + ' ' + word : word;
+    if (wd(t) <= maxW) { line = t; continue; }
+    if (line) out.push(line);
+    while (word.length > 1 && wd(word) > maxW) {
+      let k = word.length - 1;
+      while (k > 1 && wd(word.slice(0, k)) > maxW) k--;
+      const at = Math.max(...[...'-/.,;:'].map(ch => word.lastIndexOf(ch, k - 1)));   // prefer to break after punctuation
+      if (at >= k / 2) k = at + 1;
+      out.push(word.slice(0, k)); word = word.slice(k);
+    }
+    line = word;
+  }
   if (line) out.push(line);
-  return out;
+  return out.length ? out : [''];
 }
 function fit(x, text, w) {
   let s = String(text);
   if (x.measureText(s).width <= w) return s;
   while (s.length > 1 && x.measureText(s + '…').width > w) s = s.slice(0, -1);
   return s + '…';
+}
+/** the narrowest width (lo..hi) at which the text still wraps into at most `lines` lines */
+function narrowest(x, txt, font, lines, lo, hi) {
+  if (wrapLines(x, txt, font, lo).length <= lines) return lo;
+  while (hi - lo > 1) { const m = (lo + hi) >> 1; if (wrapLines(x, txt, font, m).length <= lines) hi = m; else lo = m; }
+  return hi;
 }
 /** diagonal „ПРИМЕРНИ ДАННИ“ tiles over the whole image */
 function drawWatermark(x, W, H, fam) {
@@ -189,62 +246,193 @@ function drawWatermark(x, W, H, fam) {
   for (let r = 0, y = -span; y < span; y += stepY, r++) for (let px = -span + (r % 2 ? stepX / 2 : 0); px < span; px += stepX) x.fillText('ПРИМЕРНИ ДАННИ', px, y);
   x.restore();
 }
-/** a simple table drawn on canvas (for blocks without a chart) */
-function drawTable(x, t, W, y, pad, fam) {
-  const maxRows = 16, rows = t.rows.slice(0, maxRows), cols = t.columns.length;
-  const inner = W - pad * 2;
-  x.font = `700 13px ${fam}`;
-  const widths = t.columns.map((c, i) => Math.max(x.measureText(c).width, ...rows.map(r => { x.font = `400 13px ${fam}`; return x.measureText(csvVal(r[i])).width; })) + 16);
-  const sum = widths.reduce((a, b) => a + b, 0), k = Math.min(1, inner / sum), ws = widths.map(w => w * k);
-  const slack = Math.max(0, inner - ws.reduce((a, b) => a + b, 0));
-  ws[0] += slack;
-  const draw = (cells, bold, yy) => {
-    let px = pad;
-    cells.forEach((c, i) => { x.font = `${bold ? 700 : 400} 13px ${fam}`; x.textAlign = i === 0 ? 'left' : 'right'; x.fillText(fit(x, c, ws[i] - 12), i === 0 ? px : px + ws[i] - 8, yy); px += ws[i]; });
+/** path of a rounded rectangle (fill, stroke or clip it) */
+function rrect(x, X, Y, w, h, r) {
+  r = Math.max(0, Math.min(r, w / 2, h / 2));
+  x.beginPath(); x.moveTo(X + r, Y); x.arcTo(X + w, Y, X + w, Y + h, r); x.arcTo(X + w, Y + h, X, Y + h, r); x.arcTo(X, Y + h, X, Y, r); x.arcTo(X, Y, X + w, Y, r); x.closePath();
+}
+/** 45deg stripes like repeating-linear-gradient(45deg, col 0 th, transparent th per): the mock hatch of bars and swatches (clip first) */
+function stripes(x, X, Y, w, h, col, th = 2, per = 6) {
+  x.save(); x.strokeStyle = col; x.lineWidth = th; x.beginPath();
+  for (let o = -h; o < w + h; o += per * Math.SQRT2) { x.moveTo(X + o, Y); x.lineTo(X + o + h, Y + h); }
+  x.stroke(); x.restore();
+}
+/** what a figure's draw(kit) gets: a context to measure with, the site fonts and colours, text wrapping and two drawing helpers */
+const kitOf = (x, spec) => ({ x, spec, FB, FD, cssv, loadImg, rrect, stripes, wrap: (txt, font, w) => wrapLines(x, txt, font, w) });
+/* Tables are measured first and drawn second: natural column widths, text wrapped (never cut off), numbers right-aligned, a bold total row.
+   A table from ui/table.js brings what the screen prints (`heads`, `shown`, `aligns`, `total`); a raw {columns, rows} table gets the site's number format. */
+const TB = { fs: 14, hfs: 13, sfs: 12.5, slh: 16, lh: 18, py: 6, px: 10, minInner: 520, maxInner: 1360, capFirst: 360, capText: 300, rows: 40, shown: 36, maxLines: 10, gap: 22 };
+/** the fewest decimals (0..2) that show every number of a column exactly; long fractions print like the screen: one decimal, two below 10 */
+function fewestDecimals(vals) {
+  const v = vals.filter(n => typeof n === 'number' && Number.isFinite(n));
+  const d = [0, 1, 2].find(k => v.every(n => Math.abs(n - Number(n.toFixed(k))) < 1e-9 * Math.max(1, Math.abs(n))));
+  return d ?? (Math.max(0, ...v.map(Math.abs)) >= 10 ? 1 : 2);
+}
+function shownTable(t) {
+  const head = (t.heads || t.columns).map(c => String(c ?? '').replace(/\s*\n+\s*/g, ' ').replace(/ (?=[€%]$)/, '\u00a0'));   // a unit sign never wraps alone
+  const dec = head.map((_, j) => fewestDecimals(t.rows.map(r => r[j])));
+  const text = (v, j) => (v == null || v === '' ? DASH : typeof v === 'number' ? num(v, dec[j]) : /^\d{4}-\d\d-\d\d$/.test(v) ? date(v) : String(v).replace(/\s*[\r\n]+\s*/g, ' '));
+  return {
+    head,
+    aligns: t.aligns || head.map((_, j) => (t.rows.some(r => typeof r[j] === 'number') ? 'end' : 'start')),
+    shown: t.shown || t.rows.map(r => head.map((_, j) => text(r[j], j))),
+    total: t.total || null
   };
-  x.textBaseline = 'top'; x.fillStyle = cssv('--ink');
-  draw(t.columns, true, y);
-  y += 22; x.strokeStyle = cssv('--line-strong'); x.beginPath(); x.moveTo(pad, y - 3); x.lineTo(W - pad, y - 3); x.stroke();
-  rows.forEach(r => { x.fillStyle = cssv('--ink'); draw(r.map(csvVal), false, y); y += 22; x.strokeStyle = cssv('--line'); x.beginPath(); x.moveTo(pad, y - 3); x.lineTo(W - pad, y - 3); x.stroke(); });
-  if (t.rows.length > maxRows) { x.fillStyle = cssv('--muted'); x.textAlign = 'left'; x.font = `400 12px ${fam}`; x.fillText(`… и още ${t.rows.length - maxRows} реда в CSV файла`, pad, y); y += 20; }
-  return y;
+}
+/** measures the table (column widths, wrapped lines, row heights) and returns {inner, h, draw(x, X, Y)}; the picture is as wide as the content needs, 560..1400 px.
+ *  A cell is its label plus muted sub-lines (line breaks in the shown text), like the <small> under a name or a number on screen. */
+function layoutTable(x, t, minInner = TB.minInner) {
+  const { head, aligns, shown, total } = shownTable(t);
+  const body = shown.length > TB.rows ? shown.slice(0, TB.shown) : shown, more = shown.length - body.length;
+  const fB = `400 ${TB.fs}px ${FB}`, fT = `700 ${TB.fs}px ${FB}`, fH = `700 ${TB.hfs}px ${FB}`, fS = `400 ${TB.sfs}px ${FB}`, cp = TB.px * 2;
+  const fOf = j => (j === 0 ? fT : fB);                              // the row label is bold, like the row header on screen
+  const wid = (s, f) => { x.font = f; return x.measureText(s).width; };
+  const words = (s, f) => Math.max(0, ...s.split(' ').map(wd => wid(wd, f)));
+  const parts = (s, f) => String(s).split('\n').map((p, i) => [p, i ? fS : f]);
+  const cols = head.map((h, j) => {
+    const cells = [...body.map(r => parts(r[j], fOf(j))), ...(total ? [parts(total[j], fT)] : [])].flat();
+    const end = aligns[j] === 'end';
+    const nat = Math.max(0, ...cells.map(([s, f]) => wid(s, f))) + cp;
+    const tok = Math.max(0, ...cells.map(([s, f]) => words(s, f))) + cp;
+    const h1 = wid(h, fH), hw = words(h, fH);
+    const h2 = narrowest(x, h, fH, 2, hw, h1) + cp, h3 = narrowest(x, h, fH, 3, hw, h1) + cp;      // header on 2 lines is preferred, 3 is the limit
+    const need2 = j === 0 ? Math.max(0, ...cells.map(([s, f]) => narrowest(x, s, f, 2, words(s, f), wid(s, f)))) + cp : 0;   // row labels: 2 lines at most
+    const lb = Math.max(tok, h3, need2);
+    return { end, lb, pref: Math.max(end ? nat : Math.min(nat, Math.max(j === 0 ? TB.capFirst : TB.capText, need2)), h2, lb) };
+  });
+  const sumPref = cols.reduce((a, c) => a + c.pref, 0), sumLb = cols.reduce((a, c) => a + c.lb, 0);
+  const inner = Math.min(TB.maxInner, Math.max(minInner, Math.round(sumPref)));
+  let w;
+  if (sumPref <= inner) {                                            // spare room goes to the text columns
+    const grow = cols.map(c => (c.end ? 0 : c.pref)), gs = grow.reduce((a, b) => a + b, 0);
+    w = cols.map((c, j) => c.pref + (gs ? ((inner - sumPref) * grow[j]) / gs : j === 0 ? inner - sumPref : 0));
+  } else {                                                           // too wide: columns give up room down to their minimum
+    const give = cols.map(c => c.pref - c.lb), gs = give.reduce((a, b) => a + b, 0), need = sumPref - inner;
+    w = gs >= need ? cols.map((c, j) => c.pref - (need * give[j]) / gs) : cols.map(c => (c.lb * inner) / sumLb);
+  }
+  w = w.map(Math.floor);
+  if (w.length) w[w.indexOf(Math.max(...w))] += inner - w.reduce((a, b) => a + b, 0);
+  const lines = (s, f, j, cap) => {
+    const ls = wrapLines(x, s, f, w[j] - cp);
+    if (ls.length <= cap) return ls;
+    x.font = f;                                                      // last resort only: more lines than the cap
+    return [...ls.slice(0, cap - 1), fit(x, ls.slice(cap - 1).join(' '), w[j] - cp)];
+  };
+  const cellOf = (s, f, j, cap) => {                                 // [{l: text, f: font, y: offset, sub}] with .h = height
+    const out = []; let y = 0;
+    parts(s, f).forEach(([p, ft], i) => {
+      if (i && out.length) y += 2;
+      lines(p, ft, j, i ? 3 : cap).forEach(l => { out.push({ l, f: ft, y, sub: i > 0 }); y += i ? TB.slh : TB.lh; });
+    });
+    out.h = y;
+    return out;
+  };
+  const hl = head.map((h, j) => cellOf(h, fH, j, 3));
+  const bl = body.map(r => r.map((s, j) => cellOf(s, fOf(j), j, TB.maxLines)));
+  const tl = total ? total.map((s, j) => cellOf(s, fT, j, TB.maxLines)) : null;
+  const rowH = r => Math.max(TB.lh, ...r.map(c => c.h)) + TB.py * 2, hMax = Math.max(TB.lh, ...hl.map(c => c.h));
+  const headH = rowH(hl), noteH = (more ? 26 : 0) + (body.length ? 0 : 30);
+  const h = headH + 2 + bl.reduce((a, r) => a + rowH(r), 0) + noteH + (tl ? 2 + rowH(tl) : 0);
+  const draw = (x, X, Y) => {
+    const xs = []; let a = X; w.forEach(cw => { xs.push(a); a += cw; });
+    const ink = cssv('--ink'), muted = cssv('--muted'), line = cssv('--line'), strong = cssv('--line-strong'), sunk = cssv('--sunk');
+    const put = (cell, j, y, col, dy = 0) => {
+      x.textAlign = cols[j].end ? 'right' : 'left';
+      const tx = cols[j].end ? xs[j] + w[j] - TB.px : xs[j] + TB.px;
+      cell.forEach(o => { x.font = o.f; x.fillStyle = o.sub ? muted : col; x.fillText(o.l, tx, y + TB.py + dy + o.y); });
+    };
+    let y = Y;
+    x.fillStyle = sunk; x.fillRect(X, y, inner, headH);
+    hl.forEach((c, j) => put(c, j, y, muted, hMax - c.h));           // headers sit on the rule
+    y += headH; x.fillStyle = strong; x.fillRect(X, y, inner, 2); y += 2;
+    bl.forEach((r, i) => {
+      r.forEach((c, j) => put(c, j, y, ink));
+      y += rowH(r);
+      if (!(tl && !more && i === bl.length - 1)) { x.fillStyle = line; x.fillRect(X, y - 1, inner, 1); }
+    });
+    x.textAlign = 'left'; x.fillStyle = muted; x.font = `400 13px ${FB}`;
+    if (!body.length) { x.fillText('Няма редове за показване.', X + TB.px, y + 8); y += 30; }
+    if (more) { x.fillText(`… и още ${more} реда в CSV файла`, X + TB.px, y + 6); y += 26; }
+    if (tl) {
+      x.fillStyle = strong; x.fillRect(X, y, inner, 2); y += 2;
+      x.fillStyle = sunk; x.fillRect(X, y, inner, rowH(tl));
+      tl.forEach((c, j) => put(c, j, y, ink));
+    }
+  };
+  return { inner, h, draw };
+}
+/** the title above a table: the disclosure's title in bold, its meta line (count, total) muted below */
+function layoutHead(x, o, w) {
+  const tl = wrapLines(x, o.text, `700 16px ${FB}`, w), ml = o.meta ? wrapLines(x, o.meta, `400 13px ${FB}`, w) : [];
+  const h = tl.length * 21 + (ml.length ? 2 + ml.length * 17 : 0);
+  return { h, draw: (x, X, Y) => {
+    x.textAlign = 'left'; x.fillStyle = cssv('--ink'); x.font = `700 16px ${FB}`; tl.forEach((l, i) => x.fillText(l, X, Y + i * 21));
+    x.fillStyle = cssv('--muted'); x.font = `400 13px ${FB}`; ml.forEach((l, i) => x.fillText(l, X, Y + tl.length * 21 + 2 + i * 17));
+  } };
+}
+/** one or more tables one under the other, all as wide as the widest; a titled one gets its disclosure's title above it. One untitled table is laid out exactly as layoutTable does. */
+function layoutStack(x, items) {
+  const first = items.map(o => layoutTable(x, o.t)), inner = Math.max(...first.map(l => l.inner));
+  const parts = items.map((o, i) => ({ tb: first[i].inner === inner ? first[i] : layoutTable(x, o.t, inner), hd: o.text ? layoutHead(x, o, inner) : null }));
+  const h = parts.reduce((a, p, i) => a + (i ? TB.gap : 0) + (p.hd ? p.hd.h + 8 : 0) + p.tb.h, 0);
+  const draw = (x, X, Y) => { let y = Y; parts.forEach((p, i) => { if (i) y += TB.gap; if (p.hd) { p.hd.draw(x, X, y); y += p.hd.h + 8; } p.tb.draw(x, X, y); y += p.tb.h; }); };
+  return { inner, h, draw };
+}
+/** device pixels per drawn pixel: at least 2, more for narrow pictures so every PNG is about 1200 px wide (whole numbers for chart images, which are not resampled), never past ~16 million pixels */
+function pngRatio(W, H, whole) {
+  let r = Math.min(4, Math.max(2, 1200 / W));
+  if (whole) r = Math.ceil(r - 1e-9);
+  const cap = Math.sqrt(16e6 / (W * H));
+  return r > cap ? Math.max(1, whole ? Math.floor(cap) : cap) : r;
 }
 /**
  * Composes the picture: title, subtitle, chart (or table), source footer.
  * watermark defaults to „is this block mock?“; the checker calls renderPng(spec,{watermark:false}) to prove the pixels differ.
+ * pixelRatio defaults to „sharp enough to be about 1200 px wide“; the checker passes 1.
  */
-export async function renderPng(spec, { watermark = isMock(spec), pixelRatio = 2 } = {}) {
+export async function renderPng(spec, { watermark = isMock(spec), pixelRatio } = {}) {
   await fonts();
   const { chartImage } = await import('./charts.js');
   const el = chartEl(spec);
   const inst = el && window.echarts?.getInstanceByDom(el);
-  const t = tableOf(spec);
-  let img = null, w = 0, h = 0;
-  if (inst) { const r = chartImage(inst, el, { pixelRatio }); img = await loadImg(r.url); w = r.w; h = r.h; }
-  else if (!t) throw new Error('няма какво да се нарисува');
-  const fB = '"Sofia Sans",system-ui,sans-serif', fD = '"Sofia Sans Condensed","Sofia Sans",system-ui,sans-serif';
-  const pad = 20, W = Math.max(w || 560, 320) + pad * 2, maxW = W - pad * 2;
-  const probe = document.createElement('canvas').getContext('2d');
-  const tl = wrapLines(probe, spec.title || '', `700 22px ${fD}`, maxW);
-  const sl = spec.sub ? wrapLines(probe, spec.sub, `400 13px ${fB}`, maxW) : [];
-  const src = sourceLine(spec);
-  const fl = [...(isMock(spec) ? wrapLines(probe, 'Примерни данни: измислени стойности, не са истински.', `700 12px ${fB}`, maxW) : []), ...(src ? wrapLines(probe, src, `400 12px ${fB}`, maxW) : []), ...wrapLines(probe, 'Бюджет на светло · прототип', `400 12px ${fB}`, maxW)];
-  const bodyH = img ? h : 22 * (Math.min(t.rows.length, 16) + 1) + (t.rows.length > 16 ? 20 : 0);
-  const H = pad + tl.length * 26 + (sl.length ? 4 + sl.length * 18 : 0) + 12 + bodyH + 14 + fl.length * 17 + pad;
-  const c = document.createElement('canvas');
-  c.width = Math.round(W * pixelRatio); c.height = Math.round(H * pixelRatio);
-  const x = c.getContext('2d');
-  x.scale(pixelRatio, pixelRatio); x.textBaseline = 'top';
-  x.fillStyle = cssv('--surface'); x.fillRect(0, 0, W, H);
-  let y = pad;
-  x.fillStyle = cssv('--ink'); x.font = `700 22px ${fD}`; tl.forEach(l => { x.fillText(l, pad, y); y += 26; });
-  if (sl.length) { y += 4; x.fillStyle = cssv('--muted'); x.font = `400 13px ${fB}`; sl.forEach(l => { x.fillText(l, pad, y); y += 18; }); }
-  y += 12;
-  if (img) { x.drawImage(img, pad, y, w, h); y += h; } else y = drawTable(x, t, W, y, pad, fB);
-  y += 14;
-  fl.forEach(l => { const mockLine = l.startsWith('Примерни данни'); x.fillStyle = mockLine ? cssv('--st-mock') : cssv('--muted'); x.font = `${mockLine ? 700 : 400} 12px ${fB}`; x.textAlign = 'left'; x.fillText(l, pad, y); y += 17; });
-  if (watermark) drawWatermark(x, W, H, fD);
-  return c;
+  const dr = inst ? null : drawOf(spec);
+  const ts = inst ? [] : pngTables(spec);                    // also what a figure falls back to when it cannot paint itself
+  if (!inst && !dr && !ts.length) throw new Error('няма какво да се нарисува');
+  const cv = pageCanvas();
+  try {
+    let x = ctxOf(cv), pic = null, kind = 'table';
+    if (inst) {                                              // ECharts: its own canvas image
+      const cw = Math.round(el.clientWidth), ch = Math.round(el.clientHeight);
+      pic = { w: cw, h: ch, whole: true, paint: async (c, X, Y, r) => c.drawImage(await loadImg(chartImage(inst, el, { pixelRatio: r }).url), X, Y, cw, ch) };
+      kind = 'chart';
+    } else if (dr) {
+      try { pic = await dr(kitOf(x, spec)); if (pic) kind = 'draw'; } catch (e) { console.error(e); pic = null; }
+    }
+    if (!pic && ts.length) { const tb = layoutStack(x, ts); pic = { w: tb.inner, h: tb.h, paint: tb.draw }; }
+    if (!pic) throw new Error('няма какво да се нарисува');
+    const { w, h } = pic;
+    const pad = 20, W = Math.max(w || 560, 320) + pad * 2, maxW = W - pad * 2;
+    const tl = wrapLines(x, spec.title || '', `700 22px ${FD}`, maxW);
+    const sl = spec.sub ? wrapLines(x, spec.sub, `400 13px ${FB}`, maxW) : [];
+    const src = sourceLine(spec);
+    const fl = [...(isMock(spec) ? wrapLines(x, 'Примерни данни: измислени стойности, не са истински.', `700 12px ${FB}`, maxW) : []), ...(src ? wrapLines(x, src, `400 12px ${FB}`, maxW) : []), ...wrapLines(x, 'Бюджет на светло · прототип', `400 12px ${FB}`, maxW)];
+    const H = pad + tl.length * 26 + (sl.length ? 4 + sl.length * 18 : 0) + 12 + h + 14 + fl.length * 17 + pad;
+    const pr = pixelRatio ?? pngRatio(W, H, !!pic.whole);
+    cv.width = Math.round(W * pr); cv.height = Math.round(H * pr);
+    x = ctxOf(cv);
+    x.scale(pr, pr);
+    x.fillStyle = cssv('--surface'); x.fillRect(0, 0, W, H);
+    let y = pad;
+    x.fillStyle = cssv('--ink'); x.font = `700 22px ${FD}`; tl.forEach(l => { x.fillText(l, pad, y); y += 26; });
+    if (sl.length) { y += 4; x.fillStyle = cssv('--muted'); x.font = `400 13px ${FB}`; sl.forEach(l => { x.fillText(l, pad, y); y += 18; }); }
+    y += 12;
+    x.save(); await pic.paint(x, pad, y, pr); x.restore();
+    y += h + 14;
+    fl.forEach(l => { const mockLine = l.startsWith('Примерни данни'); x.fillStyle = mockLine ? cssv('--st-mock') : cssv('--muted'); x.font = `${mockLine ? 700 : 400} 12px ${FB}`; x.textAlign = 'left'; x.fillText(l, pad, y); y += 17; });
+    if (watermark) drawWatermark(x, W, H, FD);
+    cv.dataset.kind = kind; cv.dataset.tables = String(kind === 'table' ? ts.length : 0);   // what the picture is made of: 'chart' | 'draw' | 'table' and how many tables (tests)
+    return cv;
+  } finally { cv.remove(); }
 }
 /** test helper: how many pixels differ between the PNG with and without the watermark */
 export async function pngDiff(spec) {

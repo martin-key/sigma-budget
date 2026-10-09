@@ -193,7 +193,7 @@ export function mapFigure(spec = {}) {
     { key: 'v', label: spec.valueLabel ? spec.valueLabel.charAt(0).toUpperCase() + spec.valueLabel.slice(1) : 'Стойност', num: true, fmt: v => (ok(v) ? fmtv(v) : DASH) }
   ];
   const trows = items.slice().sort((a, b) => byName(a.label ?? '', b.label ?? '')).map(it => ({ n: it.label ?? '', g: it.sub ?? '', v: ok(it.value) ? it.value : null, _mock: isMock(it) }));
-  share.attach(id, { table: () => tableData({ columns: tcols, rows: trows }) });
+  share.attach(id, { table: () => tableData({ columns: tcols, rows: trows }), draw: k => drawMap(k, id) });
 
   const label = `Картограма: ${spec.title || 'без заглавие'}. ${num(items.length, 0)} района${vals.length ? `, ${nb === 1 ? 'един клас' : num(nb, 0) + ' класа'} по стойност` : ''}.${spec.desc ? ' ' + spec.desc : ''}${spec.twin === false ? '' : ' Данните са и в таблицата под картата.'}`;
   const help = spec.help || 'Картата е един елемент за Tab. Със стрелките се местиш между районите, с Enter отваряш избрания. Същите данни има и в списъка.';
@@ -220,6 +220,83 @@ export function mapFigure(spec = {}) {
     ${legend}
     ${spec.twin === false ? '' : html`<details class="disc fig-table" id="${id}-tbl"><summary><span class="disc-title">${icon('table', { size: 16 })} Таблица с данните</span></summary><div class="disc-body">${dataTable({ id: id + '-t', caption: spec.title ? `Данни за картата: ${spec.title}` : 'Данни за картата', columns: tcols, rows: trows, dense: true, status: anyMock ? 'mock' : undefined })}</div></details>`}
   </figure>`;
+}
+
+/* ---------------------------------------------------------------- picture (PNG export) */
+/** pattern sizes are in drawing units; u = drawing units per pixel keeps the hatch and the dots the same size on screen at every zoom, and in the PNG */
+function scalePatterns(svg, u) {
+  const hp = svg.querySelector('.map-p-hatch'), np = svg.querySelector('.map-p-nd');
+  if (hp) { hp.setAttribute('width', 7 * u); hp.setAttribute('height', 7 * u); const l = hp.querySelector('line'); l.setAttribute('y2', 7 * u); l.setAttribute('stroke-width', 1.6 * u); }
+  if (np) {
+    np.setAttribute('width', 6 * u); np.setAttribute('height', 6 * u);
+    const rc = np.querySelector('rect'), c = np.querySelector('circle');
+    rc.setAttribute('width', 6 * u); rc.setAttribute('height', 6 * u);
+    c.setAttribute('cx', 2 * u); c.setAttribute('cy', 2 * u); c.setAttribute('r', 1 * u);
+  }
+}
+const PAINT = ['fill', 'fill-opacity', 'fill-rule', 'stroke', 'stroke-opacity', 'stroke-linejoin'];
+/** a standalone copy of the map SVG for an <img>: the page CSS does not reach it, so computed styles are written into the elements; screen-pixel strokes become drawing units */
+function svgCopy(svg, W, H) {
+  const u = svg.viewBox.baseVal.width / W, copy = svg.cloneNode(true);
+  scalePatterns(copy, u);
+  const from = [svg, ...svg.querySelectorAll('*')], to = [copy, ...copy.querySelectorAll('*')];
+  from.forEach((a, i) => {
+    const b = to[i], cs = getComputedStyle(a);
+    if ((cs.display === 'none' && !a.closest('defs')) || a.classList.contains('map-ovl-hl')) { b.remove(); return; }   // hidden overlays and the hover ring; anything in <defs> stays
+    const st = PAINT.map(p => { const v = cs.getPropertyValue(p), m = /^url\(.*#([^"'#)]+)["']?\)\s*$/.exec(v); return `${p}:${m ? `url(#${m[1]})` : v}`; });
+    if (cs.opacity !== '1') st.push(`opacity:${cs.opacity}`);
+    if (cs.vectorEffect === 'non-scaling-stroke') {
+      st.push(`stroke-width:${parseFloat(cs.strokeWidth) * u}`);
+      if (cs.strokeDasharray && cs.strokeDasharray !== 'none') st.push(`stroke-dasharray:${cs.strokeDasharray.split(/[ ,]+/).map(n => parseFloat(n) * u).join(' ')}`);
+    }
+    [...b.attributes].forEach(t => { if (/^(aria-|data-)/.test(t.name) || ['role', 'tabindex', 'href', 'hidden', 'class'].includes(t.name)) b.removeAttribute(t.name); });
+    b.setAttribute('style', st.join(';'));
+  });
+  copy.setAttribute('width', W); copy.setAttribute('height', H);
+  return new XMLSerializer().serializeToString(copy);
+}
+/** what „Изтегли PNG“ paints for a map: the SVG as on screen plus its legend (swatch, range, count). Returns null when the SVG cannot be turned into an image. */
+async function drawMap(k, id) {
+  const fig = document.getElementById(`${id}-fig`), svg = fig?.querySelector('.map-svg'), vb = svg?.viewBox.baseVal;
+  if (!svg || !svg.getClientRects().length || !(vb.width > 0 && vb.height > 0)) return null;
+  const W = Math.round(Math.min(900, Math.max(560, svg.getBoundingClientRect().width))), H = Math.round((W * vb.height) / vb.width);
+  const url = URL.createObjectURL(new Blob([svgCopy(svg, W, H)], { type: 'image/svg+xml;charset=utf-8' }));
+  let img;
+  try { img = await k.loadImg(url); } catch { return null; } finally { URL.revokeObjectURL(url); }
+  const { x, FB, cssv, rrect, stripes } = k, f = `400 14px ${FB}`, LH = 20, ROW = LH + 4, SW = 20, GAP = 16;
+  x.font = f;
+  const sp = x.measureText(' ').width, text = sel => fig.querySelector(sel)?.textContent.trim() || '';
+  const items = [...fig.querySelectorAll('.map-legend-list > li')].map(li => {
+    const sw = li.querySelector('.map-sw'), o = { t: li.children[1]?.textContent.trim() || '', n: li.querySelector('.map-n')?.textContent.trim() || '', bg: getComputedStyle(sw).backgroundColor, kind: sw.classList.contains('map-nd-sw') ? 'nd' : sw.dataset.mock ? 'mock' : 'bin' };
+    o.tw = x.measureText(o.t).width;
+    o.w = SW + 8 + o.tw + (o.n ? sp + x.measureText(o.n).width : 0);
+    return o;
+  });
+  let cx = 0, rows = 0;
+  items.forEach(o => { if (cx && cx + o.w > W) { rows++; cx = 0; } o.x = cx; o.row = rows; cx += o.w + GAP; });
+  const head = k.wrap(text('.map-legend-title'), f, W).filter(Boolean), note = k.wrap(text('.map-legend-note'), f, W).filter(Boolean);
+  const listH = items.length ? (rows + 1) * ROW - 4 : 0, gh = head.length * LH + (head.length ? 4 : 0) + listH + (note.length && listH ? 4 : 0) + note.length * LH;
+  return {
+    w: W, h: H + (gh ? 12 + gh : 0),
+    paint(c, X, Y) {
+      c.drawImage(img, X, Y, W, H);
+      let y = Y + H + 12;
+      c.font = f; c.textAlign = 'left';
+      c.fillStyle = cssv('--muted'); head.forEach(l => { c.fillText(l, X, y + 3); y += LH; }); if (head.length) y += 4;
+      items.forEach(o => {
+        const sx = X + o.x, sy = y + o.row * ROW;
+        rrect(c, sx, sy + 4, SW, 12, 3); c.fillStyle = o.bg; c.fill();
+        c.save(); c.clip();
+        if (o.kind === 'nd') { c.fillStyle = cssv('--faint'); for (let i = 0; i < 4; i++) for (let j = 0; j < 3; j++) { c.beginPath(); c.arc(sx + 2.5 + i * 5, sy + 4 + 2.5 + j * 5, 1.25, 0, 2 * Math.PI); c.fill(); } }
+        if (o.kind === 'mock') stripes(c, sx, sy + 4, SW, 12, cssv('--st-mock'), 1.5, 6);
+        c.restore();
+        c.fillStyle = cssv('--ink'); c.fillText(o.t, sx + SW + 8, sy + 3);
+        if (o.n) { c.fillStyle = cssv('--muted'); c.fillText(o.n, sx + SW + 8 + o.tw + sp, sy + 3); }
+      });
+      y += listH + (note.length && listH ? 4 : 0);
+      c.fillStyle = cssv('--muted'); note.forEach(l => { c.fillText(l, X, y + 3); y += LH; });
+    }
+  };
 }
 
 /* ---------------------------------------------------------------- behaviour */
@@ -346,15 +423,7 @@ export function mount(fig, ctx) {
   const fit = () => {
     const w = svg.getBoundingClientRect().width, vbw = parseFloat(svg.dataset.vbw);
     if (!(w > 0) || !(vbw > 0)) return;
-    const u = vbw / w;
-    const hp = svg.querySelector('.map-p-hatch'), np = svg.querySelector('.map-p-nd');
-    if (hp) { hp.setAttribute('width', 7 * u); hp.setAttribute('height', 7 * u); const l = hp.querySelector('line'); l.setAttribute('y2', 7 * u); l.setAttribute('stroke-width', 1.6 * u); }
-    if (np) {
-      np.setAttribute('width', 6 * u); np.setAttribute('height', 6 * u);
-      const rc = np.querySelector('rect'), c = np.querySelector('circle');
-      rc.setAttribute('width', 6 * u); rc.setAttribute('height', 6 * u);
-      c.setAttribute('cx', 2 * u); c.setAttribute('cy', 2 * u); c.setAttribute('r', 1 * u);
-    }
+    scalePatterns(svg, vbw / w);
   };
   const ro = typeof ResizeObserver === 'function' ? new ResizeObserver(fit) : null;
   ro?.observe(svg);

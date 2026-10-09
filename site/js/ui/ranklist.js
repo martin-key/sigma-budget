@@ -43,6 +43,91 @@ function rowHtml(o, it, { tag, n, rel, total }) {
     + `</${tag}>`);
 }
 
+/* The picture for „Изтегли PNG“: the rows as they stand on screen (label, small line, value, bar); an open row shows its children, indented.
+   It is read from the DOM, so it prints exactly what the page prints. rankPicture(kit, listEl, caption) → {w, h, paint} | null (the sankey list uses it too). */
+const said = n => (n?.textContent ?? '').replace(/[ \t\r\n\f]+/g, ' ').trim();
+const bare = (n, drop) => { if (!n) return ''; const c = n.cloneNode(true); c.querySelectorAll(drop).forEach(e => e.remove()); return said(c); };
+const rowOf = (row, depth) => {
+  const lab = row.querySelector('.rank-label'), fill = row.querySelector('.rank-fill');
+  return {
+    depth, n: said(row.querySelector('.rank-n')), label: (lab?.querySelector('.sk-arrow') ? '→\u00a0' : '') + bare(lab, 'small,.rank-st,.sr-only,.sk-arrow'),
+    sub: said(lab?.querySelector('small')), st: said(lab?.querySelector('.rank-st')),
+    value: bare(row.querySelector('.rank-val'), '.rank-share,.sr-only'), share: said(row.querySelector('.rank-share')),
+    pending: row.dataset.st === 'pending', pct: fill ? parseFloat(fill.style.width) || 0 : 0, mock: fill?.dataset.mock === 'true'
+  };
+};
+function rowsOf(list, depth = 0, out = []) {
+  for (const li of list.children) {
+    if (!li.getClientRects().length) continue;
+    const det = li.querySelector(':scope > details'), head = li.querySelector(':scope > .sk-from');
+    const row = det ? det.querySelector(':scope > summary > .rank-row') : li.querySelector(':scope > .rank-row');
+    if (head) out.push({ depth, head: true, n: '', label: said(head.querySelector('.sk-name')), sub: '', st: '', value: said(head.querySelector('.sk-sum')), share: '', pending: false, pct: 0, mock: false });
+    if (row) out.push(rowOf(row, depth));
+    const kids = det ? (det.open ? det.querySelector(':scope > .rank-children') : null) : li.querySelector(':scope > .sk-to');
+    if (kids) rowsOf(kids, depth + 1, out);
+  }
+  return out;
+}
+export function rankPicture(k, list, cap = '') {
+  const all = list ? rowsOf(list) : [];
+  if (!all.length) return null;
+  const { x, FB } = k, more = all.length > 40 ? all.length - 36 : 0, rows = more ? all.slice(0, 36) : all;
+  const F = { lab: `400 15px ${FB}`, val: `700 15px ${FB}`, shr: `400 12.5px ${FB}`, sub: `400 13px ${FB}`, st: `700 11.5px ${FB}`, cap: `700 14px ${FB}`, n: `700 15px ${FB}` };
+  const wid = (t, f) => { x.font = f; return x.measureText(t).width; };
+  const W = Math.round(Math.min(900, Math.max(560, list.clientWidth))), IND = 30, GAP = 14;
+  const nW = rows.some(r => r.n) ? 30 : 0;                              // the number column of an ordered list (top level only)
+  const capL = cap ? k.wrap(cap, F.cap, W) : [], capH = capL.length ? capL.length * 19 + 8 : 0;
+  const lay = rows.map(r => {
+    const x0 = r.depth * IND, nw = r.depth === 0 && !r.head ? nW : 0, vf = r.pending ? F.lab : F.val;
+    const vw = r.value ? wid(r.value, vf) : 0, sw = r.share ? wid(r.share, F.shr) : 0, stw = r.st ? wid(r.st, F.st) + 14 : 0;
+    const lw = Math.max(90, W - x0 - nw - (r.value ? vw + (sw ? sw + 8 : 0) + 12 : 0));
+    const ll = k.wrap(r.label, r.head ? F.val : F.lab, lw), sl = r.sub ? k.wrap(r.sub, F.sub, lw) : [];
+    return { ...r, x0, nw, vf, vw, sw, stw, ll, sl, h: ll.length * 20 + sl.length * 17 + (r.st ? 22 : 0) + (r.head ? 0 : 12) };
+  });
+  const h = Math.ceil(capH + lay.reduce((a, r) => a + r.h, 0) + GAP * (lay.length - 1) + (more ? 28 : 0));
+  const paint = (c, X, Y) => {
+    const col = n => k.cssv(n), ink = col('--ink'), muted = col('--muted'), line = col('--line'), strong = col('--line-strong'), sunk = col('--sunk');
+    c.textBaseline = 'top'; c.textAlign = 'left';
+    let y = Y;
+    capL.forEach(l => { c.font = F.cap; c.fillStyle = muted; c.fillText(l, X, y); y += 19; });
+    if (capH) y += 8;
+    lay.forEach((r, i) => {
+      const lx = X + r.x0 + r.nw;
+      for (let d = 1; d <= r.depth; d++) { c.fillStyle = line; c.fillRect(X + (d - 1) * IND + 16, y - (i ? GAP / 2 : 0), 2, r.h + (i ? GAP : 0)); }   // the rule down the children
+      if (r.n) { c.font = F.n; c.fillStyle = muted; c.fillText(r.n, X + r.x0, y + 2); }
+      c.font = r.head ? F.val : F.lab; c.fillStyle = ink;
+      r.ll.forEach((l, j) => c.fillText(l, lx, y + 2 + j * 20));
+      let ty = y + r.ll.length * 20;
+      c.font = F.sub; c.fillStyle = muted;
+      r.sl.forEach((l, j) => c.fillText(l, lx, ty + 2 + j * 17));
+      ty += r.sl.length * 17;
+      if (r.st) { c.strokeStyle = strong; c.lineWidth = 1; k.rrect(c, lx + .5, ty + 2.5, r.stw - 1, 17, 8.5); c.stroke(); c.font = F.st; c.fillStyle = muted; c.fillText(r.st, lx + 7, ty + 5); }
+      if (r.value) {
+        c.textAlign = 'right';
+        if (r.share) { c.font = F.shr; c.fillStyle = muted; c.fillText(r.share, X + W, y + 4); }
+        c.font = r.vf; c.fillStyle = r.pending ? col('--st-pending') : ink; c.fillText(r.value, X + W - (r.sw ? r.sw + 8 : 0), y + 2);
+        c.textAlign = 'left';
+      }
+      if (!r.head) {
+        const by = y + r.h - 8, bw = X + W - lx, fw = (bw * r.pct) / 100;
+        if (r.pending) { c.save(); c.setLineDash([3, 3]); c.strokeStyle = strong; c.lineWidth = 1; k.rrect(c, lx + .5, by + .5, bw - 1, 7, 3.5); c.stroke(); c.restore(); }
+        else {
+          c.fillStyle = sunk; k.rrect(c, lx, by, bw, 8, 4); c.fill();
+          if (fw > 0) {
+            c.save(); k.rrect(c, lx, by, fw, 8, 4); c.clip();
+            c.fillStyle = col(r.mock ? '--data-2' : '--data'); c.fillRect(lx, by, fw, 8);
+            if (r.mock) k.stripes(c, lx, by, fw, 8, col('--st-mock'));
+            c.restore();
+          }
+        }
+      }
+      y += r.h + GAP;
+    });
+    if (more) { c.font = `400 13px ${FB}`; c.fillStyle = muted; c.fillText(`… и още ${more} реда в CSV файла`, X, y - GAP + 10); }
+  };
+  return { w: W, h, paint };
+}
+
 export function ranklist(o = {}) {
   if (!o.id) throw new Error('ranklist: id is required');
   let items = (o.items || []).filter(it => it && it.label != null && it.label !== '');
@@ -85,7 +170,10 @@ export function ranklist(o = {}) {
   const unitLabel = o.unitLabel ?? (o.fmt ? undefined : o.unit === 'pct' ? '%' : o.unit === 'num' ? undefined : 'млн. €');
   const columns = [{ key: 'n', label: o.categoryLabel || 'Позиция' }, { key: 'v', label: 'Стойност', unit: unitLabel, d: o.d, num: true }];
   if (rows.some(r => ok(r.p))) columns.push({ key: 'p', label: 'Дял', unit: '%', d: 1, num: true });
-  share.attach(o.id, { table: () => tableData({ columns, rows }) });
+  share.attach(o.id, {
+    table: () => tableData({ columns, rows }),
+    draw: k => { const root = document.getElementById(o.id); return rankPicture(k, root?.querySelector(':scope > .rank-list'), said(root?.querySelector(':scope > .rank-cap'))); }
+  });
 
   return html`<div class="${cx('rank', o.ordered && 'rank-ordered', o.cls)}" id="${o.id}" data-attach="${o.id}"${anyMock ? raw(' data-mock-fig="true"') : ''}>
     ${cap}${anyMock ? html`<p class="rank-mock">${mockBadge()}</p>` : ''}

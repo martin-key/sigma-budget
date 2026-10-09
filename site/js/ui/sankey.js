@@ -19,6 +19,7 @@ import { icon } from '../icons.js';
 import { chart } from './chart.js';
 import { emptyState, mockBadge } from './states.js';
 import { dataTable, tableData } from './table.js';
+import { rankPicture } from './ranklist.js';
 import * as share from '../share.js';
 
 const ok = v => typeof v === 'number' && Number.isFinite(v);
@@ -64,7 +65,7 @@ function flowList(o, { nodes, links, fmt, unitText, mockAll }) {
       <span class="rank-bar" aria-hidden="true">${width > 0 ? html`<span class="rank-fill"${mock ? raw(' data-mock="true"') : ''} style="width:${Number(width.toFixed(1))}%"></span>` : ''}</span>
     </div></li>`;
   };
-  return html`<div class="sankey-fallback"><ul class="rank-list sk-list" aria-label="${plain(o.label ?? o.title ?? 'Потоци')}: потоци по източник">${groups.map(g => {
+  return html`<div class="sankey-fallback" data-attach="${o.id}-list"><ul class="rank-list sk-list" aria-label="${plain(o.label ?? o.title ?? 'Потоци')}: потоци по източник">${groups.map(g => {
     const sum = g.out.filter(l => ok(l.value) && l.value > 0).reduce((a, l) => a + l.value, 0);
     return html`<li class="sk-src"><p class="sk-from"><span class="sk-name">${g.n.name}</span><span class="sk-sum">${sum > 0 ? html`${fmt(sum)}${unitText ? html` ${unitText}` : ''}` : html`<span class="sk-pending">Предстои</span>`}</span></p>
       <ul class="rank-list sk-to">${g.out.map(flow)}</ul></li>`;
@@ -110,6 +111,7 @@ export function sankey(o = {}) {
     rows: links.map(l => ({ a: l.source, b: l.target, v: ok(l.value) ? l.value : null, _mock: mockAll || l.mock, _status: ok(l.value) ? undefined : 'pending' }))
   };
   const list = flowList(o, { nodes: all, links, fmt, unitText, mockAll });
+  share.attach(`${o.id}-list`, { draw: k => rankPicture(k, document.getElementById(o.id)?.querySelector('.sk-list')) });   // PNG of the list (what a phone shows)
 
   if (withChart) {
     const fig = chart({
