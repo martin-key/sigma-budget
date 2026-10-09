@@ -52,6 +52,23 @@
   .page[data-route="S15"] .s15-plan table.data :is(th, td):nth-child(4) { display: none; }
 }
 
+/* „Сравнение на години“: the two year selects stay narrow, the month select a little wider; the monthly block's two switches side by side when there is room */
+.page[data-route="S15"] .s15-cmp-controls .field,
+.page[data-route="S15"] .s15-cmp-controls .field:first-child { flex: 1 1 7.5rem; max-width: 11rem; }
+.page[data-route="S15"] .s15-cmp-controls .field:nth-child(3) { flex: 1 1 12rem; max-width: 18rem; }
+.page[data-route="S15"] .s15-cmp-controls .s15-ctl { flex: 1 1 18rem; max-width: 100%; }
+.page[data-route="S15"] .s15-cmp-opts { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--sp-3) var(--sp-5); margin-bottom: var(--sp-4); }
+.page[data-route="S15"] .s15-cmp-opts .field { flex: 1 1 14rem; min-width: 0; max-width: 100%; }
+/* the comparison tables: plain item names, the totals bold on a grey band with a line above (like a table total) */
+.page[data-route="S15"] :is(#s15-t-cmp-items, #s15-t-cmp-months) tbody th[scope="row"] { font-weight: 400; }
+.page[data-route="S15"] #s15-t-cmp-items tbody tr:has(th strong) > * { border-top: 2px solid var(--line-strong); background-color: var(--sunk); font-weight: 700; }
+/* below 640px the change in % sits under the difference (.s15-narrow) and its own column is hidden; tighter cells so four columns fit 390 px */
+@media (max-width: 639px) {
+  .page[data-route="S15"] :is(#s15-t-cmp-items, #s15-t-cmp-months) :is(th, td):nth-child(5) { display: none; }
+  .page[data-route="S15"] :is(#s15-t-cmp-items, #s15-t-cmp-months) :is(th, td) { padding-inline: 5px; }
+  .page[data-route="S15"] :is(#s15-t-cmp-items, #s15-t-cmp-months) tbody th[scope="row"] { min-width: 5.5rem; }
+}
+
 /* definition list under the budgets table: the name, then what is inside its numbers */
 .page[data-route="S15"] .s15-minor { margin: var(--sp-4) 0 var(--sp-2); font-size: var(--fs-0); }
 .page[data-route="S15"] .s15-defs { display: grid; gap: var(--sp-3); margin: 0; max-width: 70ch; }
