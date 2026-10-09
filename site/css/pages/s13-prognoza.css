@@ -13,7 +13,7 @@
 
 /* six tiles of the year lay out as 3 + 3 (or 2 x 3), never 4 + 2 (only the column count; the band itself is the shared one; phones keep its two columns) */
 @media (min-width: 600px) {
-  .page[data-route="S13"] #s13-kpis .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); }
+  .page[data-route="S13"] #s13-kpis .kpi-grid > .kpi { flex-basis: min(100%, 15rem); }
 }
 
 /* macro tables: rows under the real growth of GDP are indented */
