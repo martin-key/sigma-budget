@@ -1,6 +1,6 @@
 // Municipality helpers shared by S20 (Моята община) and S21 (Община). Pure: no DOM, no store, no fetch, no module state.
 // Money in municipalities.json (D19) is in хил. € (thousand euro); perCapita is € per person; an unknown number is
-// absent or null, never 0. The mock file mock/municipal-finance.json (M03) declares its own unit in meta.unit.
+// absent or null, never 0.
 //
 //   TYPES                    the five kinds of transfer in the order of the data: {key, label, short, text, inTotal} (text = one plain sentence;
 //                            inTotal: the first four make up transfers.total, „other targeted“ is paid on top and is OUTSIDE it, see transfers.all)
@@ -11,8 +11,6 @@
 //   similarTo(list, m, n)    the n municipalities nearest in population (never m itself), smallest first
 //   search(list, q)          {hits, via:'name'|'region'|null} (Cyrillic or Latin spelling, with or without „Община“; also the law's spelling lawName); null for an empty query
 //   normQuery(q)             the folded form of a query
-//   unitFactor(doc)          1 for „хил. €“, 1000 for „млн. €“, null when the unit is unknown (then the figures stay pending)
-//   financeIndex(doc)        Map id -> M03 record with every sum in хил. €: {id, ownRevenue, expenditure, debt, balance, quarterly[{q, revenue, expenditure}], why, mock}
 //   khilText(v, d, leva) · eurText(v, d, leva)   amounts with the visitor's „и в лева“ switch („… (≈ … лв.)“)
 //   munName(m)               „Община Благоевград“ · „Столична община“
 import { NBSP, DASH, num, khil, eur, EUR_RATE } from './format.js';
@@ -127,35 +125,6 @@ export function search(list, q) {
   }
   const byRegion = list.filter(m => place(m?.region) >= 0).sort((a, b) => bg(a.name, b.name) || bg(a.id, b.id));
   return byRegion.length ? { hits: byRegion, via: 'region' } : { hits: [], via: null };
-}
-
-/* ------------------------------------------------------------------ mock finance (M03) */
-/** how many хил. € one unit of the file is; null when the file does not say */
-export function unitFactor(doc) {
-  const u = String(doc?.meta?.unit ?? '').toLowerCase();
-  return u.startsWith('хил') ? 1 : u.startsWith('млн') ? 1000 : null;
-}
-
-/** id -> M03 record with every sum in хил. €; an empty Map when the unit is unknown (the page then shows „Предстои“) */
-export function financeIndex(doc) {
-  const out = new Map();
-  const f = unitFactor(doc);
-  if (f === null) return out;
-  const s = v => (ok(v) ? v * f : null);
-  for (const it of Array.isArray(doc?.items) ? doc.items : []) {
-    if (!it?.id) continue;
-    out.set(it.id, {
-      id: it.id,
-      ownRevenue: s(it.ownRevenue),
-      expenditure: s(it.expenditure),
-      debt: s(it.debt),
-      balance: s(it.balance),
-      quarterly: (Array.isArray(it.quarterly) ? it.quarterly : []).map(q => ({ q: q?.q, revenue: s(q?.revenue), expenditure: s(q?.expenditure) })).filter(q => ok(q.q)).sort((a, b) => a.q - b.q),
-      why: typeof it.why === 'string' ? it.why : '',
-      mock: it.mock !== false
-    });
-  }
-  return out;
 }
 
 /* ------------------------------------------------------------------ text */

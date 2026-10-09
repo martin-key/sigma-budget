@@ -44,7 +44,7 @@ export function block(o = {}) {
       sub: o.sub ? plain(o.sub) : '',
       text: sh.text ?? (o.sub ? plain(o.sub) : undefined),
       source: src, asOf: o.asOf, status: status || undefined, mock,
-      chart: sh.chart, table: sh.table, embed: sh.embed, embedParams: sh.embedParams,
+      chart: sh.chart, table: sh.table, embed: sh.embed, embedParams: sh.embedParams, link: sh.link, period: sh.period,
       report: wantReport ? reportHref(report) : undefined
     });
   }

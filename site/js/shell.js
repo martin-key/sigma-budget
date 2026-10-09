@@ -1,9 +1,11 @@
 // App shell: mock banner, masthead, section band (>=961 px), «Меню» drawer + bottom bar (<=960 px), footer, offline banner.
-// v4 (СИГМА visual language): the masthead carries the serif wordmark and the tools; #sidenav is a mono-uppercase band with the five
-// sections (the current one underlined) and the current section's screens on a second line; «Още» opens as a dropdown there.
+// V5 (СИГМА visual language): the masthead carries the serif wordmark, the search and the permanent «Моите данъци» entry; #sidenav is a
+// mono-uppercase band with the three main sections «Начало · Изпълнение · Бюджет» (the current one underlined) and the current section's
+// screens on a second line; «Още» (data and methodology, glossary, learning path, project) opens as a dropdown there. The phone bar has
+// three tabs «Начало · Отчет · Бюджет»; everything else is under «Меню».
 // Light only: no theme switch (СИГМА has no dark theme). Built once at boot from the route table. It follows the store (period, user type, sources) and the router
 // (current item, period switch hidden on screens that do not depend on a period). Page workers never edit this file.
-import { store, safe } from './store.js';
+import { store, safe, ROLE_SELECTOR } from './store.js';
 import { ROUTES, GROUPS, byId, href as routeHref } from './routes.js';
 import { html, attrs, nextId } from './html.js';
 import { icon } from './icons.js';
@@ -20,24 +22,24 @@ const yearOf = p => p.label.split(' · ')[0];
 const statusOf = p => p.label.split(' · ')[1] || '';
 const NEWS_KEY = 'bns.news.seen';
 
-/* The five sections of the app, in one list: the phone bottom bar shows the first four as tabs and „Още“ as the fifth,
-   the desktop left bar shows the same five as rows (only the current section lists its screens). Every route outside
-   the four sections lights „Още“; the glossary (S03) stays pinned at the end of the left bar. */
+/* The three main sections of the app. The phone bottom bar shows them as tabs, the desktop band as rows (only the current section lists
+   its screens). «Моите данъци» (S18) is not a section: it is a permanent entry of the masthead. Every other route lives under «Още». */
 const idsOf = (...groups) => ROUTES.filter(r => groups.includes(r.group)).map(r => r.id);
 const SECTIONS = [
-  { id: 'home', label: 'Начало', icon: 'home', to: 'S01', routes: idsOf('start').filter(id => id !== 'S03') },
-  { id: 'money', label: 'Парите', icon: 'wallet', to: 'S05', routes: idsOf('budget') },
-  { id: 'exec', label: 'Изпълнение', icon: 'gauge', to: 'S15', routes: idsOf('exec') },
-  { id: 'tax', label: 'Данъци', icon: 'percent', to: 'S18', routes: ['S18'] }
+  { id: 'home', label: 'Начало', tab: 'Начало', icon: 'home', to: 'S01', routes: ['S01'] },
+  { id: 'exec', label: 'Изпълнение', tab: 'Отчет', icon: 'gauge', to: 'S15', routes: idsOf('exec') },
+  { id: 'money', label: 'Бюджет', tab: 'Бюджет', icon: 'wallet', to: 'S07', routes: idsOf('budget'), order: ['S07', 'S06', 'S10', 'S12', 'S13', 'S14', 'S20', 'S05'] }
 ];
 const TABS = SECTIONS;
-const MORE_ROUTES = idsOf('debt', 'phase2', 'ref').filter(id => id !== 'S18');
-const MORE_GROUPS = [['debt', 'Дълг и сравнения'], ['phase2'], ['ref']];
+const MORE_GROUPS = [['learn', 'Научи повече'], ['debt', 'Контекст и сравнения'], ['ref', 'Данни и проект']];
+const MORE_ROUTES = idsOf(...MORE_GROUPS.map(g => g[0]));
+const navName = r => r.short || r.title;
 
 const openSearch = el => import('./search.js').then(m => m.openPalette(el)).catch(e => { console.error(e); });
 
 /* ------------------------------------------------------------------ settings controls (shared by the ⋯ menu and the phone „Още“ sheet) */
 function userTypeRadios(name) {
+  if (!ROLE_SELECTOR) return '';                   // V5: no role selector in the main flow (flag in js/store.js)
   return html`<fieldset class="opt-list"><legend class="opt-legend">Изглед за</legend>${store.USER_TYPES.map(t => html`<label class="opt"><input type="radio" name="${name}" value="${t.id}" data-pref="userType"${t.id === store.get('userType') ? html` checked` : ''}><span class="opt-main"><span class="opt-label">${t.label}</span><span class="opt-desc">${t.hint}</span></span></label>`)}</fieldset>`;
 }
 function toggles(withSources) {
@@ -84,7 +86,7 @@ function openMoreSheet(btn) {
   const nav = GROUPS.filter(g => g.id !== 'util').map(g => {
     const items = ROUTES.filter(r => r.group === g.id && r.nav);
     if (!items.length) return '';
-    return html`<section class="more-grp"><h3>${g.label}</h3><ul class="more-list">${items.map(r => html`<li><a href="${routeHref(r.id)}"${router.current?.route?.id === r.id ? html` aria-current="page"` : ''}>${icon(r.icon, { size: 18 })}<span>${r.title}</span>${r.phase === 2 ? html`<span class="nav-tag">фаза 2</span>` : ''}</a></li>`)}</ul></section>`;
+    return html`<section class="more-grp"><h3>${g.label}</h3><ul class="more-list">${items.map(r => html`<li><a href="${routeHref(r.id)}"${router.current?.route?.id === r.id ? html` aria-current="page"` : ''}>${icon(r.icon, { size: 18 })}<span>${navName(r)}</span></a></li>`)}</ul></section>`;
   });
   const body = html`<div class="more-sheet">
     <nav aria-label="Всички раздели">${nav}</nav>
@@ -101,7 +103,7 @@ function openMoreSheet(btn) {
 function openNavMore(btn) {
   const groups = MORE_GROUPS.map(([g, label]) => {
     const items = ROUTES.filter(r => r.group === g && r.nav && MORE_ROUTES.includes(r.id));
-    return html`<section class="more-grp"><h3>${label || GROUPS.find(x => x.id === g).label}</h3><ul class="more-list">${items.map(r => html`<li><a href="${routeHref(r.id)}"${router.current?.route?.id === r.id ? html` aria-current="page"` : ''}><span>${r.title}</span>${r.phase === 2 ? html`<span class="nav-tag">фаза 2</span>` : ''}</a></li>`)}</ul></section>`;
+    return html`<section class="more-grp"><h3>${label || GROUPS.find(x => x.id === g).label}</h3><ul class="more-list">${items.map(r => html`<li><a href="${routeHref(r.id)}"${router.current?.route?.id === r.id ? html` aria-current="page"` : ''}><span>${navName(r)}</span></a></li>`)}</ul></section>`;
   });
   popover.open(btn, { title: 'Още', body: html`<nav class="nav-pop" aria-label="Още раздели">${groups}</nav>`, label: 'Още раздели', align: 'start' });
 }
@@ -118,6 +120,7 @@ function topbarHtml() {
     <span class="badge-mock" title="Прототип с официални и примерни данни">Mock</span>
     <div class="topbar-tools">
       <button type="button" class="tool-btn searchbtn" id="btn-search" aria-haspopup="dialog" aria-keyshortcuts="/ Control+K Meta+K" aria-label="Търси: ДДС, МВР, Пловдив…"><span class="prompt" aria-hidden="true">›</span>${icon('search', { size: 20 })}<span class="ph">Търси: ДДС, МВР, Пловдив…</span><kbd aria-hidden="true">/</kbd></button>
+      <a class="tool-btn tax-link" id="link-tax" href="${routeHref('S18')}" data-nav-tax><span>Моите данъци</span></a>
       <button type="button" class="tool-btn period-btn" id="btn-period" aria-haspopup="dialog" aria-expanded="false" aria-label="Година и статус на данните: ${p.label}"><span class="p-year">${yearOf(p)}</span><span class="p-status"> · ${statusOf(p)}</span>${icon('chevronDown', { size: 14 })}</button>
       <button type="button" class="tool-btn only-wide" id="btn-sources" aria-pressed="${store.get('sources') ? 'true' : 'false'}"><span>Източници</span></button>
       <button type="button" class="icon-btn only-wide" id="btn-more" aria-haspopup="dialog" aria-expanded="false" aria-label="Още настройки" title="Още настройки">${icon('more', { size: 20 })}</button>
@@ -125,21 +128,22 @@ function topbarHtml() {
     </div></div>`;
 }
 const NEWS_DOT = label => html`<span class="nav-dot" data-news-dot data-label="${label}" hidden></span>`;
-const subLink = r => html`<li><a href="${routeHref(r.id)}" data-nav="${r.id}"><span>${r.title}</span>${r.phase === 2 ? html`<span class="nav-tag">фаза 2</span>` : ''}${r.id === 'S16' ? NEWS_DOT('Какво ново (има непрочетено)') : ''}</a></li>`;
+const subLink = r => html`<li><a href="${routeHref(r.id)}" data-nav="${r.id}"><span>${navName(r)}</span>${r.id === 'S16' ? NEWS_DOT('Какво ново (има непрочетено)') : ''}</a></li>`;
 function navHtml() {
   const rows = SECTIONS.map(s => {
-    const subs = ROUTES.filter(r => s.routes.includes(r.id) && r.nav && r.id !== s.to);
-    return html`<div class="nav-sec" data-sec="${s.id}"><a class="nav-main" href="${routeHref(s.to)}" data-nav="${s.to}"><span>${s.label}</span>${s.id === 'exec' ? NEWS_DOT('Изпълнение (има непрочетено)') : ''}</a>${subs.length ? html`<ul class="nav-sub">${subs.map(subLink)}</ul>` : ''}</div>`;
+    const own = ROUTES.filter(r => s.routes.includes(r.id) && r.nav);
+    const subs = s.order ? s.order.map(id => own.find(r => r.id === id)).filter(Boolean) : own;       // the section's own screens, the main one included (the band shows the whole line)
+    return html`<div class="nav-sec" data-sec="${s.id}"><a class="nav-main" href="${routeHref(s.to)}" data-nav="${subs.some(x => x.id === s.to) ? '' : s.to}"><span>${s.label}</span>${s.id === 'exec' ? NEWS_DOT('Изпълнение (има непрочетено)') : ''}</a>${subs.length > 1 ? html`<ul class="nav-sub">${subs.map(subLink)}</ul>` : ''}</div>`;
   });
   const more = MORE_GROUPS.map(([g, label]) => {
     const items = ROUTES.filter(r => r.group === g && r.nav && MORE_ROUTES.includes(r.id));
     return html`<h3 class="nav-sub-h">${label || GROUPS.find(x => x.id === g).label}</h3><ul class="nav-sub">${items.map(subLink)}</ul>`;
   });
   return html`<div class="nav-in">${rows}<div class="nav-sec" data-sec="more"><button type="button" class="nav-main" id="nav-more" aria-haspopup="dialog" aria-expanded="false"><span>Още</span>${icon('chevronDown', { size: 12, cls: 'nav-chev' })}</button><div class="nav-more-list" id="nav-more-list">${more}</div></div>
-    <div class="nav-end"><a class="nav-main" href="${routeHref('S03')}" data-nav="S03"><span>Речник</span></a></div></div>`;
+    </div>`;
 }
 function tabbarHtml() {
-  return html`${TABS.map(t => html`<a href="${routeHref(t.to)}" data-tab="${t.id}">${icon(t.icon, { size: 20 })}<span>${t.label}</span></a>`)}<button type="button" data-tab="more" aria-haspopup="dialog" id="btn-tab-more">${icon('menu', { size: 20 })}<span>Още</span></button>`;
+  return html`${TABS.map(t => html`<a href="${routeHref(t.to)}" data-tab="${t.id}">${icon(t.icon, { size: 20 })}<span>${t.tab}</span></a>`)}`;
 }
 function footerHtml() {
   const core = data.get('core');
@@ -165,11 +169,12 @@ function setCurrent(route) {
     else if (a.dataset.nav === root.id) a.setAttribute('aria-current', 'true');
     else a.removeAttribute('aria-current');
   });
-  const tab = TABS.find(t => t.routes.includes(route.id));
+  const tab = TABS.find(t => t.routes.includes(route.id) || (route.parent && t.routes.includes(root.id)));
   document.querySelectorAll('#tabbar [data-tab]').forEach(el => {
-    const mine = tab ? el.dataset.tab === tab.id : el.dataset.tab === 'more';
-    if (mine) el.setAttribute('aria-current', tab ? 'page' : 'true'); else el.removeAttribute('aria-current');
+    if (tab && el.dataset.tab === tab.id) el.setAttribute('aria-current', 'page'); else el.removeAttribute('aria-current');
   });
+  const tx = $('link-tax');                                  // the permanent «Моите данъци» entry of the masthead
+  if (tx) { if (route.id === 'S18') tx.setAttribute('aria-current', 'page'); else tx.removeAttribute('aria-current'); }
   const sec = tab ? tab.id : MORE_ROUTES.includes(route.id) ? 'more' : '';
   document.querySelectorAll('#sidenav .nav-sec').forEach(el => setSection(el, el.dataset.sec === sec));
 }
@@ -231,7 +236,6 @@ export const shell = {
     $('btn-period').addEventListener('click', e => openPeriod(e.currentTarget));
     $('btn-search').addEventListener('click', e => openSearch(e.currentTarget));
     $('btn-more').addEventListener('click', e => openMore(e.currentTarget));
-    $('btn-tab-more').addEventListener('click', e => openMoreSheet(e.currentTarget));
     $('btn-menu').addEventListener('click', e => {
       const b = e.currentTarget;
       b.setAttribute('aria-expanded', 'true');

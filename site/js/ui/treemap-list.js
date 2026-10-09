@@ -1,6 +1,6 @@
 // Treemap („карта“) or ranked list of the same items, switched by a control. The list is the readable default on phones (< 600 px),
 // the map is the overview on wide screens; both are always in the page, one is hidden.
-//   treemapList({id, title, sub, label, desc, unit, fmt, d, unitLabel, categoryLabel, sort, shares, view, query, mock, height, items:[…]})
+//   treemapList({id, title, sub, label, desc, unit, fmt, d, unitLabel, categoryLabel, sort, shares, view, defaultView, query, mock, height, items:[…]})
 // - `items`: the ranklist shape {label (or name), sub, value, href, mock, status, pctGdp, children, id}. The list shows every row (a row without a number is
 //   „Предстои“); the map draws only rows with a positive number and says how many it left out.
 // - `view:'list'|'map'|'pie'` forces a view, anything else = by screen width (and it follows a resize until the visitor chooses). `query:'view'` mirrors the
@@ -58,7 +58,8 @@ export function treemapList(o = {}) {
   const ck = keyOf(o.id), saved = chosen.get(ck);
   const allowed = v => v === 'list' || v === 'map' || (v === 'pie' && pieOn);
   const forced = allowed(o.view) ? o.view : allowed(saved) ? saved : null;
-  const view = data.length ? (forced || (wide ? 'map' : 'list')) : 'list';
+  const dflt = allowed(o.defaultView) ? o.defaultView : null;     // the screen's own first view; without one the width decides (map on wide screens)
+  const view = data.length ? (forced || dflt || (wide ? 'map' : 'list')) : 'list';
   const name = o.label ?? o.title;
 
   const list = ranklist({
@@ -82,7 +83,7 @@ export function treemapList(o = {}) {
   const cap = o.title || o.sub
     ? html`<p class="fig-cap">${o.title ? html`<span class="fig-title">${o.title}</span>` : ''}${o.sub ? html`<span class="fig-sub">${o.sub}</span>` : ''}</p>`
     : '';
-  return html`<div class="${cx('tmap', o.cls)}" id="${o.id}" data-ui="treemap-list" data-view="${view}" data-ck="${ck}"${forced ? raw(' data-explicit="1"') : ''}>
+  return html`<div class="${cx('tmap', o.cls)}" id="${o.id}" data-ui="treemap-list" data-view="${view}" data-ck="${ck}"${forced || dflt ? raw(' data-explicit="1"') : ''}>
     <div class="tmap-bar">${cap}${control}</div>
     <div class="tmap-list">${list}</div>
     <div class="tmap-map">${map}${left ? html`<p class="tmap-note">На картата няма ${num(left, 0)} ${left === 1 ? 'ред' : 'реда'} без положително число. ${left === 1 ? 'Той е' : 'Те са'} в списъка.</p>` : ''}</div>

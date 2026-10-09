@@ -12,6 +12,7 @@ import { num, pct, delta, money, khil, date, plural, DASH, NBSP, EUR_RATE } from
 import { amount, moneyCol, chartUnit } from '../view.js';
 import { norm, lat } from '../searchlib.js';
 import { tabs } from '../ui/tabs.js';
+import { explorer } from '../ui/explorer.js';
 import { disclosure } from '../ui/disclosure.js';
 import { block } from '../ui/block.js';
 import { kpi, kpiGrid } from '../ui/kpi.js';
@@ -632,13 +633,13 @@ export function render(ctx) {
     lede: 'Министерствата и другите органи харчат парите от държавния бюджет за 2026 г. Тук виждаш колко харчи всеки, как се променя това спрямо 2025 г. и за какви програми отиват парите.',
     context: ctxLine,
     ownContext: true,
-    body: tabs({
+    body: html`${explorer(ctx, 'rashodi:vedomstva')}${tabs({
       id: 's10-tabs', label: 'Ведомства или програми', query: 'tab', active: tab,
       tabs: [
         { key: 'vedomstva', label: 'Ведомства', count: md.items.length, body: vPanel(md, pm, ctx) },
         { key: 'programi', label: 'Програми', count: pm ? pm.programs.length : undefined, body: pPanel(md, pm, ctx) }
       ]
-    })
+    })}`
   };
 }
 

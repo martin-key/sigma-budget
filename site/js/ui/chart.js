@@ -67,11 +67,11 @@ function donutLegend(spec) {
 }
 function legendOf(spec) {
   if (spec.legend === false) return [];
-  if (spec.type === 'bar' || spec.type === 'barh' || spec.type === 'line') return spec.series.map((s, i) => ({ name: s.name, color: cssColor(spec, s.color ?? spec.colors?.[i], i), mock: !!(s.mock || spec.mock) }));
+  if (spec.type === 'bar' || spec.type === 'barh' || spec.type === 'line') return spec.series.map((s, i) => ({ name: s.name, color: cssColor(spec, s.color ?? spec.colors?.[i], i), mock: !!(s.mock || spec.mock), dashed: !!s.dashed && spec.type === 'line' }));
   if (spec.type === 'donut') return donutLegend(spec);
   return [];
 }
-const legendItems = items => html`${items.map(l => html`<li><button type="button" class="lg" aria-pressed="true" data-name="${l.name}"><span class="sw"${l.mock ? raw(' data-mock="true"') : ''} style="background-color:${l.color}"></span><span class="lg-name">${l.name}</span>${l.val != null ? html`<span class="lg-val"><span class="lg-num">${l.val}</span>${l.pct ? html`<span class="lg-pct">${l.pct}</span>` : ''}</span>` : ''}</button></li>`)}`;
+const legendItems = items => html`${items.map(l => html`<li><button type="button" class="lg" aria-pressed="true" data-name="${l.name}"><span class="sw"${l.mock ? raw(' data-mock="true"') : ''}${l.dashed ? raw(' data-dashed="true"') : ''} style="background-color:${l.color};color:${l.color}"></span><span class="lg-name">${l.name}</span>${l.val != null ? html`<span class="lg-val"><span class="lg-num">${l.val}</span>${l.pct ? html`<span class="lg-pct">${l.pct}</span>` : ''}</span>` : ''}</button></li>`)}`;
 
 /** table twin as a dataTable spec (also the source of the CSV export) */
 function tableSpec(spec) {

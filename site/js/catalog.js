@@ -58,7 +58,7 @@ export const dlName = (set, part) => nameOf(part ? part.file : set.file) || `${s
 
 /* ---------------------------------------------------------------- screens */
 const needsParam = r => !!r?.pattern && r.pattern.split('/').filter(Boolean).some(s => /^:\w+(\([^)]*\))?$/.test(s));
-/** the route of the screen that shows a route id: a child without its own menu entry (S08, S09, S11, S21) belongs to its parent; a route that needs a parameter is never a target */
+/** the route of the screen that shows a route id: a child without its own menu entry (S08, S11, S21) belongs to its parent; a route that needs a parameter is never a target */
 export function screenOf(id) {
   let r = byId[id];
   for (let n = 0; r && n < 6 && (needsParam(r) || (!r.nav && r.parent)); n++) r = r.parent ? byId[r.parent] : null;

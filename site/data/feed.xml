@@ -5,7 +5,7 @@
 <link>https://budget-na-svetlo.example/</link>
 <description>Събития по данните за държавния бюджет: месечни отчети, законодателен път, ставки и нови набори. Прототип с примерни данни, където е отбелязано.</description>
 <language>bg</language>
-<lastBuildDate>Fri, 02 Oct 2026 12:00:00 +0000</lastBuildDate>
+<lastBuildDate>Fri, 09 Oct 2026 12:00:00 +0000</lastBuildDate>
 <atom:link href="https://budget-na-svetlo.example/data/feed.xml" rel="self" type="application/rss+xml"/>
 <item>
 <title>Евростат: населението на 1 януари 2026 г.</title>
@@ -16,20 +16,20 @@
 <description>Населението на България е 6 423 207 души. Ползваме го за показателите „на човек“.</description>
 </item>
 <item>
-<title>СЕБРА: дневни обобщения на плащанията за август</title>
-<link>https://budget-na-svetlo.example/#/plashtania</link>
-<guid isPermaLink="false">sebra-2026-09-23</guid>
-<pubDate>Wed, 23 Sep 2026 12:00:00 +0000</pubDate>
-<category>Нови данни</category>
-<description>Страницата на МИДТ показва 3 дневни файла (27.08, 28.08 и 31.08): общо 68 плащания на стойност 830 688,13 €. Файловете не съдържат получателите и не са сума за месеца.</description>
-</item>
-<item>
 <title>Евростат: разходите по функции (COFOG) са допълнени до 2024 г.</title>
 <link>https://budget-na-svetlo.example/#/razhodi</link>
 <guid isPermaLink="false">eurostat-gov_10a_exp-2026-09-16</guid>
 <pubDate>Wed, 16 Sep 2026 12:00:00 +0000</pubDate>
 <category>Евростат</category>
 <description>Разходите на сектор „Държавно управление“ за 2024 г. са 41,06 млрд. € (39,2% от БВП). Разрезът по функции на Евростат не съвпада с функциите на КФП.</description>
+</item>
+<item>
+<title>Месечен отчет на КФП към края на август 2026 г.</title>
+<link>https://budget-na-svetlo.example/#/izpalnenie?mesec=8</link>
+<guid isPermaLink="false">kfp-2026-08</guid>
+<pubDate>Mon, 31 Aug 2026 12:00:00 +0000</pubDate>
+<category>Месечен отчет</category>
+<description>От началото на годината приходите са 30,12 млрд. €, разходите — 33,19 млрд. €, дефицитът е 3,08 млрд. €. Приходите са с 11,9% повече от същия период на 2025 г. Това е 60,7% от годишния план за приходите.</description>
 </item>
 <item>
 <title>НАП публикува таблицата с осигурителните ставки</title>
@@ -61,7 +61,7 @@
 <guid isPermaLink="false">kfp-2026-07</guid>
 <pubDate>Fri, 31 Jul 2026 12:00:00 +0000</pubDate>
 <category>Месечен отчет</category>
-<description>От началото на годината приходите са 26,35 млрд. €, разходите — 28,55 млрд. €, дефицитът е 2,20 млрд. €. Приходите са с 11,2% повече от същия период на 2025 г. Това е 53,1% от годишния план за приходите.</description>
+<description>От началото на годината приходите са 26,35 млрд. €, разходите — 28,55 млрд. €, дефицитът е 2,20 млрд. €. Приходите са с 11,2% повече от същия период на 2025 г.</description>
 </item>
 <item>
 <title>ДВ бр. 68: Закон за бюджета на ДОО и Закон за бюджета на НЗОК</title>

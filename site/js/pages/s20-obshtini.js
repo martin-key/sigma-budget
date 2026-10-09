@@ -1,8 +1,7 @@
-// S20 · Моята община · #/obshtini · next S23, S24 · period 2026.law only (D19 is the law; there is no table for the bill)
+// S20 · Моята община · #/obshtini · next S24 · period 2026.law only (D19 is the law; there is no table for the bill)
 // Data, only through `needs`:
 //   municipalities          D19, REAL   the main transfers of the 2026 state budget law to each municipality (хил. €), inhabitants, € per person
 //   geo/obshtini            D20, REAL   the outlines for the map (optional: without it the screen is the list and says so)
-//   mock/municipal-finance  M03, MOCK   own revenue and debt per municipality (optional: hatched „примерни“ columns, left out under „Само официални данни“)
 // The map, the list and the two rankings show the same numbers; € per person is the figure of the data (muni.pcOf), never typed.
 // The search box filters in place (a re-render would drop the caret and rebuild the map); its text is kept in ?q= with history.replaceState.
 // Oblast, view and sort are ordinary re-renders (?oblast= ?view= ?sort= ?dir=). Everything that depends on the visitor's input is a pure function of ctx.
@@ -15,12 +14,12 @@ import { ranklist } from '../ui/ranklist.js';
 import { chart } from '../ui/chart.js';
 import { seg } from '../ui/seg.js';
 import { field, textInput, selectInput } from '../ui/forms.js';
-import { emptyState, mockNote, mockHidden, pendingState } from '../ui/states.js';
+import { emptyState, pendingState } from '../ui/states.js';
 import { gl } from '../ui/gl.js';
 import { num, plural, eur, leva, money, moneyParts, NBSP, EUR_RATE } from '../format.js';
 import * as M from '../muni.js';
 
-export const needs = ['core', 'municipalities', 'geo/obshtini?', 'mock/municipal-finance?'];
+export const needs = ['core', 'municipalities', 'geo/obshtini?'];
 export const styles = ['s20-obshtini'];
 export const periods = ['2026.law'];
 export const lede = () => 'Виж колко пари държавата дава на твоята община през 2026 г. — общо и на жител. Намери общината по име, на картата или в списъка.';
@@ -29,7 +28,6 @@ const ok = v => typeof v === 'number' && Number.isFinite(v);
 const bg = (a, b) => String(a).localeCompare(String(b), 'bg');
 const clean = q => String(q ?? '').slice(0, 80).trim();
 const MAX_HITS = 8;
-const SORTS = ['name', 'region', 'population', 'total', 'perCapita', 'own', 'debt'];
 
 /* ---------------------------------------------------------------- the model: everything the screen shows, from ctx alone */
 function model(ctx) {
@@ -48,7 +46,6 @@ function model(ctx) {
   const geo = ctx.data['geo/obshtini'];
   const hasGeo = Array.isArray(geo?.features) && geo.features.length > 0;
   const view = ctx.query.view === 'list' || !hasGeo ? 'list' : 'map';
-  const fin = M.financeIndex(ctx.data['mock/municipal-finance']);
   const names = new Map();
   for (const m of all) { const k = String(m.name).trim().toLowerCase(); names.set(k, (names.get(k) ?? 0) + 1); }
   const year = [doc?.populationYear, doc?.meta?.populationYear, all.find(m => ok(m.populationYear))?.populationYear].find(ok) ?? null;
@@ -56,13 +53,13 @@ function model(ctx) {
   const fixIds = new Set(Array.isArray(doc?.popFix?.ids) ? doc.popFix.ids.map(String) : []);
   const fixNote = typeof doc?.popFix?.note === 'string' && pool.some(m => fixIds.has(String(m.id))) ? doc.popFix.note.trim() : '';
   return {
-    ok: true, doc, all, regions, oblast, oblastName, pool, geo, hasGeo, view, fin, year, fixNote,
+    ok: true, doc, all, regions, oblast, oblastName, pool, geo, hasGeo, view, year, fixNote,
     viewParam: ctx.query.view === 'list' || ctx.query.view === 'map' ? ctx.query.view : null,
     asOf: doc?.meta?.asOf,
     dupe: m => names.get(String(m.name).trim().toLowerCase()) > 1,
     aggPool: M.aggregate(pool), aggAll: M.aggregate(all),
     noPop: all.filter(m => M.popOf(m) === null),
-    lv: !!ctx.store.get('leva'), onlyReal: !!ctx.store.get('onlyReal')
+    lv: !!ctx.store.get('leva')
   };
 }
 
@@ -193,14 +190,11 @@ function mapBlock(md, ctx, q) {
 function listBlock(md, ctx, q) {
   const k = md.lv ? EUR_RATE : 1;
   const mu = md.lv ? 'хил. лв.' : 'хил. €';
-  const showFin = md.fin.size > 0 && !md.onlyReal;
   const rows = md.pool.map(m => {
-    const f = md.fin.get(String(m.id));
     const tot = M.totalOf(m), pc = M.pcOf(m);
     return {
       id: m.id, name: m.name, region: m.region, dupe: md.dupe(m), population: M.popOf(m),
       total: tot === null ? null : tot * k, perCapita: pc === null ? null : pc * k,
-      own: f && ok(f.ownRevenue) ? f.ownRevenue * k : null, debt: f && ok(f.debt) ? f.debt * k : null,
       _href: ctx.href('obshtina', { code: m.id })
     };
   }).sort((a, b) => bg(a.name, b.name) || bg(a.region, b.region));
@@ -209,27 +203,19 @@ function listBlock(md, ctx, q) {
     { key: 'region', label: 'Област' },
     { key: 'population', label: 'Жители', num: true, d: 0 },
     { key: 'total', label: 'Трансфер общо', unit: mu, num: true, d: 1 },
-    { key: 'perCapita', label: 'Трансфер на жител', unit: md.lv ? 'лв.' : '€', num: true, d: 0 },
-    ...(showFin ? [
-      { key: 'own', label: 'Собствени приходи (примерни)', unit: mu, num: true, d: 1 },
-      { key: 'debt', label: 'Дълг (примерен)', unit: mu, num: true, d: 1 }
-    ] : [])
+    { key: 'perCapita', label: 'Трансфер на жител', unit: md.lv ? 'лв.' : '€', num: true, d: 0 }
   ];
   const sortBy = columns.some(c => c.key === ctx.query.sort) ? ctx.query.sort : 'name';
-  const why = [...md.fin.values()].find(f => f.why)?.why;
   const table = dataTable({
     id: 's20-spisak', caption: `Основни трансфери към общините за 2026 г.${md.oblast ? `, област ${md.oblastName}` : ''}`,
     columns, rows, sortable: true, sortBy, dir: ctx.query.dir === 'desc' ? 'desc' : 'asc', query: true, dense: true,
     note: md.year ? `Жителите са по данни към ${md.year} г.` : undefined
   });
-  const finNote = showFin ? mockNote(why ? `Собствени приходи и дълг: примерни данни. ${why}` : 'Собствени приходи и дълг: примерни данни.')
-    : md.onlyReal && md.fin.size > 0 ? mockHidden('Скрити са колоните с примерни данни: собствени приходи и дълг.')
-      : html`<p class="s20-pending small muted">Предстои: собствени приходи и дълг на общините (примерни данни).</p>`;
   return block({
     id: 's20-karta', title: 'Общините в списък', scope: 'nat', source: ['zdb', 'gisco'], asOf: md.asOf,
-    status: showFin ? 'partial' : 'real', statusLabel: showFin ? 'Официални и примерни данни' : undefined,
+    status: 'real',
     sub: 'Основни трансфери за 2026 г. Натисни заглавие на колона, за да подредиш списъка.',
-    body: html`${md.hasGeo ? '' : html`<p class="fig-fail" role="note">Картата не се зареди. Същите данни има в списъка.</p>`}${table}${finNote}${fixFoot(md)}`
+    body: html`${md.hasGeo ? '' : html`<p class="fig-fail" role="note">Картата не се зареди. Същите данни има в списъка.</p>`}${table}${fixFoot(md)}`
   });
 }
 
@@ -256,7 +242,7 @@ function readBlock(md) {
     id: 's20-chetene', title: 'Как да четем числата', status: false, source: ['zdb', 'gisco'], asOf: md.asOf, share: false,
     body: html`<div class="prose s20-read">
       <p>Показваме основните ${gl('byudzheten-transfer', 'трансфери')} от държавния бюджет по закона за 2026 г. Те са четири вида: за делегирани дейности, изравнителна субсидия, зимно поддържане и капиталови разходи. Парите отиват в ${gl('obshtinski-byudzhet', 'бюджета на общината')}.</p>
-      <p>Не са включени собствените приходи на общината и целевите суми за конкретни местни дейности („други целеви“). Тях ще видиш на страницата на всяка община.</p>
+      <p>Не са включени собствените приходи на общината и целевите суми за конкретни местни дейности („други целеви“).</p>
       <p>„На жител“ е сумата на общината, разделена на жителите ѝ. Така големи и малки общини се сравняват по равно. Това е ${gl('razhod-na-chovek', 'средна стойност')}: никой не получава тези евро в ръка.</p>
       <p>По-голяма сума на жител не значи, че общината е по-добре или по-зле управлявана. Тя зависи от много неща, например колко училища, детски градини и пътища има общината.</p>
       ${md.year ? html`<p class="small muted">Жителите са по данни към ${md.year} г.${n ? ` За ${n === 1 ? 'една община' : `${num(n, 0)} общини`} няма данни за жителите${names}. На картата са с точки, а сума на жител за тях не показваме.` : ''}</p>` : ''}

@@ -199,7 +199,7 @@ const ENDPOINTS = [
   ['GET /api/v1/ministries', 'Ведомствата и бюджетите им.', 'ministries'],
   ['GET /api/v1/ministries/{код}/programs', 'Политиките и програмите на едно ведомство по години.', 'ministries-programs'],
   ['GET /api/v1/execution?month={месец}', 'Изпълнението на КФП за един месец.', 'execution'],
-  ['GET /api/v1/municipalities/{код}', 'Бюджетът и плащанията на една община.', 'municipalities'],
+  ['GET /api/v1/municipalities/{код}', 'Годишният бюджет и трансферите към една община.', 'municipalities'],
   ['GET /api/v1/measures', 'Мерките от бюджета и ефектите им.', 'measures']
 ];
 

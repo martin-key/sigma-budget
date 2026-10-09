@@ -53,7 +53,7 @@ const TOPICS = [
   { value: 'grafiki', label: 'Графиките и сравненията' },
   { value: 'obyasneniya', label: 'Обясненията и речникът' },
   { value: 'kalkulator', label: 'Калкулаторът за моите данъци' },
-  { value: 'obshtini', label: 'Общини, проекти и плащания (фаза 2)' },
+  { value: 'obshtini', label: 'Общини и проекти (предстои)' },
   { value: 'telefon', label: 'Достъпност и телефон' },
   { value: 'drugo', label: 'Нещо друго' }
 ];

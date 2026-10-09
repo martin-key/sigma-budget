@@ -1,8 +1,7 @@
-// S21 · Община · #/obshtina/:code · next S20, S23 · period 2026.law only (D19 is the law; there is no table for the bill)
+// S21 · Община · #/obshtina/:code · next S20 · period 2026.law only (D19 is the law; there is no table for the bill)
 // Data, only through `needs`:
 //   municipalities          D19, REAL   the main transfers of the 2026 state budget law to each municipality (хил. €), inhabitants, € per person
 //   geo/obshtini            D20, REAL   the outlines for the locator map (optional: without it the screen simply has no map)
-//   mock/municipal-finance  M03, MOCK   own revenue, expenditure, debt and the first two quarters (optional: one hatched block, left out under „Само официални данни“)
 // One municipality, found by its code (case does not matter); an unknown code is ctx.notFound(). The page is a pure function of ctx:
 // nothing is typed in, every number comes from the data or from a sum, an average or a rank of it (muni.js).
 // Groups for the comparison: the oblast (all its municipalities, the one itself included, so the figure is the one of S20), the ten municipalities
@@ -13,7 +12,6 @@ import { kpi, kpiGrid } from '../ui/kpi.js';
 import { mapFigure } from '../ui/map.js';
 import { dataTable } from '../ui/table.js';
 import { ranklist } from '../ui/ranklist.js';
-import { progress } from '../ui/progress.js';
 import { disclosure } from '../ui/disclosure.js';
 import { callout } from '../ui/cards.js';
 import { pendingState } from '../ui/states.js';
@@ -21,12 +19,11 @@ import { gl } from '../ui/gl.js';
 import { num, pct, plural, eur, leva, money, moneyParts, NBSP, EUR_RATE } from '../format.js';
 import * as M from '../muni.js';
 
-export const needs = ['core', 'municipalities', 'geo/obshtini?', 'mock/municipal-finance?'];
+export const needs = ['core', 'municipalities', 'geo/obshtini?'];
 export const styles = ['s21-obshtina'];
 export const periods = ['2026.law'];
 
 const SIMILAR_N = 10;
-const QUARTER_END = { 1: '31 март', 2: '30 юни', 3: '30 септември', 4: '31 декември' };
 const KINDS = M.TYPES.filter(t => t.inTotal);
 const SRC = ['zdb', 'gisco'];
 
@@ -57,7 +54,6 @@ function model(ctx) {
   const oblast = all.filter(x => regionKey(x) === rid);
   const similar = M.similarTo(all, m, SIMILAR_N);
   const geo = ctx.data['geo/obshtini'];
-  const finDoc = ctx.data['mock/municipal-finance'];
   const year = [doc?.populationYear, doc?.meta?.populationYear].find(ok) ?? null;
   const fixIds = new Set(Array.isArray(doc?.popFix?.ids) ? doc.popFix.ids.map(String) : []);      // the two municipalities whose population the data corrects
   const fixNote = typeof doc?.popFix?.note === 'string' ? doc.popFix.note.trim() : '';
@@ -68,9 +64,8 @@ function model(ctx) {
     aggNat: M.aggregate(all),
     rank: M.rankOf(all, m),
     hasGeo: Array.isArray(geo?.features) && geo.features.length > 0, geo,
-    finDoc, fin: M.financeIndex(finDoc).get(String(m.id)) ?? null,
     year, asOf: doc?.meta?.asOf,
-    lv: !!ctx.store.get('leva'), onlyReal: !!ctx.store.get('onlyReal')
+    lv: !!ctx.store.get('leva')
   };
 }
 
@@ -275,79 +270,6 @@ function mapBlock(md, ctx) {
   });
 }
 
-/* ---------------------------------------------------------------- D · own finances: example numbers (M03), one hatched block */
-function financeBlock(md) {
-  const { m, lv, fin } = md;
-  const title = 'Собствени финанси на общината';
-  const sub = 'Примерни числа за 2026 г.: собствени приходи, разходи, дълг и тримесечно изпълнение.';
-  if (md.onlyReal) return block({ id: 's21-finansi', title, mock: true });
-  if (!fin || !(md.finDoc?.meta?.unit)) {
-    return block({
-      id: 's21-finansi', title, status: 'pending', sub: 'Собствени приходи, разходи и дълг на общината.',
-      body: pendingState({ title: 'Предстои', text: 'Собствените приходи, разходите и дългът на общината още не са налични. Тук ще има примерни данни.' })
-    });
-  }
-  const k = lv ? EUR_RATE : 1, mu = lv ? 'хил. лв.' : 'хил. €';
-  const pop = M.popOf(m);
-  const all = M.allOf(m);
-  const allRev = ok(fin.ownRevenue) && all !== null ? fin.ownRevenue + all : null;       // own revenue + all transfers = expenditure − balance
-  const mlnOf = v => (ok(v) ? moneyParts(v / 1000) : null);
-  const lvLine = v => (lv && ok(v) ? `В лева: ${dot(levaOf(v / 1000))}` : '');
-  const join = (...a) => a.filter(Boolean).join(' ');
-
-  const pOwn = mlnOf(fin.ownRevenue), pExp = mlnOf(fin.expenditure);
-  const ownShare = allRev !== null && allRev > 0 ? (fin.ownRevenue / allRev) * 100 : null;
-  const expPc = pop !== null && ok(fin.expenditure) ? (fin.expenditure * 1000) / pop : null;
-  const debtZero = ok(fin.debt) && fin.debt === 0;
-  const pDebt = ok(fin.debt) && !debtZero ? mlnOf(fin.debt) : null;
-  const debtShare = ok(fin.debt) && ok(fin.expenditure) && fin.expenditure > 0 ? (fin.debt / fin.expenditure) * 100 : null;
-  const tiles = kpiGrid([
-    kpi({ label: 'Собствени приходи', value: pOwn ? pOwn.v : null, unit: pOwn ? pOwn.u : '', mock: true, sub: join(ownShare === null ? '' : `${pct(ownShare, 0)} от всички приходи на общината.`, lvLine(fin.ownRevenue)) }),
-    kpi({ label: 'Разходи', value: pExp ? pExp.v : null, unit: pExp ? pExp.u : '', mock: true, sub: join(expPc === null ? '' : `${pcText(expPc, false)} на жител.`, lvLine(fin.expenditure)) }),
-    kpi({
-      label: 'Дълг', value: debtZero ? '0' : pDebt ? pDebt.v : null, unit: debtZero ? '€' : pDebt ? pDebt.u : '', mock: true,
-      sub: debtZero ? 'Общината няма дълг.' : join(debtShare === null ? '' : `${pct(debtShare, 0)} от годишните разходи.`, lvLine(fin.debt))
-    })
-  ], { label: 'Примерни собствени финанси на общината' });
-
-  // the first quarters are cumulative from 1 January; the year is the annual plan (= 100 %)
-  const qs = fin.quarterly.filter(q => ok(q.revenue) || ok(q.expenditure));
-  const share = (v, whole) => (ok(v) && ok(whole) && whole > 0 ? (v / whole) * 100 : null);
-  const rows = [
-    ...qs.map(q => ({ period: `До ${QUARTER_END[q.q] ?? `края на тримесечие ${q.q}`}`, rev: ok(q.revenue) ? q.revenue * k : null, exp: ok(q.expenditure) ? q.expenditure * k : null, revShare: share(q.revenue, allRev), expShare: share(q.expenditure, fin.expenditure), _mock: true })),
-    { period: 'Цяла година (годишен план)', rev: allRev === null ? null : allRev * k, exp: ok(fin.expenditure) ? fin.expenditure * k : null, revShare: allRev === null ? null : 100, expShare: ok(fin.expenditure) ? 100 : null, _mock: true }
-  ];
-  const last = qs.length ? qs[qs.length - 1] : null;
-  const lastEnd = last ? QUARTER_END[last.q] : null;
-  const bars = last && lastEnd ? html`<div class="s21-bars">
-      ${progress({ id: 's21-bar-prihodi', label: `Приходи до ${lastEnd}`, value: share(last.revenue, allRev), max: 100, text: share(last.revenue, allRev) === null ? 'Предстои' : `${pct(share(last.revenue, allRev), 1)} от годишния план`, mock: true })}
-      ${progress({ id: 's21-bar-razhodi', label: `Разходи до ${lastEnd}`, value: share(last.expenditure, fin.expenditure), max: 100, text: share(last.expenditure, fin.expenditure) === null ? 'Предстои' : `${pct(share(last.expenditure, fin.expenditure), 1)} от годишния план`, mock: true })}
-    </div>` : '';
-  const pctCol = { num: true, d: 1, fmt: v => (ok(v) ? num(v, 1) : null) };
-  const table = rows.length > 1 ? dataTable({
-    id: 's21-tremesechie-t', caption: `Примерно тримесечно изпълнение на ${M.munName(m)}, 2026 г.`, dense: true, status: 'mock',
-    columns: [
-      { key: 'period', label: 'Период' },
-      { key: 'rev', label: 'Приходи', unit: mu, num: true, d: 1 },
-      { key: 'exp', label: 'Разходи', unit: mu, num: true, d: 1 },
-      { key: 'revShare', label: 'Приходи, дял от годината', unit: '%', ...pctCol },
-      { key: 'expShare', label: 'Разходи, дял от годината', unit: '%', ...pctCol }
-    ],
-    rows
-  }) : html`<p class="muted">Предстои: тримесечно изпълнение.</p>`;
-
-  const src = Array.isArray(md.finDoc.meta.source) && md.finDoc.meta.source.length ? md.finDoc.meta.source : ['mockgen'];
-  return block({
-    id: 's21-finansi', title, mock: true, why: fin.why || 'Примерни числа, не отчет на общината.', source: src, sub,
-    body: html`<div class="s21-stack">
-      ${tiles}
-      <div><h3 class="s21-h3">Тримесечно изпълнение</h3>${last ? html`<p class="small muted">Числата са натрупани от 1 януари. За 2026 г. има първо и второ тримесечие.</p>` : ''}</div>
-      ${bars}
-      ${table}
-    </div>`
-  });
-}
-
 /* ---------------------------------------------------------------- F · how to read the numbers */
 function readBlock(md) {
   const { m } = md;
@@ -362,7 +284,6 @@ function readBlock(md) {
       <p>Показваме основните ${gl('byudzheten-transfer', 'трансфери')} от държавния бюджет по закона за 2026 г. Те са четири вида и отиват в ${gl('obshtinski-byudzhet', 'бюджета на общината')}. „Други целеви трансфери“ са отделна сума, която се дава отгоре. Не я събираме с основните.</p>
       <p>„На жител“ е сумата на общината, разделена на жителите ѝ. Така големи и малки общини се сравняват по равно. Това е ${gl('razhod-na-chovek', 'средна стойност')}: никой не получава тези евро в ръка.</p>
       <p>По-голяма сума на жител не значи, че общината е по-добре или по-зле управлявана. Тя зависи от много неща, например колко училища, детски градини и пътища има общината.</p>
-      ${md.fin && !md.onlyReal ? html`<p>Собствените приходи, разходите и дългът са примерни числа. Те показват как ще изглежда този блок, но не са отчет на общината.</p>` : ''}
       ${lines ? html`<p class="small muted">${lines}</p>` : ''}
     </div>`
   });
@@ -376,6 +297,6 @@ export function render(ctx) {
   return {
     title: M.munName(md.m),
     lede: `Област ${md.region}. Колко пари държавата дава на общината през 2026 г., за какво са те и как сумата се сравнява с областта и с другите общини.`,
-    body: html`${moneyBlock(md)}${compareBlock(md, ctx)}${kindsBlock(md)}${mapBlock(md, ctx)}${financeBlock(md)}${readBlock(md)}`
+    body: html`${moneyBlock(md)}${compareBlock(md, ctx)}${kindsBlock(md)}${mapBlock(md, ctx)}${readBlock(md)}`
   };
 }
