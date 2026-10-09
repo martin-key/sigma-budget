@@ -11,7 +11,7 @@ import { icon } from './icons.js';
 import { store } from './store.js';
 import { sheet, popover } from './ui/sheet.js';
 import { statusPill } from './ui/status.js';
-import { getIndex, parse, run, mark, countText, hiddenText, groupLabel, POPULAR, MAX_QUERY } from './searchlib.js';
+import { getIndex, parse, run, mark, countText, hiddenText, groupLabel, metaOf, POPULAR, MAX_QUERY } from './searchlib.js';
 
 const MAX_SHOWN = 8;
 let cur = null;
@@ -25,7 +25,7 @@ function chipRow(words, label) {
 }
 
 function itemHtml(e, id, toks) {
-  return html`<a class="pal-item" role="option" id="${id}" href="${e.href}" tabindex="-1" aria-selected="false"><span class="pal-title">${mark(e.title, toks)}${e.status === 'real' ? '' : html` ${statusPill(e.status)}`}</span>${e.sub || e.period ? html`<span class="pal-sub">${[e.sub, e.period].filter(Boolean).join(' · ')}</span>` : ''}${e.value ? html`<span class="pal-val">${e.value}</span>` : ''}</a>`;
+  return html`<a class="pal-item" role="option" id="${id}" href="${e.href}" tabindex="-1" aria-selected="false"><span class="pal-title">${mark(e.title, toks)}${e.status === 'real' ? '' : html` ${statusPill(e.status)}`}</span>${metaOf(e) ? html`<span class="pal-sub">${metaOf(e)}</span>` : ''}${e.value ? html`<span class="pal-val">${e.value}</span>` : ''}</a>`;
 }
 
 export function openPalette(opener, o = {}) {

@@ -1,12 +1,10 @@
 /* S12 · Мерки в бюджета 2026. v4 (СИГМА visual language): measures as ruled tiles (a 2px rule on top, teal for revenue, ink for
-   expenditure; the kind also in words), serif names, mono labels, hairline rows; the editorial part keeps its crimson hatch strip.
+   expenditure; the kind also in words), serif names, mono labels, hairline rows; the editorial labels and the reader filter were removed (working-group feedback, point 4).
    Tokens only, light only, every selector scoped to the screen. */
 
 /* short text blocks: one comfortable line length */
 .page[data-route="S12"] .s12-intro,
-.page[data-route="S12"] .s12-ignored,
-.page[data-route="S12"] .s12-filtered,
-.page[data-route="S12"] .s12-persona { max-width: 68ch; }
+.page[data-route="S12"] .s12-ignored { max-width: 68ch; }
 .page[data-route="S12"] .s12-howto { padding-left: var(--sp-5); display: grid; gap: var(--sp-2); max-width: 68ch; }
 .page[data-route="S12"] .s12-howto li::marker { color: var(--ink-soft); font-family: var(--font-mono); }
 .page[data-route="S12"] .s12-count { color: var(--ink); font-weight: 600; white-space: nowrap; }
@@ -41,17 +39,6 @@
 /* the facts of a card are compact; on the measure page the default rows are kept */
 .page[data-route="S12"] .s12-balance { list-style: none; padding: 0; display: grid; gap: var(--sp-1); }
 
-/* the editorial part: a warm well with the narrow crimson hatch strip and a visible flag, never hatch under the words */
-.page[data-route="S12"] .s12-edit { position: relative; display: grid; gap: var(--sp-2); padding: var(--sp-3) var(--sp-3) var(--sp-3) var(--sp-5); border-radius: 0; background: var(--paper-warm); }
-.page[data-route="S12"] .s12-edit-strip { position: absolute; top: 0; bottom: 0; left: 0; width: var(--sp-2); border-radius: 0; background-color: var(--st-mock-soft); }
-.page[data-route="S12"] .s12-edit-head { display: flex; flex-wrap: wrap; gap: var(--sp-2); align-items: center; }
-.page[data-route="S12"] .s12-edit-list { display: grid; gap: var(--sp-2); }
-.page[data-route="S12"] .s12-edit-list > div { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-1); }
-.page[data-route="S12"] .s12-edit-list dt { font: 500 var(--fs-xs)/1.5 var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mid); }
-.page[data-route="S12"] .s12-edit-list dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
-.page[data-route="S12"] .s12-tags { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: var(--sp-1); }
-.page[data-route="S12"] .s12-tags li { padding: 0 6px; border: 1px solid var(--ink-soft); border-radius: 0; background: var(--paper); font: 500 var(--fs-xs)/1.6 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; }
-
 /* the quote of a measure: a hairline, a mono +/– toggle, the quoted text behind a 4px rule */
 .page[data-route="S12"] .s12-quote { padding-top: var(--sp-1); border-top: 1px solid var(--rule-soft); }
 .page[data-route="S12"] .s12-quote > summary { display: flex; align-items: center; gap: var(--sp-2); min-height: 36px; padding: var(--sp-1) 0; cursor: pointer; list-style: none; font: 500 var(--fs-xs)/1.3 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mid); }
@@ -59,26 +46,16 @@
 .page[data-route="S12"] .s12-quote > summary::before { content: "+"; flex: none; width: 1em; font: 400 1rem/1 var(--font-mono); color: var(--ink-soft); }
 .page[data-route="S12"] .s12-quote[open] > summary::before { content: "\2013"; }
 .page[data-route="S12"] .s12-quote > summary:hover { color: var(--crimson); }
-.page[data-route="S12"] .s12-quote-text,
-.page[data-route="S12"] .s12-quote-full,
-.page[data-route="S12"] .s12-ev blockquote { padding: var(--sp-2) var(--sp-4); border-left: 4px solid var(--rule); border-radius: 0; background: none; color: var(--ink-mid); overflow-wrap: anywhere; }
-.page[data-route="S12"] .s12-quote-text { margin-top: var(--sp-2); font-size: var(--fs-s); }
-.page[data-route="S12"] .s12-evidence { display: grid; gap: var(--sp-3); }
-.page[data-route="S12"] .s12-evidence-h { font: 500 var(--fs-xs)/1.3 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); }
-.page[data-route="S12"] .s12-ev { display: grid; gap: var(--sp-1); }
-.page[data-route="S12"] .s12-ev figcaption { font: 400 var(--fs-xs)/1.5 var(--font-mono); letter-spacing: .02em; color: var(--ink-soft); }
-.page[data-route="S12"] .s12-ev blockquote { font-size: var(--fs-s); }
 
-/* empty list for a group of readers */
-.page[data-route="S12"] .s12-empty > * + * { margin-top: var(--sp-3); }
-.page[data-route="S12"] .s12-empty-acts { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.page[data-route="S12"] .s12-quote-text,
+.page[data-route="S12"] .s12-quote-full { padding: var(--sp-2) var(--sp-4); border-left: 4px solid var(--rule); border-radius: 0; background: none; color: var(--ink-mid); overflow-wrap: anywhere; }
+.page[data-route="S12"] .s12-quote-text { margin-top: var(--sp-2); font-size: var(--fs-s); }
 
 @media (max-width: 640px), (pointer: coarse) {
   .page[data-route="S12"] .s12-quote > summary { min-height: 44px; }
 }
 @media (min-width: 600px) {
   .page[data-route="S12"] .s12-facts .facts-row { grid-template-columns: minmax(9rem, 10.5rem) minmax(0, 1fr); padding: var(--sp-2) 0; }
-  .page[data-route="S12"] .s12-edit-list > div { grid-template-columns: 8rem minmax(0, 1fr); gap: var(--sp-3); }
 }
 
 @media (min-width: 900px) {

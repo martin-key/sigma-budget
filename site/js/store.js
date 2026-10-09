@@ -22,17 +22,20 @@ export const SCOPES = {
   maastricht: { label: 'Маастрихт', long: 'Дълг на сектор „Държавно управление“ по методиката на Маастрихт', gl: 'sektor-darzhavno-upravlenie' }
 };
 export const DEFAULT_PERIOD = '2026.law';
+/** Roles «гражданин / журналист / експерт». OPEN DECISION (V5): the UX V2 PDF recommends no role selector in the main flow, the team has not decided.
+    false = no selector in the menu, every screen keeps the citizen view and a saved role is ignored. Set true to bring the selector back: it is
+    listed in the settings again (js/shell.js), the saved choice is read again and a change re-renders the screen (js/router.js). */
+export const ROLE_SELECTOR = false;
 const KEY = 'bns.prefs.v1';
-const DEFAULTS = { period: DEFAULT_PERIOD, userType: 'citizen', scope: 'kfp', unit: 'eur', perPerson: false, leva: false, onlyReal: false, sources: false, guide: { step: 0 } };
+const DEFAULTS = { period: DEFAULT_PERIOD, userType: 'citizen', scope: 'kfp', unit: 'eur', perPerson: false, leva: false, onlyReal: false, sources: false };
 const VALID = {
   period: v => PERIODS.some(p => p.key === v),
   userType: v => USER_TYPES.some(t => t.id === v),
   scope: v => typeof v === 'string' && Object.hasOwn(SCOPES, v),          // own keys only: 'constructor' / 'toString' are not scopes
   unit: v => v === 'eur' || v === 'pct',
-  perPerson: v => typeof v === 'boolean', leva: v => typeof v === 'boolean', onlyReal: v => typeof v === 'boolean', sources: v => typeof v === 'boolean',
-  guide: v => v && Number.isInteger(v.step) && v.step >= 0 && v.step <= 8
+  perPerson: v => typeof v === 'boolean', leva: v => typeof v === 'boolean', onlyReal: v => typeof v === 'boolean', sources: v => typeof v === 'boolean'
 };
-const PERSIST = ['userType', 'scope', 'unit', 'perPerson', 'leva', 'onlyReal', 'sources', 'guide'];   // period lives in the URL (?per=)
+const PERSIST = ['userType', 'scope', 'unit', 'perPerson', 'leva', 'onlyReal', 'sources'];   // period lives in the URL (?per=)
 
 /** safe storage accessors: never throw, return null/false when blocked */
 export const safe = {
@@ -43,7 +46,7 @@ export const safe = {
 const state = { ...DEFAULTS };
 try {
   const saved = JSON.parse(safe.get('localStorage', KEY) || '{}');
-  for (const k of PERSIST) if (Object.hasOwn(saved, k) && VALID[k](saved[k])) state[k] = saved[k];
+  for (const k of PERSIST) if (Object.hasOwn(saved, k) && VALID[k](saved[k]) && (k !== 'userType' || ROLE_SELECTOR)) state[k] = saved[k];
 } catch { /* corrupt JSON: keep defaults */ }
 const subs = new Set();
 
@@ -51,7 +54,7 @@ export const store = {
   PERIODS, USER_TYPES, SCOPES,
   get: k => state[k],
   set(k, v) {
-    if (!Object.hasOwn(VALID, k) || !VALID[k](v)) return false;
+    if (!Object.hasOwn(VALID, k) || !VALID[k](v) || (k === 'userType' && !ROLE_SELECTOR)) return false;
     if (JSON.stringify(state[k]) === JSON.stringify(v)) return false;
     state[k] = v;
     if (PERSIST.includes(k)) safe.set('localStorage', KEY, JSON.stringify(Object.fromEntries(PERSIST.map(x => [x, state[x]]))));

@@ -3,7 +3,6 @@
 //   ministries         D08+D09 REAL  the budget of the spender by the 2026 law (хил. €), the law's policy list, the bill-vs-law flags and where
 //                                    the programme budget is attached or still pending (P03)
 //   ministries/<код>?  D09 REAL      policies → programmes, nine columns, 2023–2028 (a file does not exist for the four budgets still pending)
-//   mock/indicators?   M02 MOCK      example result indicators of the programmes of 1000, 1500 and 1700 (hatched and labelled by the components)
 //   core                             the planned GDP (for „% от БВП“) and the inhabitants (for „на човек“)
 // One route, two views: the spender (#/vedomstvo/1300) and a policy or a programme of it (#/vedomstvo/1300/1300.01.01).
 // S10 links a policy as #/vedomstvo/<код>?to=pol-<код с тирета>: every policy here is a <details id="pol-…"> that the router opens and focuses.
@@ -23,7 +22,7 @@ import { unitSwitch, bindUnitSwitch } from '../ui/unit-switch.js';
 const NO_FILE = ['0100', '1800', '2300', '7400'];
 export const needs = ctx => {
   const code = String(ctx?.params?.code ?? '');
-  const list = ['core', 'ministries', 'mock/indicators?'];
+  const list = ['core', 'ministries'];
   if (/^\d{4}$/.test(code)) {
     const known = data.get('ministries')?.items?.find?.(m => m && String(m.id) === code);
     if (known ? known.programs?.status === 'real' : !NO_FILE.includes(code)) list.push(`ministries/${code}?`);
@@ -86,8 +85,7 @@ function modelOf(ctx) {
   if (pc && !node) ctx.notFound();            // a programme that this budget does not have, or a budget whose programmes are still pending
   const pbl = m.programBudgetVsLaw;
   const differs = !!m.billVsLaw || (!!pbl && ok(pbl.diffKhil) && Math.abs(pbl.diffKhil) > 0.05);
-  const mi = ctx.data['mock/indicators'];
-  return { ctx, doc, m, code, pending, file, list, byCode, gdpMln, node, parent: node?.parent ? byCode.get(node.parent) ?? null : null, pbl, differs, mi };
+  return { ctx, doc, m, code, pending, file, list, byCode, gdpMln, node, parent: node?.parent ? byCode.get(node.parent) ?? null : null, pbl, differs };
 }
 
 function head(M) {
@@ -149,44 +147,6 @@ function yearsBlock(M, id, values) {
   });
 }
 
-/* ---------------------------------------------------------------- example indicators (mock) */
-const dec = (v, d) => (ok(v) ? num(v, d ?? 0) : DASH);
-function indicatorsBlock(M) {
-  const { mi, m, code, node } = M;
-  const mm = mi?.ministries?.find?.(x => String(x.id) === code);
-  if (!mm) return '';
-  const items = (mi.items || []).filter(x => String(x.ministry) === code && (!node || x.code === node.code));
-  if (!items.length) return '';
-  const meta = { why: node ? items[0].why : mm.why, source: mi.meta?.source ?? ['mockgen'], asOf: mi.meta?.asOf };
-  if (node) {
-    const rows = items[0].indicators.map(i => ({
-      name: i.name, unit: i.unit, better: i.better === 'down' ? 'по-ниско е по-добре' : 'по-високо е по-добре', t24: i.target2024, a24: i.achieved2024, dev: i.deviationPct, met: i.met ? 'да' : 'не', t26: i.target2026, _mock: true, d: i.decimals
-    }));
-    return block({
-      id: 's11-pokazateli', title: 'Какво постига програмата', status: 'mock', mock: true, ...meta,
-      sub: 'Показатели за резултат: цел и постигнато през 2024 г., цел за 2026 г.',
-      body: html`${dataTable({
-        id: 's11-t-pokazateli', caption: 'Примерни показатели за резултат на програмата',
-        columns: [
-          { key: 'name', label: 'Показател', fmt: (v, r) => html`${v}<small class="s11-cell-sub">${r.better}</small>` }, { key: 'unit', label: 'Мерна единица' },
-          { key: 't24', label: 'Цел 2024', fmt: (v, r) => dec(v, r.d) }, { key: 'a24', label: 'Постигнато 2024', fmt: (v, r) => dec(v, r.d) },
-          { key: 'dev', label: 'Отклонение', fmt: v => (ok(v) ? `${delta(v, 1)}` : DASH) }, { key: 'met', label: 'Целта е изпълнена' },
-          { key: 't26', label: 'Цел 2026', fmt: (v, r) => dec(v, r.d) }
-        ], rows
-      })}`
-    });
-  }
-  const rows = items.map(it => ({ name: it.name, code: it.code, n: it.indicators.length, met: it.indicators.filter(i => i.met).length, _mock: true, _href: M.ctx.href('vedomstvo', { code, program: it.code }) }));
-  return block({
-    id: 's11-pokazateli', title: 'Какво постига програмата', status: 'mock', mock: true, ...meta,
-    sub: `Примерни показатели за резултат на програмите на ${plainName(m)}. Натисни програма, за да ги видиш.`,
-    body: html`${dataTable({
-      id: 's11-t-pokazateli', caption: 'Програми с примерни показатели за резултат',
-      columns: [{ key: 'name', label: 'Програма', fmt: (v, r) => html`${v}<small class="s11-cell-sub">код ${r.code}</small>` }, { key: 'n', label: 'Показатели', num: true }, { key: 'met', label: 'Изпълнени цели', num: true }], rows
-    })}`
-  });
-}
-
 /* ---------------------------------------------------------------- the original document */
 const pages = a => (Array.isArray(a) && a.length ? (a.length > 1 ? `стр. ${a[0]}–${a[a.length - 1]}` : `стр. ${a[0]}`) : '');
 function docBlock(M, year = null) {
@@ -221,7 +181,7 @@ function lawBlock(M) {
         note: prbOnly ? 'Програмите по-долу са по програмния бюджет към проекта на закона.' : null
       }) : ''}
       ${lineFacts.length ? facts(lineFacts) : ''}
-      <p class="s11-note">Всички промени между проекта и закона са описани в „<a href="${ctx.href('zakon')}">Как се прие бюджетът?</a>“.</p>`
+      <p class="s11-note">Всички промени между проекта и закона са описани в „<a href="${ctx.href('zakon')}">Пътят на бюджета</a>“.</p>`
   });
 }
 
@@ -298,7 +258,7 @@ function ministryBody(M) {
       ${facts([{ k: 'Вид', v: NOUN[m.kind] }, { k: 'Код', v: m.id }, { k: 'Член от закона', v: `чл. ${m.art}` }, { k: 'Програмен бюджет', v: doc.tiers?.[m.programs?.tier] }])}`
   });
   return html`${unitSwitch(ctx, { name: 's11-unit', note: '„% от БВП“ е спрямо планирания БВП за 2026 г.' })}
-    ${summary}${M.differs ? lawBlock(M) : ''}${policiesBlock(M)}${M.file ? yearsBlock(M, 's11-godini', M.file.total) : ''}${indicatorsBlock(M)}${skippedBlock(M)}${docBlock(M)}`;
+    ${summary}${M.differs ? lawBlock(M) : ''}${policiesBlock(M)}${M.file ? yearsBlock(M, 's11-godini', M.file.total) : ''}${skippedBlock(M)}${docBlock(M)}`;
 }
 
 /* ---------------------------------------------------------------- a policy or a programme */
@@ -327,7 +287,7 @@ function nodeBody(M) {
       id: 's11-programi', title: 'Програми на политиката', status: 'real', source: file.meta.source, asOf: file.meta.asOf, scope: { key: 'prb-programi', label: 'Програмни бюджети', note: 'без ЕС и други средства' },
       body: programTable(M, 's11-t-programi', `Програми на политика „${clip(node.name, 80)}“, 2026 г., хил. €`, node)
     }) : ''}
-    ${yearsBlock(M, 's11-godini', v)}${indicatorsBlock(M)}${docBlock(M, 2026)}`;
+    ${yearsBlock(M, 's11-godini', v)}${docBlock(M, 2026)}`;
 }
 
 /* ---------------------------------------------------------------- the module */

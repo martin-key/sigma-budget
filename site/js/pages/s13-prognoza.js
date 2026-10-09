@@ -246,7 +246,7 @@ function summaryBlock(ctx, f, d) {
   const py = f.plan >= 0 ? f.years[f.plan] : null;
   const note = callout({
     kind: 'info', title: 'Чии са тези числа?',
-    body: html`<p>Числата са от мотивите към проекта на бюджета${py ? ` за ${yr(py)}` : ''}, към ${date(f.asOf, true)}. Приетият закон може да се различава от проекта. Какво е променено, виж в „<a href="${ctx.href('S14', {}, { per: '2026.law' })}">Как се прие бюджетът?</a>“.</p>`
+    body: html`<p>Числата са от мотивите към проекта на бюджета${py ? ` за ${yr(py)}` : ''}, към ${date(f.asOf, true)}. Приетият закон може да се различава от проекта. Какво е променено, виж в „<a href="${ctx.href('S14', {}, { per: '2026.law' })}">Пътят на бюджета</a>“.</p>`
   });
   return block({
     id: 's13-sum', title: 'Накратко', scope: 'kfp', status: 'forecast', statusLabel: 'План и прогноза', source: ['asbp'], asOf: f.asOf,

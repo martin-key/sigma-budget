@@ -138,7 +138,8 @@ function cartesian(spec, tk, env) {
     if (kind === 'line') {
       const line = (data, dashed) => ({
         ...common, data, type: 'line', symbol: 'circle', symbolSize: narrow ? 6 : 8, smooth: false, connectNulls: false, showSymbol: true,
-        color, lineStyle: { width: 2, type: dashed ? 'dashed' : 'solid' },
+        color, lineStyle: { width: spec.endLabels && !dashed ? 3 : 2, type: dashed ? 'dashed' : 'solid' },
+        endLabel: spec.endLabels ? { show: true, formatter: '{a}', color: color === tk.other ? tk.other2 : color, fontSize: 12, fontFamily: tk.mono, distance: 6 } : undefined,
         itemStyle: { color, borderColor: tk.card, borderWidth: 2 },
         areaStyle: spec.area ? { color, opacity: 0.12 } : undefined,
         stack: stacked ? 'total' : undefined
@@ -195,7 +196,7 @@ function cartesian(spec, tk, env) {
     splitLine: { lineStyle: { color: tk.line } }, axisLine: { show: false }, axisTick: { show: false }
   };
   return {
-    grid: { left: 8, right: horiz ? 28 : 16, top: spec.labels && !horiz ? 28 : 12, bottom: 8, containLabel: true },
+    grid: { left: 8, right: horiz ? 28 : spec.endLabels ? 52 : 16, top: spec.labels && !horiz ? 28 : 12, bottom: 8, containLabel: true },
     xAxis: horiz ? valAxis : catAxis,
     yAxis: horiz ? catAxis : valAxis,
     tooltip: {

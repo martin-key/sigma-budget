@@ -1,5 +1,5 @@
 // S06 · Откъде идват парите? · #/prihodi/:source? · step 2 of 8 · next S07 · periods all
-// Revenue of the КФП by source: the eight groups of Annex 3 (D05 revenue.json), the July execution (D06 execution.json) and a thin
+// Revenue of the КФП by source: the eight groups of Annex 3 (D05 revenue.json), and a thin
 // editorial layer (who pays, what the visitor can do about it). Every number is computed from the data files, none is typed in.
 //   views (tabs, ?izgled=)  grafika · tablica · godini        units: млн. € / % от БВП through the unit switch; „на човек“ and „и в лева“ through view.js
 //   #/prihodi/<id>          opens that source's disclosure and scrolls to it (deferred: the router scrolls and focuses after mount)
@@ -12,7 +12,7 @@ import { disclosure } from '../ui/disclosure.js';
 import { chart } from '../ui/chart.js';
 import { dataTable } from '../ui/table.js';
 import { ranklist } from '../ui/ranklist.js';
-import { progress } from '../ui/progress.js';
+import { explorer } from '../ui/explorer.js';
 import { callout, facts } from '../ui/cards.js';
 import { pendingState } from '../ui/states.js';
 import { unitSwitch, bindUnitSwitch } from '../ui/unit-switch.js';
@@ -20,7 +20,7 @@ import { apportion } from '../calc.js';
 import { yIndex, change, chartUnit, moneyCol, amount, periodStatus } from '../view.js';
 import { num, pct, money, delta, date, DASH, NBSP } from '../format.js';
 
-export const needs = ['core', 'revenue', 'execution?', 'glossary?'];
+export const needs = ['core', 'revenue', 'glossary?'];
 export const styles = ['s06-prihodi'];
 
 const yr = y => `${y}${NBSP}г.`;
@@ -57,7 +57,6 @@ const ED = {
     me: 'Няма единна сметка: зависи от това какво притежаваш и купуваш.' }
 };
 const GLOSS_FALLBACK = { short: '', c: 'other', grp: 'tax', who: '', me: '' };
-const EXEC_ROW = { tax: 'rev.tax', nontax: 'rev.nontax', grants: 'rev.grants' };
 
 /** the data of the screen for the selected period, or null while revenue.json is missing/empty (lede, crumbs and embeds guard on it) */
 function model(ctx) {
@@ -102,16 +101,6 @@ function model(ctx) {
     // the same labels on one line: table headers and the CSV export (a line break inside a CSV cell does not survive Excel)
     flat: years.map((y, i) => (FLAT[kinds[i]] ? `${y} (${FLAT[kinds[i]]})` : String(y)))
   };
-}
-
-/** the July execution of the revenue groups, only for the year the monthly report belongs to (2026) */
-function execModel(ctx, m) {
-  const ex = ctx.data?.execution, L = ex?.latest;
-  if (!ex || !L?.kfp || !m) return null;
-  const year = Number(String(L.asOf || '').slice(0, 4));
-  const label = id => (ex.rows || []).find(r => r.id === id)?.label ?? null;
-  const entry = id => { const e = L.kfp[id]; return e && ok(e.cum) ? { ...e, label: label(id) } : null; };
-  return { year, asOf: L.asOf, total: entry('rev'), tax: entry(EXEC_ROW.tax), nontax: entry(EXEC_ROW.nontax), grants: entry(EXEC_ROW.grants), here: m.year === year };
 }
 
 // ── small pieces ───────────────────────────────────────────────────────────────────────────────────────
@@ -275,33 +264,21 @@ function compList(ctx, m, x) {
   return html`${ranklist({ id: `s06-comp-${x.id}`, caption: `От какво се състои, ${yr(m.year)}`, label: `Състав на „${x.short}“`, unit: 'mln', shares: true, sort: 'desc', categoryLabel: 'Ред от приложението', items })}${skipped ? html`<p class="small muted">За ${skipped === 1 ? 'един ред' : `${skipped} реда`} няма данни за ${yr(m.year)}.</p>` : ''}`;
 }
 
-function execPart(ctx, m, x, ex) {
-  if (!ex?.here) return '';
-  if (x.ed.grp === 'tax') {
-    return html`<p class="s06-note small">Изпълнение към ${date(ex.asOf)}: по отделните данъци още няма данни, предстои. Общото за данъците и осигуровките е в <a href="${ctx.href('S06', hereParams(ctx), { to: 's06-exec' })}">блока за изпълнението</a>.</p>`;
-  }
-  const e = x.ed.grp === 'nontax' ? ex.nontax : ex.grants;
-  if (!e) return '';
-  return html`<div class="s06-exec-one">${progress({ id: `s06-ex-${x.id}`, label: `Изпълнение към ${date(ex.asOf)}`, value: e.pctPlan, text: `${pct(e.pctPlan, 1)} от годишния план` })}
-    <p class="small muted">Събрани ${amount(ctx, { mln: e.cum })} от ${amount(ctx, { mln: e.plan })}.</p></div>`;
-}
-
-function sourceBody(ctx, m, x, ex) {
+function sourceBody(ctx, m, x) {
   const what = x.term?.def
     ? html`<span data-gl-skip>${x.term.def}</span> <a href="${ctx.href('S03', { term: x.term.slug })}">В речника<span class="sr-only">: ${x.short}</span></a>`
     : html`<span data-gl-skip>${x.name}</span>`;
   return html`<div data-gl-scan>${facts([{ k: 'Какво е', v: what }, { k: 'Кой плаща', v: x.ed.who }])}</div>
     ${miniChart(ctx, m, x)}
     ${compList(ctx, m, x)}
-    ${execPart(ctx, m, x, ex)}
     <p class="s06-me"><strong>Колко плащам аз?</strong> ${x.ed.me}${x.ed.cta ? html` <a href="${ctx.href('S18')}">Към калкулатора</a>` : ''}</p>`;
 }
 
-function sourcesBlock(ctx, m, ex, sel) {
+function sourcesBlock(ctx, m, sel) {
   const items = m.ranked.map(x => disclosure({
     id: `s06-src-${x.id}`, open: x.id === sel, title: x.short,
     meta: ok(x.val) ? html`${ok(x.share) ? html`${pct(x.share, 1)} · ` : ''}${amount(ctx, { mln: x.val, pctGdp: x.pgSel })}` : '',
-    body: sourceBody(ctx, m, x, ex)
+    body: sourceBody(ctx, m, x)
   }));
   return block({
     id: 's06-sources', title: 'Осемте източника поотделно', scope: 'kfp', status: periodStatus(ctx), source: ['asbp'], asOf: m.rev.meta?.asOf,
@@ -311,32 +288,8 @@ function sourcesBlock(ctx, m, ex, sel) {
   });
 }
 
-// ── execution to 31 July ───────────────────────────────────────────────────────────────────────────────
-function execBlock(ctx, m, ex) {
-  const title = 'Изпълнение на приходите';
-  if (!ex) {
-    return block({ id: 's06-exec', title, status: 'pending', body: pendingState({ title, text: 'Отчетът за изпълнението не е наличен в момента. Опитай пак по-късно.' }) });
-  }
-  if (!ex.here) {
-    return block({
-      id: 's06-exec', title, scope: 'kfp', status: false,
-      body: callout({ kind: 'info', body: html`Изпълнението спрямо плана се показва само за текущата бюджетна година. Смени периода на „${ex.year} · Закон“, за да видиш колко е събрано към ${date(ex.asOf, true)}. Пълният отчет е на екрана „<a href="${ctx.href('S15')}">Изпълнява ли се планът?</a>“.` })
-    });
-  }
-  const sameAsTax = ex.tax && ok(m.tax?.mln) && Math.abs(ex.tax.plan - m.tax.mln) < 0.15;
-  const list = [
-    ['total', ex.total?.label ?? 'Всички приходи', ex.total, ''],
-    ['tax', sameAsTax ? 'Данъци и осигуровки' : ex.tax?.label, ex.tax, sameAsTax ? 'В отчета на Министерството на финансите този ред се казва „данъчни приходи“, но планът му е равен на данъчно-осигурителните приходи от приложението.' : ''],
-    ['nontax', ex.nontax?.label, ex.nontax, ''],
-    ['grants', 'Помощи и дарения', ex.grants, '']
-  ].filter(it => it[2]);
-  const line = ([id, label, e, note]) => html`<li class="s06-ex-item">${progress({ id: `s06-ex-${id}`, label, value: e.pctPlan, text: `${pct(e.pctPlan, 1)} от годишния план` })}<p class="s06-ex-sub small muted">Събрани ${amount(ctx, { mln: e.cum })} от ${amount(ctx, { mln: e.plan })}${ok(e.yoyPct) ? `. Спрямо същия период на ${yr(ex.year - 1)}: ${delta(e.yoyPct, 1)}` : ''}.${note ? ` ${note}` : ''}</p></li>`;
-  return block({
-    id: 's06-exec', title: `${title} към ${date(ex.asOf)}`, scope: 'kfp', status: 'real', source: ['kfp'], asOf: ex.asOf,
-    sub: 'Колко от годишния план е събрано от началото на годината.',
-    body: html`<ul class="s06-ex-list">${list.map(line)}</ul>${pendingState({ id: 'P01' })}<p><a href="${ctx.href('S15')}">Пълният отчет: по месеци, по пера и по бюджети</a></p>`
-  });
-}
+// ── the monthly execution is not shown here: this screen is the ANNUAL budget, the reports live on «Изпълнение» ──────
+const execPointer = ctx => html`<p class="s06-exec-go small muted">Колко от годината е събрано до последния месечен отчет: <a href="${ctx.href('S15')}">Месечни отчети</a>.</p>`;
 
 // ── how to read the numbers ────────────────────────────────────────────────────────────────────────────
 function notesBlock(ctx, m) {
@@ -346,7 +299,7 @@ function notesBlock(ctx, m) {
   const r = roundingNote(m);
   if (r) items.push(r);
   if (m.firstForecast > 0) items.push(`${m.years.slice(m.firstForecast).join(' и ')} са прогноза на Министерството на финансите, не приет план.`);
-  if (m.rev.meta?.asOf) items.push(html`Числата са от мотивите към проекта на бюджета, към ${date(m.rev.meta.asOf, true)}. Приетият закон може да се различава от проекта: какво е променено, виж в „<a href="${ctx.href('S14', {}, { per: '2026.law' })}">Как се прие бюджетът?</a>“.`);
+  if (m.rev.meta?.asOf) items.push(html`Числата са от мотивите към проекта на бюджета, към ${date(m.rev.meta.asOf, true)}. Приетият закон може да се различава от проекта: какво е променено, виж в „<a href="${ctx.href('S14', {}, { per: '2026.law' })}">Пътят на бюджета</a>“.`);
   return block({
     id: 's06-notes', title: 'Как да четеш числата', status: false, source: ['asbp'], share: false,
     body: html`<ul class="s06-notes" data-gl-scan>${items.map(t => html`<li>${t}</li>`)}</ul>`
@@ -402,12 +355,11 @@ export function render(ctx) {
     sel = m.byId.get(String(asked).toLowerCase())?.id ?? null;
     if (!sel) ctx.notFound();
   }
-  const ex = execModel(ctx, m);
   return {
     context: 'Консолидирана фискална програма (КФП): приходи, помощи и дарения',
-    body: html`${stripBlock(ctx, m)}
+    body: html`${explorer(ctx, 'prihodi')}${stripBlock(ctx, m)}
       ${unitSwitch(ctx, { name: 's06-unit', note: 'Важи за числата и графиките на този екран. „На човек“ и „Сумите и в лева“ се включват от настройките.' })}
-      ${kpiBlock(ctx, m)}${viewsBlock(ctx, m)}${sourcesBlock(ctx, m, ex, sel)}${execBlock(ctx, m, ex)}${notesBlock(ctx, m)}`
+      ${kpiBlock(ctx, m)}${viewsBlock(ctx, m)}${sourcesBlock(ctx, m, sel)}${execPointer(ctx)}${notesBlock(ctx, m)}`
   };
 }
 
@@ -417,13 +369,19 @@ export function mount(root, ctx) {
   let timer = 0;
   // a deep link /prihodi/<id>: the router has scrolled to the top and focused the heading by now; bring the source into view afterwards
   if (id && ctx.kind !== 'rerender' && ctx.kind !== 'pop' && !ctx.query.to) {
-    timer = setTimeout(() => {
+    // on a direct load (a shared link) the router scrolls to the top once more when the screen is ready: wait for that mark, then scroll
+    const art = root.closest('article.page');
+    let n = 0;
+    const bring = () => {
       const el = root.querySelector(`#s06-src-${CSS.escape(id)}`);
       if (!el) return;
       el.scrollIntoView({ block: 'start' });
       el.classList.add('hl');
       setTimeout(() => el.classList.remove('hl'), 2600);
-    }, 80);
+    };
+    timer = setInterval(() => {
+      if ((art && art.dataset.ready === '1') || ++n > 40) { clearInterval(timer); timer = setTimeout(bring, 40); }
+    }, 60);
   }
-  return () => { clearTimeout(timer); off.forEach(f => f && f()); };
+  return () => { clearTimeout(timer); clearInterval(timer); off.forEach(f => f && f()); };
 }

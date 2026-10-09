@@ -11,8 +11,8 @@ import { kpi, kpiGrid } from '../ui/kpi.js';
 import { chart } from '../ui/chart.js';
 import { ranklist } from '../ui/ranklist.js';
 import { disclosure } from '../ui/disclosure.js';
-import { callout, linkCard, facts, ext } from '../ui/cards.js';
-import { emptyState, mockBadge, pendingState } from '../ui/states.js';
+import { callout, ext } from '../ui/cards.js';
+import { emptyState, pendingState } from '../ui/states.js';
 import { gl } from '../ui/gl.js';
 import { unitSwitch, bindUnitSwitch } from '../ui/unit-switch.js';
 import { apportion } from '../calc.js';
@@ -58,7 +58,6 @@ const FN_MEASURES = {
   drugi: []
 };
 const WIDE = ['d9-1', 'd9-2'];                          // pay and staff-cost measures: they touch every function
-const ACT_FN = new Set(['obrazovanie', 'zdraveopazvane']);   // the functions that have a mock breakdown by activity (S09)
 /** the budgets that sit next to the state budget but inside the КФП */
 const OWN = {
   zdraveopazvane: { src: 'zbnzok', text: html`Освен бюджета на министерството, парите за лечение минават и през Националната здравноосигурителна каса (НЗОК). Нейният бюджет е отделен закон, но влиза в ${gl('kfp', 'консолидираната програма')}.` },
@@ -117,7 +116,7 @@ function partsBlock(ctx, M) {
       ...base,
       body: callout({
         kind: 'info',
-        body: html`В таблицата към проекта на бюджета тази функция е само един общ ред, без отделни пера.${ACT_FN.has(M.id) ? html` Примерна разбивка по дейности има във фаза 2: <a href="${ctx.href('S09', { fn: M.id })}">примерни дейности</a>.` : ''}`
+        body: html`В таблицата към проекта на бюджета тази функция е само един общ ред, без отделни пера.`
       })
     });
   }
@@ -207,55 +206,36 @@ function vedBlock(ctx, M) {
   });
 }
 
-/** the measures that touch the function: the measures are real, the labels and the link to the function are editorial (M06, mock) */
+/** the measures that touch the function: the measures are real, the link to the function is editorial (M06, mock). The „кого засяга / кой плаща / кой печели“ labels are not shown any more (working-group feedback 2026-10-09) */
 function measuresBlock(ctx, M) {
   const title = 'Мерки, които засягат функцията';
   const ms = ctx.data?.measures, lb = ctx.data?.['mock/measure-labels'];
   if (!Array.isArray(ms?.items) || !Array.isArray(lb?.items)) return block({ id: 's08-merki', title, status: 'pending', body: pendingState({ title, text: 'Мерките не са налични в момента. Опитай пак по-късно.' }) });
   const ids = [...new Set([...(FN_MEASURES[M.id] || []), ...WIDE])];
-  const byId = new Map(ms.items.map(x => [x.id, x])), lbl = new Map(lb.items.map(x => [x.id, x]));
+  const byId = new Map(ms.items.map(x => [x.id, x]));
   const list = ids.map(id => byId.get(id)).filter(Boolean);
-  const why = lb.items.find(x => ids.includes(x.id) && x.why)?.why || 'Примерен редакционен етикет по текста на мярката; не е официална класификация и не е проверен.';
+  const why = 'Кои мерки засягат функцията, е редакционна преценка по текста на мярката; не е официална класификация и не е проверена.';
   const rows = list.map(m => {
-    const l = lbl.get(m.id);
     return disclosure({
       id: `s08-m-${m.id}`, title: m.name, meta: [ms.tabLabels?.[m.tab], WIDE.includes(m.id) ? 'за всички функции' : ''].filter(Boolean).join(' · '),
       body: html`<div class="s08-meas">
         ${m.text ? html`<p class="s08-meas-text" data-gl-scan>${m.text}</p>` : ''}
-        ${l ? facts([
-          { k: 'Кого засяга', v: Array.isArray(l.affects) && l.affects.length ? l.affects.join(', ') : 'Никоя от шестте групи пряко' },
-          { k: 'Кой плаща', v: l.payer },
-          { k: 'Кой печели', v: l.winner },
-          { k: 'Бележка за оценката', v: l.risk }
-        ]) : ''}
         <p class="s08-meas-go"><a href="${ctx.href('S12', { id: m.id })}">Всичко за мярката</a></p>
       </div>`
     });
   });
   return block({
     id: 's08-merki', title, mock: true, why, source: ['bill', 'mockgen'], asOf: lb.meta?.asOf,
-    sub: 'Мерките са от мотивите към проекта на бюджета. Кои от тях засягат функцията и кого засягат, е редакционна преценка.',
+    sub: 'Мерките са от мотивите към проекта на бюджета. Кои от тях засягат функцията, е редакционна преценка.',
     body: rows.length ? html`<div class="s08-stack">${rows}</div>` : emptyState({ title: 'Няма свързани мерки', text: 'В проекта на бюджета няма мярка, която засяга само тази функция.', icon: 'info' })
   });
-}
-
-/** the way in to the breakdown by activity (S09, phase 2, mock) */
-function actBlock(ctx, M) {
-  const name = id => lower(M.F.items.find(x => x.id === id)?.short ?? id);
-  const body = ACT_FN.has(M.id)
-    ? linkCard({
-      href: ctx.href('S09', { fn: M.id }), icon: 'list', kicker: 'Фаза 2', title: `Дейностите във функция „${M.short}“`,
-      text: 'По-подробна разбивка: от функцията към пера и отделни дейности. Данните са примерни.', meta: mockBadge('фаза 2 · примерни')
-    })
-    : html`<p class="s08-read">${mockBadge('фаза 2 · примерни')} Разбивка по дейности има само за <a href="${ctx.href('S09', { fn: 'obrazovanie' })}">${name('obrazovanie')}</a> и <a href="${ctx.href('S09', { fn: 'zdraveopazvane' })}">${name('zdraveopazvane')}</a>, и то с примерни данни.</p>`;
-  return block({ id: 's08-deynosti', title: 'По-подробно: дейности', status: false, report: false, sub: 'Пълната разбивка до около 500 дейности я има само Министерството на финансите.', body });
 }
 
 function notesBlock(ctx, M) {
   const F = M.F, X = ctx.data.expenditure;
   const note = id => (Array.isArray(F.notes) ? F.notes.find(n => n.id === id)?.text : F.notes?.[id]) ?? '';
   const items = [note('base'), note('col2025'), M.id === 'drugi' ? note('drugi') : ''].filter(Boolean);
-  if (X.meta?.asOf) items.push(html`Числата са от мотивите към проекта на бюджета, към ${date(X.meta.asOf, true)}. Приетият закон може да се различава от проекта: какво е променено, виж в „<a href="${ctx.href('S14', {}, { per: '2026.law' })}">Как се прие бюджетът?</a>“.`);
+  if (X.meta?.asOf) items.push(html`Числата са от мотивите към проекта на бюджета, към ${date(X.meta.asOf, true)}. Приетият закон може да се различава от проекта: какво е променено, виж в „<a href="${ctx.href('S14', {}, { per: '2026.law' })}">Пътят на бюджета</a>“.`);
   return block({ id: 's08-notes', title: 'Как да четеш числата', status: false, source: ['asbp'], share: false, body: html`<ul class="s08-notes" data-gl-scan>${items.map(t => html`<li>${t}</li>`)}</ul>` });
 }
 
@@ -285,7 +265,7 @@ export function render(ctx) {
     body: html`${unitSwitch(ctx, { name: 's08-unit', note: 'Важи за списъците и графиките на този екран. „На човек“ и „Сумите и в лева“ се включват от настройките.' })}
       ${intro}
       ${M.sel >= 0 ? html`${kpiBlock(ctx, M)}${partsBlock(ctx, M)}` : noCol}
-      ${yearsBlock(ctx, M)}${cofogBlock(ctx, M)}${vedBlock(ctx, M)}${measuresBlock(ctx, M)}${actBlock(ctx, M)}${notesBlock(ctx, M)}`
+      ${yearsBlock(ctx, M)}${cofogBlock(ctx, M)}${vedBlock(ctx, M)}${measuresBlock(ctx, M)}${notesBlock(ctx, M)}`
   };
 }
 

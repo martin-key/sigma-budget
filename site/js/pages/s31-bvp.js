@@ -1,21 +1,25 @@
 // S31 · БВП: колко расте икономиката? · #/bvp · next S13 · periods none
-// Data: outlook.json only (D01+D02+D15). `gdp.mln` is the LEVEL of БВП in млн. €; `macroRows` gdpGrowth / consumption / gfcf / exports / imports are
+// Data: outlook.json (D01+D02+D15) and gva-sectors.json (D31, Eurostat copy of the NSI national accounts: gross value added by branch, 2019–2025).
+// `gdp.mln` is the LEVEL of БВП in млн. €; `macroRows` gdpGrowth / consumption / gfcf / exports / imports are
 // REAL growth rates in % against the previous year (never levels); `macroVintage` says per year whether the number is a report or a forecast;
 // `kfp` and core.kpis.debt give the 2026 plan shares of БВП for the „Защо БВП е важен“ block. Every figure on the screen is read or computed
-// from those two files. The screen has its own year switch (?y=), because the shell shows no period line here (periods: none).
+// from those files. The screen has its own year switch (?y=), because the shell shows no period line here (periods: none). The block „От какво е съставена
+// икономиката“ has its own year switch (?sy=): shares of gross value added by branch (ten branches; manufacturing is shown inside industry); the
+// branches add up to the gross value added, which together with the taxes on products less subsidies gives БВП (checked by tools/gva_sectors_v5.py).
 import { html, esc } from '../html.js';
 import { block } from '../ui/block.js';
 import { kpi, kpiGrid } from '../ui/kpi.js';
 import { chart } from '../ui/chart.js';
 import { seg } from '../ui/seg.js';
 import { facts } from '../ui/cards.js';
+import { ranklist } from '../ui/ranklist.js';
 import { gl } from '../ui/gl.js';
 import { scopeChip } from '../ui/scope.js';
 import { byId } from '../routes.js';
 import { chartUnit } from '../view.js';
 import { num, pct, delta, money, date, NBSP } from '../format.js';
 
-export const needs = ['core', 'outlook'];
+export const needs = ['core', 'outlook', 'gva-sectors'];
 export const styles = ['s31-bvp'];
 
 /* ---------------------------------------------------------------- words and small helpers */
@@ -192,6 +196,73 @@ function growthBlock(f) {
   });
 }
 
+/* ---------------------------------------------------------------- the branches of the economy */
+/** B-E minus C: mining, power, water and waste (the part of industry that is not manufacturing) */
+const REST_OF_INDUSTRY = { name: 'Добив, ток, вода и отпадъци', desc: 'Мини и кариери, електро- и топлоенергия, водоснабдяване, събиране на отпадъци.' };
+
+function sectorsFrame(ctx) {
+  const g = ctx.data['gva-sectors'];
+  const ys = g.years, last = ys.length - 1;
+  const at = ys.indexOf(Number(ctx.query?.sy));
+  const i = at >= 0 ? at : last;
+  return { g, ys, i, y: ys[i], prov: (g.meta.provisionalYears || []).includes(ys[i]) };
+}
+
+/** the sentences under the list: who is the largest, and what changed since the first year (computed, never typed) */
+function sectorsReading(S) {
+  const { g, ys, i, y } = S;
+  const sh = (b, k) => (b.mln[k] / g.gva[k]) * 100;
+  const top = [...g.branches].sort((a, b) => b.mln[i] - a.mln[i]).slice(0, 3);
+  const first = `През ${yr(y)} най-голям дял има „${top[0].name}“ (${pct(sh(top[0], i), 1)}), следват „${top[1].name}“ (${pct(sh(top[1], i), 1)}) и „${top[2].name}“ (${pct(sh(top[2], i), 1)}).`;
+  if (i === 0) return first;
+  const ch = g.branches.map(b => ({ b, d: sh(b, i) - sh(b, 0) })).sort((a, b) => b.d - a.d);
+  const up = ch[0], down = ch[ch.length - 1];
+  const part = (x, word) => `${word} делът на „${x.b.name}“ (от ${pct(sh(x.b, 0), 1)} на ${pct(sh(x.b, i), 1)})`;
+  const move = [up.d >= 0.5 ? part(up, 'най-много нараства') : '', down.d <= -0.5 ? part(down, 'най-много намалява') : ''].filter(Boolean);
+  return move.length ? `${first} Спрямо ${yr(ys[0])} ${move.join(', а ')}.` : first;
+}
+
+function sectorsBlock(ctx) {
+  const S = sectorsFrame(ctx);
+  const { g, ys, i, y, prov } = S;
+  const gdp = g.gdp[i], gva = g.gva[i], tax = g.taxesNet[i];
+  const sh = mln => (mln / gva) * 100;
+  const row = (name, desc, mln, children) => ({ label: name, sub: desc, value: mln, share: sh(mln), pctGdp: (mln / gdp) * 100, ...(children ? { children } : {}) });
+  const items = g.branches.map(b => {
+    const part = g.parts.find(p => p.of === b.id);
+    if (!part) return row(b.name, b.desc, b.mln[i]);
+    return row(b.name, b.desc, b.mln[i], [
+      row(part.name, part.desc, part.mln[i]),
+      row(REST_OF_INDUSTRY.name, REST_OF_INDUSTRY.desc, Math.round((b.mln[i] - part.mln[i]) * 10) / 10)
+    ]);
+  });
+  const reading = sectorsReading(S);
+  const word = prov ? 'предварителни данни' : 'отчет';
+  const withPg = (mln, d = 1) => html`${money(mln, { d })} · ${pct((mln / gdp) * 100, 1)} от БВП`;
+  const asOf = g.meta.asOf;
+  return block({
+    id: 's31-b-sectors', title: 'От какво е съставена икономиката', status: 'real', statusLabel: prov ? 'Предварителни данни' : 'Отчет',
+    sub: `Какъв дял от създаденото в страната идва от всеки отрасъл, ${yr(y)} (${word}). Дяловете са от добавената стойност в текущи цени.`,
+    source: ['eurostat'], asOf, share: { text: reading },
+    body: html`<div class="stack">
+      <div class="s31-controls s31-controls-in" data-png-skip>
+        <span class="s31-controls-label">Покажи данните за:</span>
+        ${seg({ name: 's31-sy', cls: 's31-sy', label: 'Година на отраслите', value: String(y), query: 'sy', options: ys.map(v => ({ value: String(v), label: String(v) })) })}
+      </div>
+      <p class="s31-note">${reading}</p>
+      ${ranklist({ id: 's31-rl-sectors', caption: `Отрасли по дял в добавената стойност, ${yr(y)}`, label: `Отрасли на икономиката, ${yr(y)}`, unit: 'mln', d: 1, sort: 'desc', categoryLabel: 'Отрасъл', items })}
+      <p class="small muted" data-png-skip>Натисни „Промишленост“, за да видиш колко от нея е преработваща промишленост.</p>
+      ${facts([
+        { k: 'Добавена стойност на отраслите', v: withPg(gva) },
+        { k: 'Данъци върху продуктите минус субсидиите за продукти', v: withPg(tax) },
+        { k: 'БВП', v: money(gdp, { d: 1 }) }
+      ])}
+      <p class="s31-note">БВП е сборът от добавената стойност на всички отрасли и данъците върху продуктите (като ДДС и акцизите), намален със субсидиите за продукти. Затова процентите по-горе са дял от добавената стойност, а не от БВП.</p>
+      <p class="small muted">Данни на НСИ, публикувани от Евростат (национални сметки, набори nama_10_a10 и nama_10_gdp), обновени на ${date(asOf)}${NBSP}г.${prov ? ` Данните за ${yr(y)} са предварителни и могат да се променят.` : ''}</p>
+    </div>`
+  });
+}
+
 function meansBlock() {
   return block({
     id: 's31-means', title: 'Какво означава всяко', status: false, share: false,
@@ -239,13 +310,14 @@ function whyBlock(ctx, f) {
 export function render(ctx) {
   const f = frame(ctx);
   return {
-    lede: 'БВП е стойността на стоките и услугите, които страната създава за година. Не е сумата в държавната каса. Тук виждаш колко расте и как растат потреблението, инвестициите, износът и вносът.',
+    lede: 'БВП е стойността на стоките и услугите, които страната създава за година. Не е сумата в държавната каса. Тук виждаш колко расте, как растат потреблението, инвестициите, износът и вносът и от кои отрасли е съставена икономиката.',
     context: `Числата са по проекта на бюджета, към ${date(f.asOf)}${NBSP}г.`,
     body: html`
       ${controls(f)}
       ${tilesBlock(f)}
       ${levelBlock(ctx, f)}
       ${growthBlock(f)}
+      ${sectorsBlock(ctx)}
       ${meansBlock()}
       ${whyBlock(ctx, f)}`
   };

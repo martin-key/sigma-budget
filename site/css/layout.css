@@ -1,7 +1,7 @@
 /* App shell, v4 (СИГМА visual language). Wide (≥961px): masthead (#topbar: serif wordmark + tools) over a mono-uppercase section band
-   (#sidenav: the five sections + Речник, the current one underlined 2px in ink; the current section's screens on a second line).
+   (#sidenav: the three sections «Начало · Изпълнение · Бюджет» + «Още», the current one underlined 2px in ink; the current section's screens on a second line).
    ≤960px: #sidenav is hidden, «Меню» opens the full menu as a right-side drawer (dialog.sheet-drawer over a dimmed backdrop), the
-   bottom tab bar (mono labels, ink top rule) keeps the four sections and «Още» one tap away. Breadcrumbs = a mono strip with its own
+   bottom tab bar (mono labels, ink top rule) keeps the three sections «Начало · Отчет · Бюджет»; everything else is under «Меню». Breadcrumbs = a mono strip with its own
    hairline. Nothing here is sticky: like СИГМА, the masthead scrolls away (the phone tab bar stays fixed). */
 
 /* ---- full-bleed hairlines without horizontal overflow: border-image outsets are ink overflow and never scroll ---- */
@@ -35,6 +35,10 @@
 .tool-btn[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
 .tool-btn[aria-pressed="true"]:hover{background:var(--crimson);border-color:var(--crimson);color:var(--paper)}
 .tool-btn[aria-expanded="true"]{border-color:var(--ink);background:var(--paper-warm)}
+/* «Моите данъци»: a permanent, always visible secondary entry (desktop and phone); the current page fills it */
+.tax-link{text-decoration:none;border-color:var(--ink)}
+.tax-link:hover{text-decoration:none}
+.tax-link[aria-current="page"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
 /* search: an underlined field with a crimson prompt and an italic serif placeholder (СИГМА .smart-search) */
 .searchbtn{flex:0 1 340px;min-width:0;justify-content:flex-start;gap:10px;padding:4px 0 6px;border:0;border-bottom:1px solid var(--ink);background:none;color:var(--ink-soft);font:italic 400 1.125rem/1.2 var(--font-serif);letter-spacing:-.01em;text-transform:none}
 .searchbtn:hover{border-color:var(--ink);color:var(--ink);background:none}
@@ -64,6 +68,7 @@
   .topbar .only-wide{display:none}
   .menu-btn{display:inline-flex}
   .searchbtn{width:44px;height:44px}
+  .tax-link,.period-btn{min-height:44px}
 }
 @media (max-width:599px){
   /* phones: wordmark + «Меню» on the first row, the search field and the period on a second row under a hairline */
@@ -71,12 +76,13 @@
   .brand-name{font-size:1.3125rem}
   .topbar-tools{display:contents}
   .menu-btn{order:2;margin-left:auto}
-  .searchbtn{order:3;flex:1 1 auto;width:auto;height:44px;justify-content:flex-start;padding:0 0 4px;border:0;border-bottom:1px solid var(--ink);color:var(--ink-soft);font-size:1.0625rem}
+  .searchbtn{order:3;flex:1 1 7rem;min-width:0;width:auto;height:44px;justify-content:flex-start;padding:0 0 4px;border:0;border-bottom:1px solid var(--ink);color:var(--ink-soft);font-size:1.0625rem}
   .searchbtn:hover{border-color:var(--ink);color:var(--ink)}
   .searchbtn .ph,.searchbtn .prompt{display:inline}
   .searchbtn .prompt{font-size:1.25rem}
   .searchbtn svg{display:none}
-  .period-btn{order:4;min-height:44px}
+  .tax-link{order:4;flex:none;min-height:44px;padding:6px 10px}
+  .period-btn{order:5;min-height:44px}
   .period-btn .p-status{display:none}
 }
 @media (max-width:359px){.badge-mock{display:none}}
@@ -118,7 +124,7 @@
 /* bottom tab bar (≤960px): paper, ink top rule, mono uppercase labels; the current tab carries an ink bar */
 .tabbar{display:none}
 @media (max-width:960px){
-  .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:1fr 1fr 1.4fr 1fr .85fr;height:calc(var(--tabbar-h) + env(safe-area-inset-bottom,0px));padding-bottom:env(safe-area-inset-bottom,0px);background:var(--paper);border-top:1px solid var(--ink)}
+  .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(3,1fr);height:calc(var(--tabbar-h) + env(safe-area-inset-bottom,0px));padding-bottom:env(safe-area-inset-bottom,0px);background:var(--paper);border-top:1px solid var(--ink)}
 }
 .tabbar a,.tabbar button{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:0;min-height:44px;padding:4px 2px;border:0;background:none;color:var(--ink-mid);text-decoration:none;font:500 var(--fs-xs)/1.15 var(--font-mono);letter-spacing:.02em;text-transform:uppercase}
 .tabbar span{max-width:100%;overflow:hidden;text-overflow:ellipsis}

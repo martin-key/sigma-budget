@@ -1,4 +1,6 @@
-// S14 · Как се прие бюджетът? · #/zakon · next S15 (route default) · periods come from routes.js
+// S14 · Пътят на бюджета (was «Как се прие бюджетът?», working-group feedback 2026-10-09) · #/zakon · next S15 (route default) · periods come from routes.js
+// Order of the blocks, easy to hard, for a visitor who has never seen the procedure: Накратко → Хронология (the path) → Комисии (who read it) → Трите закона →
+//   чл. 1 (the main numbers changed) → отделните бюджети → 46-те бюджета → Документи → Следващият бюджет. No new content; the blocks are the same.
 // Data, only through `needs`:
 //   law          D10+D11 REAL  the bill (01.07.2026) read line by line against the adopted law (ДВ бр. 69 от 31.07.2026 г.): art. 1, the changes by article,
 //                              the 46 budgets, the legislative timeline, the counts and the document links of the 69 proposals (their content is pending: P07)
@@ -70,7 +72,7 @@ function modelOf(ctx) {
 function head(G) {
   const v = G.L.versions || {}, bill = v.bill || {}, law = v.law || {};
   return {
-    lede: `Бюджетът за 2026 г. е внесен в Народното събрание на ${dl(bill.date)} и е приет на ${dl(law.date)} Тук е пътят му ден по ден и всичко, което се е променило между внесения текст и приетия закон.`,
+    lede: `Бюджетът за 2026 г. е внесен в Народното събрание на ${dl(bill.date)} и е приет на ${dl(law.date)} По-долу е пътят му: първо накратко и по дати, после кой го е разглеждал и най-накрая числата, които са се променили между проекта и закона.`,
     context: `Сравнението е между законопроекта от ${dl(bill.date)} (№ ${bill.ref}) и закона, обнародван в „Държавен вестник“ (${law.ref}). И двете версии са показани заедно.`
   };
 }
@@ -291,7 +293,7 @@ export function render(ctx) {
   return {
     ...head(G),
     body: html`${unitSwitch(ctx, { name: 's14-unit', note: '„% от БВП“ е спрямо планирания БВП за 2026 г.' })}
-      ${summary(G)}${whenBlock(G)}${art1Block(G)}${changesBlock(G)}${budgetsBlock(G)}${committeesBlock(G)}${lawsBlock(G)}${docsBlock(G)}${nextBlock(G)}`
+      ${summary(G)}${whenBlock(G)}${committeesBlock(G)}${lawsBlock(G)}${art1Block(G)}${changesBlock(G)}${budgetsBlock(G)}${docsBlock(G)}${nextBlock(G)}`
   };
 }
 

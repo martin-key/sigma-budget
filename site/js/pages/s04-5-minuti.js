@@ -1,6 +1,9 @@
-// S04 · Бюджетът за 5 минути · #/5-minuti · next S02, S06 · periods none
-// Seven short scenes with real numbers: (1) revenue against expenditure, (2) where the money comes from (100 € as a waffle), (3) where it goes
-// (the functions), (4) deficit -> new debt -> debt, (5) the measures, (6) the execution to the latest month, (7) the way to the calculator.
+// S04 · Бюджетът за 5 минути · #/5-minuti · next S06, S03 · periods none
+// V5: the former «Пътеводител» (S02) is merged in. Six short scenes with real numbers: (1) revenue against expenditure, (2) where the money comes
+// from (100 € as a waffle), (3) where it goes (the functions), (4) deficit -> new debt -> debt, (5) the measures, (6) the execution to the latest
+// month. Under each scene «Влез по-дълбоко» does what the guide did: it leads to the EXACT screen (and block) of that indicator, with the guide's own
+// «На какво да внимаваш» note (data/guide.json, verbatim). The guide's closing «Петте проверки» ends the page. The old seventh scene (the way to the
+// tax calculator) is gone by request; «Моите данъци» stays in the masthead.
 // Every scene is a block(): the same heading, scope chip, status pill, source button and „Сподели“ as everywhere else, and `?to=s04-sceneN`
 // jumps (the router scrolls, highlights and focuses the section). The pictures are plain HTML/CSS bars and a waffle, never the only
 // carrier of a number: the label, the value and a legend are text, so the page reads the same without them.
@@ -15,12 +18,11 @@ import * as share from '../share.js';
 import { block } from '../ui/block.js';
 import { ranklist } from '../ui/ranklist.js';
 import { steps } from '../ui/progress.js';
-import { linkCard } from '../ui/cards.js';
 import { scopeChip } from '../ui/scope.js';
 import { errorState } from '../ui/states.js';
 import { gl } from '../ui/gl.js';
 
-export const needs = ['core', 'execution?', 'measures?', 'debt?'];
+export const needs = ['core', 'execution?', 'measures?', 'debt?', 'guide?'];
 export const styles = ['s04-5-minuti'];
 
 const SCENES = [
@@ -29,8 +31,7 @@ const SCENES = [
   { id: 's04-scene3', nav: 'За какво отиват', title: 'За какво отиват парите' },
   { id: 's04-scene4', nav: 'Дефицит и дълг', title: 'От дефицит до дълг' },
   { id: 's04-scene5', nav: 'Мерките', title: 'Мерките в бюджета' },
-  { id: 's04-scene6', nav: 'Изпълнението', title: 'Как върви изпълнението' },
-  { id: 's04-scene7', nav: 'А ти?', title: 'А ти? Колко плащаш ти?' }
+  { id: 's04-scene6', nav: 'Изпълнението', title: 'Как върви изпълнението' }
 ];
 const TOTAL = SCENES.length;
 const ok = v => typeof v === 'number' && Number.isFinite(v);
@@ -83,7 +84,18 @@ function bar(o) {
   </div>`;
 }
 
-/** a scene = a block: steps strip, text column (glossary scan on), picture column, link to the next scene */
+/** «Влез по-дълбоко»: links to the exact screens (and blocks) of this scene's indicators + the guide's note for the step (verbatim from guide.json).
+ *  links: [{href, title, text}]; stepNo: the guide step whose «На какво да внимаваш» belongs to the scene (0 = none) */
+function deeper(ctx, n, stepNo, links) {
+  const note = (ctx.data.guide?.steps || []).find(x => x.n === stepNo)?.blocks?.find(b => b.role === 'note');
+  return html`<section class="s04-deep" aria-labelledby="s04-deep-${n}">
+    <h3 class="s04-deep-h" id="s04-deep-${n}">Влез по-дълбоко</h3>
+    <ul class="s04-deep-list">${links.map(l => html`<li><a class="s04-deep-a" href="${l.href}"><span class="s04-deep-t">${l.title}</span><span class="s04-deep-x">${l.text}</span><span class="s04-deep-ar" aria-hidden="true">→</span></a></li>`)}</ul>
+    ${note ? html`<details class="s04-deep-note"><summary>На какво да внимаваш</summary><p>${note.text}</p></details>` : ''}
+  </section>`;
+}
+
+/** a scene = a block: steps strip, text column (glossary scan on), picture column, «Влез по-дълбоко», link to the next scene */
 function scene(n, o) {
   const s = SCENES[n - 1], nx = SCENES[n];
   const body = html`<div class="s04-steps" aria-hidden="true">${steps({ current: n, total: TOTAL })}</div>
@@ -91,6 +103,7 @@ function scene(n, o) {
       <div class="s04-text" data-gl-scan>${o.text}</div>
       <div class="s04-vis">${o.visual}</div>
     </div>
+    ${o.deep || ''}
     ${nx ? html`<p class="s04-go"><a href="${to(nx.id)}">Следваща сцена: ${nx.nav}<span aria-hidden="true"> →</span></a></p>` : ''}`;
   return block({
     id: s.id, title: o.title || s.title, level: 2, sub: `Сцена ${n} от ${TOTAL}`, scope: o.scope, status: o.status,
@@ -121,13 +134,17 @@ function scene1(ctx, core) {
   const id = twin('s04-fig1', ['Показател', 'Стойност, млн. €'], [['Приходи', rev], ['Разходи', exp], ['Дефицит', gap]]);
   const visual = html`<figure class="s04-fig" data-attach="${id}">
     <div class="s04-bars">
-      ${bar({ label: 'Приходи', value: amt(ctx, rev, g(rev)), kind: 'rev', fill: (rev / top) * 100, gap: (gap / top) * 100 })}
-      ${bar({ label: 'Разходи', value: amt(ctx, exp, g(exp)), kind: 'exp', fill: (exp / top) * 100 })}
+      ${bar({ label: html`<a href="${href('prihodi')}">Приходи</a>`, value: amt(ctx, rev, g(rev)), kind: 'rev', fill: (rev / top) * 100, gap: (gap / top) * 100 })}
+      ${bar({ label: html`<a href="${href('razhodi')}">Разходи</a>`, value: amt(ctx, exp, g(exp)), kind: 'exp', fill: (exp / top) * 100 })}
     </div>
     <figcaption class="s04-cap">Планирани приходи и разходи на КФП за 2026 г. Пунктираната част е дефицитът: разходи, за които няма приходи.</figcaption>
   </figure>`;
+  const deep = deeper(ctx, 1, 1, [
+    { href: href('start'), title: byKey.start.title, text: 'Колко е събрано и похарчено досега, и как се сравнява с миналата година.' },
+    { href: href('izpalnenie', {}, { pokazatel: 'balance' }), title: 'Салдото месец по месец', text: 'Кога дефицитът расте и кога намалява.' }
+  ]);
   return scene(1, {
-    text, visual, scope: 'kfp', source: ['asbp'], asOf: ctx.data.execution?.plan2026?.asOf,
+    text, visual, deep, scope: 'kfp', source: ['asbp'], asOf: ctx.data.execution?.plan2026?.asOf,
     share: `През 2026 г. държавата планира приходи от ${money(rev, { d: 1 })} и разходи от ${money(exp, { d: 1 })}; разликата е дефицит от ${money(gap, { d: 1 })}.`
   });
 }
@@ -156,11 +173,15 @@ function scene2(ctx, core) {
   const id = twin('s04-fig2', ['Източник на приходите', 'Стойност, млн. €', 'Дял, %'], groups.map(g => [g.name, g.mln, g.share]));
   const visual = html`<figure class="s04-fig s04-fig-waffle" data-attach="${id}">
     <div class="s04-waffle" aria-hidden="true">${squares}</div>
-    <ul class="s04-legend">${groups.map((g, i) => html`<li><span class="s04-sw" data-g="${col[i]}" aria-hidden="true"></span><span class="s04-lg-n">${g.name}</span><span class="s04-lg-v"><strong>${cells[i]}${NBSP}€</strong><span class="s04-lg-a">${amt(ctx, g.mln, ok(gdp) ? (g.mln / gdp) * 100 : undefined)}</span></span></li>`)}</ul>
+    <ul class="s04-legend">${groups.map((g, i) => html`<li><span class="s04-sw" data-g="${col[i]}" aria-hidden="true"></span><span class="s04-lg-n"><a href="${href('prihodi', { source: g.id })}">${g.name}</a></span><span class="s04-lg-v"><strong>${cells[i]}${NBSP}€</strong><span class="s04-lg-a">${amt(ctx, g.mln, ok(gdp) ? (g.mln / gdp) * 100 : undefined)}</span></span></li>`)}</ul>
     <figcaption class="s04-cap">Приходи на КФП за 2026 г. по видове. Дяловете са закръглени до цели евро така, че да се събират точно до 100${NBSP}€.</figcaption>
   </figure>`;
+  const deep = deeper(ctx, 2, 2, [
+    { href: href('prihodi'), title: byKey.prihodi.title, text: 'Всичките осем източника, по години и в таблица.' },
+    { href: href('prihodi', { source: a.id }), title: a.name, text: 'Най-големият източник: кой го плаща и какво значи за теб.' }
+  ]);
   return scene(2, {
-    text, visual, scope: 'kfp', source: ['asbp'], asOf: ctx.data.execution?.plan2026?.asOf,
+    text, visual, deep, scope: 'kfp', source: ['asbp'], asOf: ctx.data.execution?.plan2026?.asOf,
     share: `От всеки 100 € приходи на КФП през 2026 г.: ${groups.map((g, i) => `${cells[i]} € — ${g.name}`).join('; ')}.`
   });
 }
@@ -187,8 +208,13 @@ function scene3(ctx, core) {
     id: 's04-fn', caption: 'Разходи на КФП по функции за 2026 г.', unit: 'mln', d: ctx.store.get('perPerson') ? 0 : 1, categoryLabel: 'Функция',
     items: fns.map(f => ({ label: f.short || f.name, value: f.mln, share: f.share, pctGdp: f.pctGdp, href: href('funkciya', { fn: f.id }) }))
   });
+  const deep = deeper(ctx, 3, 3, [
+    { href: href('razhodi'), title: byKey.razhodi.title, text: 'Разходите по функции, по вид и по години.' },
+    { href: href('funkciya', { fn: top.id }), title: top.short || top.name, text: 'Най-голямата функция: от какво се състои.' },
+    { href: href('vedomstva'), title: byKey.vedomstva.title, text: 'Министерствата и другите бюджети, и програмите им.' }
+  ]);
   return scene(3, {
-    text, visual, scope: 'kfp', source: ['asbp'], asOf: ctx.data.execution?.plan2026?.asOf,
+    text, visual, deep, scope: 'kfp', source: ['asbp'], asOf: ctx.data.execution?.plan2026?.asOf,
     share: `Най-голямата функция на разходите за 2026 г. е „${top.short || top.name}“: ${money(top.mln, { d: 1 })} (${pct(top.share, 1)} от разходите по функции).`
   });
 }
@@ -221,23 +247,30 @@ function scene4(ctx, core) {
         <span class="s04-card-k">Дефицит ${scopeChip('kfp')}</span>
         <strong class="s04-card-v">${amt(ctx, gap, g(gap))}</strong>
         <span class="s04-card-s">Разликата между разходите и приходите.</span>
+        <a class="s04-card-a" href="${href('dalg', {}, { to: 's17-b-balance' })}">Колко е дефицитът<span aria-hidden="true"> →</span></a>
       </li>
       <li class="s04-card" data-ceiling>
         <span class="s04-card-k">Ново заемане, най-много</span>
         <strong class="s04-card-v">до ${amt(ctx, lim.mln, g(lim.mln))}</strong>
         <span class="s04-card-s">Горна граница по закона, не прогноза.</span>
+        <a class="s04-card-a" href="${href('dalg', {}, { to: 's17-b-newdebt' })}">Колко нов дълг се поема<span aria-hidden="true"> →</span></a>
       </li>
       <li class="s04-card">
         <span class="s04-card-k">Държавен дълг към края на ${d26.year} г. ${scopeChip('zdd')}</span>
         <strong class="s04-card-v">${amt(ctx, d26.mln, d26.pctGdp)}</strong>
         <span class="s04-card-s">${alt(ctx, d26.mln, d26.pctGdp) ? html`${alt(ctx, d26.mln, d26.pctGdp)}. ` : ''}По проекта на бюджета.</span>
         ${prev}
+        <a class="s04-card-a" href="${href('dalg', {}, { to: 's17-b-zdd' })}">Как се променя дългът<span aria-hidden="true"> →</span></a>
       </li>
     </ol>
     <figcaption class="s04-cap">Трите числа не се събират едно с друго: границата е таван, а дългът се променя и от връщането на стари заеми.</figcaption>
   </figure>`;
+  const deep = deeper(ctx, 4, 7, [
+    { href: href('dalg'), title: byKey.dalg.title, text: 'Държавният дълг по две методики, лихвите и откъде се покрива дефицитът.' },
+    { href: href('dalg', {}, { to: 's17-b-confuse' }), title: 'Дефицит, нов дълг и дълг', text: 'Три различни числа за една и съща тема: с какво се различават.' }
+  ]);
   return scene(4, {
-    text, visual, scope: 'zdd', source: ['zdb', 'asbp'], asOf: debt.limits.asOf,
+    text, visual, deep, scope: 'zdd', source: ['zdb', 'asbp'], asOf: debt.limits.asOf,
     share: `Законът допуска ново заемане до ${money(lim.mln, { d: 1 })} през ${debt.limits.year ?? d26.year} г. Това е горна граница, не прогноза.`
   });
 }
@@ -286,8 +319,12 @@ function scene5(ctx) {
     </div>` : ''}
     <figcaption class="s04-cap">Ефект на мерките през 2026 г.: плюс — повече приходи, минус — по-малко разходи. Пунктираната лента е индикативна сума.${stage ? html` ${stage.text}` : ''}</figcaption>
   </figure>`;
+  const deep = deeper(ctx, 5, 4, [
+    { href: href('merki'), title: byKey.merki.title, text: 'Приходните и разходните мерки: какво се променя, от кога и какъв е ефектът.' },
+    ...(big[0] ? [{ href: href('merki', { id: big[0].id }), title: big[0].name, text: 'Най-голямата мярка със сума: подробности.' }] : [])
+  ]);
   return scene(5, {
-    text, visual, source: ['asbp', 'bill'], asOf: m.meta?.asOf,
+    text, visual, deep, source: ['asbp', 'bill'], asOf: m.meta?.asOf,
     share: `Краткосрочните мерки в бюджета за 2026 г.: приходните носят ${money(t.revenueMln, { d: 1 })}, а разходните намаляват разходите с ${money(-t.expenditureMln, { d: 1 })}, от които ${money(-indicative, { d: 1 })} са индикативни суми.`
   });
 }
@@ -313,29 +350,40 @@ function scene6(ctx, core) {
   const id = twin('s04-fig6', ['Показател', `Към ${date(asOf)}, млн. €`, 'Годишен план, млн. €', 'Изпълнение, % от плана', 'Дял от 2025 г. до същия месец, %'], [
     ['Приходи', r.execMln, r.planMln, r.execPct, paceRev ?? null], ['Разходи', e.execMln, e.planMln, e.execPct, paceExp ?? null]
   ]);
-  const row = (label, kind, x, tick) => bar({
-    label, kind, fill: x.execPct, tick,
+  const row = (label, kind, x, tick, item) => bar({
+    label: html`<a href="${href('izpalnenie', {}, { pokazatel: item })}">${label}</a>`, kind, fill: x.execPct, tick,
     value: html`<strong>${amt(ctx, x.execMln, g(x.execMln))}</strong> <span class="s04-bar-p">${pct(x.execPct, 1)}${NBSP}от${NBSP}плана</span>`
   });
   const visual = html`<figure class="s04-fig" data-attach="${id}">
-    <div class="s04-bars">${row('Приходи', 'rev', r, paceRev)}${row('Разходи', 'exp', e, paceExp)}</div>
+    <div class="s04-bars">${row('Приходи', 'rev', r, paceRev, 'rev')}${row('Разходи', 'exp', e, paceExp, 'exp.total')}</div>
     <figcaption class="s04-cap">Изпълнение на плана към ${date(asOf, true)}. Запълнената част е изпълнението на плана за годината.${ok(paceRev) && ok(paceExp) ? ' Чертата е ориентир: делът от резултата за 2025 г., отчетен до същия месец.' : ''}${next ? ` Отчетът към ${next} още не е добавен.` : ''}</figcaption>
   </figure>`;
+  const deep = deeper(ctx, 6, 6, [
+    { href: href('izpalnenie'), title: byKey.izpalnenie.title, text: 'Две години един до друг за един и същ период.' },
+    { href: href('izpalnenie', {}, { to: 's15-b-plan' }), title: 'Изпълнява ли се планът', text: 'Приходи, разходи и капиталови разходи: план срещу изпълнение.' }
+  ]);
   return scene(6, {
-    text, visual, scope: 'kfp', source: ['kfp'], asOf,
+    text, visual, deep, scope: 'kfp', source: ['kfp'], asOf,
     share: `Към ${date(asOf, true)} са изпълнени ${pct(r.execPct, 1)} от плана за приходите и ${pct(e.execPct, 1)} от плана за разходите.`
   });
 }
 
-/* ------------------------------------------------------------------ 7 · and you? */
+/* ------------------------------------------------------------------ the guide's closing: the five checks (verbatim from guide.json) */
 
-function scene7() {
-  const r = byKey.danaci;
-  const text = html`
-    <p>Всичко дотук е за цялата държава. А ти колко внасяш в тези приходи?</p>
-    <p>Въведи дохода си и виж колко плащаш в данъци и осигуровки — и накъде отиват тези пари.</p>`;
-  const visual = linkCard({ href: href('danaci'), kicker: 'Калкулатор', title: r.title, text: r.desc, icon: r.icon, cls: 's04-cta' });
-  return scene(7, { text, visual, status: false });
+/** the sentence stays verbatim; the quoted name of the screen it mentions becomes a link */
+function withLink(text, phrase, to) {
+  const i = String(text).indexOf(phrase);
+  if (i < 0) return text;
+  return html`${text.slice(0, i)}<a href="${to}">${phrase}</a>${text.slice(i + phrase.length)}`;
+}
+
+function checks(ctx) {
+  const c = ctx.data.guide?.checks;
+  if (!c || !Array.isArray(c.items) || !c.items.length) return '';
+  const body = html`<p class="s04-checks-lead">${c.lead}</p>
+    <ol class="s04-checks-list">${c.items.map(it => html`<li><span class="s04-checks-n" aria-hidden="true">${it.n}</span><span class="s04-checks-short">${it.short}<span class="sr-only">: </span></span><span class="s04-checks-text">${it.text}</span></li>`)}</ol>
+    <p class="s04-checks-end">${withLink(c.end, 'Откъде са данните?', href('S24'))}</p>`;
+  return block({ id: 's04-checks', title: c.title, level: 2, sub: c.heading, status: false, body, cls: 's04-block s04-checks' });
 }
 
 /* ------------------------------------------------------------------ the page */
@@ -345,7 +393,7 @@ export function render(ctx) {
   const nav = html`<nav class="s04-nav" aria-label="Сцени на екрана"><ol>${SCENES.map((s, i) => html`<li><a href="${to(s.id)}"><span class="s04-nav-n" aria-hidden="true">${i + 1}</span>${s.nav}</a></li>`)}</ol></nav>`;
   return html`<div class="s04">
     <div class="s04-top" data-gl-scan>
-      <p class="s04-lead">Седем кратки сцени за държавния бюджет на България за 2026 г. — от общата сметка до това, което значи за теб. Четат се за около пет минути.</p>
+      <p class="s04-lead">Държавният бюджет на България за 2026 г. — от общата сметка до изпълнението. Чете се за около пет минути.</p>
       <p class="s04-basis">Числата са в евро и са по проекта на бюджета, освен където е казано друго. Какво промени приетият закон — на екрана <a href="${href('zakon')}">„${byKey.zakon.title}“</a>.</p>
     </div>
     ${nav}
@@ -355,7 +403,7 @@ export function render(ctx) {
     ${guard(4, () => scene4(ctx, core))}
     ${guard(5, () => scene5(ctx))}
     ${guard(6, () => scene6(ctx, core))}
-    ${guard(7, () => scene7())}
+    ${checks(ctx)}
   </div>`;
 }
 

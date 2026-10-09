@@ -9,7 +9,7 @@ import { byId, href as routeHref } from '../routes.js';
 import { chips } from '../ui/chips.js';
 import { emptyState, mockHidden } from '../ui/states.js';
 import { statusPill } from '../ui/status.js';
-import { getIndex, parse, run, mark, countText, hiddenText, groupLabel, screenOf, POPULAR, MAX_QUERY } from '../searchlib.js';
+import { getIndex, parse, run, mark, countText, hiddenText, groupLabel, screenOf, metaOf, POPULAR, MAX_QUERY } from '../searchlib.js';
 
 export const needs = [];                                   // the index is optional and loaded by getIndex() (never rejects)
 export const styles = ['s28-tarsene'];
@@ -23,7 +23,7 @@ const clean = s => String(s ?? '').replace(/\s+/g, ' ').trim().slice(0, MAX_QUER
 
 function hit(e, toks) {
   const where = WHERE.has(e.group) ? screenOf(e.href) : null;
-  const meta = [e.sub, e.period].filter(Boolean).join(' · ');
+  const meta = metaOf(e);
   return html`<li class="s28-hit"${e.status === 'mock' ? html` data-mock="true"` : ''}>
     <div class="s28-top"><a class="s28-link" href="${e.href}">${mark(e.title, toks)}</a>${e.status === 'real' ? '' : statusPill(e.status)}</div>
     ${meta ? html`<p class="s28-sub">${meta}</p>` : ''}

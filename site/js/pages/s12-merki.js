@@ -1,21 +1,20 @@
 // S12 · Мерки в бюджета 2026 · #/merki[/<мярка>] · next S10 · periods 2026.draft, 2026.law (both set on the route)
-// Data: D12 measures.json (real: 52 measures from the bill's motives, three lists) + M06 mock/measure-labels.json (editorial and
-// mock: who is affected / who pays / who gains; its `since`, `sinceText`, `legal`, `evidence` are verbatim text of the measure).
-// List page : callout („по законопроекта, не по приетия закон“) → „Как да четеш числата“ → persona filter (?koy=) → tabs
-//             (?spisak=short|discretionary|laws). Cards carry the effect, the date, the status, the editorial labels and the quote.
-// Measure page (#/merki/<id>): what changes · who is affected · what the motives say · related. An unknown id → ctx.notFound().
+// Data: D12 measures.json (real: 52 measures from the bill's motives, three lists) + M06 mock/measure-labels.json: only its verbatim text of
+// the measure is used here (`since`, `sinceText`, `legal`). The editorial labels (who is affected / who pays / who gains, the group filter) are
+// NOT shown any more (working-group feedback 2026-10-09): the data stays in the file, nothing reads it.
+// List page : callout („по законопроекта, не по приетия закон“) → „Как да четеш числата“ → tabs (?spisak=short|discretionary|laws).
+//             Cards carry the effect, the date, the legal basis, the status and the quote.
+// Measure page (#/merki/<id>): what changes · what the motives say · related. An unknown id → ctx.notFound().
 // Amounts are formatted here from each measure's own numbers (млн. €, signed, optionally also лева). The per-person and
 // „% от БВП“ switches do not make sense for single measures, so they are ignored here and the page says so.
-import { html, plain } from '../html.js';
+import { html } from '../html.js';
 import { block } from '../ui/block.js';
 import { kpi, kpiGrid } from '../ui/kpi.js';
 import { dataTable } from '../ui/table.js';
 import { tabs } from '../ui/tabs.js';
-import { chips } from '../ui/chips.js';
 import { disclosure } from '../ui/disclosure.js';
 import { callout, ext, facts, linkCard } from '../ui/cards.js';
 import { gl } from '../ui/gl.js';
-import { emptyState, pendingState, mockBadge } from '../ui/states.js';
 import { num, date, plural, EUR_RATE, DASH, NBSP } from '../format.js';
 
 export const needs = ['measures', 'mock/measure-labels?'];
@@ -41,10 +40,6 @@ const ok = v => typeof v === 'number' && Number.isFinite(v);
 const arr = v => (Array.isArray(v) ? v : []);
 const yr = y => `${y}${NBSP}г.`;
 
-// the persona label as an ASCII URL key: Работещ → rabotesht, Шофьор → shofyor …
-const TR = { а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', е: 'e', ж: 'zh', з: 'z', и: 'i', й: 'y', к: 'k', л: 'l', м: 'm', н: 'n', о: 'o', п: 'p', р: 'r', с: 's', т: 't', у: 'u', ф: 'f', х: 'h', ц: 'ts', ч: 'ch', ш: 'sh', щ: 'sht', ъ: 'a', ь: 'y', ю: 'yu', я: 'ya' };
-const slugOf = s => [...String(s).toLowerCase()].map(c => TR[c] ?? c).join('').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-
 /** everything the builders need, derived once per render */
 function model(ctx) {
   const D = ctx.data.measures || {};
@@ -52,15 +47,11 @@ function model(ctx) {
   const items = arr(D.items);
   const byId = new Map(items.map(i => [i.id, i]));
   const label = new Map(arr(L && L.items).map(i => [i.id, i]));
-  const personas = arr(L && L.meta && L.meta.personas).filter(p => p && p.label).map(p => ({ ...p, slug: slugOf(p.label) }));
-  const hasLabels = label.size > 0 && personas.length > 0;
-  const showLabels = hasLabels && !ctx.store.get('onlyReal');                 // editorial labels are mock: „Само официални данни“ hides them
-  const persona = showLabels ? personas.find(p => p.slug === String(ctx.query.koy || '')) || null : null;
+  const hasLabels = label.size > 0;                                           // M06 is read only for the verbatim `since`, `sinceText`, `legal`
   const rel = new Map(items.map(i => [i.id, new Set()]));                     // „related“ read both ways
   for (const i of items) for (const r of arr(i.related)) if (byId.has(r)) { rel.get(i.id).add(r); rel.get(r).add(i.id); }
-  const fits = it => !persona || arr(label.get(it.id)?.affects).includes(persona.label);
   const lists = Object.fromEntries(TABS.map(t => [t, items.filter(i => i.tab === t)]));
-  return { D, L, items, byId, label, personas, hasLabels, showLabels, persona, rel, fits, lists };
+  return { D, L, items, byId, label, hasLabels, rel, lists };
 }
 
 /** an amount in млн. €, optionally signed; with „и в лева“ on the same amount follows in лева */
@@ -111,25 +102,6 @@ function fromHtml(M, it) {
   return html`<span class="muted">Не е посочено в мотивите</span>`;
 }
 
-function tagList(arrLabels) {
-  return html`<ul class="s12-tags" role="list">${arrLabels.map(t => html`<li>${t}</li>`)}</ul>`;
-}
-
-/** the editorial part of a card: who is affected, who pays, who gains. Narrow hatched strip + visible badge (never hatch over text). */
-function labelsHtml(M, it) {
-  const lab = M.showLabels ? M.label.get(it.id) : null;
-  if (!lab) return '';
-  const a = arr(lab.affects);
-  return html`<div class="s12-edit">
-    <span class="s12-edit-strip" data-mock="true" aria-hidden="true"></span>
-    <p class="s12-edit-head">${mockBadge('Редакционен етикет')}</p>
-    <dl class="s12-edit-list">
-      <div><dt>Кого засяга</dt><dd>${a.length ? tagList(a) : html`<span class="muted">Никоя от шестте групи пряко</span>`}</dd></div>
-      <div><dt>Кой плаща</dt><dd>${lab.payer}</dd></div>
-      <div><dt>Кой печели</dt><dd>${lab.winner}</dd></div>
-    </dl></div>`;
-}
-
 function quoteHtml(it) {
   const pg = pageText(it.page);
   return html`<details class="s12-quote" id="q-${it.id}">
@@ -154,7 +126,6 @@ function card(ctx, M, it) {
     <p class="s12-text">${it.text}</p>
     ${dk ? yearsHtml(ctx, it) : ''}
     ${facts(rows, { cls: 's12-facts' })}
-    ${labelsHtml(M, it)}
     ${quoteHtml(it)}
   </article>`;
 }
@@ -197,59 +168,13 @@ const DISC_COLS = [
   { key: 'page', label: 'Страница', fmt: v => (ok(v) ? String(v) : DASH) }
 ];
 
-// ------------------------------------------------------------------ persona filter and the empty state
-const filterCounts = M => Object.fromEntries(TABS.map(t => [t, M.lists[t].filter(M.fits).length]));
-const personaTotal = (M, p) => M.items.filter(i => arr(M.label.get(i.id)?.affects).includes(p.label)).length;
-
-function liveText(M) {
-  const c = filterCounts(M);
-  return M.persona
-    ? `Показани са мерките за „${M.persona.label}“: ${c.short} в краткосрочните, ${c.discretionary} в дискреционните и ${c.laws} в промените в други закони.`
-    : `Показани са всички мерки: ${c.short} краткосрочни, ${c.discretionary} дискреционни и ${c.laws} промени в други закони.`;
-}
-
-function filterBlock(ctx, M) {
-  if (!M.hasLabels) {
-    return block({
-      id: 's12-filter', title: 'Как ме засяга', status: 'pending',
-      body: pendingState({ title: 'Как ме засяга', text: 'Редакционните етикети (кого засяга мярката, кой плаща и кой печели) още не са заредени. Списъците и числата по-долу са официални.' })
-    });
-  }
-  const p = M.persona;
-  const items = [{ label: 'Всички', count: M.items.length, query: 'koy=', pressed: !p }]
-    .concat(M.personas.map(x => ({ label: x.label, count: personaTotal(M, x), query: `koy=${x.slug}`, pressed: !!p && p.slug === x.slug })));
-  return block({
-    id: 's12-filter', title: 'Как ме засяга', level: 2, status: 'mock', statusLabel: 'Редакционни етикети',
-    sub: 'Избери група и ще останат само мерките, които според мотивите я засягат.',
-    why: M.L.meta?.notice,
-    body: html`${chips({ label: 'Група', items })}
-      ${p ? html`<p class="s12-persona"><strong>${p.label}</strong> — ${p.hint}.</p>` : ''}`
-  });
-}
-
-/** „За „Студент“ няма мерки в списъка“ + a way out: all measures, or the lists where the group does have measures */
-function emptyPanel(ctx, M, tab) {
-  const p = M.persona, c = filterCounts(M);
-  const others = TABS.filter(t => t !== tab && c[t] > 0);
-  return html`<div class="s12-empty">${emptyState({
-    title: `За „${p.label}“ няма мерки в списъка`,
-    text: `В списъка „${listLabel(M, tab)}“ няма мярка, която според мотивите засяга тази група.`
-  })}
-    <p class="s12-empty-acts">${others.map(t => html`<button type="button" class="btn" data-query="spisak=${t}" data-fk="s12-go-${t}" data-s12-go="${t}">${listLabel(M, t)}: ${plural(c[t], 'мярка', 'мерки')}</button> `)}
-    <button type="button" class="btn btn-quiet" data-query="koy=" data-fk="s12-all" data-s12-go="chip">Покажи всички мерки</button></p></div>`;
-}
-
-const filteredNote = M => (M.persona
-  ? html`<p class="s12-filtered small muted">Показани са мерките, които според мотивите засягат „${M.persona.label}“. Сумите по-горе са за всички мерки в списъка.</p>`
-  : '');
-
 // ------------------------------------------------------------------ the three lists
 function groupBlock(ctx, M, g) {
   const all = arr(g.items).map(id => M.byId.get(id)).filter(Boolean);
-  const shown = all.filter(M.fits);
+  const shown = all;
   if (!shown.length) return '';
   const P = GROUPS[g.id] || { title: g.title || 'Мерки', sub: '' };
-  const count = M.persona ? `Показани: ${shown.length} от ${all.length}.` : `${plural(all.length, 'мярка', 'мерки')}.`;
+  const count = `${plural(all.length, 'мярка', 'мерки')}.`;
   const rows = shortRows(ctx, M, all);
   const total = ok(g.totalMln) ? { label: g.id === 'short-expenditure' ? 'Общо (с индикативните)' : 'Общо', values: { eff: g.totalMln } } : null;
   return block({
@@ -275,8 +200,7 @@ function shortPanel(ctx, M) {
   });
   const groups = arr(M.D.groups).filter(g => g.tab === 'short').map(g => groupBlock(ctx, M, g)).filter(Boolean);
   const intro = html`<p class="s12-intro" data-gl-scan>Това е краткият списък от увода на мотивите. ${gl('prihodna-myarka', 'Приходните мерки')} носят на държавата повече приходи, а ${gl('razhodna-myarka', 'разходните')} намаляват разходите. Всички суми са за 2026 г.</p>`;
-  if (M.persona && !groups.length) return html`<div class="stack-lg">${intro}${emptyPanel(ctx, M, 'short')}</div>`;
-  return html`<div class="stack-lg">${intro}${sums}${filteredNote(M)}${groups}</div>`;
+  return html`<div class="stack-lg">${intro}${sums}${groups}</div>`;
 }
 
 function discPanel(ctx, M) {
@@ -305,9 +229,9 @@ function discPanel(ctx, M) {
   });
   const part = (table, id, title, sub) => {
     const all = M.lists.discretionary.filter(i => i.table === table);
-    const shown = all.filter(M.fits);
+    const shown = all;
     if (!shown.length) return '';
-    const count = M.persona ? `Показани: ${shown.length} от ${all.length}.` : `${plural(all.length, 'мярка', 'мерки')}.`;
+    const count = `${plural(all.length, 'мярка', 'мерки')}.`;
     return block({
       id, title, status: 'real', statusLabel: REAL_LABEL, source: SOURCE, asOf: M.D.meta?.asOf,
       sub: html`${sub} <span class="s12-count">${count}</span>`,
@@ -321,21 +245,17 @@ function discPanel(ctx, M) {
     part('II-9', 's12-disc-exp', 'Разходни дискреционни мерки (Табл. II-9)', 'Мерки, които променят разходите през 2026, 2027 и 2028 г.')
   ].filter(Boolean);
   const intro = html`<p class="s12-intro" data-gl-scan>Две по-подробни таблици показват мерките за 2026, 2027 и 2028 г.: II-8 за приходите и II-9 за разходите. Сумите са изменение спрямо предходната година, на ${gl('nachislena-osnova', 'начислена основа')}.</p>`;
-  if (M.persona && !blocks.length) return html`<div class="stack-lg">${intro}${emptyPanel(ctx, M, 'discretionary')}</div>`;
-  return html`<div class="stack-lg">${intro}${sums}${filteredNote(M)}${blocks}</div>`;
+  return html`<div class="stack-lg">${intro}${sums}${blocks}</div>`;
 }
 
 function lawsPanel(ctx, M) {
-  const all = M.lists.laws, shown = all.filter(M.fits);
-  const count = M.persona ? `Показани: ${shown.length} от ${all.length}.` : `${plural(all.length, 'промяна', 'промени')}.`;
+  const all = M.lists.laws;
+  const count = `${plural(all.length, 'промяна', 'промени')}.`;
   const rows = all.map(it => ({ name: it.name, law: (M.hasLabels && M.label.get(it.id)?.legal) || null, page: it.page?.docx ?? null, _href: ctx.href('merki', { id: it.id }) }));
-  const body = shown.length
-    ? html`${cardsGrid(ctx, M, shown)}${twin(ctx, 's12-t-laws', 'Промени в други закони', [
-      { key: 'name', label: 'Промяна' }, { key: 'law', label: 'Правно основание', fmt: v => v || DASH }, { key: 'page', label: 'Страница', fmt: v => (ok(v) ? String(v) : DASH) }], rows)}`
-    : emptyPanel(ctx, M, 'laws');
+  const body = html`${cardsGrid(ctx, M, all)}${twin(ctx, 's12-t-laws', 'Промени в други закони', [
+    { key: 'name', label: 'Промяна' }, { key: 'law', label: 'Правно основание', fmt: v => v || DASH }, { key: 'page', label: 'Страница', fmt: v => (ok(v) ? String(v) : DASH) }], rows)}`;
   return html`<div class="stack-lg">
     <p class="s12-intro">Част от мерките се въвеждат с промени в други закони. За тях в мотивите няма посочена сума.</p>
-    ${filteredNote(M)}
     ${block({
       id: 's12-laws', title: listLabel(M, 'laws'), status: 'real', statusLabel: REAL_LABEL, source: SOURCE, asOf: M.D.meta?.asOf,
       sub: html`${M.D.tabNotes?.laws || ''} <span class="s12-count">${count}</span>`,
@@ -363,18 +283,16 @@ function howTo(M) {
 }
 
 function listPage(ctx, M) {
-  const D = M.D, c = filterCounts(M);
+  const D = M.D, c = Object.fromEntries(TABS.map(t => [t, M.lists[t].length]));
   const ignored = ctx.store.get('perPerson') || ctx.store.get('unit') === 'pct';
-  const active = TABS.includes(ctx.query.spisak) ? ctx.query.spisak : ctx.store.get('userType') === 'expert' ? 'discretionary' : 'short';
+  const active = TABS.includes(ctx.query.spisak) ? ctx.query.spisak : 'short';
   const body = html`<div class="stack-lg s12-list">
     ${callout({
       kind: 'info', id: 's12-stage', title: 'Числата са по законопроекта, не по приетия закон',
-      body: html`<p>${D.document?.adopted || 'Приетият закон може да се различава от законопроекта.'} Как се прие бюджетът, е описано <a href="${ctx.href('S14')}">на отделен екран</a>.</p>`
+      body: html`<p>${D.document?.adopted || 'Приетият закон може да се различава от законопроекта.'} Какво е променено при приемането, е в „<a href="${ctx.href('S14')}">Пътят на бюджета</a>“.</p>`
     })}
     ${ignored ? html`<p class="s12-ignored small muted">Тук сумите са в милиони евро. „На човек“ и „% от БВП“ не се прилагат към отделните мерки.</p>` : ''}
     ${howTo(M)}
-    ${filterBlock(ctx, M)}
-    <p class="sr-only" data-s12-live>${liveText(M)}</p>
     ${tabs({
       id: 's12-lists', label: 'Списъци с мерки', query: 'spisak', active,
       tabs: [
@@ -419,26 +337,6 @@ function whatBlock(ctx, M, it) {
   });
 }
 
-function whoBlock(ctx, M, it) {
-  const lab = M.hasLabels ? M.label.get(it.id) : null;
-  if (!lab) {
-    return block({ id: 's12-m-who', title: 'Кого засяга', status: 'pending', body: pendingState({ title: 'Кого засяга', text: 'Редакционните етикети за тази мярка още не са заредени.' }) });
-  }
-  const a = arr(lab.affects).map(l => M.personas.find(p => p.label === l)).filter(Boolean);
-  const rows = [
-    { k: 'Кого засяга', v: a.length ? chips({ label: 'Групи', items: a.map(p => ({ label: p.label, href: ctx.href('merki', {}, { koy: p.slug }) })) }) : html`<span class="muted">Според текста — никоя от шестте групи пряко.</span>` },
-    { k: 'Кой плаща', v: lab.payer },
-    { k: 'Кой печели', v: lab.winner },
-    { k: 'Бележка към оценката', v: lab.risk }
-  ];
-  const quotes = [['Откъс, от който е изведено кого засяга', lab.evidence], ['Откъс за оценката', lab.riskEvidence]].filter(q => q[1]);
-  return block({
-    id: 's12-m-who', title: 'Кого засяга', status: 'mock', statusLabel: 'Редакционни етикети', why: M.L.meta?.notice,
-    body: html`<div class="stack">${facts(rows, { cls: 's12-facts-wide' })}
-      ${quotes.length ? html`<div class="s12-evidence"><p class="s12-evidence-h">Откъси от текста на мярката</p>${quotes.map(([k, q]) => html`<figure class="s12-ev"><figcaption>${k}</figcaption><blockquote data-gl-skip>${q}</blockquote></figure>`)}</div>` : ''}</div>`
-  });
-}
-
 function textBlock(ctx, M, it) {
   const doc = M.D.document || {};
   const pg = pageText(it.page);
@@ -476,7 +374,7 @@ function measurePage(ctx, M, it) {
     context: M.D.meta?.asOf ? html`Мярката е по законопроекта, внесен на ${date(M.D.meta.asOf)}.` : '',
     body: html`<div class="stack-lg s12-measure">
       ${callout({ kind: 'info', id: 's12-stage', title: 'Числата са по законопроекта, не по приетия закон', body: html`<p>${M.D.document?.adopted || 'Приетият закон може да се различава от законопроекта.'}</p>` })}
-      ${whatBlock(ctx, M, it)}${whoBlock(ctx, M, it)}${textBlock(ctx, M, it)}${relatedBlock(ctx, M, it)}
+      ${whatBlock(ctx, M, it)}${textBlock(ctx, M, it)}${relatedBlock(ctx, M, it)}
     </div>`
   };
 }
@@ -506,26 +404,4 @@ export function render(ctx) {
     return measurePage(ctx, M, it);
   }
   return listPage(ctx, M);
-}
-
-let lastLive = '';
-let goTo = '';
-/**
- * After a re-render: (1) tell screen-reader users what a persona change did to the lists (never on arrival); (2) the buttons of the
- * empty state vanish with the re-render, so keyboard focus is handed to the control that took their place (the „Всички“ chip or the
- * tab of the list that was chosen) instead of dropping to the page start.
- */
-export function mount(root, ctx) {
-  const el = root.querySelector('[data-s12-live]');
-  const text = el ? plain(el.textContent) : '';
-  if (ctx.kind === 'rerender' && text && text !== lastLive) ctx.announce(text);
-  lastLive = text;
-  if (goTo && ctx.kind === 'rerender') {
-    const target = goTo === 'chip' ? root.querySelector('#s12-filter [data-query="koy="]') : root.querySelector(`#s12-lists [role="tab"][data-key="${goTo}"]`);
-    if (target) target.focus({ preventScroll: true });
-  }
-  goTo = '';
-  const onClick = e => { const b = e.target.closest && e.target.closest('[data-s12-go]'); if (b) goTo = b.dataset.s12Go || ''; };
-  root.addEventListener('click', onClick);
-  return () => root.removeEventListener('click', onClick);
 }

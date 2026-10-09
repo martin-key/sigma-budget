@@ -1,4 +1,4 @@
-// PNG download for every statistic: the „Изтегли PNG“ item of the block menu (share.js), a visible „PNG“ button in the header of a block that has no
+// PNG download for every statistic: the „Изтегли изображение“ item of the block menu (share.js), a visible „PNG“ button in the header of a block that has no
 // menu, and the picture composer behind both.
 //   scan(root)                                 adds the button to each menu-less block with a statistic (chart, ranking, KPI tiles, progress bars, map, data table,
 //                                              the home-page strips, the 5-minute scenes) and a small bar under a loose statistic that sits outside a block;
@@ -27,9 +27,9 @@ function makeButton(key, title) {
   b.type = 'button';
   b.className = 'btn btn-sm btn-quiet png-btn';
   b.dataset.png = key;
-  b.title = 'Изтегли като картинка (PNG)';
-  b.setAttribute('aria-label', `Изтегли PNG: ${title}`);
-  b.innerHTML = `${icon('image', { size: 16 }).s}<span>PNG</span>`;
+  b.title = 'Изтегли изображение (PNG)';
+  b.setAttribute('aria-label', `Изтегли изображение: ${title}`);
+  b.innerHTML = `${icon('image', { size: 16 }).s}<span>Изображение</span>`;       // the visible word is part of the accessible name (WCAG 2.5.3)
   return b;
 }
 function blockButton(block) {
@@ -101,13 +101,13 @@ function specFor(el) {
     mock: !!(el.matches(MOCK_SEL) || el.querySelector(MOCK_SEL) || el.closest('[data-block-mock]'))
   };
 }
-function metaOf(el) {
+function metaOf(el, spec) {
   const parts = [];
   const tags = el.querySelector(':scope > .block-head > .block-tags');
   if (tags) [...tags.children].forEach(c => { if (c.matches('.src-btn, .block-asof')) return; const t = text(c); if (t) parts.push(t); });
   const tab = el.querySelector('.tab-list [role="tab"][aria-selected="true"]');
   if (tab) parts.push(text(tab));
-  const per = text(document.querySelector('.ctx-period strong'));
+  const per = spec && spec.period !== undefined ? spec.period : text(document.querySelector('.ctx-period strong'));
   if (per) parts.push(`Период: ${per}`);
   return parts.join(' · ');
 }
@@ -119,7 +119,7 @@ const STAGE_CSS = `
 [data-png-stage] a,[data-png-stage] abbr,[data-png-stage] .gl{text-decoration:none!important}
 [data-png-stage] .page-body,[data-png-stage] .page-body>*{margin:0!important}
 [data-png-stage] .block{margin:0!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:none!important;overflow:visible!important}
-[data-png-stage] .block-head,[data-png-stage] .block-sub,[data-png-stage] .block-foot,[data-png-stage] .block-strip,[data-png-stage] .mock-note,[data-png-stage] .tab-list,[data-png-stage] .seg,[data-png-stage] .unit-switch,[data-png-stage] .chips,[data-png-stage] .png-btn,[data-png-stage] .png-bar,[data-png-stage] .share-btn,[data-png-stage] .src-btn,[data-png-stage] .report-link,[data-png-stage] .sr-only,[data-png-stage] select,[data-png-stage] input,[data-png-stage] textarea,[data-png-stage] details.fig-table,[data-png-stage] [data-png-skip],[data-png-stage] [hidden],[data-png-stage] .s05-go,[data-png-stage] .s05-ic,[data-png-stage] .s04-go,[data-png-stage] [role="search"],[data-png-stage] .btn,[data-png-stage] .s22-foot,[data-png-stage] .field:has(.seg,select,input,textarea){display:none!important}
+[data-png-stage] .block-head,[data-png-stage] .block-sub,[data-png-stage] .block-foot,[data-png-stage] .block-strip,[data-png-stage] .mock-note,[data-png-stage] .tab-list,[data-png-stage] .seg,[data-png-stage] .unit-switch,[data-png-stage] .chips,[data-png-stage] .png-btn,[data-png-stage] .png-bar,[data-png-stage] .share-btn,[data-png-stage] .src-btn,[data-png-stage] .report-link,[data-png-stage] .sr-only,[data-png-stage] select,[data-png-stage] input,[data-png-stage] textarea,[data-png-stage] details.fig-table,[data-png-stage] [data-png-skip],[data-png-stage] [hidden],[data-png-stage] .s05-go,[data-png-stage] .s05-ic,[data-png-stage] .s04-go,[data-png-stage] .s04-deep,[data-png-stage] .s04-card-a,[data-png-stage] [role="search"],[data-png-stage] .btn,[data-png-stage] .s22-foot,[data-png-stage] .field:has(.seg,select,input,textarea){display:none!important}
 [data-png-stage] figure[data-view="table"] .chart,[data-png-stage] figure[data-view="table"] .fig-legend{display:none!important}
 [data-png-stage] figure[data-view="table"] details.fig-table{display:block!important}
 [data-png-stage] figure[data-view="table"] details.fig-table>summary{display:none!important}
@@ -128,7 +128,15 @@ const STAGE_CSS = `
 [data-png-stage] .rank-label,[data-png-stage] .rank-name{white-space:normal!important;overflow:visible!important;text-overflow:clip!important}
 [data-png-stage] .png-more{margin:6px 0 0;list-style:none;font-size:12px;color:var(--muted);grid-column:1/-1}
 [data-png-stage] .s12-cards,[data-png-stage] .s07-split{grid-template-columns:minmax(0,1fr)!important}
-[data-png-stage] .map-info:not(:has(.map-info-name)){display:none!important}`;
+[data-png-stage] .map-info:not(:has(.map-info-name)){display:none!important}
+[data-png-stage] .s15-more{display:none!important}
+[data-png-stage] .fig-legend .lg{min-height:0!important;padding:2px 14px 2px 0!important;border:0!important;background:none!important}
+[data-png-stage] .fig-legend{gap:2px 6px!important}
+[data-png-stage] .s15-grid .s15-dh,[data-png-stage] .s15-grid td.s15-d{display:table-cell!important}
+[data-png-stage] .s15-dm{display:none!important}
+[data-png-stage] .s15-grid .s15-h0{width:34%!important}
+[data-png-stage] .s15-grid .s15-n{font-size:var(--fs-2)!important}
+[data-png-stage] .s15-grid .s15-d .s15-n{font-size:var(--fs-1)!important}`;
 
 function note(n) { return `… и още ${n} ${n === 1 ? 'ред' : 'реда'} на сайта`; }
 function capRows(clone) {
@@ -166,7 +174,7 @@ function longestRun(stage) {
   }
   return best;
 }
-/** a very tall run of items (S22 cards, S12 measure cards, long lists of panels) is cut at an item boundary and closed with a note, so the picture stays a few screens long */
+/** a very tall run of items (S12 measure cards, long lists of panels) is cut at an item boundary and closed with a note, so the picture stays a few screens long */
 async function capHeight(st, m) {
   const body = st.stage.querySelector('.page-body');
   for (let round = 0; round < 3 && m.h > MAXH; round++) {
@@ -248,13 +256,23 @@ function rrPath(ctx, x, y, w, h, r) {
   ctx.lineTo(x, y + a); ctx.arcTo(x, y, x + a, y, a);
   ctx.closePath();
 }
-/** repeating-linear-gradient(45deg, colour 0 a, transparent a b): the site's „mock“ hatch */
+/** the site's repeating gradients: 45deg hatch of a „mock“ block, and 90deg dashes (the swatch of a dashed line in a legend) */
 function hatch(ctx, bg, x, y, w, h, rad) {
   const m = /repeating-linear-gradient\(\s*(-?[\d.]+)deg\s*,(.*)\)/.exec(bg);
-  if (!m || Math.abs(parseFloat(m[1]) - 45) > 0.5) return;
-  const stops = [...m[2].matchAll(/(rgba?\([^)]*\)|#[0-9a-fA-F]{3,8})\s+(-?[\d.]+)px/g)].map(s => ({ c: s[1], p: parseFloat(s[2]) }));
+  if (!m) return;
+  const deg = parseFloat(m[1]);
+  const stops = [...m[2].matchAll(/(rgba?\([^)]*\)|#[0-9a-fA-F]{3,8})((?:\s+-?[\d.]+px)+)/g)].map(s => ({ c: s[1], p: s[2].trim().split(/\s+/).map(parseFloat) }));
   if (stops.length < 2 || clear(stops[0].c)) return;
-  const t = Math.max(stops[1].p - stops[0].p, 0.5), p = Math.max(stops[stops.length - 1].p, t + 0.5);
+  if (Math.abs(deg - 90) < 0.5) {                                          // vertical stripes: [from, to) of every period in the colour of the first stop
+    const from = stops[0].p[0], to = stops[0].p[1] ?? stops[1].p[0], per = stops[stops.length - 1].p.slice(-1)[0];
+    if (!(per > 0) || !(to > from)) return;
+    ctx.save(); rrPath(ctx, x, y, w, h, rad); ctx.clip(); ctx.fillStyle = stops[0].c;
+    for (let px = x; px < x + w; px += per) ctx.fillRect(px + from, y, to - from, h);
+    ctx.restore();
+    return;
+  }
+  if (Math.abs(deg - 45) > 0.5) return;
+  const t = Math.max(stops[1].p[0] - stops[0].p[0], 0.5), p = Math.max(stops[stops.length - 1].p[0], t + 0.5);
   ctx.save();
   rrPath(ctx, x, y, w, h, rad); ctx.clip();
   ctx.strokeStyle = stops[0].c; ctx.lineWidth = t;
@@ -374,6 +392,19 @@ function wrap(ctx, txt, font, maxW) {
   if (line) out.push(line);
   return out;
 }
+/** like wrap(), but a word wider than the line (a web address) is broken at ? & / = or, as the last resort, anywhere */
+function wrapLink(ctx, txt, font, maxW) {
+  ctx.font = font;
+  const out = []; let line = '';
+  for (const part of String(txt).split(/(?<=[?&/=#])/)) {
+    if (ctx.measureText(line + part).width <= maxW) { line += part; continue; }
+    if (line) out.push(line);
+    line = '';
+    for (const ch of part) { if (line && ctx.measureText(line + ch).width > maxW) { out.push(line); line = ''; } line += ch; }
+  }
+  if (line) out.push(line);
+  return out;
+}
 /** diagonal „ПРИМЕРНИ ДАННИ“ tiles over the whole picture, spaced by the measured width of the words */
 function mark(x, W, H, colour) {
   const txt = 'ПРИМЕРНИ ДАННИ';
@@ -409,15 +440,19 @@ export async function canvasFor(spec, { watermark, pixelRatio = 2 } = {}) {
     const probe = document.createElement('canvas').getContext('2d');
     const tl = wrap(probe, spec.title || '', `400 24px ${SERIF}`, INNER);
     const sl = [...(spec.sub ? wrap(probe, spec.sub, `400 13px ${FAM}`, INNER) : [])];
-    const meta = wrap(probe, metaOf(el), `400 12px ${FAM}`, INNER);
+    const meta = wrap(probe, metaOf(el, spec), `400 12px ${FAM}`, INNER);
     const src = share.sourceLine(spec);
+    const link = share.shortLink(spec);
     const fl = [...(mock ? wrap(probe, 'Примерни данни: измислени стойности, не са истински.', `700 12px ${FAM}`, INNER).map(t => ({ t, mock: true })) : []),
-      ...(src ? wrap(probe, src, `400 12px ${FAM}`, INNER) : []).map(t => ({ t })), { t: 'Бюджет на светло · прототип' }];
+      ...(src ? wrap(probe, src, `400 12px ${FAM}`, INNER) : []).map(t => ({ t })),
+      ...(link ? wrapLink(probe, `Връзка: ${link}`, `400 12px ${FAM}`, INNER) : []).map(t => ({ t })), { t: 'Бюджет на светло · прототип' }];
     const H = PAD + tl.length * 26 + (sl.length ? 4 + sl.length * 18 : 0) + (meta.length ? 4 + meta.length * 17 : 0) + 14 + bodyH + 16 + fl.length * 17 + PAD;
     const pr = Math.max(1, Math.min(pixelRatio, Math.sqrt(16e6 / (W * H))));   // iOS Safari caps a canvas at about 16 million pixels
     const c = document.createElement('canvas');
     c.width = Math.round(W * pr); c.height = Math.round(H * pr);
+    c.lang = 'bg';
     const x = c.getContext('2d');
+    if ('lang' in x) x.lang = 'bg';
     x.scale(pr, pr); x.textBaseline = 'top';
     const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
     x.fillStyle = cssv('--surface') || '#fff'; x.fillRect(0, 0, W, H);
