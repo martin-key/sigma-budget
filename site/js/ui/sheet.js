@@ -1,5 +1,5 @@
 // Sheet (modal dialog / bottom sheet on phones) and popover (anchored, non-modal on wide screens).
-//   sheet.open({title, body, id, wide, returnFocus, onClose}) -> {el, close}
+//   sheet.open({title, body, id, wide, cls, returnFocus, onClose}) -> {el, close}   (cls: extra class, e.g. 'sheet-drawer' = the right-side menu drawer)
 //   popover.open(anchor, {title, body, label, id, align:'start'|'end', onClose}) -> {el, close}
 // body is SafeHtml (html`…`) | Node | string (shown as plain text).  Sheets use the native <dialog>: focus trap, Esc, inert background.
 // A popover on a <=600px screen becomes a sheet.  Both return focus to the opener and close on Esc.
@@ -22,7 +22,7 @@ export const sheet = {
     const tid = nextId('sheet-t');
     const opener = o.returnFocus || document.activeElement;
     const dlg = document.createElement('dialog');
-    dlg.className = 'sheet' + (o.wide ? ' sheet-wide' : '');
+    dlg.className = 'sheet' + (o.wide ? ' sheet-wide' : '') + (o.cls ? ' ' + o.cls : '');
     if (o.id) dlg.id = o.id;
     dlg.setAttribute('aria-labelledby', tid);
     dlg.innerHTML = `<div class="sheet-in"><header class="sheet-head"><h2 class="sheet-title" id="${tid}">${esc(o.title || '')}</h2><button type="button" class="icon-btn" data-close aria-label="Затвори">${icon('x', { size: 20 })}</button></header><div class="sheet-body"></div></div>`;

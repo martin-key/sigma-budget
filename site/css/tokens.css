@@ -1,124 +1,86 @@
-/* Design tokens + light/dark themes (visual language v2: soft cards, ink + one lime accent, Onest).
-   Light = bare :root. Dark = the same roles, re-stepped (contrast checked: mock/research/restyle-2026-10-03/contrast_v2.py).
-   Dark is applied twice on purpose: by the OS setting (unless the viewer pinned light) and by the explicit switch.
-   Roles: --bg page · --card soft grey card · --surface paper (white on a card, raised in dark) · --sunk wells/hover · --ink text and primary actions ·
-   --accent the one lime (icon chips, highlights; text on it is --on-accent) · --inv inverse card (the "next" card, the guide card). */
-
-/* Onest (SIL OFL 1.1, Latin + Cyrillic subsets of the variable font, self-hosted, no request leaves the site) */
-@font-face{font-family:"Onest";font-style:normal;font-weight:100 900;font-display:swap;src:url(../vendor/fonts/onest-cyrillic-wght.woff2) format("woff2");unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
-@font-face{font-family:"Onest";font-style:normal;font-weight:100 900;font-display:swap;src:url(../vendor/fonts/onest-latin-wght.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+/* Design tokens, v4 trial: the visual language of СИГМА (sigma.midt.bg, MIT, © 2026 МИДТ; see THIRD-PARTY.txt).
+   Flat warm paper, ink type, hairline rules instead of cards, ONE crimson accent, three type voices (serif headings, sans body,
+   mono labels), 8-pt spacing, radius ≤ 3px, no soft shadows (only popovers lift).
+   LIGHT ONLY, on purpose: СИГМА has no dark theme, so v4 has no dark tokens, no theme switch and no stored theme.
+   Every colour is a hex value: ECharts (js/charts.js) reads these tokens and cannot parse oklch(). The oklch source values are in the comments.
+   The v2/v3 token names are kept as aliases (pages and components use them); the СИГМА names are the source of truth. */
 
 :root{
   color-scheme:light;
 
-  /* type */
-  --font-body:"Onest",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-  --font-head:"Onest",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-  --font-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
-  /* five sizes: 14 / 16 / 20 / 28 / 40 px (v3). The other step names are aliases, so every existing rule lands on one of the five. */
-  --fs-s:.875rem; --fs-0:1rem; --fs-1:1.25rem; --fs-3:1.75rem; --fs-5:2.5rem;
-  --fs-xs:var(--fs-s); --fs-2:var(--fs-1); --fs-4:var(--fs-3); --fs-6:var(--fs-5);
-  --fs-h1:clamp(1.75rem,1rem + 2.4vw,2.5rem);
-  --lh-tight:1.12; --lh-body:1.5; --track-head:-.025em; --track-display:-.04em;
+  /* ---- СИГМА palette (apps/web/app/styles/tokens.css), converted to sRGB ---- */
+  --paper:#FDFAF4;        /* oklch(98.5% .008 80)  page */
+  --paper-warm:#F6F1E9;   /* oklch(96% .012 78)    hover, zebra, chips, wells */
+  --paper-deep:#F0EAE1;   /* oklch(94% .014 78)    ranked-bar fill */
+  --ink-0:#15110C;        /* oklch(18% .012 70)    text, rules, primary actions */
+  --ink-mid:#46423D;      /* oklch(38% .01 70)     secondary text (9.6:1 on paper) */
+  --ink-soft:#66625E;     /* oklch(50% .008 70)    captions, AA: 5.8:1 paper · 5.4 paper-warm · 5.1 paper-deep */
+  --rule:#D4D0CB;         /* oklch(86% .008 75)    hairline dividers ONLY (1.5:1), never a control border */
+  --rule-soft:#E4E1DC;    /* oklch(91% .008 75)    row dividers */
+  --crimson:#AC1B18;      /* oklch(48% .18 28)     the one accent: 6.9:1 on paper */
+  --crimson-tint:#FFE2DC; /* oklch(94% .04 28)     warning wash */
+  --pos:#006647;          /* oklch(45% .1 165)     positive teal (6.7:1 on paper) */
 
-  /* space, radii, shadows, motion */
-  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px; --sp-7:48px; --sp-8:72px;
-  /* two radii (v3): small for controls and chips, medium for panels. The other names are aliases of these two. */
-  --r-1:8px; --r-2:14px; --r-3:var(--r-2); --r-4:var(--r-2); --r-full:var(--r-1);
-  --shadow-1:0 1px 2px rgb(18 20 18/.04),0 2px 8px rgb(18 20 18/.05);
-  --shadow-2:0 14px 36px rgb(18 20 18/.16),0 2px 8px rgb(18 20 18/.06);
-  --t-fast:150ms; --t-med:250ms; --ease:cubic-bezier(.2,.7,.2,1);
+  /* ---- type: three voices, system stacks, no webfont ---- */
+  --font-serif:Charter,"Iowan Old Style",Georgia,"Times New Roman",serif;
+  --font-sans:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;
+  --font-mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+  --font-body:var(--font-sans);
+  --font-head:var(--font-serif);
+  /* sizes: 12 mono labels (nothing that carries meaning is smaller) · 14 secondary · 15 body (16 on phones) · 20–26 h3 · 28–40 h2 · 36–56 h1 */
+  --fs-xs:.75rem; --fs-s:.875rem; --fs-0:.9375rem; --fs-1:1.25rem; --fs-3:clamp(1.75rem,3.2vw,2.5rem); --fs-5:clamp(2.25rem,4.4vw,3.5rem);
+  --fs-2:var(--fs-1); --fs-4:var(--fs-3); --fs-6:var(--fs-5);
+  --fs-h1:var(--fs-5); --fs-h2:var(--fs-3); --fs-h3:clamp(1.25rem,2vw,1.625rem); --fs-block:clamp(1.375rem,2.2vw,1.75rem);
+  --fs-lede:clamp(1rem,.9rem + .45vw,1.125rem);
+  --lh-tight:1.1; --lh-body:1.5; --track-head:-.02em; --track-display:-.025em; --track-mono:.14em;
 
-  /* layout */
-  --nav-w:272px; --content-w:1120px; --topbar-h:64px; --tabbar-h:64px; --gutter:24px;
+  /* ---- space (strict 8-pt), radii, shadow, motion ---- */
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px; --sp-7:48px; --sp-8:64px; --sp-9:96px;
+  --r-1:2px; --r-2:3px; --r-3:3px; --r-4:3px; --r-full:2px;   /* СИГМА: square; 3px is the largest radius */
+  --shadow-1:none;
+  --shadow-2:0 18px 40px -24px rgb(0 0 0/.45);                  /* popovers only (СИГМА's search popover lift) */
+  --t-fast:150ms; --t-med:250ms; --ease:cubic-bezier(.16,1,.3,1);
 
-  /* surfaces and ink */
-  --bg:#FFFFFF; --card:#F4F4F1; --surface:#FFFFFF; --sunk:#EBEBE6; --overlay:rgb(18 20 18/.5);
-  --ink:#121412; --muted:#585C57; --faint:#666A65;
-  --line:#DADBD5; --line-strong:#868A84;
-  --inv:#121412; --on-inv:#FFFFFF; --on-inv-2:#BDC1B9;
+  /* ---- layout ---- */
+  --max:1280px; --max-narrow:880px; --gutter:64px;
+  --content-w:1152px; --nav-w:0px; --topbar-h:0px; --tabbar-h:64px;
 
-  /* brand: ink carries data, actions and links; ONE lime accent (non-text; text on it is --on-accent; as text use --accent-ink) */
-  --data:#121412; --data-hover:#4A5F00; --data-soft:#EEF3CF; --data-2:#A9AE9B; --data-3:#DCE3B2; --on-data:#FFFFFF;
-  --accent:#DDF45A; --accent-soft:#F2F8CC; --accent-ink:#4A5F00; --on-accent:#121412;
-  --focus:#121412;
-  --cur-ic:#DDF45A;
+  /* ---- roles (v2/v3 names) mapped onto the СИГМА palette ---- */
+  --bg:var(--paper); --card:var(--paper); --surface:var(--paper); --sunk:var(--paper-warm); --deep:var(--paper-deep);
+  --overlay:rgb(21 17 12/.46);
+  --ink:var(--ink-0); --muted:var(--ink-mid); --faint:var(--ink-soft);
+  --line:var(--rule); --line-soft:var(--rule-soft); --line-strong:var(--ink-soft);   /* line-strong = control borders (5.8:1) */
+  --inv:var(--ink-0); --on-inv:var(--paper); --on-inv-2:#D4D0CB;
+  --data:var(--ink-0); --data-hover:var(--crimson); --data-soft:var(--paper-warm); --data-2:#B4AB9F; --data-3:#D4D0CB; --on-data:var(--paper);
+  --accent:var(--crimson); --accent-soft:var(--crimson-tint); --accent-ink:var(--crimson); --on-accent:var(--paper);
+  --focus:var(--crimson);
+  --cur-ic:var(--paper);
 
-  /* revenue / expenditure pair: olive vs ink */
-  --rev:#6F8A00; --exp:#1B1D1A;
+  /* revenue / expenditure pair: teal vs ink (3.6:1 between them, both ≥5:1 on paper) */
+  --rev:#1F7A5C; --exp:#15110C;
 
-  /* categorical series: mostly monochrome, the accent for emphasis, then quiet hues; neutrals for "other" */
-  --series-1:#1B1D1A; --series-2:#6F8A00; --series-3:#3F6FA5; --series-4:#B5532F;
-  --series-5:#8A6D00; --series-6:#2F7F76; --series-7:#7A5890; --series-8:#B04A6B;
-  --series-other:#7B7F7A; --series-other-2:#555953;
-  --series-ring:var(--card);
+  /* categorical series, alternating dark / light so that NEIGHBOURS keep ≥ 3:1 (3.1–8.9:1): ink, warm grey, crimson, light teal,
+     steel, ochre, plum, light steel. Identity never rests on colour alone: legends, labels and table twins carry it. */
+  --series-1:#15110C; --series-2:#B4AB9F; --series-3:#AC1B18; --series-4:#7AB8A0;
+  --series-5:#2E4E6E; --series-6:#CDA556; --series-7:#6A3E6E; --series-8:#A9B3BF;
+  --series-other:#8C857C; --series-other-2:#5F5A54;
+  --series-ring:var(--paper);
 
   /* semantics (always with icon + words, never colour alone) */
-  --ok:#2B7449; --ok-soft:#E3F2E8; --warn:#8F5A00; --warn-soft:#FBEFD9; --bad:#B3261E; --bad-soft:#FBE9E7;
+  --ok:var(--pos); --ok-soft:#E3F0E9; --warn:#7A4E00; --warn-soft:#F6EBD3; --bad:var(--crimson); --bad-soft:var(--crimson-tint);
 
-  /* data status */
-  --st-real:#2B7449;     --st-real-soft:#E3F2E8;
-  --st-partial:#2F5D9A;  --st-partial-soft:#E4ECF7;
-  --st-pending:#585C57;  --st-pending-soft:#EEEFEA;
-  --st-mock:#8A3F6B;     --st-mock-soft:#F6E9F0;
-  --st-forecast:#3E5F8F; --st-forecast-soft:#EAF0F8;
-  --hatch:rgb(138 63 107/.28);
+  /* data status: mono tags told apart by their words and icons; colour only supports them */
+  --st-real:#006647;     --st-real-soft:var(--paper);
+  --st-partial:#2E4E6E;  --st-partial-soft:var(--paper);
+  --st-pending:#66625E;  --st-pending-soft:var(--paper-warm);
+  --st-mock:#AC1B18;     --st-mock-soft:var(--crimson-tint);
+  --st-forecast:#46423D; --st-forecast-soft:var(--paper);
+  --hatch:rgb(172 27 24/.24);    /* „примерни данни“: crimson 45° hatch, never used for real data */
   --hatch-step:7px;
 }
 
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    color-scheme:dark;
-      --shadow-1:0 1px 2px rgb(0 0 0/.4),0 2px 8px rgb(0 0 0/.3);
-      --shadow-2:0 14px 36px rgb(0 0 0/.6),0 2px 8px rgb(0 0 0/.4);
-      --bg:#0E100E; --card:#171A17; --surface:#212421; --sunk:#2A2D29; --overlay:rgb(0 0 0/.64);
-      --ink:#ECEEE8; --muted:#A9ADA6; --faint:#8F948D;
-      --line:#2E322D; --line-strong:#7A7F79;
-      --inv:#262A24; --on-inv:#ECEEE8; --on-inv-2:#A9ADA6;
-      --data:#E8EBE2; --data-hover:#D9F24A; --data-soft:#262A1A; --data-2:#5E6650; --data-3:#3A4128; --on-data:#0E100E;
-      --accent:#D9F24A; --accent-soft:#2C3312; --accent-ink:#D9F24A; --on-accent:#10130A;
-      --focus:#D9F24A;
-      --cur-ic:#0E100E;
-      --rev:#C9E43A; --exp:#E8EBE2;
-      --series-1:#E8EBE2; --series-2:#C9E43A; --series-3:#6FA0DA; --series-4:#E2825D;
-      --series-5:#D6B13C; --series-6:#54B5AA; --series-7:#B293CB; --series-8:#E27C9B;
-      --series-other:#8F948D; --series-other-2:#B8BCB4;
-      --ok:#6CC08F; --ok-soft:#17291F; --warn:#E3A94A; --warn-soft:#33290F; --bad:#FF8F88; --bad-soft:#3A1D1B;
-      --st-real:#6CC08F;     --st-real-soft:#17291F;
-      --st-partial:#8DB3E6;  --st-partial-soft:#17263A;
-      --st-pending:#A9ADA6;  --st-pending-soft:#262925;
-      --st-mock:#D59AAE;     --st-mock-soft:#35212C;
-      --st-forecast:#9DBAE6; --st-forecast-soft:#1A2A40;
-      --hatch:rgb(213 154 174/.32);
-  }
-}
-:root[data-theme="dark"]{
-  color-scheme:dark;
-  --shadow-1:0 1px 2px rgb(0 0 0/.4),0 2px 8px rgb(0 0 0/.3);
-  --shadow-2:0 14px 36px rgb(0 0 0/.6),0 2px 8px rgb(0 0 0/.4);
-  --bg:#0E100E; --card:#171A17; --surface:#212421; --sunk:#2A2D29; --overlay:rgb(0 0 0/.64);
-  --ink:#ECEEE8; --muted:#A9ADA6; --faint:#8F948D;
-  --line:#2E322D; --line-strong:#7A7F79;
-  --inv:#262A24; --on-inv:#ECEEE8; --on-inv-2:#A9ADA6;
-  --data:#E8EBE2; --data-hover:#D9F24A; --data-soft:#262A1A; --data-2:#5E6650; --data-3:#3A4128; --on-data:#0E100E;
-  --accent:#D9F24A; --accent-soft:#2C3312; --accent-ink:#D9F24A; --on-accent:#10130A;
-  --focus:#D9F24A;
-  --cur-ic:#0E100E;
-  --rev:#C9E43A; --exp:#E8EBE2;
-  --series-1:#E8EBE2; --series-2:#C9E43A; --series-3:#6FA0DA; --series-4:#E2825D;
-  --series-5:#D6B13C; --series-6:#54B5AA; --series-7:#B293CB; --series-8:#E27C9B;
-  --series-other:#8F948D; --series-other-2:#B8BCB4;
-  --ok:#6CC08F; --ok-soft:#17291F; --warn:#E3A94A; --warn-soft:#33290F; --bad:#FF8F88; --bad-soft:#3A1D1B;
-  --st-real:#6CC08F;     --st-real-soft:#17291F;
-  --st-partial:#8DB3E6;  --st-partial-soft:#17263A;
-  --st-pending:#A9ADA6;  --st-pending-soft:#262925;
-  --st-mock:#D59AAE;     --st-mock-soft:#35212C;
-  --st-forecast:#9DBAE6; --st-forecast-soft:#1A2A40;
-  --hatch:rgb(213 154 174/.32);
-}
-
-/* 17 px base on phones (plan 6.4); every rem-based size follows. */
+/* 15 px body on wide screens, 16 px on phones (legibility; inputs stay ≥16 px so iOS does not zoom) */
 html{font-size:100%}
-@media (min-width:1200px){:root{--gutter:40px}}
-@media (max-width:599px){html{font-size:106.25%}:root{--gutter:16px}}
+@media (max-width:880px){:root{--gutter:28px}}
+@media (max-width:599px){:root{--gutter:16px;--fs-0:1rem}}
 @media (prefers-reduced-motion:reduce){:root{--t-fast:0ms;--t-med:0ms}}

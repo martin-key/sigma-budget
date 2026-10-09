@@ -3,7 +3,7 @@
 // types: bar | barh | line | donut | treemap | sankey | option (see charts.js for the full spec).  id is required and must be unique on the screen.
 // Rules: the chart is hidden from assistive tech (role="img" + a name) and the table twin carries the data; a mock series is hatched
 // (decal) and the figure says „Примерни данни“; ECharts is loaded only when a chart becomes visible; colours follow the design tokens
-// and the theme switch re-draws in place.
+// (v4 is light only, so there is no theme re-draw).
 //
 // View switch (opt-in, one place for every screen): `views: ['bars','pie','table']` for the additive parts of one whole (a barh/bar with ONE series, or a donut),
 // `views: ['line','bars','table']` for a time series. A segmented control under the caption swaps the picture in place; the visitor's choice is kept for
@@ -258,11 +258,6 @@ export async function mount(fig, ctx) {
     if ((box.clientWidth < 480) !== narrow || shown !== view) paint();
   });
   ro.observe(box);
-  const repaint = () => paint();
-  const mo = new MutationObserver(repaint);
-  mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-  const mq = window.matchMedia('(prefers-color-scheme: dark)');
-  mq.addEventListener?.('change', repaint);
 
   const onClick = e => {
     const b = e.target.closest('.lg');
@@ -304,7 +299,7 @@ export async function mount(fig, ctx) {
   ensure();
   return () => {
     dead = true;
-    ro.disconnect(); mo.disconnect(); mq.removeEventListener?.('change', repaint);
+    ro.disconnect();
     fig.removeEventListener('click', onClick);
     fig.removeEventListener('change', onChange);
     try { inst?.dispose(); } catch { /* already gone */ }

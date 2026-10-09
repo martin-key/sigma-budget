@@ -7,20 +7,16 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; font-src 'self'; base-uri 'self'; form-action 'none'; object-src 'none'">
 <meta name="description" content="Прототип на портал за прозрачност на държавния бюджет: откъде идват парите, за какво отиват и как се изпълнява планът. Част от данните са примерни и са ясно отбелязани.">
 <meta name="robots" content="noindex,nofollow">
-<meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0E100E" media="(prefers-color-scheme: dark)">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#FDFAF4">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="manifest.json">
 <link rel="alternate" type="application/rss+xml" title="Бюджет на светло: какво ново" href="data/feed.xml">
-<link rel="preload" href="vendor/fonts/onest-cyrillic-wght.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="vendor/fonts/onest-latin-wght.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/layout.css">
 <link rel="stylesheet" href="css/components.css">
 <link rel="stylesheet" href="css/charts.css">
-<script src="js/theme-boot.js"></script>
 <script type="module" src="js/main.js"></script>
 </head>
 <body>
@@ -28,8 +24,8 @@
 <div class="mockbar" id="mockbar" role="region" aria-label="Забележка за прототипа" hidden></div>
 <div class="offline-banner" id="offline" role="status" hidden></div>
 <header class="topbar" id="topbar"></header>
+<nav class="sidenav" id="sidenav" aria-label="Основна навигация"></nav>
 <div class="shell">
-  <nav class="sidenav" id="sidenav" aria-label="Основна навигация"></nav>
   <main class="main" id="main" tabindex="-1">
     <div class="view" id="view" aria-busy="true"><p class="boot-note">Зареждане…</p></div>
   </main>

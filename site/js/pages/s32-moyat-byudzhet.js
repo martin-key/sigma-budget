@@ -396,11 +396,9 @@ export function render(ctx) {
 
 /* ---------------------------------------------------------------- the picture (PNG) */
 const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-/** the vendored Onest must be loaded before the canvas can use it; if it fails the system font stands in */
+/** v4 uses system fonts (СИГМА's stacks): wait until the document's fonts are settled */
 async function loadFonts() {
-  try {
-    await Promise.all([document.fonts.load('700 22px "Onest"'), document.fonts.load('400 13px "Onest"'), document.fonts.load('700 13px "Onest"')]);
-  } catch { /* system font */ }
+  try { await document.fonts.ready; } catch { /* system font */ }
 }
 /** `text` cut with an ellipsis so that it fits `maxW` in the font that is set on the context */
 function fitText(x, text, maxW) {
@@ -423,7 +421,7 @@ async function card(f, r) {
   x.scale(dpr, dpr);
   x.textBaseline = 'top';
   const ink = cssv('--ink') || '#111111', muted = cssv('--muted') || '#555555', rule = cssv('--line-strong') || '#999999', accent = cssv('--data') || '#1a6b4a';
-  const fB = '"Onest",system-ui,sans-serif', fD = '"Onest",system-ui,sans-serif';
+  const fB = 'system-ui,-apple-system,"Segoe UI",Arial,sans-serif', fD = 'Charter,"Iowan Old Style",Georgia,"Times New Roman",serif';
   const say = (text, px, y, o = {}) => {
     x.font = `${o.w || 400} ${px}px ${o.d ? fD : fB}`;
     x.fillStyle = o.c || ink;
@@ -436,7 +434,7 @@ async function card(f, r) {
   x.fillStyle = accent;
   x.fillRect(0, 0, W, 12);
 
-  say(`Моят бюджет ${f.year}`, 64, 40, { w: 700, d: true });
+  say(`Моят бюджет ${f.year}`, 64, 40, { w: 400, d: true });
   say(MODEL, 24, 116, { c: muted, max: W - 2 * M });
 
   // the three results side by side

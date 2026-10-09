@@ -11,7 +11,8 @@ import { icon } from '../icons.js';
 import * as share from '../share.js';
 
 const W = 760, PAD = 20, INNER = W - PAD * 2, MAXW = 1280, PP = 16;   // PP: padding of the grey panel a block is drawn on
-const FAM = '"Onest",system-ui,sans-serif';
+const FAM = 'system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif';   // v4: СИГМА's system stacks, no webfont
+const SERIF = 'Charter,"Iowan Old Style",Georgia,"Times New Roman",serif';
 const SKIP_ROUTES = new Set(['api']);                                    // S25: reference tables of the API, not statistics
 const HOST_SEL = 'li.s05-card,.kpi-grid,.table-wrap,figure.fig,.rank';   // what a loose statistic is exported together with
 const MOCK_SEL = '[data-block-mock="true"],[data-mock-fig="true"],[data-mock-table="true"],[data-kpi-mock="true"]';
@@ -364,7 +365,7 @@ async function paintTree(S, node) {
 
 /* ---------------------------------------------------------------- the picture */
 async function fonts() {
-  try { await Promise.all([document.fonts.load('700 22px "Onest"'), document.fonts.load('400 13px "Onest"'), document.fonts.load('700 13px "Onest"')]); } catch { /* system fonts are fine */ }
+  try { await document.fonts.ready; } catch { /* system fonts are fine */ }
 }
 function wrap(ctx, txt, font, maxW) {
   ctx.font = font;
@@ -377,7 +378,7 @@ function wrap(ctx, txt, font, maxW) {
 function mark(x, W, H, colour) {
   const txt = 'ПРИМЕРНИ ДАННИ';
   x.save();
-  x.globalAlpha = 0.14; x.fillStyle = colour || '#8A3F6B'; x.textAlign = 'center'; x.textBaseline = 'middle';
+  x.globalAlpha = 0.14; x.fillStyle = colour || '#AC1B18'; x.textAlign = 'center'; x.textBaseline = 'middle';
   x.font = `700 30px ${FAM}`;
   const stepX = x.measureText(txt).width + 120, stepY = 130, span = Math.hypot(W, H);
   x.translate(W / 2, H / 2); x.rotate(-Math.PI / 7);
@@ -406,7 +407,7 @@ export async function canvasFor(spec, { watermark, pixelRatio = 2 } = {}) {
     const sw = Math.max(m.w, inner), k = Math.min(1, inner / sw);
     const bodyH = Math.ceil(m.h * k) + 2 * panel;
     const probe = document.createElement('canvas').getContext('2d');
-    const tl = wrap(probe, spec.title || '', `700 22px ${FAM}`, INNER);
+    const tl = wrap(probe, spec.title || '', `400 24px ${SERIF}`, INNER);
     const sl = [...(spec.sub ? wrap(probe, spec.sub, `400 13px ${FAM}`, INNER) : [])];
     const meta = wrap(probe, metaOf(el), `400 12px ${FAM}`, INNER);
     const src = share.sourceLine(spec);
@@ -421,11 +422,11 @@ export async function canvasFor(spec, { watermark, pixelRatio = 2 } = {}) {
     const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
     x.fillStyle = cssv('--surface') || '#fff'; x.fillRect(0, 0, W, H);
     let y = PAD;
-    x.fillStyle = cssv('--ink'); x.font = `700 22px ${FAM}`; tl.forEach(l => { x.fillText(l, PAD, y); y += 26; });
+    x.fillStyle = cssv('--ink'); x.font = `400 24px ${SERIF}`; tl.forEach(l => { x.fillText(l, PAD, y); y += 26; });
     if (sl.length) { y += 4; x.fillStyle = cssv('--muted'); x.font = `400 13px ${FAM}`; sl.forEach(l => { x.fillText(l, PAD, y); y += 18; }); }
     if (meta.length) { y += 4; x.fillStyle = cssv('--muted'); x.font = `400 12px ${FAM}`; meta.forEach(l => { x.fillText(l, PAD, y); y += 17; }); }
     y += 14;
-    if (panel) { rrPath(x, PAD, y, INNER, bodyH, [12, 12, 12, 12]); x.fillStyle = cssv('--card') || '#F4F4F1'; x.fill(); }
+    if (panel) { x.fillStyle = cssv('--ink') || '#15110C'; x.fillRect(PAD, y, INNER, 1); }   // v4: no card; an ink rule on top of the block, as on the page
     x.save(); x.translate(PAD + panel, y + panel); x.scale(k, k);
     await paintTree({ ctx: x, x0: m.x0, y0: m.y0, pairs: st.pairs, pr: pr * k }, st.clone);
     x.restore();

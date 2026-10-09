@@ -171,7 +171,7 @@ const fileName = (spec, ext) => `bns-${[spec.route, spec.id].filter(Boolean).joi
 const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const loadImg = src => new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = src; });
 async function fonts() {
-  try { await Promise.all([document.fonts.load('700 22px "Onest"'), document.fonts.load('400 13px "Onest"'), document.fonts.load('700 13px "Onest"')]); } catch { /* system fonts are fine */ }
+  try { await document.fonts.ready; } catch { /* system fonts are fine */ }
 }
 function wrapLines(x, txt, font, maxW) {
   x.font = font;
@@ -189,7 +189,7 @@ function fit(x, text, w) {
 /** diagonal „ПРИМЕРНИ ДАННИ“ tiles over the whole image */
 function drawWatermark(x, W, H, fam) {
   x.save();
-  x.globalAlpha = 0.16; x.fillStyle = cssv('--st-mock') || '#8A3F6B'; x.textAlign = 'center'; x.textBaseline = 'middle';
+  x.globalAlpha = 0.16; x.fillStyle = cssv('--st-mock') || '#AC1B18'; x.textAlign = 'center'; x.textBaseline = 'middle';
   x.font = `700 34px ${fam}`;
   x.translate(W / 2, H / 2); x.rotate(-Math.PI / 7);
   const stepX = 330, stepY = 120, span = Math.hypot(W, H);
@@ -231,10 +231,10 @@ export async function renderPng(spec, { watermark = isMock(spec), pixelRatio = 2
   let img = null, w = 0, h = 0;
   if (inst) { const r = chartImage(inst, el, { pixelRatio }); img = await loadImg(r.url); w = r.w; h = r.h; }
   else if (!t) throw new Error('няма какво да се нарисува');
-  const fB = '"Onest",system-ui,sans-serif', fD = '"Onest",system-ui,sans-serif';
+  const fB = 'system-ui,-apple-system,"Segoe UI",Arial,sans-serif', fD = 'Charter,"Iowan Old Style",Georgia,"Times New Roman",serif';   // v4: system stacks
   const pad = 20, W = Math.max(w || 560, 320) + pad * 2, maxW = W - pad * 2;
   const probe = document.createElement('canvas').getContext('2d');
-  const tl = wrapLines(probe, spec.title || '', `700 22px ${fD}`, maxW);
+  const tl = wrapLines(probe, spec.title || '', `400 24px ${fD}`, maxW);
   const sl = spec.sub ? wrapLines(probe, spec.sub, `400 13px ${fB}`, maxW) : [];
   const src = sourceLine(spec);
   const fl = [...(isMock(spec) ? wrapLines(probe, 'Примерни данни: измислени стойности, не са истински.', `700 12px ${fB}`, maxW) : []), ...(src ? wrapLines(probe, src, `400 12px ${fB}`, maxW) : []), ...wrapLines(probe, 'Бюджет на светло · прототип', `400 12px ${fB}`, maxW)];
@@ -246,7 +246,7 @@ export async function renderPng(spec, { watermark = isMock(spec), pixelRatio = 2
   x.scale(pixelRatio, pixelRatio); x.textBaseline = 'top';
   x.fillStyle = cssv('--surface'); x.fillRect(0, 0, W, H);
   let y = pad;
-  x.fillStyle = cssv('--ink'); x.font = `700 22px ${fD}`; tl.forEach(l => { x.fillText(l, pad, y); y += 26; });
+  x.fillStyle = cssv('--ink'); x.font = `400 24px ${fD}`; tl.forEach(l => { x.fillText(l, pad, y); y += 26; });
   if (sl.length) { y += 4; x.fillStyle = cssv('--muted'); x.font = `400 13px ${fB}`; sl.forEach(l => { x.fillText(l, pad, y); y += 18; }); }
   y += 12;
   if (img) { x.drawImage(img, pad, y, w, h); y += h; } else y = drawTable(x, t, W, y, pad, fB);

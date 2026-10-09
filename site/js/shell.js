@@ -1,5 +1,7 @@
-// App shell: mock banner, top bar, left nav (>=900 px), bottom bar (<900 px), footer, offline banner.
-// Built once at boot from the route table. It follows the store (period, user type, theme, sources) and the router
+// App shell: mock banner, masthead, section band (>=961 px), «Меню» drawer + bottom bar (<=960 px), footer, offline banner.
+// v4 (СИГМА visual language): the masthead carries the serif wordmark and the tools; #sidenav is a mono-uppercase band with the five
+// sections (the current one underlined) and the current section's screens on a second line; «Още» opens as a dropdown there.
+// Light only: no theme switch (СИГМА has no dark theme). Built once at boot from the route table. It follows the store (period, user type, sources) and the router
 // (current item, period switch hidden on screens that do not depend on a period). Page workers never edit this file.
 import { store, safe } from './store.js';
 import { ROUTES, GROUPS, byId, href as routeHref } from './routes.js';
@@ -13,7 +15,7 @@ import { date } from './format.js';
 import { router } from './router.js';
 
 const $ = id => document.getElementById(id);
-const MARK = html`<svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="8" fill="var(--data)"/><rect x="6.5" y="19" width="4.6" height="6" rx="1.2" fill="var(--on-data)"/><rect x="13.7" y="15" width="4.6" height="10" rx="1.2" fill="var(--on-data)"/><rect x="20.9" y="11" width="4.6" height="14" rx="1.2" fill="var(--on-data)"/><circle cx="23.2" cy="6.4" r="3" fill="var(--accent)"/></svg>`;
+const MARK = html`<svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect x="3" y="18" width="6" height="11" fill="var(--ink)"/><rect x="12.5" y="12" width="6" height="17" fill="var(--ink)"/><rect x="22" y="6" width="6" height="23" fill="var(--ink)"/><rect x="2" y="29.5" width="28" height="1.5" fill="var(--ink)"/><circle cx="25" cy="2.6" r="2.4" fill="var(--crimson)"/></svg>`;
 const yearOf = p => p.label.split(' · ')[0];
 const statusOf = p => p.label.split(' · ')[1] || '';
 const NEWS_KEY = 'bns.news.seen';
@@ -37,10 +39,6 @@ const openSearch = el => import('./search.js').then(m => m.openPalette(el)).catc
 /* ------------------------------------------------------------------ settings controls (shared by the ⋯ menu and the phone „Още“ sheet) */
 function userTypeRadios(name) {
   return html`<fieldset class="opt-list"><legend class="opt-legend">Изглед за</legend>${store.USER_TYPES.map(t => html`<label class="opt"><input type="radio" name="${name}" value="${t.id}" data-pref="userType"${t.id === store.get('userType') ? html` checked` : ''}><span class="opt-main"><span class="opt-label">${t.label}</span><span class="opt-desc">${t.hint}</span></span></label>`)}</fieldset>`;
-}
-function themeRadios(name) {
-  const T = [['auto', 'Автоматична', 'monitor'], ['light', 'Светла', 'sun'], ['dark', 'Тъмна', 'moon']];
-  return html`<fieldset class="opt-list opt-row"><legend class="opt-legend">Тема</legend>${T.map(([v, l, ic]) => html`<label class="opt opt-chip"><input type="radio" name="${name}" value="${v}" data-pref="theme"${v === store.get('theme') ? html` checked` : ''}><span class="opt-main">${icon(ic, { size: 18 })}<span class="opt-label">${l}</span></span></label>`)}</fieldset>`;
 }
 function toggles(withSources) {
   return html`<div class="toggle-list">
@@ -78,7 +76,7 @@ function openPeriod(btn) {
   pop.el.querySelector('input:checked')?.focus({ preventScroll: true });
 }
 function openMore(btn) {
-  const body = html`<div class="stack">${userTypeRadios(nextId('utype'))}${themeRadios(nextId('theme'))}${toggles(false)}<p class="small"><button type="button" class="link-btn" data-action="legend">Легенда: какво означават белезите</button></p></div>`;
+  const body = html`<div class="stack">${userTypeRadios(nextId('utype'))}${toggles(false)}<p class="small"><button type="button" class="link-btn" data-action="legend">Легенда: какво означават белезите</button></p></div>`;
   const pop = popover.open(btn, { title: 'Настройки на изгледа', body, label: 'Настройки на изгледа', align: 'end' });
   bindPrefs(pop.el);
 }
@@ -91,12 +89,21 @@ function openMoreSheet(btn) {
   const body = html`<div class="more-sheet">
     <nav aria-label="Всички раздели">${nav}</nav>
     <section class="more-set" aria-labelledby="more-set-h"><h3 id="more-set-h">Настройки</h3>
-      <div class="stack">${userTypeRadios(nextId('utype'))}${themeRadios(nextId('theme'))}${toggles(true)}
+      <div class="stack">${userTypeRadios(nextId('utype'))}${toggles(true)}
       <p class="small"><button type="button" class="link-btn" data-action="legend">Легенда: какво означават белезите</button></p></div>
     </section></div>`;
-  const s = sheet.open({ title: 'Още', body, returnFocus: btn });
+  const s = sheet.open({ title: btn && btn.id === 'btn-menu' ? 'Меню' : 'Още', body, returnFocus: btn, cls: 'sheet-drawer' });
   bindPrefs(s.el);
   s.el.addEventListener('click', e => { if (e.target.closest('a[href^="#/"]')) s.close(); });
+}
+
+/** the «Още» dropdown of the wide section band: the same links as the band's hidden «Още» list (the popover closes on navigation) */
+function openNavMore(btn) {
+  const groups = MORE_GROUPS.map(([g, label]) => {
+    const items = ROUTES.filter(r => r.group === g && r.nav && MORE_ROUTES.includes(r.id));
+    return html`<section class="more-grp"><h3>${label || GROUPS.find(x => x.id === g).label}</h3><ul class="more-list">${items.map(r => html`<li><a href="${routeHref(r.id)}"${router.current?.route?.id === r.id ? html` aria-current="page"` : ''}><span>${r.title}</span>${r.phase === 2 ? html`<span class="nav-tag">фаза 2</span>` : ''}</a></li>`)}</ul></section>`;
+  });
+  popover.open(btn, { title: 'Още', body: html`<nav class="nav-pop" aria-label="Още раздели">${groups}</nav>`, label: 'Още раздели', align: 'start' });
 }
 
 /* ------------------------------------------------------------------ pieces */
@@ -107,31 +114,32 @@ function bannerHtml() {
 }
 function topbarHtml() {
   const p = store.period;
-  return html`<a class="brand" href="#/" aria-label="Бюджет на светло, към началото">${MARK}<span class="brand-name">Бюджет на светло</span></a>
+  return html`<div class="mast-in"><a class="brand" href="#/" aria-label="Бюджет на светло, към началото">${MARK}<span class="brand-name">Бюджет на светло</span></a>
     <span class="badge-mock" title="Прототип с официални и примерни данни">Mock</span>
     <div class="topbar-tools">
-      <button type="button" class="tool-btn period-btn" id="btn-period" aria-haspopup="dialog" aria-expanded="false" aria-label="Година и статус на данните: ${p.label}"><span class="p-year">${yearOf(p)}</span><span class="p-status"> · ${statusOf(p)}</span>${icon('chevronDown', { size: 16 })}</button>
-      <button type="button" class="tool-btn searchbtn" id="btn-search" aria-haspopup="dialog" aria-keyshortcuts="/ Control+K Meta+K" aria-label="Търси: ДДС, МВР, Пловдив…">${icon('search', { size: 18 })}<span class="ph">Търси: ДДС, МВР, Пловдив…</span><kbd aria-hidden="true">/</kbd></button>
-      <button type="button" class="tool-btn only-wide" id="btn-sources" aria-pressed="${store.get('sources') ? 'true' : 'false'}">${icon('link', { size: 16 })}<span>Източници</span></button>
+      <button type="button" class="tool-btn searchbtn" id="btn-search" aria-haspopup="dialog" aria-keyshortcuts="/ Control+K Meta+K" aria-label="Търси: ДДС, МВР, Пловдив…"><span class="prompt" aria-hidden="true">›</span>${icon('search', { size: 20 })}<span class="ph">Търси: ДДС, МВР, Пловдив…</span><kbd aria-hidden="true">/</kbd></button>
+      <button type="button" class="tool-btn period-btn" id="btn-period" aria-haspopup="dialog" aria-expanded="false" aria-label="Година и статус на данните: ${p.label}"><span class="p-year">${yearOf(p)}</span><span class="p-status"> · ${statusOf(p)}</span>${icon('chevronDown', { size: 14 })}</button>
+      <button type="button" class="tool-btn only-wide" id="btn-sources" aria-pressed="${store.get('sources') ? 'true' : 'false'}"><span>Източници</span></button>
       <button type="button" class="icon-btn only-wide" id="btn-more" aria-haspopup="dialog" aria-expanded="false" aria-label="Още настройки" title="Още настройки">${icon('more', { size: 20 })}</button>
-    </div>`;
+      <button type="button" class="menu-btn" id="btn-menu" aria-haspopup="dialog" aria-expanded="false"><span class="menu-box" aria-hidden="true"><span></span><span></span></span><span>Меню</span></button>
+    </div></div>`;
 }
 const NEWS_DOT = label => html`<span class="nav-dot" data-news-dot data-label="${label}" hidden></span>`;
 const subLink = r => html`<li><a href="${routeHref(r.id)}" data-nav="${r.id}"><span>${r.title}</span>${r.phase === 2 ? html`<span class="nav-tag">фаза 2</span>` : ''}${r.id === 'S16' ? NEWS_DOT('Какво ново (има непрочетено)') : ''}</a></li>`;
 function navHtml() {
   const rows = SECTIONS.map(s => {
     const subs = ROUTES.filter(r => s.routes.includes(r.id) && r.nav && r.id !== s.to);
-    return html`<div class="nav-sec" data-sec="${s.id}"><a class="nav-main" href="${routeHref(s.to)}" data-nav="${s.to}">${icon(s.icon, { size: 18 })}<span>${s.label}</span>${s.id === 'exec' ? NEWS_DOT('Изпълнение (има непрочетено)') : ''}</a>${subs.length ? html`<ul class="nav-sub">${subs.map(subLink)}</ul>` : ''}</div>`;
+    return html`<div class="nav-sec" data-sec="${s.id}"><a class="nav-main" href="${routeHref(s.to)}" data-nav="${s.to}"><span>${s.label}</span>${s.id === 'exec' ? NEWS_DOT('Изпълнение (има непрочетено)') : ''}</a>${subs.length ? html`<ul class="nav-sub">${subs.map(subLink)}</ul>` : ''}</div>`;
   });
   const more = MORE_GROUPS.map(([g, label]) => {
     const items = ROUTES.filter(r => r.group === g && r.nav && MORE_ROUTES.includes(r.id));
     return html`<h3 class="nav-sub-h">${label || GROUPS.find(x => x.id === g).label}</h3><ul class="nav-sub">${items.map(subLink)}</ul>`;
   });
-  return html`${rows}<div class="nav-sec" data-sec="more"><button type="button" class="nav-main" id="nav-more" aria-expanded="false" aria-controls="nav-more-list">${icon('menu', { size: 18 })}<span>Още</span>${icon('chevronDown', { size: 16, cls: 'nav-chev' })}</button><div class="nav-more-list" id="nav-more-list">${more}</div></div>
-    <div class="nav-end"><a class="nav-main" href="${routeHref('S03')}" data-nav="S03">${icon('book', { size: 18 })}<span>Речник</span></a></div>`;
+  return html`<div class="nav-in">${rows}<div class="nav-sec" data-sec="more"><button type="button" class="nav-main" id="nav-more" aria-haspopup="dialog" aria-expanded="false"><span>Още</span>${icon('chevronDown', { size: 12, cls: 'nav-chev' })}</button><div class="nav-more-list" id="nav-more-list">${more}</div></div>
+    <div class="nav-end"><a class="nav-main" href="${routeHref('S03')}" data-nav="S03"><span>Речник</span></a></div></div>`;
 }
 function tabbarHtml() {
-  return html`${TABS.map(t => html`<a href="${routeHref(t.to)}" data-tab="${t.id}">${icon(t.icon, { size: 22 })}<span>${t.label}</span></a>`)}<button type="button" data-tab="more" aria-haspopup="dialog" id="btn-tab-more">${icon('menu', { size: 22 })}<span>Още</span></button>`;
+  return html`${TABS.map(t => html`<a href="${routeHref(t.to)}" data-tab="${t.id}">${icon(t.icon, { size: 20 })}<span>${t.label}</span></a>`)}<button type="button" data-tab="more" aria-haspopup="dialog" id="btn-tab-more">${icon('menu', { size: 20 })}<span>Още</span></button>`;
 }
 function footerHtml() {
   const core = data.get('core');
@@ -165,10 +173,9 @@ function setCurrent(route) {
   const sec = tab ? tab.id : MORE_ROUTES.includes(route.id) ? 'more' : '';
   document.querySelectorAll('#sidenav .nav-sec').forEach(el => setSection(el, el.dataset.sec === sec));
 }
-/* the current section lists its screens; the others stay one row */
-function setSection(el, open) {
-  el.toggleAttribute('data-open', open);
-  el.querySelector('#nav-more')?.setAttribute('aria-expanded', open ? 'true' : 'false');
+/* the current section is underlined in the band and lists its screens on the band's second line */
+function setSection(el, cur) {
+  el.toggleAttribute('data-current', cur);
 }
 function refreshPeriod() {
   const p = store.period, b = $('btn-period');
@@ -176,10 +183,6 @@ function refreshPeriod() {
   b.querySelector('.p-year').textContent = yearOf(p);
   b.querySelector('.p-status').textContent = ' · ' + statusOf(p);
   b.setAttribute('aria-label', `Година и статус на данните: ${p.label}`);
-}
-function applyTheme() {
-  const t = store.get('theme'), root = document.documentElement;
-  if (t === 'light' || t === 'dark') root.setAttribute('data-theme', t); else root.removeAttribute('data-theme');
 }
 function applySources() {
   const on = store.get('sources'), root = document.documentElement;
@@ -223,18 +226,24 @@ export const shell = {
     $('sidenav').innerHTML = navHtml().toString();
     $('tabbar').innerHTML = tabbarHtml().toString();
     shell.refreshFooter();
-    applyTheme(); applySources();
+    applySources();
 
     $('btn-period').addEventListener('click', e => openPeriod(e.currentTarget));
     $('btn-search').addEventListener('click', e => openSearch(e.currentTarget));
     $('btn-more').addEventListener('click', e => openMore(e.currentTarget));
     $('btn-tab-more').addEventListener('click', e => openMoreSheet(e.currentTarget));
+    $('btn-menu').addEventListener('click', e => {
+      const b = e.currentTarget;
+      b.setAttribute('aria-expanded', 'true');
+      openMoreSheet(b);
+      const d = document.querySelector('dialog.sheet-drawer');
+      if (d) d.addEventListener('close', () => b.setAttribute('aria-expanded', 'false'), { once: true }); else b.setAttribute('aria-expanded', 'false');
+    });
     $('btn-sources').addEventListener('click', () => store.set('sources', !store.get('sources')));
-    $('nav-more').addEventListener('click', e => setSection(e.currentTarget.closest('.nav-sec'), e.currentTarget.getAttribute('aria-expanded') !== 'true'));
+    $('nav-more').addEventListener('click', e => openNavMore(e.currentTarget));
 
     store.subscribe(k => {
       if (k === 'period') refreshPeriod();
-      else if (k === 'theme') applyTheme();
       else if (k === 'sources') applySources();
     });
     router.onNavigate(({ route, demo }) => {

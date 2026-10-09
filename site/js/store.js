@@ -1,4 +1,4 @@
-// Global view state. Preferences persist in localStorage (always in try/catch, in-memory fallback);
+// Global view state (v4: light only, so there is no theme preference). Preferences persist in localStorage (always in try/catch, in-memory fallback);
 // the banner dismissal lives in sessionStorage. Changing a key notifies subscribers; the router re-renders
 // the current screen for period / userType / unit / perPerson / leva / onlyReal.
 export const PERIODS = [
@@ -23,17 +23,16 @@ export const SCOPES = {
 };
 export const DEFAULT_PERIOD = '2026.law';
 const KEY = 'bns.prefs.v1';
-const DEFAULTS = { period: DEFAULT_PERIOD, userType: 'citizen', theme: 'auto', scope: 'kfp', unit: 'eur', perPerson: false, leva: false, onlyReal: false, sources: false, guide: { step: 0 } };
+const DEFAULTS = { period: DEFAULT_PERIOD, userType: 'citizen', scope: 'kfp', unit: 'eur', perPerson: false, leva: false, onlyReal: false, sources: false, guide: { step: 0 } };
 const VALID = {
   period: v => PERIODS.some(p => p.key === v),
   userType: v => USER_TYPES.some(t => t.id === v),
-  theme: v => ['auto', 'light', 'dark'].includes(v),
   scope: v => typeof v === 'string' && Object.hasOwn(SCOPES, v),          // own keys only: 'constructor' / 'toString' are not scopes
   unit: v => v === 'eur' || v === 'pct',
   perPerson: v => typeof v === 'boolean', leva: v => typeof v === 'boolean', onlyReal: v => typeof v === 'boolean', sources: v => typeof v === 'boolean',
   guide: v => v && Number.isInteger(v.step) && v.step >= 0 && v.step <= 8
 };
-const PERSIST = ['userType', 'theme', 'scope', 'unit', 'perPerson', 'leva', 'onlyReal', 'sources', 'guide'];   // period lives in the URL (?per=)
+const PERSIST = ['userType', 'scope', 'unit', 'perPerson', 'leva', 'onlyReal', 'sources', 'guide'];   // period lives in the URL (?per=)
 
 /** safe storage accessors: never throw, return null/false when blocked */
 export const safe = {
