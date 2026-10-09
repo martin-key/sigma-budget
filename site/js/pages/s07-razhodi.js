@@ -553,7 +553,7 @@ function kpiBlock(ctx, main, eco, ex) {
   return block({ id: 's07-kpis', title: 'Разходите накратко', scope: main?.kind === 'cofog' ? COFOG_SCOPE : 'kfp', status: periodStatus(ctx), source: main?.kind === 'cofog' ? ['eurostat'] : ['asbp'], asOf: main?.asOf, body: kpiGrid(tiles, { label: 'Разходите накратко' }) });
 }
 
-// ── execution to 31 July ───────────────────────────────────────────────────────────────────────────────
+// ── execution to the latest report ───────────────────────────────────────────────────────────────────────────────
 function execModel(ctx) {
   const ex = ctx.data?.execution, L = ex?.latest;
   if (!ex || !L?.kfp) return null;

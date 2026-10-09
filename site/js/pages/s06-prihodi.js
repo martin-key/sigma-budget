@@ -1,5 +1,5 @@
 // S06 · Откъде идват парите? · #/prihodi/:source? · step 2 of 8 · next S07 · periods all
-// Revenue of the КФП by source: the eight groups of Annex 3 (D05 revenue.json), the July execution (D06 execution.json) and a thin
+// Revenue of the КФП by source: the eight groups of Annex 3 (D05 revenue.json), the latest execution (D06 execution.json) and a thin
 // editorial layer (who pays, what the visitor can do about it). Every number is computed from the data files, none is typed in.
 //   views (tabs, ?izgled=)  grafika · tablica · godini        units: млн. € / % от БВП through the unit switch; „на човек“ and „и в лева“ through view.js
 //   #/prihodi/<id>          opens that source's disclosure and scrolls to it (deferred: the router scrolls and focuses after mount)
@@ -104,7 +104,7 @@ function model(ctx) {
   };
 }
 
-/** the July execution of the revenue groups, only for the year the monthly report belongs to (2026) */
+/** the latest execution of the revenue groups, only for the year the monthly report belongs to (2026) */
 function execModel(ctx, m) {
   const ex = ctx.data?.execution, L = ex?.latest;
   if (!ex || !L?.kfp || !m) return null;
@@ -309,7 +309,7 @@ function sourcesBlock(ctx, m, ex, sel) {
   });
 }
 
-// ── execution to 31 July ───────────────────────────────────────────────────────────────────────────────
+// ── execution to the latest report ───────────────────────────────────────────────────────────────────────────────
 function execBlock(ctx, m, ex) {
   const title = 'Изпълнение на приходите';
   if (!ex) {
