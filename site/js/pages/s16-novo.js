@@ -81,7 +81,7 @@ export function summaryBlock(M) {
   const title = items.length === 5 ? `${cap(monthName(m))} ${y} в пет изречения` : `${cap(monthName(m))} ${y} накратко`;
   const sub = html`Данните са от 1 януари до ${date(h.asOf, true)} г. и са за консолидираната фискална програма (${gl('kfp', 'КФП')}). Сравнението е със същия период на ${y - 1} г.`;
   const body = html`<ol class="s16-five">${items.map(t => html`<li>${t}</li>`)}</ol>
-    <p class="s16-more"><a href="${ctx.href('S15', {}, { mesec: m })}">Всички числа и графики: „Изпълнява ли се планът?“</a></p>`;
+    <p class="s16-more"><a href="${ctx.href('S15')}">Всички числа и графики: „Месечни отчети“</a></p>`;
   const share = { text: items.map(plain).join(' ') };
   return block({ id: 's16-b-summary', level: 2, title, sub, scope: 'kfp', status: 'real', source: ['kfp'], asOf: h.asOf, share, body });
 }

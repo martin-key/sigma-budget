@@ -1,6 +1,6 @@
-// Minimal network-first service worker (M2 stub). Online: always the network, and a copy is kept; offline: the last copy.
+// Minimal network-first service worker (M2 stub, V5). Online: always the network, and a copy is kept; offline: the last copy.
 // The full offline strategy (versioned precache, data refresh, update prompt) arrives in milestone M6.
-const CACHE = 'bns-v4-1';   // v4 (СИГМА-style trial): its own cache name, so it never serves v3 files
+const CACHE = 'bns-v5-4';   // v5: its own cache name (never serves v4 or the July data of an older build); the old cache is deleted on activate
 self.addEventListener('install', () => { self.skipWaiting(); });
 self.addEventListener('activate', e => {
   e.waitUntil((async () => {

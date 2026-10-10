@@ -1,36 +1,43 @@
-// S15 Изпълнява ли се планът? (G3). Monthly budget execution (KFP, national budget, EU funds) against the plan and the pace of 2025.
-// Every number is computed from execution.json (D06/D16/D26) and components.json (D07); nothing is typed from memory.
-// Tabs are real routes: #/izpalnenie (Общо), /pera (По пера), /byudzheti (Бюджети). Controls live in the query: ?mesec= ?obhvat= ?ed= ?prag=.
+// S15 Изпълнение (V5). The monthly reports of the КФП, comparison first: two permanent year columns («2025» and «2026»), the same period,
+// the same scope, the same mode («Натрупано» or «За месеца»). Every number comes from execution.json (D06/D16/D26) through js/exec.js.
+// Routes: #/izpalnenie (the comparison), #/izpalnenie/byudzheti (the plan of every budget and the national budget against the EU funds).
+// Address: ?mesec= ?obhvat= ?rez=natrupano|mesec ?g1= (the earlier year) ?g2= ?pera=rev,exp (open groups) ?pokazatel=<row> (one item in full).
+// Arrival (working-group feedback, 2026-10-10): with no ?mesec the page opens on the LATEST reported month of the newest year (js/exec.js `defMonth`, read from execution.json: nothing here names a month),
+//   one line under the heading says which report it is (`reportLine`), and the four controls are folded into one closed disclosure «Промени» whose summary says what is shown now.
+//   A control param in the address (?mesec ?rez ?g1 ?g2 ?obhvat) keeps the disclosure open; a month other than the latest gets a link back («Последен отчет»).
+// Under the comparison: «Изпълнение на плана» (working-group feedback, 2026-10-09): three bars (приходи, разходи, капиталови разходи) = the latest report against the annual plan,
+//   КФП only, independent of the controls; neutral colours, no „lagging“ verdict (UX V2 §7: % от плана е вторичен блок с точния документ и знаменател).
+// The old links #/izpalnenie/pera and #/izpalnenie/sravnenie are redirected by js/redirects.js.
 import { html } from '../html.js';
-import { num, pct, pp, delta, date, monthName, EUR_RATE, NBSP, DASH } from '../format.js';
+import { num, pct, delta, date, monthName, EUR_RATE, NBSP, DASH } from '../format.js';
 import { block } from '../ui/block.js';
 import { seg } from '../ui/seg.js';
 import { field, selectInput } from '../ui/forms.js';
-import { chips } from '../ui/chips.js';
 import { dataTable } from '../ui/table.js';
 import { chart } from '../ui/chart.js';
-import { kpi, kpiGrid } from '../ui/kpi.js';
-import { sankey } from '../ui/sankey.js';
 import { emptyState, pendingState } from '../ui/states.js';
-import { callout } from '../ui/cards.js';
 import { gl } from '../ui/gl.js';
 import { disclosure } from '../ui/disclosure.js';
+import { planBlock } from '../ui/plan.js';
+import { icon } from '../icons.js';
+import { store } from '../store.js';
+import * as share from '../share.js';
 import { amount, moneyCol } from '../view.js';
+import { execModel, SCOPES, SCOPE_NAME, SCOPE_IN, MODES, REV_ROWS, EXP_ROWS, EARLIEST_REPORT, fin, pctChange, mlrd, balanceWord } from '../exec.js';
 
-const SCOPES = [['kfp', 'КФП'], ['nat', 'Национален бюджет'], ['eu', 'Средства от ЕС']];
-const SCOPE_IN = { kfp: 'в КФП', nat: 'в националния бюджет', eu: 'по средствата от ЕС' };
-const THRESHOLDS = [10, 15];
-const QUERY_KEYS = ['mesec', 'obhvat', 'ed', 'prag'];
-const REV_ROWS = ['rev.tax', 'rev.nontax', 'rev.grants'];
-const EXP_ROWS = ['exp.personnel', 'exp.maint', 'exp.interest', 'exp.social', 'exp.subsidies', 'exp.capex', 'exp.abroad', 'exp.reserve'];
-
-/* ------------------------------------------------------------------ small helpers */
-const fin = v => typeof v === 'number' && Number.isFinite(v);
-const r1 = v => Math.round(v * 10 + 1e-9) / 10;
-const ratio = (a, b) => (fin(a) && fin(b) && b !== 0 ? (a / b) * 100 : null);
-const mlrd = v => (fin(v) ? v / 1000 : null);
-const isoLast = (y, m) => new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10);
-const lastOf = arr => (Array.isArray(arr) && arr.length ? arr[arr.length - 1] : null);
+const QUERY_KEYS = ['mesec', 'obhvat', 'rez', 'g1', 'g2', 'pera'];
+const CONTROL_KEYS = ['mesec', 'obhvat', 'rez', 'g1', 'g2'];            // the choices of the «Промени» disclosure (?pera and ?pokazatel are not)
+const hasControlParams = q => !!q && CONTROL_KEYS.some(k => q[k] != null && String(q[k]) !== '');
+const cap1 = s => (s ? s[0].toUpperCase() + s.slice(1) : s);
+const joinBg = xs => (xs.length > 1 ? `${xs.slice(0, -1).join(', ')} и ${xs[xs.length - 1]}` : String(xs.length ? xs[0] : ''));
+const yearWord = y => (typeof y === 'number' ? `${y} г.` : `„${y}“`);
+const MONTH_CATS = Array.from({ length: 12 }, (_, i) => monthName(i + 1, true));
+const TOTALS = { rev: 'Приходи', 'exp.total': 'Разходи с вноската в ЕС', balance: 'Салдо', transfers: 'Трансфери между бюджетите, нето' };
+const GROUPS = [
+  { id: 'rev', total: 'rev', items: REV_ROWS },
+  { id: 'exp', total: 'exp.total', items: [...EXP_ROWS, 'eucontrib'] },
+];
+const ALL_ROWS = [...REV_ROWS, 'rev', ...EXP_ROWS, 'eucontrib', 'exp.total', 'transfers', 'balance'];
 
 /** the visitor's own keys of the query, for links that must keep the controls */
 export function keepQuery(ctx, over = {}) {
@@ -39,444 +46,312 @@ export function keepQuery(ctx, over = {}) {
   return { ...out, ...over };
 }
 
-/* ------------------------------------------------------------------ the model: everything the views print, derived once */
 export function model(ctx) {
-  const ex = ctx.data.execution;
-  const q = ctx.query || {};
-  const Y = ctx.period && ctx.period.year === 2025 ? 2025 : 2026;
-  const cur = ex.data[String(Y)];
-  const prevB = Y === 2026 ? ex.data['2025'] : null;
-  const planB = Y === 2026 ? ex.plan2026 : null;
-  const last = cur.months;
-  const scope = SCOPES.some(s => s[0] === q.obhvat) ? q.obhvat : 'kfp';
-  const want = Math.floor(Number(q.mesec));
-  const month = fin(want) && want >= 1 ? Math.min(want, 12) : last;
-  const notYet = month > last;
-  const m = notYet ? last : month;
-  const unit = Y === 2026 && q.ed === 'pct' ? 'pct' : 'eur';
-  const thr = Number(q.prag) === 15 ? 15 : 10;
+  const E = execModel(ctx.data.execution, ctx.query || {});
   const sub = ctx.params && ctx.params.sub;
-  const tab = sub === 'pera' ? 'pera' : sub === 'byudzheti' ? 'byudzheti' : 'obsho';
-  const cumArr = (yr, row, sc = scope) => (ex.data[String(yr)] && ex.data[String(yr)][sc] && ex.data[String(yr)][sc][row]) || null;
-  const monArr = (yr, row, sc = scope) => (ex.monthly && ex.monthly[String(yr)] && ex.monthly[String(yr)][sc] && ex.monthly[String(yr)][sc][row]) || null;
-  const planOf = (row, sc = scope) => { const v = planB && planB[sc] ? planB[sc][row] : null; return fin(v) ? v : null; };
-  const at = (arr, i) => (Array.isArray(arr) && fin(arr[i]) ? arr[i] : null);
-  // share of the 2025 result reached by each month: the file's own pace for the KFP rows (none for rows it does not list, so tiny lines are never flagged), computed for the other scopes
-  const paceArr = (row, sc = scope) => {
-    const own = ex.pace && ex.pace['2025'] ? ex.pace['2025'][row] : null;
-    if (sc === 'kfp') return Array.isArray(own) && own.length === 12 ? own : null;
-    const a = cumArr(2025, row, sc);
-    const full = lastOf(a);
-    return a && fin(full) && full > 0 ? a.map(v => (v / full) * 100) : null;
-  };
-  const rowName = id => { const r = (ex.rows || []).find(x => x.id === id); return r ? r.short || r.label : id; };
-  const asOfAt = i => (cur.asOf && cur.asOf[i]) || null;
-  // one line of the picture for a row at the chosen month
-  const item = row => {
-    const c = at(cumArr(Y, row), m - 1);
-    const p = planOf(row);
-    const pc = ratio(c, p);
-    const pv = prevB ? at(cumArr(2025, row), m - 1) : null;
-    const pa = Y === 2026 ? paceArr(row) : null;
-    const pcs = pa ? at(pa, m - 1) : null;
-    const diff = fin(pc) && fin(pcs) ? r1(r1(pc) - r1(pcs)) : null;
-    const flag = scope === 'kfp' && diff != null ? (diff <= -thr + 1e-9 ? 'down' : diff >= thr - 1e-9 ? 'up' : 'none') : null;
-    const full25 = Y === 2025 ? lastOf(cumArr(2025, row)) : null;
-    return { row, name: rowName(row), c, p, pc, pv, yoy: fin(pv) && pv !== 0 && fin(c) ? (c / pv - 1) * 100 : null, pace: pcs, diff, flag, shareOfYear: Y === 2025 ? ratio(c, full25) : null };
-  };
-  const M = { ctx, ex, Y, cur, last, scope, month, notYet, m, unit, thr, tab, cumArr, monArr, planOf, at, paceArr, rowName, item, asOf: asOfAt(m - 1) || ex.meta.asOf };
-  M.k = { rev: item('rev'), exp: item('exp.total'), bal: item('balance') };
-  return M;
+  const open = new Set(String((ctx.query && ctx.query.pera) || '').split(',').filter(Boolean));
+  const item = ctx.query && ALL_ROWS.includes(ctx.query.pokazatel) ? ctx.query.pokazatel : null;
+  const page = sub === 'byudzheti' ? 'byudzheti' : item ? 'item' : 'main';
+  return { ...E, ctx, page, item, open };
 }
+
+/* ------------------------------------------------------------------ numbers as they are printed: млрд. €, two decimals, from the unrounded млн. € */
+const B = v => (fin(v) ? num(v / 1000, 2) : DASH);
+const BS = v => (fin(v) ? num(v / 1000, 2, { sign: true }) : DASH);
+const levOf = v => (store.get('leva') && fin(v) ? `≈${NBSP}${num((v / 1000) * EUR_RATE, 2)}${NBSP}млрд. лв.` : '');
+const nameOf = (C, id) => TOTALS[id] || C.rowName(id);
+const monthsLabel = C => (C.month === 1 ? 'януари' : `януари${DASH}${monthName(C.month)}`);
+const dayOf = iso => { const d = iso ? new Date(`${iso}T00:00:00Z`) : null; return d ? `${d.getUTCDate()} ${monthName(d.getUTCMonth() + 1)}` : ''; };
+/** what the year heading says under the year: the date of the report, or the month alone */
+const periodTag = (C, y) => (C.mode === 'mesec' ? monthName(C.month) : C.has(y) && C.month <= (y === C.g1 ? C.n1 : C.n2) ? `към ${dayOf(C.asOfOf(y))}` : 'няма отчет');
+const modeWord = C => (C.mode === 'mesec' ? 'само за месеца' : 'натрупано от началото на годината');
 
 /* ------------------------------------------------------------------ words */
-const SCOPE_NAME = { kfp: 'КФП', nat: 'национален бюджет', eu: 'средства от ЕС' };
-
-export function summaryText(M) {
-  const { rev, exp, bal } = M.k;
-  if (!fin(rev.c) || !fin(exp.c)) return '';
-  const amt = v => amount(M.ctx, { mln: v });
-  const s1 = `Към ${date(M.asOf)} г. ${SCOPE_IN[M.scope]} са събрани ${amt(rev.c)}${fin(rev.pc) ? ` (${pct(rev.pc)} от годишния план)` : ''}.`;
-  const s2 = `Похарчени са ${amt(exp.c)}${fin(exp.pc) ? ` (${pct(exp.pc)})` : ''}.`;
-  const s3 = !fin(bal.c) ? '' : bal.c < 0 ? `Дефицитът е ${amt(-bal.c)}.` : bal.c > 0 ? `Излишъкът е ${amt(bal.c)}.` : 'Салдото е нула.';
-  return [s1, s2, s3].filter(Boolean).join(' ');
+function cmpWords(C, a, b, where) {
+  const p = pctChange(a, b);
+  if (!fin(p)) return `при ${B(a)}${NBSP}млрд.${NBSP}€ ${where} ${C.g1} г.`;
+  if (Math.abs(p) < 0.05) return `колкото ${where} ${C.g1} г.`;
+  return `с ${pct(Math.abs(p), 1)} ${p > 0 ? 'повече' : 'по-малко'}, отколкото ${where} ${C.g1} г.`;
 }
 
-/** the note about the rhythm: a lower share of the plan is not the same as slower spending when the plan itself is bigger */
-export function rhythmFacts(M) {
-  if (M.Y !== 2026 || M.scope !== 'kfp') return null;
-  const e = M.k.exp;
-  const full25 = lastOf(M.cumArr(2025, 'exp.total'));
-  const planGrowth = fin(e.p) && fin(full25) && full25 > 0 ? (e.p / full25 - 1) * 100 : null;
-  const pace = e.pace;
-  if (!fin(e.pc) || !fin(pace) || !fin(planGrowth) || !fin(e.yoy)) return null;
-  return { share: e.pc, pace, planGrowth, yoy: e.yoy, lower: r1(e.pc) < r1(pace), moreMoney: e.yoy > 0 && planGrowth > 0 };
+export function summaryText(C) {
+  if (C.problem) return '';
+  const mon = monthName(C.month);
+  const r1 = C.val(C.g1, 'rev'), r2 = C.val(C.g2, 'rev'), e1 = C.val(C.g1, 'exp.total'), e2 = C.val(C.g2, 'exp.total'), b2 = C.val(C.g2, 'balance');
+  const miss = [[C.g1, r1], [C.g2, r2]].filter(x => !fin(x[1])).map(x => x[0]);
+  if (miss.length) return `За ${joinBg(miss)} г. още няма отчет за ${mon}.`;
+  const natr = C.mode !== 'mesec';
+  const where = natr ? `към края на ${mon}` : `през ${mon}`;
+  const head = natr ? `Към края на ${mon} ${C.g2} г.` : `През ${mon} ${C.g2} г.`;
+  const s1 = `${head} ${SCOPE_IN[C.scope]} са събрани ${B(r2)}${NBSP}млрд.${NBSP}€, ${cmpWords(C, r1, r2, where)}`;
+  const s2 = fin(e1) && fin(e2) ? ` Похарчени са ${B(e2)}${NBSP}млрд.${NBSP}€, ${cmpWords(C, e1, e2, where)}` : '';
+  const s3 = C.scope === 'kfp' && fin(b2) ? ` ${cap1(balanceWord(b2))}: ${B(Math.abs(b2))}${NBSP}млрд.${NBSP}€.` : '';
+  return s1 + s2 + s3;
 }
 
-function chartNames(M, which) {
-  const inPct = M.unit === 'pct';
-  return {
-    cur: inPct ? `${M.Y}: дял от плана` : String(M.Y),
-    prev: inPct ? '2025: дял от резултата за годината' : '2025 (в евро)',
-    plan: inPct ? 'План (100%)' : `Годишен план ${M.Y}`,
-    verb: which === 'rev' ? 'събрани' : 'похарчени',
-  };
-}
+/* ------------------------------------------------------------------ controls */
+const ctl = (label, id, inner, cls = '') => html`<div class="field s15-ctl ${cls}"><span class="field-label" id="${id}">${label}</span>${inner}</div>`;
 
-/* ------------------------------------------------------------------ chart specs (also used by the embeds) */
-const MONTH_CATS = Array.from({ length: 12 }, (_, i) => monthName(i + 1, true));
-
-export function cumChartSpec(M, which) {
-  const row = which === 'rev' ? 'rev' : 'exp.total';
-  const label = which === 'rev' ? 'приходи' : 'разходи';
-  const inPct = M.unit === 'pct';
-  const cur = M.cumArr(M.Y, row);
-  const plan = M.planOf(row);
-  const prev = M.Y === 2026 ? M.cumArr(2025, row) : null;
-  const names = chartNames(M, which);
-  const conv = v => (!fin(v) ? null : inPct ? ratio(v, plan) : v / 1000);
-  const series = [{ name: names.cur, data: Array.from({ length: 12 }, (_, i) => (i < M.m ? conv(M.at(cur, i)) : null)), color: which === 'rev' ? '--rev' : '--exp' }];
-  if (prev) {
-    const pa = inPct ? M.paceArr(row) : null;
-    series.push({ name: names.prev, dashed: true, color: 'other', data: Array.from({ length: 12 }, (_, i) => (inPct ? M.at(pa, i) : conv(M.at(prev, i)))) });
-  }
-  if (fin(plan)) series.push({ name: names.plan, color: '--series-other-2', data: Array.from({ length: 12 }, () => (inPct ? 100 : plan / 1000)) });
-  const it = M.k[which];
-  const desc = inPct
-    ? `Към ${monthName(M.m)} са ${names.verb} ${pct(it.pc)} от годишния план; по същото време на 2025 г. е бил достигнат ${pct(it.pace)} от резултата за годината.`
-    : `Натрупаните ${label} към ${monthName(M.m)} са ${num(mlrd(it.c), 2)} млрд. €${fin(plan) ? `, при годишен план ${num(plan / 1000, 2)} млрд. €` : ''}.`;
-  const spec = {
-    id: `s15-cum-${which}`, type: 'line', title: `Натрупани ${label} през ${M.Y} г.`, categoryLabel: 'Месец', categories: MONTH_CATS, series, desc,
-    sub: inPct ? `% от годишния план, ${SCOPE_NAME[M.scope]}` : `млрд. €, ${SCOPE_NAME[M.scope]}, от началото на ${M.Y} г.`,
-    unit: inPct ? '%' : 'млрд. €', d: inPct ? 1 : 2, min: 0,
-  };
-  if (inPct) spec.fmt = v => pct(v, 1);
-  return spec;
-}
-
-export function monthlyChartSpec(M) {
-  const n = M.m;
-  const cut = a => (a || []).slice(0, n).map(mlrd);
-  const rev = M.monArr(M.Y, 'rev'), exp = M.monArr(M.Y, 'exp.total');
-  const top = (exp || []).slice(0, n).reduce((b, v, i) => (fin(v) && (b < 0 || v > exp[b]) ? i : b), -1);
-  return {
-    id: 's15-monthly', type: 'bar', title: 'Приходи и разходи по месеци', categoryLabel: 'Месец', categories: MONTH_CATS.slice(0, n),
-    sub: `млрд. €, ${SCOPE_NAME[M.scope]}, ${M.Y} г. (месечни стойности, не натрупани)`, unit: 'млрд. €', d: 2,
-    series: [{ name: 'Приходи', data: cut(rev), color: '--rev' }, { name: 'Разходи (с вноската в ЕС)', data: cut(exp), color: '--exp' }],
-    desc: top >= 0 ? `Най-големите месечни разходи са през ${monthName(top + 1)}: ${num(mlrd(exp[top]), 2)} млрд. €.` : 'Месечните приходи и разходи.',
-  };
-}
-
-export function balanceChartSpec(M) {
-  const n = M.m;
-  const cut = a => (a || []).slice(0, n).map(mlrd);
-  const bal = M.monArr(M.Y, 'balance');
-  const prev = M.Y === 2026 ? M.monArr(2025, 'balance') : null;
-  const worst = (bal || []).slice(0, n).reduce((b, v, i) => (fin(v) && (b < 0 || v < bal[b]) ? i : b), -1);
-  const series = [{ name: String(M.Y), data: cut(bal), color: 1 }];
-  if (prev) series.push({ name: '2025 (в евро)', data: cut(prev), color: 'other' });
-  return {
-    id: 's15-balance', type: 'bar', title: 'Салдо по месеци', categoryLabel: 'Месец', categories: MONTH_CATS.slice(0, n),
-    sub: `млрд. €, ${SCOPE_NAME[M.scope]} (под нулата е дефицит)`, unit: 'млрд. €', d: 2, series,
-    desc: worst >= 0 && bal[worst] < 0 ? `Най-големият месечен дефицит е през ${monthName(worst + 1)}: ${num(-mlrd(bal[worst]), 2)} млрд. €.` : 'Месечното салдо.',
-  };
-}
-
-/* ------------------------------------------------------------------ controls, tabs, the frame for a month without a report */
-const cap1 = s => (s ? s[0].toUpperCase() + s.slice(1) : s);
-const sourcesOf = M => (M.Y === 2026 ? ['kfp', 'asbp'] : ['kfp']);
-
-function monthOptions(M) {
+function monthOptions(C) {
   const out = [];
-  for (let i = 1; i <= M.last; i++) out.push({ value: String(i), label: `${cap1(monthName(i))} ${M.Y}` });
-  if (M.Y === 2026) {
-    const later = new Set((M.ex.pendingMonths || []).map(p => p.month).filter(x => fin(x) && x > M.last));
-    if (M.notYet) later.add(M.month);
-    [...later].sort((a, b) => a - b).forEach(i => out.push({ value: String(i), label: `${cap1(monthName(i))} ${M.Y} (предстои)` }));
-  }
+  const short = C.n1 && C.n2 && C.n1 !== C.n2 ? (C.n1 < C.n2 ? C.g1 : C.g2) : null;      // the year with fewer reports
+  for (let m = 1; m <= C.maxM; m++) out.push({ value: String(m), label: `${cap1(monthName(m))}${short != null && m > C.common ? ` (няма отчет за ${short} г.)` : ''}` });
+  const later = new Set(C.pendingMonths.filter(m => m > C.maxM));
+  [...later].sort((a, b) => a - b).forEach(m => out.push({ value: String(m), label: `${cap1(monthName(m))} (предстои)` }));
+  if (C.month > C.maxM && !later.has(C.month)) out.push({ value: String(C.month), label: `${cap1(monthName(C.month))} (предстои)` });
   return out;
 }
 
-const ctl = (label, id, inner) => html`<div class="field s15-ctl"><span class="field-label" id="${id}">${label}</span>${inner}</div>`;
-
-export function controls(M) {
-  const parts = [field({ id: 's15-mesec', label: 'Месец', control: selectInput({ id: 's15-mesec', name: 'mesec', value: String(M.month), options: monthOptions(M), query: 'mesec' }) })];
-  if (M.tab !== 'byudzheti') {
-    parts.push(ctl('Обхват', 's15-obhvat-l', seg({ name: 's15-obhvat', label: 'Обхват', value: M.scope, query: 'obhvat', cls: 's15-seg', options: SCOPES.map(([value, label]) => ({ value, label })) })));
-  }
-  if (M.tab === 'obsho' && M.Y === 2026) {
-    parts.push(ctl('Мерна единица', 's15-ed-l', seg({ name: 's15-ed', label: 'Мерна единица на графиките', value: M.unit, query: 'ed', cls: 's15-seg', options: [{ value: 'eur', label: 'млрд. €' }, { value: 'pct', label: '% от плана' }] })));
-  }
-  if (M.tab === 'pera' && M.Y === 2026 && M.scope === 'kfp') {
-    parts.push(ctl('Праг за отбелязване', 's15-prag-l', seg({ name: 's15-prag', label: 'Праг за отбелязване в пункта', value: String(M.thr), query: 'prag', cls: 's15-seg', options: THRESHOLDS.map(v => ({ value: String(v), label: `${v}${NBSP}пр.п.` })) })));
-  }
-  return html`<div class="s15-controls" role="group" aria-label="Какво да покажем">${parts}</div>`;
-}
-
-export function tabNav(M) {
-  const ctx = M.ctx;
-  const q = keepQuery(ctx);
-  const item = (sub, label) => ({ label, href: ctx.href('S15', sub ? { sub } : {}, q), pressed: M.tab === (sub || 'obsho') });
-  return html`<nav class="s15-tabs" aria-label="Раздели на екрана">${chips({ items: [item(null, 'Общо'), item('pera', 'По пера'), item('byudzheti', 'Бюджети')] })}</nav>`;
-}
-
-/** the month the visitor asked for has no report yet (August 2026 today) */
-export function notYetFrame(M) {
-  const ctx = M.ctx;
-  const pend = (M.ex.pendingMonths || []).find(p => p.month === M.month);
-  const when = pend && pend.asOf ? pend.asOf : isoLast(M.Y, M.month);
-  const lastIso = (M.cur.asOf && M.cur.asOf[M.last - 1]) || M.ex.meta.asOf;
-  const back = ctx.href('S15', M.tab === 'obsho' ? {} : { sub: M.tab }, keepQuery(ctx, { mesec: null }));
-  return pendingState({
-    id: 'P04', title: `Отчетът към ${date(when)} г. се очаква`,
-    text: `Не показваме числа за месец, за който още няма отчет. Най-новите данни са към ${date(lastIso)} г.`,
-    reason: 'Месечните отчети се добавят към портала, след като бъдат публикувани от Министерството на финансите.',
-    action: { href: back, label: `Към ${monthName(M.last)} ${M.Y}` }
-  });
-}
-
-/* ------------------------------------------------------------------ Общо: накратко, обяснение на ритъма, графиките */
-export function kpisBlock(M) {
-  const { rev, exp, bal } = M.k;
-  const planned = M.Y === 2026;
-  const vs = 'спрямо същото време на 2025 г.';
-  const dl = it => (planned && fin(it.yoy) ? { value: it.yoy, unit: '%', d: 1, label: vs } : undefined);
-  const ofPlan = it => (planned && fin(it.pc) ? `${pct(it.pc, 1)} от годишния план` : undefined);
-  const kind = !fin(bal.c) ? 'Салдо' : bal.c < 0 ? 'Дефицит' : bal.c > 0 ? 'Излишък' : 'Салдо';
-  const same = (a, b) => fin(a) && fin(b) && a !== 0 && b !== 0 && Math.sign(a) === Math.sign(b);
-  const balShare = planned && same(bal.c, bal.p) ? ratio(bal.c, bal.p) : null;
-  const balDelta = planned && same(bal.c, bal.pv) ? (bal.c / bal.pv - 1) * 100 : null;
-  const planWord = fin(bal.p) && bal.p > 0 ? 'планирания излишък' : 'планирания дефицит';
-  const items = [
-    kpi({ label: 'Събрани приходи', mln: rev.c, delta: dl(rev), sub: ofPlan(rev) }),
-    kpi({ label: 'Похарчени разходи', mln: exp.c, delta: dl(exp), sub: ofPlan(exp) }),
-    kpi({ label: kind, mln: fin(bal.c) ? Math.abs(bal.c) : null, delta: fin(balDelta) ? { value: balDelta, unit: '%', d: 1, label: vs } : undefined, sub: fin(balShare) ? `${pct(balShare, 1)} от ${planWord} за годината` : undefined }),
+export function controls(C) {
+  const prevYears = C.years.filter(y => y < (typeof C.g2 === 'number' ? C.g2 : Infinity));
+  const prevOpts = [...prevYears].reverse().map(y => ({ value: String(y), label: String(y) }));
+  if (!C.has(C.g1)) prevOpts.unshift({ value: String(C.g1), label: String(C.g1) });
+  const primary = [
+    field({ id: 's15-mesec', label: 'Месец', control: selectInput({ id: 's15-mesec', name: 'mesec', value: String(C.month), options: monthOptions(C), query: 'mesec' }) }),
+    ctl('Показвай', 's15-rez-l', seg({ name: 's15-rez', label: 'Показвай', value: C.mode, query: 'rez', cls: 's15-seg', options: MODES }), 's15-ctl-mode'),
   ];
+  const second = [
+    prevOpts.length > 1 ? ctl('Предходна година', 's15-g1-l', seg({ name: 's15-g1', label: 'Предходна година', value: String(C.g1), query: 'g1', cls: 's15-seg', options: prevOpts })) : '',
+    field({ id: 's15-obhvat', label: 'Обхват', control: selectInput({ id: 's15-obhvat', name: 'obhvat', value: C.scope, options: SCOPES.map(([value, label]) => ({ value, label })), query: 'obhvat' }) }),
+  ];
+  return html`<div class="s15-controls" role="group" aria-label="Какво да сравним"><div class="s15-controls-main">${primary}</div><div class="s15-controls-more">${second}</div></div>`;
+}
+
+/** what is shown now, in plain words: the period, cumulative or the month alone, the earlier year, the scope */
+export function selectionText(C) {
+  if (C.problem) return '';
+  const mon = monthName(C.month), mesec = C.mode === 'mesec';
+  return [`${mesec ? 'През' : 'Към края на'} ${mon} ${C.g2}`, mesec ? 'за месеца' : 'натрупано', `спрямо ${C.g1}`, SCOPE_NAME[C.scope]].join(' · ');
+}
+
+/** the four controls folded into one disclosure under the heading; open when the address carries a choice (a shared link never hides the choice that made it) or the choice is unusable */
+export function controlsDisclosure(C) {
+  const ctx = C.ctx;
+  const back = !C.problem && C.month !== C.defMonth
+    ? html`<p class="s15-latest"><a href="${ctx.href('S15', {}, keepQuery(ctx, { mesec: null }))}">Последен отчет (${monthName(C.defMonth)} ${C.g2})</a></p>` : '';
+  return disclosure({ id: 's15-controls', cls: 's15-chooser', title: 'Промени', meta: selectionText(C), open: !!C.problem || hasControlParams(ctx.query), body: html`${back}${controls(C)}` });
+}
+
+/** g1 = g2, or a year the file does not have: say so and offer the default comparison */
+function problemFrame(C) {
+  const ctx = C.ctx;
+  const href = ctx.href('S15', {}, keepQuery(ctx, { g1: null, g2: null, mesec: null }));
+  const action = { href, label: 'Към сравнението по подразбиране' };
+  if (C.problem === 'same') return emptyState({ title: 'Избрана е една и съща година', text: `И двете години са ${C.g1} г. Избери две различни години, за да видиш разликите.`, action });
+  const early = C.bad.every(y => typeof y === 'number' && y >= EARLIEST_REPORT && y < C.years[0]);
+  if (early) return pendingState({ id: 'P05', title: `Месечните отчети за ${joinBg(C.bad)} г. предстоят`, text: `Още не са добавени. Сега има отчети за ${joinBg(C.years)} г.`, action });
+  return emptyState({ title: `Няма данни за ${joinBg(C.bad.map(yearWord))}`, text: `Има месечни отчети за ${joinBg(C.years)} г. Избери година от тях.`, action });
+}
+
+/** what every shared picture and link of this screen says: both years, the period, the mode, the scope (and the item) — written out, so the link opens the same result tomorrow */
+const linkOf = (C, item) => ({ mesec: C.month, g1: C.g1, g2: C.g2, obhvat: C.scope, rez: C.mode, pokazatel: item || null });
+const periodOf = C => `${monthsLabel(C)} · ${C.g1} и ${C.g2} г.`;
+
+/* ------------------------------------------------------------------ the comparison grid */
+function levLine(v) { const l = levOf(v); return l ? html`<span class="s15-lev">${l}</span>` : ''; }
+
+function valueCell(C, y, id, v) {
+  if (fin(v)) return html`<span class="s15-n">${B(v)}</span>${levLine(v)}${id === 'balance' ? html`<span class="s15-sub">${balanceWord(v)}</span>` : ''}`;
+  const n = y === C.g1 ? C.n1 : C.n2;
+  return html`<span class="muted" aria-hidden="true">${DASH}</span><span class="s15-sub">${C.month > n ? 'предстои' : 'няма данни'}</span><span class="sr-only">${C.month > n ? 'отчетът предстои' : 'няма данни'}</span>`;
+}
+
+function balanceNote(a, b) {
+  if (!fin(a) || !fin(b)) return '';
+  if (a < 0 && b < 0) return b < a ? 'дефицитът е по-голям' : b > a ? 'дефицитът е по-малък' : 'същият дефицит';
+  if (a >= 0 && b >= 0) return b > a ? 'излишъкът е по-голям' : b < a ? 'излишъкът е по-малък' : 'същият излишък';
+  return b < 0 ? 'от излишък към дефицит' : 'от дефицит към излишък';
+}
+
+/** the second line of a difference: the percent change on a positive base, or what happened to a balance in words */
+const chg = (id, a, b) => (id === 'balance' ? balanceNote(a, b) : fin(pctChange(a, b)) ? delta(pctChange(a, b), 1) : '');
+
+function diffCell(id, a, b) {
+  if (!fin(a) || !fin(b)) return html`<span class="muted">${DASH}</span>`;
+  const sub = chg(id, a, b);
+  return html`<span class="s15-n">${BS(b - a)}</span>${sub ? html`<span class="s15-sub">${sub}</span>` : ''}`;
+}
+
+function rowHtml(C, id, o = {}) {
+  const a = C.val(C.g1, id), b = C.val(C.g2, id);
+  const href = C.ctx.href('S15', {}, keepQuery(C.ctx, { pokazatel: id }));
+  const cls = ['s15-row', o.kind ? `s15-row-${o.kind}` : '', id === 'balance' ? 's15-row-bal' : ''].filter(Boolean).join(' ');
+  const rid = `s15-r-${id.replace(/\./g, '-')}`;
+  const dm = fin(a) && fin(b) ? html`<span class="s15-dm">Разлика: ${BS(b - a)}${NBSP}млрд.${NBSP}€${chg(id, a, b) ? html`, ${chg(id, a, b)}` : ''}</span>` : '';
+  const name = o.kind === 'group'
+    ? html`<span class="s15-name"><a class="s15-lnk" href="${href}">${nameOf(C, id)}</a></span>${dm}<button type="button" class="s15-more" data-s15-open="${o.group}" aria-expanded="${o.isOpen ? 'true' : 'false'}" aria-controls="${o.ctrl}"><span class="s15-more-t">По пера</span><span class="s15-chev" aria-hidden="true">${icon('chevronDown', { size: 16 })}</span></button>`
+    : html`<span class="s15-name"><a class="s15-lnk" href="${href}">${nameOf(C, id)}</a></span>${dm}`;
+  return html`<tr id="${rid}" class="${cls}"${o.hidden ? html` hidden` : ''}${o.group && o.kind !== 'group' ? html` data-s15-g="${o.group}"` : ''}><th scope="row">${name}</th><td>${valueCell(C, C.g1, id, a)}</td><td>${valueCell(C, C.g2, id, b)}</td><td class="s15-d">${diffCell(id, a, b)}</td></tr>`;
+}
+
+function gridTable(C) {
+  const groups = GROUPS.map(g => {
+    const isOpen = C.open.has(g.id);
+    const ids = g.items.map(id => `s15-r-${id.replace(/\./g, '-')}`).join(' ');
+    return html`<tbody class="s15-g" id="s15-g-${g.id}">${rowHtml(C, g.total, { kind: 'group', group: g.id, isOpen, ctrl: ids })}${g.items.map(id => rowHtml(C, id, { kind: 'item', group: g.id, hidden: !isOpen }))}</tbody>`;
+  });
+  const tail = html`<tbody class="s15-g">${C.scope !== 'kfp' ? rowHtml(C, 'transfers', { kind: 'total' }) : ''}${rowHtml(C, 'balance', { kind: 'total' })}</tbody>`;
+  const th = (y, extra = '') => html`<th scope="col" class="s15-yh"${extra}><span class="s15-y">${y}</span><span class="s15-ysub">${periodTag(C, y)}</span></th>`;
+  return html`<div class="s15-grid-wrap table-wrap" id="s15-t-grid-wrap" role="region" aria-labelledby="s15-t-grid-cap" tabindex="0">
+    <table class="data s15-grid" id="s15-t-grid"><caption id="s15-t-grid-cap" class="sr-only">Приходи, разходи и салдо: ${C.g1} и ${C.g2} г., ${monthsLabel(C)}, ${modeWord(C)}, ${SCOPE_NAME[C.scope]}, млрд. евро</caption>
+      <thead><tr><th scope="col" class="s15-h0">Показател</th>${th(C.g1)}${th(C.g2)}<th scope="col" class="s15-yh s15-dh"><span class="s15-y">Разлика</span><span class="s15-ysub">${C.g2} спрямо ${C.g1}</span></th></tr></thead>
+      ${groups}${tail}
+    </table></div>`;
+}
+
+function csvTable(C) {
+  const rows = [];
+  for (const id of ALL_ROWS) {
+    if (C.scope === 'kfp' && id === 'transfers') continue;
+    const a = C.val(C.g1, id), b = C.val(C.g2, id);
+    const r = n => (fin(n) ? Math.round((n / 1000) * 1000) / 1000 : null);
+    rows.push([nameOf(C, id), r(a), r(b), fin(a) && fin(b) ? r(b - a) : null, (v => (fin(v) ? Math.round(v * 100) / 100 : null))(pctChange(a, b))]);
+  }
+  return { columns: ['Показател', `${C.g1} г., млрд. €`, `${C.g2} г., млрд. €`, 'Разлика, млрд. €', 'Промяна, %'], rows };
+}
+
+export function compareBlock(C) {
+  const mon = monthName(C.month);
+  const asOf = [C.asOfOf(C.g1), C.asOfOf(C.g2)].filter(Boolean).sort().pop();
+  const note = [
+    C.mode === 'mesec' ? `„За месеца“ е изчислено от месечните отчети: разлика между отчета към края на ${mon} и този за предходния месец (за януари – първият отчет).` : '',
+    C.scope !== 'kfp' ? 'Салдото е приходи минус разходи плюс нетните трансфери между националния бюджет и средствата от ЕС.' : '',
+    'Вноската в бюджета на ЕС е отделен ред в „Разходи“ и не се брои два пъти.',
+    'Процент не се смята, когато числото за по-ранната година е нула или под нулата.',
+  ].filter(Boolean).join(' ');
+  const wait = C.missing.map(y => `За ${y} г. отчетът за ${mon} предстои${y === C.g2 ? ` (последният е към ${dayOf(C.asOfOf(y, (y === C.g1 ? C.n1 : C.n2) - 1))} ${y} г.)` : ''}.`).join(' ');
+  share.attach('s15-b-grid', { table: () => csvTable(C) });
   return block({
-    id: 's15-kpi', level: 2, title: 'Накратко', scope: M.scope, source: sourcesOf(M), asOf: M.asOf,
-    sub: M.Y === 2026 ? 'Числата са натрупани от началото на годината.' : 'Числата са натрупани от началото на годината; за 2025 г. няма годишен план за сравнение.',
-    share: { text: summaryText(M) },
-    body: kpiGrid(items, { label: 'Основни числа' }),
+    id: 's15-b-grid', level: 2, cls: 's15-cmp', scope: C.scope, source: ['kfp'], asOf,
+    title: `Приходи и разходи: ${C.g1} и ${C.g2} г.`,
+    sub: `${cap1(monthsLabel(C))}, ${modeWord(C)}, ${SCOPE_NAME[C.scope]}, млрд. €. Разликата е ${C.g2} г. минус ${C.g1} г.`,
+    share: { text: summaryText(C), table: () => csvTable(C), link: linkOf(C), period: `${periodOf(C)} · млрд. €` },
+    body: html`${gridTable(C)}${wait ? html`<p class="s15-wait small">${wait}</p>` : ''}${summaryText(C) ? html`<p class="s15-words"><strong>Накратко.</strong> ${summaryText(C)}</p>` : ''}<p class="table-note small muted">${note}</p>`,
   });
 }
 
-export function rhythmCallout(M) {
-  const f = rhythmFacts(M);
-  if (!f) return '';
-  const body = html`
-    <p>Към ${monthName(M.m)} са изразходвани ${pct(f.share, 1)} от годишния план. По същото време на 2025 г. вече са били изразходвани ${pct(f.pace, 1)} от разходите за цялата година.</p>
-    <p>Приходите и разходите не се разпределят равномерно по месеци (${gl('sezonnost', 'сезонност')}). Затова сравняваме не с „една дванайсета на месец“, а с дела, достигнат по същото време на 2025 г.</p>
-    <p>Планът за разходите през 2026 г. е с ${num(f.planGrowth, 1)}% по-голям от отчетените разходи през цялата 2025 г. Към ${monthName(M.m)} са похарчени с ${num(f.yoy, 1)}% ${f.yoy >= 0 ? 'повече' : 'по-малко'} пари, отколкото към ${monthName(M.m)} 2025 г.${f.lower && f.moreMoney ? ' Затова по-малкият дял от плана не е същото като по-малко похарчени пари.' : ''}</p>`;
-  return callout({ kind: 'info', title: 'Как да четем дела от плана', body, id: 's15-rhythm' });
+/* ------------------------------------------------------------------ the plan: three bars (приходи, разходи, капиталови разходи), the latest report against the annual plan
+   The block itself (model, rows, text) lives in js/ui/plan.js: the start page (S01) shows the very same block (working-group feedback, 2026-10-10). */
+/** open decision (the working group asks for the plan block first on arrival; UX V2 §7 says „% от плана е вторичен блок, не води основното сравнение“): false = under the comparison */
+const PLAN_FIRST = false;
+
+/* ------------------------------------------------------------------ charts: both years, direct labels, a legend; also the embeds */
+function seriesData(C, row) {
+  const ks = Array.from({ length: C.month }, (_, k) => k);
+  return { A: ks.map(k => mlrd(C.val(C.g1, row, k))), B: ks.map(k => mlrd(C.val(C.g2, row, k))) };
 }
 
-const EMPTY_CHART = () => emptyState({ title: 'Няма данни за графиката', text: 'За избрания обхват и година отчетът няма стойности за тази графика.' });
-
-function chartBlock(M, spec, o) {
-  const has = !!spec && Array.isArray(spec.series) && spec.series.some(s => (s.data || []).some(fin));
-  return block({
-    id: o.id, level: 2, title: o.title, sub: o.sub, scope: M.scope, source: sourcesOf(M), asOf: M.asOf,
-    share: has ? { embed: spec.id, text: o.text } : false,
-    body: has ? chart(spec) : EMPTY_CHART(),
-  });
-}
-
-const cumTitle = (M, which) => (M.Y === 2026 ? (which === 'rev' ? 'Приходи спрямо плана' : 'Разходи спрямо плана') : (which === 'rev' ? 'Приходи през годината' : 'Разходи през годината'));
-const cumSub = M => (M.Y !== 2026 ? 'Натрупани от началото на годината.'
-  : M.unit === 'pct' ? 'Колко процента от годишния план са стигнати до всеки месец, сравнено с дела от резултата за 2025 г.'
-  : 'Плътната линия е 2026 г., прекъснатата е 2025 г., а хоризонталната линия е годишният план.');
-
-export function cumBlock(M, which) {
-  const it = M.k[which];
-  const word = which === 'rev' ? 'събрани' : 'похарчени';
-  const text = `Към ${date(M.asOf)} г. ${SCOPE_IN[M.scope]} са ${word} ${amount(M.ctx, { mln: it.c })}${fin(it.pc) ? ` (${pct(it.pc, 1)} от годишния план)` : ''}.`;
-  return chartBlock(M, cumChartSpec(M, which), { id: `s15-b-cum-${which}`, title: cumTitle(M, which), sub: cumSub(M), text });
-}
-
-export function obshoView(M) {
-  const out = [kpisBlock(M), rhythmCallout(M)];
-  out.push(html`<div class="s15-pair">${cumBlock(M, 'rev')}${cumBlock(M, 'exp')}</div>`);
-  out.push(chartBlock(M, monthlyChartSpec(M), { id: 's15-b-monthly', title: 'Месец по месец', sub: 'Всеки стълб е само един месец, не е натрупан от началото на годината.', text: `Приходи и разходи по месеци, ${M.Y} г., ${SCOPE_NAME[M.scope]}.` }));
-  out.push(chartBlock(M, balanceChartSpec(M), { id: 's15-b-balance', title: 'Дефицит или излишък', sub: 'Под нулата означава, че през месеца са изразходвани повече пари, отколкото са събрани.', text: `Месечно салдо, ${M.Y} г., ${SCOPE_NAME[M.scope]}.` }));
-  return out;
-}
-
-/* ------------------------------------------------------------------ По пера: таблици с план, дял и флаг ▼ ▲ */
-const FLAG_WORD = { down: 'изостава', up: 'изпреварва' };
-const FLAG_ICON = { down: '▼', up: '▲' };
-const EXTRA_NAMES = { 'exp.contingency': 'Резерв за непредвидени разходи' };
-const peraMode = M => (M.Y === 2025 ? 'year' : M.scope === 'kfp' ? 'plan' : 'yoy');
-
-function peraRowObj(M, id, mc) {
-  const it = M.item(id);
-  const flagTxt = it.flag === 'down' || it.flag === 'up' ? `${FLAG_WORD[it.flag]}, ${pp(it.diff, 1)}` : fin(it.diff) ? pp(it.diff, 1) : '';
+export function monthsSpec(C, row, o = {}) {
+  const { A, B: Bv } = seriesData(C, row);
+  const natr = C.mode !== 'mesec';
+  const label = o.label || nameOf(C, row);
+  const bar = o.bar || !natr;
+  const nonneg = [...A, ...Bv].filter(fin).every(v => v >= 0);
+  const k = (() => { for (let j = C.month - 1; j >= 0; j--) if (fin(A[j]) && fin(Bv[j])) return j; return -1; })();
+  const when = natr ? 'към края на' : 'през';
+  const shown = v => `${num(v, 2)}${NBSP}млрд.${NBSP}€`;
+  const desc = k < 0 ? `${label} по месеци за ${C.g1} и ${C.g2} г.`
+    : `${cap1(when)} ${monthName(k + 1)} ${C.g2} г.: ${shown(Bv[k])}, при ${shown(A[k])} ${when} ${monthName(k + 1)} ${C.g1} г.`;
+  const colour = o.color || (row === 'rev' || row.startsWith('rev.') ? '--rev' : row === 'balance' ? '--series-3' : '--exp');
   return {
-    name: EXTRA_NAMES[id] || it.name, plan: mc.raw(it.p), cum: mc.raw(it.c), prev: mc.raw(it.pv),
-    share: it.pc, pace: it.pace, flag: flagTxt, diff: it.diff, kind: it.flag, yoy: it.yoy, part: it.shareOfYear,
-    mp: it.p, mc: it.c, mv: it.pv,
+    id: o.id || `s15-m-${row.replace(/\./g, '-')}`, type: bar ? 'bar' : 'line', title: o.title || `${label}: ${C.g1} и ${C.g2} г.`,
+    categoryLabel: 'Месец', categories: MONTH_CATS.slice(0, C.month),
+    sub: `млрд. €, ${natr ? 'натрупано от началото на годината' : 'само за месеца'}, ${SCOPE_NAME[C.scope]}`,
+    unit: 'млрд. €', d: 2, min: nonneg && !bar ? 0 : undefined, endLabels: !bar, desc,
+    series: [
+      { name: String(C.g1), data: A, color: 'other', dashed: true },
+      { name: String(C.g2), data: Bv, color: colour },
+    ],
+    table: {
+      columns: [{ key: 'm', label: 'Месец' }, { key: 'a', label: `${C.g1} г.`, unit: 'млрд. €', d: 2, num: true }, { key: 'b', label: `${C.g2} г.`, unit: 'млрд. €', d: 2, num: true }, { key: 'd', label: 'Разлика', unit: 'млрд. €', d: 2, num: true }],
+      rows: MONTH_CATS.slice(0, C.month).map((_, j) => ({ m: cap1(monthName(j + 1)), a: A[j], b: Bv[j], d: fin(A[j]) && fin(Bv[j]) ? Math.round((Bv[j] - A[j]) * 1000) / 1000 : null })),
+    },
   };
 }
 
-const moneyCell = (mc, mln) => {
-  const lev = mc.lev(mln);
-  return html`${mc.text(mln)}${lev ? html`<span class="s15-lev">${lev}</span>` : ''}`;
-};
-const pctCell = v => (fin(v) ? pct(v, 1) : DASH);
-
-function flagCell(_v, r) {
-  if (r.kind === 'down' || r.kind === 'up') {
-    return html`<span class="s15-flag" data-flag="${r.kind}"><span aria-hidden="true">${FLAG_ICON[r.kind]}</span> ${FLAG_WORD[r.kind]}</span><span class="s15-diff">${pp(r.diff, 1)}</span>`;
-  }
-  return fin(r.diff) ? html`<span class="s15-diff">${pp(r.diff, 1)}</span>` : html`<span class="muted">${DASH}</span>`;
-}
-
-function peraColumns(M, mc, kind) {
-  const mon = monthName(M.m);
-  const got = kind === 'rev' ? 'Събрано' : 'Похарчено';
-  const mode = peraMode(M);
-  const money = (key, label, f) => ({ key, label, num: true, unit: mc.unit, d: mc.d, fmt: (_v, r) => moneyCell(mc, r[f]) });
-  if (mode === 'plan') {
-    // on a narrow screen the „Дял от плана“ column is folded into the executed cell (the CSS swaps them), so the key figure is never off-screen
-    const cumCell = (_v, r) => html`${moneyCell(mc, r.mc)}${fin(r.share) ? html`<span class="s15-sub s15-narrow">${pct(r.share, 1)} от плана</span>` : ''}`;
-    return [
-      { key: 'name', label: 'Перо' },
-      money('plan', `План за ${M.Y} г.`, 'mp'),
-      { key: 'cum', label: `${got} към ${mon}`, num: true, unit: mc.unit, d: mc.d, fmt: cumCell },
-      { key: 'share', label: 'Дял от плана', num: true, unit: '%', d: 1, fmt: pctCell },
-      { key: 'pace', label: 'Дял по същото време на 2025 г.', num: true, unit: '%', d: 1, fmt: pctCell },
-      { key: 'flag', label: 'Спрямо хода на 2025 г.', fmt: flagCell },
-    ];
-  }
-  if (mode === 'yoy') {
-    return [
-      { key: 'name', label: 'Перо' },
-      money('cum', `${got} към ${mon} ${M.Y}`, 'mc'),
-      money('prev', `${got} към ${mon} 2025`, 'mv'),
-      { key: 'yoy', label: 'Промяна', num: true, unit: '%', d: 1, fmt: v => (fin(v) ? delta(v, 1) : DASH) },
-    ];
-  }
-  return [
-    { key: 'name', label: 'Перо' },
-    money('cum', `${got} към ${mon} ${M.Y}`, 'mc'),
-    { key: 'part', label: `Дял от резултата за ${M.Y} г.`, num: true, unit: '%', d: 1, fmt: pctCell },
-  ];
-}
-
-function peraBlock(M, kind) {
-  const mc = moneyCol(M.ctx, { d: 1 });
-  const mode = peraMode(M);
-  const ids = kind === 'rev' ? REV_ROWS : [...EXP_ROWS, ...(mode === 'plan' ? ['exp.contingency'] : []), 'eucontrib'];
-  const rows = ids.map(id => peraRowObj(M, id, mc)).filter(r => mode === 'plan' || fin(r.mc) || fin(r.mv));
-  const totalId = kind === 'rev' ? 'rev' : 'exp.total';
-  const total = { label: kind === 'rev' ? 'Общо приходи' : 'Общо разходи (с вноската в ЕС)', values: peraRowObj(M, totalId, mc) };
-  const over = rows.some(r => fin(r.share) && r.share > 100);
-  const noteParts = [];
-  if (mode === 'plan' && kind === 'exp') noteParts.push('За резерва за непредвидени разходи има само план: в месечния отчет той няма отделен ред.');
-  if (over) noteParts.push('Дял над 100% означава, че за реда вече е похарчено повече от годишния план.');
-  const title = kind === 'rev' ? 'Приходи по видове' : 'Разходи по видове';
-  const has = rows.length > 0 && fin(total.values.mc);
-  const text = `${title}, ${SCOPE_NAME[M.scope]}, към ${date(M.asOf)} г.`;
+function chartBlock(C, spec, o) {
+  const has = spec.series.some(s => (s.data || []).some(fin));
   return block({
-    id: `s15-b-${kind}-rows`, level: 2, title, scope: M.scope, source: sourcesOf(M), asOf: M.asOf, share: has ? { text } : false, cls: mode === 'plan' ? 's15-plan' : undefined,
-    body: has
-      ? dataTable({ id: `s15-t-${kind}`, caption: `${title}: ${mode === 'plan' ? 'план, изпълнение и дял от плана' : mode === 'yoy' ? 'натрупано спрямо същото време на 2025 г.' : 'натрупано и дял от резултата за годината'}`, columns: peraColumns(M, mc, kind), rows, total, note: noteParts.join(' ') || undefined, dense: true, cls: 's15-tbl' })
-      : EMPTY_CHART(),
+    id: o.id, level: 2, title: o.title, sub: o.sub, scope: C.scope, source: ['kfp'], asOf: [C.asOfOf(C.g1), C.asOfOf(C.g2)].filter(Boolean).sort().pop(), cls: 's15-chart',
+    share: has ? { embed: spec.id, text: spec.desc, link: linkOf(C), period: periodOf(C) } : false,
+    body: has ? chart(spec) : emptyState({ title: 'Няма данни за графиката', text: 'За избрания обхват и месец отчетът няма стойности за тази графика.' }),
   });
 }
 
-/** how many detail rows each threshold would flag (the totals are not counted) */
-function flagCounts(rows) {
-  const cnt = t => rows.filter(r => fin(r.diff) && Math.abs(r.diff) >= t - 1e-9).length;
-  return { 10: cnt(10), 15: cnt(15) };
+export function chartsView(C) {
+  const natr = C.mode !== 'mesec';
+  const how = natr ? 'Натрупано от началото на годината; прекъснатата линия е предходната година.' : 'Всеки стълб е един месец, не е натрупан.';
+  return html`<div class="s15-pair">${[
+    chartBlock(C, monthsSpec(C, 'rev', { id: 's15-ch-rev' }), { id: 's15-b-ch-rev', title: 'Приходи по месеци', sub: how }),
+    chartBlock(C, monthsSpec(C, 'exp.total', { id: 's15-ch-exp' }), { id: 's15-b-ch-exp', title: 'Разходи по месеци', sub: how }),
+  ]}</div>
+  ${chartBlock(C, monthsSpec(C, 'balance', { id: 's15-ch-bal', bar: true, title: 'Салдо по месеци' }), { id: 's15-b-ch-bal', title: 'Салдо по месеци', sub: 'Под нулата е дефицит: изразходвани са повече пари, отколкото са събрани.' })}`;
 }
 
-function peraIntro(M) {
-  const mon = monthName(M.m);
-  const ctx = M.ctx;
-  const mode = peraMode(M);
-  if (mode === 'plan') {
-    const mc = moneyCol(ctx);
-    const rows = [...REV_ROWS, ...EXP_ROWS, 'eucontrib'].map(id => peraRowObj(M, id, mc));
-    const n = flagCounts(rows);
-    const flagged = rows.filter(r => r.kind === 'down' || r.kind === 'up');
-    const list = flagged.map(r => `${r.name} (${FLAG_WORD[r.kind]})`).join(', ');
-    const word = c => (c === 1 ? 'ред' : 'реда');
-    return html`<div class="s15-lead">
-      <p>Сравняваме два дяла: колко процента от годишния план са изпълнени към ${mon} ${M.Y} г. и колко процента от резултата за цялата 2025 г. са били достигнати към същия месец. Когато двата дяла се различават с поне ${M.thr}${NBSP}${gl('protsenten-punkt', 'процентни пункта')}, редът е отбелязан: ▼ „изостава“ или ▲ „изпреварва“.</p>
-      <p>При праг 10${NBSP}пр.п. се отбелязват ${n[10]} ${word(n[10])}, а при праг 15${NBSP}пр.п. – ${n[15]} ${word(n[15])}. Прагът се сменя от избора по-горе.${flagged.length ? ` Сега са отбелязани: ${list}.` : ' Сега няма отбелязани редове.'}</p>
-    </div>`;
-  }
-  if (mode === 'yoy') {
-    return html`<div class="s15-lead"><p>Тук сравняваме натрупаното към ${mon} ${M.Y} г. с натрупаното към същия месец на 2025 г. За ${M.scope === 'nat' ? 'националния бюджет' : 'средствата от ЕС'} няма годишен план по видове, затова няма дял от плана. Планът за общите суми и трансферите е в раздела <a href="${ctx.href('S15', { sub: 'byudzheti' }, keepQuery(ctx))}">„Бюджети“</a>.</p></div>`;
-  }
-  return html`<div class="s15-lead"><p>Показваме натрупаното към ${mon} 2025 г. и дела му от резултата за цялата година. За 2025 г. няма годишен план, затова няма дял от плана и няма отбелязване на изоставане.</p></div>`;
+/* ------------------------------------------------------------------ one item in full (a row of the grid) */
+function itemView(C) {
+  const id = C.item;
+  const ctx = C.ctx;
+  const back = ctx.href('S15', {}, keepQuery(ctx, { pokazatel: null, to: `s15-r-${id.replace(/\./g, '-')}` }));
+  const spec = monthsSpec(C, id, { id: `s15-i-${id.replace(/\./g, '-')}`, title: `${nameOf(C, id)}: ${C.g1} и ${C.g2} г.` });
+  const a = C.val(C.g1, id), b = C.val(C.g2, id);
+  return html`<p class="s15-back"><a class="back-link" href="${back}">${icon('arrowLeft', { size: 16 })}<span>Към сравнението</span></a></p>
+    ${block({
+      id: 's15-b-item', level: 2, title: nameOf(C, id), scope: C.scope, source: ['kfp'], asOf: C.asOfOf(C.g2), cls: 's15-chart',
+      sub: `${cap1(monthsLabel(C))}, ${modeWord(C)}, ${SCOPE_NAME[C.scope]}.`,
+      share: { embed: spec.id, text: `${nameOf(C, id)}: ${C.g1} г. ${B(a)} млрд. €, ${C.g2} г. ${B(b)} млрд. €.`, link: linkOf(C, id), period: periodOf(C) },
+      body: chart(spec),
+    })}`;
 }
 
-function mappingDisclosure(M) {
-  const map = (M.ex.plan2026 && M.ex.plan2026.mapping) || null;
-  if (!map || !Object.keys(map).length) return '';
-  const rows = Object.entries(map).map(([id, line]) => ({ report: M.rowName(id), annex: line }));
+/* ------------------------------------------------------------------ for experts: every row in млн. € (cumulative and for the month) */
+function expertBlock(C) {
+  const mc = moneyCol(C.ctx, { d: 1 });
+  const rows = ALL_ROWS.filter(id => !(C.scope === 'kfp' && id === 'transfers')).map(id => {
+    const g = k => ({ cum: C.cum(k, id), mon: C.mon(k, id) });
+    const A = g(C.g1), Bv = g(C.g2);
+    const r = v => (fin(v) ? Math.round(v * 10) / 10 : null);
+    return { name: nameOf(C, id), a_cum: r(A.cum), b_cum: r(Bv.cum), a_mon: r(A.mon), b_mon: r(Bv.mon), d_cum: fin(A.cum) && fin(Bv.cum) ? r(Bv.cum - A.cum) : null, d_mon: fin(A.mon) && fin(Bv.mon) ? r(Bv.mon - A.mon) : null };
+  });
+  const col = (key, label) => ({ key, label, num: true, unit: mc.unit === '€ на човек' ? 'млн. €' : 'млн. €', d: 1 });
   return disclosure({
-    id: 's15-mapping', title: 'Кои редове на отчета съответстват на кои редове на плана',
-    body: dataTable({ id: 's15-t-mapping', caption: 'Съпоставка на редовете на месечния отчет с редовете на Приложение 3', columns: [{ key: 'report', label: 'Ред в месечния отчет' }, { key: 'annex', label: 'Ред в плана (Приложение 3)' }], rows, dense: true }),
+    id: 's15-expert', title: 'Таблица за експерти (млн. €)',
+    body: html`<p class="small muted">Натрупаните стойности са самите месечни отчети; „за месеца“ е разликата между два последователни отчета. Сортира се по колона.</p>${dataTable({
+      id: 's15-t-expert', caption: `Месечни отчети на КФП: ${C.g1} и ${C.g2} г., към края на ${monthName(C.month)}, ${SCOPE_NAME[C.scope]}`, dense: true, sortable: true,
+      columns: [{ key: 'name', label: 'Ред на отчета', sort: false }, col('a_cum', `${C.g1}, натрупано`), col('b_cum', `${C.g2}, натрупано`), col('d_cum', 'Разлика, натрупано'), col('a_mon', `${C.g1}, за месеца`), col('b_mon', `${C.g2}, за месеца`), col('d_mon', 'Разлика, за месеца')], rows,
+    })}`,
   });
 }
 
-export function peraView(M) {
-  const out = [peraIntro(M), peraBlock(M, 'rev'), peraBlock(M, 'exp')];
-  if (peraMode(M) === 'plan') {
-    const note = M.ex.plan2026 && M.ex.plan2026.note;
-    if (note) out.push(callout({ kind: 'info', title: 'Как е съпоставен планът с отчета', body: html`<p>${note}</p>`, id: 's15-plan-note' }));
-    out.push(mappingDisclosure(M));
-  }
-  out.push(block({ id: 's15-taxes', level: 2, title: 'Изпълнение по видове данъци', status: 'pending', pending: 'P01' }));
-  return out;
+/* ------------------------------------------------------------------ how the numbers are made */
+export function methodDisclosure(C) {
+  const conv = C.years.filter(y => C.ex.data[String(y)] && C.ex.data[String(y)].converted);
+  const first = C.years[0];
+  const before = first - 1 > EARLIEST_REPORT ? `${EARLIEST_REPORT}${DASH}${first - 1}` : String(first - 1);
+  const dec = C.ex.reconcile && C.ex.reconcile.dec2024VsAnnex3;
+  return disclosure({
+    id: 's15-method', title: 'Как се смятат числата',
+    body: html`<ul class="s15-method">
+      <li>Източник са месечните отчети на Министерството на финансите за консолидираната фискална програма (КФП). Те са на ${gl('kasova-osnova', 'касова основа')}: отчита се кога парите са влезли или излезли.</li>
+      <li>„Натрупано“ е от началото на годината до края на избрания месец. „За месеца“ е разликата между два последователни натрупани отчета.</li>
+      <li>Разходите включват вноската в бюджета на ЕС. Тя е отделен ред и не се брои два пъти.</li>
+      <li>Салдото е дефицит (под нулата) или излишък. За националния бюджет и средствата от ЕС към приходите и разходите се добавят нетните трансфери между тях; в КФП те се нулират.</li>
+      ${conv.length ? html`<li>Отчетите за ${joinBg(conv)} г. са били в лева. Превърнали сме ги в евро по фиксирания курс ${num(EUR_RATE, 5)} лв. за 1 €.</li>` : ''}
+      ${dec ? html`<li>Декемврийският месечен отчет за 2024 г. се различава малко от Приложение 3 към Закона за 2026 г. (например приходите с 8,2 млн. €); показваме отчета.</li>` : ''}
+      <li>Процентите се смятат от точните числа, не от закръглените. Процент не се смята, когато числото за по-ранната година е нула или под нулата.</li>
+      <li>Сравняваме със същия период на предходната година. Отчетите за ${before} г. предстоят.</li>
+    </ul>`,
+  });
 }
 
-/* ------------------------------------------------------------------ Бюджети: плана по съставни бюджети (D07), националният бюджет и средствата от ЕС (официални данни) */
+/* ------------------------------------------------------------------ Бюджети: the plan of every budget (D07), the national budget and the EU funds */
 const khilToMln = v => (fin(v) ? v / 1000 : null);
-
-/** components.json (D07) is optional: its own shape is read as it is (budgets.state … other, sankey, notes); what is missing is skipped, never invented */
-const componentsOf = M => {
-  const c = M.ctx.data.components;
-  return c && typeof c === 'object' && c.budgets && typeof c.budgets === 'object' ? c : null;
-};
+const moneyCell = (mc, mln) => { const lev = mc.lev(mln); return html`${mc.text(mln)}${lev ? html`<span class="s15-lev">${lev}</span>` : ''}`; };
+const componentsOf = ctx => { const c = ctx.data.components; return c && typeof c === 'object' && c.budgets && typeof c.budgets === 'object' ? c : null; };
 const srcOf = c => (c && c.meta && Array.isArray(c.meta.source) && c.meta.source.length ? c.meta.source : ['zdb', 'asbp']);
 
-function componentSankey(c, mc) {
-  const sk = c && c.sankey;
-  if (!sk || !Array.isArray(sk.nodes) || !Array.isArray(sk.links)) return null;
-  const names = new Map(sk.nodes.map(n => [n.id, n.name || n.id]));
-  const nm = id => names.get(id) || String(id);
-  const links = sk.links.filter(l => l && fin(l.value) && l.value > 0).map(l => ({ source: nm(l.source), target: nm(l.target), value: l.value, mln: l.value }));
-  if (!links.length) return null;
-  return { nodes: sk.nodes.map(n => nm(n.id)), links: links.map(l => ({ source: l.source, target: l.target, value: mc.raw(l.value) })), total: links.reduce((t, l) => t + l.mln, 0) };
-}
-
-function sankeyBlock(M) {
-  const c = componentsOf(M);
-  const mc = moneyCol(M.ctx, { d: 1 });
-  const sp = componentSankey(c, mc);
-  const title = 'От държавния бюджет към другите бюджети';
-  if (!sp) {
-    return block({
-      id: 's15-b-sankey', level: 2, title, status: 'pending', scope: 'kfp',
-      body: pendingState({ title: 'Планът по съставни бюджети предстои', text: 'Данните за разпределението между държавния бюджет, ДОО, здравната каса и общините още не са заредени.' }),
-    });
-  }
-  const total = amount(M.ctx, { mln: sp.total });
-  return block({
-    id: 's15-b-sankey', level: 2, title, scope: 'kfp', source: srcOf(c), asOf: c.meta && c.meta.asOf,
-    sub: 'Планираните трансфери от държавния бюджет към другите бюджети през 2026 г. Това е планът, не изпълнението: месечно изпълнение по съставни бюджети предстои.',
-    share: { embed: 's15-sankey', text: `Планираните трансфери от държавния бюджет към другите бюджети през 2026 г.: ${total}.` },
-    body: sankey({ id: 's15-sankey', title: 'Трансфери от държавния бюджет по плана за 2026 г.', sub: mc.unit, desc: `Планираните трансфери от държавния бюджет към другите бюджети през 2026 г. са общо ${total}.`, nodes: sp.nodes, links: sp.links, unit: mc.unit, d: mc.d }),
-    foot: html`<p class="small muted">„Други получатели“ са трансферите, които законът не назовава поименно. Те са разликата между всички предоставени трансфери и изброените получатели.</p>`,
-  });
-}
-
-/** the plan of each budget: the numbers are the file's, only converted to млн. €; the state budget's total outflow is the sum of its three outflow lines */
-function budgetRows(M, c) {
-  const ctx = M.ctx, b = c.budgets, k = khilToMln;
+function budgetRows(ctx, c) {
+  const b = c.budgets, k = khilToMln;
   const a = v => amount(ctx, { mln: v });
   const line = (list, id) => (Array.isArray(list) ? (list.find(x => x && x.id === id) || {}).khil : null);
   const rows = [];
@@ -524,17 +399,17 @@ function budgetRows(M, c) {
   return rows;
 }
 
-function budgetsBlock(M) {
-  const c = componentsOf(M);
+function budgetsBlock(ctx) {
+  const c = componentsOf(ctx);
   if (!c) return '';
-  const rows0 = budgetRows(M, c);
+  const rows0 = budgetRows(ctx, c);
   if (!rows0.length) return '';
-  const mc = moneyCol(M.ctx, { d: 1 });
+  const mc = moneyCol(ctx, { d: 1 });
   const rows = rows0.map(r => ({ ...r, mr: r.rev, me: r.exp, mb: r.bal, rev: mc.raw(r.rev), exp: mc.raw(r.exp), bal: mc.raw(r.bal) }));
   const col = (key, label, f) => ({ key, label, num: true, unit: mc.unit, d: mc.d, fmt: (_v, r) => moneyCell(mc, r[f]) });
   const withWhat = rows.filter(r => r.what);
   return block({
-    id: 's15-b-budgets', level: 2, title: 'Планът за всеки от бюджетите', sub: 'Планът за 2026 г. Под таблицата е кратко обяснение какво влиза в числата на всеки бюджет.',
+    id: 's15-b-budgets', level: 2, title: 'Планът за всеки от бюджетите', sub: 'Планът за 2026 г. (проект). Под таблицата е кратко обяснение какво влиза в числата на всеки бюджет.',
     scope: 'kfp', source: srcOf(c), asOf: c.meta && c.meta.asOf,
     share: { text: 'Планът за 2026 г. по бюджети: приходи, разходи и салдо.' },
     body: html`${dataTable({
@@ -546,12 +421,11 @@ function budgetsBlock(M) {
   });
 }
 
-/** the other budgets that the law does not name (appendix 6 of the bill's motives) and the notes of the data file, folded away */
-function otherDisclosure(M, c) {
+function otherDisclosure(ctx, c) {
   const o = c.budgets.other;
   if (!o || !Array.isArray(o.items) || !o.items.length) return '';
   const years = Array.isArray(o.years) ? o.years : [2026, 2027, 2028];
-  const mc = moneyCol(M.ctx, { d: 1 });
+  const mc = moneyCol(ctx, { d: 1 });
   const yearLabel = (y, i) => `${y} г.${i === 0 ? ' (проект)' : ' (прогноза)'}`;
   const at = (arr, i) => (Array.isArray(arr) ? khilToMln(arr[i]) : null);
   const rows = o.items.map(it => ({ name: it.label, ...Object.fromEntries(years.map((_y, i) => [`y${i}`, mc.raw(at(it.khil, i))])), ...Object.fromEntries(years.map((_y, i) => [`m${i}`, at(it.khil, i)])) }));
@@ -564,7 +438,7 @@ function otherDisclosure(M, c) {
   });
 }
 
-function notesDisclosure(M, c) {
+function notesDisclosure(c) {
   const notes = Array.isArray(c.notes) ? c.notes.filter(x => typeof x === 'string' && x.trim()) : [];
   const b = c.budgets;
   const srcs = ['state', 'doo', 'nzok', 'municipalities', 'euAccounts', 'other'].map(k => b[k]).filter(x => x && x.sourceNote).map(x => `${x.name}: ${x.sourceNote}`);
@@ -576,63 +450,42 @@ function notesDisclosure(M, c) {
   });
 }
 
-function natEuBlock(M) {
-  const mc = moneyCol(M.ctx, { d: 1 });
-  const lines = [['rev', 'Приходи'], ['exp.total', 'Разходи (с вноската в ЕС)'], ['transfers', 'Трансфери (нето)'], ['balance', 'Бюджетно салдо']];
+/** the national budget and the EU funds side by side with the КФП, at the chosen month: the three sources of the balance I − II + III − IV */
+function natEuBlock(C) {
+  const mc = moneyCol(C.ctx, { d: 1 });
+  const lines = [['rev', 'Приходи'], ['exp.total', 'Разходи с вноската в ЕС'], ['transfers', 'Трансфери между бюджетите, нето'], ['balance', 'Бюджетно салдо']];
+  const i = C.month - 1;
   const rows = lines.map(([id, name]) => {
     const r = { name };
-    for (const [sc] of SCOPES) {
-      const c = M.at(M.cumArr(M.Y, id, sc), M.m - 1);
-      const p = M.Y === 2026 ? M.planOf(id, sc) : null;
-      r[`m_${sc}`] = c;
-      r[sc] = mc.raw(c);
-      r[`s_${sc}`] = fin(c) && fin(p) && c !== 0 && p !== 0 && Math.sign(c) === Math.sign(p) ? ratio(c, p) : null;
-    }
+    for (const [sc] of SCOPES) { const c = C.cum(C.g2, id, i, sc); r[`m_${sc}`] = c; r[sc] = mc.raw(c); }
     return r;
   });
-  const col = (sc, label) => ({
-    key: sc, label, num: true, unit: mc.unit, d: mc.d,
-    fmt: (_v, r) => html`${moneyCell(mc, r[`m_${sc}`])}${fin(r[`s_${sc}`]) ? html`<span class="s15-sub">${pct(r[`s_${sc}`], 1)} от плана</span>` : ''}`,
-  });
+  const col = (sc, label) => ({ key: sc, label, num: true, unit: mc.unit, d: mc.d, fmt: (_v, r) => moneyCell(mc, r[`m_${sc}`]) });
   const has = rows.some(r => fin(r.m_nat) || fin(r.m_eu));
+  const asOf = C.asOfOf(C.g2, i);
   return block({
-    id: 's15-b-nateu', level: 2, title: 'Национален бюджет и средства от ЕС', source: sourcesOf(M), asOf: M.asOf,
-    sub: `Натрупано към ${date(M.asOf)} г.${M.Y === 2026 ? ' Под сумата е показан делът от годишния план.' : ''}`,
-    share: has ? { text: `Национален бюджет и средства от ЕС към ${date(M.asOf)} г.` } : false,
+    id: 's15-b-nateu', level: 2, title: 'Национален бюджет и средства от ЕС', source: ['kfp'], asOf,
+    sub: `Натрупано към ${date(asOf)} г. Салдото е приходи минус разходи плюс нетните трансфери.`,
+    share: has ? { text: `Национален бюджет и средства от ЕС към ${date(asOf)} г.` } : false,
     body: has
       ? dataTable({
-        id: 's15-t-nateu', caption: `Национален бюджет, средства от ЕС и КФП към ${date(M.asOf)} г.`,
+        id: 's15-t-nateu', caption: `Национален бюджет, средства от ЕС и КФП към ${date(asOf)} г.`,
         columns: [{ key: 'name', label: 'Показател' }, col('nat', 'Национален бюджет'), col('eu', 'Средства от ЕС'), col('kfp', 'КФП (общо)')], rows, dense: true,
         note: 'Трансферите между националния бюджет и средствата от ЕС са равни по размер и с противоположен знак, затова в КФП се нулират. Приходите, разходите и салдото на КФП са сборът от двата обхвата.',
       })
-      : EMPTY_CHART(),
+      : emptyState({ title: 'Няма данни', text: 'Отчетът няма стойности за избрания месец.' }),
   });
 }
 
-export function byudzhetiView(M) {
-  const c = componentsOf(M);
-  const intro = html`<div class="s15-lead"><p>В ${gl('kfp', 'консолидираната фискална програма (КФП)')} се събират няколко отделни бюджета: държавният бюджет, държавното обществено осигуряване (ДОО), здравната каса (НЗОК), общините и средствата от ЕС. Тук е планът за 2026 г. и изпълнението по националния бюджет и средствата от ЕС.</p></div>`;
-  return [
-    intro, sankeyBlock(M), budgetsBlock(M), c ? otherDisclosure(M, c) : '', natEuBlock(M),
+export function byudzhetiView(C) {
+  const c = componentsOf(C.ctx);
+  const back = C.ctx.href('S15', {}, keepQuery(C.ctx));
+  const intro = html`<div class="s15-lead"><p>В ${gl('kfp', 'консолидираната фискална програма (КФП)')} се събират няколко отделни бюджета: държавният бюджет, държавното обществено осигуряване (ДОО), здравната каса (НЗОК), общините и средствата от ЕС. Тук е планът за 2026 г. (проект) и изпълнението по националния бюджет и средствата от ЕС.</p></div>`;
+  return html`<p class="s15-back"><a class="back-link" href="${back}">${icon('arrowLeft', { size: 16 })}<span>Към месечните отчети</span></a></p>${[
+    intro, budgetsBlock(C.ctx), c ? otherDisclosure(C.ctx, c) : '', natEuBlock(C),
     block({ id: 's15-b-monthly-components', level: 2, title: 'Изпълнение по съставни бюджети', status: 'pending', pending: 'P02' }),
-    c ? notesDisclosure(M, c) : '',
-  ];
-}
-
-/* ------------------------------------------------------------------ how the numbers are made */
-export function methodDisclosure(M) {
-  const converted = !!(M.ex.data['2025'] && M.ex.data['2025'].converted);
-  return disclosure({
-    id: 's15-method', title: 'Как се смятат числата',
-    body: html`<ul class="s15-method">
-      <li>Числата са натрупани от началото на годината до края на избрания месец.</li>
-      <li>Източник са месечните отчети на Министерството на финансите за консолидираната фискална програма. Те са на ${gl('kasova-osnova', 'касова основа')}: отчита се кога парите са влезли или излезли.</li>
-      <li>Планът за 2026 г. е „Проект“ към законопроекта за бюджета. Окончателните числа по приетия закон може да се различават.</li>
-      <li>Разходите включват вноската в бюджета на ЕС. В таблицата „По пера“ тя е отделен ред.</li>
-      ${converted ? html`<li>Отчетът за 2025 г. е бил в лева. Превърнали сме го в евро по фиксирания курс ${num(EUR_RATE, 5)} лв. за 1 €.</li>` : ''}
-      <li>Сравняваме само с 2025 г.: отчетите за 2022–2024 г. предстоят.</li>
-    </ul>`,
-  });
+    c ? notesDisclosure(c) : '',
+  ]}`;
 }
 
 /* ------------------------------------------------------------------ the page */
@@ -642,48 +495,76 @@ export const styles = ['s15-izpalnenie'];
 export function lede(ctx) {
   try {
     if (!ctx.data || !ctx.data.execution) return undefined;
-    const M = model(ctx);
-    if (M.notYet) return `Отчетът към ${date(isoLast(M.Y, M.month))} г. се очаква. Най-новите данни са към ${date(M.asOf)} г.`;
-    return summaryText(M) || undefined;
+    const C = model(ctx);
+    if (C.page === 'byudzheti') return 'Планът за 2026 г. по бюджети и изпълнението на националния бюджет и средствата от ЕС.';
+    if (C.page === 'item') return undefined;
+    return reportLine(C);                                   // the comparison follows at once; the sentence in words sits under the grid
   } catch (e) { return undefined; }
 }
 
-const embedOf = fn => ctx => {
+/** the one line under the heading: which report the numbers are from (the date is the file's own as-of date); «Последен» only while the page shows the newest report */
+export function reportLine(C) {
+  if (C.problem || C.missing.includes(C.g2)) return '';
+  const iso = C.asOfOf(C.g2);
+  if (!iso) return '';
+  return `${C.g2 === C.lastY && C.month === C.n2 ? 'Последен отчет' : 'Отчет'}: към ${date(iso, true)}${NBSP}г.`;
+}
+
+const embedOf = (row, o) => ctx => {
   if (!ctx.data || !ctx.data.execution) return null;
-  const M = model(ctx);
-  if (M.notYet) return null;
-  const spec = fn(M);
-  return spec && spec.series.some(s => (s.data || []).some(fin)) ? { chart: spec, source: sourcesOf(M), asOf: M.asOf, status: 'real' } : null;
+  const C = model(ctx);
+  if (C.problem) return null;
+  const spec = monthsSpec(C, row, o);
+  return spec.series.some(s => (s.data || []).some(fin)) ? { chart: spec, source: ['kfp'], asOf: [C.asOfOf(C.g1), C.asOfOf(C.g2)].filter(Boolean).sort().pop(), status: 'real' } : null;
 };
 
 export const embeds = {
-  's15-cum-rev': embedOf(M => cumChartSpec(M, 'rev')),
-  's15-cum-exp': embedOf(M => cumChartSpec(M, 'exp')),
-  's15-monthly': embedOf(monthlyChartSpec),
-  's15-balance': embedOf(balanceChartSpec),
+  's15-ch-rev': embedOf('rev', { id: 's15-ch-rev' }),
+  's15-ch-exp': embedOf('exp.total', { id: 's15-ch-exp' }),
+  's15-ch-bal': embedOf('balance', { id: 's15-ch-bal', bar: true, title: 'Салдо по месеци' }),
 };
 
-/** one line that says what the numbers are: a report, against which plan, for which scope, in which unit */
-export function contextLine(M) {
-  const against = M.Y === 2026 ? `спрямо плана по Закона за ${M.Y}` : 'предварителен, без план за сравнение';
-  const scope = M.tab === 'byudzheti' ? 'по съставни бюджети' : SCOPE_NAME[M.scope];
-  const unit = M.tab === 'obsho' && M.unit === 'pct' ? 'млрд. € и % от плана' : 'млрд. €';
-  return html`<span class="ctx-period"><strong>${M.notYet ? 'Последен отчет' : 'Отчет'} към ${date(M.asOf)}</strong> <span class="muted">· ${against} · ${scope} · ${unit}</span></span>`;
+/** one line that says what the numbers are: a report, which years, which scope, which mode, in which unit */
+export function contextLine(C) {
+  if (C.page === 'byudzheti') return html`<span class="ctx-period"><strong>План 2026 (проект)</strong> <span class="muted">· по бюджети · млн. €</span></span>`;
+  const when = C.problem ? '' : C.mode === 'mesec' ? `${cap1(monthName(C.month))}` : monthsLabel(C);
+  return html`<span class="ctx-period"><strong>Отчет ${when ? `· ${when}` : ''}</strong> <span class="muted">· ${C.g1} и ${C.g2} · ${C.scope === 'kfp' ? 'КФП' : SCOPE_NAME[C.scope]} · ${C.mode === 'mesec' ? 'за месеца' : 'натрупано'} · млрд. €</span></span>`;
 }
 
 export function render(ctx) {
-  const M = model(ctx);
-  const y25 = M.Y === 2025
-    ? callout({ kind: 'info', title: 'Показана е 2025 г.', body: html`<p>За 2025 г. екранът показва само отчета: без годишен план и без сравнение с предходна година.</p>`, id: 's15-y25' })
-    : '';
-  const body = M.notYet ? notYetFrame(M) : M.tab === 'pera' ? peraView(M) : M.tab === 'byudzheti' ? byudzhetiView(M) : obshoView(M);
-  return { body: html`${tabNav(M)}${controls(M)}${y25}${body}${methodDisclosure(M)}`, context: contextLine(M), ownContext: true };
+  const C = model(ctx);
+  let body;
+  if (C.page === 'byudzheti') body = byudzhetiView(C);
+  else if (C.problem) body = html`${controlsDisclosure(C)}${problemFrame(C)}`;
+  else if (C.page === 'item') body = html`${itemView(C)}${methodDisclosure(C)}`;
+  else {
+    const links = html`<p class="s15-links small"><a href="${ctx.href('S15', { sub: 'byudzheti' }, keepQuery(ctx))}">Планът по бюджети и средствата от ЕС</a></p>`;
+    const plan = planBlock(C, { link: linkOf(C) });
+    body = html`${controlsDisclosure(C)}${PLAN_FIRST ? plan : ''}${compareBlock(C)}${PLAN_FIRST ? '' : plan}${chartsView(C)}${links}${expertBlock(C)}${methodDisclosure(C)}`;
+  }
+  return { body, context: C.page === 'main' && !C.problem ? '' : contextLine(C), ownContext: true };     // the main screen says it in the line under the heading and in the «Промени» row
 }
 
 export function mount(root, ctx) {
+  // the „По пера“ buttons open and close the item rows of a group in place; the open groups are kept in the address (?pera=rev,exp)
+  const onClick = e => {
+    const b = e.target.closest('[data-s15-open]');
+    if (!b || !root.contains(b)) return;
+    const g = b.dataset.s15Open;
+    const open = b.getAttribute('aria-expanded') !== 'true';
+    b.setAttribute('aria-expanded', open ? 'true' : 'false');
+    root.querySelectorAll(`tr[data-s15-g="${g}"]`).forEach(tr => { tr.hidden = !open; });
+    const now = [...root.querySelectorAll('[data-s15-open][aria-expanded="true"]')].map(x => x.dataset.s15Open);
+    try { ctx.setQuery({ pera: now.join(',') || null }, { rerender: false }); } catch { /* the address is a convenience */ }
+    ctx.announce && ctx.announce(open ? 'Показани са редовете по пера.' : 'Редовете по пера са скрити.');
+  };
+  root.addEventListener('click', onClick);
+  // arriving by a link / the back button with a choice in the address: the disclosure shows it, even if the visitor closed it earlier in this visit
+  if (ctx.kind !== 'rerender' && hasControlParams(ctx.query)) { const d = root.querySelector('#s15-controls'); if (d && !d.open) d.open = true; }
   if (ctx.kind === 'rerender' && ctx.data && ctx.data.execution) {
-    const M = model(ctx);
-    const t = M.notYet ? lede(ctx) : summaryText(M);
+    const C = model(ctx);
+    const t = C.page === 'main' ? summaryText(C) : '';
     if (t) ctx.announce(t);
   }
+  return () => root.removeEventListener('click', onClick);
 }
