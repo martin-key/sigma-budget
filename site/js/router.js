@@ -10,8 +10,8 @@
 //   per   period key, written only when it is not the default 2026.law (the URL decides; a link click keeps the session period)
 //   to    in-page anchor: scroll + highlight (+ opens an ancestor <details>); changing only `to` does not re-render
 //   demo  loading | empty | error | pending | offline: renders that state component on any URL
-import { ROUTES, NOT_FOUND, byId, match, href as routeHref, stepOf, chainOf, GUIDE_STEPS, GROUPS } from './routes.js';
-import { store, DEFAULT_PERIOD } from './store.js';
+import { ROUTES, NOT_FOUND, byId, match, href as routeHref, chainOf, GROUPS } from './routes.js';
+import { store, DEFAULT_PERIOD, ROLE_SELECTOR } from './store.js';
 import { data, PendingError } from './data.js';
 import { html, SafeHtml } from './html.js';
 import { parseQuery, buildQuery } from './format.js';
@@ -19,12 +19,13 @@ import { breadcrumbs } from './ui/breadcrumbs.js';
 import { nextCard } from './ui/next.js';
 import { pageSkeleton, emptyState, errorState, pendingState } from './ui/states.js';
 import * as share from './share.js';
+import { redirect } from './redirects.js';
 
 export class NotFound extends Error { constructor(msg) { super(msg || 'not found'); this.name = 'NotFound'; } }
 
 const SITE = 'Бюджет на светло';
 const DEMOS = ['loading', 'empty', 'error', 'pending', 'offline'];
-const RERENDER_KEYS = ['period', 'userType', 'unit', 'perPerson', 'leva', 'onlyReal'];
+const RERENDER_KEYS = [...(ROLE_SELECTOR ? ['userType'] : []), 'period', 'unit', 'perPerson', 'leva', 'onlyReal'];     // the role selector is off in V5 (js/store.js ROLE_SELECTOR)
 const groupLabel = id => GROUPS.find(g => g.id === id)?.label || '';
 const $view = () => document.getElementById('view');
 
@@ -149,22 +150,11 @@ function supportsPeriod(route, mod) {
   const p = periodsFor(route, mod);
   return p === 'all' || p === 'none' || !Array.isArray(p) || p.includes(store.get('period'));
 }
-/* „Стъпка N от 8“ is shown only while the visitor moves along the guide: the run starts on the guide (S02) and goes on while the next
-   screen is the same step or a neighbour; any other screen, a page load and a shared link are not in the guide (then: group name, breadcrumb, „Следва“) */
-let guideRun = false, guideAt = 0;
-function trackGuide(route, kind) {
-  if (kind === 'rerender') return;
-  const st = stepOf(route);
-  if (route.id === 'S02') { guideRun = true; guideAt = 0; return; }
-  guideRun = !!st && guideRun && (!guideAt || Math.abs(st - guideAt) <= 1);
-  guideAt = guideRun ? st : 0;
-}
 function nextTarget(id) {
   const r = byId[id];
   if (!r) return null;
   if (r.id === 'S01') return { kicker: 'Начало', title: 'Към началото', text: '', href: routeHref('S01') };
-  const st = stepOf(r);
-  return { kicker: st && guideRun ? `Стъпка ${st} от ${GUIDE_STEPS}` : groupLabel(r.group), title: r.title, text: r.desc, href: routeHref(r.id) };
+  return { kicker: groupLabel(r.group), title: r.title, text: r.desc, href: routeHref(r.id) };
 }
 function buildNext(route, mod, ctx) {
   if (route.bare) return '';
@@ -182,8 +172,6 @@ function defaultCrumbs(route, title) {
 }
 function eyebrowFor(route) {
   if (route.bare) return '';
-  const st = stepOf(route);
-  if (st && guideRun) return `Стъпка ${st} от ${GUIDE_STEPS}`;
   return route.group === 'util' ? '' : groupLabel(route.group);
 }
 function contextFor(route, ctx, extra, own) {
@@ -243,7 +231,7 @@ async function build(route, params, query, o) {
   const pageCrumbs = mod.crumbs ? safeCall(mod.crumbs, ctx, null) : null;
   return {
     ...base, view: 'ready', mod, ctx, title,
-    eyebrow: parts.eyebrow ?? eyebrowFor(route),
+    eyebrow: parts.eyebrow ?? eyebrowFor(route), accent: parts.accent,
     lede: parts.lede ?? (mod.lede ? safeCall(mod.lede, ctx, route.desc) : route.desc),
     context: contextFor(route, ctx, parts.context, parts.ownContext),
     body: toHtml(parts.body),
@@ -254,12 +242,12 @@ async function build(route, params, query, o) {
 
 /* v4 (СИГМА): one italic crimson word in the heading, as СИГМА's „Къде отиват <em>парите</em> на държавата?“. Only for the route's own static
    title and only where it reads naturally (the list below); a title a page sets itself stays plain, and document.title is always plain. */
-const ACCENT = { S01: 'бюджет', S33: 'направиш', S32: 'бюджет', S04: 'минути', S06: 'парите', S07: 'парите', S10: 'харчи', S12: 'бюджета', S13: 'вървим',
-  S31: 'икономиката', S14: 'бюджетът', S15: 'планът', S16: 'ново', S17: 'дължим', S18: 'аз', S19: 'сравнения', S20: 'община', S22: 'проекти', S23: 'плаща',
+const ACCENT = { S01: 'бюджет', S04: 'минути', S06: 'парите', S07: 'парите', S10: 'харчи', S12: 'бюджета', S13: 'вървим',
+  S31: 'икономиката', S14: 'бюджетът', S15: 'отчети', S16: 'ново', S17: 'дължим', S18: 'данъци', S20: 'община',
   S24: 'данните', S25: 'данни', S26: 'проекта', S27: 'връзка', S30: 'страница' };
 function titleHtml(vm) {
-  const t = vm.title, w = ACCENT[vm.route.id];
-  if (typeof t !== 'string' || t !== vm.route.title || !w) return t;
+  const t = vm.title, w = vm.accent || (t === vm.route.title ? ACCENT[vm.route.id] : '');       // a page may name its own accent word (parts.accent)
+  if (typeof t !== 'string' || !w) return t;
   const i = t.lastIndexOf(w);
   return i < 0 ? t : html`${t.slice(0, i)}<em>${w}</em>${t.slice(i + w.length)}`;
 }
@@ -319,6 +307,16 @@ function revealTabs(el) {
     });
   }
 }
+/** a target inside the view of a list / map / pie switch (ui/treemap-list.js) that is not shown: switch to that view, as a visitor's own choice */
+function revealViews(el) {
+  for (let t = el.closest('[data-ui="treemap-list"]'); t; t = t.parentElement?.closest('[data-ui="treemap-list"]')) {
+    const pane = ['list', 'map', 'pie'].find(v => { const p = t.querySelector(`:scope > .tmap-${v}`); return p && p.contains(el); });
+    if (!pane || t.dataset.view === pane) continue;
+    t.dataset.view = pane;
+    t.dataset.explicit = '1';
+    t.querySelectorAll('.tmap-bar input[type="radio"]').forEach(r => { r.checked = r.value === pane; });
+  }
+}
 function handleTo(id) {
   if (!id) return;
   const el = document.getElementById(id);
@@ -326,6 +324,7 @@ function handleTo(id) {
   for (let p = el.parentElement; p; p = p.parentElement) if (p.tagName === 'DETAILS') p.open = true;
   if (el.tagName === 'DETAILS') el.open = true;
   revealTabs(el);
+  revealViews(el);
   el.scrollIntoView({ block: 'start' });
   el.classList.remove('hl'); void el.offsetWidth; el.classList.add('hl');
   setTimeout(() => el.classList.remove('hl'), 2600);
@@ -344,6 +343,8 @@ const focusKey = () => {
 
 async function render(kind) {
   const raw = parseHash(location.hash);
+  const red = redirect(raw.segs, raw.query);           // an old address → the matching new screen, context kept (js/redirects.js)
+  if (red) { raw.segs = red.segs; raw.query = red.query; }
   const m = match(raw.segs);
   const route = m ? m.route : NOT_FOUND;
   const params = m ? m.params : { path: raw.segs.join('/') };
@@ -376,7 +377,6 @@ async function render(kind) {
   const keepY = kind === 'rerender' ? window.scrollY : 0;
   runCleanups();
   share.reset(route);
-  trackGuide(route, kind);
   curK = k;
 
   applying = true;
@@ -402,8 +402,6 @@ async function render(kind) {
   paint(vm);
   cur = { route: vm.route, params: vm.params, query, sig: sigOf(vm.route, vm.params, query), ok: vm.view === 'ready' || vm.view === 'loading' || vm.view === 'empty' || vm.view === 'pending', vm, ctx: vm.ctx, kind, seq };
   for (const f of listeners) { try { f({ route: vm.route, params: vm.params, query, demo: vm.demo, kind, view: vm.view, title: vm.title }); } catch (e) { console.error(e); } }
-  // guide progress = the step whose screen was opened last (S02 offers „Продължи от стъпка N“); a screen under a stepped parent counts as that step
-  if (kind !== 'rerender' && vm.view === 'ready' && !vm.demo) { const st = stepOf(vm.route); if (st) store.set('guide', { step: st }); }
 
   const article = $view().querySelector('article.page');
   const h1 = article.querySelector('h1');

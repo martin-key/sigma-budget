@@ -202,10 +202,32 @@ function entry(group, title, o = {}) {
   const t = norm(`${name} ${o.sub || ''} ${o.kw || ''} ${o.period || ''} ${groupLabel(group)}`);
   return {
     group, title: name, sub: o.sub ? String(o.sub) : '', value: o.value ? String(o.value) : '', period: o.period ? String(o.period) : '',
-    status: STATUSES.includes(o.status) ? o.status : 'real', href: o.href, w: WEIGHT[group] ?? 1,
+    stage: o.stage || '', status: STATUSES.includes(o.status) ? o.status : 'real', href: o.href, w: WEIGHT[group] ?? 1,
     nn, t, nl: lat(nn), tl: lat(t), mag: mag(o.value)
   };
 }
+
+/** The stage and year of a number as the result shows it („Закон 2026“, „Отчет 2025“, „Прогноза 2026“, „По законопроекта 2026“): a bare „2026“ next to a figure could be read as
+ *  what was spent. Terms and data sets have no figure, so no stage. The index rows say it in their own words (sub / title), this only names it the same way everywhere. */
+export function stageOf(group, o) {
+  const yr = (/\b(20\d\d)\b/.exec(o.period || '') || [])[1] || '';
+  const txt = `${o.title || ''} ${o.sub || ''}`;
+  let w = '';
+  if (group === 'measures') w = 'По законопроекта';
+  else if (group === 'indicators') {
+    if (/Макроикономическа прогноза/.test(txt)) w = 'Прогноза';
+    else if (/законопроект/i.test(txt)) w = 'По законопроекта';
+    else if ((yr && yr < '2026') || /^Изпълнение |^Салдо на КФП, януари|· отчет\b/.test(txt)) w = 'Отчет';
+    else w = 'Закон';
+  } else if (group === 'institutions' || group === 'municipalities') w = 'Закон';
+  return w ? `${w} ${yr}`.trim() : '';
+}
+/** the line under a result: its description, then stage + year (the plain year when the group has no stage) */
+const SAYS = { 'Закон': /закон|бюджет \d{4}/i, 'Прогноза': /прогноз/i, 'Отчет': /отчет/i, 'По законопроекта': /законопроект/i };
+export const metaOf = e => {
+  const said = e.stage && SAYS[e.stage.replace(/ \d{4}$/, '')]?.test(`${e.title} ${e.sub}`) && (!e.period || `${e.title} ${e.sub}`.includes(e.period));   // the row already says it: do not say it twice
+  return [e.sub, said ? '' : (e.stage || e.period)].filter(Boolean).join(' · ');
+};
 
 const FIELDS = ['g', 'title', 'sub', 'value', 'period', 'status', 'href', 'kw'];
 /** the rows of data/search-index.json (DATA_SPEC 3.21); a row without a title or with a link that is not an in-app hash link is dropped */
@@ -220,23 +242,22 @@ function fromDoc(doc) {
     const g = typeof r[F.g] === 'number' ? groups[r[F.g]] : r[F.g];
     const title = r[F.title], href = r[F.href];
     if (!g || !title || typeof href !== 'string' || !href.startsWith('#/')) continue;
-    out.push(entry(String(g), title, { sub: r[F.sub], value: r[F.value], period: r[F.period], status: r[F.status], href, kw: r[F.kw] }));
+    out.push(entry(String(g), title, { sub: r[F.sub], value: r[F.value], period: r[F.period], status: r[F.status], href, kw: r[F.kw], stage: stageOf(String(g), { title, sub: r[F.sub], period: r[F.period] }) }));
   }
   return out;
 }
 
 // Words people may use for a screen that its title and description do not contain.
 const SCREEN_KW = {
-  S01: 'начало начална страница шест числа резюме', S02: 'пътеводител стъпки обучение започни', S03: 'речник термини понятия думи обяснение',
-  S04: 'кратко четиво накратко основното', S05: 'пари приходи разходи изпълнение', S06: 'приходи данъци осигуровки постъпления',
-  S07: 'разходи функции ведомства харчене', S10: 'ведомства министерства програми институции', S12: 'мерки мярка промени бюджет 2026',
-  S13: 'прогноза 2027 2028 средносрочна', S14: 'закон проект приемане парламент', S15: 'изпълнение отчет план събрано',
-  S16: 'новини последно отчети решения', S17: 'дълг задлъжнялост лихви дефицит маастрихт', S18: 'калкулатор данъци осигуровки заплата нето брутно лични',
-  S19: 'класации сравнения най-големите растеж', S20: 'общини карта трансфери', S22: 'проекти капиталови инвестиции',
-  S23: 'плащания доставчици фирми договори', S24: 'данни източници набори методика каталог', S25: 'api json csv отворени данни файлове',
+  S01: 'начало начална страница държавният бюджет достъпен език', S03: 'речник термини понятия думи обяснение',
+  S04: 'кратко четиво накратко основното пътеводител стъпки обучение започни пет проверки', S05: 'пари приходи разходи изпълнение', S06: 'приходи данъци осигуровки постъпления',
+  S07: 'разходи функции ведомства харчене', S10: 'кой харчи ведомства министерства програми институции управлява', S12: 'мерки мярка промени бюджет 2026',
+  S13: 'прогноза 2027 2028 средносрочна', S14: 'път на бюджета закон проект приемане парламент как се прие', S15: 'изпълнение месечен отчет сравнение събрано изразходвано',
+  S16: 'новини последно отчети решения', S17: 'дълг задлъжнялост лихви дефицит маастрихт', S18: 'моите данъци калкулатор осигуровки заплата нето брутно лични какво внасям',
+  S20: 'общини карта трансфери',
+  S24: 'данни източници набори методика каталог', S25: 'api json csv отворени данни файлове',
   S26: 'проекта екип прототип', S27: 'обратна връзка грешка предложение идея',
-  S31: 'бвп икономика растеж потребление инвестиции износ внос макро', S32: 'симулатор моят бюджет плъзгачи дефицит какво ако игра картинка',
-  S33: 'действие открий проследи сравни провери филтри намери теми институции програми общини приходи разходи поток сравнение мерило източник методология данни'
+  S31: 'бвп икономика растеж потребление инвестиции износ внос макро отрасли сектори добавена стойност промишленост строителство търговия услуги селско стопанство'
 };
 // a required `:name` segment (not `:name?`, not `:name(regex)?`) means the screen cannot be opened without a parameter
 const needsParam = r => r.pattern.split('/').some(s => s.startsWith(':') && !s.endsWith('?'));

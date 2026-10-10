@@ -1,9 +1,11 @@
-// Sharing: registry of shareable blocks + the ONE block menu „Сподели“ (copy text, copy link, PNG, CSV, embed code, Web Share, „Намерих грешка“).
+// Sharing: registry of shareable blocks + the ONE block menu „Сподели“ (V5: „Изтегли изображение“ and „Копирай връзка“; the table file for experts; „Намерих грешка“).
 // A block registers a spec while its screen renders (ui/block.js does this for you); the router clears the registry on every navigation.
-//   share.register(id, {title, sub, text, source:['kfp'], asOf, status, mock, chart:'chartDomId', table:{columns,rows,statuses?} | ()=>…, embed:true|'routeKey.chartId', embedParams:{code:'1000'}, report:'#/vrazka?…'})
+//   share.register(id, {title, sub, text, source:['kfp'], asOf, status, mock, chart:'chartDomId', table:{columns,rows,statuses?} | ()=>…, embed:true|'routeKey.chartId', embedParams:{code:'1000'}, report:'#/vrazka?…',
+//                       link:{mesec:8,g1:2025,g2:2026}|()=>…   the address parameters that restore the same result (written explicitly, even when they are the defaults),
+//                       period:'януари—август'               the period line of the picture (default: the period button of the page)})
 //   shareButton(id)                      the trigger button (the delegated [data-share] handler calls openMenu)
 //   textFor/linkFor/csvFor/embedFor      pure builders (also used by tests)
-//   renderPng(spec,{watermark})          canvas with title, chart and source footer; „ПРИМЕРНИ ДАННИ“ watermark whenever the data is mock
+//   renderPng(spec,{watermark})          canvas with title, period, the block, source and short link; „ПРИМЕРНИ ДАННИ“ watermark whenever the data is mock
 // Rules that never bend: the copied text always carries the source; a mock block is never exported without saying so
 // (text line, PNG watermark, CSV status column).
 import { html, esc } from './html.js';
@@ -57,8 +59,8 @@ const chartEl = spec => {
   return root ? [...root.querySelectorAll('.chart[data-ready="1"]')].find(c => c.offsetParent !== null) || null : null;
 };
 const hasChart = spec => { const el = chartEl(spec); return !!(el && window.echarts?.getInstanceByDom(el)); };
-/** what ui/png.js can draw from the DOM: charts, rankings, KPI tiles, progress bars, maps, data tables, the home and revenue strips, the 5-minute scenes */
-export const STAT_SEL = '.chart,.rank,.kpi,.prog,.map-svg,table.data,.s01-strip,.s06-strip,.s04-fig';
+/** what ui/png.js can draw from the DOM: charts, rankings, KPI tiles, progress bars, maps, data tables, the revenue strip, the 5-minute scenes */
+export const STAT_SEL = '.chart,.rank,.kpi,.prog,.map-svg,table.data,.s06-strip,.s04-fig,.s18-stat';
 export const statNodes = root => (root ? [...root.querySelectorAll(STAT_SEL)].filter(n => !n.closest('details.fig-table')) : []);
 const hasStat = spec => { const el = blockEl(spec); return !!(el && statNodes(el).length); };
 const canPng = spec => hasChart(spec) || !!tableOf(spec) || hasStat(spec);
@@ -70,16 +72,22 @@ export const shareButton = (id, o = {}) => {
 };
 
 /* ---------------------------------------------------------------- builders */
-/** link to this block on the current screen (keeps ?per= and the other state, adds ?to=<block>) */
-export function linkFor(spec) {
+/** what a link never carries: the visitor's own figures (the calculator keeps its inputs on the screen only) */
+const PERSONAL = new Set(['demo', 'brutno', 'bruto', 'zaplata', 'dohod', 'neto', 'sum', 'salary', 'gross']);
+/** link to this block on the current screen: keeps the state of the address (?per=, ?g1=…), adds the block's own `link` parameters (the same result on every opening) and ?to=<block> */
+export function linkFor(spec, { to = true } = {}) {
   const u = new URL(location.href);
   const [path, qs = ''] = (location.hash.replace(/^#/, '') || '/').split('?');
   const q = new URLSearchParams(qs);
-  q.delete('demo');
-  if (spec?.id) q.set('to', spec.id);
+  PERSONAL.forEach(k => q.delete(k));
+  const own = val(spec?.link);
+  if (own && typeof own === 'object') for (const [k, v] of Object.entries(own)) { if (v == null || v === '') q.delete(k); else if (!PERSONAL.has(k)) q.set(k, String(v)); }
+  if (to && spec?.id) q.set('to', spec.id); else q.delete('to');
   u.hash = '#' + path + (q.toString() ? '?' + q : '');
   return u.href;
 }
+/** the address printed under a picture: no scheme, no ?to= */
+export const shortLink = spec => linkFor(spec, { to: false }).replace(/^https?:\/\//, '');
 export function sourceLine(spec) {
   const ks = keysOf(spec.source);
   if (!ks.length) return '';
@@ -180,6 +188,19 @@ function wrapLines(x, txt, font, maxW) {
   if (line) out.push(line);
   return out;
 }
+/** like wrapLines, but an address wider than the line is broken at ? & / = # or, last, anywhere */
+function wrapLink(x, txt, font, maxW) {
+  x.font = font;
+  const out = []; let line = '';
+  for (const part of String(txt).split(/(?<=[?&/=#])/)) {
+    if (x.measureText(line + part).width <= maxW) { line += part; continue; }
+    if (line) out.push(line);
+    line = '';
+    for (const ch of part) { if (line && x.measureText(line + ch).width > maxW) { out.push(line); line = ''; } line += ch; }
+  }
+  if (line) out.push(line);
+  return out;
+}
 function fit(x, text, w) {
   let s = String(text);
   if (x.measureText(s).width <= w) return s;
@@ -237,12 +258,15 @@ export async function renderPng(spec, { watermark = isMock(spec), pixelRatio = 2
   const tl = wrapLines(probe, spec.title || '', `400 24px ${fD}`, maxW);
   const sl = spec.sub ? wrapLines(probe, spec.sub, `400 13px ${fB}`, maxW) : [];
   const src = sourceLine(spec);
-  const fl = [...(isMock(spec) ? wrapLines(probe, 'Примерни данни: измислени стойности, не са истински.', `700 12px ${fB}`, maxW) : []), ...(src ? wrapLines(probe, src, `400 12px ${fB}`, maxW) : []), ...wrapLines(probe, 'Бюджет на светло · прототип', `400 12px ${fB}`, maxW)];
+  const lnk = shortLink(spec);
+  const fl = [...(isMock(spec) ? wrapLines(probe, 'Примерни данни: измислени стойности, не са истински.', `700 12px ${fB}`, maxW) : []), ...(src ? wrapLines(probe, src, `400 12px ${fB}`, maxW) : []), ...(lnk ? wrapLink(probe, `Връзка: ${lnk}`, `400 12px ${fB}`, maxW) : []), ...wrapLines(probe, 'Бюджет на светло · прототип', `400 12px ${fB}`, maxW)];
   const bodyH = img ? h : 22 * (Math.min(t.rows.length, 16) + 1) + (t.rows.length > 16 ? 20 : 0);
   const H = pad + tl.length * 26 + (sl.length ? 4 + sl.length * 18 : 0) + 12 + bodyH + 14 + fl.length * 17 + pad;
   const c = document.createElement('canvas');
   c.width = Math.round(W * pixelRatio); c.height = Math.round(H * pixelRatio);
+  c.lang = 'bg';
   const x = c.getContext('2d');
+  if ('lang' in x) x.lang = 'bg';
   x.scale(pixelRatio, pixelRatio); x.textBaseline = 'top';
   x.fillStyle = cssv('--surface'); x.fillRect(0, 0, W, H);
   let y = pad;
@@ -266,16 +290,14 @@ export async function pngDiff(spec) {
 }
 
 /* ---------------------------------------------------------------- the menu */
+/** the image and the link are the whole menu of a result; the table file is a quiet option for experts; „Намерих грешка“ closes it.
+ *  The text copy, the embed code and the device share sheet are not offered (their code stays: S29 and the tests use it). */
 function menuItems(spec) {
-  const items = [
-    { act: 'copy-text', ic: 'copy', label: 'Копирай текст', desc: 'Числото, източникът и връзката.' },
-    { act: 'copy-link', ic: 'link', label: 'Копирай връзка', desc: 'Връзка, която отваря точно този блок.' }
-  ];
-  if (canPng(spec)) items.push({ act: 'png', ic: 'image', label: 'Изтегли PNG', desc: isMock(spec) ? 'Картинка с воден знак „примерни данни“.' : 'Картинка със заглавие и източник.' });
-  if (tableOf(spec)) items.push({ act: 'csv', ic: 'table', label: 'Изтегли CSV', desc: 'За Excel; с колони „статус“ и „източник“.' });
-  if (spec.embed) items.push({ act: 'embed', ic: 'code', label: 'Код за вграждане', desc: 'HTML за друг уебсайт.' });
-  if (typeof navigator.share === 'function') items.push({ act: 'share', ic: 'share', label: 'Сподели…', desc: 'През приложение на устройството.' });
-  if (spec.report) items.push({ act: 'report', ic: 'flag', label: 'Намерих грешка', desc: 'Съобщи за грешка или неточност точно в този блок.', href: spec.report, sep: true });
+  const items = [];
+  if (canPng(spec)) items.push({ act: 'png', ic: 'image', label: 'Изтегли изображение', desc: isMock(spec) ? 'Картинка с воден знак „примерни данни“.' : 'Заглавие, период, източник и връзка.' });
+  items.push({ act: 'copy-link', ic: 'link', label: 'Копирай връзка', desc: 'Отваря същия резултат.' });
+  if (tableOf(spec)) items.push({ act: 'csv', ic: 'table', label: 'Таблица за Excel (CSV)', desc: 'За експерти: с колони „статус“ и „източник“.', sep: true });
+  if (spec.report) items.push({ act: 'report', ic: 'flag', label: 'Намерих грешка', desc: 'Съобщи за неточност точно в този блок.', href: spec.report, sep: true });
   return items;
 }
 async function run(act, spec, anchor) {
@@ -284,10 +306,10 @@ async function run(act, spec, anchor) {
     else if (act === 'copy-link') await copyOrShow(linkFor(spec), 'Връзката е копирана.', 'Копирай ръчно', anchor);
     else if (act === 'csv') { download(new Blob([csvFor(spec)], { type: 'text/csv;charset=utf-8' }), fileName(spec, 'csv')); toast('CSV файлът се изтегля.'); }
     else if (act === 'png') {
-      toast('Подготвям картинката…');
+      toast('Подготвям изображението…');
       const c = await renderPng(spec);
       await new Promise((ok, no) => c.toBlob(b => { if (!b) return no(new Error('toBlob')); download(b, fileName(spec, 'png')); ok(); }, 'image/png'));
-      toast(isMock(spec) ? 'PNG е изтеглен, с воден знак „примерни данни“.' : 'PNG е изтеглен.');
+      toast(isMock(spec) ? 'Изображението е изтеглено, с воден знак „примерни данни“.' : 'Изображението е изтеглено.');
     } else if (act === 'embed') {
       const code = embedFor(spec);
       sheet.open({
@@ -323,4 +345,4 @@ export function openMenu(anchor, id) {
   return pop;
 }
 /** for ui/png.js: the loose „PNG“ buttons (blocks without the menu) run the same download as the menu item */
-export { fileName, run as runAct, drawWatermark, wrapLines };
+export { fileName, run as runAct, drawWatermark, wrapLines, wrapLink };
