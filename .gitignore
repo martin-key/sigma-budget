@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Node (не е нужен за приложението, но може да се ползва за инструменти)
+node_modules/
+
+# Браузъри на Playwright и снимки от проверките
+.pw-browsers/
+render-check/
+
+# Суровите данни не се качват — виж docs/data-sources.md
+prototype/data/raw/
+data/raw/
+
+# Временни файлове и кешове
+tmp/
+.tmp/
+*.log
+.DS_Store
+Thumbs.db
+
+# Тайни
+.env
+.secrets

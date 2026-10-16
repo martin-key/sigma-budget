@@ -1,0 +1,287 @@
+# Източници на данните
+
+Този файл описва откъде идват всички суровите данни, на които стъпват прототипът и Mock приложението, как се свалят отново и кой скрипт ги обработва.
+Суровите файлове (общо около 143 MB) **нарочно не са в хранилището** — вижте раздел „Защо суровите данни не са качени“. Всичко, което е нужно, за да се
+възстановят, е тук: адрес, начин за изтегляне, очаквано име на файла, размер и контролна сума (sha256).
+
+## 1. Обобщение
+
+| набор (папка в `prototype/data/raw/`) | институция | как се получава | файлове | консумира се от | произвежда |
+|---|---|---|---|---|---|
+| `asbp/` — мотиви и АСБП 2026–2028 (PDF) | Министерство на финансите | **ръчно** (изтегляне през браузър; предоставен от работната група) | 1 PDF, 3,4 MB | `extract_asbp_tables.py`, `extract_home_kpis.py`, `tools/mock/asbp.py` | `asbp/asbp_tables.json`, `prototype/src/home_kpis_2026.json`, данните на Mock |
+| `bnb_sdmx/` — дълг по SDDS Plus | Българска народна банка | автоматично, `fetch_sources.py` | 2 XML, 86 KB | `tools/mock/bd_debt.py` | `site/data/debt.json` |
+| `data_europa/` — метаданни на отворени набори | Европейски портал за данни (data.europa.eu) | автоматично, `fetch_sources.py` | 4 JSON-LD, 178 KB | не е вход на сглобяването — справка за наборите на портала за отворени данни; ключът `dataeuropa` в регистъра на източниците (`site/data/core.json`) сочи към този портал | — |
+| `dv/` — приетите закони за 2026 г. | „Държавен вестник“ (Народно събрание) | автоматично, `fetch_sources.py` | 3 HTML, 7,5 MB | `extract_dv_laws.py`, `build_src.py`, `tools/mock/bd_law.py` | `dv/dv_laws_2026.json`, `prototype/src/*.json`, `site/data/law.json` и др. |
+| `eurostat/` — население и дълг | Eurostat | автоматично, `fetch_sources.py` | 4 JSON, 14 KB | `build_src.py`, `tools/mock/bd_debt.py`, `bd_fiscal.py` | `prototype/src/population.json`, `debt_stock.json`, `site/data/debt.json` |
+| `kfp_2024/` — месечни отчети по КФП 2024 | Министерство на финансите | **ръчно** (предоставени от работната група) | 12 XLS, 527 KB | `tools/mock/extract_kfp_full.py` | `site/data/execution.json` |
+| `kfp_2025/` — месечни отчети по КФП 2025 | Министерство на финансите | **ръчно** (предоставени от работната група) | 12 XLS, 531 KB | `extract_2025.py` → `build_2025_json.py`, `tools/mock/extract_kfp_full.py` | `prototype/src/kfp_monthly_2025.json`, `site/data/execution.json` |
+| `kfp_2026/` — месечни отчети по КФП 2026 (до 31.08) | Министерство на финансите | **ръчно** (предоставени от работната група) | 8 XLS, 367 KB | `build_src.py`, `extract_home_kpis.py`, `tools/mock/extract_kfp_full.py` | `prototype/src/kfp_components_2026.json`, `home_kpis_2026.json`, `site/data/execution.json` |
+| `nap/` — осигурителни вноски за 2026 г. | Национална агенция за приходите | автоматично, `fetch_sources.py` | 1 PDF, 410 KB | `build_src.py`, `tools/mock/bd_rates.py` | `prototype/src/rates_2026.json`, `site/data/rates.json` |
+| `parliament/` — законопроект за бюджета и данни от API | Народно събрание | автоматично, `fetch_sources.py` | 1 DOCX, 1 ZIP (63 MB), 3 JSON | `extract_asbp_tables.py`, `extract_home_kpis.py`, `build_src.py`, `extract_program_budgets.py`, `tools/mock/extract_bill.py`, `bd_law.py` | `asbp_tables.json`, `program_budgets/`, `site/data/law.json` и др. |
+| `program_budgets/` — програмни бюджети на ПРБ | Първостепенни разпоредители (чрез архива към законопроекта) | **извлича се** от `parliament/52-602-01-19.zip` | 46 PDF + 1 архив 7z, 70 MB | `extract_program_budgets.py`, `tools/mock/bd_prb_pdf.py` | `prototype/src/program_budgets_2026.json`, `site/data/ministries/*.json` |
+| `sebra/` — дневно обобщение на плащания | МИДТ (midt.gov.bg) | автоматично, `fetch_sources.py` (+ `tools/mock/fetch_sebra.py` за още два дни) | 1 XLSX + 1 HTML, 54 KB | `tools/mock/bd_sebra.py` | `site/data/sebra.json` |
+
+Допълнителни източници, ползвани само от Mock приложението (не са в `prototype/data/raw/`):
+
+| набор | институция | как се получава | консумира се от | произвежда |
+|---|---|---|---|---|
+| Eurostat GISCO — граници и население на общините (LAU 2024) и Eurostat `demo_r_pjanaggr3` | Eurostat | автоматично, `tools/mock/fetch_gisco.py` (кеш в `tools/mock/cache/`) | `tools/mock/bd_municipal.py` | `site/data/municipalities.json`, `site/data/geo/obshtini.json` |
+| СЕБРА — дневни обобщения за 27.08 и 28.08.2026 | МИДТ | автоматично, `tools/mock/fetch_sebra.py` (кеш в `tools/mock/cache/`) | `tools/mock/bd_sebra.py` | `site/data/sebra.json` |
+| „Проект на бюджетен план на Република България за 2027 г.“ (PDF, 55 страници, МФ, октомври 2026) | Министерство на финансите | **ръчно** (предоставен от работната група) | `extract_dbp2027.py` → `build_dbp2027_site.py`, `verify_dbp2027_numbers.py` | `site/data/dbp2027.json` (екранът „Бюджет 2027 (проект)“ във v6) |
+
+## 2. Начало: как се възстановяват данните
+
+Редът е важен. Пътищата в скриптовете са константи в началото на файла (`ROOT`, `RAW`, `P`, `MOCK`); ако не съвпадат с разположението на хранилището (в оригиналната работна папка приложението е в `mock/site`), поправете ги, преди да пуснете скрипта.
+
+1. **Среда.** Python 3 с `xlrd`, `PyMuPDF`, `pdfplumber`, `python-docx`, `py7zr` (само за програмните бюджети на съдебната власт) и — за проверките — `playwright` с Chromium.
+2. **Автоматичното сваляне.** `python3 tools/prototype/fetch_sources.py` (само стандартна библиотека, иска мрежа) сваля в `prototype/data/raw/<папка>/` всичко, отбелязано „автоматично“, и пише `prototype/data/raw/MANIFEST.json` (адрес, размер, sha256, HTTP код, дата на сваляне). Неуспешните заявки също се записват в манифеста.
+3. **Ръчните набори.** Месечните отчети по КФП (`kfp_2024/`, `kfp_2025/`, `kfp_2026/`) и PDF-ът на АСБП (`asbp/UMTBF-2026-2028-motivi.pdf`) се поставят на ръка (раздел 4). Проверете файловете със sha256 от таблиците по-долу.
+4. **Извличане.** `extract_asbp_tables.py`, `extract_dv_laws.py`, `extract_program_budgets.py` → `asbp/asbp_tables.json`, `dv/dv_laws_2026.json`, `prototype/src/program_budgets_2026.json` (и разархивираните програмни бюджети).
+5. **Сглобяване на прототипа.** `build_src.py` и `extract_home_kpis.py` (+ `extract_2025.py` → `build_2025_json.py` за КФП 2025) → `prototype/src/*.json`; `gen_inline.py` ги вгражда в `prototype/site/index.html`. Речникът (`prototype/src/glossary.json`) идва от PDF на работната група чрез `extract_glossary.py` и е готов в `prototype/src/`.
+6. **Mock приложението.** `tools/mock/run_all.sh` изпълнява по ред: `fetch_gisco.py`, `fetch_sebra.py`, `extract_kfp_full.py`, `extract_bill.py`, `build_data.py`, `build_text.py`, `build_mock.py`, пак `build_data.py`, и накрая `validate_data.py` и `validate_mock.py`. Ако в `tools/mock/cache/` вече има кеширани файлове, сглобяването е без мрежа. Екранът „Бюджет 2027 (проект)“ (v6) се строи отделно с `extract_dbp2027.py` → `build_dbp2027_site.py` и се сверява с `verify_dbp2027_numbers.py`.
+
+## 3. Автоматично свалените набори
+
+### 3.1 Държавен вестник — `dv/`
+Приетите бюджетни закони за 2026 г. (HTML страници на `dv.parliament.bg`). Обработва ги `extract_dv_laws.py` → `dv/dv_laws_2026.json` (сурови таблици и цитати), после `build_src.py`.
+
+| закон | адрес |
+|---|---|
+| Закон за държавния бюджет на Република България за 2026 г., ДВ бр. 69 от 31.07.2026 | https://dv.parliament.bg/DVWeb/showMaterialDV.jsp?idMat=245041 |
+| Закон за бюджета на държавното обществено осигуряване за 2026 г., ДВ бр. 68 от 28.07.2026 | https://dv.parliament.bg/DVWeb/showMaterialDV.jsp?idMat=244982 |
+| Закон за бюджета на Националната здравноосигурителна каса за 2026 г., ДВ бр. 68 от 28.07.2026 | https://dv.parliament.bg/DVWeb/showMaterialDV.jsp?idMat=244981 |
+
+| файл | байтове | sha256 |
+|---|---:|---|
+| `zbdoo2026_dv68_idMat244982.html` | 1 612 264 | `28ea6f3e3eba8233430e3489e2885d8261199cd0d0d6fe5d43fa34bd80fb529a` |
+| `zbnzok2026_dv68_idMat244981.html` | 191 120 | `542884e21cb0b30de55c57369f6571365a2f12952862c4f6c5804dd0cd59d799` |
+| `zdb2026_dv69_idMat245041.html` | 5 655 187 | `474f18f4cf035d7702a5b9e3719e473cfb396c74d5bbecb908a9a341d0e0649f` |
+
+### 3.2 Народно събрание — `parliament/`
+Законопроектът за държавния бюджет 2026 (№ 52-602-01-19) и данните за трите законопроекта от публичния API.
+
+| файл | адрес | какво е |
+|---|---|---|
+| `52-602-01-19.docx` | https://www.parliament.bg/bills/52/52-602-01-19.docx | законопроектът с мотивите (АСБП 2026–2028), внесен 01.07.2026 |
+| `52-602-01-19.zip` | https://www.parliament.bg/bills/52/52-602-01-19.zip | архивът към законопроекта: програмните бюджети на ПРБ (папка 7), становища, протоколи |
+| `bill_167157.json` | https://www.parliament.bg/api/v1/bill/167157 | данни за законопроекта за ЗДБ 2026 |
+| `bill_167156.json` | https://www.parliament.bg/api/v1/bill/167156 | данни за законопроекта за ЗБДОО 2026 |
+| `bill_167155.json` | https://www.parliament.bg/api/v1/bill/167155 | данни за законопроекта за ЗБНЗОК 2026 |
+
+| файл | байтове | sha256 |
+|---|---:|---|
+| `52-602-01-19.docx` | 1 936 694 | `378042f3c6f05aad760099f3b5ccceaf597fd287b28242fe89b99d2a981fc174` |
+| `52-602-01-19.zip` | 63 488 595 | `59efdf6503c8ea92c033c73b48a8b20d817d61711f8e8dfe5d37587253fe35d8` |
+| `bill_167155.json` | 35 202 | `ae40704a16193a0bfd8387256f3888f61461f7944b1b96d6f5bbb4c4c9118769` |
+| `bill_167156.json` | 37 864 | `972d815ff5147cc961a503ac026f6ccdc7181b51e8d3eb16eec8aaea3ea90549` |
+| `bill_167157.json` | 201 745 | `27a4605037b5bf506d5835a1a11fb9e50664a572c322667de0080b35610cdbd3` |
+
+### 3.3 Програмни бюджети — `program_budgets/`
+Не се свалят отделно: `extract_program_budgets.py` ги разархивира от `parliament/52-602-01-19.zip` (папка „7.Програмни формати на бюджети на ПРБ с бюджет по ДБ“: 4 вложени zip-а и един архив 7z за съдебната власт) в `prototype/data/raw/program_budgets/` и от PDF-ите (таблиците „Код | Области на политики и бюджетни програми“) пише `prototype/src/program_budgets_2026.json`, като сверява сумите със ЗДБ 2026. Файловете са именувани `<код на бюджета>_<съкращение>.pdf`.
+
+| файл | байтове | sha256 |
+|---|---:|---|
+| `0100_Народно събрание.pdf` | 1 839 489 | `bc103ceeeaadef1b9420ff91a90dea16e6afec75b8fd8b94cfa581b878137883` |
+| `0200_Администрация на президента.pdf` | 643 704 | `4d32f2c01067ef9eadb21eddef040b5d03052969c088c69a1fd4f47ae7bdff57` |
+| `0300_МС.pdf` | 2 406 866 | `812a9b6bd7ce502eb2ebcdac69481e14847b22b63fdc334da97e690170ae8c9e` |
+| `0400_КС.pdf` | 605 264 | `aa01dc16505223b3b81a9acfa8594115a4eb0940c9c638608310714fb3771ec3` |
+| `0500_СП.pdf` | 982 302 | `8eb84a6b48bb4c66028d01768a7ab147c279fb0aaf2d10929af42422c94e7620` |
+| `0600_СВ.pdf` | 1 509 655 | `0020ba7217682d2cf59cf20b8ecc43390684f3ec6bf0da4f3005b1ac6e7c41ba` |
+| `10.5 0600 BCC проект СВ.7z` | 6 902 393 | `ff46f5d3057f607ac14cc820390bb8b002c59f99bd140b1df90edd3719981072` |
+| `1000_МФ.pdf` | 2 539 704 | `3a872ed2befe04c734add80d91838a7c8ace5cc2f4edb4404b84cb3fa510b228` |
+| `1100_МВнР.pdf` | 1 880 031 | `4cba21136c3a438e6e910d09ebb57ba8e4a4ddd9fc969cecf327b32c12ba6545` |
+| `1200_МО.pdf` | 1 227 111 | `34d12c4480332d494969aa9357d7638b75c9860e54f42016701c8af70bd5c6f8` |
+| `1300_МВР.pdf` | 1 374 688 | `614f8711445a24d057ddaf3b6e1879fb3fef24737e563ba8974467efe6b7cc59` |
+| `1400_МП.pdf` | 1 522 197 | `14b3c58a88b8689777ed1e891c3357dc561b9251f445690d9ef7af7aeea33741` |
+| `1500_МТСП.pdf` | 3 199 818 | `c93d375d7ae5bb942e5c9c43c3de6506568c1202710bac08ff21f3ff05179177` |
+| `1600_МЗ.pdf` | 2 932 317 | `e9651e4c2d6b5f95d14e353c5ae53224190d7d744da5c5cc78f655a638e96fd2` |
+| `1700-МОН.pdf` | 2 234 885 | `70817e7494eb8aba1cbb094c4ca17f8fac62d2a2f68329ab58d3653fb2c051cf` |
+| `1800_МК.pdf` | 2 773 083 | `504b3c85c8bac40f693b278782c1195ba38cc70e858cec7b493ae51ddaf137b2` |
+| `1900_МОСВ.pdf` | 2 238 178 | `1b3644c4afe5482f2600d1f8321bfc5459453cf54a559dade324e6be82dbdeb6` |
+| `2000_МИИИ.pdf` | 2 425 665 | `0b0fa9573ec0f831aa3ac335a404a1bb98542939488e40cbca53585532130833` |
+| `2100_МРРБ.pdf` | 1 834 747 | `2b3395c274a2e017be983b53fad540f8e98c9e186c8b723ad827d3e692b9c910` |
+| `2200_МЗХ.pdf` | 3 079 065 | `8c39b792c8e2d09371307df5cfd8b9ae16104e0a4ad603bb7adcc1bb13edcb24` |
+| `2300_МТС.pdf` | 3 451 966 | `8bb6d5fc9e2076d6d6ee75032b2a8b1aa671edb6d9781e7022433a85ec1b241e` |
+| `2400_МЕ.pdf` | 1 805 436 | `da8bc8f0521fb810d81b36403406b535ad6e3f0cd2dc5c5790bb21d9dcb4e003` |
+| `2500_ММС.pdf` | 1 901 425 | `fe888e09762b6d25875126377c5cace3b7f2a9a274318eff0e43f8af99764d84` |
+| `3000_ДАНС.pdf` | 645 807 | `7efb13177ec958aa989e21fb0f7fc2dd045c2b3bcf68ce7a5d5fe0382c6b71c9` |
+| `3200_КРДОПБГДСРСБНА.pdf` | 711 941 | `7c5e2482af49b67994329ec7d791812c19544541a34bca32650bb23698032512` |
+| `3300_КЗД.pdf` | 584 549 | `8be77ac58e80690b425c4971818063af0c08b34f9fa10cb367ff513e9e2af17c` |
+| `3400_КЗЛД.pdf` | 614 909 | `3e7ccac9d45e055c76bf9a444b8e63f6d91a662980bfe033b32db72617a8e5da` |
+| `3700_КОНПИ.pdf` | 1 241 152 | `c3968a6cc8debf7a114eca523e135ba8d12a13ba1df667df51f3e92118921aba` |
+| `3800_НСО.pdf` | 645 657 | `1cfa7d2f296154df3dc857db09f60c4130b33deac8dae12d343409c96b4e5064` |
+| `3900_ДАР.pdf` | 583 030 | `b90f2313cfa5f133eb0690fcd1df7b3c9ea9bd9f727292112025a3116fcb2bfc` |
+| `4000_ОМБУДСМАН.pdf` | 800 653 | `49b0c36e8101485684a1f89acf4eff26807ac2dfe34e5fb93e2ba6a14e5ec1b9` |
+| `4100_НСИ.pdf` | 680 387 | `e1067fc47c99d87295de68123865112d63cad02938f439233493fabea6af2af1` |
+| `4200_КЗК.pdf` | 591 169 | `3db04765e6af32b47237c975af2ab392fd107178e7d65f1c8407a4a8e4adf1b7` |
+| `4300_КРС.pdf` | 610 366 | `b765e7bdd4a37569d0789f716157fc32bc15567e4cc1839e599bbcf4430977cb` |
+| `4400_СЕМ.pdf` | 692 288 | `796be48e3073052fafcf0ceafddeb87961b5386fb94e76bf222d7eba8d158ca3` |
+| `4500_КЕВР.pdf` | 644 865 | `710b49754ec797959c47a09eed9b853510f0054f6841853bd9a0a3c9823985f8` |
+| `4600_АЯР.pdf` | 643 303 | `7fee24c5ed50b49b6dfe79cda089d9a57f70f03a95d669c3b65c90a438a22889` |
+| `4700_КФН.pdf` | 1 026 953 | `05e0f8bfc512b71911c0dc6032bbca3b37853f673f9c6e73bf3adefd74532819` |
+| `4800_ДКСИ.pdf` | 601 499 | `4978c557c972c32e1704d2ec32cde310657a15703af7d5d5e63d8964e2612089` |
+| `5300_ДАДРВВЗ.pdf` | 667 511 | `dc49558b6c22813f1273274f9f9d73f37b57e9791af724b841d5a51eb7206019` |
+| `7100_МТ.pdf` | 1 588 711 | `5090317df41e6364c64dc884552537d6886d5153a42d872f5a591cf095ca745e` |
+| `7400_МИДТ.pdf` | 1 518 727 | `af582f8a5b5a14f07b1d0e3a14be1b89ce3193e4ac674c419c36d313e84a8a3b` |
+| `8200_ЦИК.pdf` | 626 707 | `2c4a9dc23abf90d7e5233b401e5eb1b14b12aa852052dc3f1739656b4c2bf2b2` |
+| `8300_КПНРО.pdf` | 643 220 | `9d3392890156ff64573a9414bf7f461660fde6a2d5dbb2229386b25a0aa61da3` |
+| `8400_ДФЗ.pdf` | 1 345 956 | `932865effc9273f235d903d8e48f6ccf5c8cfc8e57ac7cc0345f49e6c2cd7b69` |
+| `8500_НБКСРС.pdf` | 864 495 | `478ad0b1d4317843b71000c4b6f76e6f2d17b0c1cb9f900319adc94eec005241` |
+| `8600_ДАТО.pdf` | 512 781 | `d6f21ac9838bf371e28106fa3a813758b0776eb15a52e1c598f991619238ca57` |
+
+### 3.4 Национална агенция за приходите — `nap/`
+Таблица с размерите на осигурителните вноски за 2026 г. и разпределението им (приложение към писмо ВК-30-10237 от 12.08.2026). Обработват я `build_src.py` и `tools/mock/bd_rates.py`. Сървърът затваря връзката към `urllib`, затова `fetch_sources.py` пада обратно на `curl`.
+
+- Адрес: https://nap.bg/wps/wcm/connect/nra.bg25863/6f117462-1836-48f8-9e27-a4b02a1e55fb/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5_1_%D0%92%D0%9A-30-10237_12.08.2026.pdf?MOD=AJPERES
+
+| файл | байтове | sha256 |
+|---|---:|---|
+| `nap_prilozhenie_1_VK-30-10237_12.08.2026.pdf` | 409 572 | `b0a02141c14d4358f656711edcf0a7ae52b5f02a50c465f31ba97b542219e3f4` |
+
+### 3.5 Eurostat — `eurostat/`
+JSON от публичния API (`ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/…`).
+
+| файл | заявка |
+|---|---|
+| `tps00001_BG.json` | https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/tps00001?geo=BG&sinceTimePeriod=2020 |
+| `demo_gind_BG_JAN.json` | https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/demo_gind?geo=BG&indic_de=JAN&sinceTimePeriod=2020 |
+| `gov_10dd_edpt1_BG_EU.json` | https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/gov_10dd_edpt1?geo=BG&geo=EU27_2020&na_item=GD&sector=S13&unit=MIO_EUR&unit=PC_GDP&sinceTimePeriod=2015 |
+| `gov_10q_ggdebt_BG.json` | https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/gov_10q_ggdebt?geo=BG&na_item=GD&sector=S13&unit=MIO_EUR&unit=PC_GDP&sinceTimePeriod=2024-Q1 |
+
+| файл | байтове | sha256 |
+|---|---:|---|
+| `demo_gind_BG_JAN.json` | 2 695 | `749af3142a4b7ac88f5ba7e56b43254bb97acfcdd0c67e5b0cd5d1396c8db741` |
+| `gov_10dd_edpt1_BG_EU.json` | 3 624 | `f1f2eab93abaf7f2248c7b3fdd7868c9db49c67dd8d3cefebbb69bb17c375427` |
+| `gov_10q_ggdebt_BG.json` | 3 317 | `959e31fb3108ff09bcb80a0f1cea0f5683febc245fbf539f97eac687073506a8` |
+| `tps00001_BG.json` | 4 128 | `dfdd435892de9cc6354775e9aa38d350a2585cd845bdc38d5cafd85b1ea5872b` |
+
+### 3.6 Българска народна банка — `bnb_sdmx/`
+SDMX файлове на МФ по стандарта SDDS Plus, публикувани от БНБ: дълг на сектор „Държавно управление“ (`ggd.xml`) и на централното управление (`cgd.xml`), тримесечно.
+
+- https://www.bnb.bg/bnbweb/groups/public/documents/bnb_sdmx/ggd.xml
+- https://www.bnb.bg/bnbweb/groups/public/documents/bnb_sdmx/cgd.xml
+
+| файл | байтове | sha256 |
+|---|---:|---|
+| `cgd.xml` | 44 416 | `c3305fdfec374961891e9d1ef6aa8f6d4ab358bd11a69baba802ffc23c898644` |
+| `ggd.xml` | 41 933 | `a5654ebb6b016b1a6a03a3ecf2cb268f247d73dbfdc7ce84965f7f9380772df5` |
+
+### 3.7 data.europa.eu — `data_europa/`
+Метаданни (JSON-LD) за наборите на портала за отворени данни. Самият `data.egov.bg` връща 403, затова се ползва европейският портал, който ги огледално отразява. Не са вход на сглобяването: пазят се като справка кои набори съществуват на портала (автоматичният достъп до самия портал на правителството е блокиран); регистърът на източниците в `site/data/core.json` има ключ `dataeuropa` за тях.
+
+| файл | адрес | набор |
+|---|---|---|
+| `dataset_4227.jsonld` | https://data.europa.eu/api/hub/repo/datasets/4227?useNormalizedId=true | МФ: КФП — месечна информация |
+| `dataset_7806.jsonld` | https://data.europa.eu/api/hub/repo/datasets/7806?useNormalizedId=true | МФ: плащания в СЕБРА и други плащания в БНБ (дневно) |
+| `dataset_19246.jsonld` | https://data.europa.eu/api/hub/repo/datasets/19246?useNormalizedId=true | СЕБРА: исторически плащания от 05.06.2006 |
+| `dataset_20439.jsonld` | https://data.europa.eu/api/hub/repo/datasets/20439?useNormalizedId=true | СЕБРА: индивидуални плащания ≥ 5 000 лв. |
+
+Заявките се пращат със заглавка `Accept: application/ld+json`.
+
+| файл | байтове | sha256 |
+|---|---:|---|
+| `dataset_19246.jsonld` | 28 252 | `5227023b99c2e698a4cb95b07f1902173efaa0cd6e904214fe4caa6642a3d610` |
+| `dataset_20439.jsonld` | 13 455 | `1f51fbdf83d4a3bae3d99ad6bf0bd8f480f63e82896800eb098850caad42ba50` |
+| `dataset_4227.jsonld` | 16 816 | `acd1be7b328e3bd564ef9b80f0ebc66f02f3d7479b0e8649a16e5492db6b8591` |
+| `dataset_7806.jsonld` | 119 775 | `6aaeff18ef6c74cd93fc2a9b3ccce50eea9a5f79314fa6cde417c3432a2c157f` |
+
+### 3.8 МИДТ, СЕБРА — `sebra/`
+Страницата „Документи за плащания по СЕБРА за 2026 г.“ на сайта на МИДТ и дневното обобщение за 31.08.2026 (само плащанията на самото министерство).
+
+- https://midt.gov.bg/bg/transparency/sebra/2026
+- https://midt.gov.bg/upload/3788/31.08..2026.xlsx
+
+Още два дни от същата страница (27.08 и 28.08.2026) сваля `tools/mock/fetch_sebra.py` в `tools/mock/cache/`: `https://midt.gov.bg/upload/3789/27.08..2026.xlsx` и `https://midt.gov.bg/upload/3790/28.08..2026.xlsx`.
+
+| файл | байтове | sha256 |
+|---|---:|---|
+| `midt_sebra_2026_page.html` | 41 567 | `44b1b8440b7fd221879155d7c909da47816db5a95f60c85cf2c7c9b8fc6d1af0` |
+| `midt_sebra_31.08.2026.xlsx` | 12 173 | `2fd48d3af2bc2cd77bf3175a748ea8f7c7bb44fdfcee810063891a1a13e4614f` |
+
+| кеш файл (`tools/mock/cache/`) | байтове | sha256 |
+|---|---:|---|
+| `sebra_27.08.2026.xlsx` | 12 180 | `4a27f0714b8f5812825a9e6181f01dfe91526af8774294a090adb9365774b936` |
+| `sebra_28.08.2026.xlsx` | 12 434 | `3d3f09e4db49e75040001c4f262cb8a8f055031624a16988377962bffb10af11` |
+
+### 3.9 Кешове на Mock приложението — `tools/mock/cache/`
+Генерират се от скриптовете и могат да се пресъздадат; пазят се само за да върви сглобяването без мрежа.
+
+| файл | как се получава | байтове | sha256 |
+|---|---|---:|---|
+| `gisco_lau_bg.json` | `fetch_gisco.py`: поток от `https://gisco-services.ec.europa.eu/distribution/v2/lau/` (LAU 2024; сурови 100+ MB не се пазят) — 265 общини: код, име, население, площ, граници | 466 699 | `b9793b72951e164b5a2bcdbf3004ac13fdbb15a071d5164dfc1d658d58f76208` |
+| `eurostat_pop_nuts3_bg.json` | `fetch_gisco.py`: Eurostat `demo_r_pjanaggr3`, 28-те области (NUTS 3) | 16 312 | `c5869aac65138237d190e14c0389f5688c8e5c85af72ac3edb3f5019cb19fc58` |
+| `law_bill.json` | `extract_bill.py`: сравнение на законопроекта със закона (от `parliament/52-602-01-19.docx` и `dv/`) | 233 383 | `682572456411713dc2db82c53c875a3b7ef11acbd86230c438aafca7bcdd988b` |
+
+## 4. Ръчно получавани набори
+
+Министерството на финансите публикува месечните отчети по КФП и мотивите към бюджета на официалния си сайт. **Автоматичен достъп до `minfin.bg`, `data.egov.bg` и `nsi.bg` връща HTTP 403** (защита на Cloudflare — „Just a moment“; проверено на 01.10.2026 и по-късно), затова тези файлове са получени ръчно през браузър и са предоставени от работната група. Адресът на конкретното изтегляне не е известен; пробите за достъп са записани в манифеста (`probes/`).
+
+- Официални страници на МФ: месечни отчети по КФП — `https://www.minfin.bg/bg/statistics/5`; бюджет 2026 и мотивите — `https://www.minfin.bg/bg/legislation1/609`; данни за общините — `https://www.minfin.bg/bg/810`; ежедневните файлове на СЕБРА — `https://www.minfin.bg/bg/transparency`.
+- Не се опитвайте да заобикаляте защитата — изтеглете файловете през браузър и ги проверете със sha256 по-долу.
+
+### 4.1 Месечни отчети по КФП (лист „стартова“)
+Име на файла: `<ГГГГ>-EU_funds_<ММ><ГГ>_BG_WEB.xls` (при коригирана версия — със суфикс `_1`, `_2`, `_4`). Отчетите за 2024 и 2025 г. са в млн. лв., за 2026 г. — в млн. евро. Колона B на листа „стартова“ е консолидираната фискална програма (к.2 = к.3 национален бюджет + к.4 европейски средства). Скриптовете ги четат по етикет на реда, не по номер.
+
+**2024 (12 отчета):**
+
+| файл | байтове | sha256 |
+|---|---:|---|
+| `2024-EU_funds_0124_BG_WEB.xls` | 43 520 | `60fe68ed4fd2df31357281ae3b822142bfc3f642cb21e702530d5d62144ca4b4` |
+| `2024-EU_funds_0224_BG_WEB.xls` | 43 520 | `860cb4ee425fa275bd56acb04628590df788b63d4df0c747845b172c7199e94d` |
+| `2024-EU_funds_0324_BG_WEB.xls` | 44 032 | `0eb603d1f1d1a66691d149c79b3acbc01d9368ef3b2b964b31b113fa31a4b6a4` |
+| `2024-EU_funds_0424_BG_WEB.xls` | 44 032 | `794e2fca312421e08dcc873b1eb6af83b739e638f1ea58d58eab580549481fbb` |
+| `2024-EU_funds_0524_BG_WEB.xls` | 44 032 | `dea2325e77f3d1e2fdba31d11f617f8414c654df8d26215ff427f2dbedd32f1f` |
+| `2024-EU_funds_0624_BG_WEB.xls` | 43 520 | `8b28b2278186300e467f53207f8fd05c6dbd1b8e12e2a9bdb17bdd7abcb9be70` |
+| `2024-EU_funds_0724_BG_WEB.xls` | 44 032 | `f2a4eaca7876d1e2497915abe06bb880b6452bb8b234984814519498e944b2c7` |
+| `2024-EU_funds_0824_BG_WEB.xls` | 44 032 | `026e271383ca6fe2fcd5a1e89ab3c3a114f18f0b648306b9328eb13a60a1fbee` |
+| `2024-EU_funds_0924_BG_WEB.xls` | 44 032 | `7d7e0da17469ddf50a3cb7ae151cad9d63d063951cc782595fd3046f2122bc79` |
+| `2024-EU_funds_1024_BG_WEB.xls` | 44 032 | `d4e3bf375310d582cd6a6b3445248faa257f52bee6e0b37327a841f3a261672c` |
+| `2024-EU_funds_1124_BG_WEB.xls` | 44 032 | `2aa86297d6c593f391894c57b6821b43c94ac290167b7f03bbcff1fb76e226b6` |
+| `2024-EU_funds_1224_BG_WEB_1.xls` | 44 032 | `18fea2c1dafc4344854a4f39ed23a6cacf0c196a44192eee1b0cc12c9b10eec3` |
+
+**2025 (12 отчета; декември е `_4`):**
+
+| файл | байтове | sha256 |
+|---|---:|---|
+| `2025-EU_funds_0125_BG_WEB.xls` | 44 032 | `233db62758b2bb7293b56d6e54f2dfdfe34d37f1822736145d338dabd3d58059` |
+| `2025-EU_funds_0225_BG_WEB.xls` | 44 032 | `43d31f854130ec148f9915bf3220aadbdd121786d870155063c0f240e9f62d51` |
+| `2025-EU_funds_0325_BG_WEB.xls` | 44 032 | `de1e0be97ec24856830ecbecd2ea4dd0bb19dfb9d59b5e90030ecc4e2004f3ae` |
+| `2025-EU_funds_0425_BG_WEB.xls` | 44 032 | `ba44c8c10a2ac27ad0c56932f3259bb2e91299b41cb4c927bcc4996da3cca435` |
+| `2025-EU_funds_0525_BG_WEB.xls` | 44 032 | `6fc76c9bf191ee36786faf2022ab00a0e77aa71a0b9efded63db38c078366db3` |
+| `2025-EU_funds_0625_BG_WEB.xls` | 44 032 | `caddf7739aeb525cf9a19e786ddd6243bc6d00ff80a4aa477781552c56863b9f` |
+| `2025-EU_funds_0725_BG_WEB.xls` | 44 032 | `556ee5ca47ea9cbce9c798ae33ee32759ee0c900f1eb48f1687f405ed4aab6e9` |
+| `2025-EU_funds_0825_BG_WEB.xls` | 44 032 | `df10590aaf0b21f22578728c38b4f1df7de31e13c85a23c9ef659f9cf2e8d5ba` |
+| `2025-EU_funds_0925_BG_WEB.xls` | 44 032 | `c535cc9aba40104993e11a6d2c599dba4f7018d1a6bdbf878c445416846908b8` |
+| `2025-EU_funds_1025_BG_WEB.xls` | 44 032 | `502680762e493d075522092da488db5323482141eaf14a5558944aa8e0988a5a` |
+| `2025-EU_funds_1125_BG_WEB.xls` | 44 032 | `5b4be72281ab76bcb38cb1ef7bcb72b6b3dc1a850b5ab741a89bc27357403de5` |
+| `2025-EU_funds_1225_BG_WEB_4.xls` | 46 592 | `d57c60f29426a548419ce7bc8735896decd1ac2289294de7d7f3d41bf75194ff` |
+
+**2026 (8 отчета до 31.08.2026; юли е `_2`):**
+
+| файл | байтове | sha256 |
+|---|---:|---|
+| `2026-EU_funds_0126_BG_WEB.xls` | 45 056 | `2d4e73a0220f1c487fbb76f37eb6d9191959c8f200fa987e4df7a8ce8e76c80b` |
+| `2026-EU_funds_0226_BG_WEB.xls` | 45 568 | `531f1e746acb5c3b97b805c97d8524a5e97ba4764b3aadea853532beebfe07c4` |
+| `2026-EU_funds_0326_BG_WEB.xls` | 45 568 | `dce3ee6f08d28dcff0cc344c752aa0c0255bb3a4e72a0f5322dd626daa4b30ec` |
+| `2026-EU_funds_0426_BG_WEB.xls` | 45 568 | `2dab562f5492087201cf1e45f4e66c619ec179186beb205c4d45a317fef7ebcc` |
+| `2026-EU_funds_0526_BG_WEB.xls` | 46 080 | `9bf068ebe2a503d84387d0076d134646e43f6dcb05de666b2fe7513b217f123e` |
+| `2026-EU_funds_0626_BG_WEB.xls` | 47 616 | `eaf80ab39d4ed66e0cdf04aee779671150a317567ea135aba5951042e5e68a64` |
+| `2026-EU_funds_0726_BG_WEB_2.xls` | 45 568 | `a534ad23895197ad90d469e4db9d775d388939bd2a6de4137dd05a37279a6b6f` |
+| `2026-EU_funds_0826_BG_WEB.xls` | 46 080 | `50510878ff0ee8c18db04fa5fa7435c0aca69f7d6984b744c71e2df7359cb6a8` |
+
+### 4.2 Мотиви и АСБП 2026–2028 (PDF на МФ) — `asbp/`
+- Файл: `asbp/UMTBF-2026-2028-motivi.pdf` — 3 393 872 байта, sha256 `d951d866da468ae439ecbfc4131cf5005e28be39e3fcbb70d8660ca93337ac9b`.
+- Официална страница: `https://www.minfin.bg/bg/legislation1/609`.
+- Съдържа Приложение 3 (КФП 2024–2028), таблиците на дълга, макрорамката и допусканията. Обработва се от `extract_asbp_tables.py` (текстовият слой на PDF-а; числата са отделни „span“ с координати) → `asbp/asbp_tables.json`. Приложение 3 се сверява число по число с вградените в `parliament/52-602-01-19.docx` таблици.
+- Има втора версия на АСБП (в законопроекта в парламента). Двете се различават в малки подредове (най-много 4,3 млн. €); разликата е оповестена в данните на Mock приложението.
+
+### 4.3 „Проект на бюджетен план на Република България за 2027 г.“
+- Файл: `bud2027_Draft_Budgetary_Plan_of_the_Republic_of_Bulgaria_for_2027.pdf` — 1 237 582 байта, sha256 `8c91cdf4778f2864e1eeb167f14b08d1f68a076ea4ad27a8a4305175a73f1182` (55 страници, МФ, 15.10.2026).
+- Обработва се от `extract_dbp2027.py` (всяко число носи страница и цитат) → `build_dbp2027_site.py` → `site/data/dbp2027.json`; `verify_dbp2027_numbers.py` търси всяко отпечатано число на страницата му.
+
+## 5. Защо суровите данни не са качени
+
+- **Размер.** Суровите файлове са 105 на брой и около 143 MB; само ZIP архивът на законопроекта е 63 MB, а извлечените от него програмни бюджети — още 70 MB. Хранилището е за код и документация.
+- **Не са нужни за работа.** Прототипът е един самостоятелен файл (`prototype/site/index.html`) с вградени данни, а Mock приложението зарежда само собствените си `site/data/*.json`. Суровите файлове са входове само на сглобяващите скриптове.
+- **Публични са и се свалят отново.** Всичко, получавано автоматично, е публично; адресите и контролните суми са по-горе. Ръчно получаваните файлове са официални публикации на МФ.
+- **Контролни суми.** Всеки числов набор в `site/data/` носи в каталога (`catalog.json`, поле `files`) sha256 на първичните си файлове, а `execution.json` — sha256 на всеки месечен отчет, от който идва.
