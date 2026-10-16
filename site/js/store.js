@@ -19,7 +19,8 @@ export const SCOPES = {
   nat: { label: 'Национален бюджет', long: 'Национален бюджет, без европейските средства', gl: null },
   eu: { label: 'Европейски средства', long: 'Средствата от ЕС, включени в КФП', gl: null },
   zdd: { label: 'ЗДД', long: 'Държавен дълг по Закона за държавния дълг', gl: 'darzhaven-dalg' },
-  maastricht: { label: 'Маастрихт', long: 'Дълг на сектор „Държавно управление“ по методиката на Маастрихт', gl: 'sektor-darzhavno-upravlenie' }
+  maastricht: { label: 'Маастрихт', long: 'Дълг на сектор „Държавно управление“ по методиката на Маастрихт', gl: 'sektor-darzhavno-upravlenie' },
+  esa: { label: 'ЕСС · начислено', long: 'ЕСС 2010: начислена основа, сектор „Държавно управление“ (не е КФП, не е касова основа)', gl: 'ess-2010', variant: 'esa' }
 };
 export const DEFAULT_PERIOD = '2026.law';
 /** Roles «гражданин / журналист / експерт». OPEN DECISION (V5): the UX V2 PDF recommends no role selector in the main flow, the team has not decided.

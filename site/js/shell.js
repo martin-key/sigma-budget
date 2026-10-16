@@ -28,7 +28,7 @@ const idsOf = (...groups) => ROUTES.filter(r => groups.includes(r.group)).map(r 
 const SECTIONS = [
   { id: 'home', label: 'Начало', tab: 'Начало', icon: 'home', to: 'S01', routes: ['S01'] },
   { id: 'exec', label: 'Изпълнение', tab: 'Отчет', icon: 'gauge', to: 'S15', routes: idsOf('exec') },
-  { id: 'money', label: 'Бюджет', tab: 'Бюджет', icon: 'wallet', to: 'S07', routes: idsOf('budget'), order: ['S07', 'S06', 'S10', 'S12', 'S13', 'S14', 'S20', 'S05'] }
+  { id: 'money', label: 'Бюджет', tab: 'Бюджет', icon: 'wallet', to: 'S07', routes: idsOf('budget'), order: ['S07', 'S06', 'S10', 'S12', 'S13', 'S34', 'S14', 'S20', 'S05'] }
 ];
 const TABS = SECTIONS;
 const MORE_GROUPS = [['learn', 'Научи повече'], ['debt', 'Контекст и сравнения'], ['ref', 'Данни и проект']];
