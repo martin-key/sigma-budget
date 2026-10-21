@@ -911,7 +911,7 @@ function setUserType(id) {
 }
 
 /* ---------- споделяне: „Копирай“ (текст с числото и източника) и „Изтегли PNG“ (ECharts getDataURL) ---------- */
-const SITE = "https://kindly-prism-ef49.here.now/";
+const SITE = /^https?:$/.test(location.protocol) ? location.origin + location.pathname.replace(/[^/]*$/, "") : location.href.split("#")[0].split("?")[0];
 const pageUrl = () => /^https?:$/.test(location.protocol) ? location.href : SITE + location.hash;
 const ICON = {
   copy: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>',
@@ -1015,7 +1015,7 @@ async function chartPng(o) {
   const tF = `800 20px ${fD}`, sF = `600 13px ${fB}`, nF = `500 12px ${fB}`;
   const wrap = (txt, font) => { x.font = font; const out = []; let line = ""; for (const wd of String(txt).split(/\s+/)) { const t = line ? line + " " + wd : wd; if (line && x.measureText(t).width > maxW) { out.push(line); line = wd; } else line = t; } if (line) out.push(line); return out; };
   const tl = wrap(val(o.title) || "", tF), sl = o.sub ? wrap(val(o.sub), sF) : [];
-  const fl = wrap(`Източник: ${o.src || ""}.`, nF).concat(wrap(`Бюджет на светло · прототип · ${SITE.replace(/^https:\/\//, "").replace(/\/$/, "")}`, nF));
+  const fl = wrap(`Източник: ${o.src || ""}.`, nF).concat(wrap(["Бюджет на светло", "прототип", /^https?:$/.test(location.protocol) ? SITE.replace(/^https?:\/\//, "").replace(/\/$/, "") : ""].filter(Boolean).join(" · "), nF));
   const H = pad + tl.length * 24 + (sl.length ? 4 + sl.length * 18 : 0) + 12 + h + 14 + fl.length * 17 + pad;
   c.width = W * pr; c.height = H * pr; x.scale(pr, pr); x.textBaseline = "top";
   x.fillStyle = css("--surface"); x.fillRect(0, 0, W, H);
