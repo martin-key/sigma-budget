@@ -47,15 +47,15 @@ python3 -m http.server 8001 --directory prototype/site
 # среда (еднократно): python3 -m venv .venv && .venv/bin/pip install playwright xlrd pymupdf pdfplumber python-docx
 # и Chromium: PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python -m playwright install chromium
 
-PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/check_mock.py --quick        # финалната проверка, около минута
-PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/check_mock.py                # пълната
-PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/check_mock.py --route S06    # един екран
-python3 tools/mock/validate_data.py                                                                  # проверка на наборите с данни
+PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/check_mock_v6.py --quick     # финалната проверка, около минута
+PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/check_mock_v6.py             # пълната
+PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/check_mock_v6.py --route S06 # един екран
+python3 tools/mock/validate_data_v6.py                                                               # проверка на наборите с данни
 ```
 
-Всички опции са описани в началото на `tools/mock/check_mock.py` и в раздел 14 на [`docs/dev-guide.md`](docs/dev-guide.md).
+Всички опции са описани в началото на `tools/mock/check_mock_v6.py` и в раздел 14 на [`docs/dev-guide.md`](docs/dev-guide.md). Проверките без `_v6` в името (`check_mock.py`, `validate_data.py`, `validate_mock.py` и `_v2`…`_v5`) са за по-старите версии и се пускат на съответния таг (`mock-v1` … `mock-v5`): на последното дърво очакваният резултат е различен.
 
-> **Бележка за пътищата.** Скриптовете са писани за работна папка с друго разположение (приложението в `mock/site`, а не в `site/`). Някои от тях, особено в `tools/mock/` (напр. `dlib.py`, `check_mock.py`), изчисляват пътищата си спрямо него. Ако пътят не съвпада с това хранилище, поправете константите в началото на файла (`ROOT`, `P`, `MOCK`, `SITE`, `SHOT_DIR`), преди да го пуснете.
+> **Пътища.** Скриптовете в `tools/mock/` намират хранилището от собственото си местоположение (`site/`, `prototype/`, `docs/`) и пишат само в `tmp/` (в `.gitignore`) и в `tools/mock/cache/`. Скриптовете с наставка `_v2` … `_v6` (проверките, снимките, валидаторите на отделна версия) са за съответния таг (`mock-v2` … `mock-v6`): извадете тага и ги пуснете там; сравненията на две версии четат по-старата от `tmp/versions/`. Суровите файлове (`prototype/data/raw/`), текстът на ръководството и PDF-ът на проекта на бюджетния план не са в хранилището — виж [`docs/data-sources.md`](docs/data-sources.md); без тях скриптовете спират със съобщение кое липсва.
 
 ## Данни
 
