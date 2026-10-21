@@ -1,4 +1,7 @@
-"""Сглобява src/kfp_monthly_2025.json от raw_2025.json (изхода на extract_2025.py)."""
+"""Сглобява src/kfp_monthly_2025.json от raw_2025.json (изхода на extract_2025.py).
+
+Употреба: python3 tools/prototype/build_2025_json.py <raw_2025.json> prototype/src/kfp_monthly_2025.json
+"""
 import json, sys
 
 RAW, OUT = sys.argv[1], sys.argv[2]

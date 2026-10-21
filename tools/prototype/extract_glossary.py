@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Извлича речника „Речник: бюджетът на разбираем език“ (64 термина) от PDF-а на UX члена на работната група.
 
-Какво прави: чете research/guide/Budget-na-svetlo-rechnik-64-termina.pdf (14 страници) с PyMuPDF и разпознава
+Какво прави: чете tmp/guide/Budget-na-svetlo-rechnik-64-termina.pdf (14 страници) с PyMuPDF и разпознава
 всеки ред по шрифта, както е набран в PDF-а:
   27 pt удебелен  — заглавие на страница („Речник: бюджетът…“, „Как да работи речникът“, „Свързани понятия“, …);
   18 pt удебелен  — подзаглавие / раздел („Основи: как е устроен бюджетът“ и останалите четири категории);
@@ -20,7 +20,7 @@
 и номерата на страниците са подред; всяко име в „Свързани понятия“ е намерено; адресите на източниците съвпадат
 с връзките в PDF-а; slug-овете са уникални.
 
-Вход:    research/guide/Budget-na-svetlo-rechnik-64-termina.pdf
+Вход:    tmp/guide/Budget-na-svetlo-rechnik-64-termina.pdf  (PDF-ът НЕ е в хранилището — поставете го там; папката tmp/ е в .gitignore)
 Изход:   prototype/src/glossary.json (gen_inline.py го вгражда в site/index.html като const GLOSSARY)
 Изисква: pymupdf (pip install pymupdf) — в отделен venv, не в репото на бота.
 Употреба: python3 extract_glossary.py [--png DIR]   (--png: снимки на с. 1–3 и 13, за да се види оформлението)
@@ -30,7 +30,7 @@ import datetime, hashlib, json, re, sys
 import pymupdf
 
 ROOT = str(__import__("pathlib").Path(__file__).resolve().parents[2])
-PDF = f"{ROOT}/research/guide/Budget-na-svetlo-rechnik-64-termina.pdf"
+PDF = f"{ROOT}/tmp/guide/Budget-na-svetlo-rechnik-64-termina.pdf"
 OUT = f"{ROOT}/prototype/src/glossary.json"
 FOOTER = "Бюджет на светло | Речник с 64 термина"
 EXAMPLE = "Пример:"

@@ -11,7 +11,7 @@
     „Бюджет на светло“ и лентата „Бюджет 2026 в шест числа“ са най-горе, с 6-те плочки в реда и със
     стойностите от източниците (БВП 125,2; приходи 49,6; разходи 56,8; дефицит 5,7%; капиталови
     разходи 9,36 и 32,7% изпълнение към 31 юли; дълг 30,1%), а в заглавната част е входът „Нов си тук? Започни с пътеводителя“;
-  - пътеводителят (#/patevoditel, за всеки тип потребител): текстът е дословно този в research/guide/guide_raw.txt
+  - пътеводителят (#/patevoditel, за всеки тип потребител): текстът е дословно този в tmp/guide/guide_raw.txt (файлът не е в хранилището — поставете го там)
     (номерът на стъпката е в кръгчето, а петте проверки са по една на ред; бележките са в падащите полета); всяка връзка
     води до съществуващ екран; всеки бутон „Отвори „X““ отваря екрана, който в менюто се казва X (и заглавието му е X,
     освен на началната страница), а „Назад“ връща на същата стъпка; от v3.5 „Следва:“ отваря екрана на следващата стъпка
@@ -36,11 +36,11 @@
     заглавия, числа, таблици, графики, бутони и връзки; кликът показва пояснението на място (в екрана, над долното меню,
     без смяна на адреса), Escape го затваря, а връзката в него отваря термина; търсенето на началната страница намира
     термините („КФП“, „инфлация“ → речника; при „дефицит“ първа остава плочката с числото).
-Записва снимки на ключовите екрани в research/render-check/ и печата обобщение; изходът е 1 при проблем.
+Записва снимки на ключовите екрани в tmp/render-check/ (папката tmp/ е в .gitignore) и печата обобщение; изходът е 1 при проблем.
 
 Входове: prototype/site/index.html. Мрежа: ECharts от cdnjs и шрифтовете от Google (Bash без sandbox).
 Изисква: playwright (pip install playwright) и Chromium; PLAYWRIGHT_BROWSERS_PATH, ако браузърът е другаде.
-Употреба: python3 check_render.py [--shots] [--url https://kindly-prism-ef49.here.now/]  (с --url проверява живия сайт)
+Употреба: python3 check_render.py [--shots] [--url https://example.org/budget/]  (с --url проверява живия сайт)
 """
 import asyncio, functools, http.server, json, os, re, sys, threading
 
@@ -48,7 +48,7 @@ from playwright.async_api import async_playwright
 
 ROOT = str(__import__("pathlib").Path(__file__).resolve().parents[2])
 SITE = f"{ROOT}/prototype/site"
-SHOTS = f"{ROOT}/research/render-check"
+SHOTS = f"{ROOT}/tmp/render-check"
 BAD = ["NaN", "undefined", "Infinity", "[object Object]", "null"]
 EXTRA = ["vedomstvo/9", "vedomstvo/11", "vedomstvo/12", "vedomstvo/14", "vedomstvo/45", "patevoditel/5", "patevoditel/proveri", "rechnik/kfp"]
 SHOT_PAGES = ["", "patevoditel", "rechnik", "prihodi", "izpalnenie", "vedomstvo/11", "dalg", "obshtini", "danaci", "danni"]
@@ -81,7 +81,7 @@ def strip_problems(s, user):
     return out
 
 
-GUIDE_RAW = f"{ROOT}/research/guide/guide_raw.txt"
+GUIDE_RAW = f"{ROOT}/tmp/guide/guide_raw.txt"
 GUIDE_CHECKS = ["Период", "Обхват", "Единица", "Статус", "Източник"]
 # Екраните на стъпките от пътеводителя, по ред (v3.5: и поредицата на бутоните „Следва“ в края на екраните).
 GUIDE_SEQ = ["", "prihodi", "razhodi", "merki", "vedomstva", "izpalnenie", "dalg", "danaci"]
