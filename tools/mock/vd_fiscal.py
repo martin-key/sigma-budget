@@ -333,7 +333,7 @@ def g_measures(ctx):
     # the source document
     d = m["document"]
     c.ok(d["url"].startswith("https://www.parliament.bg/") and len(d["sha256"]) == 64, "document: url/sha256")
-    local = os.path.join(L.ROOT, "sources", "bill_52-602-01-19.docx")
+    local = os.path.join(L.RAW, "parliament", "52-602-01-19.docx")
     if os.path.exists(local):
         h = hashlib.sha256()
         with open(local, "rb") as fh:

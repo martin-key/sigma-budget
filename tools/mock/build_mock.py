@@ -9,7 +9,7 @@
 Pure Python 3 standard library; fixed seed 20261002; the same input gives byte-identical files (no clock, no network).
 Run it AFTER DATA's builders (tools/build_data.py): it reads, read-only,
     site/data/{ministries,programs,measures,execution,expenditure,core,municipalities}.json   (DATA's real files)
-    tools/cache/{law_bill,gisco_lau_bg}.json, ../prototype/src/municipal_transfers_2026.json   (caches on disk)
+    tools/mock/cache/{law_bill,gisco_lau_bg}.json, ../prototype/src/municipal_transfers_2026.json   (caches on disk)
 and writes
     site/data/mock/{activities,indicators,municipal-finance,payments,projects,measure-labels,tax-assumptions}.json
 
@@ -38,7 +38,7 @@ def problem(msg):
 def need(path, what=None):
     """Load a JSON input; a missing input is a problem (with the command that creates it), not a crash."""
     if not os.path.exists(path):
-        problem("missing input %s%s" % (os.path.relpath(path, L.MOCK), " (" + what + ")" if what else ""))
+        problem("missing input %s%s" % (os.path.relpath(path, L.ROOT), " (" + what + ")" if what else ""))
         return None
     return L.load_json(path)
 

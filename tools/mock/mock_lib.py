@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """mock_lib.py - helpers shared by build_mock.py and validate_mock.py (pure Python 3 standard library).
 
-Layout, deterministic JSON writer (same style as tools/dlib.py: minified UTF-8, keys in insertion order, no NaN, no
+Layout, deterministic JSON writer (same style as tools/mock/dlib.py: minified UTF-8, keys in insertion order, no NaN, no
 "-0.0"), the seeded random streams, exact-sum apportionment, the Bulgarian working-day calendar of the mock payments
 and the ЕИК check-digit rule (the validator uses it to prove that the invented ЕИК numbers are NOT valid ones).
 
@@ -15,14 +15,16 @@ import os
 import random
 import re
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-MOCK = os.path.dirname(HERE)                         # .../budget-na-svetlo/mock
-ROOT = os.path.dirname(MOCK)                         # .../budget-na-svetlo
-DATA_DIR = os.path.join(MOCK, "site", "data")
+HERE = os.path.dirname(os.path.abspath(__file__))    # .../tools/mock
+ROOT = os.path.dirname(os.path.dirname(HERE))        # repository root
+SITE = os.path.join(ROOT, "site")                    # the Mock application
+RAW = os.path.join(ROOT, "prototype", "data", "raw")   # raw sources, NOT in the repository: see docs/data-sources.md
+TMP = os.path.join(ROOT, "tmp")                      # scratch and outputs (gitignored)
+DATA_DIR = os.path.join(SITE, "data")
 OUT_DIR = os.path.join(DATA_DIR, "mock")
 CACHE = os.path.join(HERE, "cache")
 PROTO_SRC = os.path.join(ROOT, "prototype", "src")
-ROUTES_JS = os.path.join(MOCK, "site", "js", "routes.js")
+ROUTES_JS = os.path.join(SITE, "js", "routes.js")
 
 SEED = 20261002
 BUILD_DATE = os.environ.get("BUILD_DATE", "2026-10-09")
@@ -83,7 +85,7 @@ def write_text(path, text):
 
 
 def meta(id_, title, source, source_note, unit=None, **extra):
-    """File-level envelope of DATA_SPEC 0.1 for a MOCK set (key order as in tools/dlib.py meta())."""
+    """File-level envelope of DATA_SPEC 0.1 for a MOCK set (key order as in tools/mock/dlib.py meta())."""
     m = {"id": id_, "title": title, "status": "mock", "source": list(source), "sourceNote": source_note,
          "asOf": BUILD_DATE, "retrieved": BUILD_DATE}
     if unit:

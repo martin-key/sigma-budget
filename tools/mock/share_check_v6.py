@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""share_check_v5.py - does a shared link of mock/site-v6 open the same view?  (project venv only; BRIEF-v5 §5/§6)
+"""share_check_v5.py - does a shared link of site/ (version v6, tag mock-v6) open the same view?  (project venv only; docs/plan.md)
 
-  PLAYWRIGHT_BROWSERS_PATH=P/.pw-browsers P/.venv/bin/python P/mock/tools/share_check_v5.py
+  PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/share_check_v6.py
 
 For a set of screens in a non-default state: take every block that has a «Сподели» menu, build its link the way the menu does
 (share.linkFor), open that link in a FRESH browser context (no stored state) and check that
@@ -16,9 +16,9 @@ import http.server, json, os, socketserver, sys, threading
 from pathlib import Path
 from urllib.parse import parse_qsl, urlsplit
 
-ROOT = Path(__file__).resolve().parents[1]
-SITE = ROOT / "site-v6"
-os.environ.setdefault("PLAYWRIGHT_BROWSERS_PATH", str(ROOT.parent / ".pw-browsers"))
+ROOT = Path(__file__).resolve().parents[2]            # repository root
+SITE = ROOT / "site"                                 # the Mock application: run this at the tag mock-v6
+os.environ.setdefault("PLAYWRIGHT_BROWSERS_PATH", str(ROOT / ".pw-browsers"))
 
 VIEWS = [
     "#/izpalnenie?g1=2024&g2=2025&obhvat=eu&rez=mesec&mesec=5",

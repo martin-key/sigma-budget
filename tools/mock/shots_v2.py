@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Screenshots of a site folder for the visual comparison (BEFORE = mock/site, AFTER = mock/site-v2).
+"""Screenshots of a site folder for the visual comparison (BEFORE = the tag mock-v1, AFTER = the tag mock-v2, each extracted into tmp/versions/).
 
-  PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python mock/research/restyle-2026-10-03/shots.py \
-      --site mock/site --tag before [--routes S01,S02] [--cells 1440-light,400-dark] [--full S01,S06]
+  PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/shots_v2.py \
+      --site tmp/versions/site-v1 --tag before [--routes S01,S02] [--cells 1440-light,400-dark] [--full S01,S06]
 
 Serves the folder from a throw-away local http.server (no network), opens every route at 1440x900 and 400x850, light and dark,
-waits for the page to be ready (data-ready=1, charts drawn) and saves <tag>-<route>-<width>-<scheme>.png next to this script.
+waits for the page to be ready (data-ready=1, charts drawn) and saves <tag>-<route>-<width>-<scheme>.png into tmp/shots-v2/ (--out).
 Animations are off (reduced motion) so no chart is caught half-way. --full lists the routes that also get a full-page shot.
 """
 import argparse
@@ -17,7 +17,7 @@ from pathlib import Path
 
 from playwright.sync_api import sync_playwright
 
-HERE = Path(__file__).resolve().parent
+HERE = Path(__file__).resolve().parents[2] / 'tmp' / 'shots-v2'     # default output folder (gitignored)
 ROUTES = {'S01': '#/', 'S02': '#/patevoditel', 'S05': '#/pari', 'S06': '#/prihodi', 'S13': '#/prognoza', 'S31': '#/bvp', 'S32': '#/moyat-byudzhet'}
 CELLS = {
     '1440-light': dict(w=1440, h=900, scheme='light'), '1440-dark': dict(w=1440, h=900, scheme='dark'),

@@ -18,6 +18,7 @@ data/raw/
 
 # Временни файлове и кешове
 tmp/
+tools/mock/cache/
 .tmp/
 *.log
 .DS_Store

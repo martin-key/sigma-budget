@@ -6,7 +6,7 @@ Both files are EDITORIAL TEXT, not data: every word of the glossary terms and of
 from the original sources and is never retyped here:
 
   glossary  <-  prototype/src/glossary.json            (64 terms, 5 categories, 7 related-term rows, 7 sources)
-  guide     <-  research/guide/guide_raw.txt       (introduction, 8 steps, "Preди да използваш или споделиш число")
+  guide     <-  tmp/research/guide/guide_raw.txt   (introduction, 8 steps, "Preди да използваш или споделиш число")
 
 Only the SHAPE changes (slug/categories/aliases/related/see as in DATA_SPEC 3.16, steps/blocks/next/checks as in 3.17).
 The "Виж в бюджета" links of the old single-file prototype are mapped to the route keys of the new router and every
@@ -15,8 +15,9 @@ stops the build; nothing is guessed.
 
 Deterministic (no clock, no randomness): two runs give byte-identical files. Pure Python 3 standard library.
 
-Usage:  python3 mock/tools/build_text.py [--check]       (--check = build in memory, compare with disk, write nothing)
-Output: mock/site/data/glossary.json, mock/site/data/guide.json     (exit code != 0 on any problem)
+Usage:  python3 tools/mock/build_text.py [--check]       (--check = build in memory, compare with disk, write nothing)
+Output: site/data/glossary.json, site/data/guide.json     (exit code != 0 on any problem)
+Input not in the repository: tmp/research/guide/guide_raw.txt (the guide text as supplied; the result is already in site/data/guide.json).
 """
 import json
 import math
@@ -24,15 +25,15 @@ import os
 import re
 import sys
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-MOCK = os.path.dirname(HERE)                       # .../budget-na-svetlo/mock
-ROOT = os.path.dirname(MOCK)                       # .../budget-na-svetlo
-DATA_DIR = os.path.join(MOCK, "site", "data")
+HERE = os.path.dirname(os.path.abspath(__file__))     # .../tools/mock
+ROOT = os.path.dirname(os.path.dirname(HERE))         # repository root
+SITE = os.path.join(ROOT, "site")                     # the Mock application
+DATA_DIR = os.path.join(SITE, "data")
 GLOSSARY_SRC = os.path.join(ROOT, "prototype", "src", "glossary.json")
-GUIDE_SRC = os.path.join(ROOT, "research", "guide", "guide_raw.txt")
-ROUTES_JS = os.path.join(MOCK, "site", "js", "routes.js")
+GUIDE_SRC = os.path.join(ROOT, "tmp", "research", "guide", "guide_raw.txt")   # not in the repository
+ROUTES_JS = os.path.join(SITE, "js", "routes.js")
 
-BUILD_DATE = os.environ.get("BUILD_DATE", "2026-10-09")   # same default as tools/dlib.py; a constant => byte-identical rebuilds
+BUILD_DATE = os.environ.get("BUILD_DATE", "2026-10-09")   # same default as tools/mock/dlib.py; a constant => byte-identical rebuilds
 TEXT_AS_OF = "2026-10-01"                                  # date of the source documents
 
 # route params that have a closed registry (DATA_SPEC 2.3)
@@ -42,7 +43,7 @@ SEE_LABEL = "Виж в бюджета"
 
 # "Виж в бюджета": slug -> new href.  Old target (GL_SEE of prototype v3.6 / site/index.html) in the comment.
 # Sub-block anchors of the old single page (ix-komp, ix-mesec, ix-res, dl-*, tx-dop, jul) do not exist in the new router,
-# so those links point to the screen that now holds the block (listed in NEEDS.md as "approximate").
+# so those links point to the screen that now holds the block ("approximate").
 SEE = {
     "darzhaven-byudzhet": "#/izpalnenie/byudzheti",                     # izpalnenie/ix-komp
     "kfp": "#/izpalnenie/byudzheti",                                    # izpalnenie/ix-komp
@@ -116,7 +117,7 @@ def clean(obj, where="$"):
 
 
 def jdumps(obj):
-    """Minified UTF-8 JSON, keys in insertion order (same style as tools/dlib.py)."""
+    """Minified UTF-8 JSON, keys in insertion order (same style as tools/mock/dlib.py)."""
     return json.dumps(clean(obj), ensure_ascii=False, separators=(",", ":"), allow_nan=False)
 
 
@@ -339,6 +340,10 @@ CREDIT = "Работна група „Бюджет на светло“"
 
 def read_guide_blocks():
     """Body of the raw file as paragraphs (the '#'-lines are the download header: author, channel, ids; never copied)."""
+    if not os.path.exists(GUIDE_SRC):
+        sys.stderr.write("build_text: input missing: %s (the guide text as supplied; it is not in the repository, "
+                         "the result is already in site/data/guide.json)\n" % os.path.relpath(GUIDE_SRC, ROOT))
+        sys.exit(2)
     with open(GUIDE_SRC, "r", encoding="utf-8") as fh:
         raw = fh.read().split("\n")
     body = [ln for ln in raw if not ln.startswith("#")]

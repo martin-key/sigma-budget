@@ -8,7 +8,7 @@
     python3 tools/validate_mock.py --no-rebuild    # skip the reproducibility run (build_mock.py --check, build_text.py --check)
 
 Pure Python 3 standard library. Nothing is written, nothing is fetched. It re-derives every number a mock set is tied to from
-the real files on disk (site/data/*.json of DATA, tools/cache/*, ../prototype/src/*, the motives extract under ../research/ when
+the real files on disk (site/data/*.json of DATA, tools/mock/cache/*, prototype/src/*, the motives extract under tmp/research/ when
 it is there) and compares; it never imports the builder, so a mistake in build_mock.py cannot hide itself.
 
 Checks of every file:   it parses (no NaN), it is the canonical minified form of mock_lib.jdumps, size <= 150 KB; meta
@@ -37,7 +37,7 @@ DATASETS = ["M01", "M02", "M03", "M04", "M05", "M06", "M07"]
 EXTRA = ["TEXT", "PROTO"]
 MAX_BYTES = 150 * 1024
 TEXT_FILES = ["glossary.json", "guide.json"]
-MOTIVES_TXT = os.path.join(L.ROOT, "research", "mf-umtbf-2026-2028", "extracts", "docx_motives.txt")
+MOTIVES_TXT = os.path.join(L.TMP, "research", "mf-umtbf-2026-2028", "extracts", "docx_motives.txt")   # not in the repository (optional)
 PROTO_SHA = os.path.join(L.HERE, "prototype.sha256")
 
 CYR = re.compile("[\u0400-\u04ff]")
@@ -203,7 +203,7 @@ def bad_text(text):
 def load_file(c, path, dsid_name):
     """Read, parse (NaN is refused) and compare with the canonical form. Returns (doc, text) or (None, None)."""
     if not os.path.exists(path):
-        c.fail("file is missing: %s" % os.path.relpath(path, L.MOCK))
+        c.fail("file is missing: %s" % os.path.relpath(path, L.ROOT))
         return None, None
     with open(path, "rb") as fh:
         raw = fh.read()
@@ -507,7 +507,7 @@ def check_m03(c, doc, inp):
     gis = inp.json(L.GISCO_JSON)
     tr = inp.json(L.TRANSFERS_JSON)
     if gis is None or tr is None:
-        c.fail("cache inputs are missing: %s / %s" % (os.path.relpath(L.GISCO_JSON, L.MOCK), os.path.relpath(L.TRANSFERS_JSON, L.MOCK)))
+        c.fail("cache inputs are missing: %s / %s" % (os.path.relpath(L.GISCO_JSON, L.ROOT), os.path.relpath(L.TRANSFERS_JSON, L.ROOT)))
         return
     items, regions, tot = doc.get("items") or [], doc.get("regions") or [], doc.get("totals") or {}
     lau = dict((x["id"], x) for x in gis["items"])
@@ -603,7 +603,7 @@ def check_m03(c, doc, inp):
         c.ok(abs(mexp - L.MUNICIPAL_EXP_MLN) < 0.05, "the motives say %s млн. € of municipal expenditure, the builder uses %s" % (mexp, L.MUNICIPAL_EXP_MLN))
     note = ""
     if mrev is not None:
-        note = "; own revenue implied %s vs АСБП %s млн. € (difference %s, in NEEDS.md)" % (
+        note = "; own revenue implied %s vs АСБП %s млн. € (difference %s)" % (
             bg(S["o"] / 10000.0), bg(mrev), bg(abs(mrev - S["o"] / 10000.0)))
     if pop19:
         gd = sorted(i for i in pop19 if i in lau and pop19[i] != int(lau[i]["pop"]))
@@ -666,7 +666,7 @@ def check_m04(c, doc, inp):
     exe = need(c, inp, "execution.json")
     law = inp.json(L.LAW_JSON)
     if law is None:
-        c.fail("cache input %s is missing" % os.path.relpath(L.LAW_JSON, L.MOCK))
+        c.fail("cache input %s is missing" % os.path.relpath(L.LAW_JSON, L.ROOT))
     if mins is None or exe is None or law is None:
         return
     tot = doc.get("totals") or {}
@@ -1062,7 +1062,7 @@ def check_m07(c, doc, inp):
     # --- the real rates against the law's motives
     txt = inp.text(MOTIVES_TXT)
     if txt is None:
-        c.warn("the motives extract is not on disk (research/mf-umtbf-2026-2028/extracts/docx_motives.txt): real rates not re-checked")
+        c.warn("the motives extract is not on disk (tmp/research/mf-umtbf-2026-2028/extracts/docx_motives.txt): real rates not re-checked")
         return
     s = r"\s*‖\s*‖\s*(\d+)\s*‖"
     checks = [
@@ -1197,7 +1197,7 @@ def check_text(c, inp, no_rebuild):
 def check_proto(c):
     """Every file of prototype/ equals its recorded SHA-256 and nothing was added or removed."""
     if not os.path.exists(PROTO_SHA):
-        c.fail("tools/prototype.sha256 is missing")
+        c.fail("tools/mock/prototype.sha256 is missing")
         return
     want = collections.OrderedDict()
     with open(PROTO_SHA, "r", encoding="utf-8") as fh:
@@ -1213,10 +1213,14 @@ def check_proto(c):
         for f in sorted(fn):
             have.append(os.path.relpath(os.path.join(dp, f), L.ROOT).replace(os.sep, "/"))
     changed = []
+    absent = 0
     for rel, h in want.items():
         p = os.path.join(L.ROOT, rel)
         if not os.path.exists(p):
-            changed.append("missing " + rel)
+            if rel.startswith("prototype/data/raw/"):      # raw files are not in the repository (docs/data-sources.md)
+                absent += 1
+            else:
+                changed.append("missing " + rel)
             continue
         with open(p, "rb") as fh:
             if hashlib.sha256(fh.read()).hexdigest() != h:
@@ -1224,8 +1228,10 @@ def check_proto(c):
     added = sorted(set(have) - set(want))
     c.ok(not changed, "prototype/ was modified: %s" % changed[:5])
     c.ok(not added, "prototype/ gained files: %s" % added[:5])
-    c.ok(len(want) == 124, "tools/prototype.sha256 lists %d files, expected 124" % len(want))   # 111 + the 13 KFP reports added on 2026-10-09 (2024, 08.2026)
-    c.fact("prototype/: %d files, all equal to the recorded SHA-256, none added" % len(have))
+    if absent:
+        c.warn("%d raw files of the manifest are not in the repository (prototype/data/raw, see docs/data-sources.md); the files that are present are compared" % absent)
+    c.ok(len(want) == 124, "tools/mock/prototype.sha256 lists %d files, expected 124" % len(want))   # 111 + the 13 KFP reports added on 2026-10-09 (2024, 08.2026)
+    c.fact("prototype/: %d files present, all equal to the recorded SHA-256, none added" % len(have))
 
 
 # ===================================================================================================== BUILD (two builds are byte-identical)

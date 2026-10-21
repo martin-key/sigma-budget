@@ -5,8 +5,8 @@ It serves site/ from a throw-away local http.server, drives headless Chromium (P
 `window.__ROUTES__` at 1280 px and 400 px, in the light and the dark theme, and prints what is wrong. Exit code 0 only when
 there is no failure (warnings never fail the run, unless --strict); 1 = failures; 2 = the checker itself could not run.
 
-  Run (always with the project venv; the chromium build lives in P/.pw-browsers, which this script picks up by itself):
-    PLAYWRIGHT_BROWSERS_PATH=P/.pw-browsers P/.venv/bin/python P/mock/tools/check_mock.py [options]
+  Run (always with the project venv; the chromium build lives in .pw-browsers in the repository root, which this script picks up by itself):
+    PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/check_mock.py [options]
 
   Options
     --quick            the final gate, about a minute: the first sample of every route at 1280 px and at 400 px in the light
@@ -17,7 +17,7 @@ there is no failure (warnings never fail the run, unless --strict); 1 = failures
                        still run unless --only/--skip says otherwise.
     --cells 400-dark   only these viewport/theme cells (comma list of 1280-light 1280-dark 400-light 400-dark).
     --only a,b         run only these families.     --skip a,b   leave these families out.   (see FAMILIES below)
-    --shots            save one screenshot per base load into mock/research/render-check/<route>-<cell>.png (reused names).
+    --shots            save one screenshot per base load into tmp/render-check/<route>-<cell>.png (reused names).
     --url URL          test an already running site (e.g. a deployed copy) instead of the local server.
     --jobs N           parallel browser processes (default: 5, fewer when the machine is busy).
     --axe FILE|URL     inject axe-core (fetched here, never by the page) and fail on serious/critical violations.
@@ -61,7 +61,7 @@ there is no failure (warnings never fail the run, unless --strict); 1 = failures
     - Missing /data/... files are a WARNING ("pending data file"), not a failure: the data side may not have landed them yet.
     - A stub screen (still the generic "предстои да бъде изграден" text) gets the generic checks only.
     - Text that must show a literal NaN/null/undefined (e.g. an API sample) goes in <code>/<pre> or under [data-allow-tokens].
-    - The checker never touches site/data, prototype/ or anything outside mock/ (it only writes screenshots with --shots).
+    - The checker never touches site/data, prototype/ or anything outside tmp/ (it only writes screenshots with --shots).
 """
 from __future__ import annotations
 
@@ -86,11 +86,11 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]            # .../mock
-P_ROOT = ROOT.parent                                  # .../budget-na-svetlo
-SITE = ROOT / 'site'
-SHOT_DIR = ROOT / 'research' / 'render-check'
-PROTO_SUMS = ROOT / 'tools' / 'prototype.sha256'
+ROOT = Path(__file__).resolve().parents[2]            # repository root (this file is tools/mock/check_mock.py)
+P_ROOT = ROOT                                         # older name of ROOT
+SITE = ROOT / 'site'                                  # the Mock application
+SHOT_DIR = ROOT / 'tmp' / 'render-check'                 # screenshots (gitignored)
+PROTO_SUMS = ROOT / 'tools' / 'mock' / 'prototype.sha256'
 if 'PLAYWRIGHT_BROWSERS_PATH' not in os.environ and (P_ROOT / '.pw-browsers').is_dir():
     os.environ['PLAYWRIGHT_BROWSERS_PATH'] = str(P_ROOT / '.pw-browsers')
 
@@ -2911,7 +2911,7 @@ TABS_CHARTS_JS = r"""(id) => {
   return [...p.querySelectorAll('.chart')].filter(c => !c.closest('.tmap[data-view="list"] .tmap-map')).map(c => { const s = c.querySelector('svg'), r = c.getBoundingClientRect(); return { id: c.id, ready: c.dataset.ready, w: Math.round(r.width), sw: s ? Math.round(s.getBoundingClientRect().width) : 0 }; });
 }"""
 # a treemap-list in its list view (the phone default) hides its map by design (css/charts.css), so those charts are not expected to draw
-# (NEEDS.md, FULL gate 02.10 14:40: the S07 false positive at 400 px)
+# (FULL gate 02.10 14:40: the S07 false positive at 400 px)
 TABS_SETTLED_JS = r"""(id) => { const t = document.getElementById(id), p = t && t.querySelector(':scope > [role="tabpanel"]:not([hidden])'); return !p || [...p.querySelectorAll('.chart')].filter(c => !c.closest('.tmap[data-view="list"] .tmap-map')).every(c => c.dataset.ready === '1' || c.dataset.ready === 'err'); }"""
 
 

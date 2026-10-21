@@ -1,6 +1,6 @@
 """Build context shared by the bd_*.py modules: lazy loaders for every input, plus the registry of built datasets.
 
-Inputs are read ONLY from prototype/ (frozen, read-only), research/, tools/cache/ and the already-built
+Inputs are read ONLY from prototype/ (frozen, read-only), tmp/research/, tools/mock/cache/ and the already-built
 site/data/execution.json (produced by extract_kfp_full.py). Nothing here touches the network.
 """
 import json

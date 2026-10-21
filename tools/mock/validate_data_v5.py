@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""validate_data_v5.py - validate_data.py pointed at mock/site-v5/data (a thin wrapper; the donor validator and its vd_*.py modules are NOT edited).
+"""validate_data_v5.py - validate_data.py for the version v5 (site/data at the tag mock-v5) (a thin wrapper; the donor validator and its vd_*.py modules are NOT edited).
 
-Run:  .venv/bin/python mock/tools/validate_data_v5.py [--only GROUP,...] [-v] [--list] [--no-accepted]
+Run:  .venv/bin/python tools/mock/validate_data_v5.py [--only GROUP,...] [-v] [--list] [--no-accepted]
 
-What differs from validate_data.py (each point is a deliberate V5 decision, see mock/BRIEF-v5.md section 5):
-  * DATA / SITE of vd_lib are repointed to mock/site-v5 (the validators read the paths through the vd_lib module, so nothing else changes).
-  * REBUILD and MOCK are skipped: they run build_data.py --check / validate_mock.py against mock/site (the donor, which PNGFIX is still editing) and the
+What differs from validate_data.py (each point is a deliberate V5 decision, see docs/plan.md):
+  * DATA / SITE of vd_lib are the checked-out site/ (the validators read the paths through the vd_lib module, so nothing else changes).
+  * REBUILD and MOCK are skipped: they run build_data.py --check / validate_mock.py against the v1 donor tree and the
     donor builders know nothing of the V5 active layer (the generated "C" sets and the daily СЕБРА set are taken out by tools/v5_data_active.py).
-    The same question for V5 is answered by `diff_json_v5.py mock/site/data mock/site-v5/data` (every differing leaf is classified) - see STATUS.md.
+    The same question for V5 is answered by `diff_json_v5.py tmp/versions/site-v1/data site/data` (every differing leaf is classified).
   * The SEARCH group is run with empty stand-ins for the three mock sets V5 removed (mock/projects, activities, payments); it crashed on them.
   * Problems that follow ONLY from what V5 removed on purpose are moved out of the failure count into an explicit list (ACCEPTED below: group,
     pattern, reason). They are printed with the reason at the end - nothing is hidden - and a problem not matched by a pattern stays a failure.
@@ -22,13 +22,12 @@ sys.path.insert(0, HERE)
 
 import vd_lib as L                                    # noqa: E402
 
-L.SITE = os.path.join(L.MOCK, "site-v5")
-L.DATA = os.path.join(L.SITE, "data")
+# vd_lib.SITE / DATA already point at site/ (the checked-out version; run this at the tag mock-v5)
 
 import validate_data as V                             # noqa: E402
 
 GONE_SEBRA = "СЕБРА (daily payments) was taken out of the active interface and of core.sources; data/sebra.json stays on disk, unreferenced, for phase 2"
-GONE_SEARCH = "search shows only active real sets; the 7 pending and 2 mock datasets have no search row (BRIEF-v5 section 5, search)"
+GONE_SEARCH = "search shows only active real sets; the 7 pending and 2 mock datasets have no search row (docs/plan.md, search)"
 ACCEPTED = (
     ("ENVELOPE", r"^core\.sources keys differ from the registry: \['sebra'\]$", GONE_SEBRA),
     ("ENVELOPE", r"^sebra\.json: meta\.source 'sebra' is not in core\.sources$", GONE_SEBRA),

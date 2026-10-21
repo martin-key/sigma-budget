@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Build mock/site-v6/data/dbp2027.json (the numbers of the screen S34 "Бюджет 2027 (проект)").
+"""Build site/data/dbp2027.json (the numbers of the screen S34 "Бюджет 2027 (проект)").
 
-Input : research/dbp-2027/dbp2027_figures.json  (made by tools/extract_dbp2027.py from the PDF of the
+Input : tmp/research/dbp-2027/dbp2027_figures.json  (made by tools/mock/extract_dbp2027.py from the PDF of the
         Draft Budgetary Plan 2027, 55 pages, МФ, 15.10.2026) + a few figures added by hand below.
-Output: mock/site-v6/data/dbp2027.json
+Output: site/data/dbp2027.json
 
 Rules (see the task brief):
  * no number without a page: every figure has `p` (page of the PDF) and `b` (basis: ESA_GG, KFP_CASH, ...);
@@ -19,12 +19,13 @@ Run: python3 tools/build_dbp2027_site.py
 import json
 import hashlib
 import re
+import sys
 from pathlib import Path
 
-W = Path(__file__).resolve().parent.parent          # wg/budget-na-svetlo
-SRC = W / 'research' / 'dbp-2027' / 'dbp2027_figures.json'
-PDF = W / 'sources' / 'bud2027_Draft_Budgetary_Plan_of_the_Republic_of_Bulgaria_for_2027.pdf'
-OUT = W / 'mock' / 'site-v6' / 'data' / 'dbp2027.json'
+W = Path(__file__).resolve().parents[2]          # repository root
+SRC = W / 'tmp' / 'research' / 'dbp-2027' / 'dbp2027_figures.json'     # not in the repository: made by extract_dbp2027.py
+PDF = W / 'tmp' / 'sources' / 'bud2027_Draft_Budgetary_Plan_of_the_Republic_of_Bulgaria_for_2027.pdf'   # not in the repository: docs/data-sources.md 4.3
+OUT = W / 'site' / 'data' / 'dbp2027.json'
 
 # figure-id prefixes that the screen uses (everything else in the research file is left out on purpose:
 # macro table, external environment, cash data to 31.08.2026, RRF grants)
@@ -70,6 +71,9 @@ def unit(u):
 
 
 def main():
+    for need in (SRC, PDF):
+        if not need.exists():
+            sys.exit('build_dbp2027_site: input missing: %s (not in the repository: docs/data-sources.md 4.3; SRC is made by extract_dbp2027.py)' % need.relative_to(W))
     d = json.loads(SRC.read_text(encoding='utf-8'))
     figs = {}
     for f in d['figures']:

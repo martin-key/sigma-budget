@@ -2,7 +2,7 @@
 
 Inputs (no network at build time):
   * prototype/data/raw/sebra/midt_sebra_31.08.2026.xlsx  - the day the spec is about (28 payments, 171 854,85 EUR)
-  * tools/cache/sebra_27.08.2026.xlsx, sebra_28.08.2026.xlsx - the two other files the page lists (fetch_sebra.py); optional
+  * tools/mock/cache/sebra_27.08.2026.xlsx, sebra_28.08.2026.xlsx - the two other files the page lists (fetch_sebra.py); optional
   * prototype/data/raw/sebra/midt_sebra_2026_page.html - the page itself: which files it lists, their listing date and size
 
 The .xlsx files are read with the standard library only (zip + XML). Every file is checked: the categories add up to the printed total,

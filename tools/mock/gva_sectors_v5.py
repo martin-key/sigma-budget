@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""gva_sectors_v5.py - builds mock/site-v5/data/gva-sectors.json from two saved Eurostat answers (plain stdlib, no network).
+"""gva_sectors_v5.py - builds site/data/gva-sectors.json (version v5: run at the tag mock-v5) from two saved Eurostat answers (plain stdlib, no network).
 
-  python3 mock/tools/gva_sectors_v5.py NAMA.json GDP.json            # writes the data file
-  python3 mock/tools/gva_sectors_v5.py NAMA.json GDP.json --check    # only verifies, writes nothing
+  python3 tools/mock/gva_sectors_v5.py NAMA.json GDP.json            # writes the data file
+  python3 tools/mock/gva_sectors_v5.py NAMA.json GDP.json --check    # only verifies, writes nothing
 
 The inputs are the JSON answers of the open Eurostat API (national accounts of Bulgaria, compiled from the data of the NSI):
   NAMA.json  https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/nama_10_a10?format=JSON&lang=EN&geo=BG&unit=CP_MEUR&na_item=B1G&sinceTimePeriod=2019
@@ -14,9 +14,9 @@ What is checked before anything is written: ten branches add up to the total of 
 import json, sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "site-v5" / "data" / "gva-sectors.json"
-OUTLOOK = ROOT / "site-v5" / "data" / "outlook.json"
+ROOT = Path(__file__).resolve().parents[2]            # repository root
+OUT = ROOT / "site" / "data" / "gva-sectors.json"
+OUTLOOK = ROOT / "site" / "data" / "outlook.json"
 
 # the ten branches of the NACE A*10 grouping, in the order of the classification; C (manufacturing) is a part of B-E
 BRANCHES = [

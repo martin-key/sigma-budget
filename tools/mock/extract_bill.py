@@ -2,8 +2,8 @@
 """D08 + D10 input: the budgets of the adopted ЗДБ 2026 (ДВ бр. 69/31.07.2026) against the bill as submitted.
 
 Reads (read-only):  prototype/data/raw/dv/zdb2026_dv69_idMat245041.html   the adopted law (46 budgets, чл. 2-47, + чл. 1)
-                    sources/bill_52-602-01-19.docx                         the bill, parliament file 52-602-01-19
-Writes:             tools/cache/law_bill.json                              consumed by build_data.py (bd_budgets, bd_law, bd_misc)
+                    prototype/data/raw/parliament/52-602-01-19.docx    the bill, parliament file 52-602-01-19
+Writes:             tools/mock/cache/law_bill.json                              consumed by build_data.py (bd_budgets, bd_law, bd_misc)
 
 What is compared (all amounts in хил. €, as printed):
   * every budget's headline rows (revenue, expenditure, transfers, EU contribution, balance, financing),
@@ -23,10 +23,10 @@ import difflib
 import sys
 
 import lawparse as L
-from dlib import RAW, SOURCES, SRC, Problems, jload, say, write_cache
+from dlib import RAW, SRC, Problems, jload, say, write_cache
 
 LAW_HTML = RAW / "dv" / "zdb2026_dv69_idMat245041.html"
-BILL_DOCX = SOURCES / "bill_52-602-01-19.docx"
+BILL_DOCX = RAW / "parliament" / "52-602-01-19.docx"
 EXPECT_BUDGETS = 46
 EXPECT_SUM_EXP = 13326470.3
 EXPECT_SUM_REV = 2284302.7
@@ -340,10 +340,13 @@ def build(p):
 
 def main():
     p = Problems("extract_bill")
+    for need in (LAW_HTML, BILL_DOCX):
+        if not need.exists():
+            sys.exit("extract_bill: input missing: %s (raw file, not in the repository: docs/data-sources.md)" % need.relative_to(RAW.parents[2]))
     result = build(p)
     if not p.errors:
         write_cache("law_bill.json", result)
-        say("wrote tools/cache/law_bill.json")
+        say("wrote tools/mock/cache/law_bill.json")
     p.finish()
 
 

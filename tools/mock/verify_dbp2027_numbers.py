@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """verify_dbp2027_numbers.py - look every printed number of the screen S34 up in the PDF of the Draft Budgetary Plan 2027.
 
-  W/.venv/bin/python tools/verify_dbp2027_numbers.py            figures + phrase checks (PDF only)
-  PLAYWRIGHT_BROWSERS_PATH=W/.pw-browsers W/.venv/bin/python tools/verify_dbp2027_numbers.py --screen
+  .venv/bin/python tools/mock/verify_dbp2027_numbers.py         figures + phrase checks (PDF only)
+  PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/verify_dbp2027_numbers.py --screen
                                                                 also read the rendered screen and trace every number to a figure
 
-Part 1  every `reported` figure of mock/site-v6/data/dbp2027.json: its value must be printed on the page `p` named in the file
+Part 1  every `reported` figure of site/data/dbp2027.json: its value must be printed on the page `p` named in the file
         (token match on the page text; the sign may be a minus or brackets; thousands separators are ignored).
         Every `derived` figure: its formula is recomputed from the reported figures.
 Part 2  the words the screen builds on (phrases, dates, names of acts) are looked up on the page named next to them.
@@ -20,9 +20,9 @@ import re
 import sys
 from pathlib import Path
 
-W = Path(__file__).resolve().parent.parent
-PDF = W / 'sources' / 'bud2027_Draft_Budgetary_Plan_of_the_Republic_of_Bulgaria_for_2027.pdf'
-DATA = W / 'mock' / 'site-v6' / 'data' / 'dbp2027.json'
+W = Path(__file__).resolve().parents[2]       # repository root
+PDF = W / 'tmp' / 'sources' / 'bud2027_Draft_Budgetary_Plan_of_the_Republic_of_Bulgaria_for_2027.pdf'      # the PDF is not in the repository: docs/data-sources.md 4.3
+DATA = W / 'site' / 'data' / 'dbp2027.json'
 SHA = '8c91cdf4778f2864e1eeb167f14b08d1f68a076ea4ad27a8a4305175a73f1182'
 
 TOKEN = re.compile(r'\(?-?−?\d[\d,  ]*(?:\.\d+)?\)?')
@@ -74,6 +74,8 @@ def close(a, b):
 
 
 def main():
+    if not PDF.exists():
+        sys.exit('verify_dbp2027_numbers: input missing: %s (not in the repository: docs/data-sources.md 4.3)' % PDF.relative_to(W))
     import pymupdf
     screen = '--screen' in sys.argv
     sha = hashlib.sha256(PDF.read_bytes()).hexdigest()
@@ -170,7 +172,7 @@ def main():
         print('  %s p.%d  %s' % ('ok       ' if ok else 'NOT FOUND', p, what))
         bad += 0 if ok else 1
     # the glossary no longer claims a "first" plan; make sure the screen does not either
-    s34 = (W / 'mock' / 'site-v6' / 'js' / 'pages' / 's34-byudzhet-2027.js').read_text(encoding='utf-8')
+    s34 = (W / 'site' / 'js' / 'pages' / 's34-byudzhet-2027.js').read_text(encoding='utf-8')
     if re.search(r'Първ(ият|и) (проект|план)', s34):
         print('  NOTE      the screen still says "първи/първият" - check it against the PDF')
 
@@ -188,7 +190,7 @@ def check_screen(d, nums):
     import threading
     os.environ.setdefault('PLAYWRIGHT_BROWSERS_PATH', str(W / '.pw-browsers'))
     from playwright.sync_api import sync_playwright
-    site = W / 'mock' / 'site-v6'
+    site = W / 'site'
 
     class H(http.server.SimpleHTTPRequestHandler):
         def __init__(self, *a, **k):

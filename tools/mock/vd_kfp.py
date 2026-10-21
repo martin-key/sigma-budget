@@ -15,6 +15,9 @@ import xlrd
 import vd_lib as L
 from vd_lib import Check, PROTO, fmt, isnum
 
+# the raw reports are NOT in the repository (docs/data-sources.md): without prototype/data/raw the independent re-read is skipped with a warning
+RAW_PRESENT = os.path.isdir(os.path.join(PROTO, "data", "raw"))
+
 EUR = 1.95583
 SHEET = "стартова"
 COLS = (("kfp", 1, "к.2"), ("nat", 2, "к.3"), ("eu", 3, "к.4"))
@@ -121,7 +124,9 @@ def g_kfp(ctx):
             month = i + 1
             c.ok(f["month"] == month, "%s: files[%d].month %s" % (y, i, f["month"]))
             path = os.path.join(PROTO, "data", "raw", "kfp_%s" % y, f["file"])
-            if not c.ok(os.path.exists(path), "%s-%02d: raw report %s missing" % (y, month, f["file"])):
+            if not os.path.exists(path):
+                if RAW_PRESENT:
+                    c.fail("%s-%02d: raw report %s missing" % (y, month, f["file"]))
                 continue
             files_n += 1
             c.ok(_sha(path) == f["sha256"], "%s-%02d: sha256 of %s differs from the published one" % (y, month, f["file"]))
@@ -308,5 +313,8 @@ def g_kfp(ctx):
     if pm and n_last < 12:
         c.ok(pm[0]["asOf"] == "%s-%02d-%02d" % (last_y, n_last + 1, calendar.monthrange(int(last_y), n_last + 1)[1]),
              "pendingMonths: asOf %s is not the last day of the next month" % pm[0]["asOf"])
-    c.ok(files_n == sum(WANT_MONTHS.values()), "%d of %d raw reports found" % (files_n, sum(WANT_MONTHS.values())))
+    if RAW_PRESENT:
+        c.ok(files_n == sum(WANT_MONTHS.values()), "%d of %d raw reports found" % (files_n, sum(WANT_MONTHS.values())))
+    elif not files_n:
+        c.warn("the raw monthly reports are not in the repository (prototype/data/raw, see docs/data-sources.md): the independent re-read was skipped")
     return c

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""diff_routes_v5_v6.py - rendered-text diff of every existing route: site-v5 against site-v6.
+"""diff_routes_v5_v6.py - rendered-text diff of every existing route: v5 against v6 (v6 = site/, v5 = tmp/versions/site-v5: extract the tag mock-v5 there).
 
-  PLAYWRIGHT_BROWSERS_PATH=W/.pw-browsers W/.venv/bin/python tools/diff_routes_v5_v6.py [OUTDIR]     (default OUTDIR = mock/tmp/rt)
+  PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/diff_routes_v5_v6.py [OUTDIR]     (default OUTDIR = tmp/rt)
 
 For every route of the route table (all `samples`, and the first sample of each route in every period that the route supports, and the first
 sample again at 400 px) the page is opened in a fresh browser context in BOTH sites, and these are compared once the screen has settled:
@@ -21,12 +21,13 @@ import sys
 import threading
 from pathlib import Path
 
-W = Path(__file__).resolve().parent.parent
-MOCK = W / 'mock'
+W = Path(__file__).resolve().parents[2]       # repository root
+V5 = W / 'tmp' / 'versions' / 'site-v5'        # the older tree to compare with (not in the repository)
+V6 = W / 'site'                                # the current Mock application
 os.environ.setdefault('PLAYWRIGHT_BROWSERS_PATH', str(W / '.pw-browsers'))
 ARGS = [a for a in sys.argv[1:] if not a.startswith('--')]
 SAVED = '--saved' in sys.argv           # compare the texts of an earlier run (no browser)
-OUT = Path(ARGS[0]) if ARGS else MOCK / 'tmp' / 'rt'
+OUT = Path(ARGS[0]) if ARGS else W / 'tmp' / 'rt'
 
 SETTLE = """() => {
   const v = document.getElementById('view');
@@ -122,7 +123,7 @@ def main():
         jobs, res = load_saved()
         print('compared from saved texts:', len(jobs))
     else:
-        s5, s6 = serve(MOCK / 'site-v5'), serve(MOCK / 'site-v6')
+        s5, s6 = serve(V5), serve(V6)
         b5, b6 = 'http://127.0.0.1:%d/' % s5.server_address[1], 'http://127.0.0.1:%d/' % s6.server_address[1]
     with (sync_playwright() if not SAVED else __import__('contextlib').nullcontext()) as pw:
       if not SAVED:

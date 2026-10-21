@@ -7,12 +7,13 @@ import math
 import os
 import re
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-MOCK = os.path.dirname(HERE)
-ROOT = os.path.dirname(MOCK)                      # .../budget-na-svetlo
-DATA = os.path.join(MOCK, "site", "data")
-SITE = os.path.join(MOCK, "site")
+HERE = os.path.dirname(os.path.abspath(__file__))     # .../tools/mock
+ROOT = os.path.dirname(os.path.dirname(HERE))         # repository root
+SITE = os.path.join(ROOT, "site")                     # the Mock application
+DATA = os.path.join(SITE, "data")
 PROTO = os.path.join(ROOT, "prototype")
+RAW = os.path.join(PROTO, "data", "raw")              # raw sources, NOT in the repository: see docs/data-sources.md
+TMP = os.path.join(ROOT, "tmp")                       # scratch and outputs (gitignored)
 BUILD_DATE = os.environ.get("BUILD_DATE", "2026-10-09")
 ISO = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 

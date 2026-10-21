@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""V5 helper: field-by-field diff of two JSON data trees (donor mock/site vs mock/site-v5).
+"""V5 helper: field-by-field diff of two JSON data trees (two data/ folders given as arguments: the donor v1 against v5, e.g. extracted from the tags mock-v1 and mock-v5 into tmp/versions/).
 Usage: diff_json_v5.py DONOR_DIR TARGET_DIR [--all]
 Classifies every differing leaf as DATE-ONLY (both values look like ISO dates / build stamps) or CONTENT."""
 import json, re, sys, os

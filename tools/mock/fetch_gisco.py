@@ -3,13 +3,13 @@
 
 Writes two small cache files (the raw 100+ MB GISCO GeoJSON is STREAMED and never stored):
 
-  tools/cache/gisco_lau_bg.json            Bulgaria's 265 LAUs: id, name, population, area, border rings (5 decimals)
-  tools/cache/eurostat_pop_nuts3_bg.json   Eurostat demo_r_pjanaggr3 (all sexes, all ages), the 28 Bulgarian NUTS3 regions
+  tools/mock/cache/gisco_lau_bg.json            Bulgaria's 265 LAUs: id, name, population, area, border rings (5 decimals)
+  tools/mock/cache/eurostat_pop_nuts3_bg.json   Eurostat demo_r_pjanaggr3 (all sexes, all ages), the 28 Bulgarian NUTS3 regions
 
 The build (build_data.py) reads only these caches, so it runs offline once they exist.
 `--refresh` forces a new download; without it an existing cache is reused (idempotent, no network).
 
-Choice (deviation from PLAN §5.2 D20, recorded in DATA_SPEC.md): LAU **2024** instead of LAU 2021.
+Choice (deviation from PLAN §5.2 D20, recorded in docs/data-spec.md): LAU **2024** instead of LAU 2021.
 The 2021 release carries the pre-census population estimate (6 916 548 for Bulgaria), which is 7 % above the
 census-based figures Eurostat publishes today (6 445 481 on 01.01.2024); the 2024 release has the same 265
 municipality codes and names, and its POP_2024 sums exactly to Eurostat's national figure.

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Orchestrator: builds every dataset DATA owns into mock/site/data/ (core.json last).
+"""Orchestrator: builds every dataset DATA owns into site/data/ (core.json last).
 
-  python3 mock/tools/build_data.py            build + write (only files whose content changed are rewritten)
-  python3 mock/tools/build_data.py --check    build in memory and compare with disk (exit 1 on any difference)
-  python3 mock/tools/build_data.py --dry      build in memory, print the size table, write nothing
+  python3 tools/mock/build_data.py            build + write (only files whose content changed are rewritten)
+  python3 tools/mock/build_data.py --check    build in memory and compare with disk (exit 1 on any difference)
+  python3 tools/mock/build_data.py --dry      build in memory, print the size table, write nothing
 
 A builder module that does not exist yet is skipped with a notice, so datasets can land one by one and the script can be
 re-run. It never writes DATA2's files (glossary.json, guide.json, mock/*.json); the catalog and the search index read
@@ -83,6 +83,9 @@ def main():
     ap.add_argument("--check", action="store_true", help="compare with disk, write nothing, exit 1 on a difference")
     ap.add_argument("--dry", action="store_true", help="build and print sizes, write nothing")
     args = ap.parse_args()
+    if not dlib.RAW.is_dir():
+        sys.exit("build_data: the raw files are not in the repository: put them into prototype/data/raw (docs/data-sources.md); "
+                 "tools/mock/cache/ is filled by fetch_gisco.py, fetch_sebra.py and extract_bill.py")
 
     ctx = Ctx()
     errors, skipped = run_steps(ctx)

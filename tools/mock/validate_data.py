@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """validate_data.py: the data contract of the Mock prototype (DATA_SPEC section 5). Pure standard library.
 
-Run from anywhere:  .venv/bin/python mock/tools/validate_data.py [--only GROUP,...] [-v] [--no-rebuild] [--no-mock] [--list]
+Run from anywhere:  .venv/bin/python tools/mock/validate_data.py [--only GROUP,...] [-v] [--no-rebuild] [--no-mock] [--list]
 
   --only     comma separated group names (see --list); default: all
   -v         print every problem, warning and fact in full
   --no-rebuild  skip the REBUILD group (an in-process `build_data.py --check`)
-  --no-mock  skip the MOCK group (`python3 mock/tools/validate_mock.py`, DATA2's validator)
+  --no-mock  skip the MOCK group (`python3 tools/mock/validate_mock.py`, DATA2's validator)
 Exit code: 0 all checks passed, 1 at least one violation, 2 usage error.
 Each group prints one line: OK|FAIL, name, number of checks and the key facts it established.
 """

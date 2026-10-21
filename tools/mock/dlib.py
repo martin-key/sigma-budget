@@ -1,10 +1,11 @@
 """Shared helpers for the DATA pipeline (pure stdlib, no third-party imports).
 
-Every script in mock/tools/ imports this module. It fixes the directory layout, the deterministic JSON writer
+Every data script in tools/mock/ imports this module. It fixes the directory layout, the deterministic JSON writer
 (minified, UTF-8, keys in insertion order, no NaN/Infinity, no "-0.0") and a few small utilities.
 
-The pipeline reads ONLY from prototype/, sources/, research/ and tools/cache/ and writes ONLY to
-mock/site/data/, mock/tools/cache/ and mock/tmp/.  It never touches prototype/.
+The pipeline reads ONLY from prototype/ (src/, data/raw/ - the raw files are not in the repository, see docs/data-sources.md),
+tmp/sources/, tmp/research/ and tools/mock/cache/ and writes ONLY to site/data/, tools/mock/cache/ and tmp/.
+It never touches prototype/.
 """
 import gzip
 import hashlib
@@ -15,17 +16,18 @@ import sys
 from pathlib import Path
 
 # ----------------------------------------------------------------------------------------------- layout
-P = Path(__file__).resolve().parents[2]          # .../budget-na-svetlo
-MOCK = P / "mock"
-TOOLS = MOCK / "tools"
-CACHE = TOOLS / "cache"
-DATA = MOCK / "site" / "data"
-TMP = MOCK / "tmp"
-PROTO = P / "prototype"
+ROOT = Path(__file__).resolve().parents[2]       # repository root (this file is tools/mock/dlib.py)
+P = ROOT                                         # older name of ROOT
+SITE = ROOT / "site"                             # the Mock application
+DATA = SITE / "data"
+TOOLS = ROOT / "tools" / "mock"
+CACHE = TOOLS / "cache"                          # fetched inputs (gitignored; fetch_gisco.py, fetch_sebra.py, extract_bill.py fill it)
+TMP = ROOT / "tmp"                               # scratch and outputs (gitignored)
+PROTO = ROOT / "prototype"
 SRC = PROTO / "src"
-RAW = PROTO / "data" / "raw"
-SOURCES = P / "sources"
-RESEARCH = P / "research"
+RAW = PROTO / "data" / "raw"                     # raw sources, NOT in the repository: see docs/data-sources.md
+SOURCES = TMP / "sources"                        # documents supplied by hand (the 2027 draft budgetary plan PDF), not in the repository
+RESEARCH = TMP / "research"                      # working extracts, not in the repository
 
 BUILD_DATE = os.environ.get("BUILD_DATE", "2026-10-09")
 DATA_VERSION = BUILD_DATE + ".1"

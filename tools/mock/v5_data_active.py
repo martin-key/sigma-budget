@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""V5: take the generated "C" sets and the daily СЕБРА set out of the ACTIVE data layer of site-v5.
+"""V5: take the generated "C" sets and the daily СЕБРА set out of the ACTIVE data layer of the v5 tree (pass the tree as the first argument).
 
 Usage: python3 tools/v5_data_active.py SITE_DIR [--apply]
 
@@ -11,7 +11,7 @@ What it does (idempotent; only touches <SITE_DIR>/data):
   search-index   drops entries that lead to removed screens or that are mock/pending; keeps real ones.
   core.json      drops the sebra source row.
   files          deletes data/mock/{activities,indicators,municipal-finance,payments,projects}.json from the tree
-                 (the generated originals stay in mock/site and mock/site-v4); data/sebra.json stays on disk,
+                 (the generated originals stay in the tags mock-v1 and mock-v4); data/sebra.json stays on disk,
                  unreferenced (phase 2).
 Without --apply it only prints what would change.
 """

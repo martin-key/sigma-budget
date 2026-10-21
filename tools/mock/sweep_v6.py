@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""sweep_v5.py - open many hashes of mock/site-v6 and print only the problems (console errors, failed requests, h1 missing, overflow).
+"""sweep_v5.py - open many hashes of site/ (version v6, tag mock-v6) and print only the problems (console errors, failed requests, h1 missing, overflow).
 
-  PLAYWRIGHT_BROWSERS_PATH=P/.pw-browsers P/.venv/bin/python P/mock/tools/sweep_v5.py WIDTH FILE_OR_HASH...
+  PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/sweep_v6.py WIDTH FILE_OR_HASH...
   A FILE has one hash per line ('#/izpalnenie'); lines starting with '=' print all rows. Exit code 1 when a problem was found.
 """
 import http.server, os, socketserver, sys, threading
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-SITE = ROOT / "site-v6"
-os.environ.setdefault("PLAYWRIGHT_BROWSERS_PATH", str(ROOT.parent / ".pw-browsers"))
+ROOT = Path(__file__).resolve().parents[2]            # repository root
+SITE = ROOT / "site"                                 # the Mock application: run this at the tag mock-v6
+os.environ.setdefault("PLAYWRIGHT_BROWSERS_PATH", str(ROOT / ".pw-browsers"))
 
 
 class H(http.server.SimpleHTTPRequestHandler):

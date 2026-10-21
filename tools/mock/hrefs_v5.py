@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""hrefs_v5.py - every in-app address ('#/...') written in the data files and in the JS of mock/site-v5 must reach an ACTIVE screen.
+"""hrefs_v5.py - every in-app address ('#/...') written in the data files and in the JS of site/ (version v5, tag mock-v5) must reach an ACTIVE screen.
 
-  PLAYWRIGHT_BROWSERS_PATH=P/.pw-browsers P/.venv/bin/python P/mock/tools/hrefs_v5.py [--all]
+  PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/hrefs_v5.py [--all]
 
-Collects each '#/path?query' found in site-v5/data/**/*.json and site-v5/js/**/*.js (not in comments), then asks the site's own router
+Collects each '#/path?query' found in site/data/**/*.json and site/js/**/*.js (not in comments), then asks the site's own router
 (js/routes.js match + js/redirects.js redirectHash, loaded in a browser) where it leads:
   OK          matches an active route directly
   REDIRECT    an old address that the redirect table moves (listed so the data can be rewritten to the new address)
@@ -14,9 +14,9 @@ import http.server, json, os, re, socketserver, sys, threading
 from collections import defaultdict
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-SITE = ROOT / "site-v5"
-os.environ.setdefault("PLAYWRIGHT_BROWSERS_PATH", str(ROOT.parent / ".pw-browsers"))
+ROOT = Path(__file__).resolve().parents[2]            # repository root
+SITE = ROOT / "site"                                 # the Mock application: run this at the tag mock-v5
+os.environ.setdefault("PLAYWRIGHT_BROWSERS_PATH", str(ROOT / ".pw-browsers"))
 HREF = re.compile(r"(?<![\w&])#/[A-Za-z0-9_\-/.:%+]*(?:\?[A-Za-z0-9_=&,.%:+\-]*)?")
 
 

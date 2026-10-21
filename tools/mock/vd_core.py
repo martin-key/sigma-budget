@@ -17,7 +17,7 @@ SOURCE_KEYS = ("kfp", "asbp", "bill", "zdb", "zbdoo", "zbnzok", "prb", "parliame
 
 # ------------------------------------------------------------------------------------------------------- PROTO
 def g_proto(ctx):
-    """prototype/ is frozen: same file SET and the same SHA-256 of every file as in tools/prototype.sha256."""
+    """prototype/ is frozen: same file SET and the same SHA-256 of every file as in tools/mock/prototype.sha256 (raw files may be absent; regenerate the rest with prototype_sums.py)."""
     c = Check("PROTO")
     expected = {}
     with open(os.path.join(L.HERE, "prototype.sha256"), "r", encoding="utf-8") as fh:
@@ -41,8 +41,12 @@ def g_proto(ctx):
                 for chunk in iter(lambda: fh.read(1 << 20), b""):
                     h.update(chunk)
             actual[rel] = h.hexdigest()
-    missing = sorted(set(expected) - set(actual))
+    raw_prefix = "prototype/data/raw/"                      # the raw files are not in the repository (docs/data-sources.md)
+    absent = sorted(p for p in set(expected) - set(actual) if p.startswith(raw_prefix))
+    missing = sorted(p for p in set(expected) - set(actual) if not p.startswith(raw_prefix))
     extra = sorted(set(actual) - set(expected))
+    if absent:
+        c.warn("%d raw files of the manifest are not in the repository (prototype/data/raw, see docs/data-sources.md); the files that are present are compared" % len(absent))
     c.ok(not missing, "prototype/ files missing: %s" % ", ".join(missing[:5]))
     c.ok(not extra, "prototype/ has files not in the manifest: %s" % ", ".join(extra[:5]))
     changed = sorted(p for p in expected if p in actual and expected[p] != actual[p])
@@ -287,7 +291,7 @@ def g_glossary(ctx):
 
 
 GROUPS = (
-    ("PROTO", g_proto, "prototype/ file set and every sha256 equal tools/prototype.sha256"),
+    ("PROTO", g_proto, "prototype/ file set and every sha256 equal tools/mock/prototype.sha256"),
     ("ENVELOPE", g_envelope, "meta envelopes, status/source/pending ids, nested pending blocks carry no numbers"),
     ("NUMBERS", g_numbers, "no NaN/Infinity; null and empty strings only at documented positions"),
     ("SIZES", g_sizes, "size budget of DATA_SPEC section 1"),

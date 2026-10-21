@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""calc_check_v5.py - tests of the «Моите данъци» (S18) calculator of mock/site-v5 (project venv only).
+"""calc_check_v5.py - tests of the «Моите данъци» (S18) calculator of site/ (version v5, tag mock-v5) (project venv only).
 
-  PLAYWRIGHT_BROWSERS_PATH=P/.pw-browsers P/.venv/bin/python P/mock/tools/calc_check_v5.py [--shots OUTDIR]
+  PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/calc_check_v5.py [--shots OUTDIR]
 
 Part A  the engine: js/pages/s18-danaci.js compute() is run in the browser for many salaries and compared with an independent
         Python model (Decimal, rounded half up to the cent, rates read from data/rates.json):
@@ -18,9 +18,9 @@ import http.server, json, os, re, socketserver, sys, threading
 from decimal import Decimal as D, ROUND_HALF_UP
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-SITE = ROOT / "site-v5"
-os.environ.setdefault("PLAYWRIGHT_BROWSERS_PATH", str(ROOT.parent / ".pw-browsers"))
+ROOT = Path(__file__).resolve().parents[2]            # repository root
+SITE = ROOT / "site"                                 # the Mock application: run this at the tag mock-v5
+os.environ.setdefault("PLAYWRIGHT_BROWSERS_PATH", str(ROOT / ".pw-browsers"))
 FAILS = []
 CHECKS = [0]
 

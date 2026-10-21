@@ -1,7 +1,7 @@
 """ministries.json (all 46 budgets of ЗДБ 2026), ministries/<code>.json (the published program budgets) and programs.json.
 
 Facts come from three places and are never mixed silently:
-  * the LAW (tools/cache/law_bill.json, parsed from ДВ бр. 69): name, own revenue, expenditure, transfers, the policies
+  * the LAW (tools/mock/cache/law_bill.json, parsed from ДВ бр. 69): name, own revenue, expenditure, transfers, the policies
     (or functional areas) with their amounts - for EVERY budget, so a budget whose program budget is pending still shows
     its policies and total as real numbers;
   * the BILL (same cache): bill -> law differences of the headline figures (чл. 2, 3, 16, 17);

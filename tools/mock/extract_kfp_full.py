@@ -11,7 +11,7 @@ Columns: B = к.2 (КФП) = C = к.3 (национален бюджет) + D = 
   converted numbers with the rounding bound of the conversion.  Any violation is an error (exit code 1), except the two
   source-internal differences of the 2024 files listed in KNOWN_SOURCE_DIFFS (reported as warnings, bounded).
 
-Run:  ../../.venv/bin/python extract_kfp_full.py          (needs xlrd; reads only prototype/ and writes only site/data/)
+Run:  .venv/bin/python tools/mock/extract_kfp_full.py     (needs xlrd; reads only prototype/ and writes only site/data/; raw files: docs/data-sources.md)
 """
 import calendar
 import glob
@@ -265,6 +265,9 @@ def build():
     files = list_reports()
     if len(files) != sum(EXPECTED_MONTHS.values()):
         prob.error("expected %d reports, found %d" % (sum(EXPECTED_MONTHS.values()), len(files)))
+    if not files:
+        prob.error("no reports in prototype/data/raw/kfp_*/ (raw files, not in the repository: docs/data-sources.md)")
+        prob.finish()
     reports = [parse_report(f) for f in files]
     reports.sort(key=lambda r: (r["year"], r["month"]))
     stats = {}
@@ -495,7 +498,7 @@ def build():
         "reconcile": reconcile,
     }
     path, size, changed = write_data("execution.json", doc)
-    say("wrote %s (%d bytes, %s)" % (path.relative_to(DATA.parent.parent.parent), size, "changed" if changed else "unchanged"))
+    say("wrote %s (%d bytes, %s)" % (path.relative_to(DATA.parent.parent), size, "changed" if changed else "unchanged"))
 
     # reference check for the headline of the last two reports (the July numbers must not move when a month is added)
     for (ry, rm), want in sorted(REFERENCE.items()):

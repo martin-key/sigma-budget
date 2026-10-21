@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""shot_v5.py - serve mock/site-v5 locally and take screenshots / quick probes (project venv only).
+"""shot_v5.py - serve site/ (version v5, tag mock-v5) locally and take screenshots / quick probes (project venv only).
 
-  PLAYWRIGHT_BROWSERS_PATH=P/.pw-browsers P/.venv/bin/python P/mock/tools/shot_v5.py OUTDIR 1280,390 'home=#/' 'izp=#/izpalnenie' [--full] [--zoom 2]
+  PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/shot_v5.py OUTDIR 1280,390 'home=#/' 'izp=#/izpalnenie' [--full] [--zoom 2]
   Each target is name=hash (or just a hash). One PNG per target and width: OUTDIR/<name>-<width>.png.
   Prints per shot: console errors, failed requests, horizontal overflow of the page (px), h1 text.
   --full      full-page screenshot (default: first viewport only, 1280x900 / Wx844)
@@ -11,9 +11,9 @@
 import http.server, json, os, socketserver, sys, threading
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-SITE = ROOT / "site-v5"
-os.environ.setdefault("PLAYWRIGHT_BROWSERS_PATH", str(ROOT.parent / ".pw-browsers"))
+ROOT = Path(__file__).resolve().parents[2]            # repository root
+SITE = ROOT / "site"                                 # the Mock application: run this at the tag mock-v5
+os.environ.setdefault("PLAYWRIGHT_BROWSERS_PATH", str(ROOT / ".pw-browsers"))
 
 
 class H(http.server.SimpleHTTPRequestHandler):

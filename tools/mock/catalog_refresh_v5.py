@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""catalog_refresh_v5.py - bring mock/site-v5/data/catalog.json back in line with the files of mock/site-v5/data (pure standard library).
+"""catalog_refresh_v5.py - bring site/data/catalog.json back in line with the files of site/data (version v5: check out the tag mock-v5) (pure standard library).
 
 The V5 pass edited several data files after tools/v5_data_active.py had refreshed the catalog (core, feed, guide, search-index). The catalog states
 their sizes, their top-level schema, their meta.source and the screens that read them, and the CATALOG group of validate_data prints each drift.
@@ -13,8 +13,8 @@ This script recomputes exactly what the validator compares and nothing else:
   * counts: datasets, listed files, real / mock / pending, primary sources.
 data/sebra.json stays on disk, unreferenced, and is not listed (so counts.files is 64 while the folder holds 65).
 
-  python3 mock/tools/catalog_refresh_v5.py           rewrite catalog.json when something differs
-  python3 mock/tools/catalog_refresh_v5.py --check   write nothing; exit 1 when the catalog is stale
+  python3 tools/mock/catalog_refresh_v5.py          rewrite catalog.json when something differs
+  python3 tools/mock/catalog_refresh_v5.py --check   write nothing; exit 1 when the catalog is stale
 """
 import glob
 import gzip
@@ -24,8 +24,8 @@ import os
 import re
 import sys
 
-MOCK = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SITE = os.path.join(MOCK, "site-v5")
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))   # repository root
+SITE = os.path.join(ROOT, "site")                  # the Mock application (run this at the tag mock-v5)
 DATA = os.path.join(SITE, "data")
 UNLISTED = {"sebra.json"}
 

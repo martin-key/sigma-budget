@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
 Извлича ключовите числа от „Проект на бюджетен план на Република България за 2027 г.“
-(МФ, октомври 2026; sources/bud2027_Draft_Budgetary_Plan_of_the_Republic_of_Bulgaria_for_2027.pdf)
-и ги записва в research/dbp-2027/dbp2027_figures.json.
+(МФ, октомври 2026; tmp/sources/bud2027_Draft_Budgetary_Plan_of_the_Republic_of_Bulgaria_for_2027.pdf)
+и ги записва в tmp/research/dbp-2027/dbp2027_figures.json.
 
 Всяко число носи: стойност, мерна единица, година, счетоводна основа, страница, цитат.
 - Табличните числа се четат от клетките на таблицата (PyMuPDF find_tables); цитатът е самият ред.
@@ -19,9 +19,9 @@
   EU_RULE  правило/препоръка на ЕС (корективна траектория)
   DERIVED  изчислено тук от други числа на документа
 
-Пускане (от корена на wg/budget-na-svetlo):
-  .venv/bin/python tools/extract_dbp2027.py
-Само stdlib + PyMuPDF (в .venv). Не пише никъде другаде освен в research/dbp-2027/.
+Пускане (от корена на хранилището):
+  .venv/bin/python tools/mock/extract_dbp2027.py
+Само stdlib + PyMuPDF (в .venv). Не пише никъде другаде освен в tmp/research/dbp-2027/.
 """
 import hashlib
 import json
@@ -31,11 +31,13 @@ from pathlib import Path
 
 import pymupdf
 
-ROOT = Path(__file__).resolve().parents[1]
-PDF = ROOT / "sources" / "bud2027_Draft_Budgetary_Plan_of_the_Republic_of_Bulgaria_for_2027.pdf"
-OUT = ROOT / "research" / "dbp-2027" / "dbp2027_figures.json"
-OUTLOOK = ROOT / "mock" / "site-v5" / "data" / "outlook.json"
+ROOT = Path(__file__).resolve().parents[2]            # repository root
+PDF = ROOT / "tmp" / "sources" / "bud2027_Draft_Budgetary_Plan_of_the_Republic_of_Bulgaria_for_2027.pdf"      # not in the repository: docs/data-sources.md 4.3
+OUT = ROOT / "tmp" / "research" / "dbp-2027" / "dbp2027_figures.json"
+OUTLOOK = ROOT / "site" / "data" / "outlook.json"
 EXPECT_SHA = "8c91cdf4778f2864e1eeb167f14b08d1f68a076ea4ad27a8a4305175a73f1182"
+if not PDF.exists():
+    sys.exit("extract_dbp2027: input missing: %s (not in the repository: docs/data-sources.md 4.3)" % PDF.relative_to(ROOT))
 
 BASES = {
     "ESA_GG": "ЕСС 2010, сектор „Държавно управление“, начислена основа (не КФП)",
@@ -548,7 +550,7 @@ try:
             "kfp_balance_mln": k["balance"]["mln"][i], "kfp_balance_pct_gdp": k["balance"]["pctGdp"][i],
             "gdp_mln_used_by_mock": ol["gdp"]["mln"][i],
         }
-    mock_cmp["_source"] = "mock/site-v5/data/outlook.json (КФП, касова основа; АСБП 2026–2028, Приложение 3)"
+    mock_cmp["_source"] = "site/data/outlook.json (КФП, касова основа; АСБП 2026–2028, Приложение 3)"
 except Exception as e:  # noqa: BLE001
     mock_cmp["_error"] = f"outlook.json не е прочетен: {e}"
 

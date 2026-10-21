@@ -1,22 +1,22 @@
 #!/usr/bin/env python3
-"""guide_v5.py - keep the 8-step guide texts of mock/site-v5 (data/guide.json) in line with the screen names of site-v5/js/routes.js.
+"""guide_v5.py - keep the 8-step guide texts of site/ (data/guide.json) in line with the screen names of site/js/routes.js (run at the tag mock-v5).
 (V5: the guide is no longer a screen; its notes and the five checks are shown in «Бюджетът за 5 минути» (S04). The texts still name the screens
 they point at, so the check stays: every step names a real route with that title and step number.)
 
-The guide text is the working group's own (build_text.py takes it from research/guide/guide_raw.txt and checks it against
-mock/site/js/routes.js). V5 renamed three screens the guide points at, so the old check «guide step 1: no route with title
+The guide text is the working group's own (build_text.py takes it from tmp/research/guide/guide_raw.txt and checks it against
+the v1 routes.js). V5 renamed three screens the guide points at, so the old check «guide step 1: no route with title
 'Какъв е бюджетът?'» stays red on the donor and is NOT hidden here: this script changes the three titles in the V5 copy of the
 guide (steps 1, 6, 8 and the «Следва» links that name them), says so in the file's own sourceNote, and then CHECKS the result
-against site-v5/js/routes.js exactly the way build_text.py does (route title == quoted screen name, route step == step number,
+against site/js/routes.js exactly the way build_text.py does (route title == quoted screen name, route step == step number,
 href resolves to that route, the «Следва» link of step n names step n+1).
 
-  python3 mock/tools/guide_v5.py            apply the V5 wording (idempotent) and check
-  python3 mock/tools/guide_v5.py --check    check only, write nothing; exit 1 on any problem
+  python3 tools/mock/guide_v5.py            apply the V5 wording (idempotent) and check
+  python3 tools/mock/guide_v5.py --check    check only, write nothing; exit 1 on any problem
 """
 import json, os, re, sys
 
-MOCK = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SITE = os.path.join(MOCK, "site-v5")
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))   # repository root
+SITE = os.path.join(ROOT, "site")                  # the Mock application (run this at the tag mock-v5)
 GUIDE = os.path.join(SITE, "data", "guide.json")
 ROUTES = os.path.join(SITE, "js", "routes.js")
 

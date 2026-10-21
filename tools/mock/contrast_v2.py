@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""WCAG contrast of the v2 palette, read straight from mock/site-v2/css/tokens.css (stdlib only, no browser).
+"""WCAG contrast of the v2 palette, read straight from site/css/tokens.css (run at the tag mock-v2) (stdlib only, no browser).
 
-  python3 mock/research/restyle-2026-10-03/contrast_v2.py [path/to/tokens.css]
+  python3 tools/mock/contrast_v2.py [path/to/tokens.css]
 
 Light = the bare :root block, dark = the :root[data-theme="dark"] block laid over it. Text pairs need 4.5:1, UI marks and
 chart series 3:1. Prints one line per pair and exits 1 if any pair falls short. check_mock.py repeats the main pairs in
@@ -11,7 +11,7 @@ import re
 import sys
 from pathlib import Path
 
-CSS = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parents[2] / 'site-v2' / 'css' / 'tokens.css'
+CSS = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parents[2] / 'site' / 'css' / 'tokens.css'
 
 TEXT = [('--ink', b) for b in ('--bg', '--card', '--surface', '--sunk')] + [('--muted', b) for b in ('--bg', '--card', '--surface', '--sunk')] \
     + [('--faint', b) for b in ('--bg', '--card')] \

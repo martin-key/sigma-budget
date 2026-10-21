@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""apply_v6_glue.py - the minimum shared-file glue for the new screen S34 «Бюджет 2027 (проект)» in mock/site-v6.
+"""apply_v6_glue.py - the minimum shared-file glue for the new screen S34 «Бюджет 2027 (проект)» in site/ (applied once to the v5 tree to get v6: run it on a checkout of the tag mock-v5).
 
 v6 is a byte copy of v5 plus ONE screen. This script makes the only permitted edits to shared files (every one is additive and idempotent):
   1. js/routes.js   one route row S34 (periods:'none'), after S31
@@ -17,8 +17,8 @@ import pathlib
 import re
 import sys
 
-W = pathlib.Path(__file__).resolve().parent.parent
-S = W / 'mock' / 'site-v6'
+W = pathlib.Path(__file__).resolve().parents[2]       # repository root
+S = W / 'site'                                         # the Mock application
 
 
 def rd(rel):

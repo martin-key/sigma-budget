@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""png_probe_v5.py - export the PNG of every shareable block of a screen of mock/site-v5 and save the files (project venv only).
+"""png_probe_v5.py - export the PNG of every shareable block of a screen of site/ (version v5, tag mock-v5) and save the files (project venv only).
 
-  PLAYWRIGHT_BROWSERS_PATH=P/.pw-browsers P/.venv/bin/python P/mock/tools/png_probe_v5.py OUTDIR WIDTH 'izp=#/izpalnenie' ['nachalo=#/' ...] [--click]
+  PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/png_probe_v5.py OUTDIR WIDTH 'izp=#/izpalnenie' ['nachalo=#/' ...] [--click]
 
   Each target is name=hash. For every block with a „Сподели“ menu or a „PNG“ button the picture is made the way the page makes it
   (share.renderPng) and saved as OUTDIR/<name>-<width>-<block id>.png; with --click the real menu path is used instead
@@ -11,9 +11,9 @@
 import base64, http.server, json, os, socketserver, sys, threading
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-SITE = ROOT / "site-v5"
-os.environ.setdefault("PLAYWRIGHT_BROWSERS_PATH", str(ROOT.parent / ".pw-browsers"))
+ROOT = Path(__file__).resolve().parents[2]            # repository root
+SITE = ROOT / "site"                                 # the Mock application: run this at the tag mock-v5
+os.environ.setdefault("PLAYWRIGHT_BROWSERS_PATH", str(ROOT / ".pw-browsers"))
 
 
 class H(http.server.SimpleHTTPRequestHandler):

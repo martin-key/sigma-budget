@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """V5 helper: re-apply the v3/v4 wording edits («реални данни» -> «официални данни», etc.) onto donor JSON text.
-Compares string leaves of site-v2 (old wording) vs site-v4 (new wording); for each changed string, replaces the exact
+Compares string leaves of the v2 tree (old wording) vs the v4 tree (new wording), both extracted from their tags into tmp/versions/site-v2 and site-v4; for each changed string, replaces the exact
 JSON-encoded old string by the new one in the target file text. Prints strings that did not match (manual work).
-Usage: v5_wording.py FILE_REL TARGET_DIR   (e.g. search-index.json site-v5/data)"""
+Usage: v5_wording.py FILE_REL TARGET_DIR   (e.g. search-index.json site/data; TARGET_DIR is relative to the repository root)"""
 import json, sys, os
-M = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+M = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))   # repository root
 def leaves(a, b, out):
     if type(a) != type(b): return
     if isinstance(a, dict):
@@ -16,7 +16,7 @@ def leaves(a, b, out):
 def enc(s): return json.dumps(s, ensure_ascii=False)[1:-1]   # content between the quotes
 def main():
     rel, tgt = sys.argv[1], sys.argv[2]
-    old = json.load(open(os.path.join(M, 'site-v2/data', rel))); new = json.load(open(os.path.join(M, 'site-v4/data', rel)))
+    old = json.load(open(os.path.join(M, 'tmp/versions/site-v2/data', rel))); new = json.load(open(os.path.join(M, 'tmp/versions/site-v4/data', rel)))
     out = []; leaves(old, new, out)
     pairs = {}
     for a, b in out: pairs[a] = b

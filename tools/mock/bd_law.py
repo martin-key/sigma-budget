@@ -2,7 +2,7 @@
 legislative path of the three budget laws.
 
 Inputs (no network at build time):
-  * tools/cache/law_bill.json (extract_bill.py): art. 1-47 of the bill (docx) and of the law (Държавен вестник HTML) with the
+  * tools/mock/cache/law_bill.json (extract_bill.py): art. 1-47 of the bill (docx) and of the law (Държавен вестник HTML) with the
     line-by-line diff of the five articles that differ (1, 2, 3, 16, 17).
   * prototype/data/raw/parliament/bill_16715{5,6,7}.json: dates of the reports, readings and proposals. The proposers' names in these
     files are never read; only document numbers, dates and file names.

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""accept_v5.py - acceptance tests of BRIEF-v5 §6 for mock/site-v6 (project venv only).
+"""accept_v5.py - acceptance tests of docs/plan.md for site/ (version v6, tag mock-v6) (project venv only).
 
-  PLAYWRIGHT_BROWSERS_PATH=P/.pw-browsers P/.venv/bin/python P/mock/tools/accept_v5.py [--shots OUTDIR]
+  PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/accept_v6.py [--shots OUTDIR]
 
 NUMBERS  Every number of the comparison table of the home and of #/izpalnenie is read from the screen and compared with the value
          computed independently from data/execution.json (млн. € / 1000, rounded to two decimals): the reference Jan-Aug 2025 / 2026
@@ -17,9 +17,9 @@ Exit 1 on any failure; findings that are only advice are printed as NOTE.
 import http.server, json, os, re, socketserver, sys, threading
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-SITE = ROOT / "site-v6"
-os.environ.setdefault("PLAYWRIGHT_BROWSERS_PATH", str(ROOT.parent / ".pw-browsers"))
+ROOT = Path(__file__).resolve().parents[2]            # repository root
+SITE = ROOT / "site"                                 # the Mock application: run this at the tag mock-v6
+os.environ.setdefault("PLAYWRIGHT_BROWSERS_PATH", str(ROOT / ".pw-browsers"))
 FAILS, NOTES, N = [], [], [0]
 
 

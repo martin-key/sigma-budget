@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 # One command that rebuilds every dataset of the Mock prototype and validates it.
 #
-#   mock/tools/run_all.sh            fetch (cached) -> extract -> build_data -> build_text + build_mock (DATA2) -> build_data again -> validate
-#   mock/tools/run_all.sh --check    writes nothing: every builder in --check mode, then validate (what CI would run)
+#   tools/mock/run_all.sh            fetch (cached) -> extract -> build_data -> build_text + build_mock (DATA2) -> build_data again -> validate
+#   tools/mock/run_all.sh --check    writes nothing: every builder in --check mode, then validate (what CI would run)
 #
 # Order matters: DATA2's builders read my files (ministries, programs, measures, ...) and my catalog, search index and core read
 # DATA2's files (glossary, guide, mock/*.json), so build_data runs twice. site/data/mock/, glossary.json and guide.json are never
-# cleaned or deleted by anything here. Needs .venv (xlrd, PyMuPDF, python-docx). The fetchers use the network only when their cache
-# in mock/tools/cache is missing; the build itself is offline. Exit status 0 only when every step and the validator passed.
+# cleaned or deleted by anything here. Needs .venv (xlrd, PyMuPDF, python-docx) and the raw files in prototype/data/raw (docs/data-sources.md). The fetchers use the network only when their cache
+# in tools/mock/cache is missing; the build itself is offline. Exit status 0 only when every step and the validator passed.
 set -uo pipefail
-cd "$(dirname "$0")/../.." || exit 2          # wg/budget-na-svetlo
+cd "$(dirname "$0")/../.." || exit 2          # repository root
 PY=".venv/bin/python"
-T="mock/tools"
+T="tools/mock"
 MODE="build"
 case "${1:-}" in
   "") ;;
