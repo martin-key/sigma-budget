@@ -36,7 +36,7 @@ def main():
     problems = 0
     with sync_playwright() as p:
         b = p.chromium.launch()
-        ctx = b.new_context(viewport={"width": w, "height": 900}, service_workers="block")
+        ctx = b.new_context(viewport={"width": w, "height": 900}, service_workers="block", reduced_motion="reduce")
         for h in hashes:
             page = ctx.new_page()
             errs, bad = [], []

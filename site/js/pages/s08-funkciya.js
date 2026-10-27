@@ -206,7 +206,7 @@ function vedBlock(ctx, M) {
   });
 }
 
-/** the measures that touch the function: the measures are real, the link to the function is editorial (M06, mock). The „кого засяга / кой плаща / кой печели“ labels are not shown any more (working-group feedback 2026-10-09) */
+/** the measures that touch the function: the measures are real, the link to the function is editorial (M06, mock). The „кого засяга / кой плаща / кой печели“ labels are not shown any more (working-group feedback, 2026-10-09) */
 function measuresBlock(ctx, M) {
   const title = 'Мерки, които засягат функцията';
   const ms = ctx.data?.measures, lb = ctx.data?.['mock/measure-labels'];
@@ -262,7 +262,7 @@ export function render(ctx) {
   const noCol = callout({ kind: 'info', body: `За ${yr(ctx.period.year)} в таблицата към проекта на бюджета няма разбивка по функции. Избери ${ctx.period.year < 2025 ? '2025 г. или по-нова година' : 'друг период'}. По-долу са данните на Евростат за по-стари години.` });
   return {
     title: M.name, eyebrow: 'Функция на бюджета', lede: ledeOf(ctx, M), context: 'Консолидирана фискална програма (КФП): разходи по функции',
-    body: html`${unitSwitch(ctx, { name: 's08-unit', note: 'Важи за списъците и графиките на този екран. „На човек“ и „Сумите и в лева“ се включват от настройките.' })}
+    body: html`${unitSwitch(ctx, { name: 's08-unit', note: 'Важи за списъците и графиките на този екран.' })}
       ${intro}
       ${M.sel >= 0 ? html`${kpiBlock(ctx, M)}${partsBlock(ctx, M)}` : noCol}
       ${yearsBlock(ctx, M)}${cofogBlock(ctx, M)}${vedBlock(ctx, M)}${measuresBlock(ctx, M)}${notesBlock(ctx, M)}`

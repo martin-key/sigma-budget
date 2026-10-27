@@ -283,12 +283,16 @@ async (o) => {
   if (bare) { for (const id of ['topbar', 'sidenav', 'tabbar', 'footer', 'mockbar']) if (shown(id)) add('layout', 'fail', `#${id} is visible in the bare (embed) layout`); }
   else {
     if (!shown('topbar')) add('layout', 'fail', 'the top bar is not visible');
-    if (wide && !shown('sidenav')) add('layout', 'fail', 'wide screen without the left navigation');
+    const navBtn = [...document.querySelectorAll('#sidenav .nav-main')].filter(isVis).length;
+    if (wide && window.innerWidth >= 1241 && (!shown('sidenav') || navBtn !== 5)) add('layout', 'fail', `wide screen: the header shows ${navBtn} group buttons (expected 5)`);
     if (wide && shown('tabbar')) add('layout', 'fail', 'wide screen shows the bottom bar');
-    if (!wide && shown('sidenav')) add('layout', 'fail', 'narrow screen shows the left navigation');
+    if (!wide && (navBtn || [...document.querySelectorAll('#sidenav .nav-cta')].some(isVis)) && window.innerWidth <= 1240) add('layout', 'fail', 'narrow screen shows the group buttons / the red button (only the magnifier stays; the rest is in «Меню»)');
     if (!wide && !shown('tabbar')) add('layout', 'fail', 'narrow screen without the bottom bar');
     const sb = document.getElementById('btn-search');
-    if (!sb || !isVis(sb)) add('layout', 'fail', 'the search button is not visible');
+    // V6 (26.10): the search is a magnifier button in the header (#btn-search, aria-label «Търсене», 44px target) on every screen and every width; it opens the search panel under the header
+    if (!sb || !isVis(sb)) add('layout', 'fail', 'the search magnifier in the header is not visible');
+    else { const q = sb.getBoundingClientRect(); if (!sb.closest('#topbar') || (sb.getAttribute('aria-label') || '') !== 'Търсене' || q.width < 44 || q.height < 44) add('layout', 'fail', `the search button is not a 44px «Търсене» button in the header (${Math.round(q.width)}x${Math.round(q.height)}, label ${sb.getAttribute('aria-label')})`); }
+    if (document.querySelector('#topbar #btn-sources, #topbar #btn-more, #topbar #link-tax')) add('layout', 'fail', 'the header still holds «Източници» / ⋯ / «Моите данъци» (removed in V6)');
     if (!shown('footer')) add('layout', 'fail', 'the footer is not visible');
   }
   const bodyFs = parseFloat(getComputedStyle(document.body).fontSize);
@@ -730,7 +734,7 @@ class Worker:
         o = dict(viewport={'width': extra.get('w', c['w']), 'height': extra.get('h', c['h'])}, color_scheme=c['scheme'],
                  has_touch=c['touch'], locale='bg-BG', timezone_id='Europe/Sofia', service_workers=extra.get('sw', 'block'),
                  accept_downloads=True, permissions=['clipboard-read', 'clipboard-write'])
-        if extra.get('reduced_motion'):
+        if extra.get('reduced_motion') or not extra.get('motion'):          # V6 (26.10): the checks run with the motion switched off (the final state at once); tools/motion_v6.py drives the motion itself
             o['reduced_motion'] = 'reduce'
         ctx = self.browser.new_context(**o)
         ctx.add_init_script(INIT_JS)
@@ -932,11 +936,13 @@ def deep_pass(page):
 
 # concrete numbers the plan fixes for the finished screens (checked only on screens that are no longer stubs)
 VALUE_CHECKS = {
+    # V6 (working-group feedback, 25.10): the plan block has two bars per indicator (2026, 2025: 'NN,N%'), the sums read '30,12 от 49,62 млрд. €', the lede is the new sentence; the long note is gone.
     # v5 (working-group feedback, 10.10): the start page is the v4 opening again: h1, the one button, the plan block (three bars, КФП Jan–Aug 2026 against the annual plan, млрд. €) and the eight question cards;
     # the monthly table (BRIEF §6 values 26,93 / 30,12 / … ) lives in S15 only
     'S01': dict(all=['Държавният бюджет на достъпен език', 'Разгледай бюджета за 5 минути', 'Изпълнение на плана за 2026 г.',
-                     'Приходи', 'Разходи с вноската в ЕС', 'Капиталови разходи', '60,7% от плана', '58,4% от плана', '43,2% от плана',
-                     '30,12 млрд. € от 49,62 млрд. €', '33,19 млрд. € от 56,81 млрд. €', '4,04 млрд. € от 9,36 млрд. €',
+                     'Приходи', 'Разходи с вноската в ЕС', 'Капиталови разходи', '60,7%', '58,4%', '43,2%', '61,2%', '62,3%', '53,3%',
+                     '30,12 от 49,62 млрд. €', '33,19 от 56,81 млрд. €', '4,04 от 9,36 млрд. €',
+                     'Платформата показва държавния бюджет за 2026 г. с прости думи: откъде идват парите, за какво се харчат и как се изпълнява планът.',
                      'Откъде идват парите?', 'За какво се харчат?', 'Изпълнява ли се планът?', 'Колко плащам аз?',
                      'Кой харчи парите?', 'Колко е държавният дълг?', 'Какво се променя?', 'Накъде върви бюджетът?']),
     'S15': dict(all=['26,93', '30,12', '+3,19', '29,59', '33,19', '+3,60', '−2,67', '−3,08', 'дефицит']),
@@ -1147,16 +1153,14 @@ def vc_user(page, info, j):
 
 
 def vc_prefs(page, info, j):
+    # V6 (26.10, working-group feedback): «Само официални данни», «На човек», «Сумите и в лева» (and the sources tags) have no control and an old stored value is never read: they stay off whatever the blob says.
+    # The unit («Покажи сумите в: евро / % от БВП») is still a stored preference.
     snap = page.evaluate("async () => (await import('./js/store.js')).store.snapshot()")
-    bad = [f'{k}={v!r} (store: {snap.get(k)!r})' for k, v in j['want'].items() if snap.get(k) != v]
-    fs = [fail('prefs', f'stored preference not applied: {", ".join(bad)}', route=j['route'], cell=j['cell'], url=j['hash'])] if bad else []
-    if j['want'].get('onlyReal') and not j.get('bare'):          # the embed (bare layout) shows the one figure it was asked for, whatever the visitor's preferences
-        r = page.evaluate(ONLY_REAL_JS)
-        if r['out']:
-            fs.append(fail('only-real', f'"only real data" is on but mock content is still visible: {", ".join(r["out"][:5])}', route=j['route'], cell=j['cell'], url=j['hash']))
-        if r['other']:
-            fs.append(warn('only-real-other', f'{r["other"]} [data-mock] element(s) stay visible with "only real data" on (hand-made mock content must check store.get("onlyReal"))',
-                           route=j['route'], cell=j['cell'], url=j['hash']))
+    REMOVED = ('perPerson', 'leva', 'onlyReal', 'sources')
+    bad = [f'{k}={(False if k in REMOVED else v)!r} (store: {snap.get(k)!r})' for k, v in j['want'].items() if snap.get(k) != (False if k in REMOVED else v)]
+    fs = [fail('prefs', f'stored preference not applied (or a removed switch was read): {", ".join(bad)}', route=j['route'], cell=j['cell'], url=j['hash'])] if bad else []
+    if not j.get('bare') and page.evaluate("() => document.querySelectorAll('[data-block-hidden]').length"):
+        fs.append(fail('only-real', 'a block is hidden by the removed «Само официални данни» switch', route=j['route'], cell=j['cell'], url=j['hash']))
     return fs
 
 
@@ -1236,8 +1240,8 @@ NAV_STATE_JS = r"""() => {
     n: arts.length, route: a ? a.dataset.route : '', view: a ? a.dataset.view : '', h1: h1 ? h1.textContent.trim() : '', h1n: v ? v.querySelectorAll('h1').length : 0,
     title: document.title, hash: location.hash, y: Math.round(window.scrollY), focus: ae && ae === h1 ? 'h1' : name,
     bare: document.body.classList.contains('bare'), busy: v ? v.getAttribute('aria-busy') : 'no-view',
-    side: cur('#sidenav a[data-nav]').concat(cur('#link-tax').map(x => x.split(':')[0] + ':S18')), tab: cur('#tabbar > *'), overlays: document.querySelectorAll('dialog[open], .popover, #gl-pop').length,
-    section: document.querySelectorAll('#sidenav .nav-sec[data-current]:not([data-sec="more"])').length, periodHidden: pb ? !!pb.hidden : null, nodes: document.getElementsByTagName('*').length, old: v ? v.querySelectorAll('[data-chk-old]').length : 0
+    side: cur('#sidenav a[data-nav]'), tab: cur('#tabbar > *'), overlays: document.querySelectorAll('dialog[open], .popover, #gl-pop').length,
+    section: [...document.querySelectorAll('#sidenav .nav-sec[data-current]')].map(e => e.dataset.sec), sectionBtn: document.querySelectorAll('#sidenav .nav-sec[data-current] > .nav-main[aria-current]').length, periodHidden: pb ? !!pb.hidden : null, nodes: document.getElementsByTagName('*').length, old: v ? v.querySelectorAll('[data-chk-old]').length : 0
   };
 }"""
 MARK_OLD_JS = """() => { document.querySelectorAll('#view article.page').forEach(a => a.setAttribute('data-chk-old', '1'));
@@ -1305,12 +1309,17 @@ def tour_verify(st, step, prev_title, cell, how):
     if st['overlays']:
         F('tour-overlay', f'{st["overlays"]} dialog/popover element(s) are still open after {how} navigation')
     if not step['bare']:
+        # V6: the header has five group buttons (dropdowns); the screen's group button is current (data-current + aria-current), the red «Бюджет 2027» link is current on S34 only
+        secs = st['section']
+        if step['nav'] and (len(secs) != 1 or st['sectionBtn'] != 1):
+            F('tour-nav', f'the header marks {secs} (buttons with aria-current: {st["sectionBtn"]}) for a screen of the menu (expected exactly one group)')
+        if not step['nav'] and r not in ('S08', 'S11', 'S21') and secs:
+            F('tour-nav', f'the header marks {secs} as the current group for a screen that is not in the menu')
         pages = [x for x in st['side'] if x.startswith('page:')]
-        if step['nav'] and pages != [f'page:{r}']:
-            F('tour-nav', f'#sidenav aria-current is {st["side"]} (expected only page:{r})')
-        if not step['nav'] and pages:
-            F('tour-nav', f'#sidenav marks {pages} as the current page for a screen that is not in the menu')
-        if len(st['tab']) > 1 or (len(st['tab']) == 0 and st.get('section')):                  # v5: a screen under «Още» / «Моите данъци» marks no tab
+        if pages != ([f'page:{r}'] if r == 'S34' else []):
+            F('tour-nav', f'the header links mark {pages} as the current page (only the red «Бюджет 2027» link does, on S34)')
+        tab_expected = r == 'S01' or any(x in ('g1', 'g2') for x in secs)                    # the bottom bar has the three tabs Начало · Отчет · Бюджет
+        if len(st['tab']) > 1 or (len(st['tab']) == 0 and tab_expected):
             F('tour-nav', f'#tabbar has {len(st["tab"])} aria-current items (expected one on a screen of the three sections, none elsewhere): {st["tab"]}')
         if st['periodHidden'] is not None and st['periodHidden'] != (step['periods'] == 'none'):
             F('tour-period', f'the period button is {"hidden" if st["periodHidden"] else "shown"} on a screen with periods={step["periods"]}')
@@ -1537,6 +1546,7 @@ def ch_skip(w, cell, F, W, j, outs):
     page = o.page
     page.evaluate(BLUR_JS)
     page.keyboard.press('Tab')
+    page.wait_for_timeout(120)                                               # V6: the skip link slides in with a transition; measure after it
     a = act(page)
     if not a.get('skip'):
         F('skip-link', f'the first Tab stop is {a["sig"]}, not the skip link "Към съдържанието" (it must be the first focusable element)')
@@ -1694,6 +1704,10 @@ def ch_palette(w, cell, F, W, j, outs):
     if n['focus'] != 'h1':
         F('palette-focus', f'after following a result the focus is on {n["focus"]}, not on the new screen\'s heading')
     # 4) the address changes while it is open: it goes away with the screen
+    page.evaluate(MARK_OLD_JS)
+    page.evaluate("() => { location.hash = '#/'; }")             # V6: the search field lives on the start screen (under the plan block); go back to it
+    wait_for(page, NEW_SCREEN_JS, timeout=6000)
+    settle(page, 80)
     page.click('#btn-search')
     if wait_there(page, DLG):
         page.evaluate(MARK_OLD_JS)
@@ -1706,6 +1720,10 @@ def ch_palette(w, cell, F, W, j, outs):
         if n['focus'] != 'h1':
             F('palette-focus', f'after the address changed under the open palette the focus is on {n["focus"]}, not on the heading')
     # 5) a click on the backdrop closes it
+    page.evaluate(MARK_OLD_JS)
+    page.evaluate("() => { location.hash = '#/'; }")             # V6: the search field lives on the start screen (under the plan block); go back to it
+    wait_for(page, NEW_SCREEN_JS, timeout=6000)
+    settle(page, 80)
     page.click('#btn-search')
     if wait_there(page, DLG):
         page.mouse.click(3, 3)
@@ -1790,81 +1808,44 @@ def ch_popovers(w, cell, F, W, j, outs):
             esc_close('#btn-period', 'period (restricted screen)')
         page.evaluate("() => { location.hash = '#/razhodi'; }")
         wait_for(page, "() => { const a = document.querySelector('#view article.page'); return !!a && a.dataset.route === 'S07' && a.dataset.ready === '1'; }", timeout=6000)
-    # ---- settings popover (FB4: the view-for and the theme choices moved from the top bar into «Още настройки»; the popover stays open after a choice)
-    PREF_N = "(k) => document.querySelectorAll('.popover[role=\"dialog\"] input[data-pref=\"' + k + '\"]').length"
-    s = open_pop('#btn-more', 'settings')
-    if s:
-        sane(s, 'settings')
-        for need in ('onlyReal', 'perPerson', 'leva'):
-            if need not in s['boxes']:
-                F('popover', f'the settings popover has no toggle for "{need}" (found: {s["boxes"]})')
-        nu, nt = page.evaluate(PREF_N, 'userType'), page.evaluate(PREF_N, 'theme')
-        if nu != (len(users) if meta['roles'] else 0):
-            F('popover', f'the settings popover lists {nu} view-for options, expected {len(users) if meta["roles"] else 0} (v5: the role selector is off unless ROLE_SELECTOR is true in js/store.js)')
-        if nt != 0:
-            F('popover', f'the settings popover has {nt} theme options, expected none (v4 is light only)')
-        if page.evaluate("() => document.querySelectorAll('#topbar [data-theme-set], #topbar #btn-user').length"):
-            F('topbar', 'the top bar still carries the view-for / theme controls (FB4 moves them into «Още настройки»)')
-        # user type (v5: only when the role selector is switched on)
-        want = users[1]
-        if meta['roles']:
-            page.click(f'{POP} label:has(input[data-pref="userType"][value="{want["id"]}"])')
-            page.wait_for_timeout(150)
-            if page.evaluate("async () => (await import('./js/store.js')).store.get('userType')") != want['id']:
-                F('prefs', f'choosing the view "{want["label"]}" did not set userType in the store')
-            if page.evaluate(PREFS_JS).get('userType') != want['id']:
-                F('prefs-persist', f'the user type "{want["id"]}" is not stored in localStorage (bns.prefs.v1: {page.evaluate(PREFS_JS)})')
-            if not present(page, POP):
-                W('popover', 'the settings popover closed itself after a view-for choice (it should stay open for the next one)')
-        # theme: v4 is light only (СИГМА has no dark theme), so there is nothing to switch
-        # toggles
-        if not present(page, POP):
-            s = open_pop('#btn-more', 'settings')
-        if present(page, POP):
-            page.click(f'{POP} label:has(input[data-pref="onlyReal"])')
-            page.wait_for_timeout(150)
-            on = page.evaluate("async () => (await import('./js/store.js')).store.get('onlyReal')")
-            if on is not True:
-                F('prefs', f'the "Само официални данни" toggle did not set onlyReal (store says {on!r})')
-            if page.evaluate(PREFS_JS).get('onlyReal') is not True:
-                F('prefs-persist', 'onlyReal is not stored in localStorage after the toggle')
-            if not present(page, POP):
-                W('popover', 'the settings popover closed itself after a toggle (it should stay open for the next one)')
-            else:
-                page.click(f'{POP} [data-action="legend"]')
-                if wait_there(page, 'dialog.sheet[open]'):
-                    page.keyboard.press('Escape')
-                    if not wait_gone(page, 'dialog.sheet'):
-                        F('legend', 'Escape does not close the legend sheet')
-                else:
-                    F('legend', 'the "Легенда" button in the settings popover opens nothing')
-                if present(page, POP):
-                    page.keyboard.press('Escape')
-                    wait_gone(page, POP)
-                    if not is_active(page, '#btn-more'):
-                        F('popover-focus', f'after Escape the focus is on {act(page)["sig"]}, not back on #btn-more (settings)')
-    # ---- sources
-    b = page.evaluate("() => document.getElementById('btn-sources').getAttribute('aria-pressed')")
-    page.click('#btn-sources')
-    page.wait_for_timeout(100)
-    st = page.evaluate("() => ({ p: document.getElementById('btn-sources').getAttribute('aria-pressed'), d: document.documentElement.getAttribute('data-sources') })")
-    if st['p'] == b or (st['p'] == 'true') != (st['d'] == '1'):
-        F('sources', f'the "Източници" switch is inconsistent: aria-pressed {b} -> {st["p"]}, html[data-sources]={st["d"]}')
-    if page.evaluate(PREFS_JS).get('sources') is None:
-        F('prefs-persist', 'the "Източници" switch is not stored in localStorage')
-    # ---- a reload keeps the view-for choice; v4 stays light (no data-theme, colour scheme light)
+    # ---- V6 (26.10, working-group feedback): the settings block is gone everywhere: no ⋯ popover, no footer settings button, no switches; «Легенда» stays as a footer entry
+    if present(page, '#footer [data-action="settings"], [data-pref], #btn-more'):
+        F('settings-gone', 'a settings control («Настройки», a [data-pref] switch or #btn-more) is still on the screen')
+    leg = page.evaluate("() => { const b = document.querySelector('#footer [data-action=\"legend\"]'); return b ? b.textContent.trim() : null; }")
+    if not leg or 'Легенда' not in leg:
+        F('settings-gone', f'the footer lost the «Легенда» entry (found {leg!r})')
+    # an old stored value is never read: stale switches in localStorage must not turn anything on
+    page.evaluate("() => localStorage.setItem('bns.prefs.v1', JSON.stringify({ onlyReal: true, perPerson: true, leva: true, sources: true }))")
     page.reload(wait_until='domcontentloaded')
     w.ready(page)
+    snap = page.evaluate("async () => { const s = (await import('./js/store.js')).store; return ['onlyReal', 'perPerson', 'leva', 'sources'].map(k => s.get(k)); }")
+    if any(snap):
+        F('settings-gone', f'stored values of the removed switches are still read (onlyReal, perPerson, leva, sources = {snap})')
+    # ---- V6: the five group buttons of the header (dropdowns), the red «Бюджет 2027» link, and nothing else in the button bar
+    names = page.evaluate("() => [...document.querySelectorAll('#sidenav .nav-main')].map(b => b.textContent.trim())")
+    if names != ['Начало', 'Изпълнение', 'Бюджет', 'Данъци и контекст', 'Данни и проект']:
+        F('header-nav', f'the header group buttons are {names}, expected Начало · Изпълнение · Бюджет · Данъци и контекст · Данни и проект')
+    cta = page.evaluate("() => { const a = document.querySelector('#sidenav .nav-cta'); return a ? { t: a.textContent.trim(), h: a.getAttribute('href'), last: a === document.querySelector('#sidenav .nav-in').lastElementChild, bg: getComputedStyle(a).backgroundColor } : null; }")
+    if not cta or cta['t'] != 'Бюджет 2027' or cta['h'] != '#/byudzhet-2027' or not cta['last']:
+        F('header-nav', f'the red button is {cta} (expected the last item of the bar: «Бюджет 2027» -> #/byudzhet-2027)')
+    elif cta['bg'] != 'rgb(172, 27, 24)':
+        F('header-nav', f'the «Бюджет 2027» button is not red (background {cta["bg"]})')
+    for i in range(5):
+        sel = f'#sidenav .nav-main[data-grp="{i}"]'
+        s = open_pop(sel, f'header group {i}')
+        if s:
+            sane(s, f'header group {i}')
+            links = page.evaluate("() => [...document.querySelectorAll('.popover[role=\"dialog\"] a[href^=\"#/\"]')].map(a => a.getAttribute('href'))")
+            if not links:
+                F('header-nav', f'the dropdown of header group {i} has no links')
+            esc_close(sel, f'header group {i}')
+    for gone in ('#btn-sources', '#btn-more', '#link-tax'):
+        if present(page, gone):
+            F('header-nav', f'{gone} is still in the page (removed in V6)')
     st = page.evaluate("() => ({ th: document.documentElement.getAttribute('data-theme'), cs: getComputedStyle(document.documentElement).colorScheme })")
     if st['th'] is not None or 'dark' in (st['cs'] or ''):
         F('theme-switch', f'v4 is light only, but after a reload html[data-theme]={st["th"]!r} and color-scheme is {st["cs"]!r}')
-    s = open_pop('#btn-more', 'settings (after the reload)')
-    if s:
-        kept = page.evaluate("() => [...document.querySelectorAll('.popover[role=\"dialog\"] input[data-pref=\"userType\"]:checked')].map(r => r.value)")
-        if meta['roles'] and kept != [users[1]['id']]:
-            F('prefs-persist', f'after a reload the settings popover shows the view {kept} as chosen, expected [{users[1]["id"]!r}]')
-        page.keyboard.press('Escape')
-        wait_gone(page, POP)
+    page.evaluate("() => localStorage.removeItem('bns.prefs.v1')")
 
 
 def ch_phone(w, cell, F, W, j, outs):
@@ -1891,10 +1872,12 @@ def ch_phone(w, cell, F, W, j, outs):
         return { title: (d.querySelector('.sheet-title') || {}).textContent, links: d.querySelectorAll('.more-list a').length, users: d.querySelectorAll('input[data-pref="userType"]').length, themes: d.querySelectorAll('input[data-pref="theme"]').length,
           boxes: [...d.querySelectorAll('input[type="checkbox"][data-pref]')].map(i => i.dataset.pref), foc: d.contains(document.activeElement), l: Math.round(r.left), r: Math.round(r.right), vw: innerWidth, sw: document.documentElement.scrollWidth,
           modal: document.documentElement.classList.contains('has-modal'), exp: document.getElementById('btn-menu').getAttribute('aria-haspopup') }; }""")
+    if not page.evaluate("() => { const a = document.querySelector('dialog.sheet[open] .more-cta .nav-cta'); return !!a && a.textContent.trim() === 'Бюджет 2027' && a.getAttribute('href') === '#/byudzhet-2027'; }"):
+        F('sheet', 'the phone «Меню» does not start with the red «Бюджет 2027» button')
     if st['links'] < 15:
         F('sheet', f'the "Още" sheet lists only {st["links"]} screens (expected the whole menu)')
-    if st['users'] != 0 or st['themes'] != 0 or sorted(st['boxes']) != sorted(['sources', 'onlyReal', 'perPerson', 'leva']):
-        F('sheet', f'the "Още" sheet settings are incomplete (user types {st["users"]}, themes {st["themes"]}, toggles {st["boxes"]})')
+    if st['users'] != 0 or st['themes'] != 0 or st['boxes']:   # V6 (26.10): the whole «Настройки» block is gone from the drawer
+        F('sheet', f'the phone menu still has settings (user types {st["users"]}, themes {st["themes"]}, toggles {st["boxes"]})')
     if not st['foc']:
         F('sheet-focus', 'the focus is not inside the "Още" sheet after it opened')
     if st['l'] < 0 or st['r'] > st['vw'] + 1 or st['sw'] > st['vw'] + 1:
@@ -4069,7 +4052,7 @@ def job_theme_chrome(w, j):
     wide = is_wide(cell)
     extra = {'th_chrome': 1}
     ctx, page, probe = w.cell(cell, tm='view', reduced_motion=True)
-    openers = ['#btn-search', '#btn-period', '#btn-more'] if wide else ['#btn-search', '#btn-period', '#btn-menu']
+    openers = ['#btn-search', '#btn-period', '#sidenav .nav-main[data-grp="2"]'] if wide else ['#btn-search', '#btn-period', '#btn-menu']
     try:
         for scheme in ('light', 'dark'):
             page.emulate_media(color_scheme=scheme, forced_colors='none')

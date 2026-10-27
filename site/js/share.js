@@ -242,6 +242,7 @@ function drawTable(x, t, W, y, pad, fam) {
  * watermark defaults to „is this block mock?“; the checker calls renderPng(spec,{watermark:false}) to prove the pixels differ.
  */
 export async function renderPng(spec, { watermark = isMock(spec), pixelRatio = 2 } = {}) {
+  await import('./ui/motion.js').then(m => m.settle()).catch(() => {});      // V6: a picture shows the final state, never a half-counted number
   await fonts();
   const viaDom = await import('./ui/png.js').then(m => m.canvasFor(spec, { watermark, pixelRatio })).catch(e => { console.error('[png]', e); return null; });
   if (viaDom) return viaDom;

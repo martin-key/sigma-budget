@@ -12,6 +12,7 @@
 //   demo  loading | empty | error | pending | offline: renders that state component on any URL
 import { ROUTES, NOT_FOUND, byId, match, href as routeHref, chainOf, GROUPS } from './routes.js';
 import { store, DEFAULT_PERIOD, ROLE_SELECTOR } from './store.js';
+import * as motion from './ui/motion.js';
 import { data, PendingError } from './data.js';
 import { html, SafeHtml } from './html.js';
 import { parseQuery, buildQuery } from './format.js';
@@ -54,7 +55,7 @@ function canonQuery(q) {
 const sigOf = (route, params, query) => `${route.id}|${JSON.stringify(params)}|${JSON.stringify(Object.entries(query).filter(([k]) => k !== 'to'))}`;
 const ensureKey = () => { if (!history.state || !history.state.k) history.replaceState({ k: ++histK }, ''); return history.state.k; };
 const saveScroll = () => { if (curK) scrollPos.set(curK, window.scrollY); };
-const runCleanups = () => { const c = cleanups; cleanups = []; for (const f of c) { try { f(); } catch (e) { console.error(e); } } };
+const runCleanups = () => { motion.cleanup(); const c = cleanups; cleanups = []; for (const f of c) { try { f(); } catch (e) { console.error(e); } } };
 
 /* ------------------------------------------------------------------ public helpers (also on ctx) */
 export function announce(msg) {
@@ -412,6 +413,7 @@ async function render(kind) {
     else window.scrollTo(0, 0);
   };
   applyScroll();
+  motion.enter(article, kind);                                  // V6: the screen rises in; blocks further down appear on scroll (nothing on a 'rerender'; off for reduced motion)
   if (kind === 'rerender') { if (fk) document.querySelector(fk)?.focus({ preventScroll: true }); }
   else if (kind !== 'load' && !query.to) h1.focus({ preventScroll: true });
 
@@ -431,7 +433,9 @@ async function render(kind) {
     cleanups.push(...own);
     if (article.querySelector('[data-gl-scan]')) import('./glossary.js').then(m => m.scan?.(article)).catch(e => console.error('[glossary] scan failed', e));
     await import('./ui/png.js').then(m => m.scan?.(article)).catch(e => console.error('[png] scan failed', e));   // „PNG“ button on every statistic
+    if (seq !== navSeq) return;
     if (kind === 'pop' || query.to || kind === 'load') applyScroll();
+    motion.scan(article);                                         // bars fill and numbers count when they come into view
     article.dataset.ready = '1';
   })();
   await readyP;

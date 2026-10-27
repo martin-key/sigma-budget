@@ -123,7 +123,7 @@ export function render(ctx) {
     first = false;
     return { ...c, kpi: { ...c.kpi, scope } };
   });
-  return html`${unitSwitch(ctx, { name: 's05-unit', note: 'Важи за сумите на картите. „На човек“ и „Сумите и в лева“ се включват от настройките.' })}
+  return html`${unitSwitch(ctx, { name: 's05-unit', note: 'Важи за сумите на картите.' })}
     <ul class="s05-cards" role="list">${cards.map(card)}</ul>`;
 }
 

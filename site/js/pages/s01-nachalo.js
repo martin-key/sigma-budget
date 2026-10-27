@@ -1,5 +1,5 @@
 // S01 · Начало · #/ · V5 (working-group feedback, 2026-10-10). The start page is the v4 opening again, and nothing else, top to bottom:
-//   1. «Държавният бюджет на достъпен език» with the v4 lede (the shell draws the eyebrow, the heading and the lede);
+//   1. «Държавният бюджет на достъпен език» with the lede of 25.10 (the shell draws the eyebrow, the heading and the lede);
 //   2. one primary button «Разгледай бюджета за 5 минути» → S04;
 //   3. «Изпълнение на плана за 2026 г.»: the very block of «Изпълнение» (js/ui/plan.js), numbers from execution.json through js/exec.js;
 //   4. eight question cards: the v4 «Разгледай бюджета» list, without the four cards that are not wanted here (S04, S16, S19, S24).
@@ -28,9 +28,9 @@ const ASK = [
 export function title() { return 'Държавният бюджет на достъпен език'; }
 export function next() { return []; }          // nothing after the last card: the page ends with the questions
 
-/** the v4 lede, word for word */
+/** the lede, word for word as in the working-group text of 25.10 (V6) */
 export function lede(ctx) {
-  return html`<strong>Бюджет на светло</strong> показва държавния бюджет за <span class="nowrap">2026 г.</span> с прости думи: <a href="${ctx.href('S06')}">откъде идват парите</a>, <a href="${ctx.href('S07')}">за какво се харчат</a> и <a href="${ctx.href('S15')}">как се изпълнява планът</a>.`;
+  return html`Платформата показва държавния бюджет за <span class="nowrap">2026 г.</span> с прости думи: <a href="${ctx.href('S06')}">откъде идват парите</a>, <a href="${ctx.href('S07')}">за какво се харчат</a> и <a href="${ctx.href('S15')}">как се изпълнява планът</a>.`;
 }
 
 export function render(ctx) {

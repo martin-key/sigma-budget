@@ -3,6 +3,7 @@ import { data } from './data.js';
 import { router } from './router.js';
 import { shell } from './shell.js';
 import { initActions } from './actions.js';
+import * as motion from './ui/motion.js';
 
 const wait = ms => new Promise(r => setTimeout(r, ms));
 
@@ -10,6 +11,7 @@ async function boot() {
   // core.json carries the source cards and the „Предстои“ texts; do not hold the first paint for more than ~1.5 s
   const coreP = data.load('core').catch(() => null);
   await Promise.race([coreP, wait(1500)]);
+  motion.init();
   shell.init();
   initActions();
   coreP.then(() => { shell.refreshFooter(); });

@@ -174,7 +174,7 @@ def part_a(page):
 def part_b(browser, port, shots):
     print("B. screen")
     for w in (1280, 390):
-        ctx = browser.new_context(viewport={"width": w, "height": 900 if w >= 700 else 844}, service_workers="block", has_touch=w < 700)
+        ctx = browser.new_context(viewport={"width": w, "height": 900 if w >= 700 else 844}, service_workers="block", reduced_motion="reduce", has_touch=w < 700)
         page = ctx.new_page()
         errs = []
         page.on("console", lambda m: errs.append(m.text[:160]) if m.type == "error" else None)
@@ -255,7 +255,7 @@ def main():
     port = srv.server_address[1]
     with sync_playwright() as p:
         b = p.chromium.launch()
-        ctx = b.new_context(service_workers="block")
+        ctx = b.new_context(service_workers="block", reduced_motion="reduce")
         page = ctx.new_page()
         page.goto(f"http://127.0.0.1:{port}/index.html#/danaci")
         page.wait_for_selector("#s18-view", timeout=8000)

@@ -411,8 +411,8 @@ a.gl:hover{color:var(--crimson)}
 @media (forced-colors:active){a.gl{text-decoration-color:LinkText}}
 
 /* ---- search palette (search.js): the underlined serif field with a crimson prompt, results like СИГМА's smart search ---- */
-dialog.palette{margin:72px auto 0;padding:0;border:1px solid var(--ink);border-radius:0;background:var(--paper);color:var(--ink);box-shadow:var(--shadow-2);width:min(680px,calc(100vw - 2 * var(--sp-3)));max-width:none;max-height:min(78vh,640px);overflow:hidden}
-dialog.palette::backdrop{background:var(--overlay)}
+dialog.palette{position:fixed;top:var(--pal-top,64px);right:max(var(--gutter),calc((100vw - var(--max)) / 2 + var(--gutter)));left:auto;margin:0;padding:0;border:1px solid var(--ink);border-radius:0;background:var(--paper);color:var(--ink);box-shadow:var(--shadow-2);width:min(560px,calc(100vw - 2 * var(--sp-3)));max-width:none;max-height:min(78vh,640px);overflow:hidden}   /* V6: a dropdown under the header, at the right below the magnifier */
+dialog.palette::backdrop{background:rgb(21 17 12/.18)}
 .pal-in{display:flex;flex-direction:column;max-height:inherit}
 .pal-field{display:flex;align-items:center;gap:var(--sp-3);margin:var(--sp-3) var(--sp-4) 0;padding:0 0 2px;border-bottom:1px solid var(--ink)}
 .pal-field::before{content:"›";flex:none;color:var(--crimson);font:400 1.75rem/1 var(--font-serif)}
@@ -440,7 +440,7 @@ dialog.palette::backdrop{background:var(--overlay)}
 .pal-more{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);margin-top:var(--sp-2);border-top:1px solid var(--rule);color:var(--crimson)}
 .pal-more .pal-title{font:500 var(--fs-xs)/1.3 var(--font-mono);letter-spacing:.08em;text-transform:uppercase}
 .pal-all{margin-left:auto}
-@media (max-width:599px){dialog.palette{margin-top:var(--sp-2);width:calc(100vw - 16px);max-height:calc(100vh - 16px);max-height:calc(100dvh - 16px)}.pal-foot .kbd-hint{display:none}.pal-field input{font-size:1.125rem}}
+@media (max-width:599px){dialog.palette{left:8px;right:8px;width:auto;max-height:calc(100vh - var(--pal-top,64px) - 8px);max-height:calc(100dvh - var(--pal-top,64px) - 8px)}.pal-foot .kbd-hint{display:none}.pal-field input{font-size:1.125rem}}
 
 /* ---- additions: block / KPI details, cards (ui/cards.js), list and progress details ---- */
 .block-asof{margin:0;color:var(--ink-soft);white-space:nowrap}
@@ -566,37 +566,35 @@ h4.block-title{font-size:var(--fs-1)}
 @media (max-width:639px){.exp-h{flex-basis:100%}.exp-seg{width:100%}.exp-opt{flex:1 1 auto;padding:4px 8px}}
 @media (forced-colors:active){.exp-opt{border-color:ButtonText}.exp-opt[aria-current="page"]{outline:2px solid Highlight}}
 
-/* ---- the plan block (V5), shared by S01 and S15 (js/ui/plan.js): three bars, the latest report against the annual plan; neutral colours (ink for spending, teal for revenue), never a „lagging“ colour. ----
-   Narrow (the block under 44rem wide: every phone, the landscape phone): compact rows, one under the other: «label · NN,N% от плана», bar, figures, small comparison.
-   Wide (44rem = 704px or more, so the portrait tablet at 768 too): ONE row of three equal columns (working-group feedback, 2026-10-10). The wrapper .s15-plan-wrap is the size container, so the switch follows the
-   width of the block itself (not the window: S01 and S15 share it). At the narrowest column (~218px) the label fits one line and the figures line breaks as «30,12 млрд. € / от 49,62 млрд. €»
-   (the NBSP after «от» in plan.js keeps «от 49,62 млрд. €» together). A subgrid gives every column the same four rows (name + %, bar, figures, comparison), so the bars stay level even when a name
-   wraps. Selectors keep the weight of the old S15-only rules (.page[data-route]). ---- */
+/* ---- the plan block, shared by S01 and S15 (js/ui/plan.js). V6 (working-group feedback, 25.10): per indicator the name, the sum «30,12 от 49,62 млрд. €» and TWO bars on the same 0–100% scale (2026 black, the previous
+   year red), each as one line «year · bar · percent». No notes. Neutral colours: teal (revenue) or ink (spending) for 2026, 2025 red; both bars equally thick; never a „lagging“ colour.
+   Narrow (the block under 44rem wide: every phone): the indicators one under the other. Wide (44rem or more, the portrait tablet at 768 too): three columns; a subgrid gives every column the same four rows
+   (name, sum, 2026, previous year), so the bars stay level. The wrapper .s15-plan-wrap is the size container, so the switch follows the width of the block itself (S01 and S15 share it). ---- */
 .page[data-route] .s15-plan-wrap { container: s15plan / inline-size; margin: var(--sp-4) 0 0; }
-.page[data-route] .s15-plan { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-4); }
+.page[data-route] .s15-plan { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-5); }
 .page[data-route] .s15-plan-row { display: grid; gap: var(--sp-1); }
-.page[data-route] .s15-prog { display: grid; gap: var(--sp-2); }
-.page[data-route] .s15-prog .prog-top { flex-wrap: wrap; column-gap: var(--sp-3); row-gap: 0; }
-.page[data-route] .s15-prog .prog-label { font: 400 var(--fs-1)/1.2 var(--font-serif); letter-spacing: -.01em; }
-.page[data-route] .s15-prog .prog-text { color: var(--ink); font: 500 var(--fs-0)/1.2 var(--font-mono); }
-.page[data-route] .s15-prog .prog-track { height: 14px; }
-.page[data-route] .s15-plan-row[data-kind="revenue"] .prog-fill { background: var(--rev); }
-.page[data-route] .s15-plan-fig { margin: 0; font: 400 var(--fs-s)/1.4 var(--font-mono); font-variant-numeric: tabular-nums; color: var(--ink-mid); }
-.page[data-route] .s15-plan-before { margin: 0; max-width: 60ch; font-size: var(--fs-xs); line-height: 1.45; }
+.page[data-route] .s15-plan-name { margin: 0; font: 400 var(--fs-1)/1.2 var(--font-serif); letter-spacing: -.01em; }
+.page[data-route] .s15-plan-fig { margin: 0 0 var(--sp-1); font: 400 var(--fs-s)/1.4 var(--font-mono); font-variant-numeric: tabular-nums; color: var(--ink-mid); }
 .page[data-route] .s15-lev { display: block; margin-top: 2px; color: var(--ink-mid); font: 400 var(--fs-xs)/1.35 var(--font); }
+.page[data-route] .s15-prog { display: grid; grid-template-columns: 2.75rem minmax(0, 1fr) 4.25rem; align-items: center; column-gap: var(--sp-3); }
+.page[data-route] .s15-prog .prog-top { display: contents; }
+.page[data-route] .s15-prog .prog-label { grid-column: 1; grid-row: 1; font: 500 var(--fs-s)/1.2 var(--font-mono); color: var(--ink-mid); }
+.page[data-route] .s15-prog .prog-track { grid-column: 2; grid-row: 1; }
+.page[data-route] .s15-prog .prog-text { grid-column: 3; grid-row: 1; text-align: right; color: var(--ink); font: 500 var(--fs-0)/1.2 var(--font-mono); }
+.page[data-route] .s15-prog .prog-track { height: 12px; }                       /* V6 (26.10): both bars are the SAME thickness */
+.page[data-route] .s15-prog-cur .prog-fill { background: var(--ink); }          /* 2026: black */
+.page[data-route] .s15-prog-prev .prog-fill { background: var(--crimson); }     /* 2025: red (the site's one accent, 6.9:1 on paper); the year and the percent are always written */
+.page[data-route] .s15-prog-prev .prog-label, .page[data-route] .s15-prog-prev .prog-text { color: var(--ink-mid); font-weight: 400; }
+.page[data-route] .s15-prog-prev[data-st="pending"] .prog-text { grid-column: 2 / 4; text-align: left; font-weight: 400; }
+.page[data-route] .s15-prog-prev[data-st="pending"] .prog-track { display: none; }
 @container s15plan (min-width: 44rem) {
   .page[data-route] .s15-plan { grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: var(--sp-5); row-gap: 0; }
-  .page[data-route] .s15-plan-row { grid-row: span 4; grid-template-rows: subgrid; gap: 0; }
-  .page[data-route] .s15-prog { display: contents; }
-  .page[data-route] .s15-prog .prog-top { flex-direction: column; align-items: flex-start; gap: 2px; }
-  .page[data-route] .s15-prog .prog-track { margin-top: var(--sp-2); }
-  .page[data-route] .s15-plan-fig { margin-top: var(--sp-2); }
-  .page[data-route] .s15-plan-before { margin-top: var(--sp-1); }
+  .page[data-route] .s15-plan-row { grid-row: span 4; grid-template-rows: subgrid; gap: var(--sp-2); }
 }
 @container s15plan (min-width: 64rem) {
   .page[data-route] .s15-plan { column-gap: var(--sp-6); }
 }
 @media (forced-colors: active) {
   .page[data-route] .s15-prog .prog-track { border: 1px solid CanvasText; }
-  .page[data-route] .s15-plan-row[data-kind] .prog-fill { forced-color-adjust: none; background: Highlight; }
+  .page[data-route] .s15-plan-row[data-kind] .prog-fill, .page[data-route] .s15-prog-prev .prog-fill { forced-color-adjust: none; background: Highlight; }
 }

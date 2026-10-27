@@ -346,7 +346,7 @@ function scene6(ctx, core) {
   const text = html`
     <p>${mon ? html`До края на ${mon}` : 'Към последния отчет'} са събрани <strong>${amt(ctx, r.execMln, g(r.execMln))}</strong> приходи, или ${pct(r.execPct, 1)}${NBSP}от${NBSP}плана за годината. Похарчени са <strong>${amt(ctx, e.execMln, g(e.execMln))}</strong>, или ${pct(e.execPct, 1)}${NBSP}от${NBSP}плана.</p>
     <p>${yoy ? html`Спрямо същите месеци на 2025 г. приходите са с ${pct(r.yoyPct, 1)} повече, а разходите — с ${pct(e.yoyPct, 1)} повече. ` : ''}${ok(b?.execMln) ? html`Дефицитът дотук е <strong>${amt(ctx, -b.execMln, g(-b.execMln))}</strong>${balShare !== null ? html` — ${pct(balShare, 1)}${NBSP}от${NBSP}планирания за цялата година` : ''}.` : ''}</p>
-    <p>${ok(paceRev) && ok(paceExp) ? html`Приходите и разходите не постъпват равно през годината (${gl('sezonnost', 'сезонност')}). Затова чертата в картината е ориентир: колко от резултата за цялата 2025 г. е било отчетено до същия месец — ${pct(paceRev, 1)} от приходите и ${pct(paceExp, 1)} от разходите. ` : ''}Повече — в <a href="${href('izpalnenie')}">„${byKey.izpalnenie.title}“</a>.</p>`;
+    <p>${ok(paceRev) && ok(paceExp) ? html`Приходите и разходите не постъпват равно през годината (${gl('sezonnost', 'сезонност')}). Чертата е ориентир: делът от цялата 2025 г. до същия месец — ${pct(paceRev, 1)} от приходите и ${pct(paceExp, 1)} от разходите. ` : ''}Повече — в <a href="${href('izpalnenie')}">„${byKey.izpalnenie.title}“</a>.</p>`;
   const id = twin('s04-fig6', ['Показател', `Към ${date(asOf)}, млн. €`, 'Годишен план, млн. €', 'Изпълнение, % от плана', 'Дял от 2025 г. до същия месец, %'], [
     ['Приходи', r.execMln, r.planMln, r.execPct, paceRev ?? null], ['Разходи', e.execMln, e.planMln, e.execPct, paceExp ?? null]
   ]);
@@ -356,7 +356,7 @@ function scene6(ctx, core) {
   });
   const visual = html`<figure class="s04-fig" data-attach="${id}">
     <div class="s04-bars">${row('Приходи', 'rev', r, paceRev, 'rev')}${row('Разходи', 'exp', e, paceExp, 'exp.total')}</div>
-    <figcaption class="s04-cap">Изпълнение на плана към ${date(asOf, true)}. Запълнената част е изпълнението на плана за годината.${ok(paceRev) && ok(paceExp) ? ' Чертата е ориентир: делът от резултата за 2025 г., отчетен до същия месец.' : ''}${next ? ` Отчетът към ${next} още не е добавен.` : ''}</figcaption>
+    <figcaption class="s04-cap">Изпълнение на плана към ${date(asOf, true)}. ${ok(paceRev) && ok(paceExp) ? ' Чертата: делът от 2025 г. до същия месец.' : ''}${next ? ` Отчетът към ${next} още не е добавен.` : ''}</figcaption>
   </figure>`;
   const deep = deeper(ctx, 6, 6, [
     { href: href('izpalnenie'), title: byKey.izpalnenie.title, text: 'Две години един до друг за един и същ период.' },

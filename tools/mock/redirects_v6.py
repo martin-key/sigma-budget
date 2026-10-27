@@ -58,7 +58,7 @@ def main():
     bad = 0
     with sync_playwright() as p:
         b = p.chromium.launch()
-        ctx = b.new_context(viewport={"width": 1280, "height": 900}, service_workers="block")
+        ctx = b.new_context(viewport={"width": 1280, "height": 900}, service_workers="block", reduced_motion="reduce")
         for old, sid, path, want, gone in CASES:
             page = ctx.new_page()
             errs = []

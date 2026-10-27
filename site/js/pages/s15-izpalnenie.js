@@ -216,15 +216,14 @@ export function compareBlock(C) {
   const note = [
     C.mode === 'mesec' ? `„За месеца“ е изчислено от месечните отчети: разлика между отчета към края на ${mon} и този за предходния месец (за януари – първият отчет).` : '',
     C.scope !== 'kfp' ? 'Салдото е приходи минус разходи плюс нетните трансфери между националния бюджет и средствата от ЕС.' : '',
-    'Вноската в бюджета на ЕС е отделен ред в „Разходи“ и не се брои два пъти.',
-    'Процент не се смята, когато числото за по-ранната година е нула или под нулата.',
+    'Вноската в ЕС е отделен ред и не се брои два пъти. Без процент, когато основата е нула или под нулата.',
   ].filter(Boolean).join(' ');
   const wait = C.missing.map(y => `За ${y} г. отчетът за ${mon} предстои${y === C.g2 ? ` (последният е към ${dayOf(C.asOfOf(y, (y === C.g1 ? C.n1 : C.n2) - 1))} ${y} г.)` : ''}.`).join(' ');
   share.attach('s15-b-grid', { table: () => csvTable(C) });
   return block({
     id: 's15-b-grid', level: 2, cls: 's15-cmp', scope: C.scope, source: ['kfp'], asOf,
     title: `Приходи и разходи: ${C.g1} и ${C.g2} г.`,
-    sub: `${cap1(monthsLabel(C))}, ${modeWord(C)}, ${SCOPE_NAME[C.scope]}, млрд. €. Разликата е ${C.g2} г. минус ${C.g1} г.`,
+    sub: `${cap1(monthsLabel(C))}, ${modeWord(C)}, ${SCOPE_NAME[C.scope]}, млрд. €.`,
     share: { text: summaryText(C), table: () => csvTable(C), link: linkOf(C), period: `${periodOf(C)} · млрд. €` },
     body: html`${gridTable(C)}${wait ? html`<p class="s15-wait small">${wait}</p>` : ''}${summaryText(C) ? html`<p class="s15-words"><strong>Накратко.</strong> ${summaryText(C)}</p>` : ''}<p class="table-note small muted">${note}</p>`,
   });
@@ -280,12 +279,12 @@ function chartBlock(C, spec, o) {
 
 export function chartsView(C) {
   const natr = C.mode !== 'mesec';
-  const how = natr ? 'Натрупано от началото на годината; прекъснатата линия е предходната година.' : 'Всеки стълб е един месец, не е натрупан.';
+  const how = natr ? 'Натрупано от началото на годината.' : 'Всеки стълб е един месец, не е натрупан.';
   return html`<div class="s15-pair">${[
     chartBlock(C, monthsSpec(C, 'rev', { id: 's15-ch-rev' }), { id: 's15-b-ch-rev', title: 'Приходи по месеци', sub: how }),
     chartBlock(C, monthsSpec(C, 'exp.total', { id: 's15-ch-exp' }), { id: 's15-b-ch-exp', title: 'Разходи по месеци', sub: how }),
   ]}</div>
-  ${chartBlock(C, monthsSpec(C, 'balance', { id: 's15-ch-bal', bar: true, title: 'Салдо по месеци' }), { id: 's15-b-ch-bal', title: 'Салдо по месеци', sub: 'Под нулата е дефицит: изразходвани са повече пари, отколкото са събрани.' })}`;
+  ${chartBlock(C, monthsSpec(C, 'balance', { id: 's15-ch-bal', bar: true, title: 'Салдо по месеци' }), { id: 's15-b-ch-bal', title: 'Салдо по месеци', sub: 'Под нулата е дефицит.' })}`;
 }
 
 /* ------------------------------------------------------------------ one item in full (a row of the grid) */
@@ -409,7 +408,7 @@ function budgetsBlock(ctx) {
   const col = (key, label, f) => ({ key, label, num: true, unit: mc.unit, d: mc.d, fmt: (_v, r) => moneyCell(mc, r[f]) });
   const withWhat = rows.filter(r => r.what);
   return block({
-    id: 's15-b-budgets', level: 2, title: 'Планът за всеки от бюджетите', sub: 'Планът за 2026 г. (проект). Под таблицата е кратко обяснение какво влиза в числата на всеки бюджет.',
+    id: 's15-b-budgets', level: 2, title: 'Планът за всеки от бюджетите', sub: 'Планът за 2026 г. (проект).',
     scope: 'kfp', source: srcOf(c), asOf: c.meta && c.meta.asOf,
     share: { text: 'Планът за 2026 г. по бюджети: приходи, разходи и салдо.' },
     body: html`${dataTable({

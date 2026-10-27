@@ -36,7 +36,8 @@ const VALID = {
   unit: v => v === 'eur' || v === 'pct',
   perPerson: v => typeof v === 'boolean', leva: v => typeof v === 'boolean', onlyReal: v => typeof v === 'boolean', sources: v => typeof v === 'boolean'
 };
-const PERSIST = ['userType', 'scope', 'unit', 'perPerson', 'leva', 'onlyReal', 'sources'];   // period lives in the URL (?per=)
+/* V6 (26.10): the three switches «Само официални данни», «На човек», «Сумите и в лева» (and the sources tags) have no control any more: they stay at their default (off) and an old stored value is NEVER read */
+const PERSIST = ['userType', 'scope', 'unit'];   // period lives in the URL (?per=)
 
 /** safe storage accessors: never throw, return null/false when blocked */
 export const safe = {

@@ -41,7 +41,7 @@ def main():
     bad = 0
     with sync_playwright() as p:
         b = p.chromium.launch()
-        ctx = b.new_context(viewport={"width": width, "height": 900 if width >= 700 else 844}, service_workers="block",
+        ctx = b.new_context(viewport={"width": width, "height": 900 if width >= 700 else 844}, service_workers="block", reduced_motion="reduce",
                             accept_downloads=True, has_touch=width < 700)
         for n, h in targets:
             page = ctx.new_page()

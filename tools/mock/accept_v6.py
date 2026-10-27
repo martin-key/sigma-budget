@@ -82,7 +82,7 @@ def read_grid(page):
 
 def part_numbers(browser, port):
     print("NUMBERS")
-    ctx = browser.new_context(viewport={"width": 1280, "height": 900}, service_workers="block")
+    ctx = browser.new_context(viewport={"width": 1280, "height": 900}, service_workers="block", reduced_motion="reduce")
     page = ctx.new_page()
     errs = []
     page.on("console", lambda m: errs.append(m.text[:160]) if m.type == "error" else None)
@@ -90,7 +90,13 @@ def part_numbers(browser, port):
     base = f"http://127.0.0.1:{port}/index.html"
 
     # the brief's literal figures on the home and on the comparison screen
-    for hash_ in ("#/", "#/izpalnenie"):
+    # V6 (25.10): the home page has the plan block only (the comparison table lives in #/izpalnenie since 10.10); its figures are checked here
+    page.goto(base + "#/")
+    page.wait_for_selector("#s15-b-plan .s15-plan-row", timeout=8000)
+    home = re.sub("[\u00a0\u202f\u2009]", " ", page.evaluate("() => document.querySelector('#s15-b-plan').innerText"))
+    for s in ("30,12 от 49,62", "33,19 от 56,81", "4,04 от 9,36", "60,7%", "58,4%", "43,2%"):
+        ok(s in home, f"#/: the plan figure {s} is not in the plan block")
+    for hash_ in ("#/izpalnenie",):
         page.goto(base + hash_)
         page.wait_for_selector("table.data", timeout=8000)
         page.wait_for_timeout(300)
@@ -214,7 +220,7 @@ def part_layout(browser, port):
     base = f"http://127.0.0.1:{port}/index.html"
     for w in (1280, 768, 640, 390, 360, 320):
         touch = w <= 768
-        ctx = browser.new_context(viewport={"width": w, "height": 900 if w >= 700 else 800}, service_workers="block", has_touch=touch, is_mobile=False)
+        ctx = browser.new_context(viewport={"width": w, "height": 900 if w >= 700 else 800}, service_workers="block", reduced_motion="reduce", has_touch=touch, is_mobile=False)
         page = ctx.new_page()
         errs = []
         page.on("console", lambda m: errs.append(m.text[:160]) if m.type == "error" else None)
@@ -245,7 +251,7 @@ def part_layout(browser, port):
 
     # keyboard: the tab walk, desktop and phone
     for w in (1280, 390):
-        ctx = browser.new_context(viewport={"width": w, "height": 900 if w >= 700 else 800}, service_workers="block")
+        ctx = browser.new_context(viewport={"width": w, "height": 900 if w >= 700 else 800}, service_workers="block", reduced_motion="reduce")
         page = ctx.new_page()
         for name, h in (("home", "#/"), ("izpalnenie", "#/izpalnenie"), ("danaci", "#/danaci"), ("razhodi", "#/razhodi"), ("tarsene", "#/tarsene")):
             page.goto(base + h)
@@ -279,7 +285,7 @@ def main():
     srv.daemon_threads = True
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     port = srv.server_address[1]
-    only = [a for a in sys.argv[1:] if a in ("numbers", "layout")]
+    only = [a for a in sys.argv[1:] if a in ("numbers", "layout", "overlap")]
     with sync_playwright() as p:
         b = p.chromium.launch()
         if not only or "numbers" in only:
@@ -288,6 +294,11 @@ def main():
             part_layout(b, port)
         b.close()
     srv.shutdown()
+    if not only or "overlap" in only:                           # V6 (27.10): no interactive element on another, no sideways scroll, on every screen (tools/overlap_v6.py --quick)
+        import subprocess
+        print("OVERLAP (overlap_v6.py --quick)")
+        r = subprocess.run([sys.executable, str(Path(__file__).with_name("overlap_v6.py")), "--quick"], capture_output=True, text=True)
+        ok(r.returncode == 0, "overlap_v6 --quick found something: " + " | ".join(l.strip() for l in r.stdout.splitlines() if "FOUND" in l)[:600])
     print(f"RESULT: {'FAIL' if FAILS else 'PASS'}: {N[0]} checks, {len(FAILS)} failures, {len(NOTES)} notes")
     sys.exit(1 if FAILS else 0)
 

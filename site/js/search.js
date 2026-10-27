@@ -142,6 +142,7 @@ export function openPalette(opener, o = {}) {
     clearTimeout(tPaint); clearTimeout(tLive);
     window.removeEventListener('hashchange', onHash);
     dlg.remove();
+    if (back) back.setAttribute('aria-expanded', 'false');
     document.documentElement.classList.remove('has-modal');
     if (cur === me) cur = null;
     if (!moved && back && back.isConnected) back.focus({ preventScroll: true });
@@ -149,6 +150,10 @@ export function openPalette(opener, o = {}) {
   dlg.addEventListener('close', finish);
   window.addEventListener('hashchange', onHash);
 
+  // V6 (26.10): the panel hangs under the header, below the magnifier that opened it (CSS: dialog.palette); the top edge follows the header, also after the page was scrolled
+  const hb = document.getElementById('topbar');
+  dlg.style.setProperty('--pal-top', `${Math.max(8, Math.round(hb ? hb.getBoundingClientRect().bottom : 0) + 4)}px`);
+  if (back) back.setAttribute('aria-expanded', 'true');
   document.body.appendChild(dlg);
   document.documentElement.classList.add('has-modal');
   if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');

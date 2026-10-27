@@ -40,6 +40,8 @@
   --shadow-1:none;
   --shadow-2:0 18px 40px -24px rgb(0 0 0/.45);                  /* popovers only (СИГМА's search popover lift) */
   --t-fast:150ms; --t-med:250ms; --ease:cubic-bezier(.16,1,.3,1);
+  /* motion (V6, 26.10): the ONE source of timings; css/motion.css and js/ui/motion.js read these. Only transform and opacity are animated. «prefers-reduced-motion: reduce» zeroes all of them (below) and js/ui/motion.js stays off. */
+  --dur-1:150ms; --dur-2:240ms; --dur-3:420ms; --dur-4:700ms; --stagger:55ms; --ease-out:var(--ease); --ease-io:cubic-bezier(.65,0,.35,1);
 
   /* ---- layout ---- */
   --max:1280px; --max-narrow:880px; --gutter:64px;
@@ -84,4 +86,4 @@
 html{font-size:100%}
 @media (max-width:880px){:root{--gutter:28px}}
 @media (max-width:599px){:root{--gutter:16px;--fs-0:1rem}}
-@media (prefers-reduced-motion:reduce){:root{--t-fast:0ms;--t-med:0ms}}
+@media (prefers-reduced-motion:reduce){:root{--t-fast:0ms;--t-med:0ms;--dur-1:0ms;--dur-2:0ms;--dur-3:0ms;--dur-4:0ms;--stagger:0ms}}

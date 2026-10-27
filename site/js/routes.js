@@ -13,7 +13,7 @@ export const GROUPS = [
 ];
 const R = (id, key, pattern, file, title, group, icon, o = {}) => ({ id, key, pattern, file, title, group, icon, step: null, next: ['S01'], parent: null, phase: 1, nav: true, samples: [], desc: '', periods: 'all', short: '', ...o });
 export const ROUTES = [
-  R('S01', 'start', '/', 's01-nachalo', 'Държавният бюджет на достъпен език', 'start', 'home', { short: 'Начало', step: 1, next: [], periods: 'none', desc: 'Бюджет на светло показва държавния бюджет за 2026 г. с прости думи.' }),
+  R('S01', 'start', '/', 's01-nachalo', 'Държавният бюджет на достъпен език', 'start', 'home', { short: 'Начало', step: 1, next: [], periods: 'none', desc: 'Платформата показва държавния бюджет за 2026 г. с прости думи: откъде идват парите, за какво се харчат и как се изпълнява планът.' }),
   R('S03', 'rechnik', '/rechnik/:term?', 's03-rechnik', 'Речник', 'learn', 'book', { next: ['S04', 'S01'], samples: ['#/rechnik', '#/rechnik/dds'], desc: 'Думите от бюджетния език, обяснени просто.', periods: 'none' }),
   R('S04', '5-minuti', '/5-minuti', 's04-5-minuti', 'Бюджетът за 5 минути', 'learn', 'clock', { short: 'За 5 минути', next: ['S06', 'S03'], desc: 'Шест кратки сцени за бюджета; под всяка — връзки към точните екрани с подробности.', periods: 'none' }),
   R('S05', 'pari', '/pari', 's05-pari', 'Годишната рамка', 'budget', 'wallet', { short: 'Годишната рамка', next: ['S07'], desc: 'Годишната бюджетна рамка накратко: приходи, разходи, дефицит и как се връзват с месечните отчети.' }),

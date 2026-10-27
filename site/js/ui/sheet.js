@@ -93,7 +93,7 @@ export const popover = {
       if (closed) return;
       closed = true;
       off.forEach(f => f());
-      el.remove();
+      if (document.documentElement.classList.contains('mo')) { el.setAttribute('data-closing', ''); el.setAttribute('inert', ''); setTimeout(() => el.remove(), 170); } else el.remove();      // V6: a short fade-out (css/motion.css), only with motion on
       anchor.setAttribute('aria-expanded', 'false');
       if (activePop && activePop.el === el) activePop = null;
       try { o.onClose?.(); } catch (e) { console.error(e); }

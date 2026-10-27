@@ -76,7 +76,7 @@ def main():
     with sync_playwright() as p:
         b = p.chromium.launch()
         for view in VIEWS:
-            ctx = b.new_context(viewport={"width": 1280, "height": 900}, service_workers="block")
+            ctx = b.new_context(viewport={"width": 1280, "height": 900}, service_workers="block", reduced_motion="reduce")
             page = ctx.new_page()
             errs = []
             page.on("pageerror", lambda e: errs.append(str(e)[:120]))
@@ -95,7 +95,7 @@ def main():
                 for k, v in want_q.items():
                     ok(qs.get(k) == v, f"{view} [{sid}]: the link lost ?{k}={v} (has {qs.get(k)!r})")
                 # a FRESH context: nothing stored, only the address
-                c2 = b.new_context(viewport={"width": 1280, "height": 900}, service_workers="block")
+                c2 = b.new_context(viewport={"width": 1280, "height": 900}, service_workers="block", reduced_motion="reduce")
                 p2 = c2.new_page()
                 p2.goto(base + "#" + link.split("#", 1)[1])
                 settle(p2)
@@ -117,7 +117,7 @@ def main():
             ctx.close()
 
         # personal inputs never reach the address, and a link from this screen does not carry them
-        ctx = b.new_context(viewport={"width": 1280, "height": 900}, service_workers="block")
+        ctx = b.new_context(viewport={"width": 1280, "height": 900}, service_workers="block", reduced_motion="reduce")
         page = ctx.new_page()
         page.goto(base + "#/danaci?brutno=3000&zaplata=3000&demo=1")
         settle(page)
