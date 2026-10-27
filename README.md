@@ -64,6 +64,7 @@ python3 tools/mock/validate_data_v6.py                                          
 
 ## Документация
 
+- [`docs/approach-specification.md`](docs/approach-specification.md) — спецификация за реализация на Sigma Budget: Cloudflare архитектура, възпроизводими данни, публични издания, инструмент за качване и критерии за приемане. Това е целевият договор за имплементиращия екип; описаните нови услуги и CLI още не са реализирани.
 - [`docs/dev-guide.md`](docs/dev-guide.md) — как се прави екран: договорът на модула, компоненти, данни, диаграми, споделяне, CSS, маршрути, достъпност, проверки.
 - [`docs/data-spec.md`](docs/data-spec.md) и [`docs/data-spec-mock.md`](docs/data-spec-mock.md) — формите на файловете в `site/data/`.
 - [`docs/plan.md`](docs/plan.md) — кратко резюме на плана: цели, потребители, екрани, етапи, версии.
