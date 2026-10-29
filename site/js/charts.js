@@ -8,13 +8,15 @@ import { esc } from './html.js';
 
 /* ---------------------------------------------------------------- loader */
 let loading = null;
+// label wrapping ('break'), containLabel and the other text layout of ECharts measure with textPx (in the page language), before the first chart
+const withMeasure = ec => { ec.setPlatformAPI?.({ measureText: (text, font) => ({ width: textPx(text, font || '12px sans-serif') }) }); return ec; };
 export function loadECharts() {
   if (window.echarts) return Promise.resolve(window.echarts);
   if (!loading) {
     loading = new Promise((ok, no) => {
       const s = document.createElement('script');
       s.src = new URL('vendor/echarts.min.js', document.baseURI).href;
-      s.onload = () => (window.echarts ? ok(window.echarts) : no(new Error('echarts missing after load')));
+      s.onload = () => (window.echarts ? ok(withMeasure(window.echarts)) : no(new Error('echarts missing after load')));
       s.onerror = () => { loading = null; no(new Error('echarts failed to load')); };
       document.head.appendChild(s);
     });
@@ -92,9 +94,14 @@ function base(spec, tk) {
 const mark = (c, hatch) => `<span style="display:inline-block;width:10px;height:10px;border-radius:var(--r-1);margin-right:6px;background:${c};${hatch ? 'outline:1px solid ' + c : ''}"></span>`;
 
 /* Text measured with the real font (canvas). ECharts' own `overflow:'truncate'` estimates every non-ASCII letter as one full-width CJK glyph
-   (zrender truncateText/estimateLength), so Cyrillic labels are cut at about HALF the room they have; labels with a known width go through fitText(). */
+   (zrender truncateText/estimateLength), so Cyrillic labels are cut at about HALF the room they have; labels with a known width go through fitText().
+   The context takes the page language: a canvas outside the document measures with none, but under lang="bg" system-ui draws Bulgarian letter
+   forms (macOS: about 9% wider), so names wrapped or cut to a measured width ran out of their column. ECharts measures through here too (loadECharts). */
 let measure = null;
-export const textPx = (text, font) => { measure ||= document.createElement('canvas').getContext('2d'); measure.font = font; return measure.measureText(String(text)).width; };
+export const textPx = (text, font) => {
+  if (!measure) { measure = document.createElement('canvas').getContext('2d'); measure.lang = document.documentElement.lang || 'inherit'; }
+  measure.font = font; return measure.measureText(String(text)).width;
+};
 /** `text`, cut with an ellipsis so that it is at most maxPx wide in `font` (CSS font shorthand, e.g. '13px system-ui') */
 export function fitText(text, maxPx, font) {
   const t = String(text);
