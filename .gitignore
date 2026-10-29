@@ -27,3 +27,7 @@ Thumbs.db
 # Тайни
 .env
 .secrets
+
+# Сглобеният сайт (tools/site/build.py) и локалното състояние на wrangler
+dist/
+.wrangler/
