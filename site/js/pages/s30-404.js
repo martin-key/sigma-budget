@@ -3,6 +3,7 @@
 // a search field and six places to start from (PLAN S30). Normal chrome (not bare), no „Следва“ card (next: []), no period line (periods: 'none').
 // The field carries [data-search-field] like the one of S28: "/" and Ctrl/Cmd+K focus it instead of opening the palette on top of it.
 import { html } from '../html.js';
+import { toHref } from '../loc.js';
 import { byId, href as routeHref } from '../routes.js';
 import { linkCard } from '../ui/cards.js';
 import { MAX_QUERY } from '../searchlib.js';
@@ -17,7 +18,7 @@ export function render(ctx) {
   const path = String(ctx.params.path ?? '').trim();
   const shown = path.length > MAX_SHOWN ? `${path.slice(0, MAX_SHOWN - 1)}…` : path;
   // the sentence is the lede (the line under the heading), so it is not repeated in the body
-  const lede = html`${shown ? html`Адресът <code class="s30-path">#/${shown}</code>` : 'Този адрес'} не води до екран от сайта. Може да е изписан грешно или страницата да е преместена.`;
+  const lede = html`${shown ? html`Адресът <code class="s30-path">${toHref('/' + shown)}</code>` : 'Този адрес'} не води до екран от сайта. Може да е изписан грешно или страницата да е преместена.`;
   return {
     lede,
     body: html`<div class="s30">

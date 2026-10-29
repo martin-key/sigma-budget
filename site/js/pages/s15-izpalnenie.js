@@ -491,6 +491,15 @@ export function byudzhetiView(C) {
 export const needs = ['core', 'execution', 'components?'];
 export const styles = ['s15-izpalnenie'];
 
+/** for search and answer engines (js/seo.js): the plan question of the start page and the „Накратко“ sentence under the comparison */
+export function question(ctx) { return ctx.data?.execution && model(ctx).page === 'main' ? 'Изпълнява ли се бюджетът за 2026 г.?' : ''; }
+export function answer(ctx) {
+  if (!ctx.data?.execution) return '';
+  const C = model(ctx);
+  return C.page === 'main' ? summaryText(C) || '' : '';
+}
+export function docTitle(ctx) { return ctx.data?.execution && model(ctx).page === 'byudzheti' ? 'Месечни отчети по бюджети' : null; }
+
 export function lede(ctx) {
   try {
     if (!ctx.data || !ctx.data.execution) return undefined;

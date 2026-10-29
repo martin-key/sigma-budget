@@ -426,6 +426,13 @@ function notesBlock(f) {
 }
 
 /* ---------------------------------------------------------------- the screen */
+/** for search and answer engines (js/seo.js): the sentences of the „Накратко“ block */
+export const question = 'Какви са приходите, разходите и дефицитът на бюджета до 2028 г.?';
+export function answer(ctx) {
+  const f = frame(ctx);
+  return f ? points(f, debtOf(ctx, f)).map(t => String(t)).join(' ') : '';
+}
+
 export function render(ctx) {
   const f = frame(ctx), d = debtOf(ctx, f);
   const rev = revExpChart(ctx, f), def = deficitChart(ctx, f), int = interestChart(ctx, f);

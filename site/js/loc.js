@@ -1,0 +1,64 @@
+// The address of a screen. Every screen has its own path (/prihodi/dds?per=2026.draft): the build (tools/site/build.py) prerenders each
+// path into its own HTML file for search engines and for the first paint. The old hash addresses (#/prihodi/dds) still open: the router
+// reads them and rewrites the address bar to the path.
+// Hash mode: with window.__HASH_ROUTES__ set before boot, the app keeps the hash addresses of V6 (links, the address bar, history).
+// The v6 checks in tools/mock/ run in this mode (they set it with an init script), so their hash expectations stay valid.
+// Code that builds a link writes the internal form '/prihodi/dds?x=1' (or the old '#/prihodi/dds') and passes it through toHref().
+
+/** the site root, wherever the current page is (/razhodi/obrazovanie loads its files from the root, not from /razhodi/) */
+export const ROOT = new URL('../', import.meta.url);
+export const BASE = ROOT.pathname;                                     // '/' when the site is served at the root of its host
+export const HASH = typeof window !== 'undefined' && !!window.__HASH_ROUTES__;
+
+/** '#/x?y' | '/x?y' | 'x?y' -> '/x?y' (the internal form; the base is not part of it) */
+export function internal(a) {
+  let s = String(a ?? '').replace(/^#/, '');
+  if (!HASH && BASE !== '/' && s.startsWith(BASE)) s = '/' + s.slice(BASE.length);
+  return s.startsWith('/') ? s : '/' + s;
+}
+/** the link to an address in the active mode: '/x?y' -> '/x?y' (path mode) or '#/x?y' (hash mode) */
+export const toHref = a => (HASH ? '#' : BASE.slice(0, -1)) + internal(a);
+/** a full URL for the address (share links, embed code, canonical) */
+export const absolute = (a, origin) => new URL(toHref(a), origin || location.href).href;
+
+/** the current address, internal form '/x?y'. In path mode an old hash address (#/x) in the address bar wins: it is a link from V6 */
+export function here() {
+  if (HASH || location.hash.startsWith('#/')) return internal(location.hash || '#/');
+  return internal(location.pathname).replace(/\/index\.html$/, '/') + location.search;     // /index.html is the start page
+}
+/** the address bar's own string for the current address, to compare with toHref() */
+export const hereHref = () => (HASH ? location.hash : location.pathname + location.search);
+/** the path and query of the current address: { path:'/x', query:'y' } */
+export function parts(a = here()) { const i = a.indexOf('?'); return i < 0 ? { path: a, query: '' } : { path: a.slice(0, i), query: a.slice(i + 1) }; }
+
+/** a link of the app (to a screen), as opposed to a file (/data/core.json), a fragment (#main) or another site */
+export function isAppHref(h) {
+  if (!h || typeof h !== 'string') return false;
+  if (h.startsWith('#/')) return true;
+  if (HASH || h.startsWith('#')) return false;
+  let u;
+  try { u = new URL(h, location.href); } catch { return false; }
+  return u.origin === location.origin && u.pathname.startsWith(BASE) && !/\.[a-z0-9]{1,5}$/i.test(u.pathname);
+}
+export const isAppLink = a => !!a && isAppHref(a.getAttribute('href'));
+
+/** path mode: an old '#/x' link written by a page, a data file (search index, feed) or a component becomes '/x' in the DOM, so that
+ *  crawlers, „Open in new tab“ and the prerendered HTML all see the path; a file link relative to the root (data/core.json) becomes
+ *  /data/core.json, which also holds on /danni/execution. Hash mode: nothing to do (every page is the root document). */
+const LINKS = 'a[href^="#/"],a[href^="data/"]';
+const fixOne = a => { const h = a.getAttribute('href'); a.setAttribute('href', h.startsWith('#/') ? toHref(h) : BASE + h); };
+export function fixLinks(root) {
+  if (HASH || !root || !root.querySelectorAll) return;
+  if (root.matches?.(LINKS)) fixOne(root);
+  for (const a of root.querySelectorAll(LINKS)) fixOne(a);
+}
+export function watchLinks() {
+  if (HASH || typeof MutationObserver === 'undefined') return;
+  fixLinks(document.body);
+  new MutationObserver(list => {
+    for (const m of list) {
+      if (m.type === 'attributes') { if (m.target.matches?.(LINKS)) fixOne(m.target); continue; }
+      for (const n of m.addedNodes) if (n.nodeType === 1) fixLinks(n);
+    }
+  }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['href'] });
+}

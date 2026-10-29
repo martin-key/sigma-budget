@@ -385,6 +385,12 @@ const found = ctx => {
   return id ? (arr(ctx.data.measures && ctx.data.measures.items).find(i => i.id === id) || null) : null;
 };
 
+/** the same measure can stand in two lists (short-term and discretionary): the document title names the list (js/seo.js) */
+export function docTitle(ctx) {
+  const it = found(ctx), lbl = it && ctx.data.measures?.tabLabels?.[it.tab];
+  return it ? `${it.name}${lbl ? ` · ${lbl}` : ''}` : null;
+}
+
 export function crumbs(ctx) {
   const it = found(ctx);
   return it ? [{ label: 'Мерки в бюджета 2026', href: ctx.href('merki') }, { label: it.name }] : null;

@@ -163,6 +163,7 @@ def warn(code, msg, **kw):
 # ---------------------------------------------------------------------------------------------- JS run inside the page
 # Installed before any page script (context.add_init_script): records what the page itself cannot report to Playwright.
 INIT_JS = r"""
+window.__HASH_ROUTES__ = true;   /* V7: the app opens on paths (/prihodi); these checks drive the hash addresses (#/prihodi), which js/loc.js keeps in hash mode */
 (() => {
   const k = window.__chk = { csp: [], rej: [] };
   document.addEventListener('securitypolicyviolation', e => k.csp.push(`${e.violatedDirective} ${e.blockedURI}`));
@@ -1925,7 +1926,7 @@ def ch_mockbar(w, cell, F, W, j, outs):
         return
     page = o.page
     st = page.evaluate("() => { const b = document.getElementById('mockbar'), r = b.getBoundingClientRect(); return { hidden: b.hidden, h: Math.round(r.height), t: (b.textContent || '').trim().slice(0, 60), legend: !!b.querySelector('[data-action=\"legend\"]'), x: !!b.querySelector('[data-action=\"dismiss-banner\"]') }; }")
-    if st['hidden'] or st['h'] < 10 or 'Mock' not in st['t']:
+    if st['hidden'] or st['h'] < 10 or ('Mock' not in st['t'] and 'Бета' not in st['t']):          # V7: the banner says „Бета версия“
         F('mockbar', f'the Mock banner is not visible on a fresh visit (hidden={st["hidden"]}, height {st["h"]}px, text "{st["t"]}")')
         return
     if not st['legend'] or not st['x']:

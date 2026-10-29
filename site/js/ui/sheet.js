@@ -5,6 +5,7 @@
 // A popover on a <=600px screen becomes a sheet.  Both return focus to the opener and close on Esc.
 // Opening one while another is open replaces it at once; a change of the address hash (any navigation, also Back) closes it, so neither outlives its screen.
 import { SafeHtml, esc, nextId } from '../html.js';
+import { isAppLink } from '../loc.js';
 import { icon } from '../icons.js';
 
 const toNode = (body, into) => {
@@ -34,6 +35,7 @@ export const sheet = {
       if (closed) return;
       closed = true;
       window.removeEventListener('hashchange', onHash);
+      window.removeEventListener('popstate', onHash);
       dlg.remove();
       const mine = !!activeSheet && activeSheet.el === dlg;          // not the one that was already replaced
       if (mine) { activeSheet = null; document.documentElement.classList.remove('has-modal'); }
@@ -41,12 +43,13 @@ export const sheet = {
       if (mine && !moved && opener && opener.isConnected && typeof opener.focus === 'function') opener.focus({ preventScroll: true });
     };
     window.addEventListener('hashchange', onHash);
+    window.addEventListener('popstate', onHash);
     dlg.addEventListener('close', finish);
     dlg.addEventListener('cancel', () => { /* Esc: native close follows */ });
     dlg.addEventListener('click', e => {
       if (e.target === dlg || e.target.closest('[data-close]')) { dlg.close(); return; }   // backdrop or the X
       // a plain click on an in-app link: the router follows it (history.pushState fires no hashchange), so the sheet must go with the screen
-      if (!e.defaultPrevented && e.button === 0 && !(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) && e.target.closest('a[href^="#/"]')) { moved = true; dlg.close(); }
+      if (!e.defaultPrevented && e.button === 0 && !(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) && isAppLink(e.target.closest('a[href]'))) { moved = true; dlg.close(); }
     });
     document.documentElement.classList.add('has-modal');
     if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
@@ -109,9 +112,10 @@ export const popover = {
       }
     }, true);
     on(document, 'pointerdown', e => { if (!el.contains(e.target) && !anchor.contains(e.target)) close(false); }, true);
-    on(el, 'click', e => { if (e.target.closest('[data-close]')) close(true); else if (e.target.closest('a[href^="#/"]')) close(false); });
+    on(el, 'click', e => { if (e.target.closest('[data-close]')) close(true); else if (isAppLink(e.target.closest('a[href]'))) close(false); });
     const reflow = () => { if (!anchor.isConnected) close(false); else place(anchor, el, o.align); };
     on(window, 'hashchange', () => close(false));
+    on(window, 'popstate', () => close(false));
     on(window, 'resize', reflow);
     on(window, 'scroll', reflow, { passive: true, capture: true });
     // focus the first control (or the popover itself) so keyboard users land inside

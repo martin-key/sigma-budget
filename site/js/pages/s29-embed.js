@@ -7,6 +7,7 @@
 // the frame loads, without a single real number.
 // Inside the frame nothing navigates the frame itself: the source and the „Бюджет на светло →“ links are absolute and open a new tab.
 import { html } from '../html.js';
+import { absolute } from '../loc.js';
 import { icon } from '../icons.js';
 import { data } from '../data.js';
 import { date } from '../format.js';
@@ -70,7 +71,6 @@ async function load(ctx) {
 }
 
 /** absolute address of a screen of the site (the frame is on someone else's page: a relative link would stay inside the frame) */
-const absolute = hash => new URL(hash, document.baseURI).href;
 
 const comma = list => list.flatMap((x, i) => (i ? [', ', x] : [x]));
 function sourcesOf(keys) {
