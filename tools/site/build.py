@@ -3,6 +3,7 @@
     PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/site/build.py
     ... build.py --origin https://preview.example.org     # the address the canonical links, the sitemap and llms.txt name
     ... build.py --limit 40 --out tmp/dist-try            # a quick partial build (the checks below still run)
+    ... build.py --origin https://staging.example --noindex   # a staging build: robots.txt and X-Robots-Tag keep it out of search engines
 
 How it works. dist/ starts as a copy of site/. The app is served from there (tools/site/serve.py, every path gets the app shell) and
 headless Chromium crawls it from the start page: every screen it reaches through a link becomes one file, /razhodi/obrazovanie ->
@@ -22,6 +23,7 @@ import json
 import pathlib
 import re
 import shutil
+import subprocess
 import sys
 import time
 import urllib.parse
@@ -56,6 +58,7 @@ SNAPSHOT_JS = r"""
   doc.removeAttribute('class');
   doc.setAttribute('data-prerendered', '');
   for (const el of doc.querySelectorAll('[_echarts_instance_]')) { el.replaceChildren(); el.removeAttribute('_echarts_instance_'); }   // a canvas has no content in HTML: the app draws it again
+  for (const el of doc.querySelectorAll('script[src]')) if (el.type !== 'module') el.remove();   // vendor/echarts.min.js (1 MB), added by js/charts.js: in the file it would block the first paint; the app loads it again
   for (const el of doc.querySelectorAll('svg.map-svg')) el.replaceChildren();          // 265 municipality outlines are ~280 KB of HTML: the app draws the map again
   for (const el of doc.querySelectorAll('[data-hydrated]')) el.removeAttribute('data-hydrated');
   for (const el of doc.querySelectorAll('#toasts, #live')) el.replaceChildren();
@@ -211,7 +214,13 @@ def clean_text(t, cap):
     return s if len(s) <= cap else s[:cap].rsplit('\n', 1)[0] + '\n…'
 
 
-def write_extras(out, pages, origin, lastmod, routes):
+# The Content-Security-Policy of site/index.html as an HTTP header, plus what a <meta> cannot carry: frame-ancestors (no framing of the
+# site by others; worker/index.js lifts it for /embed/*, which is made to be framed). Every file is same-origin: HSTS keeps it on https.
+CSP = ("default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; font-src 'self'; "
+       "base-uri 'self'; form-action 'none'; object-src 'none'; frame-ancestors 'self'")
+
+
+def write_extras(out, pages, origin, lastmod, routes, noindex=False):
     """sitemap.xml, robots.txt, llms.txt, llms-full.txt, _headers"""
     idx = {p: i for p, i in pages.items() if 'noindex' not in i['robots']}
     order = {r['id']: n for n, r in enumerate(routes)}
@@ -225,6 +234,7 @@ def write_extras(out, pages, origin, lastmod, routes):
     (out / 'sitemap.xml').write_text('\n'.join(sm) + '\n', encoding='utf-8')
 
     (out / 'robots.txt').write_text(
+        '# Тестова среда: не за индексиране.\nUser-agent: *\nDisallow: /\n' if noindex else
         '# Бюджет на светло: всички страници са отворени за търсачки и езикови модели.\n'
         'User-agent: *\nAllow: /\nDisallow: /embed/\n\n'
         f'Sitemap: {origin}/sitemap.xml\n', encoding='utf-8')
@@ -276,9 +286,14 @@ def write_extras(out, pages, origin, lastmod, routes):
     (out / '_headers').write_text(
         '# Cloudflare Workers Static Assets: headers of the static files (wrangler.jsonc)\n'
         '/*\n'
+        f'  Content-Security-Policy: {CSP}\n'
+        '  X-Frame-Options: SAMEORIGIN\n'
         '  X-Content-Type-Options: nosniff\n'
         '  Referrer-Policy: strict-origin-when-cross-origin\n'
+        '  Strict-Transport-Security: max-age=31536000\n'
+        '  Cross-Origin-Opener-Policy: same-origin\n'
         '  Permissions-Policy: camera=(), microphone=(), geolocation=(), browsing-topics=()\n'
+        + ('  X-Robots-Tag: noindex\n' if noindex else '') +
         '/vendor/*\n'
         '  Cache-Control: public, max-age=604800\n'
         '/data/*\n'
@@ -289,12 +304,31 @@ def write_extras(out, pages, origin, lastmod, routes):
     return paths
 
 
+def stamp_files(out, origin, data_version):
+    """what in the copied files depends on this build: the RSS links (data/feed.xml was generated with a placeholder host and hash addresses)
+    and the cache name of the service worker (a new name per build: the worker of the previous build drops its copies on activate)"""
+    feed = out / 'data' / 'feed.xml'
+    if feed.is_file():
+        x = feed.read_text(encoding='utf-8')
+        x = re.sub(r'https?://budget-na-svetlo\.example/(?:#/)?', origin + '/', x).replace(origin + '/#/', origin + '/')
+        feed.write_text(x, encoding='utf-8')
+    sw = out / 'sw.js'
+    try:
+        rev = subprocess.run(['git', 'rev-parse', '--short', 'HEAD'], cwd=ROOT, capture_output=True, text=True, check=True).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        rev = 'local'
+    s, n = re.subn(r"const CACHE = '[^']*';", f"const CACHE = 'bns-{data_version or 'data'}-{rev}';", sw.read_text(encoding='utf-8'), count=1)
+    if n:
+        sw.write_text(s, encoding='utf-8')
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
     ap.add_argument('--out', default=str(ROOT / 'dist'))
     ap.add_argument('--origin', help='production address (default: <meta name="site-origin"> in site/index.html)')
     ap.add_argument('--jobs', type=int, default=6, help='pages built at the same time')
     ap.add_argument('--limit', type=int, default=0, help='build at most N screens (a quick try; links to the others then fail the check)')
+    ap.add_argument('--noindex', action='store_true', help='a staging build: robots.txt disallows everything and every response says X-Robots-Tag: noindex')
     a = ap.parse_args()
 
     template = (SITE / 'index.html').read_text(encoding='utf-8')
@@ -305,7 +339,7 @@ def main():
         sys.exit('refusing to build into the source folder')
     if out.exists():
         shutil.rmtree(out)
-    shutil.copytree(SITE, out)
+    shutil.copytree(SITE, out, ignore=shutil.ignore_patterns('sebra.json'))     # СЕБРА: on disk for phase 2, used by no screen and not in the catalog
     template = template.replace('<meta name="site-origin" content="https://sigma-budget.my-data.bg">', f'<meta name="site-origin" content="{origin}">')
     (out / 'index.html').write_text(template, encoding='utf-8')
     (out / 'app.html').write_text(template, encoding='utf-8')         # the bare app shell: the host serves it for /embed/* (worker/index.js)
@@ -344,7 +378,8 @@ def main():
     else:
         (out / '404.html').write_text(nf['html'].replace(base, origin + '/').replace(f'<link rel="canonical" href="{loc(NOT_FOUND_PROBE)}">', ''), encoding='utf-8')
 
-    paths = write_extras(out, crawl.pages, origin, lastmod, routes)
+    paths = write_extras(out, crawl.pages, origin, lastmod, routes, a.noindex)
+    stamp_files(out, origin, dv)
     dt = time.time() - t0
     print(f'\n{len(crawl.pages)} screens prerendered ({len(paths)} in the sitemap) in {dt:.0f} s → {out}')
     for path, msg in warns[:40]:
