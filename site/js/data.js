@@ -4,13 +4,14 @@
 // pages render the „Предстои“ component for it. A network failure is a LoadError (the „Опитай пак“ state).
 export class PendingError extends Error { constructor(name) { super('pending: ' + name); this.name = 'PendingError'; this.file = name; } }
 export class LoadError extends Error { constructor(name, cause) { super('load failed: ' + name); this.name = 'LoadError'; this.file = name; this.cause = cause; } }
+import { ROOT } from './loc.js';
 const OK_NAME = /^[A-Za-z0-9_-]+(\/[A-Za-z0-9_-]+)*$/;
 const cache = new Map();   // name -> Promise<json>
 const done = new Map();    // name -> json (sync access after resolve)
 
 function fetchJson(name) {
   if (!OK_NAME.test(name)) return Promise.reject(new PendingError(name));
-  return fetch(new URL(`data/${name}.json`, document.baseURI)).then(async res => {
+  return fetch(new URL(`data/${name}.json`, ROOT)).then(async res => {
     if (res.status === 404) throw new PendingError(name);
     if (!res.ok) throw new LoadError(name, res.status);
     const text = await res.text();

@@ -9,6 +9,7 @@
 // Rules that never bend: the copied text always carries the source; a mock block is never exported without saying so
 // (text line, PNG watermark, CSV status column).
 import { html, esc } from './html.js';
+import { here, parts as addrParts, absolute } from './loc.js';
 import { icon } from './icons.js';
 import { data } from './data.js';
 import { date, csvCell } from './format.js';
@@ -76,15 +77,13 @@ export const shareButton = (id, o = {}) => {
 const PERSONAL = new Set(['demo', 'brutno', 'bruto', 'zaplata', 'dohod', 'neto', 'sum', 'salary', 'gross']);
 /** link to this block on the current screen: keeps the state of the address (?per=, ?g1=…), adds the block's own `link` parameters (the same result on every opening) and ?to=<block> */
 export function linkFor(spec, { to = true } = {}) {
-  const u = new URL(location.href);
-  const [path, qs = ''] = (location.hash.replace(/^#/, '') || '/').split('?');
+  const { path, query: qs } = addrParts(here());
   const q = new URLSearchParams(qs);
   PERSONAL.forEach(k => q.delete(k));
   const own = val(spec?.link);
   if (own && typeof own === 'object') for (const [k, v] of Object.entries(own)) { if (v == null || v === '') q.delete(k); else if (!PERSONAL.has(k)) q.set(k, String(v)); }
   if (to && spec?.id) q.set('to', spec.id); else q.delete('to');
-  u.hash = '#' + path + (q.toString() ? '?' + q : '');
-  return u.href;
+  return absolute(path + (q.toString() ? '?' + q : ''));
 }
 /** the address printed under a picture: no scheme, no ?to= */
 export const shortLink = spec => linkFor(spec, { to: false }).replace(/^https?:\/\//, '');
@@ -117,7 +116,7 @@ export function csvFor(spec) {
   t.rows.forEach((r, i) => lines.push([...r.map(csvVal), st(i), src].map(csvCell).join(';')));
   return '\uFEFF' + lines.join('\r\n') + '\r\n';
 }
-/** hash of the embed view (S29): #/embed/<routeKey>.<chartId>[?per=…&<spec.embedParams>]
+/** address of the embed view (S29): /embed/<routeKey>.<chartId>[?per=…&<spec.embedParams>] (internal form, js/loc.js)
  *  embedParams = the host screen's own address parameters ({code:'1000'} for #/vedomstvo/1000): S29 hands them back to the screen as its params.
  *  Keys are plain names (never per/demo), values primitives. */
 export function embedHash(spec) {
@@ -125,21 +124,19 @@ export function embedHash(spec) {
   const key = e === true ? `${pre}.${spec.chart || spec.id}` : typeof e === 'string' && e ? (e.includes('.') ? e : `${pre}.${e}`) : '';
   if (!key) return '';
   const q = new URLSearchParams();
-  const per = new URLSearchParams((location.hash.split('?')[1] || '')).get('per');
+  const per = new URLSearchParams(addrParts(here()).query).get('per');
   if (per) q.set('per', per);
   for (const [k, v] of Object.entries(spec.embedParams || {})) {
     if (/^[A-Za-z][\w-]*$/.test(k) && k !== 'per' && k !== 'demo' && v != null && v !== '' && typeof v !== 'object') q.set(k, String(v));
   }
   const qs = q.toString();
-  return `#/embed/${key}${qs ? '?' + qs : ''}`;
+  return `/embed/${key}${qs ? '?' + qs : ''}`;
 }
 /** iframe code for the embed view (S29) */
 export function embedFor(spec) {
   const h = embedHash(spec);
   if (!h) return '';
-  const u = new URL(location.href);
-  u.hash = h;
-  return `<iframe src="${esc(u.href)}" title="${esc(spec.title)}" width="720" height="440" loading="lazy" style="border:0;max-width:100%" referrerpolicy="no-referrer"></iframe>`;
+  return `<iframe src="${esc(absolute(h))}" title="${esc(spec.title)}" width="720" height="440" loading="lazy" style="border:0;max-width:100%" referrerpolicy="no-referrer"></iframe>`;
 }
 
 /* ---------------------------------------------------------------- clipboard and downloads */

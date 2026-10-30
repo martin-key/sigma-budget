@@ -106,14 +106,16 @@ def main():
 
     with sync_playwright() as p:
         b = p.chromium.launch()
-        pg0 = b.new_page(); pg0.goto(U); pg0.wait_for_timeout(800)
+        pg0 = b.new_page(); pg0.add_init_script("window.__HASH_ROUTES__ = true"); pg0.goto(U); pg0.wait_for_timeout(800)
         routes = [r for r in pg0.evaluate("window.__ROUTES__") if not r.get("bare") and (not only or r["id"] in only)]
         pg0.close()
         for r in routes:
             if not r["samples"]: r["samples"] = ["#/nyama-takava-stranitsa"]          # S30: the 404 screen
 
         def ctx(w):
-            return b.new_context(viewport={"width": w, "height": 900 if w >= 700 else 844}, service_workers="block", has_touch=w < 700, reduced_motion="reduce")
+            c = b.new_context(viewport={"width": w, "height": 900 if w >= 700 else 844}, service_workers="block", has_touch=w < 700, reduced_motion="reduce")
+            c.add_init_script("window.__HASH_ROUTES__ = true")   # V7: these checks drive the hash addresses (js/loc.js hash mode)
+            return c
 
         def load(c, hash_, errs):
             pg = c.new_page()

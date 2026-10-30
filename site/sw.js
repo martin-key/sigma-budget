@@ -4,7 +4,9 @@
 // The page that is open while the new worker takes over may still hold a mix (it was loaded under the old worker); the next load is clean. (A forced reload from the worker, WindowClient.navigate, was tried: it hangs
 // on a URL with a #fragment, so it is not used.)
 // The full offline strategy (versioned precache, data refresh, update prompt) arrives in milestone M6.
-const CACHE = 'bns-v5-11';   // v5: its own cache name (never serves v4 or the July data of an older build); the old cache is deleted on activate
+// V7: every screen is a path (/prihodi). Offline, a page that was never opened falls back to the copy of the start page: it is the same app, and the
+// router builds the screen from the address and the data in the cache.
+const CACHE = 'bns-v7-1';   // its own cache name per address scheme (a v6 copy holds hash-era pages); the old cache is deleted on activate
 self.addEventListener('install', () => { self.skipWaiting(); });
 self.addEventListener('activate', e => {
   e.waitUntil((async () => {
@@ -28,6 +30,10 @@ self.addEventListener('fetch', e => {
     } catch (err) {
       const hit = await caches.match(req, { ignoreSearch: false });
       if (hit) return hit;
+      if (req.mode === 'navigate') {
+        const shell = (await caches.match(req, { ignoreSearch: true })) || (await caches.match(new URL('./', self.registration.scope).href));
+        if (shell) return shell;
+      }
       throw err;
     }
   })());

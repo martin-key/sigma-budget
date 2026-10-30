@@ -3,6 +3,7 @@
 // A chart spec is plain data (see DEV_GUIDE.md §Charts):
 //   { id, type:'bar'|'barh'|'line'|'donut'|'treemap'|'sankey'|'option', title, sub, unit, categories, series:[{name,data,color,mock,dashed,dashFrom,stack}], labelWidth, labelOverflow,
 //     data (donut/treemap), nodes+links (sankey), stack:true, area:true, mock:true, fmt:v=>string, d:1, height:280, option:{…} (deep-merged last) }
+import { ROOT } from './loc.js';
 import { num } from './format.js';
 import { esc } from './html.js';
 
@@ -15,7 +16,7 @@ export function loadECharts() {
   if (!loading) {
     loading = new Promise((ok, no) => {
       const s = document.createElement('script');
-      s.src = new URL('vendor/echarts.min.js', document.baseURI).href;
+      s.src = new URL('vendor/echarts.min.js', ROOT).href;
       s.onload = () => (window.echarts ? ok(withMeasure(window.echarts)) : no(new Error('echarts missing after load')));
       s.onerror = () => { loading = null; no(new Error('echarts failed to load')); };
       document.head.appendChild(s);

@@ -5,6 +5,7 @@
 //       add data-norender when the page updates itself in place (tabs do this)
 // "/" and Ctrl/Cmd+K open the search palette from any screen.
 import { router, setQuery, rerender } from './router.js';
+import { internal } from './loc.js';
 import { store } from './store.js';
 import { openSource } from './ui/source.js';
 import { openLegend } from './ui/status.js';
@@ -23,7 +24,7 @@ function onClick(e) {
   const gl = t.closest('a[data-gl]');
   if (gl && plain(e)) {
     e.preventDefault();
-    const slug = gl.dataset.gl || (gl.getAttribute('href') || '').replace(/^#\/rechnik\//, '');
+    const slug = gl.dataset.gl || internal(gl.getAttribute('href') || '').replace(/^\/rechnik\//, '');
     import('./glossary.js').then(m => m.openTerm(gl, slug)).catch(err => { console.error(err); router.go(gl.getAttribute('href') || '#/rechnik'); });
     return;
   }

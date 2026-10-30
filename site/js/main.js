@@ -4,6 +4,7 @@ import { router } from './router.js';
 import { shell } from './shell.js';
 import { initActions } from './actions.js';
 import * as motion from './ui/motion.js';
+import { watchLinks, ROOT } from './loc.js';
 
 const wait = ms => new Promise(r => setTimeout(r, ms));
 
@@ -12,6 +13,7 @@ async function boot() {
   const coreP = data.load('core').catch(() => null);
   await Promise.race([coreP, wait(1500)]);
   motion.init();
+  watchLinks();                                                   // path mode: old #/x links in pages and data become /x (js/loc.js)
   shell.init();
   initActions();
   coreP.then(() => { shell.refreshFooter(); });
@@ -22,8 +24,8 @@ async function boot() {
 function registerWorker() {
   try {
     if (!('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) return;
-    window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); }, { once: true });
-    if (document.readyState === 'complete') navigator.serviceWorker.register('sw.js').catch(() => {});
+    window.addEventListener('load', () => { navigator.serviceWorker.register(new URL('sw.js', ROOT)).catch(() => {}); }, { once: true });
+    if (document.readyState === 'complete') navigator.serviceWorker.register(new URL('sw.js', ROOT)).catch(() => {});
   } catch { /* a service worker is an enhancement */ }
 }
 

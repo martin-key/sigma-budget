@@ -196,6 +196,12 @@ dialog.sheet.sheet-drawer .sheet-title{font:500 var(--fs-xs)/1 var(--font-mono);
 .more-list a:hover{background:var(--paper-warm);color:var(--crimson)}
 .more-list a[aria-current]{color:var(--crimson);font-weight:600}
 .more-list a[aria-current]::before{content:"›";flex:none;color:var(--crimson);font:400 1.125rem/1 var(--font-serif)}
+/* the sister platform СИГМА (js/shell.js): after the screens of the site, in the quieter mono voice, with the arrow of a link to another site */
+.sister-link,.more-list a.sister-link{display:inline-flex;align-items:center;gap:6px;min-height:44px;font:500 var(--fs-xs)/1.3 var(--font-mono);letter-spacing:var(--track-mono);text-transform:uppercase;color:var(--ink-mid);text-decoration:none}
+.sister-link::after{content:"↗";font-family:var(--font-sans);letter-spacing:0}
+.sister-link:hover,.more-list a.sister-link:hover{color:var(--crimson)}
+.more-sister{margin:var(--sp-5) 0 0;padding-top:var(--sp-1);border-top:1px solid var(--rule)}
+.more-list .nav-sister{margin-top:var(--sp-2);border-top:1px solid var(--rule)}
 .more-list svg{display:none}
 .more-list .nav-tag{margin-left:auto}
 .more-set{padding-top:var(--sp-4);border-top:1px solid var(--ink)}

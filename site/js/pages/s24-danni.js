@@ -6,6 +6,7 @@
 // caret and the glossary links of the first render stay. render() and mount() share listState(), so a deep link draws the right rows at once.
 // All catalogue logic (model, filters, citation, rich text) is in ../catalog.js: one page module never imports another (DEV_GUIDE §17.6).
 import { html, raw } from '../html.js';
+import { absolute } from '../loc.js';
 import { date, num, plural } from '../format.js';
 import { href, byKey } from '../routes.js';
 import { icon } from '../icons.js';
@@ -32,7 +33,7 @@ const withSep = parts => html`${parts.filter(Boolean).map((p, i) => (i ? html`${
 const dot = parts => parts.filter(Boolean).join(' · ');
 const joinList = (items, sep = ', ') => html`${items.map((x, i) => html`${i ? sep : ''}${x}`)}`;
 const metaList = rows => html`<dl class="s24-meta">${rows.filter(r => r && r.v != null && r.v !== '' && r.v !== false).map(r => html`<div class="s24-m${r.wide ? ' s24-m-wide' : ''}"><dt>${r.k}</dt><dd>${r.v}</dd></div>`)}</dl>`;
-const pageUrl = hash => { try { const u = new URL(document.baseURI); u.hash = ''; u.search = ''; return u.href + hash; } catch { return hash; } };
+const pageUrl = addr => absolute(addr);
 const httpText = code => (code === 403 ? 'отказан достъп (403)' : code === 404 ? 'не е намерен (404)' : code === 200 ? 'отговаря (200)' : code ? `отговор ${code}` : '');
 
 const ADJ = { real: ['официален', 'официални'], partial: ['частичен', 'частични'], forecast: ['прогнозен', 'прогнозни'], mock: ['примерен', 'примерни'], pending: ['предстоящ', 'предстоящи'] };

@@ -64,8 +64,10 @@ def main():
         b = p.chromium.launch()
 
         def ctx(w, reduce):
-            return b.new_context(viewport={"width": w, "height": 900 if w >= 700 else 844}, service_workers="block", has_touch=w < 700,
-                                 reduced_motion="reduce" if reduce else "no-preference")
+            c = b.new_context(viewport={"width": w, "height": 900 if w >= 700 else 844}, service_workers="block", has_touch=w < 700,
+                              reduced_motion="reduce" if reduce else "no-preference")
+            c.add_init_script("window.__HASH_ROUTES__ = true")   # V7: these checks drive the hash addresses (js/loc.js hash mode)
+            return c
 
         # 1. reduced motion
         print("1 reduced motion")

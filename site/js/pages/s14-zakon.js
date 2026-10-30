@@ -288,6 +288,8 @@ function nextBlock(G) {
   return block({ id: 's14-2027', title: n.title || 'Следващият бюджет', status: 'pending', body: pendingState({ title: n.title, text: n.note, expected: n.expected }) });
 }
 
+export const question = 'Кога и как беше приет бюджетът за 2026 г.?';   // js/seo.js: the lede answers it with the dates
+
 export function render(ctx) {
   const G = modelOf(ctx);
   return {

@@ -17,6 +17,7 @@ import { openLegend } from './ui/status.js';
 import { data } from './data.js';
 import { date } from './format.js';
 import { router } from './router.js';
+import { here, parts as addrParts, toHref, isAppLink } from './loc.js';
 
 const $ = id => document.getElementById(id);
 const MARK = html`<svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect x="3" y="18" width="6" height="11" fill="var(--ink)"/><rect x="12.5" y="12" width="6" height="17" fill="var(--ink)"/><rect x="22" y="6" width="6" height="23" fill="var(--ink)"/><rect x="2" y="29.5" width="28" height="1.5" fill="var(--ink)"/><circle cx="25" cy="2.6" r="2.4" fill="var(--crimson)"/></svg>`;
@@ -41,6 +42,9 @@ const NAV_GROUPS = [
   ['Данъци и контекст', ['S18', 'S17', 'S31']],
   ['Данни и проект', ['S24', 'S25', 'S26', 'S27']]
 ];
+/* The sister platform (spec §2.2): visible, but after the screens of the site: the last item of «Данни и проект», the phone «Меню» and the footer. */
+const SIGMA = { label: 'СИГМА — обществени поръчки', href: 'https://sigma.midt.bg/' };
+const sigmaLink = cls => html`<a class="${cls}" href="${SIGMA.href}" target="_blank" rel="noopener">${SIGMA.label}<span class="sr-only"> (друг сайт, в нов раздел)</span></a>`;   // a new tab: also out of an embed frame
 const rootId = r => (r.parent ? rootId(byId[r.parent]) : r.id);
 const groupOf = route => { const root = rootId(route); return NAV_GROUPS.findIndex(([, ids]) => ids.includes(route.id) || ids.includes(root)); };
 const groupItems = ids => ids.map(id => byId[id]).filter(r => r && r.nav);
@@ -71,9 +75,10 @@ function openMoreSheet(btn) {
   const body = html`<div class="more-sheet">
     <p class="more-cta"><a class="nav-cta" href="${routeHref('S34')}">${CTA}</a></p>
     <nav aria-label="Всички раздели">${nav}</nav>
+    <p class="more-sister">${sigmaLink('sister-link')}</p>
   </div>`;
   const s = sheet.open({ title: 'Меню', body, returnFocus: btn, cls: 'sheet-drawer' });
-  s.el.addEventListener('click', e => { if (e.target.closest('a[href^="#/"]')) s.close(); });
+  s.el.addEventListener('click', e => { if (isAppLink(e.target.closest('a[href]'))) s.close(); });
 }
 
 /** a dropdown of the wide header: the screens of one group (the popover closes on Esc, on a click outside and on navigation; focus goes back to the button) */
@@ -81,20 +86,21 @@ function openNavGroup(btn, i) {
   const [label, ids] = NAV_GROUPS[i];
   const cur = router.current?.route;
   const items = groupItems(ids).map(r => html`<li><a href="${routeHref(r.id)}"${cur && (cur.id === r.id) ? html` aria-current="page"` : ''}><span>${navName(r)}</span></a></li>`);
+  if (i === NAV_GROUPS.length - 1) items.push(html`<li class="nav-sister">${sigmaLink('sister-link')}</li>`);
   popover.open(btn, { body: html`<nav class="nav-pop" aria-label="${label}"><ul class="more-list">${items}</ul></nav>`, label, align: 'start' });
 }
 
 /* ------------------------------------------------------------------ pieces */
 function bannerHtml() {
   return html`<span class="hatch-swatch" aria-hidden="true"></span>
-    <p><strong>Mock прототип:</strong> официални данни, където ги има; примерните са със щриховка. <button type="button" class="link-btn" data-action="legend">Легенда</button></p>
+    <p><strong>Бета.</strong> Официални данни; примерните стойности са със щриховка. <button type="button" class="link-btn" data-action="legend">Легенда</button></p>
     <button type="button" class="x" data-action="dismiss-banner" aria-label="Скрий съобщението за тази сесия">${icon('x', { size: 18 })}</button>`;
 }
 const CTA = 'Бюджет 2027';
 function topbarHtml() {
   const p = store.period;
-  return html`<div class="mast-in"><a class="brand" href="#/" aria-label="Бюджет на светло, към началото">${MARK}<span class="brand-name">Бюджет на светло</span></a>
-    <span class="badge-mock" title="Прототип с официални и примерни данни">Mock</span>
+  return html`<div class="mast-in"><a class="brand" href="${routeHref('S01')}" aria-label="Бюджет на светло, към началото">${MARK}<span class="brand-name">Бюджет на светло</span></a>
+    <span class="badge-mock" title="Бета версия: официални данни и няколко означени примерни стойности">Бета</span>
     <div class="topbar-tools">
       <button type="button" class="tool-btn period-btn" id="btn-period" aria-haspopup="dialog" aria-expanded="false" aria-label="Година и статус на данните: ${p.label}"><span class="p-year">${yearOf(p)}</span><span class="p-status"> · ${statusOf(p)}</span>${icon('chevronDown', { size: 14 })}</button>
       <nav class="sidenav" id="sidenav" aria-label="Основна навигация">${navHtml()}</nav>
@@ -128,8 +134,9 @@ function footerHtml() {
     <div class="fine">
       ${kfp ? html`<span>Данните: КФП към ${kfp}${b.kfpPublished ? html` (обн. ${date(b.kfpPublished)})` : ''}</span>` : ''}
       ${b && b.dataVersion ? html`<span>Версия на данните: ${b.dataVersion}</span>` : ''}
-      <span>Mock прототип: част от данните са примерни и са със щриховка.</span>
+      <span>Бета версия: няколко стойности са примерни и са означени със щриховка.</span>
       <span>Лиценз на данните: предстои решение.</span>
+      <span>${sigmaLink('sister-link')}</span>
       <button type="button" class="link-btn" data-action="legend">Легенда: какво означават белезите</button>
     </div>
     <p class="small muted">Работна група „Бюджет на светло“</p>
@@ -158,7 +165,7 @@ function setCurrent(route) {
     else if (a.dataset.nav === root.id) a.setAttribute('aria-current', 'true');
     else a.removeAttribute('aria-current');
   });
-  document.querySelectorAll('#footer a[href^="#/"]').forEach(a => {      // the footer marks the current screen too
+  document.querySelectorAll('#footer a[href]').forEach(a => {      // the footer marks the current screen too
     if (a.getAttribute('href').split('?')[0] === routeHref(route.id)) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
   });
   const tab = TABS.find(t => t.routes.includes(route.id) || (route.parent && t.routes.includes(root.id)));
@@ -246,11 +253,11 @@ export const shell = {
       updateOffline(demo);
       if (route.id === 'S16') markNewsSeen();
       const fb = document.querySelector('[data-feedback-link]');
-      if (fb) fb.setAttribute('href', `#/vrazka?type=greshka&from=${encodeURIComponent(location.hash.replace(/^#\/?/, '').split('?')[0])}`);
+      if (fb) fb.setAttribute('href', toHref(`/vrazka?type=greshka&from=${encodeURIComponent(addrParts(here()).path.replace(/^\//, ''))}`));
     });
     window.addEventListener('online', () => updateOffline(router.current?.vm?.demo));
     window.addEventListener('offline', () => updateOffline(router.current?.vm?.demo));
-    updateOffline(new URLSearchParams(location.hash.split('?')[1] || '').get('demo'));
+    updateOffline(new URLSearchParams(addrParts(here()).query).get('demo'));
     checkNews();
   },
   refreshFooter() { const f = $('footer'); if (f) { f.innerHTML = footerHtml().toString(); syncFooter(); } },

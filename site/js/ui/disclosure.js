@@ -6,9 +6,10 @@
 // - `title` / `meta` may be text or markup; `body` is markup (a plain string is text). Do not put headings inside `title`.
 // - `?to=<id>` of the disclosure itself or of anything inside it opens it (router).
 import { html, raw, cx } from '../html.js';
+import { here, parts as addrParts } from '../loc.js';
 
 const MEM = new Map();
-const memKey = id => `${location.hash.split('?')[0]}|${id}`;
+const memKey = id => `${addrParts(here()).path}|${id}`;
 
 export function disclosure(o = {}) {
   if (!o.id) throw new Error('disclosure: id is required');

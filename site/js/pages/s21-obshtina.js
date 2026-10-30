@@ -296,6 +296,7 @@ export function render(ctx) {
   if (!md.m) ctx.notFound();
   return {
     title: M.munName(md.m),
+    docTitle: `${M.munName(md.m)}, област ${md.region}`,                    // two municipalities are called Бяла (js/seo.js: one title per address)
     lede: `Област ${md.region}. Колко пари държавата дава на общината през 2026 г., за какво са те и как сумата се сравнява с областта и с другите общини.`,
     body: html`${moneyBlock(md)}${compareBlock(md, ctx)}${kindsBlock(md)}${mapBlock(md, ctx)}${readBlock(md)}`
   };

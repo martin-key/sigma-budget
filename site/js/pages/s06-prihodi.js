@@ -332,6 +332,12 @@ export const lede = ctx => {
   return `${first} ${second}${third}`;
 };
 
+/** /prihodi/dds: the heading stays the question of the screen, the document title names the source (one title per address, js/seo.js) */
+export const docTitle = ctx => {
+  const x = ctx.params?.source ? model(ctx)?.byId.get(String(ctx.params.source).toLowerCase()) : null;
+  return x ? `${x.short}: приходи през ${yr(model(ctx).year)}` : null;
+};
+
 export const crumbs = ctx => {
   const id = String(ctx.params?.source || '').toLowerCase();
   const x = id ? model(ctx)?.byId.get(id) : null;

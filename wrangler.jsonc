@@ -1,0 +1,18 @@
+// Cloudflare Workers Static Assets: the prerendered site (tools/site/build.py writes dist/) and the small Worker for what has no file.
+//   PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/site/build.py   # dist/
+//   npx wrangler@4 dev                                                                # local preview of the host on http://localhost:8787
+//   npx wrangler@4 deploy                                                             # needs a Cloudflare account; the domain is set up separately
+// html_handling "auto-trailing-slash": /prihodi is served from prihodi.html without a redirect (the build writes no folders with index.html).
+// not_found_handling "none": a path without a file goes to worker/index.js (the embed view, the 404 screen).
+{
+  "name": "sigma-budget",
+  "main": "worker/index.js",
+  "compatibility_date": "2025-09-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "none"
+  },
+  "observability": { "enabled": true }
+}
