@@ -155,11 +155,11 @@ def main():
                             for f in fs: add(r["id"], w, f["k"] + f"/scrolled@{int(frac * 100)}", f["m"])
                             if fs: shot(pg, r["id"], w, f"scrolled{int(frac * 100)}")
                         under = pg.evaluate("(() => { const t = document.getElementById('tabbar'); if (!t || getComputedStyle(t).display === 'none') return null; const top = t.getBoundingClientRect().top; const bad = [...document.querySelectorAll('#footer a,#footer button,#footer summary')].filter(e => { const d = e.closest('details'); if (d && !d.open && !e.matches('summary')) return false; return e.getBoundingClientRect().bottom > top + 1 && e.getBoundingClientRect().height > 2; }); return bad.length ? bad[0].textContent.trim().slice(0, 24) : null; })()")
-                        if under: add(r["id"], w, "under-tabbar", f"the last footer control «{under}» is hidden behind the bottom bar at the end of the page")
+                        if under: add(r["id"], w, "under-tabbar", f"the last footer control «{under}» is hidden behind the bottom bar at the end of the page"); shot(pg, r["id"], w, "under-tabbar")
                         if w in (1280, 390):
                             pg.emulate_media(media="print"); pg.wait_for_timeout(120)
                             ph = pg.evaluate("[document.documentElement.scrollWidth - document.documentElement.clientWidth, !!document.querySelector('h1') && document.querySelector('h1').getBoundingClientRect().height > 0]")
-                            if ph[0] > 1 or not ph[1]: add(r["id"], w, "print", f"sideways scroll {ph[0]}px / heading visible {ph[1]}")
+                            if ph[0] > 1 or not ph[1]: add(r["id"], w, "print", f"sideways scroll {ph[0]}px / heading visible {ph[1]}"); shot(pg, r["id"], w, "print")   # taken with print media on
                     pg.close()
             c.close()
 
