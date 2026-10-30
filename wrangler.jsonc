@@ -14,5 +14,9 @@
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "none"
   },
-  "observability": { "enabled": true }
+  "observability": { "enabled": true },
+  // staging (push to develop, .github/workflows/site.yml): its own Worker, a build with --noindex; production is the top level (push to main)
+  "env": {
+    "staging": { "name": "sigma-budget-staging" }
+  }
 }

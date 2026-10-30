@@ -1,0 +1,90 @@
+# Checks, build and deployment of the site (README „Сглобяване и публикуване“).
+#   pull request to develop or main  -> data validation, prerender build with its page checks, quick v6 check
+#   push to develop                  -> the same, then deploy dist/ to the staging Worker (noindex)
+#   push to main                     -> the same, then deploy dist/ to production
+# Deployment needs the repository secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID, and the variables PRODUCTION_ORIGIN
+# (https://sigma-budget.my-data.bg) and STAGING_ORIGIN (the staging Worker's address); without them the deploy step is skipped.
+name: site
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+  workflow_dispatch:
+
+concurrency:
+  group: site-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - name: Install tools
+        run: |
+          python -m pip install -r requirements-dev.txt
+          python -m playwright install --with-deps chromium
+      - name: Validate the data
+        run: python tools/mock/validate_data_v6.py
+      - name: Build and check every page
+        env:
+          ORIGIN: ${{ github.ref == 'refs/heads/main' && vars.PRODUCTION_ORIGIN || vars.STAGING_ORIGIN || 'https://sigma-budget.my-data.bg' }}
+          NOINDEX: ${{ github.ref != 'refs/heads/main' && '--noindex' || '' }}
+        run: python tools/site/build.py --origin "$ORIGIN" $NOINDEX
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+          retention-days: 7
+
+  check:
+    # The v6 checks were tuned on macOS fonts: on Linux a few text-width findings can differ, so this job informs and does not block.
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - run: |
+          python -m pip install -r requirements-dev.txt
+          python -m playwright install --with-deps chromium
+      - run: python tools/mock/check_mock_v6.py --quick
+
+  deploy:
+    needs: build
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+      - name: Deploy to Cloudflare Workers
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          TARGET_ENV: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::notice::Cloudflare secrets are not set: skipping the deployment."
+            exit 0
+          fi
+          if [ "$TARGET_ENV" = production ]; then npx --yes wrangler@4 deploy; else npx --yes wrangler@4 deploy --env staging; fi

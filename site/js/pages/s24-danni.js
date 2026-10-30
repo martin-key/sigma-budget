@@ -306,7 +306,7 @@ function passportRows(set, M) {
     : chips({ label: 'Екрани, които ползват набора', items: set.screenRoutes.map(r => ({ label: r.title, href: href(r.key) })) }) } : null;
   return [
     { k: 'Статус', v: html`<span class="s24-st">${statusPill(set.status)}<span>${(STATUS[set.status] || STATUS.pending).text}</span></span>` },
-    set.mock ? { k: 'Откъде са стойностите', v: 'Няма източник: стойностите са измислени за прототипа.' } : null,
+    set.mock ? { k: 'Откъде са стойностите', v: 'Няма източник: стойностите са примерни, измислени за показване.' } : null,
     real.length ? { k: pend ? 'Откъде ще дойдат' : set.mock ? 'Свързан с официални данни от' : real.length > 1 ? 'Източници' : 'Източник', v: srcBlock(real, M) } : null,
     pend && set.expected ? { k: 'Къде да ги видиш', v: set.expected } : null,
     { k: 'Период', v: C.periodLabel(set.period) },

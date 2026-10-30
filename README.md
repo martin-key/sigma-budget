@@ -54,14 +54,14 @@ python3 tools/site/serve.py --dist                                              
 npx wrangler@4 deploy                                                                           # Cloudflare (нужни са акаунт и домейн)
 ```
 
-Производственият адрес е в `<meta name="site-origin">` на `site/index.html`. `sigma-budget.my-data.bg` още не е потвърден. Картинките (`og.png`, иконите) се рисуват с `tools/site/make_images.py`.
+Производственият адрес е в `<meta name="site-origin">` на `site/index.html`; `sigma-budget.my-data.bg` още не е потвърден. Адресът за обратна връзка е в `<meta name="feedback-email">`. GitHub Actions (`.github/workflows/site.yml`) проверява и сглобява всеки PR. Push към `develop` качва staging, а push към `main` качва production, щом са зададени секретите на Cloudflare. Готовността за production е в [`docs/production-readiness.md`](docs/production-readiness.md). Картинките (`og.png`, иконите) се рисуват с `tools/site/make_images.py`.
 
 ## Проверки
 
 Проверките са безглави (Playwright + Chromium) и обхождат всеки маршрут при 1280 px и 400 px, светла и тъмна тема. Проверките `_v6` пускат приложението в хеш режим (`#/prihodi`). Адресите с пътища се проверяват от `tools/site/build.py`.
 
 ```bash
-# среда (еднократно): python3 -m venv .venv && .venv/bin/pip install playwright xlrd pymupdf pdfplumber python-docx
+# среда (еднократно, Python 3.12+): python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
 # и Chromium: PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python -m playwright install chromium
 
 PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/check_mock_v6.py --quick     # финалната проверка, около минута
@@ -78,7 +78,7 @@ PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/overlap_v
 PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/perf_v6.py
 ```
 
-`accept_v6.py` включва бързия вариант на проверката за припокриване. Основните проверки работят с намалено движение; `motion_v6.py` проверява и включените анимации. Service worker използва кеш `bns-v5-11` и презаверява заявките към хостинга. Посетител със стар работник може да се нуждае от още едно зареждане, за да се обновят последователно всички модули.
+`accept_v6.py` включва бързия вариант на проверката за припокриване. Основните проверки работят с намалено движение; `motion_v6.py` проверява и включените анимации. Service worker презаверява заявките към хостинга; сглобяването дава на кеша му ново име (данни + commit), а старият кеш се изтрива. Посетител със стар работник може да се нуждае от още едно зареждане, за да се обновят последователно всички модули.
 
 Всички опции са описани в началото на `tools/mock/check_mock_v6.py` и в раздел 14 на [`docs/dev-guide.md`](docs/dev-guide.md). Проверките без `_v6` в името (`check_mock.py`, `validate_data.py`, `validate_mock.py` и `_v2`…`_v5`) са за по-старите версии и се пускат на съответния таг (`mock-v1` … `mock-v5`): на последното дърво очакваният резултат е различен.
 
@@ -95,6 +95,7 @@ PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/perf_v6.p
 - [`docs/dev-guide.md`](docs/dev-guide.md) — как се прави екран: договорът на модула, компоненти, данни, диаграми, споделяне, CSS, маршрути, достъпност, проверки.
 - [`docs/data-spec.md`](docs/data-spec.md) и [`docs/data-spec-mock.md`](docs/data-spec-mock.md) — формите на файловете в `site/data/`.
 - [`docs/plan.md`](docs/plan.md) — кратко резюме на плана: цели, потребители, екрани, етапи, версии.
+- [`docs/production-readiness.md`](docs/production-readiness.md) — оценка на готовността за production: какво е проверено, какво е нужно от човек преди пускането и какво остава след него.
 - [`docs/adr/`](docs/adr/) — архитектурни решения (0001: статичен сайт с предварително изобразени страници вместо React Router SSR).
 - [`docs/data-sources.md`](docs/data-sources.md) — произход на данните.
 

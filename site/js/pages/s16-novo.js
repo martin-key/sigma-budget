@@ -256,7 +256,7 @@ export function lede(ctx) {
 
 export function render(ctx) {
   const M = model(ctx);
-  return html`${summaryBlock(M)}${expectedBlock(M)}${feedBlock(M)}${rssBlock(M)}${subscribeBlock()}`;
+  return html`${summaryBlock(M)}${expectedBlock(M)}${feedBlock(M)}${rssBlock(M)}`;   // V7: the sample subscription form (subscribeBlock) is out: it sent nothing, and RSS is the real channel
 }
 
 /* ------------------------------------------------------------------ behaviour: the chronology filter is announced, the mock form is checked and answered, the RSS address is copied */
