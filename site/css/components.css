@@ -245,7 +245,7 @@ h3.block-title{font-size:var(--fs-h3)}
 .kpi-label a::after{content:"";position:absolute;inset:0}
 .kpi:has(.kpi-label a:hover) .kpi-num{color:var(--crimson)}
 .kpi-label a:hover{color:var(--ink)}
-.kpi-num{font:400 clamp(1.625rem,2.8vw,2.25rem)/1.05 var(--font-serif);letter-spacing:-.01em;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.kpi-num{font:400 clamp(1.625rem,2.8vw,2.25rem)/1.05 var(--font-serif);letter-spacing:-.01em;font-variant-numeric:tabular-nums}
 .kpi-unit{font:400 var(--fs-1)/1.1 var(--font-serif);color:var(--ink-mid)}
 .kpi-delta{order:3;display:block;font:500 var(--fs-xs)/1.45 var(--font-mono);letter-spacing:.02em;font-variant-numeric:tabular-nums}
 .kpi-delta[data-tone="good"]{color:var(--pos)}
