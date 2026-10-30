@@ -364,7 +364,7 @@ export function render(ctx) {
   return {
     context: 'Консолидирана фискална програма (КФП): приходи, помощи и дарения',
     body: html`${explorer(ctx, 'prihodi')}${stripBlock(ctx, m)}
-      ${unitSwitch(ctx, { name: 's06-unit', note: 'Важи за числата и графиките на този екран.' })}
+      ${unitSwitch(ctx, { name: 's06-unit', note: 'Важи за числата и графиките.' })}
       ${kpiBlock(ctx, m)}${viewsBlock(ctx, m)}${sourcesBlock(ctx, m, sel)}${execPointer(ctx)}${notesBlock(ctx, m)}`
   };
 }

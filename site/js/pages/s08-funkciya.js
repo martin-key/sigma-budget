@@ -262,7 +262,7 @@ export function render(ctx) {
   const noCol = callout({ kind: 'info', body: `За ${yr(ctx.period.year)} в таблицата към проекта на бюджета няма разбивка по функции. Избери ${ctx.period.year < 2025 ? '2025 г. или по-нова година' : 'друг период'}. По-долу са данните на Евростат за по-стари години.` });
   return {
     title: M.name, eyebrow: 'Функция на бюджета', lede: ledeOf(ctx, M), context: 'Консолидирана фискална програма (КФП): разходи по функции',
-    body: html`${unitSwitch(ctx, { name: 's08-unit', note: 'Важи за списъците и графиките на този екран.' })}
+    body: html`${unitSwitch(ctx, { name: 's08-unit', note: 'Важи за списъците и графиките.' })}
       ${intro}
       ${M.sel >= 0 ? html`${kpiBlock(ctx, M)}${partsBlock(ctx, M)}` : noCol}
       ${yearsBlock(ctx, M)}${cofogBlock(ctx, M)}${vedBlock(ctx, M)}${measuresBlock(ctx, M)}${notesBlock(ctx, M)}`

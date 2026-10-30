@@ -619,7 +619,7 @@ export function render(ctx) {
   const intro = same ? html`<p class="s07-intro">Разрезите „За какво“ и „По вид“ са едни и същи разходи, разрязани по различен начин. Функциите (${money(kfp.total, { d: 1 })}) са без вноската в бюджета на ЕС (${money(eco.eu.val, { d: 1 })}), затова разрезът по вид е с толкова повече: ${money(eco.total, { d: 1 })}.</p>` : '';
   return {
     context: 'Консолидирана фискална програма (КФП): разходи',
-    body: html`${explorer(ctx, po === 'vid' ? 'rashodi:vid' : 'rashodi:funkcii')}${unitSwitch(ctx, { name: 's07-unit', note: 'Важи за числата и графиките на този екран.' })}
+    body: html`${explorer(ctx, po === 'vid' ? 'rashodi:vid' : 'rashodi:funkcii')}${unitSwitch(ctx, { name: 's07-unit', note: 'Важи за числата и графиките.' })}
       ${kpiBlock(ctx, main, eco)}${intro}
       <div id="s07-po" class="s07-cut" data-cut="${po}">${po === 'vid' ? vid() : funkcii()}</div>
       ${execPointer(ctx)}${notesBlock(ctx, mm)}`
