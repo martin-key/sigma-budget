@@ -332,7 +332,7 @@ function askForm(id, o) {
       <textarea class="input s03-textarea" id="${id}-text" name="text" rows="3" maxlength="${feedback.MAX_TEXT}" aria-describedby="${id}-text-hint ${id}-text-err" required></textarea>
       <p class="field-error" id="${id}-text-err" role="alert" hidden></p>
     </div>
-    <div class="cluster"><button type="submit" class="btn btn-primary">Изпрати</button></div>
+    <div class="cluster"><button type="submit" class="btn btn-primary">${feedback.SEND}</button></div>
     <p class="s03-ask-done" data-s03-done hidden>${feedback.SENT}</p>
   </form>`;
 }
