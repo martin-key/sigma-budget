@@ -49,6 +49,13 @@ const rootId = r => (r.parent ? rootId(byId[r.parent]) : r.id);
 const groupOf = route => { const root = rootId(route); return NAV_GROUPS.findIndex(([, ids]) => ids.includes(route.id) || ids.includes(root)); };
 const groupItems = ids => ids.map(id => byId[id]).filter(r => r && r.nav);
 const navName = r => r.short || r.title;
+/* A menu link keeps the chosen year when its screen can show it. A plain click always did (router.go adds ?per=); the address itself also covers a new tab and a copied link.
+   The dropdowns and the drawer are built when they open; the tab bar and the footer are built once, so syncLinks() follows every navigation. */
+const navHref = id => {
+  const per = store.periodParam(), p = byId[id].periods;
+  return routeHref(id, {}, per && (p === 'all' || (Array.isArray(p) && p.includes(per))) ? { per } : {});
+};
+const syncLinks = () => document.querySelectorAll('#tabbar a[data-route], #footer a[data-route]').forEach(a => a.setAttribute('href', navHref(a.dataset.route)));
 
 const openSearch = el => import('./search.js').then(m => m.openPalette(el)).catch(e => { console.error(e); });
 
@@ -71,7 +78,7 @@ function openPeriod(btn) {
   pop.el.querySelector('input:checked')?.focus({ preventScroll: true });
 }
 function openMoreSheet(btn) {
-  const nav = NAV_GROUPS.map(([label, ids]) => html`<section class="more-grp"><h3>${label}</h3><ul class="more-list">${groupItems(ids).map(r => html`<li><a href="${routeHref(r.id)}"${router.current?.route?.id === r.id ? html` aria-current="page"` : ''}>${icon(r.icon, { size: 18 })}<span>${navName(r)}</span></a></li>`)}</ul></section>`);
+  const nav = NAV_GROUPS.map(([label, ids]) => html`<section class="more-grp"><h3>${label}</h3><ul class="more-list">${groupItems(ids).map(r => html`<li><a href="${navHref(r.id)}"${router.current?.route?.id === r.id ? html` aria-current="page"` : ''}>${icon(r.icon, { size: 18 })}<span>${navName(r)}</span></a></li>`)}</ul></section>`);
   const body = html`<div class="more-sheet">
     <p class="more-cta"><a class="nav-cta" href="${routeHref('S34')}">${CTA}</a></p>
     <nav aria-label="Всички раздели">${nav}</nav>
@@ -85,7 +92,7 @@ function openMoreSheet(btn) {
 function openNavGroup(btn, i) {
   const [label, ids] = NAV_GROUPS[i];
   const cur = router.current?.route;
-  const items = groupItems(ids).map(r => html`<li><a href="${routeHref(r.id)}"${cur && (cur.id === r.id) ? html` aria-current="page"` : ''}><span>${navName(r)}</span></a></li>`);
+  const items = groupItems(ids).map(r => html`<li><a href="${navHref(r.id)}"${cur && (cur.id === r.id) ? html` aria-current="page"` : ''}><span>${navName(r)}</span></a></li>`);
   if (i === NAV_GROUPS.length - 1) items.push(html`<li class="nav-sister">${sigmaLink('sister-link')}</li>`);
   popover.open(btn, { body: html`<nav class="nav-pop" aria-label="${label}"><ul class="more-list">${items}</ul></nav>`, label, align: 'start' });
 }
@@ -114,7 +121,7 @@ function navHtml() {
   return html`<div class="nav-in">${rows}${lupa}<a class="nav-cta" href="${routeHref('S34')}" data-nav="S34">${CTA}</a></div>`;
 }
 function tabbarHtml() {
-  return html`${TABS.map(t => html`<a href="${routeHref(t.to)}" data-tab="${t.id}">${icon(t.icon, { size: 20 })}<span>${t.tab}</span></a>`)}`;
+  return html`${TABS.map(t => html`<a href="${navHref(t.to)}" data-route="${t.to}" data-tab="${t.id}">${icon(t.icon, { size: 20 })}<span>${t.tab}</span></a>`)}`;
 }
 /* V6 footer: every screen of the menu, grouped (the ids are the real routes of js/routes.js; nav:false screens like S08/S11/S21 are children of listed ones).
    Phones: one collapsible group per heading (native <details>, keyboard-operable); wide screens: all groups open side by side (syncFooter below). */
@@ -127,7 +134,7 @@ function footerHtml() {
   const cur = router.current?.route?.id;
   const groups = NAV_GROUPS.map(([label, ids]) => {
     const items = groupItems(ids);
-    return html`<details class="foot-grp"${wide ? html` open` : ''}><summary>${label}</summary><ul>${items.map(r => html`<li><a href="${routeHref(r.id)}"${r.id === 'S27' ? html` data-feedback-link` : ''}${cur === r.id ? html` aria-current="page"` : ''}>${navName(r)}</a></li>`)}</ul></details>`;
+    return html`<details class="foot-grp"${wide ? html` open` : ''}><summary>${label}</summary><ul>${items.map(r => html`<li><a href="${navHref(r.id)}" data-route="${r.id}"${r.id === 'S27' ? html` data-feedback-link` : ''}${cur === r.id ? html` aria-current="page"` : ''}>${navName(r)}</a></li>`)}</ul></details>`;
   });
   return html`<div class="footer-in">
     <nav class="foot-nav" aria-label="Всички страници">${groups}</nav>
@@ -247,6 +254,7 @@ export const shell = {
     });
     router.onNavigate(({ route, demo }) => {
       setCurrent(route);
+      syncLinks();
       const per = router.periods;
       const b = $('btn-period');
       if (b) b.hidden = per === 'none';

@@ -6,6 +6,7 @@
 //   list()                         -> records, newest first
 //   clear()                        -> forget them all
 //   mailto(rec)                    -> 'mailto:…' with the message and its context, or '' without an address
+//   SEND                           -> the label of the submit button: without an address nothing is sent, so it says where the message goes
 //   SENT                           -> the one success sentence (PLAN S27)
 //   TO                             -> the team's address (<meta name="feedback-email">), or ''
 //   TYPES                          -> {error, unclear, idea} -> visible form names
@@ -13,6 +14,7 @@ import { safe } from './store.js';
 
 export const KEY = 'bns.feedback.v1';
 export const TO = (typeof document !== 'undefined' && document.querySelector('meta[name="feedback-email"]')?.content || '').trim();
+export const SEND = TO ? 'Изпрати' : 'Запази в този браузър';
 export const SENT = TO ? 'Благодарим. Остава да изпратиш имейла.' : 'Благодарим. Записахме го в този браузър.';
 export const TYPES = { error: 'Намерих грешка', unclear: 'Още не разбирам', idea: 'Предложи идея' };
 export const MAX_TEXT = 1000;

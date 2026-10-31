@@ -3,7 +3,7 @@
 // Routes: #/izpalnenie (the comparison), #/izpalnenie/byudzheti (the plan of every budget and the national budget against the EU funds).
 // Address: ?mesec= ?obhvat= ?rez=natrupano|mesec ?g1= (the earlier year) ?g2= ?pera=rev,exp (open groups) ?pokazatel=<row> (one item in full).
 // Arrival (working-group feedback, 2026-10-10): with no ?mesec the page opens on the LATEST reported month of the newest year (js/exec.js `defMonth`, read from execution.json: nothing here names a month),
-//   one line under the heading says which report it is (`reportLine`), and the four controls are folded into one closed disclosure «Промени» whose summary says what is shown now.
+//   one line under the heading says which report it is (`reportLine`), and the four controls are folded into one closed disclosure «Избери месец и сравнение» whose summary says what is shown now.
 //   A control param in the address (?mesec ?rez ?g1 ?g2 ?obhvat) keeps the disclosure open; a month other than the latest gets a link back («Последен отчет»).
 // Under the comparison: «Изпълнение на плана» (working-group feedback, 2026-10-09): three bars (приходи, разходи, капиталови разходи) = the latest report against the annual plan,
 //   КФП only, independent of the controls; neutral colours, no „lagging“ verdict (UX V2 §7: % от плана е вторичен блок с точния документ и знаменател).
@@ -26,7 +26,7 @@ import { amount, moneyCol } from '../view.js';
 import { execModel, SCOPES, SCOPE_NAME, SCOPE_IN, MODES, REV_ROWS, EXP_ROWS, EARLIEST_REPORT, fin, pctChange, mlrd, balanceWord } from '../exec.js';
 
 const QUERY_KEYS = ['mesec', 'obhvat', 'rez', 'g1', 'g2', 'pera'];
-const CONTROL_KEYS = ['mesec', 'obhvat', 'rez', 'g1', 'g2'];            // the choices of the «Промени» disclosure (?pera and ?pokazatel are not)
+const CONTROL_KEYS = ['mesec', 'obhvat', 'rez', 'g1', 'g2'];            // the choices of the «Избери месец и сравнение» disclosure (?pera and ?pokazatel are not)
 const hasControlParams = q => !!q && CONTROL_KEYS.some(k => q[k] != null && String(q[k]) !== '');
 const cap1 = s => (s ? s[0].toUpperCase() + s.slice(1) : s);
 const joinBg = xs => (xs.length > 1 ? `${xs.slice(0, -1).join(', ')} и ${xs[xs.length - 1]}` : String(xs.length ? xs[0] : ''));
@@ -129,7 +129,7 @@ export function controlsDisclosure(C) {
   const ctx = C.ctx;
   const back = !C.problem && C.month !== C.defMonth
     ? html`<p class="s15-latest"><a href="${ctx.href('S15', {}, keepQuery(ctx, { mesec: null }))}">Последен отчет (${monthName(C.defMonth)} ${C.g2})</a></p>` : '';
-  return disclosure({ id: 's15-controls', cls: 's15-chooser', title: 'Промени', meta: selectionText(C), open: !!C.problem || hasControlParams(ctx.query), body: html`${back}${controls(C)}` });
+  return disclosure({ id: 's15-controls', cls: 's15-chooser', title: 'Избери месец и сравнение', meta: selectionText(C), open: !!C.problem || hasControlParams(ctx.query), body: html`${back}${controls(C)}` });
 }
 
 /** g1 = g2, or a year the file does not have: say so and offer the default comparison */
@@ -550,7 +550,7 @@ export function render(ctx) {
     const plan = planBlock(C, { link: linkOf(C) });
     body = html`${controlsDisclosure(C)}${PLAN_FIRST ? plan : ''}${compareBlock(C)}${PLAN_FIRST ? '' : plan}${chartsView(C)}${links}${expertBlock(C)}${methodDisclosure(C)}`;
   }
-  return { body, context: C.page === 'main' && !C.problem ? '' : contextLine(C), ownContext: true };     // the main screen says it in the line under the heading and in the «Промени» row
+  return { body, context: C.page === 'main' && !C.problem ? '' : contextLine(C), ownContext: true };     // the main screen says it in the line under the heading and in the «Избери месец и сравнение» row
 }
 
 export function mount(root, ctx) {

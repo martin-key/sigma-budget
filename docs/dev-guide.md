@@ -661,7 +661,7 @@ khilText(v, d, leva) · eurText(v, d, leva) · munName(m)     // суми, съ�
 Обвивката няма контрол за общото предпочитание `unit` (менютата ѝ носят период, тип потребител, „На човек“ и „Сумите и в лева“, но не и единицата), затова всеки екран, чиито числа съществуват и в млн. €, и като % от БВП, носи този. Това е `seg` (раздел 5.13) с видим етикет и по избор бележка.
 ```js
 import { unitSwitch, bindUnitSwitch } from '../ui/unit-switch.js';
-unitSwitch(ctx, { name:'s06-unit', note:'…' })   // → SafeHtml; `name` е уникално в екрана (радио идентификатори `${name}-eur` / `${name}-pct`); стойност = ctx.store.get('unit')
+unitSwitch(ctx, { name:'s06-unit', note:'…' })   // → SafeHtml; `name` е уникално в екрана (радио идентификатори `${name}-eur` / `${name}-pct`); стойност = ctx.store.get('unit'); след `note` компонентът винаги добавя „Изборът остава и на другите екрани.“
 bindUnitSwitch(root, ctx, name)                  // → почистване; викай от mount(): изборът прави ctx.store.set('unit', 'eur'|'pct'); рутерът рисува наново и обявява „Показваме в евро / в проценти“
 ```
 `unit` е в `RERENDER_KEYS`, така че не е нужно нищо друго; стойността се чете с `view.chartUnit(ctx, …)` (5.22) за диаграми и с `ctx.store.get('unit')` за числа. Трите му CSS правила (`.unit-switch`, `.unit-switch-label`, `.unit-switch-note`) са в края на `components.css`. S13 има собствено копие на контрола и може да премине към този.

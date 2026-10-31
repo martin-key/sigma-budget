@@ -140,7 +140,7 @@ function scene1(ctx, core) {
     <figcaption class="s04-cap">Планирани приходи и разходи на КФП за 2026 г. Пунктираната част е дефицитът: разходи, за които няма приходи.</figcaption>
   </figure>`;
   const deep = deeper(ctx, 1, 1, [
-    { href: href('start'), title: byKey.start.title, text: 'Колко е събрано и похарчено досега, и как се сравнява с миналата година.' },
+    { href: href('izpalnenie'), title: byKey.izpalnenie.title, text: 'Колко е събрано и похарчено досега, и как се сравнява с миналата година.' },
     { href: href('izpalnenie', {}, { pokazatel: 'balance' }), title: 'Салдото месец по месец', text: 'Кога дефицитът расте и кога намалява.' }
   ]);
   return scene(1, {
