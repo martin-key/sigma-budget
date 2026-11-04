@@ -98,6 +98,7 @@ PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/perf_v6.p
 - [`docs/production-readiness.md`](docs/production-readiness.md) — оценка на готовността за production: какво е проверено, какво е нужно от човек преди пускането и какво остава след него.
 - [`docs/adr/`](docs/adr/) — архитектурни решения (0001: статичен сайт с предварително изобразени страници вместо React Router SSR).
 - [`docs/data-sources.md`](docs/data-sources.md) — произход на данните.
+- [`docs/data-acquisition.md`](docs/data-acquisition.md) — придобиване на данните: кои източници се свалят от къде, работят ли скриптовете, ръчният импорт и Claude skill. Пробата за достъп е `python3 tools/data/probe_sources.py`.
 
 ## История и версии
 
