@@ -491,10 +491,23 @@ function exportP(pm, ctx) {
 }
 
 /* ---------------------------------------------------------------- the pieces of the page */
-function overview(md, pm, ctx) {
+/** the answer to „Кой харчи?“ in two sentences: the sum and the three biggest budgets, each with its amount and share. On the screen under the
+    totals (overview) and, the same text, the short answer for search and answer engines (answer below, js/seo.js) */
+function topLine(md) {
   const top = [...md.items].sort((a, b) => b.mln - a.mln).slice(0, 3);
+  if (!top.length) return '';
   const topShare = top.reduce((s, m) => s + m.mln, 0) / md.total * 100;
-  const names = `${top.slice(0, -1).map(m => `${m.name} (${pct(m.share, 1)})`).join(', ')} и ${top[top.length - 1].name} (${pct(top[top.length - 1].share, 1)})`;
+  const one = m => `${m.name} (${money(m.mln, { d: 2 })}, ${pct(m.share, 1)})`;
+  const names = top.length > 1 ? `${top.slice(0, -1).map(one).join(', ')} и ${one(top[top.length - 1])}` : one(top[0]);
+  return `Ведомствата харчат общо ${money(md.total, { d: 2 })} по закона за 2026 г. Най-големи са бюджетите на ${names}: заедно ${pct(topShare, 1)} от сбора.`;
+}
+export function answer(ctx) {
+  if (!ctx.data?.ministries) return '';
+  const md = model(ctx);
+  return md.ok ? topLine(md) : '';
+}
+
+function overview(md, pm, ctx) {
   const N = md.items.length;
   const items = [
     kpi({ label: 'Ведомства с бюджет', value: num(N, 0), gl: 'parvostepenen-razporeditel-s-byudzhet', sub: md.artMin !== null ? `Членове ${md.artMin}–${md.artMax} от закона.` : '' }),
@@ -511,7 +524,7 @@ function overview(md, pm, ctx) {
     sub: 'Разходите и собствените приходи на всички ведомства по закона за 2026 г.',
     body: html`${kpiGrid(items, { label: 'Основни числа за ведомствата' })}
       ${callout({ kind: 'info', title: 'Какво е и какво не е в сбора', body: md.doc.scopeNote || 'Сборът е на разходите на първостепенните разпоредители. Не е целият държавен бюджет.' })}
-      <p class="s10-top">Най-големи по разходи са бюджетите на ${names}. Заедно те са ${pct(topShare, 1)} от сбора.</p>`
+      <p class="s10-top">${topLine(md)}</p>`
   });
 }
 

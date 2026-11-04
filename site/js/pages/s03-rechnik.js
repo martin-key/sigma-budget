@@ -16,6 +16,7 @@ import { emptyState } from '../ui/states.js';
 import { ext } from '../ui/cards.js';
 import { srcTag } from '../ui/source.js';
 import * as feedback from '../feedback.js';
+import { siteUrl } from '../seo.js';
 
 export const needs = ['glossary'];
 export const styles = ['s03-rechnik'];
@@ -354,6 +355,23 @@ export const lede = ctx => {
   if (!g) return undefined;
   if (!ctx.params.term) return g.subtitle;
   return termOf(ctx, indexOf(g))?.def ?? 'Такава дума няма в речника. Потърси я в целия речник.';
+};
+
+/** JSON-LD (js/seo.js): the glossary is a DefinedTermSet, a term's page a DefinedTerm with its definition, as on the screen */
+const termUrl = t => siteUrl(`/rechnik/${encodeURIComponent(t.slug)}`);
+const SET_ID = () => siteUrl('/rechnik') + '#terms';
+export const schema = ctx => {
+  const g = ctx.data?.glossary;
+  if (!g) return [];
+  if (ctx.params.term) {
+    const t = termOf(ctx, indexOf(g));
+    if (!t) return [];
+    const alt = [...new Set([t.name, ...(Array.isArray(t.aliases) ? t.aliases : [])].filter(a => a && a !== t.title))];
+    return [{ '@type': 'DefinedTerm', '@id': termUrl(t) + '#term', url: termUrl(t), name: t.title, alternateName: alt.length ? alt : undefined,
+      description: t.def, termCode: t.slug, inLanguage: 'bg', inDefinedTermSet: { '@id': SET_ID() } }];
+  }
+  return [{ '@type': 'DefinedTermSet', '@id': SET_ID(), url: siteUrl('/rechnik'), name: g.title, description: g.subtitle, inLanguage: 'bg',
+    hasDefinedTerm: (g.terms || []).filter(t => t && t.slug && t.title).map(t => ({ '@type': 'DefinedTerm', '@id': termUrl(t) + '#term', name: t.title, url: termUrl(t) })) }];
 };
 
 export const crumbs = ctx => {
