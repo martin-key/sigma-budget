@@ -27,7 +27,7 @@
 
 ### Търсачки и езикови модели (SEO/GEO/AEO)
 
-✅ Всяка страница има собствен адрес и HTML с текста и таблиците. Има заглавие и описание на страница, каноничен адрес, Open Graph и JSON-LD (`WebSite`, `Organization`, `BreadcrumbList`, `FAQPage` с отговор с числа на въпросните екрани). Сглобяват се `sitemap.xml`, `robots.txt`, `llms.txt` и `llms-full.txt`. RSS (`data/feed.xml`) вече сочи истинските адреси, а не `budget-na-svetlo.example/#/…`.
+✅ Всяка страница има собствен адрес и HTML с текста и таблиците. Има заглавие и описание на страница, каноничен адрес, Open Graph и JSON-LD (`WebSite`, `Organization`, `BreadcrumbList`, `FAQPage` с отговор с числа на 8 въпросни екрана, `Dataset` за 17-те реални набора и `DataCatalog`, `DefinedTerm` за 69-те термина на речника). Сглобяват се `sitemap.xml`, `robots.txt`, `llms.txt` и `llms-full.txt`. RSS (`data/feed.xml`) вече сочи истинските адреси, а не `budget-na-svetlo.example/#/…`.
 
 ### Хостинг в Cloudflare
 

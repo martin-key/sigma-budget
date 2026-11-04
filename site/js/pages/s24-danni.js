@@ -7,6 +7,7 @@
 // All catalogue logic (model, filters, citation, rich text) is in ../catalog.js: one page module never imports another (DEV_GUIDE §17.6).
 import { html, raw } from '../html.js';
 import { absolute } from '../loc.js';
+import { siteUrl, orgRef } from '../seo.js';
 import { date, num, plural } from '../format.js';
 import { href, byKey } from '../routes.js';
 import { icon } from '../icons.js';
@@ -412,6 +413,41 @@ export async function render(ctx) {
   const set = M.find(slug);
   if (!set) ctx.notFound();
   return detailView(ctx, M, set);
+}
+
+/* JSON-LD (js/seo.js): the list is a DataCatalog of the sets, a set's page is a Dataset with its files, period and official sources, so that
+   dataset search engines (Google Dataset Search) and answer engines find the files. Left out: sample (mock) sets, whose values are not
+   official (spec 9.3: demo data is not indexed as official numbers), pending sets, which have no file, and the service files of the site
+   (core, search index, news feed, the catalog itself), which are not data about the budget. */
+const indexable = s => s.status !== 'mock' && !s.mock && s.status !== 'pending' && s.group !== 'service' && (s.file || s.parts.length);
+const setUrl = s => siteUrl(`/danni/${encodeURIComponent(s.slug)}`);
+const isoPeriod = p => { const m = String(p || '').match(/\b(?:19|20)\d{2}(?:-\d{2})?\b/g); return m ? (m.length > 1 ? `${m[0]}/${m[m.length - 1]}` : m[0]) : undefined; };
+const kb = b => (Number.isFinite(b) ? `${Math.max(1, Math.round(b / 1024))} KB` : undefined);
+const download = (file, type, bytes) => ({ '@type': 'DataDownload', contentUrl: siteUrl('/' + file), encodingFormat: type || 'application/json', contentSize: kb(bytes) });
+function datasetNode(M, s) {
+  const files = s.file ? [download(s.file, s.mediaType, s.bytes)] : s.parts.map(p => download(p.file, s.mediaType, p.bytes));
+  const sources = uniq(s.source.map(k => M.src(k).url).filter(Boolean));
+  return {
+    '@type': 'Dataset', '@id': setUrl(s) + '#dataset', url: setUrl(s), name: s.title, identifier: s.id || s.slug,
+    // dataset search wants 50+ characters: a short description gets the context the page shows around it
+    description: (s.desc || s.title).length >= 50 ? s.desc : `${s.desc || s.title} Отворен набор (${s.format || 'JSON'}) за държавния бюджет на България.`,
+    inLanguage: 'bg', isAccessibleForFree: true, creator: orgRef(), publisher: orgRef(),
+    keywords: uniq(['държавен бюджет', 'България', M.groups.find(g => g.id === s.group)?.label].filter(Boolean)),
+    spatialCoverage: { '@type': 'Place', name: 'България' }, temporalCoverage: isoPeriod(s.period),
+    dateModified: /^\d{4}-\d{2}-\d{2}/.test(s.asOf) ? s.asOf.slice(0, 10) : undefined,
+    isBasedOn: sources.length ? sources : undefined, distribution: files,
+    includedInDataCatalog: { '@id': siteUrl('/danni') + '#catalog' }
+  };
+}
+export function schema(ctx) {
+  const M = modelOf(ctx), slug = slugOf(ctx);
+  if (slug) { const s = M.find(slug); return s && indexable(s) ? [datasetNode(M, s)] : []; }
+  return [{
+    '@type': 'DataCatalog', '@id': siteUrl('/danni') + '#catalog', url: siteUrl('/danni'), name: 'Наборите с данни на „Бюджет на светло“',
+    description: 'Отворените файлове на сайта: държавният бюджет на България, месечното му изпълнение, дългът, ведомствата и общините, с източник, период и статус.',
+    inLanguage: 'bg', publisher: orgRef(),
+    dataset: M.sets.filter(indexable).map(s => ({ '@type': 'Dataset', '@id': setUrl(s) + '#dataset', name: s.title, url: setUrl(s) }))
+  }];
 }
 
 export function crumbs(ctx) {

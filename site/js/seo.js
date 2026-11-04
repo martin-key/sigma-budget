@@ -15,6 +15,10 @@ const SITE = 'Бюджет на светло';
 const ORG = 'Работна група „Бюджет на светло“';
 const MAXD = 160;
 const origin = () => (document.querySelector('meta[name="site-origin"]')?.content || location.origin).replace(/\/+$/, '');
+/** the production address of a path of the site ('/danni/execution', '/data/core.json'): for the JSON-LD a screen adds through mod.schema */
+export const siteUrl = (path = '/') => origin() + (String(path).startsWith('/') ? path : '/' + path);
+/** the publisher node, to reference from a screen's own nodes ({ '@id': … }) */
+export const orgRef = () => ({ '@id': origin() + '/#org' });
 
 /** plain text of a value that may be SafeHtml, a string with tags or a number */
 export function plain(v) {
@@ -54,10 +58,10 @@ function modified() {
 function graph(vm, { url, title, desc, question, answer }) {
   const o = origin(), home = o + '/';
   const g = [
-    { '@type': 'WebSite', '@id': home + '#website', url: home, name: SITE, inLanguage: 'bg', publisher: { '@id': home + '#org' },
+    { '@type': 'WebSite', '@id': home + '#website', url: home, name: SITE, alternateName: 'Sigma Budget', inLanguage: 'bg', publisher: { '@id': home + '#org' },
       description: 'Държавният бюджет на България на разбираем език, по официални данни: откъде идват парите, къде отиват, изпълнява ли се планът, колко дължим.',
       potentialAction: { '@type': 'SearchAction', target: { '@type': 'EntryPoint', urlTemplate: o + '/tarsene?q={search_term_string}' }, 'query-input': 'required name=search_term_string' } },
-    { '@type': 'Organization', '@id': home + '#org', name: ORG, url: home, logo: { '@type': 'ImageObject', url: o + '/icon-512.png', width: 512, height: 512 } }
+    { '@type': 'Organization', '@id': home + '#org', name: ORG, alternateName: SITE, url: home, logo: { '@type': 'ImageObject', url: o + '/icon-512.png', width: 512, height: 512 } }
   ];
   const crumbs = (vm.crumbs || []).filter(c => c && c.label);
   const faq = !!(question && answer);                                 // FAQPage is a WebPage: the question and its answer, both on the screen
