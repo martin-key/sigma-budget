@@ -206,12 +206,14 @@ def main(argv):
         a = via_urllib(url, headers)
         b = None if args.no_curl else via_curl(url, headers)
         va, vb = verdict(a, expected), verdict(b, expected)
-        if va in ("wrong-content", "network") or vb in ("wrong-content", "network"):
-            time.sleep(2)                              # втори опит: различава нестабилен сървър от постоянен отказ
-            a2 = via_urllib(url, headers)
-            if verdict(a2, expected) == "ok":
-                a, va = a2, "flaky"
-            if b is not None and vb != "ok":
+        retry = ("wrong-content", "network")         # втори опит: различава нестабилен сървър от постоянен отказ
+        if va in retry or vb in retry:
+            time.sleep(2)
+            if va in retry:                            # само клиентът, който не е минал: успешният остава „ok“
+                a2 = via_urllib(url, headers)
+                if verdict(a2, expected) == "ok":
+                    a, va = a2, "flaky"
+            if vb in retry:
                 b2 = via_curl(url, headers)
                 if verdict(b2, expected) == "ok":
                     b, vb = b2, "flaky"
