@@ -1,0 +1,14 @@
+// TEMPORARY while the SSR app is built next to the static site (docs/adr/0002-react-router-ssr.md); merged into wrangler.jsonc at the switch
+{
+  "name": "sigma-budget",
+  "main": "./workers/app.ts",
+  "compatibility_date": "2025-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": { "binding": "ASSETS", "html_handling": "auto-trailing-slash", "not_found_handling": "none" },
+  "observability": { "enabled": true },
+  "d1_databases": [
+    { "binding": "DB", "database_name": "sigma-budget-registry", "database_id": "00000000-0000-0000-0000-000000000000", "migrations_dir": "migrations" }
+  ],
+  "r2_buckets": [{ "binding": "OBJECTS", "bucket_name": "sigma-budget-objects" }],
+  "vars": { "ACCESS_ISSUER": "", "ACCESS_AUD": "", "SERVICE_TOKENS": "", "ENVIRONMENT": "production", "SITE_ORIGIN": "https://sigma-budget.my-data.bg", "SIGMA_URL": "https://sigma.midt.bg/", "NOINDEX": "" }
+}

@@ -1,6 +1,8 @@
 // Global view state (v4: light only, so there is no theme preference). Preferences persist in localStorage (always in try/catch, in-memory fallback);
 // the banner dismissal lives in sessionStorage. Changing a key notifies subscribers; the router re-renders
 // the current screen for period / userType / unit / perPerson / leva / onlyReal.
+import { serverScope } from './env.js';
+
 export const PERIODS = [
   { key: '2024.report', year: 2024, status: 'report', vintage: 'actual', label: '2024 · Отчет', desc: 'Отчетени данни' },
   { key: '2025.report', year: 2025, status: 'report', vintage: 'prelim', label: '2025 · Отчет', desc: 'Предварителен отчет' },
@@ -45,7 +47,13 @@ export const safe = {
   set(store, k, v) { try { window[store].setItem(k, v); return true; } catch { return false; } },
   del(store, k) { try { window[store].removeItem(k); } catch { /* blocked */ } }
 };
-const state = { ...DEFAULTS };
+const own = { ...DEFAULTS };
+/** the server (js/env.js) gives every request its own view state: the period of its address, the defaults for the rest */
+const S = () => serverScope()?.state || own;
+const state = new Proxy({}, { get: (_, k) => S()[k], set: (_, k, v) => { S()[k] = v; return true; }, has: (_, k) => k in S(),
+  ownKeys: () => Reflect.ownKeys(S()), getOwnPropertyDescriptor: (_, k) => Object.getOwnPropertyDescriptor(S(), k) });
+/** the view state a server request starts from: the defaults, and the period of the address when it is a valid one */
+export const requestState = per => ({ ...DEFAULTS, period: VALID.period(per) ? per : DEFAULT_PERIOD });
 try {
   const saved = JSON.parse(safe.get('localStorage', KEY) || '{}');
   for (const k of PERSIST) if (Object.hasOwn(saved, k) && VALID[k](saved[k]) && (k !== 'userType' || ROLE_SELECTOR)) state[k] = saved[k];

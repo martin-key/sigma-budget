@@ -5,8 +5,11 @@
 // The v6 checks in tools/mock/ run in this mode (they set it with an init script), so their hash expectations stay valid.
 // Code that builds a link writes the internal form '/prihodi/dds?x=1' (or the old '#/prihodi/dds') and passes it through toHref().
 
-/** the site root, wherever the current page is (/razhodi/obrazovanie loads its files from the root, not from /razhodi/) */
-export const ROOT = new URL('../', import.meta.url);
+import { serverScope } from './env.js';
+
+/** the site root, wherever the current page is (/razhodi/obrazovanie loads its files from the root, not from /razhodi/). On the server
+ *  (js/env.js) the site is at the root of its host; the scope of the request knows the host */
+export const ROOT = typeof document === 'undefined' ? new URL('https://server.invalid/') : new URL('../', import.meta.url);
 export const BASE = ROOT.pathname;                                     // '/' when the site is served at the root of its host
 export const HASH = typeof window !== 'undefined' && !!window.__HASH_ROUTES__;
 
@@ -19,10 +22,12 @@ export function internal(a) {
 /** the link to an address in the active mode: '/x?y' -> '/x?y' (path mode) or '#/x?y' (hash mode) */
 export const toHref = a => (HASH ? '#' : BASE.slice(0, -1)) + internal(a);
 /** a full URL for the address (share links, embed code, canonical) */
-export const absolute = (a, origin) => new URL(toHref(a), origin || location.href).href;
+export const absolute = (a, origin) => new URL(toHref(a), origin || serverScope()?.origin || location.href).href;
 
 /** the current address, internal form '/x?y'. In path mode an old hash address (#/x) in the address bar wins: it is a link from V6 */
 export function here() {
+  const sc = serverScope();
+  if (sc) return internal(sc.url.pathname).replace(/\/index\.html$/, '/') + sc.url.search;     // the server: the request's address
   if (HASH || location.hash.startsWith('#/')) return internal(location.hash || '#/');
   return internal(location.pathname).replace(/\/index\.html$/, '/') + location.search;     // /index.html is the start page
 }
@@ -49,7 +54,10 @@ export const isAppLink = a => !!a && isAppHref(a.getAttribute('href'));
  *  crawlers, „Open in new tab“ and the prerendered HTML all see the path; a file link relative to the root (data/core.json) becomes
  *  /data/core.json, which also holds on /danni/execution. Hash mode: nothing to do (every page is the root document). */
 const LINKS = 'a[href^="#/"],a[href^="data/"]';
-const fixOne = a => { const h = a.getAttribute('href'); a.setAttribute('href', h.startsWith('#/') ? toHref(h) : BASE + h); };
+// a data file of the visit's release (js/data.js); data/releases/… is the address of a release itself and stays as it is
+const dataBaseOf = () => { const b = (typeof document === 'undefined' ? '' : document.querySelector('meta[name="data-base"]')?.content) || ''; return /^\/data\/(releases\/[0-9a-f]{64}\/data\/)?$/.test(b) ? b : ''; };
+export const fileHref = (h, base = dataBaseOf()) => (base && h.startsWith('data/') && !h.startsWith('data/releases/') ? base + h.slice(5) : BASE + h);
+const fixOne = a => { const h = a.getAttribute('href'); a.setAttribute('href', h.startsWith('#/') ? toHref(h) : fileHref(h)); };
 export function fixLinks(root) {
   if (HASH || !root || !root.querySelectorAll) return;
   if (root.matches?.(LINKS)) fixOne(root);

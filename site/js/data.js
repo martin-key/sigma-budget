@@ -5,6 +5,7 @@
 export class PendingError extends Error { constructor(name) { super('pending: ' + name); this.name = 'PendingError'; this.file = name; } }
 export class LoadError extends Error { constructor(name, cause) { super('load failed: ' + name); this.name = 'LoadError'; this.file = name; this.cause = cause; } }
 import { ROOT } from './loc.js';
+import { serverScope } from './env.js';
 const OK_NAME = /^[A-Za-z0-9_-]+(\/[A-Za-z0-9_-]+)*$/;
 const cache = new Map();   // name -> Promise<json>
 const done = new Map();    // name -> json (sync access after resolve)
@@ -30,15 +31,32 @@ function execNumbers(text) {
   return out;
 }
 const ADAPT = { execution: execNumbers };
+/** the JSON of a data file as the pages read it: the same in the browser and on the server (workers/release-data.ts) */
+export const parse = (name, text) => (ADAPT[name] ? ADAPT[name](text) : JSON.parse(text));
+
+/* One release for the whole visit (docs/approach-specification.md, section 7.3; docs/adr/0002-react-router-ssr.md): a page drawn by the
+   server names its release (<meta name="release-id">) and where its files are (<meta name="data-base">: /data/releases/<id>/data/ when
+   it comes from the registry). Every file the browser loads afterwards comes from there, so a release published in the middle of a visit
+   does not mix with the one on the screen. Without the tags (the static site) the files are the site's own data/. */
+const metaOf = n => (typeof document === 'undefined' ? '' : document.querySelector(`meta[name="${n}"]`)?.content || '');
+export const pinnedBase = () => { const b = serverScope()?.dataBase || metaOf('data-base'); return /^\/data\/(releases\/[0-9a-f]{64}\/data\/)?$/.test(b) ? b : null; };
+const pinnedRelease = () => { const r = serverScope()?.releaseId || metaOf('release-id'); return /^[0-9a-f]{64}$/.test(r) ? r : null; };
+/** the address of a data file of the visit's release: href('execution-provenance') -> /data/releases/<id>/data/execution-provenance.json */
+export const dataHref = name => (pinnedBase() || '/data/') + name + '.json';
+/** the record of the visit's release, as data/releases/current.json has it (the CSV exports and S15 name it) */
+const releaseRecord = rid => ({ release_id: rid, manifest: `data/releases/${rid}/manifest.json` });
 
 function fetchJson(name) {
   if (!OK_NAME.test(name)) return Promise.reject(new PendingError(name));
-  return fetch(new URL(`data/${name}.json`, ROOT)).then(async res => {
+  const rid = pinnedRelease();
+  if (name === 'releases/current' && rid) return Promise.resolve(releaseRecord(rid));
+  const base = pinnedBase();
+  return fetch(base ? new URL(`${base}${name}.json`, location.origin) : new URL(`data/${name}.json`, ROOT)).then(async res => {
     if (res.status === 404) throw new PendingError(name);
     if (!res.ok) throw new LoadError(name, res.status);
     const text = await res.text();
     if (/^\s*</.test(text)) throw new PendingError(name);      // SPA/HTML fallback = the file does not exist
-    try { return ADAPT[name] ? ADAPT[name](text) : JSON.parse(text); } catch (e) { throw new LoadError(name, e); }
+    try { return parse(name, text); } catch (e) { throw new LoadError(name, e); }
   }, e => { throw new LoadError(name, e); });
 }
 const raceAbort = (p, signal) => (!signal ? p : new Promise((ok, no) => {
@@ -53,6 +71,12 @@ export const data = {
   load(name, o = {}) {
     if (o.demo === 'error') return Promise.reject(new LoadError(name, 'demo'));
     if (o.demo === 'pending') return Promise.reject(new PendingError(name));
+    const sc = serverScope();
+    if (sc) {                                                  // the server: the file of the request's release (workers/release-data.ts)
+      if (!OK_NAME.test(name)) return Promise.reject(new PendingError(name));
+      if (name === 'releases/current' && sc.releaseId) { const r = releaseRecord(sc.releaseId); sc.data.set(name, r); return Promise.resolve(r); }
+      return sc.load(name).then(j => { sc.data.set(name, j); return j; });
+    }
     let p = cache.get(name);
     if (!p) {
       p = fetchJson(name).then(j => { done.set(name, j); return j; }, e => { if (e instanceof LoadError) cache.delete(name); throw e; });
@@ -61,7 +85,7 @@ export const data = {
     return raceAbort(p, o.signal);
   },
   /** already loaded? returns the json or undefined (never fetches) */
-  get: name => done.get(name),
+  get: name => (serverScope()?.data || done).get(name),
   /** warm the cache without waiting for it and without throwing */
   prefetch(name) { data.load(name).catch(() => {}); },
   reset() { cache.clear(); done.clear(); },
@@ -70,6 +94,6 @@ export const data = {
   /** source keys of a node with inheritance */
   sourceOf: (node, doc) => node?.source || doc?.meta?.source || [],
   /** core.sources entry, or a minimal stub so a popover always has something to show */
-  source(key) { return done.get('core')?.sources?.[key] || { title: key, publisher: '', url: '', kind: '', access: '', note: '' }; },
-  pending: id => done.get('core')?.pending?.[id]
+  source(key) { return data.get('core')?.sources?.[key] || { title: key, publisher: '', url: '', kind: '', access: '', note: '' }; },
+  pending: id => data.get('core')?.pending?.[id]
 };

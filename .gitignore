@@ -41,7 +41,9 @@ Thumbs.db
 wrangler.local.jsonc
 tools/environments.local.json
 
-# Сглобеният сайт (tools/site/build.py) и локалното състояние на wrangler
+# Сглобеният сайт (tools/site/build.py), сглобеното SSR приложение (react-router build) и локалното състояние на wrangler
 dist/
+build/
+.react-router/
 .wrangler/
 work/
