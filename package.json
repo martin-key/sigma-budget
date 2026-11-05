@@ -1,0 +1,12 @@
+{
+  "name": "sigma-budget-tools",
+  "private": true,
+  "description": "Node tools of the repository: wrangler for the Worker, the local registry and the release checks (docs/release.md)",
+  "scripts": {
+    "dev": "wrangler dev",
+    "registry:local": "wrangler d1 migrations apply DB --local"
+  },
+  "devDependencies": {
+    "wrangler": "4.156.0"
+  }
+}

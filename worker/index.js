@@ -3,17 +3,25 @@
 //   /embed/*        the embed view is not prerendered: the app shell (dist/app.html) builds it in the browser; not for indexing, and made to be
 //                   framed by other sites (the _headers of every other path forbid that: frame-ancestors 'self', X-Frame-Options)
 //   anything else   the 404 screen (dist/404.html) with status 404, so a mistyped address is not a page of its own for search engines
-// No state, no storage, no outside requests: the read-only API and the release registry of docs/approach-specification.md come later.
+//   /api/releases*, /data/releases/*   the public, read-only release API (api.js); GET and HEAD only
+//   /admin/*        the operator API (admin.js), behind Cloudflare Access and checked again here (access.js)
+// The release registry is D1 (binding DB) and the objects are R2 (binding OBJECTS): docs/release.md, migrations/0001_registry.sql.
 // Conditional requests: the embed view passes a 304 from the assets through unchanged (an empty body with status 200 left the page blank);
 // the 404 screen drops the conditional headers, so it always comes back whole with status 404.
+import { adminApi } from './admin.js';
+import { publicApi } from './api.js';
+
 const CONDITIONAL = ['If-None-Match', 'If-Modified-Since', 'If-Match', 'If-Unmodified-Since', 'If-Range'];
+const RELEASES = /^\/(api\/releases(\/|$)|data\/releases\/)/;
 
 export default {
   async fetch(request, env) {
-    if (request.method !== 'GET' && request.method !== 'HEAD') {
-      return new Response('Method not allowed', { status: 405, headers: { Allow: 'GET, HEAD' } });
-    }
     const url = new URL(request.url);
+    if (url.pathname.startsWith('/admin/')) return adminApi(request, env, url);
+    if (request.method !== 'GET' && request.method !== 'HEAD') {
+      return new Response('Method not allowed', { status: 405, headers: { Allow: 'GET, HEAD' } });   // the public routes never write
+    }
+    if (RELEASES.test(url.pathname)) return publicApi(request, env, url);
     const embed = url.pathname.startsWith('/embed/');
     const ask = new Headers(request.headers);
     if (!embed) for (const name of CONDITIONAL) ask.delete(name);

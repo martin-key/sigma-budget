@@ -3,7 +3,12 @@
 //   npx wrangler@4 dev                                                                # local preview of the host on http://localhost:8787
 //   npx wrangler@4 deploy --env staging                                               # needs a Cloudflare account; production is not deployed from here
 // html_handling "auto-trailing-slash": /prihodi is served from prihodi.html without a redirect (the build writes no folders with index.html).
-// not_found_handling "none": a path without a file goes to worker/index.js (the embed view, the 404 screen).
+// not_found_handling "none": a path without a file goes to worker/index.js (the embed view, the 404 screen, the release API, /admin/*).
+// The release registry (D1, binding DB, migrations/) and the objects (R2, binding OBJECTS) are one database and one bucket per environment
+// (docs/approach-specification.md, section 3.1). Provisioning is separate from the code deploy (docs/release.md, „Среди“): the database
+// ids below are filled in when the environment is created; until then `wrangler dev` uses local copies and a deploy fails on purpose.
+// ACCESS_ISSUER and ACCESS_AUD come from the Access application of the environment; OPERATORS and SERVICE_TOKENS list who may publish.
+// Empty, the operator API answers 503.
 {
   "name": "sigma-budget",
   "main": "worker/index.js",
@@ -15,9 +20,21 @@
     "not_found_handling": "none"
   },
   "observability": { "enabled": true },
+  "d1_databases": [
+    { "binding": "DB", "database_name": "sigma-budget-registry", "database_id": "00000000-0000-0000-0000-000000000000", "migrations_dir": "migrations" }
+  ],
+  "r2_buckets": [{ "binding": "OBJECTS", "bucket_name": "sigma-budget-objects" }],
+  "vars": { "ACCESS_ISSUER": "", "ACCESS_AUD": "", "OPERATORS": "", "SERVICE_TOKENS": "", "ENVIRONMENT": "production" },
   // staging (push to develop, .github/workflows/site.yml): its own Worker, a build with --noindex.
   // The top level is production: CI never deploys it, that is a separate controlled procedure (docs/approach-specification.md, stage E).
   "env": {
-    "staging": { "name": "sigma-budget-staging" }
+    "staging": {
+      "name": "sigma-budget-staging",
+      "d1_databases": [
+        { "binding": "DB", "database_name": "sigma-budget-staging-registry", "database_id": "00000000-0000-0000-0000-000000000000", "migrations_dir": "migrations" }
+      ],
+      "r2_buckets": [{ "binding": "OBJECTS", "bucket_name": "sigma-budget-staging-objects" }],
+      "vars": { "ACCESS_ISSUER": "", "ACCESS_AUD": "", "OPERATORS": "", "SERVICE_TOKENS": "", "ENVIRONMENT": "staging" }
+    }
   }
 }
