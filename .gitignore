@@ -32,3 +32,4 @@ Thumbs.db
 # Сглобеният сайт (tools/site/build.py) и локалното състояние на wrangler
 dist/
 .wrangler/
+work/

@@ -11,6 +11,7 @@
 #   format        the expected kind of file (the magic bytes raw_sources.py checks)
 #   parser        the scripts that read the originals
 #   live          true when the publisher changes the file in place (APIs, pages): a refetch is expected to differ
+#   files[].via   the script that reduces the answer at `url` to the cached file: a refetch cannot compare them byte for byte
 #   files[]       path (a glob for families) of the original as the build reads it; url when it has its own address;
 #                 the sha256 of every file under prototype/data/raw is pinned in tools/mock/prototype.sha256; a file
 #                 elsewhere carries `sha256` here, or `pinned: false` when it has no pin yet
@@ -205,6 +206,7 @@ sources:
     url: https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/gov_10q_ggdebt?geo=BG&na_item=GD&sector=S13&unit=MIO_EUR&unit=PC_GDP&sinceTimePeriod=2024-Q1
     title: Тримесечен дълг на сектор „Държавно управление“
   - path: tools/mock/cache/eurostat_pop_nuts3_bg.json
+    via: tools/mock/fetch_gisco.py
     url: https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/demo_r_pjanaggr3
     title: population of the 28 oblasts (NUTS 3), written by tools/mock/fetch_gisco.py
     sha256: c5869aac65138237d190e14c0389f5688c8e5c85af72ac3edb3f5019cb19fc58
@@ -251,6 +253,7 @@ sources:
   live: false
   files:
   - path: tools/mock/cache/gisco_lau_bg.json
+    via: tools/mock/fetch_gisco.py
     sha256: b9793b72951e164b5a2bcdbf3004ac13fdbb15a071d5164dfc1d658d58f76208
     url: https://gisco-services.ec.europa.eu/distribution/v2/lau/
     title: '265 municipalities: code, name, population, area, borders (streamed from the 100+ MB GeoJSON)'
@@ -275,9 +278,11 @@ sources:
     url: https://midt.gov.bg/upload/3788/31.08..2026.xlsx
     title: 'МИДТ: дневно обобщение за 31.08.2026'
   - path: tools/mock/cache/sebra_27.08.2026.xlsx
+    url: https://midt.gov.bg/upload/3789/27.08..2026.xlsx
     sha256: 4a27f0714b8f5812825a9e6181f01dfe91526af8774294a090adb9365774b936
     title: daily summary for 27.08.2026, written by tools/mock/fetch_sebra.py
   - path: tools/mock/cache/sebra_28.08.2026.xlsx
+    url: https://midt.gov.bg/upload/3790/28.08..2026.xlsx
     sha256: 3d3f09e4db49e75040001c4f262cb8a8f055031624a16988377962bffb10af11
     title: daily summary for 28.08.2026, written by tools/mock/fetch_sebra.py
   limitations:
