@@ -9,7 +9,9 @@
 import { HEX64, current, isPublic, json, manifestOf, objectKey, readObject } from './store.js';
 import { pseudonym } from './access.js';
 
-const IMMUTABLE = 'public, max-age=31536000, immutable';
+// no-transform: a release file is served with exactly the bytes of its sha256. Without it a zone feature that edits HTML on the way out
+// (Web Analytics automatic setup inserts its beacon, Email Obfuscation, Rocket Loader) changes the originals, and they no longer hash.
+const IMMUTABLE = 'public, max-age=31536000, immutable, no-transform';
 const ACTIVE = new Set(['text/html', 'application/xml', 'image/svg+xml']);       // originals that a browser could run: a download, never a page
 
 async function releaseOr404(env, rid) {

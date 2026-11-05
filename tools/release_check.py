@@ -292,6 +292,7 @@ def main(argv):
         s, h, _b = req("GET", base + "/data/releases/%s/prototype/data/raw/dv/law.html" % A[2])
         ok(s == 200 and "attachment" in h.get("Content-Disposition", "") and h.get("Content-Security-Policy") == "sandbox",
            "an HTML original is a download in a sandbox, not a page of this origin")
+        ok("no-transform" in h.get("Cache-Control", ""), "release files are no-transform: the edge may not edit their bytes (a Web Analytics beacon)")
         s, _h, _b = req("GET", base + "/data/releases/%s/data/not-listed.json" % A[2])
         ok(s == 404, "a file the manifest does not list: 404")
         s, _h, _b = req("GET", base + "/data/releases/%s/%%2e%%2e/%%2e%%2e/secret" % A[2])

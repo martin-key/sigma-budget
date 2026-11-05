@@ -19,7 +19,8 @@ Operator operations (stage C; an Access login or a service token, docs/release.m
   budget upload         --release DIR --environment NAME        upload a candidate (resumable) and seal it; it does not become current
   budget publish        --release DIR --environment NAME        check locally, upload, publish on the current revision, read it back
   budget rollback       --release-id ID --environment NAME      make an earlier release current again (a new revision)
-  --yes skips the question before a change; --dry-run writes nothing remote. Environments: tools/environments.json.
+  --yes skips the question before a change; --dry-run writes nothing remote. Environments: tools/environments.json, and your own
+  in tools/environments.local.json (not in git).
 
 Every command prints a readable report, or JSON with --json. Exit codes (section 8.3):
   0 checked, nothing differs   1 differences   2 invalid data or usage   3 missing input or unavailable source (unverified)
@@ -655,8 +656,11 @@ def cmd_import_source(a):
 # ------------------------------------------------------------------------------------------------------------------------ operator
 def environment(name):
     envs = json.loads((ROOT / "tools" / "environments.json").read_text(encoding="utf-8"))
+    local = ROOT / "tools" / "environments.local.json"  # your own account's environments, not in git
+    if local.exists():
+        envs.update(json.loads(local.read_text(encoding="utf-8")))
     if name not in envs or name.startswith("_"):
-        raise Fail(EXIT_INVALID, "no environment %r in tools/environments.json" % name)
+        raise Fail(EXIT_INVALID, "no environment %r in tools/environments.json or tools/environments.local.json" % name)
     url = os.environ.get("BUDGET_%s_URL" % name.upper()) or envs[name].get("url")
     if not url:
         raise Fail(EXIT_INVALID, "%s is not provisioned yet: %s" % (name, envs[name].get("note")))
@@ -667,14 +671,17 @@ def credentials(url):
     """the Access credentials, never printed: a token (BUDGET_ACCESS_TOKEN, or `cloudflared access token`), or a service token pair"""
     if os.environ.get("CF_ACCESS_CLIENT_ID") and os.environ.get("CF_ACCESS_CLIENT_SECRET"):
         return {"CF-Access-Client-Id": os.environ["CF_ACCESS_CLIENT_ID"], "CF-Access-Client-Secret": os.environ["CF_ACCESS_CLIENT_SECRET"]}
+    app = url + "/admin/operations"  # the Access application covers /admin/* only; cloudflared finds it by that redirect
     tok = os.environ.get("BUDGET_ACCESS_TOKEN")
     if not tok and shutil.which("cloudflared"):
-        r = subprocess.run(["cloudflared", "access", "token", "-app=" + url], capture_output=True, text=True)
+        r = subprocess.run(["cloudflared", "access", "token", "-app=" + app], capture_output=True, text=True)
         tok = r.stdout.strip() if r.returncode == 0 else None
     if not tok:
         raise Fail(EXIT_AUTH, "no Access credentials: `cloudflared access login %s`, or BUDGET_ACCESS_TOKEN, or a service token "
-                              "(CF_ACCESS_CLIENT_ID and CF_ACCESS_CLIENT_SECRET)" % url)
-    return {"Cf-Access-Jwt-Assertion": tok}
+                              "(CF_ACCESS_CLIENT_ID and CF_ACCESS_CLIENT_SECRET)" % app)
+    # Cf-Access-Token is what the Access edge reads from a client; it hands the Worker Cf-Access-Jwt-Assertion. `wrangler dev` has no
+    # edge, so the Worker gets that header directly. Either way the Worker checks the signature, iss, aud and exp itself.
+    return {"Cf-Access-Token": tok, "Cf-Access-Jwt-Assertion": tok}
 
 
 def http(method, url, body=None, headers=None, timeout=120, raw=False):

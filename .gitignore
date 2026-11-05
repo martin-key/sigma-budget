@@ -29,6 +29,10 @@ Thumbs.db
 .env
 .secrets
 
+# Собствените среди: адресите и id-тата на твоя Cloudflare акаунт (docs/release.md, „Среди“)
+wrangler.local.jsonc
+tools/environments.local.json
+
 # Сглобеният сайт (tools/site/build.py) и локалното състояние на wrangler
 dist/
 .wrangler/

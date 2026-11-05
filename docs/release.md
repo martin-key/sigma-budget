@@ -92,7 +92,7 @@ work/candidate/
 
 `publish` запазва `request_id` в `work/receipts/<release_id>.json` преди заявката. Ако отговорът се изгуби, пита `GET /admin/requests/:id`,
 а не публикува отново с нов ID. Накрая чете указателя, манифеста и един файл без кеш. Изходи: 4 отказан достъп, 5 конфликт на ревизии
-(някой е публикувал пръв), 6 непотвърдено публикуване. Достъпът: `cloudflared access login <адрес>`, или `BUDGET_ACCESS_TOKEN`, или service
+(някой е публикувал пръв), 6 непотвърдено публикуване. Достъпът: `cloudflared access login <адрес>/admin/operations`, или `BUDGET_ACCESS_TOKEN`, или service
 token в `CF_ACCESS_CLIENT_ID` и `CF_ACCESS_CLIENT_SECRET`. Токените не се печатат и не влизат в манифеста или в разписките.
 
 **Публичният API** (`worker/api.js`, раздел 9.2) е само за четене:
@@ -102,7 +102,7 @@ token в `CF_ACCESS_CLIENT_ID` и `CF_ACCESS_CLIENT_SECRET`. Токените н
 | `GET /api/releases/current` | `release_id`, ревизия, адресът на манифеста; `no-store`. Без издание: `404` „няма публикувано издание“. |
 | `GET /api/releases` | Журналът по страници; операторът е роля и псевдоним. |
 | `GET /data/releases/:id/manifest.json` | Точните байтове на манифеста. |
-| `GET /data/releases/:id/:path` | Файл от манифеста, изход или оригинал; ETag, `immutable`, Range. HTML и XML оригиналите са за сваляне. |
+| `GET /data/releases/:id/:path` | Файл от манифеста, изход или оригинал; ETag, `immutable` и `no-transform` (никоя настройка на зоната, например бийконът на Web Analytics, не променя байтовете), Range. HTML и XML оригиналите са за сваляне. |
 | `GET /api/releases/:id/datasets/:dataset` | Файловете на един набор с `release_id` и схемата. |
 | `GET /api/releases/:id/provenance/<запис>` | Откъде е едно число: `data/2026-09/kfp/rev` → отчетът, листът, клетката и оригиналът за сваляне. |
 
@@ -116,13 +116,32 @@ token в `CF_ACCESS_CLIENT_ID` и `CF_ACCESS_CLIENT_SECRET`. Токените н
 **Среди.** Създаването на среда е отделно от deploy-а на кода и иска Cloudflare акаунта (раздел 12):
 
 ```bash
-npx wrangler d1 create sigma-budget-staging-registry          # id-то влиза в wrangler.jsonc, env.staging
+npx wrangler d1 create sigma-budget-staging-registry          # id-то влиза в env.staging
 npx wrangler r2 bucket create sigma-budget-staging-objects
 npx wrangler d1 migrations apply DB --env staging --remote
 ```
 
-После: Access приложение за `/admin/*` с allow политика за операторите; `ACCESS_ISSUER`, `ACCESS_AUD` и `OPERATORS` в `env.staging.vars`;
-адресът на staging в `tools/environments.json`. Production следва същите стъпки по отделна процедура (етап E).
+После: Access приложение за `/admin/*` с allow политика за операторите; `ACCESS_ISSUER` и `ACCESS_AUD` в `env.staging.vars`;
+`OPERATORS` като таен ключ на Worker-а (`npx wrangler secret put OPERATORS --env staging`), за да не са имейлите в публичното
+хранилище; адресът на staging в `tools/environments.json`. Production следва същите стъпки по отделна процедура (етап E).
+
+Zero Trust организацията има нужда от метод за вход (**Integrations → Identity providers**: One-time PIN или Cloudflare); без него
+страницата на Access казва, че няма методи за вход. `OPERATORS` съдържа имейла, който Access записва в токена: при вход с Cloudflare
+това е имейлът на Cloudflare акаунта, не непременно служебният. Пропуснат ли е, Access пуска заявката, а Worker-ът отговаря `403`
+„not an operator of this environment“.
+
+**Своя среда.** Средата на организацията е в `wrangler.jsonc` и `tools/environments.json`. Среда в собствен акаунт (например за проба)
+не влиза в git: `wrangler.local.jsonc` е копие на `wrangler.jsonc` с id-тата и адреса на акаунта, а `tools/environments.local.json`
+добавя или заменя среди за `budget`. Двата файла са в `.gitignore`. Командите на wrangler получават `-c wrangler.local.jsonc`:
+
+```bash
+npx wrangler d1 migrations apply DB --env staging --remote -c wrangler.local.jsonc
+npx wrangler deploy --env staging -c wrangler.local.jsonc
+npx wrangler secret put OPERATORS --env staging -c wrangler.local.jsonc
+```
+
+Таен ключ не може да носи името на обикновена променлива на качената версия (код 10053), затова `secret put` идва след deploy-а.
+Access приложението покрива само `/admin/*`: сайтът и публичният API остават отворени.
 
 ## Изданието в сайта
 
