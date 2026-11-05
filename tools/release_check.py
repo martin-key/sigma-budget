@@ -330,6 +330,9 @@ def main(argv):
         s2, h2, b2 = req("GET", base + "/izpalnenie")
         ok(s2 == 200 and h2.get("X-Screen-Cache") == "HIT" and h2.get("X-Release-Id") == rid and b2 == b and "max-age=0" in h2.get("Cache-Control", ""),
            "the screen again comes from the edge cache: the same bytes, the same release, revalidated by the visitor")
+        s3, h3, b3 = req("GET", base + "/izpalnenie", headers={"Accept-Encoding": "gzip"})
+        ok(s3 == 200 and h3.get("Content-Encoding") == "gzip" and gzip.decompress(b3) == b and "no-transform" in h3.get("Cache-Control", ""),
+           "the document is compressed by the Worker for a visitor that accepts gzip (no-transform keeps the edge from it), the same bytes")
         s, h, b = req("GET", base + "/data/x.json")
         ok(s == 200 and x is not None and sha(b) == next(o["sha256"] for o in x[3]["outputs"] if o["path"] == "data/x.json") and h.get("X-Release-Id") == rid,
            "the stable address /data/x.json serves the file of the current release")

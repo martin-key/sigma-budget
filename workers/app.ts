@@ -48,6 +48,23 @@ const cacheKey = (rid: string, url: URL) => new Request(`https://ssr.cache/${BUI
 const RELEASES = /^\/(api\/releases(\/|$)|data\/releases\/)/;
 const DATA_FILE = /^\/data\/(?!releases\/)[A-Za-z0-9_\-./]+$/;
 
+/* no-transform keeps Cloudflare from editing a response, and from compressing it too: the Worker compresses text itself. The runtime
+   gzips a body sent with Content-Encoding; the visitor decodes it to the same bytes. The visitor's own Accept-Encoding decides
+   (request.cf.clientAcceptEncoding: the header the Worker sees is rewritten); a Range request and a client without gzip get the bytes. */
+const TEXT = /^(text\/|application\/(json|xml|javascript)|image\/svg\+xml)/;
+function encoded(request: Request, res: Response): Response {
+  const accepts = String((request as Request & { cf?: { clientAcceptEncoding?: string } }).cf?.clientAcceptEncoding ?? '').toLowerCase();
+  if (!res.body || res.headers.has('Content-Encoding') || request.headers.has('Range') || !TEXT.test(res.headers.get('Content-Type') || '')
+      || !/\bgzip\b/.test(accepts)) return res;
+  const h = new Headers(res.headers);
+  h.set('Content-Encoding', 'gzip');
+  h.append('Vary', 'Accept-Encoding');
+  h.delete('Content-Length');
+  const tag = h.get('ETag');
+  if (tag && !tag.startsWith('W/')) h.set('ETag', 'W/' + tag);                // another representation of the same bytes
+  return new Response(res.body, { status: res.status, statusText: res.statusText, headers: h });
+}
+
 /** a static file when there is one, else the answer the Worker already has */
 async function fallback(request: Request, env: Env, res: Response): Promise<Response> {
   const file = await env.ASSETS.fetch(request);
@@ -65,8 +82,8 @@ async function dataFile(request: Request, env: Env, url: URL, data: ReleaseData)
     'Cache-Control': 'public, max-age=300, must-revalidate, no-transform', ETag: etag, 'X-Release-Id': data.releaseId,
     'Access-Control-Allow-Origin': '*', 'X-Content-Type-Options': 'nosniff',
   };
-  if (request.headers.get('If-None-Match') === etag) return new Response(null, { status: 304, headers });
-  return new Response(request.method === 'HEAD' ? null : f.bytes, { headers });
+  if ((request.headers.get('If-None-Match') || '').replace(/^W\//, '') === etag) return new Response(null, { status: 304, headers });
+  return encoded(request, new Response(request.method === 'HEAD' ? null : f.bytes, { headers }));
 }
 
 /* the headers that site/_headers (tools/site/build.py) gives the static files, for the documents the Worker draws. no-transform: a zone
@@ -114,13 +131,13 @@ export default {
     const cache = request.method === 'GET' ? edge() : undefined;
     const key = cacheKey(data.releaseId, url);
     const hit = cache ? await cache.match(key) : undefined;
-    if (hit) return documentHeaders(hit, env, embed, data.releaseId, 'HIT');
+    if (hit) return encoded(request, documentHeaders(hit, env, embed, data.releaseId, 'HIT'));
     const res = await scopes.run(scope, () => handler(request, { cloudflare: { env, ctx }, release }));
     if (cache && (res.status === 200 || res.status === 404)) {
       const copy = new Response(res.clone().body, { status: res.status, headers: res.headers });
       copy.headers.set('Cache-Control', 'public, max-age=86400');
       ctx.waitUntil(cache.put(key, copy).catch(() => {}));
     }
-    return documentHeaders(res, env, embed, data.releaseId, 'MISS');
+    return encoded(request, documentHeaders(res, env, embed, data.releaseId, 'MISS'));
   },
 } satisfies ExportedHandler<Env>;
