@@ -19,10 +19,12 @@ import glob
 import os
 import re
 import sys
+from decimal import ROUND_HALF_UP, Decimal
 
 import xlrd
 
 import asbp
+import exec_contract
 from dlib import (DATA, EUR, RAW, SRC, BUILD_DATE, Problems, jload, meta, pct, rnd, say, sha256_file, to_eur,
                   write_data)
 
@@ -262,11 +264,93 @@ def check_report(rep, prob, stats):
             prob.error("%s: control row 34 = %s" % (fn, rep["control34"]))
 
 
+D_EUR = Decimal("1.95583")
+D_PLACES = Decimal("0.001")
+D_TENTH = Decimal("0.1")
+
+
+def dec(x):
+    """the decimal a float of this extractor stands for (its repr: the numbers are read to 6 places and rounded to 3)"""
+    return Decimal(repr(x))
+
+
 def convert(v, unit):
-    """Original number -> млн. € rounded to 3 decimals (BGN is divided by 1.95583 first)."""
-    if unit == "BGN":
-        return to_eur(v, 3)
-    return rnd(v, 3)
+    """Original number -> млн. € rounded to 3 decimals, in decimal arithmetic (BGN is divided by 1.95583 first). The float returned holds
+    exactly that decimal (exec_contract.money() writes it); on the 3168 numbers of the 33 reports it equals the earlier float division."""
+    d = dec(v) / D_EUR if unit == "BGN" else dec(v)
+    r = float(d.quantize(D_PLACES, rounding=ROUND_HALF_UP))
+    return 0.0 if r == 0 else r
+
+
+def tenth(x):
+    """a 3-place value -> 1 place, half away from zero (as Excel and the MF releases round), in decimal arithmetic"""
+    r = float(dec(x).quantize(D_TENTH, rounding=ROUND_HALF_UP))
+    return 0.0 if r == 0 else r
+
+
+PLAN_ANNEX = {"rev": "r.total", "rev.tax": "r.tax", "rev.nontax": "r.nontax", "rev.grants": "r.grants", "exp": "x.exp",
+              "exp.personnel": "x.personnel", "exp.maint": "x.maint", "exp.interest": "x.interest", "exp.interest.ext": "x.interest.ext",
+              "exp.interest.dom": "x.interest.dom", "exp.social": ("x.social", "x.scholarships"), "exp.subsidies": "x.subsidies",
+              "exp.abroad": "x.abroad", "exp.capex": "x.capex", "exp.reserve": "x.reserve", "exp.contingency": "x.contingency",
+              "eucontrib": "x.eucontrib", "exp.total": "x.total", "balance": "x.balance", "fin": "x.fin"}
+PLAN_COMPONENTS = {"nat": "national", "eu": "eu"}
+PLAN_COMPONENT_KEYS = {"rev": "rev", "exp.total": "exp_incl_eu_contribution", "balance": "balance",
+                       "transfers": {"nat": "transfer_to_eu_accounts_net", "eu": "transfer_from_state_budget_net"}}
+
+
+def provenance(by_year, rows_out, plan2026, a3, as_of):
+    """execution-provenance.json: a compact index from every number of execution.json to its place in the original (spec, section 6.2).
+    A record `data/2026-09/kfp/rev` is the original of 2026-09, sheet „стартова“, column of kfp, row of rev."""
+    originals = {}
+    for year, lst in sorted(by_year.items()):
+        for rep, f in lst:
+            originals["%04d-%02d" % (year, rep["month"])] = {"source": "kfp", "file": os.path.basename(f), "sha256": sha256_file(f),
+                                                             "asOf": rep["asOf"], "unit": rep["unit"]}
+    tables = jload(RAW / "asbp" / "asbp_tables.json")
+    annex_rows = dict(zip([s[0] for s in asbp.REVENUE + asbp.EXPENDITURE], asbp._content_rows(tables["tables"]["annex3_mln"])))
+    pdf = {"source": "asbp", "file": tables["source"]["file"], "sha256": tables["source"]["sha256"],
+           "table": tables["tables"]["annex3_mln"]["title"], "column": tables["tables"]["annex3_mln"]["columns"][2]}
+
+    def annex(key):
+        r = annex_rows[key]
+        return {"page": r["page"], "row": r["label"].strip(), "y": r["y"]}
+
+    plan = {"kfp": {}}
+    for rid in plan2026["kfp"]:
+        keys = PLAN_ANNEX[rid]
+        plan["kfp"][rid] = ({"cells": [annex(k) for k in keys], "rule": "the sum of the rows, rounded to 1 place"} if isinstance(keys, tuple)
+                            else annex(keys))
+    for col, part in PLAN_COMPONENTS.items():
+        plan[col] = {}
+        for rid in plan2026[col]:
+            k = PLAN_COMPONENT_KEYS[rid]
+            plan[col][rid] = {"path": "national_vs_eu_2026.plan.%s.%s" % (part, k[col] if isinstance(k, dict) else k)}
+    return {
+        "meta": meta("execution-provenance", "Произход на числата в execution.json", "real", ["kfp", "asbp"],
+                     "клетката в оригиналния отчет на МФ за всяко число на месечното изпълнение и страницата на Приложение 3 за плана",
+                     as_of),
+        "schema": "provenance/1",
+        "dataset": "execution",
+        "record": "<block>/<ГГГГ-ММ>/<колона>/<ред>, например data/2026-09/kfp/rev: оригиналът на 2026-09, лист „%s“, клетка B11" % SHEET,
+        "sheet": SHEET,
+        "columns": {col: "ABCDEFGH"[ci] for col, ci, _kc, _kl in COLS},
+        "rows": {r["id"]: r["row"] for r in rows_out if "row" in r},
+        "computed": {"exp.total": {"from": ["exp", "eucontrib"],
+                                   "rule": "exp + eucontrib of the same report, added on the original numbers, then converted"}},
+        "rules": {
+            "data": "the cell of the original of the month; 2024 and 2025: млн. лв. ÷ 1.95583, rounded to 3 places (contract.conversion)",
+            "monthly": "data(m) − data(m − 1) of the same year, column and row; January = data(1)",
+            "latest": "cum and prevYearCum: data of the latest month of this and the previous year, rounded to 1 place; plan: plan2026",
+            "pace": "data(m) ÷ data(12) of the same year × 100",
+            "reconcile": "data(12) of 2024 and 2025 against the columns 2024 Отчет and 2025 Предв. отчет of Приложение 3",
+        },
+        "originals": originals,
+        "plan2026": {"kfp": dict(pdf, rows=plan["kfp"]),
+                     "nat": {"source": "prototype/src/kfp_components_2026.json", "rows": plan["nat"],
+                             "note": "made by tools/prototype/build_src.py from the motives (Табл. II-3/II-4); see sources/registry.yaml"},
+                     "eu": {"source": "prototype/src/kfp_components_2026.json", "rows": plan["eu"],
+                            "note": "made by tools/prototype/build_src.py from the motives (Табл. II-3/II-4); see sources/registry.yaml"}},
+    }
 
 
 def build():
@@ -382,7 +466,7 @@ def build():
             mc = {}
             for rid in HEADLINE:
                 cum = series[col][rid]
-                mc[rid] = [rnd(cum[i] - (cum[i - 1] if i else 0.0), 3) for i in range(len(cum))]
+                mc[rid] = [float(dec(cum[i]) - (dec(cum[i - 1]) if i else 0)) + 0.0 for i in range(len(cum))]   # exact on 3 places
             my[col] = mc
         monthly[str(year)] = my
 
@@ -440,7 +524,7 @@ def build():
         rows_for = LATEST_ROWS if col == "kfp" else ["rev", "exp.total", "balance"]
         for rid in rows_for:
             cum = all_series[last_year][col][rid][n_last - 1]
-            d = {"cum": rnd(cum, 1)}
+            d = {"cum": tenth(cum)}
             plan_v = plan_by_col[col].get(rid)
             if plan_v is not None and rid != "balance":
                 d["plan"] = plan_v
@@ -448,7 +532,7 @@ def build():
             elif plan_v is not None:
                 d["plan"] = plan_v
             prev = all_series[prev_year][col][rid][n_last - 1]
-            d["prevYearCum"] = rnd(prev, 1)
+            d["prevYearCum"] = tenth(prev)
             if prev >= MIN_BASE_FOR_YOY and cum >= 0:          # no growth rate on a tiny base (e.g. 1.1 -> 31.4 млн. €)
                 d["yoyPct"] = rnd(100.0 * (cum / prev - 1.0), 1)
             lc[rid] = d
@@ -472,13 +556,13 @@ def build():
                ("exp.social", None), ("exp.subsidies", "x.subsidies"), ("exp.abroad", "x.abroad"), ("exp.capex", "x.capex"),
                ("exp.reserve", "x.reserve"), ("eucontrib", "x.eucontrib"), ("exp.total", "x.total"), ("balance", "x.balance")]
     def reconcile_year(year, col_index):
-        dec = all_series[year]["kfp"]
+        december = all_series[year]["kfp"]
         ay = {k: v[col_index] for k, v in a3["mln"].items()}
         rec = {}
         for rid, ak in rec_map:
-            kv = dec[rid][-1]
+            kv = december[rid][-1]
             av = rnd(ay["x.social"] + ay["x.scholarships"], 1) if ak is None else ay[ak]
-            rec[rid] = {"kfp": rnd(kv, 3), "annex3": av, "diff": rnd(kv - av, 1)}
+            rec[rid] = {"kfp": kv, "annex3": av, "diff": tenth(float(dec(kv) - dec(av)))}
         return rec
     if len(a3["mln"]["r.total"]) != 5:            # Annex 3 columns: 2024 Отчет, 2025 Предв. отчет, 2026 Проект, 2027, 2028
         prob.error("Annex 3 has %d columns, expected 5 (2024-2028)" % len(a3["mln"]["r.total"]))
@@ -529,7 +613,10 @@ def build():
         "pendingMonths": pending_months,
         "reconcile": reconcile,
     }
-    path, size, changed = write_data("execution.json", doc)
+    path, size, changed = write_data("execution.json", exec_contract.canonical(doc))
+    say("wrote %s (%d bytes, %s)" % (path.relative_to(DATA.parent.parent), size, "changed" if changed else "unchanged"))
+    prov = provenance(by_year, rows_out, plan2026, a3, data[str(last_year)]["asOf"][-1])
+    path, size, changed = write_data(exec_contract.CONTRACT["provenance"], prov)
     say("wrote %s (%d bytes, %s)" % (path.relative_to(DATA.parent.parent), size, "changed" if changed else "unchanged"))
     prob.finish()
     return doc

@@ -17,7 +17,8 @@ COMPARE_ROWS = ("rev", "exp.total", "balance")
 
 
 def _ex():
-    return json.loads(EXECUTION.read_text(encoding="utf-8"))
+    import exec_contract                                # contract v2: money as decimal strings, read as floats
+    return exec_contract.load(EXECUTION)
 
 
 def num(v, d=2, sign=False):

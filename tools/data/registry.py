@@ -215,7 +215,7 @@ def check_paths(r):
         r.err("git ls-files failed: the absolute-path check needs a git checkout")
         return
     for rel in tracked:
-        if not rel.startswith(CODE) or rel.startswith("site/data/"):
+        if not rel.startswith(CODE) or rel.startswith("site/data/") or rel == "tools/data/registry.py":   # this file holds the pattern
             continue
         try:
             text = (ROOT / rel).read_text(encoding="utf-8")

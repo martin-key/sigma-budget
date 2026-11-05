@@ -9,6 +9,28 @@ const OK_NAME = /^[A-Za-z0-9_-]+(\/[A-Za-z0-9_-]+)*$/;
 const cache = new Map();   // name -> Promise<json>
 const done = new Map();    // name -> json (sync access after resolve)
 
+// execution.json, contract v2 (tools/mock/exec_contract.py): money as decimal strings ("33898.456"), percentages as numbers. The pages
+// compute with numbers, so the loader turns the money into numbers once; the file as published stays on `canonical` (not enumerable),
+// for the exports, which must carry the published decimals (docs/approach-specification.md, section 6.1). Version 1 passes unchanged.
+const COLS = ['kfp', 'nat', 'eu'];
+const num = v => (v == null ? null : Number(v));
+function execNumbers(text) {
+  const out = JSON.parse(text);
+  if (!out || !out.contract || out.contract.schema !== 2) return out;
+  const series = blocks => { for (const b of Object.values(blocks || {})) for (const c of COLS) for (const [r, a] of Object.entries(b[c] || {})) b[c][r] = a.map(num); };
+  series(out.data);
+  series(out.monthly);
+  for (const c of COLS) {
+    const plan = out.plan2026?.[c] || {};
+    for (const k of Object.keys(plan)) plan[k] = num(plan[k]);
+    for (const d of Object.values(out.latest?.[c] || {})) for (const k of ['cum', 'plan', 'prevYearCum']) if (k in d) d[k] = num(d[k]);
+  }
+  for (const [key, rec] of Object.entries(out.reconcile || {})) if (key.startsWith('dec')) for (const d of Object.values(rec)) for (const k of ['kfp', 'annex3', 'diff']) d[k] = num(d[k]);
+  Object.defineProperty(out, 'canonical', { value: JSON.parse(text), enumerable: false });
+  return out;
+}
+const ADAPT = { execution: execNumbers };
+
 function fetchJson(name) {
   if (!OK_NAME.test(name)) return Promise.reject(new PendingError(name));
   return fetch(new URL(`data/${name}.json`, ROOT)).then(async res => {
@@ -16,7 +38,7 @@ function fetchJson(name) {
     if (!res.ok) throw new LoadError(name, res.status);
     const text = await res.text();
     if (/^\s*</.test(text)) throw new PendingError(name);      // SPA/HTML fallback = the file does not exist
-    try { return JSON.parse(text); } catch (e) { throw new LoadError(name, e); }
+    try { return ADAPT[name] ? ADAPT[name](text) : JSON.parse(text); } catch (e) { throw new LoadError(name, e); }
   }, e => { throw new LoadError(name, e); });
 }
 const raceAbort = (p, signal) => (!signal ? p : new Promise((ok, no) => {

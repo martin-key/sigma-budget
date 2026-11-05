@@ -26,6 +26,7 @@ import vd_lib as L                                    # noqa: E402
 # vd_lib.SITE / DATA already point at site/ (the checked-out version; run this at the tag mock-v6)
 
 import validate_data as V                             # noqa: E402
+import vd_contract                                    # noqa: E402  contract v2 of execution.json (stage B)
 
 GONE_SEBRA = "СЕБРА (daily payments) was taken out of the active interface and of core.sources; data/sebra.json stays on disk, unreferenced, for phase 2"
 GONE_SEARCH = "search shows only active real sets; the 7 pending and 2 mock datasets have no search row (docs/plan.md, search)"
@@ -106,7 +107,7 @@ def main(argv):
             if flag not in argv:
                 argv.append(flag)                      # see the docstring: they test the donor tree
     orig = V.all_groups
-    V.all_groups = lambda: [(n, wrap(n, fn, use_accepted), d) for n, fn, d in orig()]
+    V.all_groups = lambda: [(n, wrap(n, fn, use_accepted), d) for n, fn, d in list(orig()) + list(vd_contract.GROUPS)]
     code = V.main(argv)
     if use_accepted and _used:
         print("\nACCEPTED V5 DIVERGENCES (%d problems the donor reports; each follows from a deliberate removal, see the docstring):" % len(_used))

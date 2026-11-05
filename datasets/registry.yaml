@@ -265,6 +265,24 @@ datasets:
   checked: '2026-11-05'
   limitations:
   - prototype/src/kfp_components_2026.json comes from build_src.py, which no longer runs
+- id: execution-provenance
+  catalogId: execution-provenance
+  title: Произход на числата от месечните отчети
+  status: real
+  files:
+  - site/data/execution-provenance.json
+  producer: tools/mock/extract_kfp_full.py
+  inputs:
+  - kfp
+  - prototype/data/raw/asbp/asbp_tables.json
+  schema: docs/data-spec.md
+  screens:
+  - S15
+  scope: every number of execution.json, and the plan for 2026
+  rebuild: .venv-data/bin/python tools/mock/rebuild_v6.py --build-date 2026-11-05
+  checked: '2026-11-05'
+  limitations:
+  - the national and EU plan (plan2026.nat, plan2026.eu) points into prototype/src/kfp_components_2026.json, whose producer no longer runs
 - id: debt
   catalogId: D13
   title: 'Държавен дълг: размер, лихви и лимити'

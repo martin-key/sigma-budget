@@ -46,7 +46,8 @@ def note(msg):
     print("  NOTE", msg)
 
 
-EX = json.load(open(SITE / "data" / "execution.json", encoding="utf-8"))
+import exec_contract                                 # noqa: E402
+EX = exec_contract.load(SITE / "data" / "execution.json")      # contract v2: money as decimal strings, read as floats
 FOLD = {"kfp": "kfp", "nat": "nat", "eu": "eu"}
 ROWS = [("rev", "Приходи"), ("exp.total", "Разходи"), ("balance", "Салдо")]
 

@@ -6,6 +6,7 @@ site/data/execution.json (produced by extract_kfp_full.py). Nothing here touches
 import json
 
 import asbp
+import exec_contract
 from dlib import CACHE, DATA, RAW, RESEARCH, SRC, jload
 
 PDF_PAGES = RESEARCH / "mf-umtbf-2026-2028" / "extracts" / "pdf_pages_clean.json"
@@ -62,7 +63,7 @@ class Ctx:
             p = DATA / "execution.json"
             if not p.exists():
                 raise FileNotFoundError("site/data/execution.json is missing: run tools/extract_kfp_full.py first")
-            return json.loads(p.read_text(encoding="utf-8"))
+            return exec_contract.numbers(json.loads(p.read_text(encoding="utf-8")))   # contract v2: money as decimal strings
         return self._get("execution", load)
 
     @property

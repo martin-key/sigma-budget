@@ -55,11 +55,19 @@ def tag_files(env):
 def main(argv):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--build-date", help="YYYY-MM-DD for meta.retrieved and build.dataVersion (else BUILD_DATE or the dlib.py default)")
+    ap.add_argument("--versions-ready", action="store_true",
+                    help="tmp/versions/site-v2|v4/data are already in place (tools/budget.py writes them from the tags before a build without git)")
     args = ap.parse_args(argv)
     env = dict(os.environ)
     if args.build_date:
         env["BUILD_DATE"] = args.build_date
-    tag_files(env)
+    if args.versions_ready:
+        missing = [str(p) for t in ("v2", "v4") for f in WORDING_FILES
+                   for p in [ROOT / "tmp" / "versions" / ("site-" + t) / "data" / f] if not p.is_file()]
+        if missing:
+            sys.exit("rebuild_v6: --versions-ready, but missing: " + ", ".join(missing))
+    else:
+        tag_files(env)
     run([T + "extract_kfp_full.py"], env)
     run([T + "build_data.py"], env)
     for f in WORDING_FILES:

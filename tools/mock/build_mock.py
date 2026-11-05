@@ -44,7 +44,11 @@ def need(path, what=None):
 
 
 def data(name):
-    return need(os.path.join(L.DATA_DIR, name), "run tools/build_data.py first")
+    obj = need(os.path.join(L.DATA_DIR, name), "run tools/build_data.py first")
+    if name == "execution.json" and obj is not None:
+        import exec_contract                                        # contract v2: money as decimal strings
+        obj = exec_contract.numbers(obj)
+    return obj
 
 
 def k1(t):
