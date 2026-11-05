@@ -221,7 +221,7 @@ def _expected(ctx):
     out = []
     for p in ex["pendingMonths"]:
         d = PENDING_DEFS[p["id"]]
-        out.append({"id": p["id"], "title": "Месечен отчет на КФП към края на %s 2026 г." % month_name(p["month"]),
+        out.append({"id": p["id"], "title": "Месечен отчет на КФП към края на %s %s г." % (month_name(p["month"]), p["asOf"][:4]),
                     "status": "pending", "note": d["reason"], "expected": d["expected"]})
     nxt = law["next"]
     out.append({"title": nxt["title"], "status": nxt["status"], "note": nxt["note"], "expected": nxt["expected"]})

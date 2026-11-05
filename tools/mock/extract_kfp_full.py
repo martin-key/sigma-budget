@@ -90,6 +90,9 @@ MIN_BASE_FOR_YOY = 50.0          # млн. €: below this base a year-on-year %
 FIN_BALANCE_TOL = 0.005          # млн. (original units): fin vs -balance differ by <= 0.0019 in the 2025/2026 reports
 # the series starts with the January 2024 report; file name month = month in the title, months 1..n per year
 FIRST_YEAR = 2024
+# the builders and validators still read data["2026"], the 2026 plan and kfpMonths2026 (bd_feed, bd_core, vd_catalog):
+# a 2027 report stops here until they are generalised
+LAST_YEAR = 2026
 # the Ministry names the file „…-EU_funds_MMYY_BG_WEB.xls“; the September 2026 report came as „EU funds“, with a space
 FILE_RE = re.compile(r"EU[ _]funds_(\d{2})(\d{2})_")
 # source-internal differences of single reports (original units, млн. лв.): checked against the stated bound, reported as a
@@ -288,6 +291,9 @@ def build():
     years = sorted(by_year)
     if years != list(range(FIRST_YEAR, FIRST_YEAR + len(years))):
         prob.error("years %s are not consecutive from %d" % (years, FIRST_YEAR))
+    if years and years[-1] > LAST_YEAR:
+        prob.error("reports for %d: the builders read only up to %d (see LAST_YEAR); generalise them before adding the next year"
+                   % (years[-1], LAST_YEAR))
     for y, lst in by_year.items():
         months = [r["month"] for r, _ in lst]
         if months != list(range(1, len(months) + 1)):

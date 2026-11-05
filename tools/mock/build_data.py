@@ -20,6 +20,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import dlib                        # noqa: E402
+from bd_common import set_kfp_pending  # noqa: E402
 from bd_ctx import Ctx             # noqa: E402
 
 # (module, function): order = the order the screens need the data; every function puts its files into ctx.out.
@@ -88,6 +89,7 @@ def main():
                  "tools/mock/cache/ is filled by fetch_gisco.py, fetch_sebra.py and extract_bill.py")
 
     ctx = Ctx()
+    set_kfp_pending(ctx.execution)
     errors, skipped = run_steps(ctx)
     blobs = serialise(ctx)
 
