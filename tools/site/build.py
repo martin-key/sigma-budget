@@ -18,7 +18,9 @@ import argparse
 import asyncio
 import collections
 import datetime
+import gzip
 import html
+import io
 import json
 import pathlib
 import re
@@ -35,7 +37,7 @@ from playwright.async_api import async_playwright  # noqa: E402
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 SITE = ROOT / 'site'
 NOT_FOUND_PROBE = '/nyama-takava-stranitsa'
-FILE_EXT = re.compile(r'\.[A-Za-z0-9]{1,5}$')
+FILE_EXT = re.compile(r'\.[A-Za-z][A-Za-z0-9]{0,4}$')     # as FILE_EXT in site/js/loc.js: /vedomstvo/0200/0200.01.00 is a screen
 UI_NOISE = {'Сподели', 'PNG', 'Копирай', 'Таблица', 'Графика', 'Източник', 'Източници', 'Покажи още', 'Скрий', 'Следва', 'Виж още', 'CSV', 'JSON'}
 
 # Run in the page once the screen is ready: what the build needs to know, and the document as the file should hold it.
@@ -56,12 +58,18 @@ SNAPSHOT_JS = r"""
   };
   const doc = document.documentElement.cloneNode(true);
   doc.removeAttribute('class');
-  doc.setAttribute('data-prerendered', '');
+  doc.setAttribute('data-prerendered', location.pathname + location.search);   // the address this HTML is the screen of (js/router.js compares it)
   for (const el of doc.querySelectorAll('[_echarts_instance_]')) { el.replaceChildren(); el.removeAttribute('_echarts_instance_'); }   // a canvas has no content in HTML: the app draws it again
   for (const el of doc.querySelectorAll('script[src]')) if (el.type !== 'module') el.remove();   // vendor/echarts.min.js (1 MB), added by js/charts.js: in the file it would block the first paint; the app loads it again
   for (const el of doc.querySelectorAll('svg.map-svg')) el.replaceChildren();          // 265 municipality outlines are ~280 KB of HTML: the app draws the map again
   for (const el of doc.querySelectorAll('[data-hydrated]')) el.removeAttribute('data-hydrated');
   for (const el of doc.querySelectorAll('#toasts, #live')) el.replaceChildren();
+  // the same HTML from every build: the „има непрочетено“ dot is the visitor's own state (js/shell.js checkNews sets it again), and the page
+  // styles land in <head> wherever their module happened to finish loading (js/router.js loadStyle): they go after the shared styles, by name
+  for (const dot of doc.querySelectorAll('[data-news-dot]')) { dot.hidden = true; delete dot.dataset.latest; dot.parentElement?.removeAttribute('aria-label'); }
+  const shared = [...doc.querySelectorAll('head > link[rel="stylesheet"]:not([data-page])')].pop();
+  const css = [...doc.querySelectorAll('link[data-page]')].sort((x, y) => (x.dataset.page < y.dataset.page ? -1 : 1));
+  if (shared) shared.after(...css);
   for (const el of doc.querySelectorAll('dialog, .popover')) el.remove();
   doc.querySelector('#view')?.removeAttribute('aria-busy');
   const o = location.origin;
@@ -304,14 +312,31 @@ def write_extras(out, pages, origin, lastmod, routes, noindex=False):
     return paths
 
 
+def gz_size(raw):
+    """as gz_size in tools/mock/catalog_refresh_v5.py, which wrote the sizes of the catalog"""
+    buf = io.BytesIO()
+    with gzip.GzipFile(fileobj=buf, mode='wb', mtime=0, compresslevel=9) as fh:
+        fh.write(raw)
+    return len(buf.getvalue())
+
+
 def stamp_files(out, origin, data_version):
     """what in the copied files depends on this build: the RSS links (data/feed.xml was generated with a placeholder host and hash addresses)
-    and the cache name of the service worker (a new name per build: the worker of the previous build drops its copies on activate)"""
+    and the cache name of the service worker (a new name per build: the worker of the previous build drops its copies on activate).
+    Runs before the crawl: the new links change the size of feed.xml, and data/catalog.json (and the catalog screen built from it) must give
+    the size of the file that is served"""
     feed = out / 'data' / 'feed.xml'
     if feed.is_file():
         x = feed.read_text(encoding='utf-8')
         x = re.sub(r'https?://budget-na-svetlo\.example/(?:#/)?', origin + '/', x).replace(origin + '/#/', origin + '/')
         feed.write_text(x, encoding='utf-8')
+        cat_file = out / 'data' / 'catalog.json'
+        cat = json.loads(cat_file.read_text(encoding='utf-8'))
+        raw = feed.read_bytes()
+        for d in cat['datasets']:
+            if d.get('file') == 'data/feed.xml':
+                d['bytes'], d['gzipBytes'] = len(raw), gz_size(raw)
+        cat_file.write_text(json.dumps(cat, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
     sw = out / 'sw.js'
     try:
         rev = subprocess.run(['git', 'rev-parse', '--short', 'HEAD'], cwd=ROOT, capture_output=True, text=True, check=True).stdout.strip()
@@ -350,6 +375,7 @@ def main():
     routes_js = (SITE / 'js' / 'routes.js').read_text(encoding='utf-8')
     seeds = ['/'] + sorted({norm_path(urllib.parse.unquote(s.lstrip('#')).split('?')[0]) or '/' for s in re.findall(r"'(#/[^']*)'", routes_js)} - {None})
 
+    stamp_files(out, origin, dv)
     t0 = time.time()
     srv, base = serve.start(out, shell=template.encode('utf-8'))
     print(f'build: {base} -> {out} · origin {origin} · {a.jobs} pages at a time')
@@ -376,10 +402,10 @@ def main():
     if not nf or nf['route'] != 'S30':
         fails.append((NOT_FOUND_PROBE, 'the 404 screen was not built'))
     else:
-        (out / '404.html').write_text(nf['html'].replace(base, origin + '/').replace(f'<link rel="canonical" href="{loc(NOT_FOUND_PROBE)}">', ''), encoding='utf-8')
+        (out / '404.html').write_text(nf['html'].replace(base, origin + '/').replace(f'<link rel="canonical" href="{loc(NOT_FOUND_PROBE)}">', '')
+                                      .replace(f'data-prerendered="{NOT_FOUND_PROBE}"', 'data-prerendered="404"'), encoding='utf-8')   # served for any unknown path
 
     paths = write_extras(out, crawl.pages, origin, lastmod, routes, a.noindex)
-    stamp_files(out, origin, dv)
     dt = time.time() - t0
     print(f'\n{len(crawl.pages)} screens prerendered ({len(paths)} in the sitemap) in {dt:.0f} s → {out}')
     for path, msg in warns[:40]:

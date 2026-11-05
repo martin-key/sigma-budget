@@ -21,6 +21,7 @@ import threading
 import urllib.parse
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
+FILE_EXT = re.compile(r'\.[A-Za-z][A-Za-z0-9]{0,4}$')     # as in site/js/loc.js: /vedomstvo/0200/0200.01.00 is a screen, not a file
 
 
 class Handler(http.server.SimpleHTTPRequestHandler):
@@ -44,6 +45,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
         if self.command != 'HEAD':
             self.wfile.write(body)
+        return True                                          # answered: _route() tells do_GET not to send a second response
 
     def _resolve(self):
         """the file for the request path, or None. Order: the file itself, <path>.html, <path>/index.html"""
@@ -67,7 +69,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             if f.suffix == '.html' and f.name != pathlib.Path(urllib.parse.unquote(raw)).name:
                 return self._send_file(f)                    # /prihodi -> prihodi.html (SimpleHTTPRequestHandler would 404)
             return None                                      # an ordinary file: let the base class serve it (ranges, types)
-        has_ext = bool(re.search(r'\.[A-Za-z0-9]{1,5}$', raw)) and not raw.startswith('/embed/')   # /embed/prognoza.s13-deficit is a screen
+        has_ext = bool(FILE_EXT.search(raw)) and not raw.startswith('/embed/')   # /embed/prognoza.s13-deficit is a screen
         if self.dist:
             if raw.startswith('/embed/'):
                 return self._send_file(pathlib.Path(self.directory) / 'app.html')

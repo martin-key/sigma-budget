@@ -4,10 +4,16 @@
 // The page that is open while the new worker takes over may still hold a mix (it was loaded under the old worker); the next load is clean. (A forced reload from the worker, WindowClient.navigate, was tried: it hangs
 // on a URL with a #fragment, so it is not used.)
 // The full offline strategy (versioned precache, data refresh, update prompt) arrives in milestone M6.
-// V7: every screen is a path (/prihodi). Offline, a page that was never opened falls back to the copy of the start page: it is the same app, and the
-// router builds the screen from the address and the data in the cache.
+// V7: every screen is a path (/prihodi). Offline, a page that was never opened falls back to the app shell (/app: dist/app.html, the bare template;
+// the development server answers it with site/index.html): the router builds the screen from the address and the copies in the cache. The shell is
+// stored on install, so the fallback is there whatever page the visitor landed on (before, landing on /prihodi left /razhodi and / without a copy:
+// a network error offline). It is the bare shell, not the prerendered start page, so no other screen's text stands under the address.
 const CACHE = 'bns-v7-1';   // its own cache name per address scheme (a v6 copy holds hash-era pages); the old cache is deleted on activate
-self.addEventListener('install', () => { self.skipWaiting(); });
+const START = () => new URL('app', self.registration.scope).href;
+self.addEventListener('install', e => {
+  self.skipWaiting();
+  e.waitUntil(caches.open(CACHE).then(c => c.add(new Request(START(), { cache: 'no-cache' }))).catch(() => {}));   // offline at install: the fallback stays the copies kept below
+});
 self.addEventListener('activate', e => {
   e.waitUntil((async () => {
     for (const k of await caches.keys()) if (k !== CACHE) await caches.delete(k);
@@ -31,7 +37,7 @@ self.addEventListener('fetch', e => {
       const hit = await caches.match(req, { ignoreSearch: false });
       if (hit) return hit;
       if (req.mode === 'navigate') {
-        const shell = (await caches.match(req, { ignoreSearch: true })) || (await caches.match(new URL('./', self.registration.scope).href));
+        const shell = (await caches.match(req, { ignoreSearch: true })) || (await caches.match(START()));
         if (shell) return shell;
       }
       throw err;

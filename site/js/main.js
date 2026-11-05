@@ -1,6 +1,6 @@
 // Boot: core data (small, eager) -> shell -> router.  Everything else loads lazily.
 import { data } from './data.js';
-import { router } from './router.js';
+import { router, dropStalePrerender } from './router.js';
 import { shell } from './shell.js';
 import { initActions } from './actions.js';
 import * as motion from './ui/motion.js';
@@ -9,6 +9,7 @@ import { watchLinks, ROOT } from './loc.js';
 const wait = ms => new Promise(r => setTimeout(r, ms));
 
 async function boot() {
+  dropStalePrerender();                                           // the HTML of another address is not shown while the data loads
   // core.json carries the source cards and the „Предстои“ texts; do not hold the first paint for more than ~1.5 s
   const coreP = data.load('core').catch(() => null);
   await Promise.race([coreP, wait(1500)]);

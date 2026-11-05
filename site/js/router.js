@@ -394,6 +394,7 @@ async function render(kind) {
   try { store.set('period', query.per && store.periodByKey(query.per) ? query.per : DEFAULT_PERIOD); } finally { applying = false; }
 
   // the first render over a prerendered page (tools/site/build.py): its HTML is already the screen, so no skeleton in between and no rise-in or count-up of what is already shown
+  // (dropStalePrerender has taken the mark off an HTML that is the screen of another address)
   const pre = kind === 'load' && document.documentElement.hasAttribute('data-prerendered');
   document.documentElement.removeAttribute('data-prerendered');
   const timer = kind === 'rerender' || pre ? 0 : setTimeout(() => {
@@ -455,8 +456,11 @@ async function render(kind) {
 }
 
 /* ------------------------------------------------------------------ events */
+const noFragment = h => h.split('#')[0];
 function onLocation(kind) {
-  if (kind === 'hash' && !HASH && !location.hash.startsWith('#/')) { lastHref = location.href; return; }   // path mode: a plain #fragment is the browser's own business
+  // path mode: when only a plain #fragment changed (a link to #x, or Back from it), the browser scrolls to it. Chrome fires popstate as well
+  // as hashchange for it, so both are ignored; a render would take the screen back to the top
+  if (!HASH && !location.hash.startsWith('#/') && noFragment(location.href) === noFragment(lastHref)) { lastHref = location.href; return; }
   if (location.href !== lastHref) render(kind);
 }
 
@@ -493,6 +497,24 @@ function onStore(key) {
     }[key];
     if (msg) announce(msg);
   }, 0);
+}
+
+/** The prerendered HTML (tools/site/build.py) is the screen of one address, written in data-prerendered. When the page opens under
+ *  another one (an old link /#/prihodi/dds loads the HTML of /; a screen without its own file gets 404.html), that text and its numbers
+ *  must not stand under the new address while the core data loads: main.js calls this before it waits, and the view stays empty and
+ *  busy until the router paints the screen. */
+export function dropStalePrerender() {
+  const doc = document.documentElement, at = doc.getAttribute('data-prerendered');
+  if (at === null) return;
+  const raw = parseHash(here());
+  const red = redirect(raw.segs, raw.query);
+  if (red) { raw.segs = red.segs; raw.query = red.query; }
+  const m = match(raw.segs);
+  const want = canonHash(m ? m.canon : raw.segs, canonQuery(raw.query));
+  if (at === '404' ? !m : at === want && !location.hash.startsWith('#/')) return;
+  doc.removeAttribute('data-prerendered');
+  const v = $view();
+  if (v) { v.replaceChildren(); v.setAttribute('aria-busy', 'true'); }
 }
 
 export const router = {

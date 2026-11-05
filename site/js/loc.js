@@ -31,6 +31,9 @@ export const hereHref = () => (HASH ? location.hash : location.pathname + locati
 /** the path and query of the current address: { path:'/x', query:'y' } */
 export function parts(a = here()) { const i = a.indexOf('?'); return i < 0 ? { path: a, query: '' } : { path: a.slice(0, i), query: a.slice(i + 1) }; }
 
+/** a file name ends in an extension that starts with a letter (.json, .woff2); a program code such as /vedomstvo/0200/0200.01.00 is a screen */
+export const FILE_EXT = /\.[a-z][a-z0-9]{0,4}$/i;
+
 /** a link of the app (to a screen), as opposed to a file (/data/core.json), a fragment (#main) or another site */
 export function isAppHref(h) {
   if (!h || typeof h !== 'string') return false;
@@ -38,7 +41,7 @@ export function isAppHref(h) {
   if (HASH || h.startsWith('#')) return false;
   let u;
   try { u = new URL(h, location.href); } catch { return false; }
-  return u.origin === location.origin && u.pathname.startsWith(BASE) && !/\.[a-z0-9]{1,5}$/i.test(u.pathname);
+  return u.origin === location.origin && u.pathname.startsWith(BASE) && !FILE_EXT.test(u.pathname);
 }
 export const isAppLink = a => !!a && isAppHref(a.getAttribute('href'));
 
