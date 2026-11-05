@@ -39,6 +39,8 @@ jobs:
           python -m playwright install --with-deps chromium
       - name: Check the source and dataset registries
         run: python tools/data/registry.py check
+      - name: Check the published release (site/data against its manifest)
+        run: ./budget validate --site
       - name: Validate the data
         run: python tools/mock/validate_data_v6.py
       - name: Build and check every page

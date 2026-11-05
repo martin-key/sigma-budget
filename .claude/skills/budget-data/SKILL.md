@@ -112,16 +112,24 @@ minfin.bg винаги дава `challenge`: той е ръчен. nra.bg и dat
 
 ## 7. Сглобяване и проверка
 
+Изданието се сглобява от commit (`docs/release.md`). Затова първо запиши промените в кода и пиновете: заглавните числа от стъпка 5,
+датата на сглобяване по-долу, редът на новия отчет в `tools/mock/prototype.sha256` (`import` го добави) и редът му в
+`docs/data-sources.md` (стъпка 9). Суровите файлове не са в git: сглобяването ги чете от това копие и сверява всеки с пина му от commit-а.
+
 ```bash
-.venv-data/bin/python tools/mock/rebuild_v6.py --build-date ГГГГ-ММ-ДД
-.venv-data/bin/python tools/mock/validate_data_v6.py
+git add tools/mock/extract_kfp_full.py tools/mock/vd_kfp.py tools/mock/dlib.py tools/mock/vd_lib.py tools/mock/build_text.py tools/mock/mock_lib.py \
+  tools/mock/prototype.sha256 tools/mock/validate_mock.py docs/data-sources.md
+git commit -m "data(kfp): pin the October 2026 report and its headline"
+./budget build --build-date ГГГГ-ММ-ДД --site
+./budget validate --site
 .venv-data/bin/python tools/data/registry.py check
 ```
 
-- `rebuild_v6.py` пуска `extract_kfp_full.py`, строителите и слоя v5/v6 (`v5_wording.py`, `v5_data_active.py`, `apply_v6_glue.py`, `catalog_refresh_v5.py`) в реда, който дава публикуваните файлове.
+- `budget build` сглобява commit-а в образа на `tools/data/Dockerfile` (без docker: в `.venv-data`). Той пуска `rebuild_v6.py`: `extract_kfp_full.py`, строителите и слоя v5/v6 (`v5_wording.py`, `v5_data_active.py`, `apply_v6_glue.py`, `catalog_refresh_v5.py`) в реда, който дава публикуваните файлове. С `--site` слага данните в `site/data`, а манифеста на изданието в `site/data/releases/`.
+- Отпечатва `release_id` и `missingInputs`. Кажи на човека кои входове липсват и кои набори засягат.
 - **Не пускай `build_data.py` или `run_all.sh` сами в режим на запис.** Те пишат изхода на строителите от v1 и махат слоя v5/v6.
 - **Датата на сглобяване** е денят на сглобяването и влиза във всеки файл. Сложи същата дата като стойност по подразбиране на `BUILD_DATE` в `tools/mock/dlib.py`, `vd_lib.py`, `build_text.py` и `mock_lib.py`. Иначе CI ще отхвърли новите дати.
-- `validate_data_v6.py` е същата проверка като в CI. Трябва да завърши с код 0.
+- `budget validate --site` е същата проверка като в CI: манифестът, SHA-256 на всеки файл и `validate_data_v6.py`. Трябва да завърши с код 0.
 - `registry.py check` сверява `sources/registry.yaml` и `datasets/registry.yaml` с хранилището, също като в CI. Новият месец по КФП не иска промяна в регистрите: шаблонът `kfp_2026/*.xls` го покрива. Нов вид източник или нов файл в `site/data` иска запис там.
 - `validate_mock.py` брои редовете на `tools/mock/prototype.sha256`. При нов суров файл увеличи числото там.
 
@@ -151,9 +159,13 @@ git diff --stat
 ## 10. PR
 
 ```bash
-git add site/data prototype/src tools/mock/prototype.sha256 tools/mock/extract_kfp_full.py tools/mock/vd_kfp.py docs/data-sources.md \
-  tools/mock/dlib.py tools/mock/vd_lib.py tools/mock/build_text.py tools/mock/mock_lib.py tools/mock/validate_mock.py
+git add site/data
 git commit -m "data(kfp): add the October 2026 report"
+```
+
+Кодът и пиновете вече са в commit-а от стъпка 7; манифестът на изданието казва неговия хеш. Затова направи стъпка 9 преди 7. После:
+
+```bash
 git push -u origin HEAD
 gh pr create --repo midt-bg/sigma-budget --base main --head "$(gh api user -q .login):$(git branch --show-current)"
 ```
@@ -163,7 +175,7 @@ gh pr create --repo midt-bg/sigma-budget --base main --head "$(gh api user -q .l
 В описанието на PR напиши:
 
 - кои файлове са влезли: име, sha256, режим (`auto`, `auto-bg` или `import`) и откъде;
-- кои проверки са минали;
+- `release_id` и кои проверки са минали;
 - какво се променя на сайта;
 - какво остава.
 

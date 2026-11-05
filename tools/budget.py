@@ -7,7 +7,8 @@ Public operations, no credentials:
   budget build          [--commit REV] [--inputs DIR] [--out work/candidate] [--build-date YYYY-MM-DD] [--site]
                         the release of one commit: the code of that commit, the inputs of DIR (default: this checkout), the pinned image;
                         writes data/, validation.json and manifest.json; --site also puts the outputs and the manifest into site/data
-  budget validate       --release DIR                           the manifest, the bytes and sha256 of every output, the data checks
+  budget validate       (--release DIR | --site)                the manifest, the bytes and sha256 of every output, the data checks;
+                        --site: the release published in site/data, as CI checks it
   budget reproduce      (--manifest PATH|URL | --current SITE) [--originals DIR]
                         rebuild the release from its commit and its originals and compare every output byte for byte
   budget refetch        (--manifest PATH|URL | --current SITE) [--out DIR]
@@ -288,6 +289,8 @@ def build_release(commit, inputs_dir, out, build_date, env, log=print):
             pin = pinned.get(path) or rec["entry"].get("sha256")
             if pin and pin != h:
                 bad.append("%s: sha256 %s…, pinned %s…" % (path, h[:12], pin[:12]))
+            elif not pin and rec["entry"].get("pinned") is not False:
+                bad.append("%s: not pinned in the commit (commit its line of prototype.sha256 first)" % path)
             s = sources.get(rec["source"]) if rec["source"] else None
             a = acq.get(path, {})
             item = {"path": path, "kind": rec["kind"], "datasets": sorted(rec["datasets"]), "mime": MIME.get(p.suffix.lower(), "application/octet-stream"),
@@ -400,9 +403,19 @@ def publish_to_site(out, rid):
 
 
 # ------------------------------------------------------------------------------------------------------------------------ checks
-def check_release_dir(release):
-    """the manifest against the files of a release folder: [(path, problem)]"""
-    mbytes = (release / "manifest.json").read_bytes()
+def site_release():
+    """the release published in site/data: (manifest path, path of an output -> file)"""
+    data = ROOT / "site" / "data"
+    cur = json.loads((data / RELEASES / "current.json").read_text(encoding="utf-8"))
+    folder = data / RELEASES / cur["release_id"]
+    where = lambda rel: folder / rel if rel == "validation.json" else ROOT / "site" / rel      # noqa: E731
+    return folder / "manifest.json", where, cur["release_id"]
+
+
+def check_release_dir(release, manifest=None, where=None):
+    """the manifest against the files of a release folder (or of site/data with site_release()): [(path, problem)]"""
+    where = where or (lambda rel: release / rel)
+    mbytes = (manifest or release / "manifest.json").read_bytes()
     m = json.loads(mbytes)
     probs = []
     if canonical_json(m) != mbytes:
@@ -410,15 +423,16 @@ def check_release_dir(release):
     if m.get("manifest_schema") != MANIFEST_SCHEMA:
         probs.append(("manifest.json", "manifest_schema %r" % m.get("manifest_schema")))
     for o in m["outputs"]:
-        p = release / o["path"]
+        p = where(o["path"])
         if not p.is_file():
             probs.append((o["path"], "missing"))
         elif p.stat().st_size != o["bytes"] or sha256_file(p) != o["sha256"]:
             probs.append((o["path"], "bytes or sha256 differ from the manifest"))
     listed = {o["path"] for o in m["outputs"]}
-    for p in release.rglob("*"):
-        rel = p.relative_to(release).as_posix()
-        if p.is_file() and rel not in listed and rel not in ("manifest.json", "receipt.json"):
+    data = release / "data"
+    for p in data.rglob("*"):
+        rel = "data/" + p.relative_to(data).as_posix()
+        if p.is_file() and rel not in listed and not rel.startswith("data/%s/" % RELEASES):
             probs.append((rel, "not listed in the manifest"))
     return sha256_bytes(mbytes), m, probs
 
@@ -448,8 +462,15 @@ def cmd_build(a):
 
 
 def cmd_validate(a):
-    release = Path(a.release).resolve()
-    rid, m, probs = check_release_dir(release)
+    if a.site:
+        release = ROOT / "site"
+        manifest, where, pointer = site_release()
+        rid, m, probs = check_release_dir(release, manifest, where)
+        if rid != pointer:
+            probs.append(("data/%s/current.json" % RELEASES, "points to %s…, the manifest hashes to %s…" % (pointer[:12], rid[:12])))
+    else:
+        release = Path(a.release).resolve()
+        rid, m, probs = check_release_dir(release)
     env = dict(os.environ, BUDGET_DATA_DIR=str(release / "data"))
     r = subprocess.run([sys.executable, str(ROOT / "tools" / "mock" / "validate_data_v6.py")], capture_output=True, env=env)
     report = validation_report((r.stdout + r.stderr).decode("utf-8", "replace"))
@@ -605,7 +626,9 @@ def main(argv):
     b.add_argument("--env", choices=["docker", "local"])
     b.add_argument("--site", action="store_true", help="also put the outputs and the manifest into site/data")
     v = sub.add_parser("validate")
-    v.add_argument("--release", required=True)
+    vg = v.add_mutually_exclusive_group(required=True)
+    vg.add_argument("--release", help="a release folder (budget build --out)")
+    vg.add_argument("--site", action="store_true", help="the release published in site/data (releases/current.json)")
     for name in ("reproduce", "refetch"):
         p = sub.add_parser(name)
         g = p.add_mutually_exclusive_group(required=True)

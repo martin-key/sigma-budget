@@ -45,6 +45,8 @@ python3 -m http.server 8001 --directory prototype/site
 
 ## Сглобяване и публикуване
 
+Данните се сглобяват като издание с командата `budget` ([`docs/release.md`](docs/release.md)): `./budget build --build-date ГГГГ-ММ-ДД --site` сглобява един commit в закования образ на `tools/data/Dockerfile`, пише `site/data` и манифеста с `release_id` в `site/data/releases/`. `./budget reproduce` сглобява изданието отново от оригиналите и сравнява всеки файл. Нужни са суровите файлове (`docs/data-sources.md`).
+
 Сглобяването изобразява предварително всеки екран (775 страници, около минута) в `dist/`. Всяка страница има свой HTML с текста и таблиците, заглавие, описание, каноничен адрес, Open Graph и JSON-LD. Пишат се и `sitemap.xml`, `robots.txt`, `llms.txt`, `llms-full.txt` и `_headers`. Сглобяването е и проверка на адресите и спира при грешка. Подробности има в раздел 11 на [`docs/dev-guide.md`](docs/dev-guide.md). Това сглобяване е преходно: по [спецификацията](docs/approach-specification.md) страниците с данни са със SSR, а предложението да остане статичен сайт ([ADR 0001](docs/adr/0001-static-prerender.md)) е отхвърлено.
 
 ```bash
@@ -69,6 +71,7 @@ PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/check_moc
 PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/check_mock_v6.py --route S06 # един екран
 python3 tools/mock/validate_data_v6.py                                                               # проверка на наборите с данни
 .venv/bin/python tools/data/registry.py check                                                       # регистрите на източниците и наборите
+./budget validate --site                                                                            # site/data срещу манифеста на изданието
 ```
 
 За анимациите, припокриването на контроли и работата при ограничен процесор има отделни проверки:
