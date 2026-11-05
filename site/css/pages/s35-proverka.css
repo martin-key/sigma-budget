@@ -1,0 +1,7 @@
+/* S35 · Данни и проверка */
+.s35-block { margin-block: 2rem; }
+.s35-rid, .s35-sha { overflow-wrap: anywhere; word-break: break-all; }
+.s35-cmd { overflow-x: auto; padding: .75rem; background: var(--paper-warm); border: 1px solid var(--rule); border-radius: 4px; }
+.s35-list { padding-inline-start: 1.25rem; }
+.s35-list li { margin-block: .35rem; overflow-wrap: anywhere; }
+.s35-newer:not([hidden]) { font-weight: 600; }

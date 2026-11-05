@@ -47,8 +47,10 @@ export function isAppHref(h) {
   if (HASH || h.startsWith('#')) return false;
   let u;
   try { u = new URL(h, location.href); } catch { return false; }
-  return u.origin === location.origin && u.pathname.startsWith(BASE) && !FILE_EXT.test(u.pathname);
+  return u.origin === location.origin && u.pathname.startsWith(BASE) && !FILE_EXT.test(u.pathname) && !NOT_SCREENS.test(u.pathname.slice(BASE.length - 1));
 }
+/** addresses of the server that are files or JSON, not screens: the data files and the release API (/api itself is the S25 screen) */
+const NOT_SCREENS = /^\/(data\/|api\/releases(\/|$))/;
 export const isAppLink = a => !!a && isAppHref(a.getAttribute('href'));
 
 /** path mode: an old '#/x' link written by a page, a data file (search index, feed) or a component becomes '/x' in the DOM, so that

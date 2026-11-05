@@ -23,6 +23,8 @@ function siteFiles(): Plugin {
 
 export default defineConfig({
   publicDir: false,
+  // a tag per build: part of the edge-cache key of a drawn screen (workers/app.ts), so a new deploy never serves the HTML of the previous one
+  define: { __BUILD__: JSON.stringify(Date.now().toString(36)) },
   plugins: [
     cloudflare({ viteEnvironment: { name: 'ssr' }, configPath: process.env.WRANGLER_CONFIG || './wrangler.jsonc' }),
     reactRouter(),

@@ -326,9 +326,18 @@ def main(argv):
            "a screen is drawn from the current release and names it, with the data base of that release")
         ok("no-transform" in h.get("Cache-Control", "") and h.get("Content-Security-Policy", "").startswith("default-src 'self'"),
            "the document is no-transform and carries the content security policy")
+        time.sleep(1)                                          # the copy is stored after the response (ctx.waitUntil)
+        s2, h2, b2 = req("GET", base + "/izpalnenie")
+        ok(s2 == 200 and h2.get("X-Screen-Cache") == "HIT" and h2.get("X-Release-Id") == rid and b2 == b and "max-age=0" in h2.get("Cache-Control", ""),
+           "the screen again comes from the edge cache: the same bytes, the same release, revalidated by the visitor")
         s, h, b = req("GET", base + "/data/x.json")
         ok(s == 200 and x is not None and sha(b) == next(o["sha256"] for o in x[3]["outputs"] if o["path"] == "data/x.json") and h.get("X-Release-Id") == rid,
            "the stable address /data/x.json serves the file of the current release")
+        s, h, b = req("GET", base + "/proverka")
+        page = b.decode("utf-8", "replace")
+        revs = [e["revision"] for e in jbody(req("GET", base + "/api/releases?limit=50")[2]).get("items", [])]
+        ok(s == 200 and 'data-view="ready"' in page and rid in page and 'id="s35-journal' in page and all(">%d<" % r in page for r in revs),
+           "„Данни и проверка“ (section 9.1) is drawn from the current release, with its files and the registry's journal (%d revisions)" % len(revs))
 
         if a.real:
             print("the release of budget build, published and reproduced from the Worker")

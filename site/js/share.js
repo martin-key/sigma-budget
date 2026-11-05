@@ -47,14 +47,15 @@ const val = x => (typeof x === 'function' ? x() : x);
 
 /* Charts and tables register what they can export (a table twin for CSV); blocks find them in their own DOM at share time.
    attach(domId, {table:()=>({columns,rows,statuses?}), chart:true}) — cleared with the registry on every navigation. */
-const attached = new Map();
-resetHooks.add(() => attached.clear());
-export const attach = (id, o) => { attached.set(id, o); return id; };
+const ownAttached = new Map();
+const attachedOf = () => scoped('attached', ownAttached);   // one map per server request (js/env.js)
+resetHooks.add(() => ownAttached.clear());
+export const attach = (id, o) => { attachedOf().set(id, o); return id; };
 const blockEl = spec => (spec.id ? document.getElementById(spec.id) : null);
 function attachments(spec) {
   const root = blockEl(spec);
   if (!root) return [];
-  return [...root.querySelectorAll('[data-attach]')].map(n => ({ el: n, vis: n.getClientRects().length > 0, ...attached.get(n.dataset.attach) })).filter(a => a.table || a.chart).sort((x, y) => y.vis - x.vis);
+  return [...root.querySelectorAll('[data-attach]')].map(n => ({ el: n, vis: n.getClientRects().length > 0, ...attachedOf().get(n.dataset.attach) })).filter(a => a.table || a.chart).sort((x, y) => y.vis - x.vis);
 }
 const tableOf = spec => {
   const t = val(spec.table) ?? attachments(spec).find(a => a.table)?.table();

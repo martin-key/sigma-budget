@@ -29,7 +29,7 @@ export const NAV_GROUPS = [
   ['Изпълнение', ['S15', 'S16']],
   ['Бюджет', ['S07', 'S06', 'S10', 'S12', 'S13', 'S34', 'S14', 'S20', 'S05']],
   ['Данъци и контекст', ['S18', 'S17', 'S31']],
-  ['Данни и проект', ['S24', 'S25', 'S26', 'S27']]
+  ['Данни и проект', ['S24', 'S35', 'S25', 'S26', 'S27']]
 ];
 /* The sister platform (spec §2.2): visible, but after the screens of the site: the last item of «Данни и проект», the phone «Меню» and the footer. */
 // the address of the original СИГМА is configuration (docs/approach-specification.md, section 2.2): <meta name="sigma-url"> in the page,

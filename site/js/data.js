@@ -39,6 +39,8 @@ export const parse = (name, text) => (ADAPT[name] ? ADAPT[name](text) : JSON.par
    it comes from the registry). Every file the browser loads afterwards comes from there, so a release published in the middle of a visit
    does not mix with the one on the screen. Without the tags (the static site) the files are the site's own data/. */
 const metaOf = n => (typeof document === 'undefined' ? '' : document.querySelector(`meta[name="${n}"]`)?.content || '');
+/** the visit's release comes from a registry (it has a journal and a public API); false for the static site and for a Worker without one */
+export const fromRegistry = () => !!pinnedBase()?.startsWith('/data/releases/');
 export const pinnedBase = () => { const b = serverScope()?.dataBase || metaOf('data-base'); return /^\/data\/(releases\/[0-9a-f]{64}\/data\/)?$/.test(b) ? b : null; };
 const pinnedRelease = () => { const r = serverScope()?.releaseId || metaOf('release-id'); return /^[0-9a-f]{64}$/.test(r) ? r : null; };
 /** the address of a data file of the visit's release: href('execution-provenance') -> /data/releases/<id>/data/execution-provenance.json */
@@ -50,8 +52,18 @@ function fetchJson(name) {
   if (!OK_NAME.test(name)) return Promise.reject(new PendingError(name));
   const rid = pinnedRelease();
   if (name === 'releases/current' && rid) return Promise.resolve(releaseRecord(rid));
-  const base = pinnedBase();
-  return fetch(base ? new URL(`${base}${name}.json`, location.origin) : new URL(`data/${name}.json`, ROOT)).then(async res => {
+  if (RELEASE_FILE[name]) {                                   // the manifest and the checks of the visit's release (S35 „Данни и проверка“)
+    const id = rid ? Promise.resolve(rid) : data.load('releases/current').then(c => c.release_id);
+    return id.then(i => fetchFile(name, new URL(`/data/releases/${i}/${RELEASE_FILE[name]}`, location.origin)));
+  }
+  if (name === 'release/journal') {                           // the registry's public journal; no registry, no journal (nothing to ask for)
+    return fromRegistry() ? fetchFile(name, new URL('/api/releases?limit=50', location.origin)) : Promise.reject(new PendingError(name));
+  }
+  return fetchFile(name, pinnedBase() ? new URL(`${pinnedBase()}${name}.json`, location.origin) : new URL(`data/${name}.json`, ROOT));
+}
+const RELEASE_FILE = { 'release/manifest': 'manifest.json', 'release/validation': 'validation.json' };
+function fetchFile(name, url) {
+  return fetch(url).then(async res => {
     if (res.status === 404) throw new PendingError(name);
     if (!res.ok) throw new LoadError(name, res.status);
     const text = await res.text();

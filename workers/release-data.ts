@@ -3,7 +3,10 @@
 //   no registry or no current release (local, CI): the files of site/data that the build put in the static assets, under the release that
 //   site/data/releases/current.json names
 // A file that is not in the release is PENDING (the „Предстои“ state), as a 404 is in the browser; an unreadable one is an error.
+// Three names are not files of data/ (S35 „Данни и проверка“): release/manifest and release/validation are the manifest and the checks of
+// the release, release/journal is the registry's public journal (PENDING without a registry).
 import { current, manifestOf, readObject } from '../worker/store.js';
+import { publicApi } from '../worker/api.js';
 import { parse, PendingError, LoadError } from '../site/js/data.js';
 
 export interface ReleaseData {
@@ -18,6 +21,7 @@ export interface ReleaseData {
 }
 
 type Manifest = { json: { outputs: { path: string; sha256: string; mime: string }[] } };
+const JOURNAL_PATH = '/api/releases?limit=50';
 const POINTER_MS = 10_000;                                    // a new release shows within ten seconds; the files of a release never change
 let pointer: { at: number; rid: string | null } | null = null;
 const texts = new Map<string, string>();                      // sha256 -> text: immutable, so one copy per isolate is safe
@@ -31,7 +35,7 @@ async function currentRelease(env: Env): Promise<string | null> {
   return rid;
 }
 
-async function fromRegistry(env: Env, rid: string): Promise<ReleaseData | null> {
+async function fromRegistry(env: Env, rid: string, origin: string): Promise<ReleaseData | null> {
   const m = (await manifestOf(env, rid)) as Manifest | null;
   if (!m) return null;
   const byPath = new Map(m.json.outputs.map(o => [o.path, o.sha256]));
@@ -46,7 +50,14 @@ async function fromRegistry(env: Env, rid: string): Promise<ReleaseData | null> 
       return bytes ? { bytes, mime: mimes.get(path) || 'application/octet-stream', sha256: sha } : null;
     },
     async load(name) {
-      const sha = byPath.get(`data/${name}.json`);
+      if (name === 'release/manifest') return m.json;
+      if (name === 'release/journal') {
+        const url = new URL(JOURNAL_PATH, origin);
+        const res = await publicApi(new Request(url), env, url);
+        if (!res.ok) throw new LoadError(name, res.status);
+        return res.json();
+      }
+      const sha = byPath.get(name === 'release/validation' ? 'validation.json' : `data/${name}.json`);
       if (!sha) throw new PendingError(name);
       let text = texts.get(sha);
       if (text === undefined) {
@@ -66,7 +77,10 @@ function fromAssets(env: Env, origin: string, releaseId: string): ReleaseData {
     dataBase: '/data/',
     async file() { return null; },
     async load(name) {
-      const res = await env.ASSETS.fetch(new Request(new URL(`/data/${name}.json`, origin)));
+      if (name === 'release/journal') throw new PendingError(name);           // no registry: the release was published with the site
+      const own = { 'release/manifest': 'manifest.json', 'release/validation': 'validation.json' }[name];
+      const path = own ? `/data/releases/${releaseId}/${own}` : `/data/${name}.json`;
+      const res = await env.ASSETS.fetch(new Request(new URL(path, origin)));
       if (res.status === 404) throw new PendingError(name);
       if (!res.ok) throw new LoadError(name, res.status);
       const text = await res.text();
@@ -90,7 +104,7 @@ async function assetsReleaseId(env: Env, origin: string): Promise<string> {
 export async function releaseData(env: Env, origin: string): Promise<ReleaseData> {
   const rid = await currentRelease(env);
   if (rid) {
-    const r = await fromRegistry(env, rid);
+    const r = await fromRegistry(env, rid, origin);
     if (r) return r;
   }
   return fromAssets(env, origin, await assetsReleaseId(env, origin));

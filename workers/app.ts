@@ -37,6 +37,14 @@ const scopes = new AsyncLocalStorage<Scope>();
 provideScope(() => scopes.getStore() ?? null);
 
 const handler = createRequestHandler(() => import('virtual:react-router/server-build'), import.meta.env.MODE);
+
+/* A drawn screen depends only on the release, the build and the address: the edge cache keeps it under exactly that key, so a repeated
+   request costs no render (a cold render takes up to ~60 ms of CPU, docs/production-readiness.md), and a new release or a new deploy is a
+   new key. The stored copy is the response before documentHeaders(); the visitor's copy is always revalidated (max-age=0). */
+declare const __BUILD__: string;
+const BUILD = typeof __BUILD__ !== 'undefined' ? __BUILD__ : 'dev';
+const edge = () => (globalThis as unknown as { caches?: { default?: Cache } }).caches?.default;
+const cacheKey = (rid: string, url: URL) => new Request(`https://ssr.cache/${BUILD}/${rid || 'none'}${url.pathname}${url.search}`);
 const RELEASES = /^\/(api\/releases(\/|$)|data\/releases\/)/;
 const DATA_FILE = /^\/data\/(?!releases\/)[A-Za-z0-9_\-./]+$/;
 
@@ -63,8 +71,9 @@ async function dataFile(request: Request, env: Env, url: URL, data: ReleaseData)
 
 /* the headers that site/_headers (tools/site/build.py) gives the static files, for the documents the Worker draws. no-transform: a zone
    feature that edits HTML on the way out (the Web Analytics beacon, Email Obfuscation, Rocket Loader) must not change the screens */
-function documentHeaders(res: Response, env: Env, embed: boolean, rid: string): Response {
+function documentHeaders(res: Response, env: Env, embed: boolean, rid: string, cached?: 'HIT' | 'MISS'): Response {
   const h = new Headers(res.headers);
+  if (cached) h.set('X-Screen-Cache', cached);
   h.set('Content-Security-Policy', CSP + (embed ? '; frame-ancestors *' : "; frame-ancestors 'self'"));
   if (!embed) h.set('X-Frame-Options', 'SAMEORIGIN');
   h.set('X-Content-Type-Options', 'nosniff');
@@ -72,7 +81,7 @@ function documentHeaders(res: Response, env: Env, embed: boolean, rid: string): 
   h.set('Strict-Transport-Security', 'max-age=31536000');
   h.set('Cross-Origin-Opener-Policy', 'same-origin');
   h.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), browsing-topics=()');
-  if (!h.has('Cache-Control') || res.status === 200) h.set('Cache-Control', 'public, max-age=0, must-revalidate, no-transform');
+  if (!h.has('Cache-Control') || res.status === 200 || res.status === 404) h.set('Cache-Control', 'public, max-age=0, must-revalidate, no-transform');
   if (env.NOINDEX === '1' || embed) h.set('X-Robots-Tag', 'noindex');
   if (rid) h.set('X-Release-Id', rid);
   return new Response(res.body, { status: res.status, statusText: res.statusText, headers: h });
@@ -86,8 +95,11 @@ export default {
       return new Response('Method not allowed', { status: 405, headers: { Allow: 'GET, HEAD' } });
     }
     if (RELEASES.test(url.pathname)) {
-      // the registry's releases; a release that was published with the site (site/data/releases/) is one of the static files
-      const res = await publicApi(request, env, url);
+      // the registry's releases; a release that was published with the site (site/data/releases/) is one of the static files. An
+      // environment without a registry (no D1 tables: a local check, a new environment) answers as one where the release is unknown
+      let res: Response;
+      try { res = await publicApi(request, env, url); }
+      catch { res = Response.json({ error: 'no release registry in this environment' }, { status: 404, headers: { 'Cache-Control': 'no-store' } }); }
       return res.status === 404 && url.pathname.startsWith('/data/releases/') ? fallback(request, env, res) : res;
     }
 
@@ -98,7 +110,17 @@ export default {
     const release = { id: data.releaseId, dataBase: data.dataBase, origin, sigmaUrl, feedbackEmail: env.FEEDBACK_EMAIL || '' };
     const scope: Scope = { url, origin, releaseId: data.releaseId, dataBase: data.dataBase, sigmaUrl,
       state: requestState(url.searchParams.get('per')), data: new Map(), load: data.load };
+    const embed = url.pathname.startsWith('/embed/');
+    const cache = request.method === 'GET' ? edge() : undefined;
+    const key = cacheKey(data.releaseId, url);
+    const hit = cache ? await cache.match(key) : undefined;
+    if (hit) return documentHeaders(hit, env, embed, data.releaseId, 'HIT');
     const res = await scopes.run(scope, () => handler(request, { cloudflare: { env, ctx }, release }));
-    return documentHeaders(res, env, url.pathname.startsWith('/embed/'), data.releaseId);
+    if (cache && (res.status === 200 || res.status === 404)) {
+      const copy = new Response(res.clone().body, { status: res.status, headers: res.headers });
+      copy.headers.set('Cache-Control', 'public, max-age=86400');
+      ctx.waitUntil(cache.put(key, copy).catch(() => {}));
+    }
+    return documentHeaders(res, env, embed, data.releaseId, 'MISS');
   },
 } satisfies ExportedHandler<Env>;

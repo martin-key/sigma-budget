@@ -93,6 +93,8 @@ def norm_path(href):
         p = p.rstrip('/')
     if FILE_EXT.search(p) and not p.startswith('/embed/'):
         return None
+    if re.match(r'/(data/|api/releases(/|$))', p):                  # the data files and the release API (as NOT_SCREENS in site/js/loc.js)
+        return None
     if p.startswith('/embed/'):
         return None
     return p

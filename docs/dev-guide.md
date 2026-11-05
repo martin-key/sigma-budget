@@ -856,6 +856,7 @@ export const styles = ['s06-prihodi'];       // зарежда css/pages/s06-pri
 | S23 | `plashtania` | `#/plashtania/:eik?` | `pages/s23-plashtania.js` | Кой на кого плаща? | phase2 | 2026.draft, 2026.law | S24,S01 | `#/plashtania` `#/plashtania/999000012` |
 | S24 | `danni` | `#/danni/:set?` | `pages/s24-danni.js` | Откъде са данните? | ref | none | S25,S01 | `#/danni` `#/danni/execution` |
 | S25 | `api` | `#/api` | `pages/s25-api.js` | Отворени данни и API | ref | none | S01 | `#/api` |
+| S35 | `proverka` | `#/proverka` | `pages/s35-proverka.js` | Данни и проверка | ref | none | S24,S25 | `#/proverka` |
 | S26 | `za-proekta` | `#/za-proekta` | `pages/s26-za-proekta.js` | За проекта | ref | none | S27,S01 | `#/za-proekta` |
 | S27 | `vrazka` | `#/vrazka` | `pages/s27-vrazka.js` | Обратна връзка | ref | none | S01 | `#/vrazka` |
 | S28 | `tarsene` | `#/tarsene` | `pages/s28-tarsene.js` | Търсене | util | none | S02,S01 | `#/tarsene` `#/tarsene?q=%D0%94%D0%94%D0%A1` |
