@@ -77,6 +77,7 @@ def main():
         b = p.chromium.launch()
         for view in VIEWS:
             ctx = b.new_context(viewport={"width": 1280, "height": 900}, service_workers="block", reduced_motion="reduce")
+            ctx.add_init_script("window.__HASH_ROUTES__ = true")   # V7: the app opens on paths (/prihodi); this check drives the hash addresses (js/loc.js hash mode)
             page = ctx.new_page()
             errs = []
             page.on("pageerror", lambda e: errs.append(str(e)[:120]))
@@ -96,6 +97,7 @@ def main():
                     ok(qs.get(k) == v, f"{view} [{sid}]: the link lost ?{k}={v} (has {qs.get(k)!r})")
                 # a FRESH context: nothing stored, only the address
                 c2 = b.new_context(viewport={"width": 1280, "height": 900}, service_workers="block", reduced_motion="reduce")
+                c2.add_init_script("window.__HASH_ROUTES__ = true")   # V7: the app opens on paths (/prihodi); this check drives the hash addresses (js/loc.js hash mode)
                 p2 = c2.new_page()
                 p2.goto(base + "#" + link.split("#", 1)[1])
                 settle(p2)
@@ -118,6 +120,7 @@ def main():
 
         # personal inputs never reach the address, and a link from this screen does not carry them
         ctx = b.new_context(viewport={"width": 1280, "height": 900}, service_workers="block", reduced_motion="reduce")
+        ctx.add_init_script("window.__HASH_ROUTES__ = true")   # V7: the app opens on paths (/prihodi); this check drives the hash addresses (js/loc.js hash mode)
         page = ctx.new_page()
         page.goto(base + "#/danaci?brutno=3000&zaplata=3000&demo=1")
         settle(page)

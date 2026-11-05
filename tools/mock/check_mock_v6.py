@@ -113,6 +113,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]            # repository root (this file is tools/mock/check_mock_v6.py)
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import expect_v6                                      # noqa: E402  the plan and comparison figures of the latest report
 P_ROOT = ROOT                                         # older name of ROOT
 SITE = ROOT / 'site'                                  # the Mock application  (version v6: run at the tag mock-v6)
 SHOT_DIR = ROOT / 'tmp' / 'render-check-v6'                 # screenshots (gitignored)
@@ -935,18 +937,20 @@ def deep_pass(page):
     settle(page)
 
 
-# concrete numbers the plan fixes for the finished screens (checked only on screens that are no longer stubs)
+# concrete numbers the plan fixes for the finished screens (checked only on screens that are no longer stubs). The plan block and the
+# S15 comparison follow the latest report in site/data/execution.json (expect_v6); they were written in for August 2026.
+_PLAN, _CMP = expect_v6.plan(), expect_v6.compare()
 VALUE_CHECKS = {
     # V6 (working-group feedback, 25.10): the plan block has two bars per indicator (2026, 2025: 'NN,N%'), the sums read '30,12 от 49,62 млрд. €', the lede is the new sentence; the long note is gone.
     # v5 (working-group feedback, 10.10): the start page is the v4 opening again: h1, the one button, the plan block (three bars, КФП Jan–Aug 2026 against the annual plan, млрд. €) and the eight question cards;
     # the monthly table (BRIEF §6 values 26,93 / 30,12 / … ) lives in S15 only
     'S01': dict(all=['Държавният бюджет на достъпен език', 'Разгледай бюджета за 5 минути', 'Изпълнение на плана за 2026 г.',
-                     'Приходи', 'Разходи с вноската в ЕС', 'Капиталови разходи', '60,7%', '58,4%', '43,2%', '61,2%', '62,3%', '53,3%',
-                     '30,12 от 49,62 млрд. €', '33,19 от 56,81 млрд. €', '4,04 от 9,36 млрд. €',
+                     'Приходи', 'Разходи с вноската в ЕС', 'Капиталови разходи', *_PLAN['cur'], *_PLAN['prev'],
+                     *[s + ' млрд. €' for s in _PLAN['sums']],
                      'Платформата показва държавния бюджет за 2026 г. с прости думи: откъде идват парите, за какво се харчат и как се изпълнява планът.',
                      'Откъде идват парите?', 'За какво се харчат?', 'Изпълнява ли се планът?', 'Колко плащам аз?',
                      'Кой харчи парите?', 'Колко е държавният дълг?', 'Какво се променя?', 'Накъде върви бюджетът?']),
-    'S15': dict(all=['26,93', '30,12', '+3,19', '29,59', '33,19', '+3,60', '−2,67', '−3,08', 'дефицит']),
+    'S15': dict(all=[*_CMP['prev'], *_CMP['cur'], *_CMP['diff'], 'дефицит']),
     'S18': dict(all=['1 500'], needs='rates.json'),
 }
 

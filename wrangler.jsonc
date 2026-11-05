@@ -1,7 +1,7 @@
 // Cloudflare Workers Static Assets: the prerendered site (tools/site/build.py writes dist/) and the small Worker for what has no file.
 //   PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/site/build.py   # dist/
 //   npx wrangler@4 dev                                                                # local preview of the host on http://localhost:8787
-//   npx wrangler@4 deploy                                                             # needs a Cloudflare account; the domain is set up separately
+//   npx wrangler@4 deploy --env staging                                               # needs a Cloudflare account; production is not deployed from here
 // html_handling "auto-trailing-slash": /prihodi is served from prihodi.html without a redirect (the build writes no folders with index.html).
 // not_found_handling "none": a path without a file goes to worker/index.js (the embed view, the 404 screen).
 {
@@ -15,7 +15,8 @@
     "not_found_handling": "none"
   },
   "observability": { "enabled": true },
-  // staging (push to develop, .github/workflows/site.yml): its own Worker, a build with --noindex; production is the top level (push to main)
+  // staging (push to develop, .github/workflows/site.yml): its own Worker, a build with --noindex.
+  // The top level is production: CI never deploys it, that is a separate controlled procedure (docs/approach-specification.md, stage E).
   "env": {
     "staging": { "name": "sigma-budget-staging" }
   }
