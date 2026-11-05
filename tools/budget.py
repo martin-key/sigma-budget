@@ -14,9 +14,16 @@ Public operations, no credentials:
   budget refetch        (--manifest PATH|URL | --current SITE) [--out DIR]
                         download the originals again from their official addresses and compare them with the release
 
+Operator operations (stage C; an Access login or a service token, docs/release.md); there is no default environment:
+  budget status         --environment NAME                      the current release, the revision and the last journal entries
+  budget upload         --release DIR --environment NAME        upload a candidate (resumable) and seal it; it does not become current
+  budget publish        --release DIR --environment NAME        check locally, upload, publish on the current revision, read it back
+  budget rollback       --release-id ID --environment NAME      make an earlier release current again (a new revision)
+  --yes skips the question before a change; --dry-run writes nothing remote. Environments: tools/environments.json.
+
 Every command prints a readable report, or JSON with --json. Exit codes (section 8.3):
   0 checked, nothing differs   1 differences   2 invalid data or usage   3 missing input or unavailable source (unverified)
-  (4 auth, 5 revision conflict and 6 unconfirmed publish belong to `publish`, stage C)
+  4 auth refused   5 revision conflict (someone published first)   6 the publish is not confirmed by the read-back
 The build runs in the image of tools/data/Dockerfile (--env docker, the default when docker answers) or in .venv-data (--env local).
 """
 import argparse
@@ -48,8 +55,10 @@ MIME = {".xls": "application/vnd.ms-excel", ".xlsx": "application/vnd.openxmlfor
         ".pdf": "application/pdf", ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         ".zip": "application/zip", ".7z": "application/x-7z-compressed", ".json": "application/json", ".jsonld": "application/ld+json",
         ".xml": "application/xml", ".html": "text/html", ".txt": "text/plain", ".csv": "text/csv"}
+HEX = __import__("re").compile(r"^[0-9a-f]{64}$")
 MAGIC = {".pdf": b"%PDF", ".zip": b"PK", ".docx": b"PK", ".xlsx": b"PK", ".xls": b"\xd0\xcf\x11\xe0", ".7z": b"7z\xbc\xaf"}
-EXIT_OK, EXIT_DIFF, EXIT_INVALID, EXIT_MISSING = 0, 1, 2, 3
+EXIT_OK, EXIT_DIFF, EXIT_INVALID, EXIT_MISSING, EXIT_AUTH, EXIT_CONFLICT, EXIT_UNCONFIRMED = 0, 1, 2, 3, 4, 5, 6
+RECEIPTS = ROOT / "work" / "receipts"
 
 
 class Fail(Exception):
@@ -128,10 +137,15 @@ def read_location(loc):
 
 
 def current_manifest(site):
-    """--current SITE: resolve the public pointer once (section 6.4) and keep to that release"""
+    """--current SITE: resolve the public pointer once (section 6.4) and keep to that release. The registry (/api/releases/current) when the
+    site has one, else the pointer published with the static site (data/releases/current.json)"""
     site = site.rstrip("/")
-    cur = json.loads(fetch(site + "/data/%s/current.json" % RELEASES).decode("utf-8"))
-    return site + "/data/" + cur["manifest"].split("data/", 1)[-1], cur["release_id"]
+    try:
+        cur = json.loads(fetch(site + "/api/releases/current", tries=1).decode("utf-8"))
+        return site + cur["manifest"], cur["release_id"]
+    except (Fail, ValueError, KeyError):
+        cur = json.loads(fetch(site + "/data/%s/current.json" % RELEASES).decode("utf-8"))
+        return site + "/data/" + cur["manifest"].split("data/", 1)[-1], cur["release_id"]
 
 
 def kind_ok(path, head):
@@ -217,6 +231,18 @@ def export_commit(commit, dest):
         out.mkdir(parents=True, exist_ok=True)
         for f in WORDING_FILES:
             (out / f).write_bytes(git("show", "%s:site/data/%s" % (tag, f), binary=True))
+
+
+def stage_inputs(found, inputs_dir, view):
+    """only the inputs the registries declare, linked (or copied) into a view the build sees: an input that the registry forgets makes the
+    build fail at once, so the inputs of the manifest are all the build read"""
+    for path in found:
+        src, dst = inputs_dir / path, view / path
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            os.link(src, dst)
+        except OSError:
+            shutil.copy2(src, dst)
 
 
 def docker_ready():
@@ -306,14 +332,19 @@ def build_release(commit, inputs_dir, out, build_date, env, log=print):
             inputs.append({k: v for k, v in item.items() if v is not None})
         if bad:
             raise Fail(EXIT_INVALID, "inputs differ from their pins (tools/mock/prototype.sha256, sources/registry.yaml):\n  " + "\n  ".join(bad))
+        view = work / "inputs"
+        stage_inputs(found, inputs_dir, view)
         args = ["tools/mock/rebuild_v6.py", "--versions-ready"] + (["--build-date", build_date] if build_date else [])
-        rc, output = run_in_env(env, src, inputs_dir, args)
+        rc, output = run_in_env(env, src, view, args)
         (work / "build.log").write_text(output, encoding="utf-8")
         if rc:
-            raise Fail(EXIT_INVALID, "the build failed (exit %d):\n%s" % (rc, output[-1500:]))
+            keep = ROOT / "tmp" / "budget-last-build.log"
+            keep.parent.mkdir(parents=True, exist_ok=True)
+            keep.write_text(output, encoding="utf-8")
+            raise Fail(EXIT_INVALID, "the build failed (exit %d), the whole log is in %s:\n%s" % (rc, keep.relative_to(ROOT), output[-1500:]))
         data = src / "site" / "data"
         shutil.copytree(data, out / "data", ignore=shutil.ignore_patterns(RELEASES))
-        rc, voutput = run_in_env(env, src, inputs_dir, ["tools/mock/validate_data_v6.py"], {"BUILD_DATE": build_date} if build_date else None)
+        rc, voutput = run_in_env(env, src, view, ["tools/mock/validate_data_v6.py"], {"BUILD_DATE": build_date} if build_date else None)
         report = validation_report(voutput)
         report["passed"] = rc == 0
         (out / "validation.json").write_bytes(canonical_json(report))
@@ -494,7 +525,19 @@ def cmd_reproduce(a):
     mbytes, base = resolve_manifest(a)
     rid = sha256_bytes(mbytes)
     m = json.loads(mbytes)
-    originals = Path(a.originals).resolve()
+    fetched = None
+    if a.originals is None and base.startswith("http"):
+        fetched = tempfile.mkdtemp(prefix="budget-originals-")                   # the originals of the release, from the release itself
+        for i in m["inputs"]:
+            try:
+                b = fetch(base + urllib.parse.quote(i["path"]))
+            except Fail:
+                continue
+            if sha256_bytes(b) == i["sha256"]:
+                t = Path(fetched) / i["path"]
+                t.parent.mkdir(parents=True, exist_ok=True)
+                t.write_bytes(b)
+    originals = Path(fetched or a.originals or ROOT).resolve()
     missing, differ = [], []
     for i in m["inputs"]:
         p = originals / i["path"]
@@ -514,12 +557,20 @@ def cmd_reproduce(a):
         diffs = compare_outputs(m, Path(tmp) / "out")
     published = []
     if base.startswith("http") and not a.skip_published:
+        site = base.rsplit("/data/releases/", 1)[0] + "/" if "/data/releases/" in base else None
         for o in m["outputs"]:
-            try:
-                if sha256_bytes(fetch(base.rsplit("/data/", 1)[0] + "/" + o["path"] if "/data/releases/" in base else base + o["path"])) != o["sha256"]:
-                    published.append(o["path"])
-            except Fail:
+            got = None
+            q = urllib.parse.quote(o["path"])
+            for url in [base + q] + ([site + q] if site and o["path"].startswith("data/") else []):
+                try:                                    # the release address (registry), else the file of the static site (stage B)
+                    got = fetch(url, tries=1)
+                    break
+                except Fail:
+                    continue
+            if got is None:
                 published.append(o["path"] + " (unavailable)")
+            elif sha256_bytes(got) != o["sha256"]:
+                published.append(o["path"])
     result.update({"differences": [{"path": p, "problem": x} for p, x in diffs], "publishedDiffer": published,
                    "verdict": "reproduced byte for byte" if not diffs and not published else "differs"})
     return (EXIT_DIFF if diffs or published else EXIT_OK), result
@@ -601,6 +652,260 @@ def cmd_import_source(a):
     return (EXIT_OK if r.returncode == 0 else EXIT_INVALID), {"imported": a.file, "exit": r.returncode}
 
 
+# ------------------------------------------------------------------------------------------------------------------------ operator
+def environment(name):
+    envs = json.loads((ROOT / "tools" / "environments.json").read_text(encoding="utf-8"))
+    if name not in envs or name.startswith("_"):
+        raise Fail(EXIT_INVALID, "no environment %r in tools/environments.json" % name)
+    url = os.environ.get("BUDGET_%s_URL" % name.upper()) or envs[name].get("url")
+    if not url:
+        raise Fail(EXIT_INVALID, "%s is not provisioned yet: %s" % (name, envs[name].get("note")))
+    return url.rstrip("/")
+
+
+def credentials(url):
+    """the Access credentials, never printed: a token (BUDGET_ACCESS_TOKEN, or `cloudflared access token`), or a service token pair"""
+    if os.environ.get("CF_ACCESS_CLIENT_ID") and os.environ.get("CF_ACCESS_CLIENT_SECRET"):
+        return {"CF-Access-Client-Id": os.environ["CF_ACCESS_CLIENT_ID"], "CF-Access-Client-Secret": os.environ["CF_ACCESS_CLIENT_SECRET"]}
+    tok = os.environ.get("BUDGET_ACCESS_TOKEN")
+    if not tok and shutil.which("cloudflared"):
+        r = subprocess.run(["cloudflared", "access", "token", "-app=" + url], capture_output=True, text=True)
+        tok = r.stdout.strip() if r.returncode == 0 else None
+    if not tok:
+        raise Fail(EXIT_AUTH, "no Access credentials: `cloudflared access login %s`, or BUDGET_ACCESS_TOKEN, or a service token "
+                              "(CF_ACCESS_CLIENT_ID and CF_ACCESS_CLIENT_SECRET)" % url)
+    return {"Cf-Access-Jwt-Assertion": tok}
+
+
+def http(method, url, body=None, headers=None, timeout=120, raw=False):
+    """(status, parsed JSON, or the bytes with raw=True); network errors raise Fail(EXIT_MISSING): the caller decides whether a retry is safe"""
+    req = urllib.request.Request(url, data=body, method=method, headers=dict({"User-Agent": UA}, **(headers or {})))
+    try:
+        with urllib.request.urlopen(req, timeout=timeout, context=tls_context()) as res:
+            status, data = res.status, res.read()
+    except urllib.error.HTTPError as e:
+        status, data = e.code, e.read()
+    except (urllib.error.URLError, OSError) as e:
+        raise Fail(EXIT_MISSING, "%s %s: %s" % (method, url, e))
+    if raw:
+        return status, data
+    try:
+        return status, json.loads(data.decode("utf-8")) if data else {}
+    except (UnicodeDecodeError, ValueError):
+        return status, data
+
+
+def admin(method, base, path, body=None, creds=None, ctype="application/json"):
+    status, data = http(method, base + path, body, dict(creds or {}, **({"Content-Type": ctype} if body is not None else {})))
+    if status in (401, 403):
+        raise Fail(EXIT_AUTH, "%s %s: %s" % (method, path, data.get("error") if isinstance(data, dict) else status))
+    return status, data
+
+
+def remote_current(base):
+    status, data = http("GET", base + "/api/releases/current", headers={"Cache-Control": "no-cache"})
+    if status == 404 and isinstance(data, dict) and "revision" in data:
+        return {"release_id": None, "revision": data["revision"]}
+    if status != 200:
+        raise Fail(EXIT_MISSING, "GET /api/releases/current: %s %s" % (status, data))
+    return data
+
+
+def object_file(release, originals, m, sha):
+    """the local file of an object of the manifest: the manifest, an output of the release folder, an original"""
+    rid = sha256_bytes((release / "manifest.json").read_bytes())
+    if sha == rid:
+        return release / "manifest.json"
+    for o in m["outputs"]:
+        if o["sha256"] == sha and (release / o["path"]).is_file():
+            return release / o["path"]
+    for i in m["inputs"]:
+        if i["sha256"] == sha and (originals / i["path"]).is_file():
+            return originals / i["path"]
+    return None
+
+
+def receipt_path(rid):
+    return RECEIPTS / ("%s.json" % rid)
+
+
+def load_receipt(rid):
+    p = receipt_path(rid)
+    return json.loads(p.read_text(encoding="utf-8")) if p.is_file() else {"release_id": rid}
+
+
+def save_receipt(r):
+    RECEIPTS.mkdir(parents=True, exist_ok=True)
+    receipt_path(r["release_id"]).write_text(json.dumps(r, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+
+
+def upload_release(release, originals, base, creds, dry_run=False, log=print):
+    """resumable: an open operation of this release (the receipt) is continued; objects the server has are not sent again"""
+    mbytes = (release / "manifest.json").read_bytes()
+    rid = sha256_bytes(mbytes)
+    m = json.loads(mbytes)
+    r = load_receipt(rid)
+    need = None
+    if r.get("operation") and r.get("environment") == base:
+        status, data = admin("GET", base, "/admin/operations/" + r["operation"], creds=creds)
+        if status == 200 and data.get("state") == "open":
+            need = data["needed"]
+            log("upload: continuing operation %s (%d objects left)" % (r["operation"], len(need)))
+        elif status == 200 and data.get("state") == "sealed":
+            return rid, r["operation"], 0
+    if need is None:
+        if dry_run:
+            objs = {o["sha256"]: o["bytes"] for o in m["inputs"] + m["outputs"]}
+            return rid, None, len(objs) + 1
+        status, data = admin("POST", base, "/admin/operations", mbytes, creds)
+        if status != 201:
+            raise Fail(EXIT_INVALID, "the server refused the manifest: %s" % json.dumps(data, ensure_ascii=False)[:600])
+        r.update({"operation": data["operation_id"], "environment": base})
+        save_receipt(r)
+        need = data["needed"]
+        log("upload: operation %s, %d of %d objects to send" % (data["operation_id"], len(need), data["objects"]))
+    for o in need:
+        f = object_file(release, originals, m, o["sha256"])
+        if not f:
+            raise Fail(EXIT_MISSING, "no local file for %s (an original? --originals)" % o["sha256"])
+        b = f.read_bytes()
+        if sha256_bytes(b) != o["sha256"]:
+            raise Fail(EXIT_INVALID, "%s does not hash to the manifest" % f)
+        for attempt in range(3):
+            try:
+                status, data = admin("PUT", base, "/admin/operations/%s/objects/%s" % (r["operation"], o["sha256"]), b, creds, "application/octet-stream")
+                break
+            except Fail as e:
+                if e.code != EXIT_MISSING or attempt == 2:
+                    raise
+                time.sleep(2 * (attempt + 1))
+        if status != 200:
+            raise Fail(EXIT_INVALID, "%s: %s" % (f, data))
+    status, data = admin("POST", base, "/admin/operations/%s/seal" % r["operation"], b"{}", creds)
+    if status not in (200,):
+        raise Fail(EXIT_INVALID, "seal: %s" % json.dumps(data, ensure_ascii=False)[:600])
+    return rid, r["operation"], len(need)
+
+
+def confirm(a, lines):
+    """what will change, on stderr (stdout carries the result, JSON with --json), and a question unless --yes or --dry-run"""
+    for ln in lines:
+        print(ln, file=sys.stderr)
+    if a.yes or a.dry_run:
+        return
+    if not sys.stdin.isatty():
+        raise Fail(EXIT_INVALID, "not confirmed: run in a terminal or add --yes")
+    print("Продължи? [y/N] ", end="", file=sys.stderr, flush=True)
+    if input().strip().lower() not in ("y", "yes", "д", "да"):
+        raise Fail(EXIT_INVALID, "stopped by the operator")
+
+
+def publish_request(base, creds, r, rid, kind, expected):
+    """POST /admin/publish once per request_id; a lost response is answered by GET /admin/requests/:id, never by a new request"""
+    key = "%s:%s:%d" % (kind, base, expected)
+    reqs = r.setdefault("requests", {})
+    if key not in reqs:
+        reqs[key] = {"request_id": str(__import__("uuid").uuid4()), "state": "sent"}
+        save_receipt(r)
+    req_id = reqs[key]["request_id"]
+    body = json.dumps({"release_id": rid, "expected_revision": expected, "request_id": req_id, "kind": kind}).encode("utf-8")
+    try:
+        status, data = admin("POST", base, "/admin/publish", body, creds)
+    except Fail as e:
+        if e.code != EXIT_MISSING:
+            raise
+        status, data = admin("GET", base, "/admin/requests/" + req_id, creds=creds)
+        if status == 404:
+            raise Fail(EXIT_UNCONFIRMED, "the publish request %s was not answered and is not in the journal: run the same command again" % req_id)
+    if status == 409:
+        raise Fail(EXIT_CONFLICT, "revision conflict: %s" % json.dumps(data, ensure_ascii=False))
+    if status != 200:
+        raise Fail(EXIT_INVALID, "publish: %s %s" % (status, json.dumps(data, ensure_ascii=False)[:600]))
+    reqs[key].update({"state": "applied", "revision": data["revision"], "at": data["at"]})
+    save_receipt(r)
+    return data
+
+
+def read_back(base, rid, m):
+    """the public view after the change, without cache: the pointer, the manifest bytes and one output (section 7.2, step 7)"""
+    cur = remote_current(base)
+    if cur.get("release_id") != rid:
+        raise Fail(EXIT_UNCONFIRMED, "the current release is %s, not %s" % (cur.get("release_id"), rid))
+    status, data = http("GET", base + "/data/releases/%s/manifest.json" % rid, raw=True)
+    if status != 200 or sha256_bytes(data) != rid:
+        raise Fail(EXIT_UNCONFIRMED, "the published manifest does not hash to the release_id (HTTP %s)" % status)
+    o = m["outputs"][0]
+    status, data = http("GET", base + "/data/releases/%s/%s" % (rid, urllib.parse.quote(o["path"])), raw=True)
+    if status != 200 or sha256_bytes(data) != o["sha256"]:
+        raise Fail(EXIT_UNCONFIRMED, "%s does not read back as in the manifest (HTTP %s)" % (o["path"], status))
+    return cur
+
+
+def cmd_status(a):
+    base = environment(a.environment)
+    cur = remote_current(base)
+    status, data = http("GET", base + "/api/releases?limit=5")
+    return EXIT_OK, {"environment": a.environment, "url": base, "release_id": cur.get("release_id"), "revision": cur.get("revision"),
+                     "journal": data.get("items", []) if isinstance(data, dict) else []}
+
+
+def cmd_upload(a):
+    base = environment(a.environment)
+    release = Path(a.release).resolve()
+    rid, _m, probs = check_release_dir(release)
+    if probs:
+        raise Fail(EXIT_INVALID, "the release folder fails its manifest: %s" % probs[:3])
+    creds = {} if a.dry_run else credentials(base)
+    rid, op, sent = upload_release(release, Path(a.originals).resolve(), base, creds, a.dry_run, log=(lambda *_: None) if a.json else print)
+    return EXIT_OK, {"environment": a.environment, "release_id": rid, "operation": op, "objects": sent, "dryRun": a.dry_run,
+                     "state": "would upload" if a.dry_run else "sealed: a candidate, not current"}
+
+
+def cmd_publish(a):
+    base = environment(a.environment)
+    release = Path(a.release).resolve()
+    rid, m, probs = check_release_dir(release)                # every byte as the manifest says (section 7.2, step 1)
+    vrep = next((o for o in m["outputs"] if o.get("role") == "validation"), None)
+    if not vrep:
+        probs.append(("validation.json", "the release has no validation report"))
+    elif not probs and not json.loads((release / vrep["path"]).read_bytes()).get("passed"):
+        probs.append(("validation.json", "the validation of the build did not pass"))
+    if probs:
+        raise Fail(EXIT_INVALID, "the local checks fail: %s" % probs[:3])
+    cur = remote_current(base)
+    confirm(a, ["environment: %s (%s)" % (a.environment, base), "current:     %s (revision %s)" % (cur.get("release_id"), cur.get("revision")),
+                "new:         %s (commit %s, %d outputs)" % (rid, m["processing"]["code"]["commit"][:12], len(m["outputs"]))])
+    if a.dry_run:
+        return EXIT_OK, {"environment": a.environment, "release_id": rid, "expected_revision": cur.get("revision"), "dryRun": True}
+    creds = credentials(base)
+    upload_release(release, Path(a.originals).resolve(), base, creds, log=(lambda *_: None) if a.json else print)
+    r = load_receipt(rid)
+    done = publish_request(base, creds, r, rid, "publish", cur.get("revision"))
+    after = read_back(base, rid, m)
+    return EXIT_OK, {"environment": a.environment, "release_id": rid, "revision": after["revision"], "previous_release_id": done.get("previous_release_id"),
+                     "replay": bool(done.get("replay")), "receipt": str(receipt_path(rid))}
+
+
+def cmd_rollback(a):
+    base = environment(a.environment)
+    if not HEX.match(a.release_id or ""):
+        raise Fail(EXIT_INVALID, "--release-id is a sha256")
+    cur = remote_current(base)
+    confirm(a, ["environment: %s (%s)" % (a.environment, base), "current:     %s (revision %s)" % (cur.get("release_id"), cur.get("revision")),
+                "back to:     %s" % a.release_id])
+    if a.dry_run:
+        return EXIT_OK, {"environment": a.environment, "release_id": a.release_id, "expected_revision": cur.get("revision"), "dryRun": True}
+    creds = credentials(base)
+    r = load_receipt(a.release_id)
+    done = publish_request(base, creds, r, a.release_id, "rollback", cur.get("revision"))
+    status, raw = http("GET", base + "/data/releases/%s/manifest.json" % a.release_id, raw=True)
+    if status != 200:
+        raise Fail(EXIT_UNCONFIRMED, "the manifest of %s does not read back (HTTP %s)" % (a.release_id, status))
+    after = read_back(base, a.release_id, json.loads(raw))
+    return EXIT_OK, {"environment": a.environment, "release_id": a.release_id, "revision": after["revision"],
+                     "previous_release_id": done.get("previous_release_id"), "replay": bool(done.get("replay"))}
+
+
 def report(result, as_json):
     if as_json:
         print(json.dumps(result, ensure_ascii=False, indent=1))
@@ -635,7 +940,8 @@ def main(argv):
         g.add_argument("--manifest")
         g.add_argument("--current", metavar="SITE")
         if name == "reproduce":
-            p.add_argument("--originals", default=str(ROOT), help="a folder with the originals at their paths (default: this checkout)")
+            p.add_argument("--originals", help="a folder with the originals at their paths (default: downloaded from the release when it is "
+                                                 "a URL, else this checkout)")
             p.add_argument("--env", choices=["docker", "local"])
             p.add_argument("--skip-published", action="store_true", help="do not download the published outputs")
         else:
@@ -646,11 +952,24 @@ def main(argv):
     i.add_argument("--source", required=True)
     i.add_argument("--file", required=True)
     i.add_argument("--url")
-    for p in (b, v) + tuple(sub.choices[n] for n in ("reproduce", "refetch", "collect", "import-source")):
+    st = sub.add_parser("status")
+    st.add_argument("--environment", required=True)
+    for name in ("upload", "publish", "rollback"):
+        p = sub.add_parser(name)
+        p.add_argument("--environment", required=True, help="tools/environments.json; no default, production is always named")
+        if name == "rollback":
+            p.add_argument("--release-id", required=True)
+        else:
+            p.add_argument("--release", required=True, help="a release folder (budget build --out)")
+            p.add_argument("--originals", default=str(ROOT), help="where the originals are (default: this checkout)")
+        p.add_argument("--yes", action="store_true", help="do not ask before the change")
+        p.add_argument("--dry-run", action="store_true", help="read only: no upload, no publish")
+    for p in (b, v) + tuple(sub.choices[n] for n in ("reproduce", "refetch", "collect", "import-source", "status", "upload", "publish", "rollback")):
         p.add_argument("--json", action="store_true", default=argparse.SUPPRESS)
     a = ap.parse_args(argv)
     fn = {"build": cmd_build, "validate": cmd_validate, "reproduce": cmd_reproduce, "refetch": cmd_refetch, "collect": cmd_collect,
-          "import-source": cmd_import_source}[a.cmd]
+          "import-source": cmd_import_source, "status": cmd_status, "upload": cmd_upload, "publish": cmd_publish,
+          "rollback": cmd_rollback}[a.cmd]
     try:
         code, result = fn(a)
     except Fail as e:

@@ -1,6 +1,6 @@
 # Checks, build and deployment of the site (README „Сглобяване и публикуване“).
 #   pull request to develop or main  -> the registries, data validation, prerender build with its page checks, the v6 checks of the app,
-#                                       and a build of the pinned data image
+#                                       a build of the pinned data image, and the release registry on a local Worker (stage C)
 #   push to develop                  -> the same, then deploy dist/ to the staging Worker (noindex)
 #   push to main                     -> the same checks; nothing is deployed
 # This workflow never deploys to production: that is a separate, controlled procedure (docs/approach-specification.md, section 11, stage E).
@@ -83,6 +83,23 @@ jobs:
       - name: Motion
         run: python tools/mock/motion_v6.py
 
+  release:
+    # the release registry and the operator API (stage C) on the Worker with local D1 and R2: acceptance scenarios 3, 4, 5 and 9, rollback
+    # and the public API, with synthetic releases (tools/release_check.py; docs/release.md)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: python tools/release_check.py
+
   data-image:
     # the pinned environment of the data processing (tools/data/Dockerfile): it must build from its digest and hash-locked
     # dependencies. Running it needs the raw files, which are not in the repository.
@@ -94,7 +111,7 @@ jobs:
       - run: docker run --rm sigma-budget-data python -c "import fitz, xlrd, yaml, docx, pdfplumber, py7zr; print(fitz.VersionBind)"
 
   deploy:
-    needs: [build, check]
+    needs: [build, check, release]
     if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     timeout-minutes: 15

@@ -774,4 +774,4 @@ datasets:
   checked: '2026-11-05'
   limitations:
   - 'the manifest is not in catalog.json: it lists the sha256 of the catalog, and the catalog would have to list the manifest'
-  - 'the originals are not public yet (stage C, R2): `budget reproduce` needs a local copy of them'
+  - 'no environment has the registry yet (it needs the Cloudflare account): the originals are public only from a registry'
