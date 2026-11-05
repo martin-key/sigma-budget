@@ -12,6 +12,8 @@ interface Env {
   SITE_ORIGIN?: string;
   /** the address of the original СИГМА (docs/approach-specification.md, section 2.2) */
   SIGMA_URL?: string;
+  /** the address the feedback form writes to (site/js/feedback.js); empty: the form keeps the message in the browser and says so */
+  FEEDBACK_EMAIL?: string;
   /** "1" keeps the environment out of search engines (staging) */
   NOINDEX?: string;
 }

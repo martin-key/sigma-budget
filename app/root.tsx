@@ -29,7 +29,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <meta httpEquiv="Content-Security-Policy" content={CSP} />
         {first.map((t, i) => <Tag key={i} t={t} />)}
         <meta name="site-origin" content={doc?.release.origin ?? ''} />
-        <meta name="feedback-email" content="" />
+        <meta name="feedback-email" content={doc?.release.feedbackEmail ?? ''} />
         <meta name="sigma-url" content={doc?.release.sigmaUrl ?? ''} />
         <meta name="release-id" content={doc?.release.id ?? ''} />
         <meta name="data-base" content={doc?.release.dataBase ?? '/data/'} />

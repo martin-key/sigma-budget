@@ -4,10 +4,10 @@
 // The page that is open while the new worker takes over may still hold a mix (it was loaded under the old worker); the next load is clean. (A forced reload from the worker, WindowClient.navigate, was tried: it hangs
 // on a URL with a #fragment, so it is not used.)
 // The full offline strategy (versioned precache, data refresh, update prompt) arrives in milestone M6.
-// V7: every screen is a path (/prihodi). Offline, a page that was never opened falls back to the app shell (/app: dist/app.html, the bare template;
-// the development server answers it with site/index.html): the router builds the screen from the address and the copies in the cache. The shell is
+// V7: every screen is a path (/prihodi). Offline, a page that was never opened falls back to the app shell (/app: app.html, the bare template
+// that the build copies from site/index.html; the development server answers it with site/index.html): the router builds the screen from the address and the copies in the cache. The shell is
 // stored on install, so the fallback is there whatever page the visitor landed on (before, landing on /prihodi left /razhodi and / without a copy:
-// a network error offline). It is the bare shell, not the prerendered start page, so no other screen's text stands under the address.
+// a network error offline). It is the bare shell, not the start page the server drew, so no other screen's text stands under the address.
 const CACHE = 'bns-v7-1';   // its own cache name per address scheme (a v6 copy holds hash-era pages); the old cache is deleted on activate
 const START = () => new URL('app', self.registration.scope).href;
 self.addEventListener('install', e => {

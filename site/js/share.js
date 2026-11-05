@@ -8,6 +8,7 @@
 //   renderPng(spec,{watermark})          canvas with title, period, the block, source and short link; „ПРИМЕРНИ ДАННИ“ watermark whenever the data is mock
 // Rules that never bend: the copied text always carries the source; a mock block is never exported without saying so
 // (text line, PNG watermark, CSV status column).
+import { scoped, serverScope } from './env.js';
 import { html, esc } from './html.js';
 import { here, parts as addrParts, absolute } from './loc.js';
 import { icon } from './icons.js';
@@ -20,17 +21,23 @@ import { popover, sheet } from './ui/sheet.js';
 import { toast } from './ui/toast.js';
 
 /* ---------------------------------------------------------------- registry */
-const registry = new Map();
+const own = new Map();
 const resetHooks = new Set();
 let curRoute = null;
-/** called by the router at the start of every render: clears specs and lets registries (charts…) clear theirs */
-export const reset = route => { registry.clear(); curRoute = route || null; resetHooks.forEach(f => { try { f(); } catch (e) { console.error(e); } }); };
+const registryOf = () => scoped('share', own);              // the server draws each request into its own registry (js/env.js)
+/** called by the router at the start of every render: clears specs and lets registries (charts…) clear theirs. On the server the
+ *  request starts with empty maps of its own and only names its screen */
+export const reset = route => {
+  const sc = serverScope();
+  if (sc) { sc.route = route || null; return; }
+  own.clear(); curRoute = route || null; resetHooks.forEach(f => { try { f(); } catch (e) { console.error(e); } });
+};
 export const onReset = fn => { resetHooks.add(fn); return () => resetHooks.delete(fn); };
-export const register = (id, spec) => { registry.set(id, { id, route: curRoute?.key || null, ...spec }); return id; };
-export const get = id => registry.get(id);
-export const all = () => [...registry.entries()];
 /** the route row of the screen being drawn (ui/block.js and ui/cards.js use its key for „Намерих грешка“ and embeds) */
-export const currentRoute = () => curRoute;
+export const currentRoute = () => { const sc = serverScope(); return sc ? sc.route || null : curRoute; };
+export const register = (id, spec) => { registryOf().set(id, { id, route: currentRoute()?.key || null, ...spec }); return id; };
+export const get = id => registryOf().get(id);
+export const all = () => [...registryOf().entries()];
 
 /** mock when flagged, or when the block on screen contains something hatched as mock (a mock chart/table/KPI inside a „real“ block still exports labelled) */
 const MOCK_INSIDE = '[data-mock-fig="true"],[data-mock-table="true"],[data-kpi-mock="true"]';
@@ -69,7 +76,7 @@ const canPng = spec => hasChart(spec) || !!tableOf(spec) || hasStat(spec);
 
 /** trigger button for a block header */
 export const shareButton = (id, o = {}) => {
-  const label = o.label || 'Сподели', t = registry.get(id)?.title;
+  const label = o.label || 'Сподели', t = registryOf().get(id)?.title;
   return html`<button type="button" class="btn btn-sm btn-quiet share-btn" data-share="${id}"${t ? html` aria-label="${label}: ${t}"` : ''} aria-haspopup="dialog" aria-expanded="false">${icon('share', { size: 16 })}<span>${label}</span></button>`;
 };
 

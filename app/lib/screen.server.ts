@@ -6,6 +6,7 @@ import { head } from '../../site/js/seo.js';
 import { bannerHtml, topbarHtml, tabbarHtml, footerHtml } from '../../site/js/chrome.js';
 import { data } from '../../site/js/data.js';
 import { toHref, parts, fileHref } from '../../site/js/loc.js';
+import { reset as resetShare } from '../../site/js/share.js';
 
 export interface HeadTag { tag: 'meta' | 'link'; attrs: Record<string, string> }
 export interface ScreenDoc {
@@ -18,7 +19,7 @@ export interface ScreenDoc {
   /** the address this document is the screen of (site/js/router.js dropStalePrerender compares it); '404' for the 404 screen */
   prerendered: string;
   bare: boolean;
-  release: { id: string; dataBase: string; origin: string; sigmaUrl: string };
+  release: { id: string; dataBase: string; origin: string; sigmaUrl: string; feedbackEmail: string };
   banner: string;
   topbar: string;
   view: string;
@@ -44,6 +45,7 @@ export async function renderScreen(url: URL, release: Rel): Promise<ScreenResult
   if (r.found && !sameAddress(r.want, address)) return { redirect: r.want };    // /Prihodi, an old address, a default ?per= → the canonical one
   const { route, params, query } = r;
 
+  resetShare(route);
   try { await data.load('core'); } catch { /* the footer and the source cards degrade without core.json, as in the browser */ }
   let vm;
   let status = route.id === 'S30' ? 404 : 200;

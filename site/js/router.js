@@ -203,7 +203,7 @@ async function render(kind) {
   applying = true;
   try { store.set('period', query.per && store.periodByKey(query.per) ? query.per : DEFAULT_PERIOD); } finally { applying = false; }
 
-  // the first render over a prerendered page (tools/site/build.py): its HTML is already the screen, so no skeleton in between and no rise-in or count-up of what is already shown
+  // the first render over a page the server drew (app/, workers/app.ts; data-prerendered names its address): its HTML is already the screen, so no skeleton in between and no rise-in or count-up of what is already shown
   // (dropStalePrerender has taken the mark off an HTML that is the screen of another address)
   const pre = kind === 'load' && document.documentElement.hasAttribute('data-prerendered');
   document.documentElement.removeAttribute('data-prerendered');
@@ -308,7 +308,7 @@ function onStore(key) {
   }, 0);
 }
 
-/** The prerendered HTML (tools/site/build.py) is the screen of one address, written in data-prerendered. When the page opens under
+/** The HTML the server drew (app/root.tsx) is the screen of one address, written in data-prerendered. When the page opens under
  *  another one (an old link /#/prihodi/dds loads the HTML of /; a screen without its own file gets 404.html), that text and its numbers
  *  must not stand under the new address while the core data loads: main.js calls this before it waits, and the view stays empty and
  *  busy until the router paints the screen. */

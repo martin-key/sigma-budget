@@ -1,5 +1,5 @@
-// The address of a screen. Every screen has its own path (/prihodi/dds?per=2026.draft): the build (tools/site/build.py) prerenders each
-// path into its own HTML file for search engines and for the first paint. The old hash addresses (#/prihodi/dds) still open: the router
+// The address of a screen. Every screen has its own path (/prihodi/dds?per=2026.draft): the server draws each one into the first response,
+// for search engines and for the first paint (docs/adr/0002-react-router-ssr.md). The old hash addresses (#/prihodi/dds) still open: the router
 // reads them and rewrites the address bar to the path.
 // Hash mode: with window.__HASH_ROUTES__ set before boot, the app keeps the hash addresses of V6 (links, the address bar, history).
 // The v6 checks in tools/mock/ run in this mode (they set it with an init script), so their hash expectations stay valid.
@@ -9,7 +9,8 @@ import { serverScope } from './env.js';
 
 /** the site root, wherever the current page is (/razhodi/obrazovanie loads its files from the root, not from /razhodi/). On the server
  *  (js/env.js) the site is at the root of its host; the scope of the request knows the host */
-export const ROOT = typeof document === 'undefined' ? new URL('https://server.invalid/') : new URL('../', import.meta.url);
+const SERVER_ROOT = { get href() { return (serverScope()?.origin || 'https://server.invalid') + '/'; }, pathname: '/', toString() { return this.href; } };
+export const ROOT = typeof document === 'undefined' ? SERVER_ROOT : new URL('../', import.meta.url);
 export const BASE = ROOT.pathname;                                     // '/' when the site is served at the root of its host
 export const HASH = typeof window !== 'undefined' && !!window.__HASH_ROUTES__;
 
@@ -51,7 +52,7 @@ export function isAppHref(h) {
 export const isAppLink = a => !!a && isAppHref(a.getAttribute('href'));
 
 /** path mode: an old '#/x' link written by a page, a data file (search index, feed) or a component becomes '/x' in the DOM, so that
- *  crawlers, „Open in new tab“ and the prerendered HTML all see the path; a file link relative to the root (data/core.json) becomes
+ *  crawlers, „Open in new tab“ and the server's HTML all see the path; a file link relative to the root (data/core.json) becomes
  *  /data/core.json, which also holds on /danni/execution. Hash mode: nothing to do (every page is the root document). */
 const LINKS = 'a[href^="#/"],a[href^="data/"]';
 // a data file of the visit's release (js/data.js); data/releases/… is the address of a release itself and stays as it is

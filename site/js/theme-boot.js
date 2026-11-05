@@ -1,7 +1,7 @@
 // The theme before the first paint (docs/approach-specification.md, section 9.3; css/tokens.css). A classic script in <head>, before the
 // styles: the visitor's choice from the footer (localStorage bns.theme: light or dark) goes on html[data-theme]; without one the system
 // decides (prefers-color-scheme). It also sets the colour of the browser bar. js/shell.js writes the choice; the build keeps this script
-// in every prerendered page (data-keep).
+// in every page the server draws (app/root.tsx).
 (function () {
   var t = null;
   try { t = localStorage.getItem('bns.theme'); } catch (e) { /* storage blocked: the system decides */ }

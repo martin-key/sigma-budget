@@ -4,7 +4,8 @@
     python tools/release_check.py                  synthetic releases (no raw files needed: this is what CI runs)
     python tools/release_check.py --real DIR       also publish the release of `budget build` in DIR and reproduce it from the Worker
 
-It starts `wrangler dev` (node_modules, package-lock.json) with a fresh local D1 and R2, applies migrations/, and signs Cloudflare Access
+It builds the site (react-router build: the Worker of workers/app.ts and the static files, docs/adr/0002-react-router-ssr.md) and starts
+`wrangler dev` on it (node_modules, package-lock.json) with a fresh local D1 and R2, applies migrations/, and signs Cloudflare Access
 tokens with an RSA key made for the run (openssl; the Worker gets the public key as ACCESS_JWKS). Then:
   9  operator: no token, a foreign key, a wrong audience, an expired token and a person who is not an operator are refused
   3  damaged upload: wrong bytes, an object missing, an unsafe path, a too large object: nothing becomes current
@@ -14,6 +15,7 @@ tokens with an RSA key made for the run (openssl; the Worker gets the public key
   —  `budget rollback` makes an earlier release current with a new revision; a release that never was current cannot be rolled back to
   —  the public API: the pointer, the journal without operator names, the manifest bytes, the files by the manifest only, ETag/304, Range,
      originals in HTML as a download, unknown and unpublished releases 404, and no public route that writes
+  6  one release: a screen is drawn from the current release and names it with its data base; the stable /data/<file> follows it
 Exit code 0 only when every check passes.
 """
 import argparse
@@ -147,15 +149,16 @@ def main(argv):
     if not wrangler.exists():
         sys.exit("release_check: run `npm ci` first (wrangler from package-lock.json)")
     tmp = Path(tempfile.mkdtemp(prefix="release-check-"))
-    state, assets = tmp / "state", tmp / "assets"
-    assets.mkdir()
-    (assets / "app.html").write_text("<!doctype html><title>app</title>", encoding="utf-8")
-    (assets / "404.html").write_text("<!doctype html><title>404</title>", encoding="utf-8")
+    state = tmp / "state"
+    built = ROOT / "build" / "server" / "wrangler.json"
+    b = subprocess.run([str(ROOT / "node_modules" / ".bin" / "react-router"), "build"], cwd=ROOT, capture_output=True, text=True)
+    if b.returncode != 0 or not built.exists():
+        sys.exit("release_check: react-router build failed:\n" + (b.stdout + b.stderr)[-2000:])
     key, foreign = Keys(tmp, "test-key"), Keys(tmp, "foreign-key")
     port = free_port()
     base = "http://127.0.0.1:%d" % port
-    subprocess.run([str(wrangler), "d1", "migrations", "apply", "DB", "--local", "--persist-to", str(state)], cwd=ROOT, check=True, capture_output=True)
-    dev = subprocess.Popen([str(wrangler), "dev", "--ip", "127.0.0.1", "--port", str(port), "--persist-to", str(state), "--assets", str(assets),
+    subprocess.run([str(wrangler), "d1", "migrations", "apply", "DB", "--local", "-c", str(built), "--persist-to", str(state)], cwd=ROOT, check=True, capture_output=True)
+    dev = subprocess.Popen([str(wrangler), "dev", "-c", str(built), "--ip", "127.0.0.1", "--port", str(port), "--persist-to", str(state),
                             "--var", "ACCESS_ISSUER:" + ISSUER, "--var", "ACCESS_AUD:" + AUD, "--var", "OPERATORS:" + OPERATORS,
                             "--var", "SERVICE_TOKENS:ci-publisher", "--var", "ACCESS_JWKS:" + json.dumps({"keys": [key.jwk]}),
                             "--var", "MAX_OBJECT_BYTES:%d" % (64 * 1024 * 1024 if a.real else 4096)], cwd=ROOT, stdout=open(tmp / "wrangler.log", "w"), stderr=subprocess.STDOUT)
@@ -311,6 +314,22 @@ def main(argv):
             s, _h, _b = req(m_, base + path, b"x")
             ok(s == 405, "%s %s: 405, no public route writes" % (m_, path.split("/")[1]))
 
+        print("one release on the screen (scenario 6)")
+        cur = jbody(req("GET", base + "/api/releases/current")[2])
+        rid = cur.get("release_id", "")
+        files = {"A": A, "B": B, "C": C, "D": D}
+        x = next((r for r in files.values() if r[2] == rid), None)
+        s, h, b = req("GET", base + "/izpalnenie")
+        page = b.decode("utf-8", "replace")
+        ok(s == 200 and h.get("X-Release-Id") == rid and ('<meta name="release-id" content="%s"/>' % rid) in page
+           and ('<meta name="data-base" content="/data/releases/%s/data/"/>' % rid) in page,
+           "a screen is drawn from the current release and names it, with the data base of that release")
+        ok("no-transform" in h.get("Cache-Control", "") and h.get("Content-Security-Policy", "").startswith("default-src 'self'"),
+           "the document is no-transform and carries the content security policy")
+        s, h, b = req("GET", base + "/data/x.json")
+        ok(s == 200 and x is not None and sha(b) == next(o["sha256"] for o in x[3]["outputs"] if o["path"] == "data/x.json") and h.get("X-Release-Id") == rid,
+           "the stable address /data/x.json serves the file of the current release")
+
         if a.real:
             print("the release of budget build, published and reproduced from the Worker")
             rel = Path(a.real).resolve()
@@ -321,6 +340,11 @@ def main(argv):
             pj = jbody(b)
             ok(s == 200 and pj.get("cell") == "B11" and pj.get("value") == "33898.456" and pj.get("original", {}).get("download"),
                "provenance of data/2026-09/kfp/rev: B11 of the September report, 33898.456, with the original to download")
+            time.sleep(11)                                     # the Worker reads the pointer at most every ten seconds (workers/release-data.ts)
+            s, h, b = req("GET", base + "/izpalnenie")
+            page = b.decode("utf-8", "replace")
+            ok(s == 200 and h.get("X-Release-Id") == rid and 'data-view="ready"' in page and "/data/releases/%s/data/execution-provenance.json" % rid in page,
+               "the monthly screen is drawn from the published release, and its provenance link is the file of that release")
             code, r = budget(["reproduce", "--current", base], dict(env))
             ok(code == 0 and r.get("verdict") == "reproduced byte for byte",
                "budget reproduce --current: the originals downloaded from the release, rebuilt byte for byte (%s)" % (r.get("verdict") or json.dumps(r)[:400]))

@@ -1,8 +1,10 @@
 {
   "name": "sigma-budget-tools",
   "private": true,
-  "description": "Node tools of the repository: wrangler for the Worker, the local registry and the release checks (docs/release.md)",
+  "description": "The site (React Router SSR on Cloudflare Workers, docs/adr/0002-react-router-ssr.md) and the Node tools of the repository",
   "scripts": {
+    "build": "react-router build",
+    "typecheck": "react-router typegen && tsc",
     "dev": "wrangler dev",
     "registry:local": "wrangler d1 migrations apply DB --local"
   },

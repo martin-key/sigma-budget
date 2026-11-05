@@ -13,9 +13,11 @@ export interface ReleaseData {
   dataBase: string;
   /** a data file, parsed as the pages read it (site/js/data.js parse) */
   load(name: string): Promise<unknown>;
+  /** the bytes of a file of the release (data/catalog.json), for the stable addresses /data/…; null: not from the registry */
+  file(path: string): Promise<{ bytes: ArrayBuffer; mime: string; sha256: string } | null>;
 }
 
-type Manifest = { json: { outputs: { path: string; sha256: string }[] } };
+type Manifest = { json: { outputs: { path: string; sha256: string; mime: string }[] } };
 const POINTER_MS = 10_000;                                    // a new release shows within ten seconds; the files of a release never change
 let pointer: { at: number; rid: string | null } | null = null;
 const texts = new Map<string, string>();                      // sha256 -> text: immutable, so one copy per isolate is safe
@@ -33,9 +35,16 @@ async function fromRegistry(env: Env, rid: string): Promise<ReleaseData | null> 
   const m = (await manifestOf(env, rid)) as Manifest | null;
   if (!m) return null;
   const byPath = new Map(m.json.outputs.map(o => [o.path, o.sha256]));
+  const mimes = new Map(m.json.outputs.map(o => [o.path, o.mime]));
   return {
     releaseId: rid,
     dataBase: `/data/releases/${rid}/data/`,
+    async file(path) {
+      const sha = byPath.get(path);
+      if (!sha) return null;
+      const bytes = await readObject(env, sha);
+      return bytes ? { bytes, mime: mimes.get(path) || 'application/octet-stream', sha256: sha } : null;
+    },
     async load(name) {
       const sha = byPath.get(`data/${name}.json`);
       if (!sha) throw new PendingError(name);
@@ -55,6 +64,7 @@ function fromAssets(env: Env, origin: string, releaseId: string): ReleaseData {
   return {
     releaseId,
     dataBase: '/data/',
+    async file() { return null; },
     async load(name) {
       const res = await env.ASSETS.fetch(new Request(new URL(`/data/${name}.json`, origin)));
       if (res.status === 404) throw new PendingError(name);

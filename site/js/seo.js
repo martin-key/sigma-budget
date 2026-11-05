@@ -1,5 +1,5 @@
 // The <head> of a screen for search engines, social cards and answer engines (SEO/GEO/AEO). The router calls apply() after every paint;
-// the build (tools/site/build.py) snapshots the result into the prerendered HTML, so one place decides what a crawler reads.
+// the server writes the same head into the first response (app/root.tsx, head()), so one place decides what a crawler reads.
 //   description   the screen's short answer (parts.answer / mod.answer), else its lede, else the route's desc; at most ~160 characters
 //   Q&A           a screen named as a question („Колко дължим?“), or one that names its question (mod.question), with a factual answer that is
 //                 on the screen: mod.answer (the page's own „Накратко“) or the lede when it has a number in it -> FAQPage in the JSON-LD

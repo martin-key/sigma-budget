@@ -1,12 +1,10 @@
-"""Static server for the site with path addresses (/prihodi, /razhodi/obrazovanie).
+"""Static server for the site with path addresses (/prihodi, /razhodi/obrazovanie): the app in the browser, without the server part.
 
-    python3 tools/site/serve.py              # site/ on http://127.0.0.1:8000/  (development: every unknown path gets the app shell)
-    python3 tools/site/serve.py --dist       # dist/ as the host serves it: /prihodi -> prihodi.html, an unknown path -> 404.html with status 404
+    python3 tools/site/serve.py              # site/ on http://127.0.0.1:8000/  (every unknown path gets the app shell)
     python3 tools/site/serve.py --port 8080 --dir some/folder
 
-The development mode answers every path without a file extension with site/index.html, so the router builds the screen in the browser.
-The --dist mode follows the production host (worker/index.js on Cloudflare Workers Static Assets): the prerendered file of the path,
-/embed/* falls back to the app shell app.html (the embed view is not prerendered), and any other unknown path gets 404.html.
+Every path without a file extension gets site/index.html, so the router builds the screen in the browser. The v6 checks (tools/mock/) run
+the app this way. The host itself draws every screen on the server (docs/adr/0002-react-router-ssr.md): npm run build, then npx wrangler dev.
 """
 import argparse
 import functools
@@ -25,9 +23,8 @@ FILE_EXT = re.compile(r'\.[A-Za-z][A-Za-z0-9]{0,4}$')     # as in site/js/loc.js
 
 
 class Handler(http.server.SimpleHTTPRequestHandler):
-    """SimpleHTTPRequestHandler with path-address fallbacks. `dist` switches between the development and the host behaviour."""
+    """SimpleHTTPRequestHandler with path-address fallbacks"""
 
-    dist = False
     shell = None          # bytes of the app shell for the development fallback (site/index.html); read at start
 
     def log_message(self, *a):
@@ -70,11 +67,6 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 return self._send_file(f)                    # /prihodi -> prihodi.html (SimpleHTTPRequestHandler would 404)
             return None                                      # an ordinary file: let the base class serve it (ranges, types)
         has_ext = bool(FILE_EXT.search(raw)) and not raw.startswith('/embed/')   # /embed/prognoza.s13-deficit is a screen
-        if self.dist:
-            if raw.startswith('/embed/'):
-                return self._send_file(pathlib.Path(self.directory) / 'app.html')
-            nf = pathlib.Path(self.directory) / '404.html'
-            return self._send_file(nf if nf.is_file() else b'not found', 404)
         if has_ext:
             return None                                      # a missing file stays a 404 (the data loader reads a 404 as „предстои“)
         return self._send_file(self.shell)
@@ -96,10 +88,10 @@ class Server(socketserver.ThreadingTCPServer):
             super().handle_error(request, client_address)
 
 
-def start(directory, port=0, dist=False, shell=None):
+def start(directory, port=0, shell=None):
     """start a threaded server in the background; returns (server, base_url)"""
     directory = str(pathlib.Path(directory).resolve())
-    H = type('H', (Handler,), {'dist': dist, 'shell': shell if shell is not None else (pathlib.Path(directory) / 'index.html').read_bytes()})
+    H = type('H', (Handler,), {'shell': shell if shell is not None else (pathlib.Path(directory) / 'index.html').read_bytes()})
     srv = Server(('127.0.0.1', port), functools.partial(H, directory=directory))
     srv.daemon_threads = True
     threading.Thread(target=srv.serve_forever, daemon=True).start()
@@ -108,14 +100,13 @@ def start(directory, port=0, dist=False, shell=None):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
-    ap.add_argument('--dist', action='store_true', help='serve dist/ as the host does (prerendered files, 404.html)')
-    ap.add_argument('--dir', help='folder to serve (default site/, or dist/ with --dist)')
+    ap.add_argument('--dir', help='folder to serve (default site/)')
     ap.add_argument('--port', type=int, default=8000)
     a = ap.parse_args()
-    d = pathlib.Path(a.dir) if a.dir else ROOT / ('dist' if a.dist else 'site')
+    d = pathlib.Path(a.dir) if a.dir else ROOT / 'site'
     if not (d / 'index.html').is_file():
-        sys.exit(f'{d}/index.html not found' + (' (run tools/site/build.py first)' if a.dist else ''))
-    srv, url = start(d, a.port, a.dist)
+        sys.exit(f'{d}/index.html not found')
+    srv, url = start(d, a.port)
     print(f'serving {d} on {url}  (Ctrl+C to stop)')
     try:
         threading.Event().wait()

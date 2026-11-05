@@ -1,18 +1,20 @@
-"""Build the site for the host: dist/ with one prerendered HTML file per screen, plus sitemap.xml, robots.txt, llms.txt, llms-full.txt and _headers.
+"""Build the site for the host and check every screen (docs/adr/0002-react-router-ssr.md).
 
     PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/site/build.py
     ... build.py --origin https://preview.example.org     # the address the canonical links, the sitemap and llms.txt name
-    ... build.py --limit 40 --out tmp/dist-try            # a quick partial build (the checks below still run)
-    ... build.py --origin https://staging.example --noindex   # a staging build: robots.txt and X-Robots-Tag keep it out of search engines
+    ... build.py --limit 40                                # a quick partial check (the link checks below still run)
+    ... build.py --env staging --noindex                   # staging: its Worker config (CLOUDFLARE_ENV), kept out of search engines
 
-How it works. dist/ starts as a copy of site/. The app is served from there (tools/site/serve.py, every path gets the app shell) and
-headless Chromium crawls it from the start page: every screen it reaches through a link becomes one file, /razhodi/obrazovanie ->
-dist/razhodi/obrazovanie.html, written from the live DOM after the screen is built (reduced motion: the final state). The head of
-each file is what js/seo.js set: title, description, canonical, social cards and JSON-LD. In the browser the app then takes over
-the same HTML (the router repaints it without a skeleton). The 404 screen is written to dist/404.html. /embed/* is not prerendered.
+How it works. `react-router build` writes build/client (the files of site/, served as they are) and build/server (the Worker that draws
+every screen from the current release, workers/app.ts). The files that depend on this build are stamped in build/client (the RSS links,
+the service worker's cache name). Then the built Worker runs under `wrangler dev` with an empty registry, so it draws the screens from
+the data built from git, and headless Chromium crawls it from the start page: every screen it reaches through a link is checked twice,
+as the server sends it (a finished screen in the HTML itself, for crawlers and the first paint: data-view="ready", an h1, a description,
+the canonical link) and as the browser shows it once the app has taken over. Last, sitemap.xml, robots.txt, llms.txt, llms-full.txt and
+_headers are written into build/client.
 
-The build is also a check of the path addresses: a screen that is not ready, shows an error, logs a console error, links to an
-address that is not a screen or still carries an old #/ link, or lacks a title, description or canonical link fails the build (exit 1).
+A screen that is not ready, shows an error, logs a console error, links to an address that is not a screen or still carries an old #/
+link, or lacks a title, description or canonical link fails the build (exit 1).
 """
 import argparse
 import asyncio
@@ -22,17 +24,18 @@ import gzip
 import html
 import io
 import json
+import os
 import pathlib
 import re
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 import urllib.parse
+import urllib.request
 
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-import serve  # noqa: E402
-from playwright.async_api import async_playwright  # noqa: E402
+from playwright.async_api import async_playwright
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 SITE = ROOT / 'site'
@@ -95,11 +98,6 @@ def norm_path(href):
     return p
 
 
-def out_file(out, path):
-    """'/' -> index.html, '/razhodi/obrazovanie' -> razhodi/obrazovanie.html (the host maps /x to x.html: no trailing-slash redirect)"""
-    return out / 'index.html' if path == '/' else out / (urllib.parse.unquote(path).lstrip('/') + '.html')
-
-
 class Crawl:
     def __init__(self, base, jobs, limit):
         self.base, self.jobs, self.limit = base, jobs, limit
@@ -130,6 +128,16 @@ class Crawl:
     async def visit_once(self, ctx, path):
         page = await ctx.new_page()
         errs = []
+        ssr = {}
+        try:                                                    # the document as the server sends it, before any script runs
+            raw = await page.request.get(self.base.rstrip('/') + path, max_redirects=0)
+            doc = await raw.text()
+            m = lambda rx: (re.search(rx, doc, re.S) or [None, ''])[1]   # noqa: E731
+            ssr = {'status': raw.status, 'view': m(r'<article class="page[^"]*"[^>]*data-view="([^"]*)"'),
+                   'h1': re.sub(r'<[^>]+>', '', m(r'<h1[^>]*>(.*?)</h1>')).strip(), 'desc': html.unescape(m(r'<meta name="description" content="([^"]*)"')),
+                   'canonical': html.unescape(m(r'<link rel="canonical" href="([^"]*)"'))}
+        except Exception as e:  # noqa: BLE001
+            ssr = {'error': str(e).splitlines()[0][:200]}
         page.on('console', lambda m: errs.append('console: ' + m.text[:200]) if m.type == 'error' else None)
         page.on('pageerror', lambda e: errs.append('pageerror: ' + str(e)[:200]))
         page.on('requestfailed', lambda r: errs.append(f'request failed: {r.url[-90:]} ({r.failure})') if 'ERR_ABORTED' not in str(r.failure) else None)
@@ -147,6 +155,7 @@ class Crawl:
             return None, f'not built: {str(e).splitlines()[0][:200]}'
         await page.close()
         info['errors'] = errs
+        info['ssr'] = ssr
         return info, None
 
     async def worker(self, browser):
@@ -188,7 +197,7 @@ class Crawl:
 
 
 def check_page(path, info, built, origin):
-    """the checks of one prerendered screen: list of (level, message)"""
+    """the checks of one screen: list of (level, message)"""
     out = []
     F = lambda m: out.append(('fail', m))   # noqa: E731
     W = lambda m: out.append(('warn', m))   # noqa: E731
@@ -221,6 +230,20 @@ def check_page(path, info, built, origin):
         p = norm_path(h)
         if p and p not in built:
             F(f'links to {h}, which was not built')
+    ssr = info.get('ssr') or {}                                  # what a crawler without JavaScript reads
+    if ssr.get('error'):
+        F('the server document could not be read: ' + ssr['error'])
+    else:
+        if ssr.get('status') != 200:
+            F(f'the server answers {ssr.get("status")}')
+        if ssr.get('view') != 'ready':
+            F(f'the server document is not a finished screen (data-view="{ssr.get("view")}")')
+        if not ssr.get('h1'):
+            F('the server document has no h1')
+        if not ssr.get('desc'):
+            F('the server document has no meta description')
+        if ssr.get('canonical') != want:
+            F(f'the server document has canonical {ssr.get("canonical")!r}, expected {want!r}')
     return out
 
 
@@ -239,7 +262,7 @@ def clean_text(t, cap):
 
 
 # The Content-Security-Policy of site/index.html as an HTTP header, plus what a <meta> cannot carry: frame-ancestors (no framing of the
-# site by others; worker/index.js lifts it for /embed/*, which is made to be framed). Every file is same-origin: HSTS keeps it on https.
+# site by others; workers/app.ts lifts it for /embed/*, which is made to be framed). Every file is same-origin: HSTS keeps it on https.
 CSP = ("default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; font-src 'self'; "
        "base-uri 'self'; form-action 'none'; object-src 'none'; frame-ancestors 'self'")
 
@@ -366,32 +389,56 @@ def stamp_files(out, origin, data_version):
         sw.write_text(s, encoding='utf-8')
 
 
+def free_port():
+    import socket
+    with socket.socket() as so:
+        so.bind(('127.0.0.1', 0))
+        return so.getsockname()[1]
+
+
+def start_worker(built, origin, sigma_url, state):
+    """the built Worker under wrangler dev, with an empty registry (the screens come from the data built from git): (process, base)"""
+    port = free_port()
+    args = [str(ROOT / 'node_modules' / '.bin' / 'wrangler'), 'dev', '-c', str(built), '--ip', '127.0.0.1', '--port', str(port),
+            '--persist-to', str(state), '--var', 'SITE_ORIGIN:' + origin, '--var', 'NOINDEX:']
+    if sigma_url:
+        args += ['--var', 'SIGMA_URL:' + sigma_url]
+    proc = subprocess.Popen(args, cwd=ROOT, stdout=open(state / 'wrangler.log', 'w'), stderr=subprocess.STDOUT)
+    base = f'http://127.0.0.1:{port}/'
+    for _ in range(90):
+        try:
+            with urllib.request.urlopen(base + 'robots.txt', timeout=2):
+                return proc, base
+        except OSError:
+            time.sleep(1)
+    proc.terminate()
+    sys.exit(f'build: wrangler dev did not start ({state / "wrangler.log"})')
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
-    ap.add_argument('--out', default=str(ROOT / 'dist'))
     ap.add_argument('--origin', help='production address (default: <meta name="site-origin"> in site/index.html)')
-    ap.add_argument('--sigma-url', help='address of the original СИГМА for the menu and the footer (default: <meta name="sigma-url"> in site/index.html)')
-    ap.add_argument('--jobs', type=int, default=6, help='pages built at the same time')
-    ap.add_argument('--limit', type=int, default=0, help='build at most N screens (a quick try; links to the others then fail the check)')
-    ap.add_argument('--noindex', action='store_true', help='a staging build: robots.txt disallows everything and every response says X-Robots-Tag: noindex')
+    ap.add_argument('--sigma-url', help='address of the original СИГМА for the menu and the footer (default: the Worker config)')
+    ap.add_argument('--env', default='', help='the Worker environment of wrangler.jsonc to build for (CLOUDFLARE_ENV), e.g. staging')
+    ap.add_argument('--no-build', action='store_true', help='check the build/ that is there (react-router build was run already)')
+    ap.add_argument('--jobs', type=int, default=6, help='pages checked at the same time')
+    ap.add_argument('--limit', type=int, default=0, help='check at most N screens (a quick try; links to the others then fail the check)')
+    ap.add_argument('--noindex', action='store_true', help='a staging build: robots.txt disallows everything and every file says X-Robots-Tag: noindex')
     a = ap.parse_args()
 
     template = (SITE / 'index.html').read_text(encoding='utf-8')
-    origin = a.origin or re.search(r'<meta name="site-origin" content="([^"]+)"', template).group(1)
-    origin = origin.rstrip('/')
-    out = pathlib.Path(a.out).resolve()
-    if out == SITE.resolve() or out == ROOT:
-        sys.exit('refusing to build into the source folder')
-    if out.exists():
-        shutil.rmtree(out)
-    shutil.copytree(SITE, out, ignore=shutil.ignore_patterns('sebra.json'))     # СЕБРА: on disk for phase 2, used by no screen and not in the catalog
-    template = template.replace('<meta name="site-origin" content="https://sigma-budget.my-data.bg">', f'<meta name="site-origin" content="{origin}">')
-    if a.sigma_url:
-        if not re.fullmatch(r'https://[^\s"<>]+', a.sigma_url):
-            sys.exit('--sigma-url must be an https address')
-        template = re.sub(r'<meta name="sigma-url" content="[^"]*">', f'<meta name="sigma-url" content="{html.escape(a.sigma_url)}">', template)
-    (out / 'index.html').write_text(template, encoding='utf-8')
-    (out / 'app.html').write_text(template, encoding='utf-8')         # the bare app shell: the host serves it for /embed/* (worker/index.js)
+    origin = (a.origin or re.search(r'<meta name="site-origin" content="([^"]+)"', template).group(1)).rstrip('/')
+    if a.sigma_url and not re.fullmatch(r'https://[^\s"<>]+', a.sigma_url):
+        sys.exit('--sigma-url must be an https address')
+    if not a.no_build:
+        env = dict(os.environ, **({'CLOUDFLARE_ENV': a.env} if a.env else {}))
+        r = subprocess.run([str(ROOT / 'node_modules' / '.bin' / 'react-router'), 'build'], cwd=ROOT, env=env, capture_output=True, text=True)
+        if r.returncode != 0:
+            sys.exit('build: react-router build failed:\n' + (r.stdout + r.stderr)[-3000:])
+    out, built = ROOT / 'build' / 'client', ROOT / 'build' / 'server' / 'wrangler.json'
+    if not out.is_dir() or not built.is_file():
+        sys.exit('build: no build/ (run without --no-build)')
+    (out / 'data' / 'sebra.json').unlink(missing_ok=True)       # СЕБРА: on disk for phase 2, used by no screen and not in the catalog
 
     core = json.loads((SITE / 'data' / 'core.json').read_text(encoding='utf-8'))
     dv = (core.get('build') or {}).get('dataVersion') or ''
@@ -401,37 +448,40 @@ def main():
 
     stamp_files(out, origin, dv)
     t0 = time.time()
-    srv, base = serve.start(out, shell=template.encode('utf-8'))
-    print(f'build: {base} -> {out} · origin {origin} · {a.jobs} pages at a time')
-    crawl = Crawl(base, a.jobs, a.limit)
-    asyncio.run(crawl.run(seeds))
-    srv.shutdown()
+    state = pathlib.Path(tempfile.mkdtemp(prefix='site-build-'))
+    worker, base = start_worker(built, origin, a.sigma_url, state)
+    print(f'build: {base} (build/server, {a.env or "top-level"} config) · origin {origin} · {a.jobs} pages at a time')
+    try:
+        crawl = Crawl(base, a.jobs, a.limit)
+        asyncio.run(crawl.run(seeds))
+    finally:
+        worker.terminate()
+        try:
+            worker.wait(timeout=20)
+        except subprocess.TimeoutExpired:
+            worker.kill()
+        shutil.rmtree(state, ignore_errors=True)
 
     routes = (crawl.pages.get('/') or {}).get('routes') or []          # window.__ROUTES__ (js/routes.js)
 
-    built = set(crawl.pages)
+    built_paths = set(crawl.pages)
     fails, warns = list(crawl.fails), list(crawl.warns)
-    loc = lambda p: origin + ('/' if p == '/' else p)   # noqa: E731
     for path, info in sorted(crawl.pages.items()):
-        for level, msg in check_page(path, info, built if not a.limit else built | {norm_path(h) for i in crawl.pages.values() for h in i['links']}, origin):
+        for level, msg in check_page(path, info, built_paths if not a.limit else built_paths | {norm_path(h) for i in crawl.pages.values() for h in i['links']}, origin):
             (fails if level == 'fail' else warns).append((path, msg))
-        f = out_file(out, path)
-        f.parent.mkdir(parents=True, exist_ok=True)
-        f.write_text(info['html'].replace(base, origin + '/'), encoding='utf-8')
     titles = collections.Counter(i['title'] for i in crawl.pages.values())
     for path, info in crawl.pages.items():
         if titles[info['title']] > 1:
             warns.append((path, f'the title is shared by {titles[info["title"]]} screens: {info["title"]}'))
     nf = crawl.not_found
     if not nf or nf['route'] != 'S30':
-        fails.append((NOT_FOUND_PROBE, 'the 404 screen was not built'))
-    else:
-        (out / '404.html').write_text(nf['html'].replace(base, origin + '/').replace(f'<link rel="canonical" href="{loc(NOT_FOUND_PROBE)}">', '')
-                                      .replace(f'data-prerendered="{NOT_FOUND_PROBE}"', 'data-prerendered="404"'), encoding='utf-8')   # served for any unknown path
+        fails.append((NOT_FOUND_PROBE, 'the 404 screen is not shown for an unknown address'))
+    elif (nf.get('ssr') or {}).get('status') != 404:
+        fails.append((NOT_FOUND_PROBE, f'an unknown address answers {(nf.get("ssr") or {}).get("status")}, not 404'))
 
     paths = write_extras(out, crawl.pages, origin, lastmod, routes, a.noindex)
     dt = time.time() - t0
-    print(f'\n{len(crawl.pages)} screens prerendered ({len(paths)} in the sitemap) in {dt:.0f} s → {out}')
+    print(f'\n{len(crawl.pages)} screens checked ({len(paths)} in the sitemap) in {dt:.0f} s → {out}')
     for path, msg in warns[:40]:
         print(f'  warn {path}: {msg}')
     if len(warns) > 40:

@@ -12,27 +12,34 @@
 prototype/          старият прототип (v3.6): един самостоятелен HTML файл с вградени данни
   site/index.html     самото приложение — отваря се направо или през статичен сървър
   src/                извлечените набори (JSON), които скриптът gen_inline.py вгражда в index.html
-site/               приложението: статичен сайт, чисти ES модули, без framework
-  index.html          скелетът на обвивката
+app/ workers/       приложението на сървъра: React Router (SSR) в Cloudflare Worker, TypeScript (ADR 0002)
+site/               браузърната част: ES модули, стилове и данни; екраните се изобразяват със същия код и на сървъра
+  index.html          скелетът на обвивката (за проверките и офлайн)
   js/ css/ vendor/    код, стилове, ECharts и шрифтове
   data/               набори с данни (JSON), от които зарежда приложението
 tools/
   prototype/          скриптове за извличане и сглобяване на данните на прототипа
   mock/               скриптове за сглобяване и проверка на данните и приложението на Mock
-  site/               сървър за разработка, сглобяване на dist/ (предварително изобразени страници, sitemap, llms.txt), картинките
-worker/ wrangler.jsonc   хостингът: Cloudflare Workers Static Assets и малкият Worker за адресите без файл
+  site/               сглобяване и проверка на всеки екран (сървър и браузър), sitemap, llms.txt; сървър за разработка; картинките
+worker/             операторският API и публичният API на изданията (D1, R2, Cloudflare Access)
+wrangler.jsonc      хостингът: Cloudflare Workers със Static Assets
 docs/               документация (на български): ръководство за разработка, спецификации на данните, план
   data-sources.md     откъде идват суровите данни и как се свалят отново (суровите файлове не са качени)
 ```
 
 ## Как се пуска локално
 
-И двете приложения са статични — за разработка не е нужен `node`, пакетен мениджър или сглобяване.
+Сайтът е Cloudflare Worker: React Router изобразява всеки екран на сървъра от текущото издание, а браузърът го поема
+([ADR 0002](docs/adr/0002-react-router-ssr.md)).
 
 ```bash
-# Приложението (адресите са пътища като /prihodi: сървърът връща обвивката за всеки път без файл)
+# Сайтът както в Cloudflare: сървърът изобразява екраните (без регистър данните са тези от site/data)
+npm ci && npm run build && npx wrangler dev
+# после отворете http://127.0.0.1:8787/
+
+# Само браузърната част, без сглобяване (проверките в tools/mock/ я ползват така)
 python3 tools/site/serve.py
-# после отворете http://127.0.0.1:8000/
+# http://127.0.0.1:8000/
 
 # Старият прототип
 python3 -m http.server 8001 --directory prototype/site
@@ -47,16 +54,21 @@ python3 -m http.server 8001 --directory prototype/site
 
 Данните се сглобяват като издание с командата `budget` ([`docs/release.md`](docs/release.md)): `./budget build --build-date ГГГГ-ММ-ДД --site` сглобява един commit в закования образ на `tools/data/Dockerfile`, пише `site/data` и манифеста с `release_id` в `site/data/releases/`. `./budget reproduce` сглобява изданието отново от оригиналите и сравнява всеки файл. Нужни са суровите файлове (`docs/data-sources.md`). `./budget publish --release work/candidate --environment staging` го качва в R2, записва го в регистъра в D1 и го прави текущо през операторския API зад Cloudflare Access; `python tools/release_check.py` проверява това на локален Worker (`npm ci` преди това).
 
-Сглобяването изобразява предварително всеки екран (775 страници, около минута) в `dist/`. Всяка страница има свой HTML с текста и таблиците, заглавие, описание, каноничен адрес, Open Graph и JSON-LD. Пишат се и `sitemap.xml`, `robots.txt`, `llms.txt`, `llms-full.txt` и `_headers`. Сглобяването е и проверка на адресите и спира при грешка. Подробности има в раздел 11 на [`docs/dev-guide.md`](docs/dev-guide.md). Това сглобяване е преходно: по [спецификацията](docs/approach-specification.md) страниците с данни са със SSR, а предложението да остане статичен сайт ([ADR 0001](docs/adr/0001-static-prerender.md)) е отхвърлено.
+Сайтът е React Router в framework режим със SSR в Cloudflare Worker ([ADR 0002](docs/adr/0002-react-router-ssr.md)): всеки екран
+се изобразява на сървъра от текущото издание в регистъра (D1 и R2), така че ново издание се вижда без ново сглобяване. Сървърният
+HTML на всяка страница има текста и таблиците, заглавие, описание, каноничен адрес, Open Graph и JSON-LD; браузърът го поема и
+дозарежда файловете на същото издание. `tools/site/build.py` сглобява Worker-а (`react-router build` в `build/`), пуска го и проверява
+всеки екран два пъти: както го праща сървърът и както го показва браузърът. Пише и `sitemap.xml`, `robots.txt`, `llms.txt`,
+`llms-full.txt` и `_headers`, а при грешка спира. Предложението сайтът да остане статичен ([ADR 0001](docs/adr/0001-static-prerender.md))
+е отхвърлено.
 
 ```bash
-PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/site/build.py                 # dist/ за https://sigma-budget.my-data.bg
-PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/site/build.py --origin https://… # друг адрес
-python3 tools/site/serve.py --dist                                                               # dist/ както го сервира хостингът
-npx wrangler@4 deploy --env staging                                                             # staging в Cloudflare (нужен е акаунт)
+PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/site/build.py                  # build/ за https://sigma-budget.my-data.bg, с проверките
+PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/site/build.py --env staging --noindex   # за staging
+npx wrangler deploy -c build/server/wrangler.json                                                 # каченото е сглобеното (нужен е акаунт)
 ```
 
-Производственият адрес е в `<meta name="site-origin">` на `site/index.html`; `sigma-budget.my-data.bg` още не е потвърден. Адресът за обратна връзка е в `<meta name="feedback-email">`, а адресът на оригиналната СИГМА в `<meta name="sigma-url">` (при сглобяване: `--sigma-url`). Файлът CSV на всяка таблица казва на всеки ред периода, единицата, обхвата, изданието, статуса и източника; текстова клетка, която започва с `=`, `+`, `-` или `@`, получава апостроф, за да не я изпълни електронна таблица. GitHub Actions (`.github/workflows/site.yml`) проверява и сглобява всеки PR. Push към `main` качва staging, щом са зададени секретите на Cloudflare. Production не се качва от CI: това е отделна контролирана процедура (етап E в [спецификацията](docs/approach-specification.md)). Готовността за production е в [`docs/production-readiness.md`](docs/production-readiness.md). Картинките (`og.png`, иконите) се рисуват с `tools/site/make_images.py`.
+Производственият адрес е `SITE_ORIGIN` в `wrangler.jsonc`; `sigma-budget.my-data.bg` още не е потвърден. Адресът за обратна връзка е в `<meta name="feedback-email">`, а адресът на оригиналната СИГМА е `SIGMA_URL` в `wrangler.jsonc`. Файлът CSV на всяка таблица казва на всеки ред периода, единицата, обхвата, изданието, статуса и източника; текстова клетка, която започва с `=`, `+`, `-` или `@`, получава апостроф, за да не я изпълни електронна таблица. GitHub Actions (`.github/workflows/site.yml`) проверява и сглобява всеки PR. Push към `main` качва staging, щом са зададени секретите на Cloudflare. Production не се качва от CI: това е отделна контролирана процедура (етап E в [спецификацията](docs/approach-specification.md)). Готовността за production е в [`docs/production-readiness.md`](docs/production-readiness.md). Картинките (`og.png`, иконите) се рисуват с `tools/site/make_images.py`.
 
 ## Проверки
 
@@ -100,7 +112,7 @@ PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/perf_v6.p
 - [`docs/data-spec.md`](docs/data-spec.md) и [`docs/data-spec-mock.md`](docs/data-spec-mock.md) — формите на файловете в `site/data/`.
 - [`docs/plan.md`](docs/plan.md) — кратко резюме на плана: цели, потребители, екрани, етапи, версии.
 - [`docs/production-readiness.md`](docs/production-readiness.md) — оценка на готовността за production: какво е проверено, какво е нужно от човек преди пускането и какво остава след него.
-- [`docs/adr/`](docs/adr/) — архитектурни решения (0001: статичен сайт с предварително изобразени страници вместо React Router SSR).
+- [`docs/adr/`](docs/adr/) — архитектурни решения (0001: статичен сайт вместо React Router SSR, отхвърлено; 0002: React Router SSR на два етапа).
 - [`docs/data-sources.md`](docs/data-sources.md) — произход на данните.
 - [`docs/data-acquisition.md`](docs/data-acquisition.md) — придобиване на данните: кои източници се свалят от къде, работят ли скриптовете, ръчният импорт и Claude skill. Пробата за достъп е `python3 tools/data/probe_sources.py`.
 

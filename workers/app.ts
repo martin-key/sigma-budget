@@ -3,6 +3,8 @@
 //   /admin/*                            the operator API (worker/admin.js), behind Cloudflare Access and checked again there
 //   anything but GET and HEAD           405: the public routes never write
 //   /api/releases*, /data/releases/*    the public, read-only release API (worker/api.js)
+//   /data/<file>                        the stable address of a data file: the file of the current release (registry), else the static one
+//                                       (wrangler.jsonc assets.run_worker_first sends these here before the static files)
 //   every screen                        React Router: the screen drawn from the current release (app/), one scope per request
 // The registry is D1 (binding DB), the objects are R2 (binding OBJECTS): docs/release.md.
 import { AsyncLocalStorage } from 'node:async_hooks';
@@ -17,7 +19,7 @@ import { CSP } from '../app/lib/security';
 declare module 'react-router' {
   interface AppLoadContext {
     cloudflare: { env: Env; ctx: ExecutionContext };
-    release: { id: string; dataBase: string; origin: string; sigmaUrl: string };
+    release: { id: string; dataBase: string; origin: string; sigmaUrl: string; feedbackEmail: string };
   }
 }
 
@@ -36,6 +38,28 @@ provideScope(() => scopes.getStore() ?? null);
 
 const handler = createRequestHandler(() => import('virtual:react-router/server-build'), import.meta.env.MODE);
 const RELEASES = /^\/(api\/releases(\/|$)|data\/releases\/)/;
+const DATA_FILE = /^\/data\/(?!releases\/)[A-Za-z0-9_\-./]+$/;
+
+/** a static file when there is one, else the answer the Worker already has */
+async function fallback(request: Request, env: Env, res: Response): Promise<Response> {
+  const file = await env.ASSETS.fetch(request);
+  return file.status === 404 ? res : file;
+}
+
+/** /data/<file>: from the current release when there is a registry, so the stable addresses follow a new release without a deploy */
+async function dataFile(request: Request, env: Env, url: URL, data: ReleaseData): Promise<Response> {
+  const path = url.pathname.slice(1);
+  const f = path.includes('..') ? null : await data.file(path);
+  if (!f) return env.ASSETS.fetch(request);
+  const etag = `"${f.sha256}"`;
+  const headers = {
+    'Content-Type': f.mime + (/^text\/|json|xml/.test(f.mime) && !/charset/.test(f.mime) ? '; charset=utf-8' : ''),
+    'Cache-Control': 'public, max-age=300, must-revalidate, no-transform', ETag: etag, 'X-Release-Id': data.releaseId,
+    'Access-Control-Allow-Origin': '*', 'X-Content-Type-Options': 'nosniff',
+  };
+  if (request.headers.get('If-None-Match') === etag) return new Response(null, { status: 304, headers });
+  return new Response(request.method === 'HEAD' ? null : f.bytes, { headers });
+}
 
 /* the headers that site/_headers (tools/site/build.py) gives the static files, for the documents the Worker draws. no-transform: a zone
    feature that edits HTML on the way out (the Web Analytics beacon, Email Obfuscation, Rocket Loader) must not change the screens */
@@ -61,12 +85,17 @@ export default {
     if (request.method !== 'GET' && request.method !== 'HEAD') {
       return new Response('Method not allowed', { status: 405, headers: { Allow: 'GET, HEAD' } });
     }
-    if (RELEASES.test(url.pathname)) return publicApi(request, env, url);
+    if (RELEASES.test(url.pathname)) {
+      // the registry's releases; a release that was published with the site (site/data/releases/) is one of the static files
+      const res = await publicApi(request, env, url);
+      return res.status === 404 && url.pathname.startsWith('/data/releases/') ? fallback(request, env, res) : res;
+    }
 
     const origin = (env.SITE_ORIGIN || url.origin).replace(/\/+$/, '');
     const sigmaUrl = env.SIGMA_URL || '';
     const data = await releaseData(env, url.origin);
-    const release = { id: data.releaseId, dataBase: data.dataBase, origin, sigmaUrl };
+    if (DATA_FILE.test(url.pathname)) return dataFile(request, env, url, data);
+    const release = { id: data.releaseId, dataBase: data.dataBase, origin, sigmaUrl, feedbackEmail: env.FEEDBACK_EMAIL || '' };
     const scope: Scope = { url, origin, releaseId: data.releaseId, dataBase: data.dataBase, sigmaUrl,
       state: requestState(url.searchParams.get('per')), data: new Map(), load: data.load };
     const res = await scopes.run(scope, () => handler(request, { cloudflare: { env, ctx }, release }));

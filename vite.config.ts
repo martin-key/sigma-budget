@@ -6,7 +6,8 @@ import { defineConfig, type Plugin } from 'vite';
 
 // The browser part of the site stays the files of site/ (docs/adr/0002-react-router-ssr.md): its ES modules, styles, data and images are
 // copied into the client build as they are. They are not Vite's publicDir, because the server imports the same modules (site/js/render.js).
-// site/index.html is the shell of the static site; here every screen comes from the server, so it is left out.
+// site/index.html is the shell of the static site; here every screen comes from the server, so it is not the start page. It is kept as
+// app.html: the bare shell the service worker stores for offline use (site/sw.js), which builds a screen from the copies it has.
 function siteFiles(): Plugin {
   return {
     name: 'site-files',
@@ -15,6 +16,7 @@ function siteFiles(): Plugin {
       if (!options.dir || !/[\\/]client$/.test(options.dir)) return;
       cpSync(resolve('site'), options.dir, { recursive: true, filter: src => !/[\\/]site[\\/]index\.html$/.test(src) });
       rmSync(resolve(options.dir, 'index.html'), { force: true });
+      cpSync(resolve('site/index.html'), resolve(options.dir, 'app.html'));
     },
   };
 }
