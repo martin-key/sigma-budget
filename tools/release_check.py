@@ -18,6 +18,7 @@ Exit code 0 only when every check passes.
 """
 import argparse
 import base64
+import gzip
 import hashlib
 import json
 import os
@@ -285,6 +286,10 @@ def main(argv):
         out0 = A[3]["outputs"][0]
         s, h, b = req("GET", base + "/data/releases/%s/%s" % (A[2], out0["path"]))
         ok(s == 200 and sha(b) == out0["sha256"] and h.get("ETag") == '"%s"' % out0["sha256"], "an output: its bytes and the ETag of its sha256")
+        s, h, b = req("GET", base + "/data/releases/%s/%s" % (A[2], out0["path"]), headers={"Accept-Encoding": "gzip"})
+        ok(s == 200 and h.get("Content-Encoding") == "gzip" and sha(gzip.decompress(b)) == out0["sha256"] and h.get("ETag") == 'W/"%s"' % out0["sha256"]
+           and "no-transform" in h.get("Cache-Control", ""), "compressed by the Worker (no-transform keeps the edge from it): it decodes to the bytes of the sha256 (%s, %s, %d bytes)"
+           % (h.get("Content-Encoding"), h.get("ETag"), len(b)))
         s, _h, _b = req("GET", base + "/data/releases/%s/%s" % (A[2], out0["path"]), headers={"If-None-Match": '"%s"' % out0["sha256"]})
         ok(s == 304, "If-None-Match: 304")
         s, h, b = req("GET", base + "/data/releases/%s/%s" % (A[2], out0["path"]), headers={"Range": "bytes=0-9"})

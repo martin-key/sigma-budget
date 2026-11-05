@@ -48,7 +48,7 @@ sources:
 - id: asbp
   title: 'Мотиви към законопроекта за държавния бюджет 2026: актуализирана средносрочна бюджетна прогноза (АСБП) 2026–2028'
   publisher: Министерство на финансите
-  page: https://www.parliament.bg/bills/52/52-602-01-19.docx
+  page: https://www.minfin.bg/bg/legislation1/609
   access: browser-only
   acquisition: import
   format: pdf

@@ -445,7 +445,7 @@ async function render(kind) {
     } catch (e) { console.error(e); }
     if (seq !== navSeq) { for (const f of own) { try { f(); } catch (e) { console.error(e); } } return; }
     cleanups.push(...own);
-    if (article.querySelector('[data-gl-scan]')) import('./glossary.js').then(m => m.scan?.(article)).catch(e => console.error('[glossary] scan failed', e));
+    if (article.querySelector('[data-gl-scan]')) await import('./glossary.js').then(m => m.scan?.(article)).catch(e => console.error('[glossary] scan failed', e));   // before data-ready: a ready screen has its glossary links
     await import('./ui/png.js').then(m => m.scan?.(article)).catch(e => console.error('[png] scan failed', e));   // „PNG“ button on every statistic
     if (seq !== navSeq) return;
     if (kind === 'pop' || query.to || kind === 'load') applyScroll();

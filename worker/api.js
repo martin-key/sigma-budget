@@ -12,6 +12,15 @@ import { pseudonym } from './access.js';
 // no-transform: a release file is served with exactly the bytes of its sha256. Without it a zone feature that edits HTML on the way out
 // (Web Analytics automatic setup inserts its beacon, Email Obfuscation, Rocket Loader) changes the originals, and they no longer hash.
 const IMMUTABLE = 'public, max-age=31536000, immutable, no-transform';
+// no-transform also keeps Cloudflare from compressing: the Worker compresses text itself (the runtime gzips a body sent with
+// Content-Encoding). The client decodes it to the exact bytes of the sha256; a Range request and a client without gzip get them as they are.
+const TEXTY = /^(text\/|application\/(json|xml|javascript)|image\/svg\+xml)/;
+function encodingFor(request, mime) {
+  if (!TEXTY.test(mime) || request.headers.has('Range')) return null;
+  // the visitor's own Accept-Encoding: the header the Worker sees is rewritten by Cloudflare ("br, gzip" even for a client without gzip)
+  const ae = String(request.cf?.clientAcceptEncoding ?? '').toLowerCase();
+  return /\bgzip\b/.test(ae) ? 'gzip' : null;
+}
 const ACTIVE = new Set(['text/html', 'application/xml', 'image/svg+xml']);       // originals that a browser could run: a download, never a page
 
 async function releaseOr404(env, rid) {
@@ -30,7 +39,9 @@ async function serveObject(request, env, rid, entry) {
     headers['Content-Disposition'] = `attachment; filename="${entry.path.split('/').pop()}"`;
     headers['Content-Security-Policy'] = 'sandbox';
   }
-  if ((request.headers.get('If-None-Match') || '').split(',').map(s => s.trim()).includes(tag)) return new Response(null, { status: 304, headers });
+  const enc = encodingFor(request, entry.mime);
+  if (enc) Object.assign(headers, { 'Content-Encoding': enc, ETag: 'W/' + tag, Vary: 'Accept-Encoding' });   // another representation: a weak tag
+  if ((request.headers.get('If-None-Match') || '').split(',').map(s => s.trim().replace(/^W\//, '')).includes(tag)) return new Response(null, { status: 304, headers });
   const m = /^bytes=(\d*)-(\d*)$/.exec(request.headers.get('Range') || '');
   if (m && (m[1] || m[2])) {
     const size = entry.bytes;
@@ -43,7 +54,7 @@ async function serveObject(request, env, rid, entry) {
   }
   const buf = await readObject(env, entry.sha256);          // read whole and checked again: an object that does not hash to its key is not served
   if (!buf) return json({ error: 'object missing' }, 500);
-  return new Response(request.method === 'HEAD' ? null : buf, { headers: { ...headers, 'Content-Length': String(entry.bytes) } });
+  return new Response(request.method === 'HEAD' ? null : buf, { headers: enc ? headers : { ...headers, 'Content-Length': String(entry.bytes) } });
 }
 
 async function provenance(env, rid, man, record) {

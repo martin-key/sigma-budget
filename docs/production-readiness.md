@@ -41,7 +41,7 @@
 | заглавки | CSP като HTTP заглавка с `frame-ancestors 'self'` (останалите страници не могат да се вграждат чужди сайтове), `X-Frame-Options`, HSTS, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, COOP |
 | кеш | HTML, JS и CSS с повторна проверка (ETag); `data/*` 5 min; `vendor/*` 7 дни. Service worker-ът получава ново име на кеша при всяко сглобяване. |
 | среди | `staging` (`sigma-budget-staging`, сглобява се с `--noindex`). Production е горното ниво на `wrangler.jsonc`, но CI не го качва: production включваме по-късно, ръчно (етап E). |
-| CI/CD | `.github/workflows/site.yml`: при PR валидиране на данните, сглобяване с проверка на всяка страница и шестте проверки v6 на приложението; всички спират PR-а. Push към `develop` → staging, щом има секрети, и само ако проверките минат. Push към `main` не качва нищо. |
+| CI/CD | `.github/workflows/site.yml`: при PR валидиране на данните, сглобяване с проверка на всяка страница и шестте проверки v6 на приложението; всички спират PR-а. Push към `main` → staging, щом има секрети, и само ако проверките минат. Клон `develop` няма; production се качва по-късно и на ръка. |
 
 ### Данни
 

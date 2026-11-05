@@ -1,18 +1,17 @@
 # Checks, build and deployment of the site (README „Сглобяване и публикуване“).
-#   pull request to develop or main  -> the registries, data validation, prerender build with its page checks, the v6 checks of the app,
+#   pull request to main             -> the registries, data validation, prerender build with its page checks, the v6 checks of the app,
 #                                       a build of the pinned data image, and the release registry on a local Worker (stage C)
-#   push to develop                  -> the same, then deploy dist/ to the staging Worker (noindex)
-#   push to main                     -> the same checks; nothing is deployed
-# This workflow never deploys to production: that is a separate, controlled procedure (docs/approach-specification.md, section 11, stage E).
+#   push to main                     -> the same, then deploy dist/ to the staging Worker (noindex)
+# There is no develop branch. This workflow never deploys to production: production comes later, by hand (docs/production-readiness.md).
 # The staging deployment needs the repository secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID and the variable STAGING_ORIGIN
 # (the staging Worker's address); without them the deploy step is skipped.
 name: site
 
 on:
   pull_request:
-    branches: [develop, main]
+    branches: [main]
   push:
-    branches: [develop, main]
+    branches: [main]
   workflow_dispatch:
 
 concurrency:
@@ -112,7 +111,7 @@ jobs:
 
   deploy:
     needs: [build, check, release]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: staging

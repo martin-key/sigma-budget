@@ -115,6 +115,19 @@ class Crawl:
             self.queue.append(path)
 
     async def visit(self, ctx, path):
+        """build one screen; a page that fails or logs a failed request is built once more (a network change in the middle of a build
+        is not a fault of the page), and the second result is the one that counts"""
+        for attempt in (1, 2):
+            info, err = await self.visit_once(ctx, path)
+            if info is not None and not info['errors']:
+                return info
+            if attempt == 2:
+                if info is None:
+                    self.fails.append((path, err))
+                return info
+        return None
+
+    async def visit_once(self, ctx, path):
         page = await ctx.new_page()
         errs = []
         page.on('console', lambda m: errs.append('console: ' + m.text[:200]) if m.type == 'error' else None)
@@ -122,16 +135,19 @@ class Crawl:
         page.on('requestfailed', lambda r: errs.append(f'request failed: {r.url[-90:]} ({r.failure})') if 'ERR_ABORTED' not in str(r.failure) else None)
         try:
             await page.goto(self.base.rstrip('/') + path, wait_until='domcontentloaded')
+            # data-ready="1": mounted, the glossary links applied (js/router.js); then every chart that is shown has drawn (a chart in a
+            # closed tab or a hidden view stays data-ready="0" until it is shown). The same moment in every build: the same files.
             await page.wait_for_selector('article.page[data-ready="1"]', timeout=45000)
+            await page.wait_for_function("() => [...document.querySelectorAll('article.page .chart')]"
+                                         ".every(b => b.dataset.ready !== '0' || b.clientWidth < 10)", timeout=20000)
             await page.wait_for_timeout(150)
             info = await page.evaluate(SNAPSHOT_JS)
         except Exception as e:  # noqa: BLE001 - every failure of one page is reported, the crawl goes on
-            self.fails.append((path, f'not built: {str(e).splitlines()[0][:200]}'))
             await page.close()
-            return None
+            return None, f'not built: {str(e).splitlines()[0][:200]}'
         await page.close()
         info['errors'] = errs
-        return info
+        return info, None
 
     async def worker(self, browser):
         ctx = await browser.new_context(viewport={'width': 1280, 'height': 900}, reduced_motion='reduce', service_workers='block', locale='bg-BG', timezone_id='Europe/Sofia')
