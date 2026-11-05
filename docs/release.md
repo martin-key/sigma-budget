@@ -123,7 +123,7 @@ npx wrangler d1 migrations apply DB --env staging --remote
 
 После: Access приложение за `/admin/*` с allow политика за операторите; `ACCESS_ISSUER` и `ACCESS_AUD` в `env.staging.vars`;
 `OPERATORS` като таен ключ на Worker-а (`npx wrangler secret put OPERATORS --env staging`), за да не са имейлите в публичното
-хранилище; адресът на staging в `tools/environments.json`. Production следва същите стъпки по отделна процедура (етап E).
+хранилище; адресът на staging в `tools/environments.json`. Production следва същите стъпки по-късно, ръчно (етап E).
 
 Zero Trust организацията има нужда от метод за вход (**Integrations → Identity providers**: One-time PIN или Cloudflare); без него
 страницата на Access казва, че няма методи за вход. `OPERATORS` съдържа имейла, който Access записва в токена: при вход с Cloudflare

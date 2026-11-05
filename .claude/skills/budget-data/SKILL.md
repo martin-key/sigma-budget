@@ -10,9 +10,9 @@ Skill-ът води администратора през месечния ци�
 ## Правила, които важат винаги
 
 - **Числата ги вадят само скриптовете.** Не пиши и не поправяй число на ръка в `site/data/`, `prototype/src/` или в кода. Единственото изключение са заглавните числа за независимата проверка (стъпка 5), които казва човекът.
-- **Не заобикаляй защити.** Не отваряй minfin.bg в браузър, който управляваш ти: вграден, Chrome или headless. Не решавай проверки и не пренасяй бисквитки. Файловете от minfin.bg ги сваля човекът в своя браузър.
+- **Начинът на сваляне е свободен.** Днес файловете от minfin.bg ги сваля човекът в своя браузър, защото скрипт не минава проверката на Cloudflare. Ако има работещ автоматичен начин, източникът минава от `import` на `fetch` в `sources/registry.yaml`. Задължителни са оригиналните байтове, sha256, адресът и датата. Бисквитки и токени не влизат в хранилището.
 - **Не опреснявай живите източници без нужда.** Такива са API на Народното събрание, страницата на МИДТ, Eurostat, БНБ и Държавен вестник. Когато се променят, проверките в строителите спират сглобяването. Сваляй само липсващото, освен ако човекът изрично иска нова версия.
-- **Работи само в отделен клон.** Отделяй го от основния клон на midt-bg/sigma-budget. Днес това е `main`, а ако там бъде създаден `develop`, е `develop`. PR-ът е към същия клон. Не push-вай в основния клон, не сливай и не публикувай: решават CI и човек.
+- **Работи само в отделен клон.** Отделяй го от `main` на midt-bg/sigma-budget. PR-ът е към `main`. Не push-вай в основния клон, не сливай и не публикувай: решават CI и човек.
 - **Не разхлабвай проверка, която спира.** Покажи какво се е променило в източника и предложи поправка в кода с тест, като отделна промяна.
 
 ## 0. Подготовка (веднъж на машина)
@@ -35,8 +35,6 @@ git fetch upstream
 git switch -c data/kfp-2026-10 upstream/main
 ```
 
-Ако основният клон е `develop`, пиши `upstream/develop`.
-
 ## 1. Какво има и какво липсва
 
 ```bash
@@ -57,7 +55,7 @@ python3 tools/data/raw_sources.py status
 python3 tools/data/probe_sources.py
 ```
 
-minfin.bg винаги дава `challenge`: той е ръчен. nra.bg и data.egov.bg минават само от България.
+Днес minfin.bg дава `challenge`, затова файловете от него се свалят ръчно. nra.bg и data.egov.bg минават само от България.
 
 ## 3. Отворените източници: само липсващото
 
@@ -114,10 +112,10 @@ minfin.bg винаги дава `challenge`: той е ръчен. nra.bg и dat
 
 Изданието се сглобява от commit (`docs/release.md`). Затова първо запиши промените в кода и пиновете: заглавните числа от стъпка 5,
 датата на сглобяване по-долу, редът на новия отчет в `tools/mock/prototype.sha256` (`import` го добави) и редът му в
-`docs/data-sources.md` (стъпка 9). Суровите файлове не са в git: сглобяването ги чете от това копие и сверява всеки с пина му от commit-а.
+`docs/data-sources.md` (стъпка 9). Файловете от minfin.bg са в git (`prototype/data/raw/kfp_*/` и `asbp/`), затова новият отчет влиза в същия commit. Останалите сурови файлове не са в git: сглобяването ги чете от локалното копие и сверява всеки с пина му от commit-а.
 
 ```bash
-git add tools/mock/extract_kfp_full.py tools/mock/vd_kfp.py tools/mock/dlib.py tools/mock/vd_lib.py tools/mock/build_text.py tools/mock/mock_lib.py \
+git add prototype/data/raw/kfp_2026/ tools/mock/extract_kfp_full.py tools/mock/vd_kfp.py tools/mock/dlib.py tools/mock/vd_lib.py tools/mock/build_text.py tools/mock/mock_lib.py \
   tools/mock/prototype.sha256 tools/mock/validate_mock.py docs/data-sources.md
 git commit -m "data(kfp): pin the October 2026 report and its headline"
 ./budget build --build-date ГГГГ-ММ-ДД --site
@@ -170,7 +168,7 @@ git push -u origin HEAD
 gh pr create --repo midt-bg/sigma-budget --base main --head "$(gh api user -q .login):$(git branch --show-current)"
 ```
 
-Клонът отива във fork-а (`origin`), а PR-ът е към midt-bg. Ако основният клон е `develop`, пиши `--base develop`.
+Клонът отива във fork-а (`origin`), а PR-ът е към `main` на midt-bg.
 
 В описанието на PR напиши:
 
