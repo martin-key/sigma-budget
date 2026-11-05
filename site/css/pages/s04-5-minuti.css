@@ -68,7 +68,7 @@
 .page[data-route="S04"] .s04-legend { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; border-top: 1px solid var(--ink); }
 .page[data-route="S04"] .s04-legend li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--sp-3); align-items: baseline; padding: var(--sp-2) 0; border-bottom: 1px solid var(--rule-soft); }
 .page[data-route="S04"] .s04-legend li:last-child { border-bottom: 0; }
-.page[data-route="S04"] .s04-sw { align-self: center; width: 12px; height: 12px; border-radius: 0; background: var(--series-other); box-shadow: inset 0 0 0 1px rgb(0 0 0/.15); }
+.page[data-route="S04"] .s04-sw { align-self: center; width: 12px; height: 12px; border-radius: 0; background: var(--series-other); box-shadow: inset 0 0 0 1px var(--swatch-edge); }
 .page[data-route="S04"] .s04-sw[data-g="1"] { background: var(--series-1); }
 .page[data-route="S04"] .s04-sw[data-g="2"] { background: var(--series-2); }
 .page[data-route="S04"] .s04-sw[data-g="3"] { background: var(--series-3); }

@@ -63,7 +63,7 @@
 /* the four result rows: net, your contributions, your tax, the employer's contributions: each with its own amount and share */
 .page[data-route="S18"] .s18-rows { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--ink); }
 .page[data-route="S18"] .s18-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--sp-3); align-items: start; padding: var(--sp-3) 0; border-bottom: 1px solid var(--rule-soft); }
-.page[data-route="S18"] .s18-sw { display: inline-block; width: 12px; height: 12px; margin-top: .3em; border-radius: 0; box-shadow: inset 0 0 0 1px rgb(0 0 0/.15); }
+.page[data-route="S18"] .s18-sw { display: inline-block; width: 12px; height: 12px; margin-top: .3em; border-radius: 0; box-shadow: inset 0 0 0 1px var(--swatch-edge); }
 .page[data-route="S18"] .s18-row-name { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
 .page[data-route="S18"] .s18-row-sub { color: var(--ink-mid); font-size: var(--fs-s); }
 .page[data-route="S18"] .s18-row-val { display: grid; justify-items: end; gap: 2px; font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }

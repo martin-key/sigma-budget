@@ -16,7 +16,7 @@
 
 .page[data-route="S06"] .s06-legend { list-style: none; margin: var(--sp-4) 0 0; padding: 0; display: grid; gap: 0 var(--sp-7); grid-template-columns: minmax(0, 1fr); border-top: 1px solid var(--ink); }
 .page[data-route="S06"] .s06-legend li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--sp-3); min-height: 2.75rem; border-bottom: 1px solid var(--rule-soft); }
-.page[data-route="S06"] .s06-sw { width: .75rem; height: .75rem; border-radius: 0; background: var(--c, var(--series-other)); box-shadow: inset 0 0 0 1px rgb(0 0 0/.15); }
+.page[data-route="S06"] .s06-sw { width: .75rem; height: .75rem; border-radius: 0; background: var(--c, var(--series-other)); box-shadow: inset 0 0 0 1px var(--swatch-edge); }
 .page[data-route="S06"] .s06-leg-name { display: inline-flex; align-items: center; min-height: 2.75rem; overflow-wrap: anywhere; }
 .page[data-route="S06"] .s06-leg-v { font: 500 .875rem/1.3 var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; }
 

@@ -6,7 +6,7 @@
 // mono-uppercase band with the three main sections «Начало · Изпълнение · Бюджет» (the current one underlined) and the current section's
 // screens on a second line; «Още» (data and methodology, glossary, learning path, project) opens as a dropdown there. The phone bar has
 // three tabs «Начало · Отчет · Бюджет»; everything else is under «Меню».
-// Light only: no theme switch (СИГМА has no dark theme). Built once at boot from the route table. It follows the store (period, user type, sources) and the router
+// Light and dark (spec 9.3): the footer has the theme switch (system, light, dark; js/theme-boot.js applies it before the first paint). Built once at boot from the route table. It follows the store (period, user type, sources) and the router
 // (current item, period switch hidden on screens that do not depend on a period). Page workers never edit this file.
 import { store, safe } from './store.js';
 import { ROUTES, GROUPS, byId, href as routeHref } from './routes.js';
@@ -43,7 +43,10 @@ const NAV_GROUPS = [
   ['Данни и проект', ['S24', 'S25', 'S26', 'S27']]
 ];
 /* The sister platform (spec §2.2): visible, but after the screens of the site: the last item of «Данни и проект», the phone «Меню» and the footer. */
-const SIGMA = { label: 'СИГМА — обществени поръчки', href: 'https://sigma.midt.bg/' };
+// the address of the original СИГМА is configuration (docs/approach-specification.md, section 2.2): <meta name="sigma-url"> in site/index.html,
+// set per build with tools/site/build.py --sigma-url; only an https address is used
+const sigmaHref = () => { const v = (document.querySelector('meta[name="sigma-url"]')?.content || '').trim(); return /^https:\/\/[^\s"<>]+$/.test(v) ? v : 'https://sigma.midt.bg/'; };
+const SIGMA = { label: 'СИГМА — обществени поръчки', get href() { return sigmaHref(); } };
 const sigmaLink = cls => html`<a class="${cls}" href="${SIGMA.href}" target="_blank" rel="noopener">${SIGMA.label}<span class="sr-only"> (друг сайт, в нов раздел)</span></a>`;   // a new tab: also out of an embed frame
 const rootId = r => (r.parent ? rootId(byId[r.parent]) : r.id);
 const groupOf = route => { const root = rootId(route); return NAV_GROUPS.findIndex(([, ids]) => ids.includes(route.id) || ids.includes(root)); };
@@ -145,6 +148,7 @@ function footerHtml() {
       <span>Лиценз на данните: предстои решение.</span>
       <span>${sigmaLink('sister-link')}</span>
       <button type="button" class="link-btn" data-action="legend">Легенда: какво означават белезите</button>
+      ${themePicker()}
     </div>
     <p class="small muted">Работна група „Бюджет на светло“</p>
   </div>`;
@@ -162,7 +166,30 @@ function syncFooter() {
 function footClick(e) {
   const sm = e.target.closest && e.target.closest('details.foot-grp > summary');
   if (sm && window.matchMedia(WIDE).matches) e.preventDefault();
+  const t = e.target.closest && e.target.closest('[data-theme-pick]');
+  if (t) pickTheme(t.dataset.themePick);
 }
+
+/* ------------------------------------------------------------------ theme (docs/approach-specification.md, section 9.3) */
+// '' follows the system (prefers-color-scheme), 'light' and 'dark' are the visitor's choice (localStorage bns.theme, read by js/theme-boot.js)
+const THEME_KEY = 'bns.theme';
+const THEMES = [['', 'системна'], ['light', 'светла'], ['dark', 'тъмна']];
+const DARK = '(prefers-color-scheme: dark)';
+const themeNow = () => { const t = safe.get('localStorage', THEME_KEY); return t === 'light' || t === 'dark' ? t : ''; };
+const isDark = () => (themeNow() ? themeNow() === 'dark' : !!window.matchMedia?.(DARK).matches);
+function applyTheme() {
+  const t = themeNow();
+  if (t) document.documentElement.setAttribute('data-theme', t); else document.documentElement.removeAttribute('data-theme');
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', isDark() ? '#14120F' : '#FDFAF4');
+  document.querySelectorAll('[data-theme-pick]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.themePick === t)));
+}
+function pickTheme(t) {
+  if (t) safe.set('localStorage', THEME_KEY, t); else safe.del('localStorage', THEME_KEY);
+  applyTheme();
+  router.rerender();                                           // the charts read the colours when they draw
+  router.announce(`Тема: ${THEMES.find(x => x[0] === t)[1]}.`);
+}
+const themePicker = () => html`<span class="theme-pick" role="group" aria-label="Тема на сайта">Тема:${THEMES.map(([v, label]) => html` <button type="button" class="link-btn" data-theme-pick="${v}" aria-pressed="${String(themeNow() === v)}">${label}</button>`)}</span>`;
 
 /* ------------------------------------------------------------------ dynamic state */
 function setCurrent(route) {
@@ -236,6 +263,8 @@ export const shell = {
     shell.refreshFooter();
     $('footer')?.addEventListener('click', footClick);
     window.matchMedia(WIDE).addEventListener?.('change', syncFooter);
+    applyTheme();
+    window.matchMedia?.(DARK).addEventListener?.('change', () => { if (!themeNow()) { applyTheme(); router.rerender(); } });   // the system switched, the visitor follows it
     applySources();
 
     $('btn-period').addEventListener('click', e => openPeriod(e.currentTarget));

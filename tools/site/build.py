@@ -60,7 +60,7 @@ SNAPSHOT_JS = r"""
   doc.removeAttribute('class');
   doc.setAttribute('data-prerendered', location.pathname + location.search);   // the address this HTML is the screen of (js/router.js compares it)
   for (const el of doc.querySelectorAll('[_echarts_instance_]')) { el.replaceChildren(); el.removeAttribute('_echarts_instance_'); }   // a canvas has no content in HTML: the app draws it again
-  for (const el of doc.querySelectorAll('script[src]')) if (el.type !== 'module') el.remove();   // vendor/echarts.min.js (1 MB), added by js/charts.js: in the file it would block the first paint; the app loads it again
+  for (const el of doc.querySelectorAll('script[src]')) if (el.type !== 'module' && !el.hasAttribute('data-keep')) el.remove();   // vendor/echarts.min.js (1 MB), added by js/charts.js: in the file it would block the first paint; the app loads it again. js/theme-boot.js (data-keep) stays: it sets the theme before the first paint
   for (const el of doc.querySelectorAll('svg.map-svg')) el.replaceChildren();          // 265 municipality outlines are ~280 KB of HTML: the app draws the map again
   for (const el of doc.querySelectorAll('[data-hydrated]')) el.removeAttribute('data-hydrated');
   for (const el of doc.querySelectorAll('#toasts, #live')) el.replaceChildren();
@@ -354,6 +354,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
     ap.add_argument('--out', default=str(ROOT / 'dist'))
     ap.add_argument('--origin', help='production address (default: <meta name="site-origin"> in site/index.html)')
+    ap.add_argument('--sigma-url', help='address of the original СИГМА for the menu and the footer (default: <meta name="sigma-url"> in site/index.html)')
     ap.add_argument('--jobs', type=int, default=6, help='pages built at the same time')
     ap.add_argument('--limit', type=int, default=0, help='build at most N screens (a quick try; links to the others then fail the check)')
     ap.add_argument('--noindex', action='store_true', help='a staging build: robots.txt disallows everything and every response says X-Robots-Tag: noindex')
@@ -369,6 +370,10 @@ def main():
         shutil.rmtree(out)
     shutil.copytree(SITE, out, ignore=shutil.ignore_patterns('sebra.json'))     # СЕБРА: on disk for phase 2, used by no screen and not in the catalog
     template = template.replace('<meta name="site-origin" content="https://sigma-budget.my-data.bg">', f'<meta name="site-origin" content="{origin}">')
+    if a.sigma_url:
+        if not re.fullmatch(r'https://[^\s"<>]+', a.sigma_url):
+            sys.exit('--sigma-url must be an https address')
+        template = re.sub(r'<meta name="sigma-url" content="[^"]*">', f'<meta name="sigma-url" content="{html.escape(a.sigma_url)}">', template)
     (out / 'index.html').write_text(template, encoding='utf-8')
     (out / 'app.html').write_text(template, encoding='utf-8')         # the bare app shell: the host serves it for /embed/* (worker/index.js)
 

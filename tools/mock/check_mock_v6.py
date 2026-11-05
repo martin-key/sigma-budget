@@ -126,6 +126,8 @@ if 'PLAYWRIGHT_BROWSERS_PATH' not in os.environ and (P_ROOT / '.pw-browsers').is
 CELLS = {
     '1280-light': dict(w=1280, h=900, scheme='light', touch=False),
     '400-light': dict(w=400, h=800, scheme='light', touch=True),
+    '1280-dark': dict(w=1280, h=900, scheme='dark', touch=False),         # spec 9.3: light and dark (css/tokens.css)
+    '400-dark': dict(w=400, h=800, scheme='dark', touch=True),
 }
 QUICK_CELLS = ['1280-light', '400-light']
 DEMOS = ['loading', 'empty', 'error', 'pending']                     # the body is replaced by a state component
@@ -1830,11 +1832,11 @@ def ch_popovers(w, cell, F, W, j, outs):
     names = page.evaluate("() => [...document.querySelectorAll('#sidenav .nav-main')].map(b => b.textContent.trim())")
     if names != ['Начало', 'Изпълнение', 'Бюджет', 'Данъци и контекст', 'Данни и проект']:
         F('header-nav', f'the header group buttons are {names}, expected Начало · Изпълнение · Бюджет · Данъци и контекст · Данни и проект')
-    cta = page.evaluate("() => { const a = document.querySelector('#sidenav .nav-cta'); return a ? { t: a.textContent.trim(), h: a.getAttribute('href'), last: a === document.querySelector('#sidenav .nav-in').lastElementChild, bg: getComputedStyle(a).backgroundColor } : null; }")
+    cta = page.evaluate("() => { const a = document.querySelector('#sidenav .nav-cta'); return a ? { t: a.textContent.trim(), h: a.getAttribute('href'), last: a === document.querySelector('#sidenav .nav-in').lastElementChild, bg: getComputedStyle(a).backgroundColor, accent: (() => { const p = document.createElement('i'); p.style.color = 'var(--crimson)'; document.body.append(p); const c = getComputedStyle(p).color; p.remove(); return c; })() } : null; }")
     if not cta or cta['t'] != 'Бюджет 2027' or cta['h'] != '#/byudzhet-2027' or not cta['last']:
         F('header-nav', f'the red button is {cta} (expected the last item of the bar: «Бюджет 2027» -> #/byudzhet-2027)')
-    elif cta['bg'] != 'rgb(172, 27, 24)':
-        F('header-nav', f'the «Бюджет 2027» button is not red (background {cta["bg"]})')
+    elif cta['bg'] != cta.get('accent'):
+        F('header-nav', f'the «Бюджет 2027» button is not the accent colour (background {cta["bg"]}, --crimson {cta.get("accent")})')
     for i in range(5):
         sel = f'#sidenav .nav-main[data-grp="{i}"]'
         s = open_pop(sel, f'header group {i}')
@@ -1847,9 +1849,27 @@ def ch_popovers(w, cell, F, W, j, outs):
     for gone in ('#btn-sources', '#btn-more', '#link-tax'):
         if present(page, gone):
             F('header-nav', f'{gone} is still in the page (removed in V6)')
-    st = page.evaluate("() => ({ th: document.documentElement.getAttribute('data-theme'), cs: getComputedStyle(document.documentElement).colorScheme })")
-    if st['th'] is not None or 'dark' in (st['cs'] or ''):
-        F('theme-switch', f'v4 is light only, but after a reload html[data-theme]={st["th"]!r} and color-scheme is {st["cs"]!r}')
+    # the theme switch in the footer (spec 9.3): dark is applied, kept over a reload before the first paint (js/theme-boot.js), and
+    # „системна“ gives the choice back to the system
+    st = lambda: page.evaluate("() => ({ th: document.documentElement.getAttribute('data-theme'), cs: getComputedStyle(document.documentElement).colorScheme, "
+                               "ls: localStorage.getItem('bns.theme'), pressed: [...document.querySelectorAll('[data-theme-pick][aria-pressed=\"true\"]')].map(b => b.dataset.themePick) })")
+    if not present(page, '#footer [data-theme-pick="dark"]'):
+        F('theme-switch', 'the footer has no theme switch (системна · светла · тъмна)')
+    else:
+        page.click('#footer [data-theme-pick="dark"]')
+        a = st()
+        if a['th'] != 'dark' or 'dark' not in (a['cs'] or '') or a['ls'] != 'dark' or a['pressed'] != ['dark']:
+            F('theme-switch', f'after «тъмна»: data-theme={a["th"]!r}, color-scheme={a["cs"]!r}, stored={a["ls"]!r}, pressed={a["pressed"]}')
+        page.reload()
+        page.wait_for_selector('article.page[data-ready="1"]', timeout=15000)
+        b = st()
+        if b['th'] != 'dark':
+            F('theme-switch', f'after a reload the dark choice is lost: data-theme={b["th"]!r}')
+        page.click('#footer [data-theme-pick=""]')
+        c = st()
+        if c['th'] is not None or c['ls'] is not None:
+            F('theme-switch', f'after «системна»: data-theme={c["th"]!r}, stored={c["ls"]!r}')
+    page.evaluate("() => localStorage.removeItem('bns.theme')")
     page.evaluate("() => localStorage.removeItem('bns.prefs.v1')")
 
 
@@ -2039,7 +2059,8 @@ SHARE_LIST_JS = r"""async () => {
     let csv = '', csvErr = '', text = '', link = '', embed = '', embedHash = '', textErr = '';
     try { csv = sh.csvFor(s); } catch (e) { csvErr = String(e); }
     try { text = sh.textFor(s); link = sh.linkFor(s); embed = sh.embedFor(s); embedHash = sh.embedHash(s); } catch (e) { textErr = String(e); }
-    out.push({ id, route: s.route || '', title: s.title || '', source: [].concat(s.source || []).filter(Boolean), status: s.status || '', mock: sh.isMock(s),
+    const rel = (await import('./js/data.js')).data.get('releases/current');
+    out.push({ id, route: s.route || '', title: s.title || '', source: [].concat(s.source || []).filter(Boolean), status: s.status || '', mock: sh.isMock(s), release: rel ? rel.release_id || '' : null,
       el: !!el, btn: !!btn, btnVisible: !!btn && btn.getClientRects().length > 0, hasChart, hasStat, report: s.report || '', csv: csv.slice(0, 80000), csvErr, text, link, embed, embedHash, textErr });
   }
   return { specs: out, orphans: [...new Set([...document.querySelectorAll('[data-share]')].map(b => b.dataset.share).filter(id => !sh.get(id)))],
@@ -2129,6 +2150,12 @@ def share_pure(s, labels, F, W):
             F('share-csv', f'{sid}: a CSV cell contains a line break (a cell must be one line: row-by-row tools break on it)')
         if hdr[-2:] != ['статус', 'източник']:
             F('share-csv', f'{sid}: the last two CSV columns are {hdr[-2:]}, expected „статус“ and „източник“')
+        if hdr[-6:-2] != ['период', 'единица', 'обхват', 'издание']:              # spec, section 9.2: every row says its period, unit, scope, release
+            F('share-csv', f'{sid}: the CSV lacks the columns период, единица, обхват, издание before статус (has {hdr[-6:-2]})')
+        # spreadsheet formula injection: a text cell must not begin with = + - @ or a tab (a number such as -3,08 is not text)
+        inj = [c for r in rows for c in r if re.match(r'[=+@\t\r\uFF1D\uFF0B\uFF0D\uFF20]', c) or (c.startswith('-') and not re.fullmatch(r'-\d+(,\d+)?', c))]
+        if inj:
+            F('share-csv', f'{sid}: CSV cells that a spreadsheet would run as a formula: {inj[:3]}')
         bad = [i for i, r in enumerate(rows) if len(r) != len(hdr)]
         if bad:
             F('share-csv', f'{sid}: CSV rows {bad[:5]} have another number of cells than the header ({len(hdr)})')
@@ -2142,6 +2169,10 @@ def share_pure(s, labels, F, W):
             F('share-mock', f'{sid} is a mock block, but its CSV labels rows „Официални данни“')
         if s['source'] and any(not r[-1].strip() for r in body):
             F('share-csv', f'{sid}: CSV rows without a source although the block names sources')
+        if s.get('release') and any(r[-3] != s['release'] for r in body if len(r) >= 3):
+            F('share-csv', f'{sid}: CSV rows name another release than data/releases/current.json ({s["release"][:12]}…)')
+        if s.get('release') is not None and not s.get('release'):
+            W('share-csv', f'{sid}: no release ID in the CSV (data/releases/current.json missing?)')
         dec = [c for r in body for c in r[:-2] if re.fullmatch(r'-?\d+\.\d+', c)]
         if dec:
             W('share-csv', f'{sid}: decimal point instead of a comma in cells such as {dec[:3]} (Excel with a Bulgarian locale reads them as text)')

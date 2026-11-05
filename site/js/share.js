@@ -13,6 +13,7 @@ import { here, parts as addrParts, absolute } from './loc.js';
 import { icon } from './icons.js';
 import { data } from './data.js';
 import { date, csvCell } from './format.js';
+import { SCOPES } from './store.js';
 import { statusLabel } from './ui/status.js';
 import { srcShort } from './ui/source.js';
 import { popover, sheet } from './ui/sheet.js';
@@ -105,15 +106,33 @@ export function textFor(spec) {
   lines.push(linkFor(spec));
   return lines.join('\n');
 }
-const csvVal = v => (v == null ? '' : typeof v === 'number' ? (Number.isFinite(v) ? String(v).replace('.', ',') : '') : String(v).replace(/\s*[\r\n]+\s*/g, ' '));   // a cell is one line: a break inside a cell breaks row-by-row tools
-/** CSV: UTF-8 BOM, ";" separator, decimal comma, CRLF; last two columns are „статус“ and „източник“ */
+// spreadsheet formula injection (docs/approach-specification.md, section 9.2): a text cell that begins with = + - @, a tab or a carriage
+// return (or their full-width forms) gets a leading apostrophe, so a spreadsheet shows it as text and never runs it. Numbers are written as
+// numbers (decimal comma) and are not touched: -3,08 stays a number.
+export const FORMULA_START = /^[=+\-@\t\r\uFF1D\uFF0B\uFF0D\uFF20]/;
+const guard = s => (FORMULA_START.test(s) ? "'" + s : s);
+const csvVal = v => (v == null ? '' : typeof v === 'number' ? (Number.isFinite(v) ? String(v).replace('.', ',') : '') : guard(String(v).replace(/\s*[\r\n]+\s*/g, ' ')));   // a cell is one line: a break inside a cell breaks row-by-row tools
+/** what every row of a CSV says about itself (section 9.2): the period, the unit, the budget scope and the release of the data. The period
+ *  line of a block is „януари—септември 2026 г. · млрд. €“: the part after „ · “ is the unit, unless the block names one */
+export function csvMeta(spec) {
+  const [per, ...rest] = String(spec.period || '').split(' · ');
+  const scope = typeof spec.scope === 'string' ? spec.scope : spec.scope?.key;
+  return {
+    period: per || (spec.asOf ? `към ${date(spec.asOf)}` : ''),
+    unit: spec.unit || rest.join(' · '),
+    scope: scope ? SCOPES[scope]?.long || SCOPES[scope]?.label || scope : '',
+    release: data.get('releases/current')?.release_id || '',
+  };
+}
+/** CSV: UTF-8 BOM, ";" separator, decimal comma, CRLF; then „период“, „единица“, „обхват“, „издание“; the last two columns are „статус“ and „източник“ */
 export function csvFor(spec) {
   const t = tableOf(spec);
   if (!t) return '';
   const src = keysOf(spec.source).map(srcShort).join('; ');
   const st = i => statusLabel(t.statuses?.[i] || spec.status || (isMock(spec) ? 'mock' : 'real'));
-  const lines = [[...t.columns, 'статус', 'източник'].map(c => csvCell(csvVal(c))).join(';')];
-  t.rows.forEach((r, i) => lines.push([...r.map(csvVal), st(i), src].map(csvCell).join(';')));
+  const m = csvMeta(spec);
+  const lines = [[...t.columns, 'период', 'единица', 'обхват', 'издание', 'статус', 'източник'].map(c => csvCell(csvVal(c))).join(';')];
+  t.rows.forEach((r, i) => lines.push([...r.map(csvVal), ...[m.period, m.unit, m.scope, m.release].map(csvVal), st(i), src].map(csvCell).join(';')));
   return '\uFEFF' + lines.join('\r\n') + '\r\n';
 }
 /** address of the embed view (S29): /embed/<routeKey>.<chartId>[?per=…&<spec.embedParams>] (internal form, js/loc.js)

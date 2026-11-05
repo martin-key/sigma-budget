@@ -18,6 +18,7 @@ async function boot() {
   shell.init();
   initActions();
   coreP.then(() => { shell.refreshFooter(); });
+  data.prefetch('releases/current');                            // the release ID that every CSV names (js/share.js csvMeta)
   await router.start();
   registerWorker();
 }

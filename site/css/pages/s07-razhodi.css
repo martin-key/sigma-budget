@@ -25,7 +25,7 @@
 .page[data-route="S07"] .s07-view .seg { max-width: 100%; }
 
 /* the colour square of a panel title: the same colour as the rectangle of the map */
-.page[data-route="S07"] .s07-sw { flex: none; width: .75rem; height: .75rem; border-radius: 0; background: var(--c, var(--series-other)); box-shadow: inset 0 0 0 1px rgb(0 0 0/.15); }
+.page[data-route="S07"] .s07-sw { flex: none; width: .75rem; height: .75rem; border-radius: 0; background: var(--c, var(--series-other)); box-shadow: inset 0 0 0 1px var(--swatch-edge); }
 .page[data-route="S07"] [data-c="1"] { --c: var(--series-1); }
 .page[data-route="S07"] [data-c="2"] { --c: var(--series-2); }
 .page[data-route="S07"] [data-c="3"] { --c: var(--series-3); }
