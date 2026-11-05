@@ -80,9 +80,12 @@ def exists(rel, base=None):
 
 
 def data_files():
-    """Every file under site/data as site-data-relative paths with '/' separators, sorted."""
+    """Every file under site/data as site-data-relative paths with '/' separators, sorted. site/data/releases/ is left out: the manifests
+    describe the release (tools/budget.py, docs/release.md), they are not datasets of it."""
     out = []
     for dp, dn, fn in os.walk(DATA):
+        if os.path.samefile(dp, DATA) and "releases" in dn:
+            dn.remove("releases")
         dn.sort()
         for f in fn:
             out.append(os.path.relpath(os.path.join(dp, f), DATA).replace(os.sep, "/"))

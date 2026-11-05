@@ -307,6 +307,9 @@ def write_extras(out, pages, origin, lastmod, routes, noindex=False):
         '/data/*\n'
         '  Cache-Control: public, max-age=300, must-revalidate\n'
         '  Access-Control-Allow-Origin: *\n'
+        '/data/releases/current.json\n'                                    # the pointer to the current release (spec, section 9.2)
+        '  ! Cache-Control\n'
+        '  Cache-Control: no-store\n'
         '/llms*.txt\n'
         '  Content-Type: text/plain; charset=utf-8\n', encoding='utf-8')
     return paths

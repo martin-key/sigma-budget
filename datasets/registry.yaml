@@ -753,3 +753,21 @@ datasets:
   notRebuilt: tmp/research/dbp-2027/dbp2027_figures.json and its PDF are missing
   limitations:
   - not listed in catalog.json (the catalog screen would change)
+- id: releases
+  catalogId: null
+  title: Изданията на данните
+  status: real
+  files:
+  - site/data/releases/*
+  producer: tools/budget.py (build --site)
+  inputs:
+  - every output of the release
+  schema: docs/release.md
+  screens:
+  - S15
+  scope: 'the release of site/data: manifest.json and validation.json of every release, current.json points to the current one'
+  rebuild: ./budget build --build-date 2026-11-05 --site
+  checked: '2026-11-05'
+  limitations:
+  - 'the manifest is not in catalog.json: it lists the sha256 of the catalog, and the catalog would have to list the manifest'
+  - 'the originals are not public yet (stage C, R2): `budget reproduce` needs a local copy of them'

@@ -20,6 +20,7 @@ import { gl } from '../ui/gl.js';
 import { disclosure } from '../ui/disclosure.js';
 import { planBlock } from '../ui/plan.js';
 import { icon } from '../icons.js';
+import { siteUrl } from '../seo.js';
 import { store } from '../store.js';
 import * as share from '../share.js';
 import { amount, moneyCol } from '../view.js';
@@ -343,6 +344,29 @@ export function methodDisclosure(C) {
   });
 }
 
+/* ------------------------------------------------------------------ where the numbers come from (execution-provenance.json) and which release */
+// docs/approach-specification.md, sections 6.2 and 7.3: every number on the screen leads to the cell of the original report it was read from,
+// and the screen names the release it shows. The two reports of the comparison, their files and SHA-256, the column of the scope and the
+// cells of the three headline rows; the release ID from data/releases/current.json, with the manifest and the command that reproduces it.
+const PROOF_ROWS = [['rev', 'приходите'], ['exp.total', 'разходите с вноската в ЕС'], ['balance', 'салдото']];
+export function proofDisclosure(ctx, C) {
+  const p = ctx.data['execution-provenance'];
+  const col = p && p.columns && p.columns[C.scope];
+  if (!p || !p.originals || !col) return '';
+  const cell = rid => (p.rows[rid] ? col + p.rows[rid] : (p.computed?.[rid]?.from || []).map(r => col + p.rows[r]).join(' + '));
+  const mm = String(C.month).padStart(2, '0');
+  const reports = [...new Set([C.g1, C.g2])].map(y => ({ y, o: p.originals[`${y}-${mm}`] })).filter(r => r.o);
+  if (!reports.length) return '';
+  const rel = ctx.data['releases/current'];
+  const rid = rel && /^[0-9a-f]{64}$/.test(rel.release_id || '') ? rel.release_id : '';
+  return disclosure({
+    id: 's15-proof', title: 'Откъде са числата',
+    body: html`<p>Всяко число тук е клетка от месечния отчет на МФ, лист „${p.sheet}“, колона ${col} (${SCOPE_NAME[C.scope] || C.scope}). Например ${PROOF_ROWS.map(([rid, label], i) => html`${i ? (i === PROOF_ROWS.length - 1 ? ' и ' : ', ') : ''}${label}: ${cell(rid)}`)}. „За месеца“ е разликата с отчета за предходния месец.</p>
+      <ul class="s15-proof">${reports.map(r => html`<li>${r.y}: отчетът към ${date(r.o.asOf, true)}${NBSP}г., файл <code>${r.o.file}</code>${r.o.unit === 'BGN' ? ' (в лева, превърнат в евро)' : ''}, SHA-256 <code class="s15-sha">${r.o.sha256}</code></li>`)}</ul>
+      ${rid ? html`<p>Издание на данните <code>${rid.slice(0, 12)}</code>: <a href="data/${rel.manifest.split('data/').pop()}">манифест</a> (оригинали, код, среда и SHA-256 на всеки файл) и <a href="data/execution-provenance.json">произход на всяко число</a> (JSON). Всеки може да го сглоби отново от оригиналите: <code class="s15-cmd">./budget reproduce --current ${siteUrl('/').replace(/\/$/, '')}</code></p>` : ''}`,
+  });
+}
+
 /* ------------------------------------------------------------------ Бюджети: the plan of every budget (D07), the national budget and the EU funds */
 const khilToMln = v => (fin(v) ? v / 1000 : null);
 const moneyCell = (mc, mln) => { const lev = mc.lev(mln); return html`${mc.text(mln)}${lev ? html`<span class="s15-lev">${lev}</span>` : ''}`; };
@@ -488,7 +512,7 @@ export function byudzhetiView(C) {
 }
 
 /* ------------------------------------------------------------------ the page */
-export const needs = ['core', 'execution', 'components?'];
+export const needs = ['core', 'execution', 'components?', 'execution-provenance?', 'releases/current?'];
 export const styles = ['s15-izpalnenie'];
 
 /** for search and answer engines (js/seo.js): the plan question of the start page and the „Накратко“ sentence under the comparison */
@@ -548,7 +572,7 @@ export function render(ctx) {
   else {
     const links = html`<p class="s15-links small"><a href="${ctx.href('S15', { sub: 'byudzheti' }, keepQuery(ctx))}">Планът по бюджети и средствата от ЕС</a></p>`;
     const plan = planBlock(C, { link: linkOf(C) });
-    body = html`${controlsDisclosure(C)}${PLAN_FIRST ? plan : ''}${compareBlock(C)}${PLAN_FIRST ? '' : plan}${chartsView(C)}${links}${expertBlock(C)}${methodDisclosure(C)}`;
+    body = html`${controlsDisclosure(C)}${PLAN_FIRST ? plan : ''}${compareBlock(C)}${PLAN_FIRST ? '' : plan}${chartsView(C)}${links}${expertBlock(C)}${methodDisclosure(C)}${proofDisclosure(ctx, C)}`;
   }
   return { body, context: C.page === 'main' && !C.problem ? '' : contextLine(C), ownContext: true };     // the main screen says it in the line under the heading and in the «Избери месец и сравнение» row
 }

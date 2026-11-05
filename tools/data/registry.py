@@ -35,7 +35,7 @@ DATA = ROOT / "site" / "data"
 ACCESS = {"auto", "auto-bg", "browser-only", "supplied", "reference", "generated"}
 ACQUISITION = {"fetch", "fetch-bg", "import", "supplied", "reference", "generated"}
 STATUS = {"real", "mock", "pending"}
-OTHER_INPUTS = re.compile(r"^(network|git tag mock-v\d+)$")
+OTHER_INPUTS = re.compile(r"^(network|git tag mock-v\d+|every output of the release)$")
 ABSOLUTE = re.compile(r"(?<![\w.])(/Users/[^/\s'\"]+/|/home/[a-z][\w-]*/|[A-Za-z]:\\(?:Users|home)\\)")
 CODE = ("tools/", "site/", "worker/", ".github/", "wrangler.jsonc")
 
@@ -149,7 +149,7 @@ def check_datasets(reg, source_ids, inter, r):
             r.ok(d.get("rebuild") or d.get("notRebuilt"), "dataset %s: neither rebuild nor notRebuilt" % did)
             r.ok(d.get("inputs"), "dataset %s: no inputs" % did)
             for x in d.get("inputs", []):
-                r.ok(x in known, "dataset %s: unknown input %s" % (did, x))
+                r.ok(x in known or OTHER_INPUTS.match(x), "dataset %s: unknown input %s" % (did, x))
             for k in ("schema", "scope"):
                 r.ok(d.get(k), "dataset %s: no %s" % (did, k))
             if d.get("schema"):
