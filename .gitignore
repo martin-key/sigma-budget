@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 .venv/
+.venv-data/
 venv/
 .pytest_cache/
 

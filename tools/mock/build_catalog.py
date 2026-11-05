@@ -116,7 +116,7 @@ def _period(slug, obj, ctx):
     """A short human period string, computed from the file itself (None when a file has no period)."""
     if obj is None:
         return None
-    if slug in ("outlook", "revenue"):
+    if slug in ("outlook", "revenue", "gva-sectors"):
         return _yrs(obj["years"][0], obj["years"][-1])
     if slug == "core":
         return _yrs(obj["years"]["list"][0], obj["years"]["list"][-1])
@@ -255,6 +255,11 @@ def _list_and(items):
     return items[0] if len(items) == 1 else ", ".join(items[:-1]) + " и " + items[-1]
 
 
+# the probed sites, in the order the access trap names them
+ACCESS_SITES = [("www.minfin.bg", "на Министерството на финансите (minfin.bg)"), ("data.egov.bg", "на портала data.egov.bg"),
+                ("www.nsi.bg", "на НСИ")]
+
+
 def _probes():
     """The automatic-access checks recorded in the download manifest: only URL, HTTP status and day (no notes)."""
     man = json.loads((RAW / "MANIFEST.json").read_text(encoding="utf-8"))
@@ -289,6 +294,8 @@ def traps(ctx):
     bad = [p for p in probes if p["httpStatus"] == 403]
     if not bad:
         raise ValueError("catalog traps: no recorded 403 probe for the access trap")
+    # only the sites whose probe answered 403 (from Bulgaria data.egov.bg and nsi.bg open: docs/data-acquisition.md, 2.1)
+    blocked = [label for host, label in ACCESS_SITES if any(urllib.parse.urlsplit(p["url"]).hostname == host for p in bad)]
     return [
         {"id": "eur-bgn", "title": "Евро и лева",
          "text": "От 1 януари 2026 г. България е в еврозоната, а курсът е фиксиран: 1 € = %s лв. Месечните отчети за 2025 г. са "
@@ -309,11 +316,11 @@ def traps(ctx):
                  % (fmt_money(fn_total), cy, fmt_money(cofog_total), fmt_money(kfp_same_year)),
          "related": ["expenditure"]},
         {"id": "access", "title": "Достъп до първичните данни",
-         "text": "Страниците на Министерството на финансите (minfin.bg), на портала data.egov.bg и на НСИ връщат отказ (403) към "
-                 "автоматични заявки (проверено на %s) и се отварят само през браузър. Затова месечните отчети на КФП са "
-                 "изтеглени ръчно, а данните, които са само там (разбивка по данъци, съставни бюджети, отчетите след август), са "
-                 "означени „предстои“. Огледалото на данните на Министерството на финансите в data.europa.eu не е винаги "
-                 "актуално." % fmt_date(bad[0]["checked"], long=True),
+         "text": "Страниците %s връщат отказ (403) към автоматични заявки (проверено на %s) и се отварят само през браузър. Затова "
+                 "месечните отчети на КФП са изтеглени ръчно, а данните, които са само там (разбивка по данъци, съставни бюджети, "
+                 "отчетите след %s), са означени „предстои“. Огледалото на данните на Министерството на финансите в "
+                 "data.europa.eu не е винаги актуално."
+                 % (_list_and(blocked), fmt_date(bad[0]["checked"], long=True), month_name(ctx.execution["latest"]["month"])),
          "related": ["p01", "p02", "p04", "p06"], "evidence": probes},
         {"id": "two-versions", "title": "Две версии на мотивите (АСБП)",
          "text": "Мотивите към законопроекта са в две версии: PDF (проект от юни 2026 г.), от който са числата на Приложение 3, и "
@@ -406,6 +413,22 @@ _SEBRA_CACHE = [("sebra_27.08.2026.xlsx", "3789/27.08..2026.xlsx", "27.08.2026")
 _ASBP_PDF = RAW / "asbp" / "UMTBF-2026-2028-motivi.pdf"
 
 
+# the two saved Eurostat answers behind gva-sectors.json (gva_sectors_v5.py); they are not in prototype/data/raw, so their record is
+# written out here as it was taken on 2026-10-09
+GVA_FILES = [
+    {"name": "nama_10_a10_BG_B1G.json", "title": "Евростат nama_10_a10: брутна добавена стойност по отрасли, България (годишно, текущи цени)",
+     "url": "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/nama_10_a10?format=JSON&lang=EN&geo=BG&unit=CP_MEUR"
+            "&na_item=B1G&sinceTimePeriod=2019",
+     "sha256": "681101ff7faf0a533bc7f754500fe901d80f2722174b42ca15d40aed286d6b4e", "bytes": 5125, "retrieved": "2026-10-09",
+     "source": ["eurostat"], "usedBy": ["gva-sectors"], "role": "source"},
+    {"name": "nama_10_gdp_BG.json", "title": "Евростат nama_10_gdp: БВП и данъци върху продуктите минус субсидии, България (годишно, текущи цени)",
+     "url": "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/nama_10_gdp?format=JSON&lang=EN&geo=BG&unit=CP_MEUR"
+            "&na_item=B1GQ&na_item=D21X31&sinceTimePeriod=2019",
+     "sha256": "f1a7d8a93d840b36d67062129f879877cbb19070e65ee02b644ff355f89a8b23", "bytes": 3330, "retrieved": "2026-10-09",
+     "source": ["eurostat"], "usedBy": ["gva-sectors"], "role": "source"},
+]
+
+
 def _url_name(url):
     return urllib.parse.unquote(url.split("?")[0].rsplit("/", 1)[-1])
 
@@ -449,6 +472,7 @@ def primary_files(ctx):
                 row["bytes"] = local.stat().st_size
             row.update({"source": ["kfp"], "usedBy": ["execution"], "role": "source"})
             out.append(row)
+    out.extend(dict(f) for f in GVA_FILES)
     if len({r["sha256"] for r in out}) != len(out):
         raise ValueError("catalog: two primary files share a checksum")
     return out

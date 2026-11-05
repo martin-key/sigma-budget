@@ -16,7 +16,9 @@ prototype/data/raw/MANIFEST.json (адрес, файл, размер, sha256, HT
 import datetime, hashlib, json, os, sys, time, urllib.error, urllib.request
 
 ROOT = str(__import__("pathlib").Path(__file__).resolve().parents[2]) + "/prototype/data/raw"
-UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"
+UA = "budget-na-svetlo-data-pipeline/1.0 (+public data; contact: working group)"   # същият като fetch_gisco.py; не се представяме за браузър
+# първите байтове, които файлът трябва да има (страница за грешка или проверка с код 200 не се записва като данни)
+MAGIC = {".pdf": b"%PDF", ".zip": b"PK", ".docx": b"PK", ".xlsx": b"PK", ".xls": b"\xd0\xcf\x11\xe0"}
 ES = "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data"
 
 # (папка, файл, адрес, бележка, допълнителни заглавки)
@@ -36,9 +38,10 @@ SOURCES = [
     ("parliament", "bill_167157.json", "https://www.parliament.bg/api/v1/bill/167157", "ЗДБ 2026 — данни за законопроекта", {}),
     ("parliament", "bill_167156.json", "https://www.parliament.bg/api/v1/bill/167156", "ЗБДОО 2026 — данни за законопроекта", {}),
     ("parliament", "bill_167155.json", "https://www.parliament.bg/api/v1/bill/167155", "ЗБНЗОК 2026 — данни за законопроекта", {}),
-    # НАП — таблицата с вноските за 2026 г. (приложение към становище ВК-30-10237 от 12.08.2026)
+    # НАП — таблицата с вноските за 2026 г. (приложение към становище ВК-30-10237 от 12.08.2026); nap.bg пренасочва към nra.bg,
+    # а nra.bg отговаря само от България (docs/data-acquisition.md, раздел 2.1)
     ("nap", "nap_prilozhenie_1_VK-30-10237_12.08.2026.pdf",
-     "https://nap.bg/wps/wcm/connect/nra.bg25863/6f117462-1836-48f8-9e27-a4b02a1e55fb/"
+     "https://nra.bg/wps/wcm/connect/nra.bg25863/6f117462-1836-48f8-9e27-a4b02a1e55fb/"
      "%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5_1_%D0%92%D0%9A-30-10237_12.08.2026.pdf?MOD=AJPERES",
      "НАП: размери на осигурителните вноски за 2026 г. и разпределението им", {}),
     # Eurostat
@@ -103,6 +106,10 @@ def main():
         if only and key not in only and folder not in only:
             continue
         status, data = fetch(url, headers)
+        magic = MAGIC.get(os.path.splitext(name)[1].lower())
+        if status == 200 and magic and not data.startswith(magic):
+            print(f"{status}  {len(data):>10}  {key}  НЕ Е ЗАПИСАН: не е {os.path.splitext(name)[1]} (страница за грешка или проверка?)")
+            continue                                   # старият файл и записът му в манифеста остават
         entry = {"url": url, "note": note, "http_status": status,
                  "retrieved": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
         if status == 200:

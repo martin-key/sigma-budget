@@ -13,9 +13,9 @@ import datetime
 import os
 from xml.sax.saxutils import escape
 
-from bd_common import PENDING_DEFS, fmt_date, fmt_eur, fmt_money, fmt_num, fmt_pct, month_name
+from bd_common import PENDING_DEFS, POPULATION_ASOF, fmt_date, fmt_eur, fmt_money, fmt_num, fmt_pct, month_name
 from bd_fiscal import population_latest
-from dlib import BUILD_DATE, meta
+from dlib import BUILD_DATE, jsonstat_series, meta
 
 BASE_URL_DEFAULT = "https://budget-na-svetlo.example/"        # reserved TLD: never resolves, never impersonates a real site
 
@@ -139,11 +139,17 @@ def _eurostat_events(ctx):
     d_annual = ctx.raw("eurostat/gov_10dd_edpt1_BG_EU.json")["updated"][:10]
     d_quarter = ctx.raw("eurostat/gov_10q_ggdebt_BG.json")["updated"][:10]
     d_cofog = ctx.src("cofog_bg")["updated"][:10]
-    pop_raw = ctx.raw("eurostat/tps00001_BG.json")["updated"][:10]
     if mst["asOf"] != d_annual or q["asOf"] != d_quarter:
         raise ValueError("feed: debt.latest asOf dates differ from the Eurostat update dates")
     cy = exp["cofog"]["years"][-1]
-    pop = population_latest(ctx.src("population"))
+    pop_src = ctx.src("population")
+    pop = population_latest(pop_src)
+    # the population is the one of prototype/src/population.json (release POPULATION_ASOF); the downloaded tps00001 may be a later
+    # release: the event keeps the date of the numbers it shows, as long as the downloaded file still gives the same numbers
+    tps = jsonstat_series(ctx.raw("eurostat/tps00001_BG.json"), "time", {"geo": "BG"})
+    if any(str(y) in tps and int(tps[str(y)][0]) != int(v) for y, v in zip(pop_src["years"], pop_src["persons"])):
+        raise ValueError("feed: Eurostat tps00001 now gives other population numbers than prototype/src/population.json")
+    pop_raw = POPULATION_ASOF
     return [
         {"id": "eurostat-gov_10dd_edpt1-" + d_annual, "date": d_annual, "dateKind": "published", "kind": "eurostat",
          "title": "Евростат: дългът на държавното управление за %d г." % mst["year"],
@@ -215,7 +221,7 @@ def _expected(ctx):
     out = []
     for p in ex["pendingMonths"]:
         d = PENDING_DEFS[p["id"]]
-        out.append({"id": p["id"], "title": "Месечен отчет на КФП към края на %s 2026 г." % month_name(p["month"]),
+        out.append({"id": p["id"], "title": "Месечен отчет на КФП към края на %s %s г." % (month_name(p["month"]), p["asOf"][:4]),
                     "status": "pending", "note": d["reason"], "expected": d["expected"]})
     nxt = law["next"]
     out.append({"title": nxt["title"], "status": nxt["status"], "note": nxt["note"], "expected": nxt["expected"]})

@@ -1230,7 +1230,7 @@ def check_proto(c):
     c.ok(not added, "prototype/ gained files: %s" % added[:5])
     if absent:
         c.warn("%d raw files of the manifest are not in the repository (prototype/data/raw, see docs/data-sources.md); the files that are present are compared" % absent)
-    c.ok(len(want) == 124, "tools/mock/prototype.sha256 lists %d files, expected 124" % len(want))   # 111 + the 13 KFP reports added on 2026-10-09 (2024, 08.2026)
+    c.ok(len(want) == 125, "tools/mock/prototype.sha256 lists %d files, expected 125" % len(want))   # 111 + the 13 KFP reports added on 2026-10-09 (2024, 08.2026) + 09.2026
     c.fact("prototype/: %d files present, all equal to the recorded SHA-256, none added" % len(have))
 
 

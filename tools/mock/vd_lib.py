@@ -14,7 +14,7 @@ DATA = os.path.join(SITE, "data")
 PROTO = os.path.join(ROOT, "prototype")
 RAW = os.path.join(PROTO, "data", "raw")              # raw sources, NOT in the repository: see docs/data-sources.md
 TMP = os.path.join(ROOT, "tmp")                       # scratch and outputs (gitignored)
-BUILD_DATE = os.environ.get("BUILD_DATE", "2026-10-09")
+BUILD_DATE = os.environ.get("BUILD_DATE", "2026-11-05")
 ISO = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 

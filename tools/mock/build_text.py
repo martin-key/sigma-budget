@@ -33,7 +33,7 @@ GLOSSARY_SRC = os.path.join(ROOT, "prototype", "src", "glossary.json")
 GUIDE_SRC = os.path.join(ROOT, "tmp", "research", "guide", "guide_raw.txt")   # not in the repository
 ROUTES_JS = os.path.join(SITE, "js", "routes.js")
 
-BUILD_DATE = os.environ.get("BUILD_DATE", "2026-10-09")   # same default as tools/mock/dlib.py; a constant => byte-identical rebuilds
+BUILD_DATE = os.environ.get("BUILD_DATE", "2026-11-05")   # same default as tools/mock/dlib.py; a constant => byte-identical rebuilds
 TEXT_AS_OF = "2026-10-01"                                  # date of the source documents
 
 # route params that have a closed registry (DATA_SPEC 2.3)

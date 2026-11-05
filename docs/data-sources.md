@@ -15,7 +15,7 @@
 | `eurostat/` — население и дълг | Eurostat | автоматично, `fetch_sources.py` | 4 JSON, 14 KB | `build_src.py`, `tools/mock/bd_debt.py`, `bd_fiscal.py` | `prototype/src/population.json`, `debt_stock.json`, `site/data/debt.json` |
 | `kfp_2024/` — месечни отчети по КФП 2024 | Министерство на финансите | **ръчно** (предоставени от работната група) | 12 XLS, 527 KB | `tools/mock/extract_kfp_full.py` | `site/data/execution.json` |
 | `kfp_2025/` — месечни отчети по КФП 2025 | Министерство на финансите | **ръчно** (предоставени от работната група) | 12 XLS, 531 KB | `extract_2025.py` → `build_2025_json.py`, `tools/mock/extract_kfp_full.py` | `prototype/src/kfp_monthly_2025.json`, `site/data/execution.json` |
-| `kfp_2026/` — месечни отчети по КФП 2026 (до 31.08) | Министерство на финансите | **ръчно** (предоставени от работната група) | 8 XLS, 367 KB | `build_src.py`, `extract_home_kpis.py`, `tools/mock/extract_kfp_full.py` | `prototype/src/kfp_components_2026.json`, `home_kpis_2026.json`, `site/data/execution.json` |
+| `kfp_2026/` — месечни отчети по КФП 2026 (до 30.09) | Министерство на финансите | **ръчно** (предоставени от работната група) | 8 XLS, 367 KB | `build_src.py`, `extract_home_kpis.py`, `tools/mock/extract_kfp_full.py` | `prototype/src/kfp_components_2026.json`, `home_kpis_2026.json`, `site/data/execution.json` |
 | `nap/` — осигурителни вноски за 2026 г. | Национална агенция за приходите | автоматично, `fetch_sources.py` | 1 PDF, 410 KB | `build_src.py`, `tools/mock/bd_rates.py` | `prototype/src/rates_2026.json`, `site/data/rates.json` |
 | `parliament/` — законопроект за бюджета и данни от API | Народно събрание | автоматично, `fetch_sources.py` | 1 DOCX, 1 ZIP (63 MB), 3 JSON | `extract_asbp_tables.py`, `extract_home_kpis.py`, `build_src.py`, `extract_program_budgets.py`, `tools/mock/extract_bill.py`, `bd_law.py` | `asbp_tables.json`, `program_budgets/`, `site/data/law.json` и др. |
 | `program_budgets/` — програмни бюджети на ПРБ | Първостепенни разпоредители (чрез архива към законопроекта) | **извлича се** от `parliament/52-602-01-19.zip` | 46 PDF + 1 архив 7z, 70 MB | `extract_program_budgets.py`, `tools/mock/bd_prb_pdf.py` | `prototype/src/program_budgets_2026.json`, `site/data/ministries/*.json` |
@@ -132,7 +132,7 @@
 ### 3.4 Национална агенция за приходите — `nap/`
 Таблица с размерите на осигурителните вноски за 2026 г. и разпределението им (приложение към писмо ВК-30-10237 от 12.08.2026). Обработват я `build_src.py` и `tools/mock/bd_rates.py`. Сървърът затваря връзката към `urllib`, затова `fetch_sources.py` пада обратно на `curl`.
 
-- Адрес: https://nap.bg/wps/wcm/connect/nra.bg25863/6f117462-1836-48f8-9e27-a4b02a1e55fb/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5_1_%D0%92%D0%9A-30-10237_12.08.2026.pdf?MOD=AJPERES
+- Адрес: https://nra.bg/wps/wcm/connect/nra.bg25863/6f117462-1836-48f8-9e27-a4b02a1e55fb/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5_1_%D0%92%D0%9A-30-10237_12.08.2026.pdf?MOD=AJPERES
 
 | файл | байтове | sha256 |
 |---|---:|---|
@@ -220,7 +220,7 @@ SDMX файлове на МФ по стандарта SDDS Plus, публику�
 - Не се опитвайте да заобикаляте защитата — изтеглете файловете през браузър и ги проверете със sha256 по-долу.
 
 ### 4.1 Месечни отчети по КФП (лист „стартова“)
-Име на файла: `<ГГГГ>-EU_funds_<ММ><ГГ>_BG_WEB.xls` (при коригирана версия — със суфикс `_1`, `_2`, `_4`). Отчетите за 2024 и 2025 г. са в млн. лв., за 2026 г. — в млн. евро. Колона B на листа „стартова“ е консолидираната фискална програма (к.2 = к.3 национален бюджет + к.4 европейски средства). Скриптовете ги четат по етикет на реда, не по номер.
+Име на файла: `<ГГГГ>-EU_funds_<ММ><ГГ>_BG_WEB.xls` (при коригирана версия — със суфикс `_1`, `_2`, `_4`). От отчета за септември 2026 г. министерството дава името с интервал (`EU funds`); `tools/data/raw_sources.py import` записва файла под името с долна черта. Отчетите за 01.2025, 06.2025, 02.2026 и 07.2026 са свалени отново на 04.11.2026 г.: министерството ги е записало наново, числата са същите, байтовете и sha256 са други, а юли вече е без суфикс `_2`. Отчетите за 2024 и 2025 г. са в млн. лв., за 2026 г. — в млн. евро. Колона B на листа „стартова“ е консолидираната фискална програма (к.2 = к.3 национален бюджет + к.4 европейски средства). Скриптовете ги четат по етикет на реда, не по номер.
 
 **2024 (12 отчета):**
 
@@ -243,12 +243,12 @@ SDMX файлове на МФ по стандарта SDDS Plus, публику�
 
 | файл | байтове | sha256 |
 |---|---:|---|
-| `2025-EU_funds_0125_BG_WEB.xls` | 44 032 | `233db62758b2bb7293b56d6e54f2dfdfe34d37f1822736145d338dabd3d58059` |
+| `2025-EU_funds_0125_BG_WEB.xls` | 44 032 | `511b87bf72cee443e4c62c0fc1e95d639f7912b1076d6b6078b126e6ade11cc4` |
 | `2025-EU_funds_0225_BG_WEB.xls` | 44 032 | `43d31f854130ec148f9915bf3220aadbdd121786d870155063c0f240e9f62d51` |
 | `2025-EU_funds_0325_BG_WEB.xls` | 44 032 | `de1e0be97ec24856830ecbecd2ea4dd0bb19dfb9d59b5e90030ecc4e2004f3ae` |
 | `2025-EU_funds_0425_BG_WEB.xls` | 44 032 | `ba44c8c10a2ac27ad0c56932f3259bb2e91299b41cb4c927bcc4996da3cca435` |
 | `2025-EU_funds_0525_BG_WEB.xls` | 44 032 | `6fc76c9bf191ee36786faf2022ab00a0e77aa71a0b9efded63db38c078366db3` |
-| `2025-EU_funds_0625_BG_WEB.xls` | 44 032 | `caddf7739aeb525cf9a19e786ddd6243bc6d00ff80a4aa477781552c56863b9f` |
+| `2025-EU_funds_0625_BG_WEB.xls` | 44 032 | `ccb9bea36a8c3dba11aadb76a4a550560d7be77ccfbcf79e6333902e588b04db` |
 | `2025-EU_funds_0725_BG_WEB.xls` | 44 032 | `556ee5ca47ea9cbce9c798ae33ee32759ee0c900f1eb48f1687f405ed4aab6e9` |
 | `2025-EU_funds_0825_BG_WEB.xls` | 44 032 | `df10590aaf0b21f22578728c38b4f1df7de31e13c85a23c9ef659f9cf2e8d5ba` |
 | `2025-EU_funds_0925_BG_WEB.xls` | 44 032 | `c535cc9aba40104993e11a6d2c599dba4f7018d1a6bdbf878c445416846908b8` |
@@ -256,18 +256,19 @@ SDMX файлове на МФ по стандарта SDDS Plus, публику�
 | `2025-EU_funds_1125_BG_WEB.xls` | 44 032 | `5b4be72281ab76bcb38cb1ef7bcb72b6b3dc1a850b5ab741a89bc27357403de5` |
 | `2025-EU_funds_1225_BG_WEB_4.xls` | 46 592 | `d57c60f29426a548419ce7bc8735896decd1ac2289294de7d7f3d41bf75194ff` |
 
-**2026 (8 отчета до 31.08.2026; юли е `_2`):**
+**2026 (9 отчета до 30.09.2026):**
 
 | файл | байтове | sha256 |
 |---|---:|---|
 | `2026-EU_funds_0126_BG_WEB.xls` | 45 056 | `2d4e73a0220f1c487fbb76f37eb6d9191959c8f200fa987e4df7a8ce8e76c80b` |
-| `2026-EU_funds_0226_BG_WEB.xls` | 45 568 | `531f1e746acb5c3b97b805c97d8524a5e97ba4764b3aadea853532beebfe07c4` |
+| `2026-EU_funds_0226_BG_WEB.xls` | 45 568 | `5156ca02b2180dd97d5ef1b9c47d4efbd2ac397bac86e5b84fa2fdc7b8955123` |
 | `2026-EU_funds_0326_BG_WEB.xls` | 45 568 | `dce3ee6f08d28dcff0cc344c752aa0c0255bb3a4e72a0f5322dd626daa4b30ec` |
 | `2026-EU_funds_0426_BG_WEB.xls` | 45 568 | `2dab562f5492087201cf1e45f4e66c619ec179186beb205c4d45a317fef7ebcc` |
 | `2026-EU_funds_0526_BG_WEB.xls` | 46 080 | `9bf068ebe2a503d84387d0076d134646e43f6dcb05de666b2fe7513b217f123e` |
 | `2026-EU_funds_0626_BG_WEB.xls` | 47 616 | `eaf80ab39d4ed66e0cdf04aee779671150a317567ea135aba5951042e5e68a64` |
-| `2026-EU_funds_0726_BG_WEB_2.xls` | 45 568 | `a534ad23895197ad90d469e4db9d775d388939bd2a6de4137dd05a37279a6b6f` |
+| `2026-EU_funds_0726_BG_WEB.xls` | 45 568 | `133cb5cf2995930305b84689c650ce3cb3f357fc56e6969d8f50d04af8d70b43` |
 | `2026-EU_funds_0826_BG_WEB.xls` | 46 080 | `50510878ff0ee8c18db04fa5fa7435c0aca69f7d6984b744c71e2df7359cb6a8` |
+| `2026-EU_funds_0926_BG_WEB.xls` | 46 080 | `34a01ba7d55c029c1b5bc2cf312fc383f3bc125b3d77955767cd045da3ee03ec` |
 
 ### 4.2 Мотиви и АСБП 2026–2028 (PDF на МФ) — `asbp/`
 - Файл: `asbp/UMTBF-2026-2028-motivi.pdf` — 3 393 872 байта, sha256 `d951d866da468ae439ecbfc4131cf5005e28be39e3fcbb70d8660ca93337ac9b`.

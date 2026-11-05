@@ -12,6 +12,9 @@ from dlib import BUILD_DATE, isnum
 NBSP = "\u00a0"
 NNBSP = "\u202f"
 MINUS = "\u2212"
+# the Eurostat release of tps00001 that prototype/src/population.json copies (core.json and the feed event both carry it);
+# a later release with the same numbers does not move it, bd_feed.py stops if the numbers change
+POPULATION_ASOF = "2026-09-30"
 
 # --------------------------------------------------------------------------------------------- formatting
 # Mirrors site/js/format.js (group separator = narrow no-break space, decimal comma, typographic minus).
@@ -134,11 +137,13 @@ SOURCES = {
         "kind": "api", "access": "open",
         "note": "Дати на докладите, четенията и предложенията между първо и второ четене; само броят и връзките към документите."},
     "eurostat": {
-        "title": "Eurostat: държавен дълг, разходи по функции (COFOG), население",
+        "title": "Eurostat: държавен дълг, разходи по функции (COFOG), население, БВП по отрасли",
         "publisher": "Евростат",
         "url": "https://ec.europa.eu/eurostat/web/main/data/database",
         "kind": "api", "access": "open",
-        "note": "Набори gov_10dd_edpt1, gov_10q_ggdebt, gov_10a_exp, tps00001, demo_r_pjanaggr3. Разходите по функции (COFOG) са по методика на сектор „Държавно управление“, не по КФП."},
+        "note": "Набори gov_10dd_edpt1, gov_10q_ggdebt, gov_10a_exp, tps00001, demo_r_pjanaggr3, nama_10_a10 и nama_10_gdp (национални "
+                "сметки на България по данни на НСИ: добавена стойност по отрасли и БВП). Разходите по функции (COFOG) са по методика "
+                "на сектор „Държавно управление“, не по КФП."},
     "bnb": {
         "title": "БНБ: дълг на сектор „Държавно управление“ и на централното управление (SDMX)",
         "publisher": "Българска народна банка",
@@ -199,8 +204,7 @@ PENDING_DEFS = {
             "reason": "За тези бюджети таблиците на програмния бюджет в архива към законопроекта не се разчетоха надеждно (различен формат на документа), затова не показваме числа.",
             "expected": "Програмни бюджети на ведомствата, архив към законопроекта 52-602-01-19",
             "source": ["prb"], "screens": ["S10", "S11"]},
-    "P04": {"title": "Отчетът към 30.09.2026 г. и следващите",
-            "reason": "Отчетът за септември 2026 г. още не е добавен: страницата на МФ с месечните отчети се отваря само през браузър (отказ 403 към автоматични заявки), а последният наличен файл е за август 2026 г.",
+    "P04": {"title": None, "reason": None,                    # set_kfp_pending() fills both from execution.json
             "expected": "Месечна информация за КФП, minfin.bg",
             "source": ["minfin"], "screens": ["S15", "S16"]},
     "P05": {"title": "Ориентир 2022–2023",
@@ -216,6 +220,18 @@ PENDING_DEFS = {
             "expected": "Предложения за второ гласуване, parliament.bg",
             "source": ["parliament"], "screens": ["S14"]},
 }
+
+
+def set_kfp_pending(execution):
+    """P04 names the next КФП report and the last one added. build_data.py calls this before the builders run,
+    so core, the catalog, the feed and search follow execution.json instead of a month written into the code."""
+    nxt, last = execution["pendingMonths"][0], execution["latest"]
+    y, m, d = nxt["asOf"].split("-")
+    PENDING_DEFS["P04"].update(
+        title="Отчетът към %s.%s.%s г. и следващите" % (d, m, y),
+        reason="Отчетът за %s %s г. още не е добавен: страницата на МФ с месечните отчети се отваря само през браузър "
+               "(отказ 403 към автоматични заявки), а последният наличен файл е за %s %s г."
+               % (month_name(nxt["month"]), y, month_name(last["month"]), last["asOf"][:4]))
 
 
 def pending_block(pid, **override):

@@ -5,7 +5,7 @@ It carries what every screen needs without a second request: the source registry
 and the eight revenue groups. Every number here is COPIED from the dataset that owns it (`outlook`, `revenue`,
 `expenditure`, `execution`, VI-1); `validate_data.py` asserts they are identical. Budget: <= 10 KB gzip, <= 40 KB raw.
 """
-from bd_common import EBK_ART, PENDING_DEFS, SOURCES, pending_block
+from bd_common import EBK_ART, PENDING_DEFS, POPULATION_ASOF, SOURCES, pending_block
 from bd_fiscal import population_latest, zdd_table
 from dlib import DATA, EUR, DATA_VERSION, isnum, jload, meta, pct, rnd
 
@@ -64,7 +64,7 @@ def build_core(ctx):
            "href": "#/izpalnenie"}
     cap = pair(kfp["exp.capex"])
     cap["pctGdp"] = pct(kfp["exp.capex"]["plan"], gdp_precise, 2)
-    cap["href"] = "#/izpalnenie/pera"
+    cap["href"] = "#/izpalnenie?pera=exp"
     debt = {"zddMln": zdd["totalMln"][I26], "pctGdp": zdd["totalPctGdp"][I26], "year": 2026, "scope": "zdd", "href": "#/dalg"}
     kpis = {
         "gdp": {"mln": outlook["gdp"]["mln"][I26], "mlnPrecise": gdp_precise, "year": 2026, "vintage": "plan", "href": "#/prognoza"},
@@ -117,7 +117,7 @@ def build_core(ctx):
         "pending": {pid: pending_block(pid) for pid in sorted(PENDING_DEFS)},
         "counts": counts,
         "population": {"year": pop["year"], "date": pop["date"], "persons": pop["persons"], "source": ["eurostat"],
-                       "asOf": "2026-09-30", "series": {"years": pop_years, "persons": pop_persons}},
+                       "asOf": POPULATION_ASOF, "series": {"years": pop_years, "persons": pop_persons}},
         "kpis": kpis,
         "functions": functions,
         "revenueGroups": groups,

@@ -296,7 +296,7 @@ def _feed_rest(c, f, ctx):
     for i, p in enumerate(pm):
         e = ex_l[i] if i < len(ex_l) else {}
         pend = core["pending"].get(p["id"], {})
-        c.ok(e.get("id") == p["id"] and e.get("status") == "pending" and e.get("title") == "Месечен отчет на КФП към края на %s 2026 г." % MONTHS[p["month"] - 1],
+        c.ok(e.get("id") == p["id"] and e.get("status") == "pending" and e.get("title") == "Месечен отчет на КФП към края на %s %s г." % (MONTHS[p["month"] - 1], p["asOf"][:4]),
              "expected[%d]: id / status / title vs execution.pendingMonths" % i)
         c.ok(e.get("note") == pend.get("reason") and e.get("expected") == pend.get("expected"), "expected[%d]: note / expected must be the text of core.pending.%s" % (i, p["id"]))
     nx = ex_l[-1] if ex_l else {}
