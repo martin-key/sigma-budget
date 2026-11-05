@@ -81,7 +81,7 @@ def _nap_rows():
     try:
         import fitz                      # PyMuPDF: build-time only, not needed to serve the site
     except ImportError as exc:
-        raise RuntimeError("rates: PyMuPDF (fitz) is needed to read the NAP table; run with .venv/bin/python") from exc
+        raise RuntimeError("rates: PyMuPDF (fitz) is needed to read the NAP table; run with .venv-data/bin/python (tools/data/requirements.txt)") from exc
     rows = {}
     with fitz.open(str(NAP_PDF)) as doc:
         for pno, page in enumerate(doc, start=1):

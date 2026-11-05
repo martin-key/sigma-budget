@@ -1,8 +1,7 @@
-# Инструментите в tools/ (проверки, валидатор, сглобяване на сайта). Python 3.12+ (check_mock_v6.py).
+# Проверките, валидаторът и сглобяването на сайта в tools/. Python 3.12+ (check_mock_v6.py).
 #   python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
 #   PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python -m playwright install chromium
+# Обработката на данните (PDF, docx, 7z, run_all.sh) е в отделна среда: tools/data/requirements.txt. Там PyMuPDF е 1.26.5, защото 2.0
+# разчита 1 от 46 програмни бюджета; затова тук няма PyMuPDF.
 playwright==1.64.1
 xlrd==2.0.2
-pymupdf==2.0
-pdfplumber==0.11.10
-python-docx==1.2.0

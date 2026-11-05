@@ -312,7 +312,10 @@ def read_kfp(data):
         import xlrd
     except ImportError:
         raise ValueError("за отчетите по КФП трябва xlrd: пусни с .venv-data/bin/python (tools/data/requirements.txt)")
-    wb = xlrd.open_workbook(file_contents=data)
+    try:
+        wb = xlrd.open_workbook(file_contents=data)
+    except Exception as exc:                           # noqa: BLE001 - a damaged file: xlrd raises CompDocError, XLRDError, struct.error and others
+        raise ValueError("файлът не се чете като .xls (%s: %s)" % (type(exc).__name__, exc))
     if KFP_SHEET not in wb.sheet_names():
         raise ValueError("няма лист „%s“ (листове: %s)" % (KFP_SHEET, ", ".join(wb.sheet_names())))
     sh = wb.sheet_by_name(KFP_SHEET)
@@ -369,7 +372,7 @@ def import_one(src, args, by_hash, stamp, log):
     rel = "kfp_%04d/%s" % (year, name)
     period = (month, year % 100)
     same = [p for p in sorted((RAW / ("kfp_%04d" % year)).glob("*.xls")) if kfp_period(p.name) == period]   # на диска
-    sums = read_sums()                                 # версия от списъка, която я няма на диска: новият файл я заменя
+    sums = read_sums()                                 # версия от списъка, която я няма на диска: само с --replace новият файл я заменя
     listed = [r for r in sorted(sums) if r.startswith("kfp_%04d/" % year) and kfp_period(r) == period and not (RAW / r).is_file()]
     if any(sha256_file(p) == sha for p in same):
         rel_have = next(p for p in same if sha256_file(p) == sha).relative_to(RAW).as_posix()
@@ -378,9 +381,9 @@ def import_one(src, args, by_hash, stamp, log):
         add_sum(rel_have, sha, args.dry_run)          # на мястото си е, но може още да не е в prototype.sha256
         print("  вече е внесен: %s (редът му в tools/mock/prototype.sha256 е налице)" % rel_have)
         return True
-    if same and not args.replace:
+    if (same or listed) and not args.replace:          # закованата версия е друга, дори файлът ѝ да не е на диска
         print("  ГРЕШКА: за %04d-%02d вече има %s. Ако това е коригирана версия, пусни с --replace." % (
-            year, month, ", ".join(p.name for p in same)))
+            year, month, ", ".join([p.name for p in same] + ["%s (ред в tools/mock/prototype.sha256, sha256 %s…)" % (r, sums[r][:12]) for r in listed])))
         return False
     for p in same:
         drop_sum(p.relative_to(RAW).as_posix(), args.dry_run)

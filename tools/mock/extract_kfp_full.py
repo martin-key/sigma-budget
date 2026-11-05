@@ -9,10 +9,10 @@ Columns: B = к.2 (КФП) = C = к.3 (национален бюджет) + D = 
 * 2024 and 2025 reports are in млн. лв.; every number is converted to млн. € (divided by 1.95583, rounded to 3 decimals AFTER dividing).
 * 2026 reports are in млн. € and only rounded to 3 decimals.
 * Identities are checked on the ORIGINAL numbers (rounded to 6 decimals) with the exact rounding bound (n+1)*0.5e-6, and on the
-  converted numbers with the rounding bound of the conversion.  Any violation is an error (exit code 1), except the two
+  converted numbers with the rounding bound of the conversion.  Any violation is an error (exit code 1, nothing is written), except the two
   source-internal differences of the 2024 files listed in KNOWN_SOURCE_DIFFS (reported as warnings, bounded).
 
-Run:  .venv/bin/python tools/mock/extract_kfp_full.py     (needs xlrd; reads only prototype/ and writes only site/data/; raw files: docs/data-sources.md)
+Run:  .venv-data/bin/python tools/mock/extract_kfp_full.py     (needs xlrd; reads only prototype/ and writes only site/data/; raw files: docs/data-sources.md)
 """
 import calendar
 import glob
@@ -495,6 +495,25 @@ def build():
     pending_months = [{"month": nxt_month, "asOf": "%04d-%02d-%02d" % (nxt_year, nxt_month, calendar.monthrange(nxt_year, nxt_month)[1]),
                        "status": "pending", "id": "P04"}]
 
+    # the newest report must be the newest headline a person has read from the MF release (REFERENCE): without this, a report missing
+    # from the disk takes the data a month back without a word, and a new report would go out without its independent check
+    if (last_year, n_last) != max(REFERENCE):
+        prob.error("the newest report on disk is %d-%02d, the newest headline in REFERENCE is %d-%02d: a missing report is not "
+                   "published as an older month, and a new report needs its MF headline in REFERENCE and in vd_kfp.HEADLINES"
+                   % ((last_year, n_last) + max(REFERENCE)))
+    # reference check for the headline of the latest reports (the July numbers must not move when a month is added)
+    for (ry, rm), want in sorted(REFERENCE.items()):
+        j = all_series.get(ry, {}).get("kfp", {})
+        if len(j.get("rev", [])) < rm:
+            continue                                   # reported above
+        ref = (j["rev"][rm - 1], j["exp.total"][rm - 1], j["balance"][rm - 1])
+        say("%d-%02d cumulative: rev %.3f  exp.total %.3f  balance %.3f" % ((ry, rm) + ref))
+        if tuple(rnd(v, 1) for v in ref) != want:
+            prob.error("%d-%02d headline reference differs from %s: %s" % (ry, rm, want, ref))
+    if prob.errors:
+        say("nothing written: site/data/execution.json keeps the last extraction that passed")
+        prob.finish()
+
     doc = {
         "meta": meta("D06+D16+D26", "Месечно изпълнение на консолидираната фискална програма (КФП)", "real", ["kfp"],
                      "лист „стартова“ на месечните отчети на МФ, редове 11–49, колони к.2–к.4 (натрупано от началото на годината)",
@@ -512,14 +531,6 @@ def build():
     }
     path, size, changed = write_data("execution.json", doc)
     say("wrote %s (%d bytes, %s)" % (path.relative_to(DATA.parent.parent), size, "changed" if changed else "unchanged"))
-
-    # reference check for the headline of the last two reports (the July numbers must not move when a month is added)
-    for (ry, rm), want in sorted(REFERENCE.items()):
-        j = all_series[ry]["kfp"]
-        ref = (j["rev"][rm - 1], j["exp.total"][rm - 1], j["balance"][rm - 1])
-        say("%d-%02d cumulative: rev %.3f  exp.total %.3f  balance %.3f" % ((ry, rm) + ref))
-        if tuple(rnd(v, 1) for v in ref) != want:
-            prob.error("%d-%02d headline reference differs from %s: %s" % (ry, rm, want, ref))
     prob.finish()
     return doc
 
