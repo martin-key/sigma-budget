@@ -171,6 +171,7 @@ sources:
   access: auto-bg
   acquisition: fetch-bg
   format: pdf
+  parser: tools/mock/bd_rates.py
   period: social security contributions 2026
   unit: '%'
   live: false
@@ -180,7 +181,6 @@ sources:
     title: 'НАП: размери на осигурителните вноски за 2026 г. и разпределението им'
   limitations:
   - nra.bg answers only from Bulgaria; from elsewhere it may serve a CAPTCHA page instead of the PDF
-  - 'no builder reads the PDF today: rates.json takes the contribution rates from ЗБДОО and the bill'
 - id: eurostat
   title: 'Eurostat: държавен дълг, разходи по функции (COFOG), население, БВП по отрасли'
   publisher: Евростат

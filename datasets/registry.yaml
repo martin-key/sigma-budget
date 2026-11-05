@@ -139,6 +139,7 @@ datasets:
   - site/data/ministries.json
   producer: tools/mock/bd_budgets.py (build_budgets)
   inputs:
+  - prototype/data/raw/program_budgets/*
   - prototype/src/program_budgets_2026.json
   - tools/mock/cache/law_bill.json
   schema: docs/data-spec.md
@@ -163,6 +164,7 @@ datasets:
   - site/data/ministries/*.json
   producer: tools/mock/bd_budgets.py (build_budgets)
   inputs:
+  - prototype/data/raw/program_budgets/*
   - prototype/src/program_budgets_2026.json
   - tools/mock/cache/law_bill.json
   schema: docs/data-spec.md
@@ -182,6 +184,7 @@ datasets:
   - site/data/programs.json
   producer: tools/mock/bd_budgets.py (build_budgets)
   inputs:
+  - prototype/data/raw/program_budgets/*
   - prototype/src/program_budgets_2026.json
   - tools/mock/cache/law_bill.json
   schema: docs/data-spec.md
@@ -320,6 +323,7 @@ datasets:
   producer: tools/mock/bd_rates.py (build_rates)
   inputs:
   - bill
+  - nap
   - zbdoo
   - zbnzok
   schema: docs/data-spec.md
@@ -331,7 +335,7 @@ datasets:
   rebuild: .venv-data/bin/python tools/mock/rebuild_v6.py --build-date 2026-11-05
   checked: '2026-11-05'
   limitations:
-  - 'the NAP table is not read: the rates come from ЗБДОО, ЗБНЗОК and the bill'
+  - the NAP table (prototype/data/raw/nap/) is downloaded only from Bulgaria; from elsewhere nra.bg may serve a CAPTCHA page
 - id: municipalities
   catalogId: D19
   title: 'Общини: трансфери, население и области'
