@@ -55,9 +55,9 @@
 
 | файл | байтове | sha256 |
 |---|---:|---|
-| `zbdoo2026_dv68_idMat244982.html` | 1 612 264 | `28ea6f3e3eba8233430e3489e2885d8261199cd0d0d6fe5d43fa34bd80fb529a` |
-| `zbnzok2026_dv68_idMat244981.html` | 191 120 | `542884e21cb0b30de55c57369f6571365a2f12952862c4f6c5804dd0cd59d799` |
-| `zdb2026_dv69_idMat245041.html` | 5 655 187 | `474f18f4cf035d7702a5b9e3719e473cfb396c74d5bbecb908a9a341d0e0649f` |
+| `zbdoo2026_dv68_idMat244982.html` | 1 612 264 | `5ff97d5c9e3c75f6a9756afc48e6eef6ceb37b9fb8287ef56f655ff13ebcd145` |
+| `zbnzok2026_dv68_idMat244981.html` | 191 120 | `ed7110bfc489ab16f2d62bb34fddcccdf183478ad18af56876931f53046509e4` |
+| `zdb2026_dv69_idMat245041.html` | 5 655 187 | `b5eb1db99e0cfb3a5b7840472985345b3d1a9b974b9a8a861b1b7a557522a119` |
 
 ### 3.2 Народно събрание — `parliament/`
 Законопроектът за държавния бюджет 2026 (№ 52-602-01-19) и данните за трите законопроекта от публичния API.
@@ -76,7 +76,7 @@
 | `52-602-01-19.zip` | 63 488 595 | `59efdf6503c8ea92c033c73b48a8b20d817d61711f8e8dfe5d37587253fe35d8` |
 | `bill_167155.json` | 35 202 | `ae40704a16193a0bfd8387256f3888f61461f7944b1b96d6f5bbb4c4c9118769` |
 | `bill_167156.json` | 37 864 | `972d815ff5147cc961a503ac026f6ccdc7181b51e8d3eb16eec8aaea3ea90549` |
-| `bill_167157.json` | 201 745 | `27a4605037b5bf506d5835a1a11fb9e50664a572c322667de0080b35610cdbd3` |
+| `bill_167157.json` | 201 434 | `6ca68e171f639e9e15905774a13f2c0eb15816b3d8aa7ea0a15398c1ed432ff9` |
 
 ### 3.3 Програмни бюджети — `program_budgets/`
 Не се свалят отделно: `extract_program_budgets.py` ги разархивира от `parliament/52-602-01-19.zip` (папка „7.Програмни формати на бюджети на ПРБ с бюджет по ДБ“: 4 вложени zip-а и един архив 7z за съдебната власт) в `prototype/data/raw/program_budgets/` и от PDF-ите (таблиците „Код | Области на политики и бюджетни програми“) пише `prototype/src/program_budgets_2026.json`, като сверява сумите със ЗДБ 2026. Файловете са именувани `<код на бюджета>_<съкращение>.pdf`.
@@ -152,10 +152,10 @@ JSON от публичния API (`ec.europa.eu/eurostat/api/dissemination/stati
 
 | файл | байтове | sha256 |
 |---|---:|---|
-| `demo_gind_BG_JAN.json` | 2 695 | `749af3142a4b7ac88f5ba7e56b43254bb97acfcdd0c67e5b0cd5d1396c8db741` |
-| `gov_10dd_edpt1_BG_EU.json` | 3 624 | `f1f2eab93abaf7f2248c7b3fdd7868c9db49c67dd8d3cefebbb69bb17c375427` |
-| `gov_10q_ggdebt_BG.json` | 3 317 | `959e31fb3108ff09bcb80a0f1cea0f5683febc245fbf539f97eac687073506a8` |
-| `tps00001_BG.json` | 4 128 | `dfdd435892de9cc6354775e9aa38d350a2585cd845bdc38d5cafd85b1ea5872b` |
+| `demo_gind_BG_JAN.json` | 2 695 | `6950d5f8aa460e819964aa7625e327e537506596d8b83e858c87be225db06617` |
+| `gov_10dd_edpt1_BG_EU.json` | 3 624 | `3017517bf6ee3c8cc3a42f895b08c162da02d4d046a5a64132799d5e6333dafd` |
+| `gov_10q_ggdebt_BG.json` | 3 390 | `7acad3d3154cfa6758a7e7fbba85987ae0bcd30f7ba72422e686b8a00052fdf1` |
+| `tps00001_BG.json` | 4 128 | `ff04b43ce8535c36c4abadc6c10171b7132e09690e471a7cffb23ff03ced92fc` |
 
 ### 3.6 Българска народна банка — `bnb_sdmx/`
 SDMX файлове на МФ по стандарта SDDS Plus, публикувани от БНБ: дълг на сектор „Държавно управление“ (`ggd.xml`) и на централното управление (`cgd.xml`), тримесечно.
@@ -166,7 +166,7 @@ SDMX файлове на МФ по стандарта SDDS Plus, публику�
 | файл | байтове | sha256 |
 |---|---:|---|
 | `cgd.xml` | 44 416 | `c3305fdfec374961891e9d1ef6aa8f6d4ab358bd11a69baba802ffc23c898644` |
-| `ggd.xml` | 41 933 | `a5654ebb6b016b1a6a03a3ecf2cb268f247d73dbfdc7ce84965f7f9380772df5` |
+| `ggd.xml` | 42 862 | `447b174a28e8b7ef2ab8ead01fb2e38607bc6d948fd0e6899e01a75153f84fa8` |
 
 ### 3.7 data.europa.eu — `data_europa/`
 Метаданни (JSON-LD) за наборите на портала за отворени данни. Самият `data.egov.bg` връща 403, затова се ползва европейският портал, който ги огледално отразява. Не са вход на сглобяването: пазят се като справка кои набори съществуват на портала (автоматичният достъп до самия портал на правителството е блокиран); регистърът на източниците в `site/data/core.json` има ключ `dataeuropa` за тях.
@@ -197,7 +197,7 @@ SDMX файлове на МФ по стандарта SDDS Plus, публику�
 
 | файл | байтове | sha256 |
 |---|---:|---|
-| `midt_sebra_2026_page.html` | 41 567 | `44b1b8440b7fd221879155d7c909da47816db5a95f60c85cf2c7c9b8fc6d1af0` |
+| `midt_sebra_2026_page.html` | 72 258 | `677aab28b65b7eef4b5b2e3ced49cd8c77d72c2bd17c3ead3bf77fa976a14ad8` |
 | `midt_sebra_31.08.2026.xlsx` | 12 173 | `2fd48d3af2bc2cd77bf3175a748ea8f7c7bb44fdfcee810063891a1a13e4614f` |
 
 | кеш файл (`tools/mock/cache/`) | байтове | sha256 |
