@@ -10,7 +10,7 @@
 # in tools/mock/cache is missing; the build itself is offline. Exit status 0 only when every step and the validator passed.
 set -uo pipefail
 cd "$(dirname "$0")/../.." || exit 2          # repository root
-PY=".venv/bin/python"
+PY="${PY:-.venv/bin/python}"                  # the data env: PY=.venv-data/bin/python (tools/data/requirements.txt)
 T="tools/mock"
 MODE="build"
 case "${1:-}" in
