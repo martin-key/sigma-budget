@@ -448,7 +448,7 @@ intermediates:
   - prototype/data/raw/dv/dv_laws_2026.json
   - prototype/src/zdb2026.json
   reproducible: true
-  sha256: 682572456411713dc2db82c53c875a3b7ef11acbd86230c438aafca7bcdd988b
+  sha256: a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291
 - path: prototype/src/program_budgets_2026.json
   producer: tools/prototype/extract_program_budgets.py
   inputs:

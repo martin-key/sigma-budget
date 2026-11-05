@@ -212,7 +212,7 @@ SDMX файлове на МФ по стандарта SDDS Plus, публику�
 |---|---|---:|---|
 | `gisco_lau_bg.json` | `fetch_gisco.py`: поток от `https://gisco-services.ec.europa.eu/distribution/v2/lau/` (LAU 2024; сурови 100+ MB не се пазят) — 265 общини: код, име, население, площ, граници | 466 699 | `b9793b72951e164b5a2bcdbf3004ac13fdbb15a071d5164dfc1d658d58f76208` |
 | `eurostat_pop_nuts3_bg.json` | `fetch_gisco.py`: Eurostat `demo_r_pjanaggr3`, 28-те области (NUTS 3) | 16 312 | `c5869aac65138237d190e14c0389f5688c8e5c85af72ac3edb3f5019cb19fc58` |
-| `law_bill.json` | `extract_bill.py`: сравнение на законопроекта със закона (от `parliament/52-602-01-19.docx` и `dv/`) | 233 383 | `682572456411713dc2db82c53c875a3b7ef11acbd86230c438aafca7bcdd988b` |
+| `law_bill.json` | `extract_bill.py`: сравнение на законопроекта със закона (от `parliament/52-602-01-19.docx` и `dv/`) | 233 378 | `a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291` |
 
 ## 4. Ръчно получавани набори
 
