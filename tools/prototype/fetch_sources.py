@@ -16,6 +16,9 @@ prototype/data/raw/MANIFEST.json (адрес, файл, размер, sha256, HT
 import datetime, hashlib, json, os, sys, time, urllib.error, urllib.request
 
 ROOT = str(__import__("pathlib").Path(__file__).resolve().parents[2]) + "/prototype/data/raw"
+# the access probes are no data: their pages go to tmp/sources/probes/ (prototype/data/raw holds only the pinned files of
+# tools/mock/prototype.sha256, which the PROTO check enforces); their status stays in MANIFEST.json
+PROBES = str(__import__("pathlib").Path(__file__).resolve().parents[2]) + "/tmp/sources/probes"
 UA = "budget-na-svetlo-data-pipeline/1.0 (+public data; contact: working group)"   # същият като fetch_gisco.py; не се представяме за браузър
 # първите байтове, които файлът трябва да има (страница за грешка или проверка с код 200 не се записва като данни)
 MAGIC = {".pdf": b"%PDF", ".zip": b"PK", ".docx": b"PK", ".xlsx": b"PK", ".xls": b"\xd0\xcf\x11\xe0"}
@@ -113,8 +116,9 @@ def main():
         entry = {"url": url, "note": note, "http_status": status,
                  "retrieved": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
         if status == 200:
-            os.makedirs(os.path.join(ROOT, folder), exist_ok=True)
-            open(os.path.join(ROOT, folder, name), "wb").write(data)
+            target = PROBES if folder == "probes" else os.path.join(ROOT, folder)
+            os.makedirs(target, exist_ok=True)
+            open(os.path.join(target, name), "wb").write(data)
             entry.update({"file": key, "bytes": len(data), "sha256": hashlib.sha256(data).hexdigest()})
         manifest[key] = entry
         print(f"{status}  {len(data) if data else 0:>10}  {key}")
