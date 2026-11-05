@@ -5,14 +5,14 @@ description: Обновява данните на сайта от публичн
 
 # Обновяване на данните
 
-Skill-ът води администратора през месечния цикъл от `docs/data-acquisition.md` (раздели 6 и 7). Пуска скриптовете на хранилището и обяснява на прост език какво са направили. Резултатът е клон и PR към `develop` с `site/data/*.json`, сглобени от скриптовете.
+Skill-ът води администратора през месечния цикъл от `docs/data-acquisition.md` (раздели 6 и 7). Пуска скриптовете на хранилището и обяснява на прост език какво са направили. Резултатът е клон и PR към github.com/midt-bg/sigma-budget с `site/data/*.json`, сглобени от скриптовете.
 
 ## Правила, които важат винаги
 
 - **Числата ги вадят само скриптовете.** Не пиши и не поправяй число на ръка в `site/data/`, `prototype/src/` или в кода. Единственото изключение са заглавните числа за независимата проверка (стъпка 5), които казва човекът.
 - **Не заобикаляй защити.** Не отваряй minfin.bg в браузър, който управляваш ти: вграден, Chrome или headless. Не решавай проверки и не пренасяй бисквитки. Файловете от minfin.bg ги сваля човекът в своя браузър.
 - **Не опреснявай живите източници без нужда.** Такива са API на Народното събрание, страницата на МИДТ, Eurostat, БНБ и Държавен вестник. Когато се променят, проверките в строителите спират сглобяването. Сваляй само липсващото, освен ако човекът изрично иска нова версия.
-- **Работи само в клон от `develop`.** PR-ът е към `develop`, никога към `main`. Не сливай и не публикувай: решават CI и човек.
+- **Работи само в отделен клон.** Отделяй го от основния клон на midt-bg/sigma-budget. Днес това е `main`, а ако там бъде създаден `develop`, е `develop`. PR-ът е към същия клон. Не push-вай в основния клон, не сливай и не публикувай: решават CI и човек.
 - **Не разхлабвай проверка, която спира.** Покажи какво се е променило в източника и предложи поправка в кода с тест, като отделна промяна.
 
 ## 0. Подготовка (веднъж на машина)
@@ -26,12 +26,14 @@ uv pip install --python .venv-data/bin/python -r tools/data/requirements.txt
 
 Без uv: `python3.12 -m venv .venv-data && .venv-data/bin/pip install -r tools/data/requirements.txt`.
 
-Клон за промяната, кръстен по периода:
+Клон за промяната, кръстен по периода. Командите приемат, че midt-bg/sigma-budget е remote `upstream`, а твоят fork е `origin`. Ако имаш права за запис в midt-bg и работиш направо в него, пиши `origin` вместо `upstream`.
 
 ```bash
-git switch develop && git pull --ff-only
-git switch -c data/kfp-2026-09
+git fetch upstream
+git switch -c data/kfp-2026-10 upstream/main
 ```
+
+Ако основният клон е `develop`, пиши `upstream/develop`.
 
 ## 1. Какво има и какво липсва
 
@@ -147,10 +149,12 @@ git diff --stat
 ```bash
 git add site/data prototype/src tools/mock/prototype.sha256 tools/mock/extract_kfp_full.py tools/mock/vd_kfp.py docs/data-sources.md \
   tools/mock/dlib.py tools/mock/vd_lib.py tools/mock/build_text.py tools/mock/mock_lib.py tools/mock/validate_mock.py
-git commit -m "data(kfp): add the September 2026 report"
+git commit -m "data(kfp): add the October 2026 report"
 git push -u origin HEAD
-gh pr create --base develop
+gh pr create --repo midt-bg/sigma-budget --base main --head "$(gh api user -q .login):$(git branch --show-current)"
 ```
+
+Клонът отива във fork-а (`origin`), а PR-ът е към midt-bg. Ако основният клон е `develop`, пиши `--base develop`.
 
 В описанието на PR напиши:
 
