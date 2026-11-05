@@ -1,5 +1,6 @@
 # Checks, build and deployment of the site (README „Сглобяване и публикуване“).
-#   pull request to develop or main  -> data validation, prerender build with its page checks, the v6 checks of the app
+#   pull request to develop or main  -> the registries, data validation, prerender build with its page checks, the v6 checks of the app,
+#                                       and a build of the pinned data image
 #   push to develop                  -> the same, then deploy dist/ to the staging Worker (noindex)
 #   push to main                     -> the same checks; nothing is deployed
 # This workflow never deploys to production: that is a separate, controlled procedure (docs/approach-specification.md, section 11, stage E).
@@ -31,11 +32,13 @@ jobs:
         with:
           python-version: '3.13'
           cache: pip
-          cache-dependency-path: requirements-dev.txt
+          cache-dependency-path: requirements-dev.lock
       - name: Install tools
         run: |
-          python -m pip install -r requirements-dev.txt
+          python -m pip install --require-hashes -r requirements-dev.lock
           python -m playwright install --with-deps chromium
+      - name: Check the source and dataset registries
+        run: python tools/data/registry.py check
       - name: Validate the data
         run: python tools/mock/validate_data_v6.py
       - name: Build and check every page
@@ -61,9 +64,9 @@ jobs:
         with:
           python-version: '3.13'
           cache: pip
-          cache-dependency-path: requirements-dev.txt
+          cache-dependency-path: requirements-dev.lock
       - run: |
-          python -m pip install -r requirements-dev.txt
+          python -m pip install --require-hashes -r requirements-dev.lock
           python -m playwright install --with-deps chromium
       - name: Screens, accessibility and layout
         run: python tools/mock/check_mock_v6.py
@@ -77,6 +80,16 @@ jobs:
         run: python tools/mock/accept_v6.py
       - name: Motion
         run: python tools/mock/motion_v6.py
+
+  data-image:
+    # the pinned environment of the data processing (tools/data/Dockerfile): it must build from its digest and hash-locked
+    # dependencies. Running it needs the raw files, which are not in the repository.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t sigma-budget-data tools/data
+      - run: docker run --rm sigma-budget-data python -c "import fitz, xlrd, yaml, docx, pdfplumber, py7zr; print(fitz.VersionBind)"
 
   deploy:
     needs: [build, check]

@@ -4,6 +4,8 @@
 Суровите файлове (общо около 143 MB) **нарочно не са в хранилището** — вижте раздел „Защо суровите данни не са качени“. Всичко, което е нужно, за да се
 възстановят, е тук: адрес, начин за изтегляне, очаквано име на файла, размер и контролна сума (sha256).
 
+Машинночетимата версия е в два регистъра. `sources/registry.yaml` описва източниците и междинните файлове, а `datasets/registry.yaml` описва всеки файл на `site/data`: производител, входове, екрани, период, обхват, единица, статус и как се сглобява отново. `python3 tools/data/registry.py check` ги сверява с хранилището в CI и показва наборите, чиято верига до оригиналите има празнина.
+
 ## 1. Обобщение
 
 | набор (папка в `prototype/data/raw/`) | институция | как се получава | файлове | консумира се от | произвежда |
@@ -33,11 +35,11 @@
 
 Редът е важен. Скриптовете намират хранилището от собственото си местоположение: константите в началото на файла (`ROOT`, `RAW`, `SITE`, `TMP`) сочат към `prototype/data/raw/`, `site/` и `tmp/`; кешът на Mock приложението е `tools/mock/cache/`. Ръчно доставяните входове, които не са в хранилището, са `tmp/sources/` (PDF на проекта на бюджетния план) и `tmp/research/` (междинните извлечения).
 
-1. **Среда.** Python 3 с `xlrd`, `PyMuPDF`, `pdfplumber`, `python-docx`, `py7zr` (само за програмните бюджети на съдебната власт) и — за проверките — `playwright` с Chromium.
+1. **Среда.** Обработката е в `tools/data/requirements.lock` (PyMuPDF 1.26.5, `xlrd`, `pdfplumber`, `python-docx`, `py7zr`, PyYAML, с хешове) или в образа `tools/data/Dockerfile` (Python 3.12.10 по digest). В образа `rebuild_v6.py` дава `site/data` байт по байт (05.11.2026). Проверките и сглобяването на сайта са в `requirements-dev.lock` (`playwright` с Chromium, `xlrd`, PyYAML).
 2. **Автоматичното сваляне.** `python3 tools/prototype/fetch_sources.py` (само стандартна библиотека, иска мрежа) сваля в `prototype/data/raw/<папка>/` всичко, отбелязано „автоматично“, и пише `prototype/data/raw/MANIFEST.json` (адрес, размер, sha256, HTTP код, дата на сваляне). Неуспешните заявки също се записват в манифеста.
 3. **Ръчните набори.** Месечните отчети по КФП (`kfp_2024/`, `kfp_2025/`, `kfp_2026/`) и PDF-ът на АСБП (`asbp/UMTBF-2026-2028-motivi.pdf`) се поставят на ръка (раздел 4). Проверете файловете със sha256 от таблиците по-долу.
 4. **Извличане.** `extract_asbp_tables.py`, `extract_dv_laws.py`, `extract_program_budgets.py` → `asbp/asbp_tables.json`, `dv/dv_laws_2026.json`, `prototype/src/program_budgets_2026.json` (и разархивираните програмни бюджети).
-5. **Сглобяване на прототипа.** `build_src.py` и `extract_home_kpis.py` (+ `extract_2025.py` → `build_2025_json.py` за КФП 2025) → `prototype/src/*.json`; `gen_inline.py` ги вгражда в `prototype/site/index.html`. Речникът (`prototype/src/glossary.json`) идва от PDF на работната група чрез `extract_glossary.py` и е готов в `prototype/src/`.
+5. **Сглобяване на прототипа.** Към 05.11.2026 `build_src.py`, `extract_2025.py`, `build_2025_json.py` и `extract_glossary.py` не минават (`sources/registry.yaml`, `intermediates`). `build_src.py` и `extract_home_kpis.py` (+ `extract_2025.py` → `build_2025_json.py` за КФП 2025) → `prototype/src/*.json`; `gen_inline.py` ги вгражда в `prototype/site/index.html`. Речникът (`prototype/src/glossary.json`) идва от PDF на работната група чрез `extract_glossary.py` и е готов в `prototype/src/`.
 6. **Mock приложението.** `tools/mock/run_all.sh` изпълнява по ред: `fetch_gisco.py`, `fetch_sebra.py`, `extract_kfp_full.py`, `extract_bill.py`, `build_data.py`, `build_text.py`, `build_mock.py`, пак `build_data.py`, и накрая `validate_data.py` и `validate_mock.py`. Ако в `tools/mock/cache/` вече има кеширани файлове, сглобяването е без мрежа. Екранът „Бюджет 2027 (проект)“ (v6) се строи отделно с `extract_dbp2027.py` → `build_dbp2027_site.py` и се сверява с `verify_dbp2027_numbers.py`.
 
 ## 3. Автоматично свалените набори

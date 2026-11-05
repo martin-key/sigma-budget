@@ -61,13 +61,14 @@ npx wrangler@4 deploy --env staging                                             
 Проверките са безглави (Playwright + Chromium) и обхождат всеки маршрут при 1280 px и 400 px. Сайтът има само светла тема (`site/css/tokens.css`); тъмната, която иска [спецификацията](docs/approach-specification.md) (раздел 9.3), още я няма. Проверките на приложението (`check_mock_v6`, `redirects_v6`, `calc_check_v6`, `share_check_v6`, `accept_v6`, `motion_v6`, `overlap_v6`) го пускат в хеш режим (`#/prihodi`), а цифрите, които очакват, четат от `site/data/execution.json` (`tools/mock/expect_v6.py`). Шестте първи са в CI и спират PR-а. Адресите с пътища се проверяват от `tools/site/build.py`.
 
 ```bash
-# среда (еднократно, Python 3.12+): python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
+# среда (еднократно, Python 3.12+): python3 -m venv .venv && .venv/bin/pip install --require-hashes -r requirements-dev.lock
 # и Chromium: PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python -m playwright install chromium
 
 PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/check_mock_v6.py --quick     # финалната проверка, около минута
 PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/check_mock_v6.py             # пълната
 PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/check_mock_v6.py --route S06 # един екран
 python3 tools/mock/validate_data_v6.py                                                               # проверка на наборите с данни
+.venv/bin/python tools/data/registry.py check                                                       # регистрите на източниците и наборите
 ```
 
 За анимациите, припокриването на контроли и работата при ограничен процесор има отделни проверки:

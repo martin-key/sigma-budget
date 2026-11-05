@@ -17,14 +17,16 @@ Skill-ът води администратора през месечния ци�
 
 ## 0. Подготовка (веднъж на машина)
 
-Средата за обработката е отделна от `.venv`, защото PyMuPDF 2.0 от `requirements-dev.txt` не чете програмните бюджети:
+Средата за обработката е отделна от `.venv`: тя държи PyMuPDF 1.26.5, а 2.0 не чете програмните бюджети. Инсталира се от lockfile-а с хешовете:
 
 ```bash
 uv venv .venv-data --python 3.12
-uv pip install --python .venv-data/bin/python -r tools/data/requirements.txt
+uv pip install --python .venv-data/bin/python --require-hashes -r tools/data/requirements.lock
 ```
 
-Без uv: `python3.12 -m venv .venv-data && .venv-data/bin/pip install -r tools/data/requirements.txt`.
+Без uv: `python3.12 -m venv .venv-data && .venv-data/bin/pip install --require-hashes -r tools/data/requirements.lock`.
+
+Същата среда има и като образ, по digest: `docker build -t sigma-budget-data tools/data`. Тогава всяка команда `.venv-data/bin/python …` по-долу става `docker run --rm -v "$PWD":/repo sigma-budget-data python …`. Образът е референтната среда: в него `rebuild_v6.py` дава `site/data` байт по байт.
 
 Клон за промяната, кръстен по периода. Командите приемат, че midt-bg/sigma-budget е remote `upstream`, а твоят fork е `origin`. Ако имаш права за запис в midt-bg и работиш направо в него, пиши `origin` вместо `upstream`.
 
@@ -113,12 +115,14 @@ minfin.bg винаги дава `challenge`: той е ръчен. nra.bg и dat
 ```bash
 .venv-data/bin/python tools/mock/rebuild_v6.py --build-date ГГГГ-ММ-ДД
 .venv-data/bin/python tools/mock/validate_data_v6.py
+.venv-data/bin/python tools/data/registry.py check
 ```
 
 - `rebuild_v6.py` пуска `extract_kfp_full.py`, строителите и слоя v5/v6 (`v5_wording.py`, `v5_data_active.py`, `apply_v6_glue.py`, `catalog_refresh_v5.py`) в реда, който дава публикуваните файлове.
 - **Не пускай `build_data.py` или `run_all.sh` сами в режим на запис.** Те пишат изхода на строителите от v1 и махат слоя v5/v6.
 - **Датата на сглобяване** е денят на сглобяването и влиза във всеки файл. Сложи същата дата като стойност по подразбиране на `BUILD_DATE` в `tools/mock/dlib.py`, `vd_lib.py`, `build_text.py` и `mock_lib.py`. Иначе CI ще отхвърли новите дати.
 - `validate_data_v6.py` е същата проверка като в CI. Трябва да завърши с код 0.
+- `registry.py check` сверява `sources/registry.yaml` и `datasets/registry.yaml` с хранилището, също като в CI. Новият месец по КФП не иска промяна в регистрите: шаблонът `kfp_2026/*.xls` го покрива. Нов вид източник или нов файл в `site/data` иска запис там.
 - `validate_mock.py` брои редовете на `tools/mock/prototype.sha256`. При нов суров файл увеличи числото там.
 
 Ако нещо спре, прочети грешката, обясни я и спри (виж правилата).
