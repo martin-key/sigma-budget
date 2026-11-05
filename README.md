@@ -45,20 +45,20 @@ python3 -m http.server 8001 --directory prototype/site
 
 ## Сглобяване и публикуване
 
-Сглобяването изобразява предварително всеки екран (около 500 страници, около 35 s) в `dist/`. Всяка страница има свой HTML с текста и таблиците, заглавие, описание, каноничен адрес, Open Graph и JSON-LD. Пишат се и `sitemap.xml`, `robots.txt`, `llms.txt`, `llms-full.txt` и `_headers`. Сглобяването е и проверка на адресите и спира при грешка. Подробности има в [`docs/adr/0001-static-prerender.md`](docs/adr/0001-static-prerender.md) и в раздел 11 на [`docs/dev-guide.md`](docs/dev-guide.md).
+Сглобяването изобразява предварително всеки екран (775 страници, около минута) в `dist/`. Всяка страница има свой HTML с текста и таблиците, заглавие, описание, каноничен адрес, Open Graph и JSON-LD. Пишат се и `sitemap.xml`, `robots.txt`, `llms.txt`, `llms-full.txt` и `_headers`. Сглобяването е и проверка на адресите и спира при грешка. Подробности има в раздел 11 на [`docs/dev-guide.md`](docs/dev-guide.md). Това сглобяване е преходно: по [спецификацията](docs/approach-specification.md) страниците с данни са със SSR, а предложението да остане статичен сайт ([ADR 0001](docs/adr/0001-static-prerender.md)) е отхвърлено.
 
 ```bash
 PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/site/build.py                 # dist/ за https://sigma-budget.my-data.bg
 PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/site/build.py --origin https://… # друг адрес
 python3 tools/site/serve.py --dist                                                               # dist/ както го сервира хостингът
-npx wrangler@4 deploy                                                                           # Cloudflare (нужни са акаунт и домейн)
+npx wrangler@4 deploy --env staging                                                             # staging в Cloudflare (нужен е акаунт)
 ```
 
-Производственият адрес е в `<meta name="site-origin">` на `site/index.html`; `sigma-budget.my-data.bg` още не е потвърден. Адресът за обратна връзка е в `<meta name="feedback-email">`. GitHub Actions (`.github/workflows/site.yml`) проверява и сглобява всеки PR. Push към `develop` качва staging, а push към `main` качва production, щом са зададени секретите на Cloudflare. Готовността за production е в [`docs/production-readiness.md`](docs/production-readiness.md). Картинките (`og.png`, иконите) се рисуват с `tools/site/make_images.py`.
+Производственият адрес е в `<meta name="site-origin">` на `site/index.html`; `sigma-budget.my-data.bg` още не е потвърден. Адресът за обратна връзка е в `<meta name="feedback-email">`. GitHub Actions (`.github/workflows/site.yml`) проверява и сглобява всеки PR. Push към `develop` качва staging, щом са зададени секретите на Cloudflare. Production не се качва от CI: това е отделна контролирана процедура (етап E в [спецификацията](docs/approach-specification.md)). Готовността за production е в [`docs/production-readiness.md`](docs/production-readiness.md). Картинките (`og.png`, иконите) се рисуват с `tools/site/make_images.py`.
 
 ## Проверки
 
-Проверките са безглави (Playwright + Chromium) и обхождат всеки маршрут при 1280 px и 400 px, светла и тъмна тема. Проверките `_v6` пускат приложението в хеш режим (`#/prihodi`). Адресите с пътища се проверяват от `tools/site/build.py`.
+Проверките са безглави (Playwright + Chromium) и обхождат всеки маршрут при 1280 px и 400 px. Сайтът има само светла тема (`site/css/tokens.css`); тъмната, която иска [спецификацията](docs/approach-specification.md) (раздел 9.3), още я няма. Проверките на приложението (`check_mock_v6`, `redirects_v6`, `calc_check_v6`, `share_check_v6`, `accept_v6`, `motion_v6`, `overlap_v6`) го пускат в хеш режим (`#/prihodi`), а цифрите, които очакват, четат от `site/data/execution.json` (`tools/mock/expect_v6.py`). Шестте първи са в CI и спират PR-а. Адресите с пътища се проверяват от `tools/site/build.py`.
 
 ```bash
 # среда (еднократно, Python 3.12+): python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
