@@ -84,6 +84,29 @@ def _same(a, b, tol, what):
     return max([abs(x - y) for x, y in zip(a, b)] + [0.0])
 
 
+# Eurostat revises the annual series with every EDP notification (April, October); the prototype copies it is checked against
+# (prototype/src/debt_gdp.json, debt_stock.json) stay frozen. Each accepted revision is written out under the release ("updated" of
+# gov_10dd_edpt1) as year: (prototype, Eurostat). Any other difference, or a new release, stops the build until it is reviewed here.
+EUROSTAT_REVISIONS = {"2026-10-21": {
+    ("BG", "PC_GDP"): {2020: (24.5, 24.4), 2022: (22.5, 22.4), 2023: (22.9, 22.8), 2024: (23.8, 23.7)},
+    ("BG", "MIO_EUR"): {2025: (34634.9, 34797.0)},
+    ("EU27_2020", "PC_GDP"): {2015: (85.1, 85.0), 2016: (84.1, 84.0), 2018: (79.5, 79.4), 2019: (77.5, 77.4), 2020: (89.5, 89.4),
+                              2021: (86.7, 86.6), 2022: (82.4, 82.3), 2023: (80.5, 80.3), 2024: (80.7, 80.3), 2025: (81.7, 81.5)},
+}}
+
+
+def _same_revised(new, old, years, key, release, what):
+    """Eurostat (new) against the frozen prototype copy (old), year by year: equal, or exactly the revision listed for the release."""
+    listed = EUROSTAT_REVISIONS.get(release, {}).get(key, {})
+    if len(new) != len(old) or len(new) != len(years):
+        raise ValueError("cross-check failed: %s: %d / %d values for %d years" % (what, len(new), len(old), len(years)))
+    for y, a, b in zip(years, new, old):
+        if (a == b and y not in listed) or listed.get(y) == (b, a):
+            continue
+        raise ValueError("cross-check failed: %s %d: Eurostat %r, prototype %r, revision listed for %s: %r" % (
+            what, y, a, b, release, listed.get(y)))
+
+
 def build_debt(ctx):
     z = zdd_table(ctx)
     vintage = [PRINTED_VINTAGE[c.split(" ", 1)[1]] for c in ctx.tables["VI_1"]["columns"]]
@@ -110,10 +133,13 @@ def build_debt(ctx):
     ann = _eurostat_annual(ctx)
     gdp_proto = ctx.src("debt_gdp")
     yrs = [str(y) for y in ann["years"]]
-    _same(ann["bgPct"], [gdp_proto["BG"][y] for y in yrs], 0.0, "Eurostat BG %GDP vs prototype debt_gdp")
-    _same(ann["euPct"], [gdp_proto["EU27_2020"][y] for y in yrs], 0.0, "Eurostat EU27 %GDP vs prototype debt_gdp")
+    _same_revised(ann["bgPct"], [gdp_proto["BG"][y] for y in yrs], ann["years"], ("BG", "PC_GDP"), ann["asOf"],
+                  "Eurostat BG %GDP vs prototype debt_gdp")
+    _same_revised(ann["euPct"], [gdp_proto["EU27_2020"][y] for y in yrs], ann["years"], ("EU27_2020", "PC_GDP"), ann["asOf"],
+                  "Eurostat EU27 %GDP vs prototype debt_gdp")
     ga = ctx.src("debt_stock")["gg_debt_annual"]
-    _same(ann["bgMln"][5:], ga["mln_eur"], 0.0, "Eurostat BG mln 2020-2025 vs prototype debt_stock")
+    _same_revised(ann["bgMln"][5:], ga["mln_eur"], ann["years"][5:], ("BG", "MIO_EUR"), ann["asOf"],
+                  "Eurostat BG mln 2020-2025 vs prototype debt_stock")
     maastricht = {"years": ann["years"], "bg": {"mln": ann["bgMln"], "pctGdp": ann["bgPct"]},
                   "eu27": {"pctGdp": ann["euPct"], "mln": ann["euMln"]}, "thresholdPctGdp": 60,
                   "thresholdNote": "Референтна стойност от 60% от БВП (Протокол за процедурата при прекомерен дефицит към Договорите на ЕС).",

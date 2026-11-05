@@ -444,7 +444,10 @@ def build_law(ctx):
     for got, want in fixed:
         if got != want:
             raise ValueError("the parliament or gazette files give %r where this module expects %r" % (got, want))
-    if (z["reports"], z["opinions"], len(z["proposals"]), z["reportAuthors"], len(z["committees"])) != (23, 70, 69, 23, 24):
+    # the parliament's data, checked 2026-11-04: 22 committee reports and 71 opinions (until October 23 and 70). The report of the
+    # Комисия по регионална политика, благоустройство и местно самоуправление is no longer in stan_list, and the same committee now
+    # lists the НСОРБ opinion of 08.07.2026 twice. A further change stops the build again, to be reviewed the same way.
+    if (z["reports"], z["opinions"], len(z["proposals"]), z["reportAuthors"], len(z["committees"])) != (22, 71, 69, 22, 24):
         raise ValueError("counts of the budget bill changed: %r" % ((z["reports"], z["opinions"], len(z["proposals"])),))
     by_date = dict(sorted(Counter(p["date"] for p in z["proposals"]).items()))
     leading = [c["name"] for c in z["committees"] if c["role"] == "водеща"]
@@ -553,7 +556,10 @@ def build_law(ctx):
         "committees": {"total": len(z["committees"]), "leading": leading[0], "reported": z["reportAuthors"]},
         "opinionsNote": "Становищата са постъпили в комисиите от организации и институции; докладите са на комисиите.",
     }
-    nxt = {"title": "Бюджет 2027", "status": "pending", "note": "Проектът за бюджет 2027 не е включен в данните към 02.10.2026 г.; ще бъде добавен при публикуването му.",
+    # the wording site/data has carried since d1f0f6c (the plan for 2027 is on the screen S34; the bill comes when it is submitted)
+    nxt = {"title": "Бюджет 2027", "status": "pending",
+           "note": "Бюджетният план за 2027 г. (изпратен на 15.10.2026 г.) е на екрана „Бюджет 2027 (проект)“. Законопроектът за държавния "
+                   "бюджет за 2027 г. ще бъде добавен, когато бъде внесен в Народното събрание.",
            "expected": "минфин.бг, parliament.bg"}
 
     dba = sum(1 for r in rows if r["changed"])

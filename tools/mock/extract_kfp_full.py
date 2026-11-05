@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""D06 + D16 + D26: full extraction of the 32 monthly KFP reports (2024: 12, 2025: 12, 2026: 8) -> site/data/execution.json.
+"""D06 + D16 + D26: full extraction of the monthly KFP reports since January 2024 -> site/data/execution.json.
 
-Source files: prototype/data/raw/kfp_2024/*.xls, kfp_2025/*.xls and kfp_2026/*.xls, sheet "стартова" (cumulative since 1 January).
-Layout is identical in all 32 files (54 rows); every expected row label is verified before a number is read.
+Source files: prototype/data/raw/kfp_<year>/*.xls from 2024 on, sheet "стартова" (cumulative since 1 January). Every year but the
+last must hold all 12 reports; the last one holds months 1..n, n being the newest report (no month count is written in the code).
+Layout is identical in all files (54 rows); every expected row label is verified before a number is read.
 Columns: B = к.2 (КФП) = C = к.3 (национален бюджет) + D = к.4 (европейски средства).
 
 * 2024 and 2025 reports are in млн. лв.; every number is converted to млн. € (divided by 1.95583, rounded to 3 decimals AFTER dividing).
@@ -65,7 +66,7 @@ ROWS = [
     (48, "fin.priv", "и възмездни  средства - нето", 1, "fin", "financing", "Приватизация и възмездни средства"),
     (49, "fin.priv.shares", "приватизация на дялове, акции и участия", 2, "fin.priv", "financing", "Приватизация на дялове и акции"),
 ]
-# sheet rows that are blank in ALL 32 reports (dropped, verified at run time): 15, 18, 42, 43, 44, 47
+# sheet rows that are blank in ALL reports (dropped, verified at run time): 15, 18, 42, 43, 44, 47
 BLANK_ROWS = [15, 18, 42, 43, 44, 47]
 # computed row: Разходи с вноската в ЕС
 EXP_TOTAL = {"id": "exp.total", "label": "Разходи (с вноската в ЕС)", "short": "Разходи с вноската в ЕС", "level": 0,
@@ -87,8 +88,10 @@ SUM_IDENTITIES = {
 
 MIN_BASE_FOR_YOY = 50.0          # млн. €: below this base a year-on-year % is not published
 FIN_BALANCE_TOL = 0.005          # млн. (original units): fin vs -balance differ by <= 0.0019 in the 2025/2026 reports
-# reports per year that must be there (file name month = month in the title, months 1..n)
-EXPECTED_MONTHS = {2024: 12, 2025: 12, 2026: 8}
+# the series starts with the January 2024 report; file name month = month in the title, months 1..n per year
+FIRST_YEAR = 2024
+# the Ministry names the file „…-EU_funds_MMYY_BG_WEB.xls“; the September 2026 report came as „EU funds“, with a space
+FILE_RE = re.compile(r"EU[ _]funds_(\d{2})(\d{2})_")
 # source-internal differences of single reports (original units, млн. лв.): checked against the stated bound, reported as a
 # warning instead of an error.  Nothing is corrected: the numbers are published as the Ministry printed them.
 KNOWN_SOURCE_DIFFS = {
@@ -97,8 +100,10 @@ KNOWN_SOURCE_DIFFS = {
     # November 2024: the control row 34 (balance + financing) is 0.000035 млн. лв. in к.2 and к.3 instead of 0
     ("row34", 2024, 11): 0.00004,
 }
-# reference headline of the last two reports (KFP, млн. €, 1 decimal): rev, exp.total, balance
-REFERENCE = {(2026, 7): (26347.4, 28548.8, -2201.4), (2026, 8): (30117.8, 33193.2, -3075.5)}
+# reference headline of the latest reports (KFP, млн. €, 1 decimal): rev, exp.total, balance
+# September 2026: the MF release of 02.11.2026, https://www.minfin.bg/bg/news/13559
+REFERENCE = {(2026, 7): (26347.4, 28548.8, -2201.4), (2026, 8): (30117.8, 33193.2, -3075.5),
+             (2026, 9): (33898.5, 37567.6, -3669.2)}
 
 HEADLINE = ["rev", "exp.total", "balance"]
 # rows for which the "pace" block (share of the year's final cumulative) is published
@@ -128,8 +133,9 @@ def clean_label(raw):
 
 def list_reports():
     files = []
-    for year in sorted(EXPECTED_MONTHS):
-        files += sorted(glob.glob(str(RAW / ("kfp_%d" % year) / "*.xls")))
+    for d in sorted(glob.glob(str(RAW / "kfp_[0-9][0-9][0-9][0-9]"))):
+        if int(os.path.basename(d)[4:]) >= FIRST_YEAR:
+            files += sorted(glob.glob(os.path.join(d, "*.xls")))
     return files
 
 
@@ -137,7 +143,7 @@ def parse_report(path):
     """Parse one report. Returns {'year','month','asOf','unit','values':{id:{col:float|None}}, 'labels':{id:str}, 'blank':[rows]}.
 
     Values are the ORIGINAL numbers rounded to 6 decimals (the xls holds float noise like 3e-13); blank cells are None.
-    Raises ValueError when the layout deviates from the one all 32 files share.
+    Raises ValueError when the layout deviates from the one all files share.
     """
     sh = xlrd.open_workbook(path).sheet_by_name(SHEET)
     if sh.nrows != 54 or sh.ncols != 4:
@@ -263,8 +269,6 @@ def convert(v, unit):
 def build():
     prob = Problems("extract_kfp_full")
     files = list_reports()
-    if len(files) != sum(EXPECTED_MONTHS.values()):
-        prob.error("expected %d reports, found %d" % (sum(EXPECTED_MONTHS.values()), len(files)))
     if not files:
         prob.error("no reports in prototype/data/raw/kfp_*/ (raw files, not in the repository: docs/data-sources.md)")
         prob.finish()
@@ -277,16 +281,19 @@ def build():
     by_year = {}
     for rep in reports:
         f = rep["path"]
-        m = re.search(r"EU_funds_(\d{2})(\d{2})_", os.path.basename(f))
+        m = FILE_RE.search(os.path.basename(f))
         if not m or (int(m.group(1)), 2000 + int(m.group(2))) != (rep["month"], rep["year"]):
             prob.error("%s: file name does not match the as-of date %s" % (os.path.basename(f), rep["asOf"]))
         by_year.setdefault(rep["year"], []).append((rep, f))
+    years = sorted(by_year)
+    if years != list(range(FIRST_YEAR, FIRST_YEAR + len(years))):
+        prob.error("years %s are not consecutive from %d" % (years, FIRST_YEAR))
     for y, lst in by_year.items():
         months = [r["month"] for r, _ in lst]
         if months != list(range(1, len(months) + 1)):
             prob.error("year %d: months %s are not 1..n" % (y, months))
-        if len(months) != EXPECTED_MONTHS.get(y):
-            prob.error("year %d: %d reports, expected %s" % (y, len(months), EXPECTED_MONTHS.get(y)))
+        if y != years[-1] and len(months) != 12:
+            prob.error("year %d: %d reports, expected 12 (only the last year may be incomplete)" % (y, len(months)))
         for r, _f in lst:
             if r["asOf"] != "%04d-%02d-%02d" % (y, r["month"], calendar.monthrange(y, r["month"])[1]):
                 prob.error("%s: the title date %s is not the last day of the month" % (os.path.basename(_f), r["asOf"]))

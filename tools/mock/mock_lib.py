@@ -5,7 +5,7 @@ Layout, deterministic JSON writer (same style as tools/mock/dlib.py: minified UT
 "-0.0"), the seeded random streams, exact-sum apportionment, the Bulgarian working-day calendar of the mock payments
 and the ЕИК check-digit rule (the validator uses it to prove that the invented ЕИК numbers are NOT valid ones).
 
-Nothing here reads the clock or the network. The build date is a constant (BUILD_DATE env var, default 2026-10-09; was 2026-10-02 until the KFP 2024 + 08.2026 rebuild) so
+Nothing here reads the clock or the network. The build date is a constant (BUILD_DATE env var, default 2026-11-05; was 2026-10-09 until the 09.2026 rebuild, 2026-10-02 before the KFP 2024 + 08.2026 one) so
 that two builds are byte-identical.
 """
 import datetime
@@ -27,7 +27,7 @@ PROTO_SRC = os.path.join(ROOT, "prototype", "src")
 ROUTES_JS = os.path.join(SITE, "js", "routes.js")
 
 SEED = 20261002
-BUILD_DATE = os.environ.get("BUILD_DATE", "2026-10-09")
+BUILD_DATE = os.environ.get("BUILD_DATE", "2026-11-05")
 
 GISCO_JSON = os.path.join(CACHE, "gisco_lau_bg.json")
 LAW_JSON = os.path.join(CACHE, "law_bill.json")
