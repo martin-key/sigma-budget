@@ -236,7 +236,7 @@ function notesBlock(ctx, M) {
   const note = id => (Array.isArray(F.notes) ? F.notes.find(n => n.id === id)?.text : F.notes?.[id]) ?? '';
   const items = [note('base'), note('col2025'), M.id === 'drugi' ? note('drugi') : ''].filter(Boolean);
   if (X.meta?.asOf) items.push(html`Числата са от мотивите към проекта на бюджета, към ${date(X.meta.asOf, true)}. Приетият закон може да се различава от проекта: какво е променено, виж в „<a href="${ctx.href('S14', {}, { per: '2026.law' })}">Пътят на бюджета</a>“.`);
-  return block({ id: 's08-notes', title: 'Как да четеш числата', status: 'real', pill: false, source: ['asbp'], share: false, body: html`<ul class="s08-notes" data-gl-scan>${items.map(t => html`<li>${t}</li>`)}</ul>` });
+  return block({ id: 's08-notes', title: 'Как да четеш числата', status: 'real', pill: false, report: false, source: ['asbp'], share: false, body: html`<ul class="s08-notes" data-gl-scan>${items.map(t => html`<li>${t}</li>`)}</ul>` });
 }
 
 // ── page contract ──────────────────────────────────────────────────────────────────────────────────────

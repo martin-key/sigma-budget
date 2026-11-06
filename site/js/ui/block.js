@@ -3,7 +3,8 @@
 // - status 'real' (default) | 'partial' | 'forecast' | 'mock' | 'pending' | 'text' | false (no status); mock:true ≡ status:'mock'
 //   'text': words only, no number of the data (a definition, a guide's checklist, the visitor's own inputs): no pill, and
 //   tools/mock/check_mock_v6.py fails such a block that shows a chart, a table, a KPI or a sourced number.
-//   pill:false keeps the status and its data-block-status but shows no pill (a note under the figures: it cites real numbers)
+//   pill:false keeps the status and its data-block-status but shows no pill (a note under the figures: it cites real numbers);
+//   a 'text' block has no „Намерих грешка“ link unless report is set
 // - a mock block is hatched on its top edge, says „Примерни данни“ (pill + note with `why`) and, while „Само официални данни“ is on,
 //   is replaced by the one-line `mockHidden` note (the id stays, so ?to= still lands somewhere)
 // - one meta line under the title: scope chip, status pill, „Данни към <asOf>“, „Източник“ button (from `source`)
@@ -38,7 +39,7 @@ export function block(o = {}) {
 
   const src = keysOf(o.source);
   const wantShare = o.share === undefined ? src.length > 0 && status !== 'pending' : !!o.share;
-  const wantReport = o.report ?? (status !== false && status !== 'pending' && status !== 'mock');
+  const wantReport = o.report ?? (status !== false && status !== 'pending' && status !== 'mock' && status !== 'text');
   const report = { block: id, src: src.join(','), type: 'error' };
   if (wantShare) {
     const sh = typeof o.share === 'object' && o.share ? o.share : {};

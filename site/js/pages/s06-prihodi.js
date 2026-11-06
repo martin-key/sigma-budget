@@ -301,7 +301,7 @@ function notesBlock(ctx, m) {
   if (m.firstForecast > 0) items.push(`${m.years.slice(m.firstForecast).join(' и ')} са прогноза на Министерството на финансите, не приет план.`);
   if (m.rev.meta?.asOf) items.push(html`Числата са от мотивите към проекта на бюджета, към ${date(m.rev.meta.asOf, true)}. Приетият закон може да се различава от проекта: какво е променено, виж в „<a href="${ctx.href('S14', {}, { per: '2026.law' })}">Пътят на бюджета</a>“.`);
   return block({
-    id: 's06-notes', title: 'Как да четеш числата', status: 'real', pill: false, source: ['asbp'], share: false,
+    id: 's06-notes', title: 'Как да четеш числата', status: 'real', pill: false, report: false, source: ['asbp'], share: false,
     body: html`<ul class="s06-notes" data-gl-scan>${items.map(t => html`<li>${t}</li>`)}</ul>`
   });
 }

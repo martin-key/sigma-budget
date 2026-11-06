@@ -7,6 +7,8 @@ import { bannerHtml, topbarHtml, tabbarHtml, footerHtml } from '../../site/js/ch
 import { data } from '../../site/js/data.js';
 import { toHref, parts, fileHref } from '../../site/js/loc.js';
 import { reset as resetShare } from '../../site/js/share.js';
+import { index as glossaryIndex, link as linkTerms } from '../../site/js/glossary-scan.js';
+import { parseHTML } from 'linkedom';
 
 export interface HeadTag { tag: 'meta' | 'link'; attrs: Record<string, string> }
 export interface ScreenDoc {
@@ -35,6 +37,19 @@ export type ScreenResult = { redirect: string } | { doc: ScreenDoc };
 const fixLinks = (s: string, base = '') => s
   .replace(/href="(#\/[^"]*)"/g, (_m, h: string) => `href="${toHref(h)}"`)
   .replace(/href="(data\/[^"]*)"/g, (_m, h: string) => `href="${fileHref(h, base)}"`);
+/* the glossary links the browser adds to running text (site/js/glossary-scan.js, the same rules), so a crawler reads them too. The
+   article is parsed with linkedom only when it has text to scan, and written out only when a term was linked; linkedom writes the same
+   HTML in its own spelling (&#160;, " />", empty attributes as ="" and so on), so the two spellings a reader could notice are put back */
+async function withGlossary(article: string): Promise<string> {
+  if (!article.includes('data-gl-scan')) return article;
+  let terms;
+  try { terms = glossaryIndex(await data.load('glossary')); } catch { return article; }
+  const { document } = parseHTML(`<!doctype html><html><body>${article}</body></html>`);
+  const root = document.querySelector('article.page');
+  if (!root || !linkTerms(root, terms)) return article;
+  return root.outerHTML.replace(/&#160;/g, '\u00a0').replace(/" \/>/g, '"/>');
+}
+
 const sameAddress = (a: string, b: string) => { try { return decodeURIComponent(a) === decodeURIComponent(b); } catch { return a === b; } };
 
 type Rel = ScreenDoc['release'];
@@ -71,7 +86,7 @@ export async function renderScreen(url: URL, release: Rel): Promise<ScreenResult
       release,
       banner: String(bannerHtml()),
       topbar: fixLinks(String(topbarHtml({ route: shown, periods: periodsFor(shown, mod) }))),
-      view: vm ? fixLinks(String(frameHtml(vm)), release.dataBase === '/data/' ? '' : release.dataBase) : '',
+      view: vm ? fixLinks(await withGlossary(String(frameHtml(vm))), release.dataBase === '/data/' ? '' : release.dataBase) : '',
       busy: !vm,
       footer: fixLinks(String(footerHtml({ wide: true, cur: shown.id, theme: '', from: parts(r.want).path.replace(/^\//, '') }))),
       tabbar: fixLinks(String(tabbarHtml(shown))),
