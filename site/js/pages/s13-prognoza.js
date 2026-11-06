@@ -416,7 +416,7 @@ function notesBlock(f) {
   const disc = vtable ? disclosure({ id: 's13-versions', title: 'Разлики между двете версии на документа', meta: `${vers.length} реда`, body: vtable }) : '';
   if (!rest.length && !two && !disc) return '';
   return block({
-    id: 's13-notes', title: 'Бележки към числата', status: false, source: ['asbp'], share: false, asOf: f.asOf,
+    id: 's13-notes', title: 'Бележки към числата', status: 'real', pill: false, source: ['asbp'], share: false, asOf: f.asOf,
     body: html`<div class="stack">
       ${rest.length ? html`<ul class="s13-notes" data-gl-scan>${rest.map(n => html`<li>${clean(n.text)}</li>`)}</ul>` : ''}
       ${two ? html`<p class="s13-note-two" data-gl-scan>${clean(two.text)}${disc ? ' Разликите са в таблицата по-долу.' : ''}</p>` : ''}

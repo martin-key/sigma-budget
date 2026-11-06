@@ -540,6 +540,8 @@ async (o) => {
     const blocks = [...view.querySelectorAll('section.block')];
     const noSt = blocks.filter(b => !b.dataset.blockStatus).map(path);
     if (noSt.length) add('block-status', 'warn', `block without data-block-status: ${take(noSt, 3)}`);
+    const textData = blocks.filter(b => b.dataset.blockStatus === 'text' && b.querySelector('figure.fig, table, .kpi, .val, [data-src]')).map(path);
+    if (textData.length) add('block-text', 'fail', `a block marked as text shows data (a chart, a table, a KPI or a sourced number): ${take(textData, 3)}`);
     info.blocks = blocks.length; info.mockBlocks = blocks.filter(b => b.dataset.blockMock === 'true').length; }
   const charts = [...document.querySelectorAll('.chart')];
   info.charts = charts.length;

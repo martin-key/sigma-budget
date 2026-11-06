@@ -223,7 +223,7 @@ function inputsBlock(st, c, env) {
   const sv = sliderState(st.gross);
   const labelOf = () => env.emp?.label || 'Трудов договор';
   return block({
-    id: 's18-inputs', title: 'Твоите данни', status: false, share: false, report: false,
+    id: 's18-inputs', title: 'Твоите данни', status: 'text', share: false, report: false,
     body: html`
       <div class="s18-group">
         <p class="field-label" id="s18-type-l">Вид доход</p>

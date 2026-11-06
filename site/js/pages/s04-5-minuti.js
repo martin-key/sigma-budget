@@ -383,7 +383,7 @@ function checks(ctx) {
   const body = html`<p class="s04-checks-lead">${c.lead}</p>
     <ol class="s04-checks-list">${c.items.map(it => html`<li><span class="s04-checks-n" aria-hidden="true">${it.n}</span><span class="s04-checks-short">${it.short}<span class="sr-only">: </span></span><span class="s04-checks-text">${it.text}</span></li>`)}</ol>
     <p class="s04-checks-end">${withLink(c.end, 'Откъде са данните?', href('S24'))}</p>`;
-  return block({ id: 's04-checks', title: c.title, level: 2, sub: c.heading, status: false, body, cls: 's04-block s04-checks' });
+  return block({ id: 's04-checks', title: c.title, level: 2, sub: c.heading, status: 'text', body, cls: 's04-block s04-checks' });
 }
 
 /* ------------------------------------------------------------------ the page */
