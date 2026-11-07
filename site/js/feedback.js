@@ -1,14 +1,21 @@
-// Feedback box of the Mock. Nothing is sent anywhere: the forms of S03 („Още не разбирам“) and S27 (three forms) keep what a visitor
-// "sent" in this browser only, through `safe` (localStorage, key bns.feedback.v1). If storage is blocked the entries live in memory until reload.
+// Feedback box. The forms of S03 („Още не разбирам“) and S27 (three forms) keep what a visitor sent in this browser, through `safe`
+// (localStorage, key bns.feedback.v1; in memory until reload when storage is blocked), and prepare an e-mail to the team: mailto(rec).
+// The site has no server that receives messages: the visitor sends the e-mail from their own mail app, to <meta name="feedback-email">.
+// Without that address the forms only keep the message here and say so (TO is '').
 //   add({type, text, ...context})  -> the stored record (always returns one; `persisted` says whether it reached localStorage)
 //   list()                         -> records, newest first
 //   clear()                        -> forget them all
-//   SENT                           -> the one success sentence of the Mock (PLAN S27)
+//   mailto(rec)                    -> 'mailto:…' with the message and its context, or '' without an address
+//   SEND                           -> the label of the submit button: without an address nothing is sent, so it says where the message goes
+//   SENT                           -> the one success sentence (PLAN S27)
+//   TO                             -> the team's address (<meta name="feedback-email">), or ''
 //   TYPES                          -> {error, unclear, idea} -> visible form names
 import { safe } from './store.js';
 
 export const KEY = 'bns.feedback.v1';
-export const SENT = 'Благодарим. В истинското приложение това отива при екипа.';
+export const TO = (typeof document !== 'undefined' && document.querySelector('meta[name="feedback-email"]')?.content || '').trim();
+export const SEND = TO ? 'Изпрати' : 'Запази в този браузър';
+export const SENT = TO ? 'Благодарим. Остава да изпратиш имейла.' : 'Благодарим. Записахме го в този браузър.';
 export const TYPES = { error: 'Намерих грешка', unclear: 'Още не разбирам', idea: 'Предложи идея' };
 export const MAX_TEXT = 1000;
 
@@ -46,3 +53,12 @@ export function add(entry = {}) {
 }
 
 export function clear() { safe.del('localStorage', KEY); mem = []; }
+
+const LABEL = { from: 'Екран', val: 'Число или текст', src: 'Източник', block: 'Блок', topic: 'Част от сайта', term: 'Термин', contact: 'Имейл за отговор' };
+/** the e-mail the visitor sends from their own mail app: subject „[Бюджет на светло] <form>“, the text, then the context lines and the page */
+export function mailto(rec) {
+  if (!TO || !rec) return '';
+  const lines = [rec.text, '', ...Object.keys(LABEL).filter(k => rec[k]).map(k => `${LABEL[k]}: ${rec[k]}`), `Страница: ${location.href}`];
+  const q = `subject=${encodeURIComponent(`[Бюджет на светло] ${TYPES[rec.type] || 'Съобщение'}`)}&body=${encodeURIComponent(lines.join('\n'))}`;
+  return `mailto:${encodeURIComponent(TO).replace(/%40/g, '@')}?${q}`;
+}

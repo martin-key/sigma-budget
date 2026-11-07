@@ -3,6 +3,7 @@
 // Every number and every event comes from feed.json (built by the data pipeline from the other data sets); nothing is typed from memory.
 // The visitor filters the chronology in the query: ?vid=report|law|plenary|rates|eurostat|data (none = all events).
 import { html, plain, raw } from '../html.js';
+import { ROOT } from '../loc.js';
 import { icon } from '../icons.js';
 import { pct, date, monthName, plural, NBSP } from '../format.js';
 import { copyOrShow } from '../share.js';
@@ -166,7 +167,7 @@ export function feedBlock(M) {
 /* ------------------------------------------------------------------ RSS: a real static file next to the data */
 const FEED_FILE = 'data/feed.xml';
 function feedUrl() {
-  try { return new URL(FEED_FILE, document.baseURI).href; } catch (e) { return FEED_FILE; }
+  try { return new URL(FEED_FILE, ROOT).href; } catch (e) { return FEED_FILE; }
 }
 
 export function rssBlock(M) {
@@ -255,7 +256,7 @@ export function lede(ctx) {
 
 export function render(ctx) {
   const M = model(ctx);
-  return html`${summaryBlock(M)}${expectedBlock(M)}${feedBlock(M)}${rssBlock(M)}${subscribeBlock()}`;
+  return html`${summaryBlock(M)}${expectedBlock(M)}${feedBlock(M)}${rssBlock(M)}`;   // V7: the sample subscription form (subscribeBlock) is out: it sent nothing, and RSS is the real channel
 }
 
 /* ------------------------------------------------------------------ behaviour: the chronology filter is announced, the mock form is checked and answered, the RSS address is copied */

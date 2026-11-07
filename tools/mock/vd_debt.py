@@ -17,6 +17,12 @@ def _tol_sum(n):
     return 0.05 * (n + 1) + 0.01
 TOL_PCT = 0.051                 # a printed percentage against total / GDP
 TOL_STORED = 0.0051             # a stored deviation is rounded to two decimals
+# Eurostat releases (maastricht.asOf) whose GDP is newer than the one of Annex 3 (June 2026): for these years the printed share follows
+# Eurostat's GDP, so it is held to TOL_GDP_VINTAGE instead of TOL_PCT. A new release is listed here after review (bd_debt.EUROSTAT_REVISIONS).
+GDP_VINTAGE = {"2026-10-21": (2024, 2025)}
+TOL_GDP_VINTAGE = 0.2
+# the quarterly series as published: first and last quarter (a new quarter is a reviewed change of these values)
+QUARTERS = (("eurostat", "2024-Q1", "2026-Q2"), ("bnbGg", "2015-Q4", "2026-Q2"), ("bnbCg", "2008-Q1", "2026-Q2"))
 SPACES = re.compile(r"[\s\u00a0\u202f]+")
 WORD = {"actual": "Отчет", "plan": "Проект", "forecast": "Прогноза"}
 GROUP_IDS = ("maturity", "instrument", "rate", "currency", "creditor")
@@ -112,17 +118,24 @@ def g_debt(ctx):
          "latest.maastricht must equal the last year of the annual series")
     for k in (2024, 2025):                               # the GDP of both years is known: the printed share must follow
         i = my.index(k)
-        c.near(mx["bg"]["pctGdp"][i], 100.0 * mx["bg"]["mln"][i] / z["gdpMln"][yrs.index(k)], TOL_PCT, "maastricht %d: percent against the GDP" % k)
+        newer = k in GDP_VINTAGE.get(mx["asOf"], ())
+        c.near(mx["bg"]["pctGdp"][i], 100.0 * mx["bg"]["mln"][i] / z["gdpMln"][yrs.index(k)], TOL_GDP_VINTAGE if newer else TOL_PCT,
+               "maastricht %d: percent against the GDP%s" % (k, " of Annex 3 (Eurostat GDP of %s is newer)" % mx["asOf"] if newer else ""))
     # --- quarterly series
     q = d["quarterly"]
     eu, gg, cg = q["eurostat"], q["bnbGg"], q["bnbCg"]
-    for name, s, first, last in (("eurostat", eu, "2024-Q1", "2026-Q1"), ("bnbGg", gg, "2015-Q4", "2026-Q1"), ("bnbCg", cg, "2008-Q1", "2026-Q2")):
+    for name, first, last in QUARTERS:
+        s = q[name]
         qs = s["quarters"]
         c.ok(qs[0] == first and qs[-1] == last and qs == _quarters(first, len(qs)), "quarterly.%s: quarters must run %s..%s without a gap" % (name, first, last))
         c.ok(len(s["mln"]) == len(qs) and all(isnum(v) and v > 0 for v in s["mln"]), "quarterly.%s: mln" % name)
     c.ok(eu["dataset"] == "gov_10q_ggdebt" and gg["indicator"] == "GGALN_G01_XDC" and cg["indicator"] == "GCALN_G01_AC_XDC", "quarterly dataset / indicators")
     c.ok(len(eu["pctGdp"]) == len(eu["flags"]) == len(eu["quarters"]), "quarterly.eurostat: pctGdp / flags length")
-    c.ok(eu["flags"][:-1] == [""] * (len(eu["flags"]) - 1) and eu["flags"][-1] == "p" and set(eu["flagLabels"]) == {"p"}, "quarterly.eurostat.flags: only the last quarter is provisional")
+    n_p = 0                                              # Eurostat marks the newest quarter(s) provisional
+    while n_p < len(eu["flags"]) and eu["flags"][-1 - n_p] == "p":
+        n_p += 1
+    c.ok(n_p >= 1 and eu["flags"] == [""] * (len(eu["flags"]) - n_p) + ["p"] * n_p and set(eu["flagLabels"]) == {"p"},
+         "quarterly.eurostat.flags: only the newest quarters are provisional")
     lq = lm["quarter"]
     c.ok(lq["id"] == eu["quarters"][-1] and lq["mln"] == eu["mln"][-1] and lq["pctGdp"] == eu["pctGdp"][-1] and lq["flag"] == eu["flags"][-1] and lq["asOf"] == eu["asOf"],
          "latest.maastricht.quarter must equal the last Eurostat quarter")

@@ -10,11 +10,11 @@ import re
 HERE = os.path.dirname(os.path.abspath(__file__))     # .../tools/mock
 ROOT = os.path.dirname(os.path.dirname(HERE))         # repository root
 SITE = os.path.join(ROOT, "site")                     # the Mock application
-DATA = os.path.join(SITE, "data")
+DATA = os.environ.get("BUDGET_DATA_DIR") or os.path.join(SITE, "data")   # tools/budget.py validate points it at a release
 PROTO = os.path.join(ROOT, "prototype")
 RAW = os.path.join(PROTO, "data", "raw")              # raw sources, NOT in the repository: see docs/data-sources.md
 TMP = os.path.join(ROOT, "tmp")                       # scratch and outputs (gitignored)
-BUILD_DATE = os.environ.get("BUILD_DATE", "2026-10-09")
+BUILD_DATE = os.environ.get("BUILD_DATE", "2026-11-05")
 ISO = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
@@ -64,10 +64,15 @@ def _no_constants(name):
 
 
 def load(rel, base=None):
-    """Parse site/data/<rel> (NaN / Infinity are errors)."""
+    """Parse site/data/<rel> (NaN / Infinity are errors). execution.json comes through the adapter of its contract v2 (money as decimal
+    strings -> floats), so the checks compute as before; vd_contract.py checks the file as written."""
     path = os.path.join(base or DATA, rel)
     with open(path, "r", encoding="utf-8") as fh:
-        return json.loads(fh.read(), parse_constant=_no_constants)
+        obj = json.loads(fh.read(), parse_constant=_no_constants)
+    if os.path.basename(rel) == "execution.json":
+        import exec_contract
+        obj = exec_contract.numbers(obj)
+    return obj
 
 
 def exists(rel, base=None):
@@ -75,9 +80,12 @@ def exists(rel, base=None):
 
 
 def data_files():
-    """Every file under site/data as site-data-relative paths with '/' separators, sorted."""
+    """Every file under site/data as site-data-relative paths with '/' separators, sorted. site/data/releases/ is left out: the manifests
+    describe the release (tools/budget.py, docs/release.md), they are not datasets of it."""
     out = []
     for dp, dn, fn in os.walk(DATA):
+        if os.path.samefile(dp, DATA) and "releases" in dn:
+            dn.remove("releases")
         dn.sort()
         for f in fn:
             out.append(os.path.relpath(os.path.join(dp, f), DATA).replace(os.sep, "/"))

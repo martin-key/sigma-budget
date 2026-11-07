@@ -1,0 +1,169 @@
+# Checks, build and deployment of the site (README „Сглобяване и публикуване“; docs/adr/0002-react-router-ssr.md).
+#   pull request to main             -> the registries, data validation, the TypeScript check, the build of the Worker (React Router SSR)
+#                                       with every screen checked as the server sends it and as the browser shows it, the v6 checks of the
+#                                       app (check_mock_v6 against the built Worker), a build of the pinned data image, and the release
+#                                       registry on a local Worker (stage C)
+#   push to main                     -> the same, then deploy the built Worker to staging (noindex)
+# There is no develop branch. This workflow never deploys to production: production comes later, by hand (docs/production-procedure.md).
+# The staging deployment needs the repository secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID and the variable STAGING_ORIGIN
+# (the staging Worker's address); without them the deploy step is skipped.
+name: site
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: site-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: requirements-dev.lock
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install tools
+        run: |
+          python -m pip install --require-hashes -r requirements-dev.lock
+          python -m playwright install --with-deps chromium
+          npm ci
+      - name: TypeScript
+        run: npx react-router typegen && npx tsc
+      - name: Check the source and dataset registries
+        run: python tools/data/registry.py check
+      - name: Check the published release (site/data against its manifest)
+        run: ./budget validate --site
+      - name: Validate the data
+        run: python tools/mock/validate_data_v6.py
+      - name: Compatibility of code and data (stage E)
+        run: python tools/compat_check.py
+      - name: Build the Worker for staging and check every screen
+        env:
+          ORIGIN: ${{ vars.STAGING_ORIGIN || 'https://sigma-budget.my-data.bg' }}
+        run: python tools/site/build.py --env staging --origin "$ORIGIN" --noindex
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: build
+          retention-days: 7
+
+  check:
+    # The v6 checks of the app (hash mode, the expected figures read from site/data/execution.json): all of them block, and the
+    # staging deployment waits for them. The full check_mock_v6 also covers 400 px and keyboard paths; it runs against the built Worker
+    # (the screens drawn on the server, then taken over by the app), the others test the app on the static files of site/.
+    needs: [build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/.pw-browsers   # the checks look there first (redirects_v6 and others set it as their default)
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: requirements-dev.lock
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: |
+          python -m pip install --require-hashes -r requirements-dev.lock
+          python -m playwright install --with-deps chromium
+          npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: build
+          path: build
+      - name: Screens, accessibility and layout (against the built Worker)
+        run: |
+          npx wrangler dev -c build/server/wrangler.json --ip 127.0.0.1 --port 8787 --persist-to "$RUNNER_TEMP/state" > "$RUNNER_TEMP/wrangler.log" 2>&1 &
+          for i in $(seq 1 60); do curl -sf -o /dev/null http://127.0.0.1:8787/robots.txt && break; sleep 1; done
+          python tools/mock/check_mock_v6.py --url http://127.0.0.1:8787/
+      - name: Old addresses
+        run: python tools/mock/redirects_v6.py
+      - name: Tax calculator
+        run: python tools/mock/calc_check_v6.py
+      - name: Sharing and export
+        run: python tools/mock/share_check_v6.py
+      - name: Acceptance figures
+        run: python tools/mock/accept_v6.py
+      - name: Motion
+        run: python tools/mock/motion_v6.py
+
+  release:
+    # the release registry and the operator API (stage C) on the Worker with local D1 and R2: acceptance scenarios 3, 4, 5, 6 and 9, rollback
+    # and the public API, with synthetic releases (tools/release_check.py; docs/release.md); the restore drill of scenario 10
+    # (tools/restore_drill.py; docs/operator-guide.md)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: python tools/release_check.py
+      - run: python tools/restore_drill.py
+
+  data-image:
+    # the pinned environment of the data processing (tools/data/Dockerfile): it must build from its digest and hash-locked
+    # dependencies. Running it needs the raw files, which are not in the repository.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t sigma-budget-data tools/data
+      - run: docker run --rm sigma-budget-data python -c "import fitz, xlrd, yaml, docx, pdfplumber, py7zr; print(fitz.VersionBind)"
+
+  deploy:
+    needs: [build, check, release]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: build
+          path: build
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      # the wrangler of package-lock.json, the one release_check tests with
+      - run: npm ci
+      - name: Deploy to the staging Worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          STAGING_ORIGIN: ${{ vars.STAGING_ORIGIN }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::notice::Cloudflare secrets are not set: skipping the deployment."
+            exit 0
+          fi
+          # the new code must read the release that is current on staging (tools/compat_check.py; no release yet passes)
+          if [ -n "$STAGING_ORIGIN" ]; then python3 tools/compat_check.py --env-url "$STAGING_ORIGIN"; fi
+          npx wrangler deploy -c build/server/wrangler.json      # built with CLOUDFLARE_ENV=staging: the staging Worker, D1 and R2

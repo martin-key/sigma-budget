@@ -1,27 +1,30 @@
 #!/usr/bin/env python3
-"""D06 + D16 + D26: full extraction of the 32 monthly KFP reports (2024: 12, 2025: 12, 2026: 8) -> site/data/execution.json.
+"""D06 + D16 + D26: full extraction of the monthly KFP reports since January 2024 -> site/data/execution.json.
 
-Source files: prototype/data/raw/kfp_2024/*.xls, kfp_2025/*.xls and kfp_2026/*.xls, sheet "стартова" (cumulative since 1 January).
-Layout is identical in all 32 files (54 rows); every expected row label is verified before a number is read.
+Source files: prototype/data/raw/kfp_<year>/*.xls from 2024 on, sheet "стартова" (cumulative since 1 January). Every year but the
+last must hold all 12 reports; the last one holds months 1..n, n being the newest report (no month count is written in the code).
+Layout is identical in all files (54 rows); every expected row label is verified before a number is read.
 Columns: B = к.2 (КФП) = C = к.3 (национален бюджет) + D = к.4 (европейски средства).
 
 * 2024 and 2025 reports are in млн. лв.; every number is converted to млн. € (divided by 1.95583, rounded to 3 decimals AFTER dividing).
 * 2026 reports are in млн. € and only rounded to 3 decimals.
 * Identities are checked on the ORIGINAL numbers (rounded to 6 decimals) with the exact rounding bound (n+1)*0.5e-6, and on the
-  converted numbers with the rounding bound of the conversion.  Any violation is an error (exit code 1), except the two
+  converted numbers with the rounding bound of the conversion.  Any violation is an error (exit code 1, nothing is written), except the two
   source-internal differences of the 2024 files listed in KNOWN_SOURCE_DIFFS (reported as warnings, bounded).
 
-Run:  .venv/bin/python tools/mock/extract_kfp_full.py     (needs xlrd; reads only prototype/ and writes only site/data/; raw files: docs/data-sources.md)
+Run:  .venv-data/bin/python tools/mock/extract_kfp_full.py     (needs xlrd; reads only prototype/ and writes only site/data/; raw files: docs/data-sources.md)
 """
 import calendar
 import glob
 import os
 import re
 import sys
+from decimal import ROUND_HALF_UP, Decimal
 
 import xlrd
 
 import asbp
+import exec_contract
 from dlib import (DATA, EUR, RAW, SRC, BUILD_DATE, Problems, jload, meta, pct, rnd, say, sha256_file, to_eur,
                   write_data)
 
@@ -65,7 +68,7 @@ ROWS = [
     (48, "fin.priv", "и възмездни  средства - нето", 1, "fin", "financing", "Приватизация и възмездни средства"),
     (49, "fin.priv.shares", "приватизация на дялове, акции и участия", 2, "fin.priv", "financing", "Приватизация на дялове и акции"),
 ]
-# sheet rows that are blank in ALL 32 reports (dropped, verified at run time): 15, 18, 42, 43, 44, 47
+# sheet rows that are blank in ALL reports (dropped, verified at run time): 15, 18, 42, 43, 44, 47
 BLANK_ROWS = [15, 18, 42, 43, 44, 47]
 # computed row: Разходи с вноската в ЕС
 EXP_TOTAL = {"id": "exp.total", "label": "Разходи (с вноската в ЕС)", "short": "Разходи с вноската в ЕС", "level": 0,
@@ -87,8 +90,13 @@ SUM_IDENTITIES = {
 
 MIN_BASE_FOR_YOY = 50.0          # млн. €: below this base a year-on-year % is not published
 FIN_BALANCE_TOL = 0.005          # млн. (original units): fin vs -balance differ by <= 0.0019 in the 2025/2026 reports
-# reports per year that must be there (file name month = month in the title, months 1..n)
-EXPECTED_MONTHS = {2024: 12, 2025: 12, 2026: 8}
+# the series starts with the January 2024 report; file name month = month in the title, months 1..n per year
+FIRST_YEAR = 2024
+# the builders and validators still read data["2026"], the 2026 plan and kfpMonths2026 (bd_feed, bd_core, vd_catalog):
+# a 2027 report stops here until they are generalised
+LAST_YEAR = 2026
+# the Ministry names the file „…-EU_funds_MMYY_BG_WEB.xls“; the September 2026 report came as „EU funds“, with a space
+FILE_RE = re.compile(r"EU[ _]funds_(\d{2})(\d{2})_")
 # source-internal differences of single reports (original units, млн. лв.): checked against the stated bound, reported as a
 # warning instead of an error.  Nothing is corrected: the numbers are published as the Ministry printed them.
 KNOWN_SOURCE_DIFFS = {
@@ -97,8 +105,10 @@ KNOWN_SOURCE_DIFFS = {
     # November 2024: the control row 34 (balance + financing) is 0.000035 млн. лв. in к.2 and к.3 instead of 0
     ("row34", 2024, 11): 0.00004,
 }
-# reference headline of the last two reports (KFP, млн. €, 1 decimal): rev, exp.total, balance
-REFERENCE = {(2026, 7): (26347.4, 28548.8, -2201.4), (2026, 8): (30117.8, 33193.2, -3075.5)}
+# reference headline of the latest reports (KFP, млн. €, 1 decimal): rev, exp.total, balance
+# September 2026: the MF release of 02.11.2026, https://www.minfin.bg/bg/news/13559
+REFERENCE = {(2026, 7): (26347.4, 28548.8, -2201.4), (2026, 8): (30117.8, 33193.2, -3075.5),
+             (2026, 9): (33898.5, 37567.6, -3669.2)}
 
 HEADLINE = ["rev", "exp.total", "balance"]
 # rows for which the "pace" block (share of the year's final cumulative) is published
@@ -128,8 +138,9 @@ def clean_label(raw):
 
 def list_reports():
     files = []
-    for year in sorted(EXPECTED_MONTHS):
-        files += sorted(glob.glob(str(RAW / ("kfp_%d" % year) / "*.xls")))
+    for d in sorted(glob.glob(str(RAW / "kfp_[0-9][0-9][0-9][0-9]"))):
+        if int(os.path.basename(d)[4:]) >= FIRST_YEAR:
+            files += sorted(glob.glob(os.path.join(d, "*.xls")))
     return files
 
 
@@ -137,7 +148,7 @@ def parse_report(path):
     """Parse one report. Returns {'year','month','asOf','unit','values':{id:{col:float|None}}, 'labels':{id:str}, 'blank':[rows]}.
 
     Values are the ORIGINAL numbers rounded to 6 decimals (the xls holds float noise like 3e-13); blank cells are None.
-    Raises ValueError when the layout deviates from the one all 32 files share.
+    Raises ValueError when the layout deviates from the one all files share.
     """
     sh = xlrd.open_workbook(path).sheet_by_name(SHEET)
     if sh.nrows != 54 or sh.ncols != 4:
@@ -253,18 +264,98 @@ def check_report(rep, prob, stats):
             prob.error("%s: control row 34 = %s" % (fn, rep["control34"]))
 
 
+D_EUR = Decimal("1.95583")
+D_PLACES = Decimal("0.001")
+D_TENTH = Decimal("0.1")
+
+
+def dec(x):
+    """the decimal a float of this extractor stands for (its repr: the numbers are read to 6 places and rounded to 3)"""
+    return Decimal(repr(x))
+
+
 def convert(v, unit):
-    """Original number -> млн. € rounded to 3 decimals (BGN is divided by 1.95583 first)."""
-    if unit == "BGN":
-        return to_eur(v, 3)
-    return rnd(v, 3)
+    """Original number -> млн. € rounded to 3 decimals, in decimal arithmetic (BGN is divided by 1.95583 first). The float returned holds
+    exactly that decimal (exec_contract.money() writes it); on the 3168 numbers of the 33 reports it equals the earlier float division."""
+    d = dec(v) / D_EUR if unit == "BGN" else dec(v)
+    r = float(d.quantize(D_PLACES, rounding=ROUND_HALF_UP))
+    return 0.0 if r == 0 else r
+
+
+def tenth(x):
+    """a 3-place value -> 1 place, half away from zero (as Excel and the MF releases round), in decimal arithmetic"""
+    r = float(dec(x).quantize(D_TENTH, rounding=ROUND_HALF_UP))
+    return 0.0 if r == 0 else r
+
+
+PLAN_ANNEX = {"rev": "r.total", "rev.tax": "r.tax", "rev.nontax": "r.nontax", "rev.grants": "r.grants", "exp": "x.exp",
+              "exp.personnel": "x.personnel", "exp.maint": "x.maint", "exp.interest": "x.interest", "exp.interest.ext": "x.interest.ext",
+              "exp.interest.dom": "x.interest.dom", "exp.social": ("x.social", "x.scholarships"), "exp.subsidies": "x.subsidies",
+              "exp.abroad": "x.abroad", "exp.capex": "x.capex", "exp.reserve": "x.reserve", "exp.contingency": "x.contingency",
+              "eucontrib": "x.eucontrib", "exp.total": "x.total", "balance": "x.balance", "fin": "x.fin"}
+PLAN_COMPONENTS = {"nat": "national", "eu": "eu"}
+PLAN_COMPONENT_KEYS = {"rev": "rev", "exp.total": "exp_incl_eu_contribution", "balance": "balance",
+                       "transfers": {"nat": "transfer_to_eu_accounts_net", "eu": "transfer_from_state_budget_net"}}
+
+
+def provenance(by_year, rows_out, plan2026, a3, as_of):
+    """execution-provenance.json: a compact index from every number of execution.json to its place in the original (spec, section 6.2).
+    A record `data/2026-09/kfp/rev` is the original of 2026-09, sheet „стартова“, column of kfp, row of rev."""
+    originals = {}
+    for year, lst in sorted(by_year.items()):
+        for rep, f in lst:
+            originals["%04d-%02d" % (year, rep["month"])] = {"source": "kfp", "file": os.path.basename(f), "sha256": sha256_file(f),
+                                                             "asOf": rep["asOf"], "unit": rep["unit"]}
+    tables = jload(RAW / "asbp" / "asbp_tables.json")
+    annex_rows = dict(zip([s[0] for s in asbp.REVENUE + asbp.EXPENDITURE], asbp._content_rows(tables["tables"]["annex3_mln"])))
+    pdf = {"source": "asbp", "file": tables["source"]["file"], "sha256": tables["source"]["sha256"],
+           "table": tables["tables"]["annex3_mln"]["title"], "column": tables["tables"]["annex3_mln"]["columns"][2]}
+
+    def annex(key):
+        r = annex_rows[key]
+        return {"page": r["page"], "row": r["label"].strip(), "y": r["y"]}
+
+    plan = {"kfp": {}}
+    for rid in plan2026["kfp"]:
+        keys = PLAN_ANNEX[rid]
+        plan["kfp"][rid] = ({"cells": [annex(k) for k in keys], "rule": "the sum of the rows, rounded to 1 place"} if isinstance(keys, tuple)
+                            else annex(keys))
+    for col, part in PLAN_COMPONENTS.items():
+        plan[col] = {}
+        for rid in plan2026[col]:
+            k = PLAN_COMPONENT_KEYS[rid]
+            plan[col][rid] = {"path": "national_vs_eu_2026.plan.%s.%s" % (part, k[col] if isinstance(k, dict) else k)}
+    return {
+        "meta": meta("execution-provenance", "Произход на числата в execution.json", "real", ["kfp", "asbp"],
+                     "клетката в оригиналния отчет на МФ за всяко число на месечното изпълнение и страницата на Приложение 3 за плана",
+                     as_of),
+        "schema": "provenance/1",
+        "dataset": "execution",
+        "record": "<block>/<ГГГГ-ММ>/<колона>/<ред>, например data/2026-09/kfp/rev: оригиналът на 2026-09, лист „%s“, клетка B11" % SHEET,
+        "sheet": SHEET,
+        "columns": {col: "ABCDEFGH"[ci] for col, ci, _kc, _kl in COLS},
+        "rows": {r["id"]: r["row"] for r in rows_out if "row" in r},
+        "computed": {"exp.total": {"from": ["exp", "eucontrib"],
+                                   "rule": "exp + eucontrib of the same report, added on the original numbers, then converted"}},
+        "rules": {
+            "data": "the cell of the original of the month; 2024 and 2025: млн. лв. ÷ 1.95583, rounded to 3 places (contract.conversion)",
+            "monthly": "data(m) − data(m − 1) of the same year, column and row; January = data(1)",
+            "latest": "cum and prevYearCum: data of the latest month of this and the previous year, rounded to 1 place; plan: plan2026",
+            "pace": "data(m) ÷ data(12) of the same year × 100",
+            "reconcile": "data(12) of 2024 and 2025 against the columns 2024 Отчет and 2025 Предв. отчет of Приложение 3",
+        },
+        "originals": originals,
+        "plan2026": {"kfp": dict(pdf, rows=plan["kfp"]),
+                     "nat": {"source": "prototype/src/kfp_components_2026.json", "rows": plan["nat"],
+                             "note": "made by tools/prototype/build_src.py from the motives (Табл. II-3/II-4); see sources/registry.yaml"},
+                     "eu": {"source": "prototype/src/kfp_components_2026.json", "rows": plan["eu"],
+                            "note": "made by tools/prototype/build_src.py from the motives (Табл. II-3/II-4); see sources/registry.yaml"}},
+    }
 
 
 def build():
     prob = Problems("extract_kfp_full")
     files = list_reports()
-    if len(files) != sum(EXPECTED_MONTHS.values()):
-        prob.error("expected %d reports, found %d" % (sum(EXPECTED_MONTHS.values()), len(files)))
     if not files:
         prob.error("no reports in prototype/data/raw/kfp_*/ (raw files, not in the repository: docs/data-sources.md)")
         prob.finish()
@@ -277,16 +368,22 @@ def build():
     by_year = {}
     for rep in reports:
         f = rep["path"]
-        m = re.search(r"EU_funds_(\d{2})(\d{2})_", os.path.basename(f))
+        m = FILE_RE.search(os.path.basename(f))
         if not m or (int(m.group(1)), 2000 + int(m.group(2))) != (rep["month"], rep["year"]):
             prob.error("%s: file name does not match the as-of date %s" % (os.path.basename(f), rep["asOf"]))
         by_year.setdefault(rep["year"], []).append((rep, f))
+    years = sorted(by_year)
+    if years != list(range(FIRST_YEAR, FIRST_YEAR + len(years))):
+        prob.error("years %s are not consecutive from %d" % (years, FIRST_YEAR))
+    if years and years[-1] > LAST_YEAR:
+        prob.error("reports for %d: the builders read only up to %d (see LAST_YEAR); generalise them before adding the next year"
+                   % (years[-1], LAST_YEAR))
     for y, lst in by_year.items():
         months = [r["month"] for r, _ in lst]
         if months != list(range(1, len(months) + 1)):
             prob.error("year %d: months %s are not 1..n" % (y, months))
-        if len(months) != EXPECTED_MONTHS.get(y):
-            prob.error("year %d: %d reports, expected %s" % (y, len(months), EXPECTED_MONTHS.get(y)))
+        if y != years[-1] and len(months) != 12:
+            prob.error("year %d: %d reports, expected 12 (only the last year may be incomplete)" % (y, len(months)))
         for r, _f in lst:
             if r["asOf"] != "%04d-%02d-%02d" % (y, r["month"], calendar.monthrange(y, r["month"])[1]):
                 prob.error("%s: the title date %s is not the last day of the month" % (os.path.basename(_f), r["asOf"]))
@@ -369,7 +466,7 @@ def build():
             mc = {}
             for rid in HEADLINE:
                 cum = series[col][rid]
-                mc[rid] = [rnd(cum[i] - (cum[i - 1] if i else 0.0), 3) for i in range(len(cum))]
+                mc[rid] = [float(dec(cum[i]) - (dec(cum[i - 1]) if i else 0)) + 0.0 for i in range(len(cum))]   # exact on 3 places
             my[col] = mc
         monthly[str(year)] = my
 
@@ -427,7 +524,7 @@ def build():
         rows_for = LATEST_ROWS if col == "kfp" else ["rev", "exp.total", "balance"]
         for rid in rows_for:
             cum = all_series[last_year][col][rid][n_last - 1]
-            d = {"cum": rnd(cum, 1)}
+            d = {"cum": tenth(cum)}
             plan_v = plan_by_col[col].get(rid)
             if plan_v is not None and rid != "balance":
                 d["plan"] = plan_v
@@ -435,7 +532,7 @@ def build():
             elif plan_v is not None:
                 d["plan"] = plan_v
             prev = all_series[prev_year][col][rid][n_last - 1]
-            d["prevYearCum"] = rnd(prev, 1)
+            d["prevYearCum"] = tenth(prev)
             if prev >= MIN_BASE_FOR_YOY and cum >= 0:          # no growth rate on a tiny base (e.g. 1.1 -> 31.4 млн. €)
                 d["yoyPct"] = rnd(100.0 * (cum / prev - 1.0), 1)
             lc[rid] = d
@@ -459,13 +556,13 @@ def build():
                ("exp.social", None), ("exp.subsidies", "x.subsidies"), ("exp.abroad", "x.abroad"), ("exp.capex", "x.capex"),
                ("exp.reserve", "x.reserve"), ("eucontrib", "x.eucontrib"), ("exp.total", "x.total"), ("balance", "x.balance")]
     def reconcile_year(year, col_index):
-        dec = all_series[year]["kfp"]
+        december = all_series[year]["kfp"]
         ay = {k: v[col_index] for k, v in a3["mln"].items()}
         rec = {}
         for rid, ak in rec_map:
-            kv = dec[rid][-1]
+            kv = december[rid][-1]
             av = rnd(ay["x.social"] + ay["x.scholarships"], 1) if ak is None else ay[ak]
-            rec[rid] = {"kfp": rnd(kv, 3), "annex3": av, "diff": rnd(kv - av, 1)}
+            rec[rid] = {"kfp": kv, "annex3": av, "diff": tenth(float(dec(kv) - dec(av)))}
         return rec
     if len(a3["mln"]["r.total"]) != 5:            # Annex 3 columns: 2024 Отчет, 2025 Предв. отчет, 2026 Проект, 2027, 2028
         prob.error("Annex 3 has %d columns, expected 5 (2024-2028)" % len(a3["mln"]["r.total"]))
@@ -482,6 +579,25 @@ def build():
     pending_months = [{"month": nxt_month, "asOf": "%04d-%02d-%02d" % (nxt_year, nxt_month, calendar.monthrange(nxt_year, nxt_month)[1]),
                        "status": "pending", "id": "P04"}]
 
+    # the newest report must be the newest headline a person has read from the MF release (REFERENCE): without this, a report missing
+    # from the disk takes the data a month back without a word, and a new report would go out without its independent check
+    if (last_year, n_last) != max(REFERENCE):
+        prob.error("the newest report on disk is %d-%02d, the newest headline in REFERENCE is %d-%02d: a missing report is not "
+                   "published as an older month, and a new report needs its MF headline in REFERENCE and in vd_kfp.HEADLINES"
+                   % ((last_year, n_last) + max(REFERENCE)))
+    # reference check for the headline of the latest reports (the July numbers must not move when a month is added)
+    for (ry, rm), want in sorted(REFERENCE.items()):
+        j = all_series.get(ry, {}).get("kfp", {})
+        if len(j.get("rev", [])) < rm:
+            continue                                   # reported above
+        ref = (j["rev"][rm - 1], j["exp.total"][rm - 1], j["balance"][rm - 1])
+        say("%d-%02d cumulative: rev %.3f  exp.total %.3f  balance %.3f" % ((ry, rm) + ref))
+        if tuple(rnd(v, 1) for v in ref) != want:
+            prob.error("%d-%02d headline reference differs from %s: %s" % (ry, rm, want, ref))
+    if prob.errors:
+        say("nothing written: site/data/execution.json keeps the last extraction that passed")
+        prob.finish()
+
     doc = {
         "meta": meta("D06+D16+D26", "Месечно изпълнение на консолидираната фискална програма (КФП)", "real", ["kfp"],
                      "лист „стартова“ на месечните отчети на МФ, редове 11–49, колони к.2–к.4 (натрупано от началото на годината)",
@@ -497,16 +613,11 @@ def build():
         "pendingMonths": pending_months,
         "reconcile": reconcile,
     }
-    path, size, changed = write_data("execution.json", doc)
+    path, size, changed = write_data("execution.json", exec_contract.canonical(doc))
     say("wrote %s (%d bytes, %s)" % (path.relative_to(DATA.parent.parent), size, "changed" if changed else "unchanged"))
-
-    # reference check for the headline of the last two reports (the July numbers must not move when a month is added)
-    for (ry, rm), want in sorted(REFERENCE.items()):
-        j = all_series[ry]["kfp"]
-        ref = (j["rev"][rm - 1], j["exp.total"][rm - 1], j["balance"][rm - 1])
-        say("%d-%02d cumulative: rev %.3f  exp.total %.3f  balance %.3f" % ((ry, rm) + ref))
-        if tuple(rnd(v, 1) for v in ref) != want:
-            prob.error("%d-%02d headline reference differs from %s: %s" % (ry, rm, want, ref))
+    prov = provenance(by_year, rows_out, plan2026, a3, data[str(last_year)]["asOf"][-1])
+    path, size, changed = write_data(exec_contract.CONTRACT["provenance"], prov)
+    say("wrote %s (%d bytes, %s)" % (path.relative_to(DATA.parent.parent), size, "changed" if changed else "unchanged"))
     prob.finish()
     return doc
 

@@ -1,0 +1,55 @@
+// The site on Cloudflare Workers (docs/adr/0002-react-router-ssr.md): React Router draws every screen in the Worker (workers/app.ts) from
+// the current release; the files of site/ (css, js, data, images) are the static assets of the client build.
+//   npm run build                                    # react-router build: build/client (the static files) and build/server (the Worker)
+//   npx wrangler dev                                 # after the build: the Worker on http://localhost:8787 (wrangler reads the built config)
+//   CLOUDFLARE_ENV=staging npm run build && npx wrangler deploy     # staging; production is not deployed from here (stage E)
+// The Vite plugin (@cloudflare/vite-plugin) sets the assets directory to the client build and picks the environment from CLOUDFLARE_ENV.
+// html_handling "auto-trailing-slash", not_found_handling "none": a path without a file goes to the Worker (every screen, the release API,
+// /admin/*). run_worker_first: /data/* reaches the Worker first, so the stable addresses /data/<file> follow the current release of the
+// registry and /data/releases/* is the release API (workers/app.ts); what neither knows comes from the static files.
+// SITE_ORIGIN names the public address in canonical links (empty: the address of the request); NOINDEX "1" keeps an environment out of
+// search engines; SIGMA_URL is the address of the original СИГМА (docs/approach-specification.md, section 2.2); FEEDBACK_EMAIL is the
+// address of the feedback form (empty: the form keeps the message in the browser and says so).
+// The release registry (D1, binding DB, migrations/) and the objects (R2, binding OBJECTS) are one database and one bucket per environment
+// (docs/approach-specification.md, section 3.1). Provisioning is separate from the code deploy (docs/release.md, „Среди“): the database
+// ids below are filled in when the environment is created; until then `wrangler dev` uses local copies and a deploy fails on purpose.
+// A deployment in your own account keeps its ids and hostname in wrangler.local.jsonc, which is not in git (docs/release.md, „Среди“).
+// ACCESS_ISSUER and ACCESS_AUD come from the Access application of the environment; empty, the operator API answers 503.
+// SERVICE_TOKENS lists the Access service tokens that may publish. OPERATORS, the operators' emails, is a Worker secret
+// (`npx wrangler secret put OPERATORS --env staging`), so the addresses stay out of this public repository.
+{
+  "name": "sigma-budget",
+  "main": "./workers/app.ts",
+  "compatibility_date": "2025-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "binding": "ASSETS",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "none",
+    "run_worker_first": ["/data/*"]
+  },
+  "observability": { "enabled": true },
+  "d1_databases": [
+    { "binding": "DB", "database_name": "sigma-budget-registry", "database_id": "00000000-0000-0000-0000-000000000000", "migrations_dir": "migrations" }
+  ],
+  "r2_buckets": [{ "binding": "OBJECTS", "bucket_name": "sigma-budget-objects" }],
+  "vars": { "ACCESS_ISSUER": "", "ACCESS_AUD": "", "SERVICE_TOKENS": "", "ENVIRONMENT": "production",
+    "SITE_ORIGIN": "https://sigma-budget.my-data.bg", "SIGMA_URL": "https://sigma.midt.bg/", "FEEDBACK_EMAIL": "", "NOINDEX": "" },
+  // staging (push to develop, .github/workflows/site.yml): its own Worker, a build with --noindex.
+  // The top level is production: CI never deploys it, that is a separate controlled procedure (docs/approach-specification.md, stage E).
+  "env": {
+    "staging": {
+      "name": "sigma-budget-staging",
+      // staging answers only on its own hostname: no workers.dev or preview address next to it, so /admin/* has the one door that
+      // Cloudflare Access guards (docs/approach-specification.md, section 3.3). The hostname is the environment's:
+      //   "routes": [{ "pattern": "<staging hostname>", "custom_domain": true }],
+      "workers_dev": false,
+      "preview_urls": false,
+      "d1_databases": [
+        { "binding": "DB", "database_name": "sigma-budget-staging-registry", "database_id": "00000000-0000-0000-0000-000000000000", "migrations_dir": "migrations" }
+      ],
+      "r2_buckets": [{ "binding": "OBJECTS", "bucket_name": "sigma-budget-staging-objects" }],
+      "vars": { "ACCESS_ISSUER": "", "ACCESS_AUD": "", "SERVICE_TOKENS": "", "ENVIRONMENT": "staging", "SITE_ORIGIN": "", "SIGMA_URL": "https://sigma.midt.bg/", "FEEDBACK_EMAIL": "", "NOINDEX": "1" }
+    }
+  }
+}

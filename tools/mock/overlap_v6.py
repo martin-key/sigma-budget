@@ -14,6 +14,7 @@
   CLICKS (1280 and 390, every route): each visible button / tab / switch / summary / menu is pressed; no console error, no page error, Escape closes what opened, the hash is restored
   KEYS (1280 and 390): Tab walks the first 25 stops without a focus ring lost off-screen; Escape closes the header dropdown and the search panel; Back / Forward keep the route
   --quick  widths 1440 / 1241 / 390, banner on, no clicks, no keys (about 2 minutes; accept_v6.py runs it)
+  --shots DIR  a screenshot of the viewport of every page state with a layout finding (DIR/<route>-<width>px-<state>.png)
 Exit 1 when anything is found; the findings are printed one per line.
 """
 import http.server, json, os, socketserver, sys, threading
@@ -104,16 +105,21 @@ def main():
         found.append(f"{route} {w}px [{kind}] {msg}")
         print("  FOUND", found[-1])
 
+    def shot(pg, route, w, state):
+        if shots: pg.screenshot(path=str(shots / f"{route}-{w}px-{state}.png"))
+
     with sync_playwright() as p:
         b = p.chromium.launch()
-        pg0 = b.new_page(); pg0.goto(U); pg0.wait_for_timeout(800)
+        pg0 = b.new_page(); pg0.add_init_script("window.__HASH_ROUTES__ = true"); pg0.goto(U); pg0.wait_for_timeout(800)
         routes = [r for r in pg0.evaluate("window.__ROUTES__") if not r.get("bare") and (not only or r["id"] in only)]
         pg0.close()
         for r in routes:
             if not r["samples"]: r["samples"] = ["#/nyama-takava-stranitsa"]          # S30: the 404 screen
 
         def ctx(w):
-            return b.new_context(viewport={"width": w, "height": 900 if w >= 700 else 844}, service_workers="block", has_touch=w < 700, reduced_motion="reduce")
+            c = b.new_context(viewport={"width": w, "height": 900 if w >= 700 else 844}, service_workers="block", has_touch=w < 700, reduced_motion="reduce")
+            c.add_init_script("window.__HASH_ROUTES__ = true")   # V7: these checks drive the hash addresses (js/loc.js hash mode)
+            return c
 
         def load(c, hash_, errs):
             pg = c.new_page()
@@ -137,20 +143,23 @@ def main():
                     if not banner:
                         pg.evaluate("document.getElementById('mockbar') && (document.getElementById('mockbar').hidden = true)"); pg.wait_for_timeout(60)
                     n += 1
-                    for f in pg.evaluate(LAYOUT_JS):
+                    fs = pg.evaluate(LAYOUT_JS)
+                    for f in fs:
                         add(r["id"], w, f["k"] + ("" if banner else "/no-banner"), f["m"])
+                    if fs: shot(pg, r["id"], w, "banner" if banner else "no-banner")
                     if banner:
                         for e in errs: add(r["id"], w, "errors", e)
                         for frac in ((0.33, 0.66, 1) if w in (1920, 1280, 1024, 390) else (1,)):         # sticky parts (S07's side column) are measured where they stick
                             pg.evaluate(f"window.scrollTo(0, (document.body.scrollHeight - innerHeight) * {frac})"); pg.wait_for_timeout(140)
-                            for f in pg.evaluate(LAYOUT_JS):
-                                if f["k"] in ("overlap", "outside"): add(r["id"], w, f["k"] + f"/scrolled@{int(frac * 100)}", f["m"])
+                            fs = [f for f in pg.evaluate(LAYOUT_JS) if f["k"] in ("overlap", "outside")]
+                            for f in fs: add(r["id"], w, f["k"] + f"/scrolled@{int(frac * 100)}", f["m"])
+                            if fs: shot(pg, r["id"], w, f"scrolled{int(frac * 100)}")
                         under = pg.evaluate("(() => { const t = document.getElementById('tabbar'); if (!t || getComputedStyle(t).display === 'none') return null; const top = t.getBoundingClientRect().top; const bad = [...document.querySelectorAll('#footer a,#footer button,#footer summary')].filter(e => { const d = e.closest('details'); if (d && !d.open && !e.matches('summary')) return false; return e.getBoundingClientRect().bottom > top + 1 && e.getBoundingClientRect().height > 2; }); return bad.length ? bad[0].textContent.trim().slice(0, 24) : null; })()")
-                        if under: add(r["id"], w, "under-tabbar", f"the last footer control «{under}» is hidden behind the bottom bar at the end of the page")
+                        if under: add(r["id"], w, "under-tabbar", f"the last footer control «{under}» is hidden behind the bottom bar at the end of the page"); shot(pg, r["id"], w, "under-tabbar")
                         if w in (1280, 390):
                             pg.emulate_media(media="print"); pg.wait_for_timeout(120)
                             ph = pg.evaluate("[document.documentElement.scrollWidth - document.documentElement.clientWidth, !!document.querySelector('h1') && document.querySelector('h1').getBoundingClientRect().height > 0]")
-                            if ph[0] > 1 or not ph[1]: add(r["id"], w, "print", f"sideways scroll {ph[0]}px / heading visible {ph[1]}")
+                            if ph[0] > 1 or not ph[1]: add(r["id"], w, "print", f"sideways scroll {ph[0]}px / heading visible {ph[1]}"); shot(pg, r["id"], w, "print")   # taken with print media on
                     pg.close()
             c.close()
 
@@ -161,8 +170,9 @@ def main():
                 errs = []
                 pg = load(c, h, errs)
                 for e in errs: add(r["id"], 1280, "errors", f"{h}: {e}")
-                for f in pg.evaluate(LAYOUT_JS):
-                    if f["k"] in ("overlap", "hscroll"): add(r["id"], 1280, f["k"], f"{h}: {f['m']}")
+                fs = [f for f in pg.evaluate(LAYOUT_JS) if f["k"] in ("overlap", "hscroll")]
+                for f in fs: add(r["id"], 1280, f["k"], f"{h}: {f['m']}")
+                if fs: shot(pg, r["id"], 1280, "sample" + str(r["samples"].index(h)))
                 pg.close()
         c.close()
 

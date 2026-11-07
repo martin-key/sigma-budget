@@ -6,11 +6,11 @@
 #
 # Order matters: DATA2's builders read my files (ministries, programs, measures, ...) and my catalog, search index and core read
 # DATA2's files (glossary, guide, mock/*.json), so build_data runs twice. site/data/mock/, glossary.json and guide.json are never
-# cleaned or deleted by anything here. Needs .venv (xlrd, PyMuPDF, python-docx) and the raw files in prototype/data/raw (docs/data-sources.md). The fetchers use the network only when their cache
+# cleaned or deleted by anything here. Needs .venv-data (tools/data/requirements.txt: xlrd, PyMuPDF 1.26.5, python-docx) and the raw files in prototype/data/raw (docs/data-sources.md). The fetchers use the network only when their cache
 # in tools/mock/cache is missing; the build itself is offline. Exit status 0 only when every step and the validator passed.
 set -uo pipefail
 cd "$(dirname "$0")/../.." || exit 2          # repository root
-PY=".venv/bin/python"
+PY="${PY:-.venv-data/bin/python}"             # the data env (tools/data/requirements.txt): PyMuPDF 2.0 of .venv reads 1 of 46 program budgets
 T="tools/mock"
 MODE="build"
 case "${1:-}" in

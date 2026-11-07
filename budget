@@ -1,0 +1,8 @@
+#!/bin/sh
+# The budget command (docs/approach-specification.md, section 8.1; docs/release.md): tools/budget.py with any Python 3.9+ and PyYAML.
+# Builds run in the pinned image of tools/data/Dockerfile when docker answers, else in .venv-data.
+for py in "$(dirname "$0")/.venv-data/bin/python" "$(dirname "$0")/.venv/bin/python" python3; do
+  if command -v "$py" >/dev/null 2>&1 && "$py" -c "import yaml" 2>/dev/null; then exec "$py" "$(dirname "$0")/tools/budget.py" "$@"; fi
+done
+echo "budget: needs Python 3.9+ with PyYAML (pip install --require-hashes -r requirements-dev.lock)" >&2
+exit 2

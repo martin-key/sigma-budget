@@ -20,6 +20,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import dlib                        # noqa: E402
+from bd_common import set_kfp_pending  # noqa: E402
 from bd_ctx import Ctx             # noqa: E402
 
 # (module, function): order = the order the screens need the data; every function puts its files into ctx.out.
@@ -84,10 +85,12 @@ def main():
     ap.add_argument("--dry", action="store_true", help="build and print sizes, write nothing")
     args = ap.parse_args()
     if not dlib.RAW.is_dir():
-        sys.exit("build_data: the raw files are not in the repository: put them into prototype/data/raw (docs/data-sources.md); "
-                 "tools/mock/cache/ is filled by fetch_gisco.py, fetch_sebra.py and extract_bill.py")
+        sys.exit("build_data: prototype/data/raw is missing: the MF reports and the ASBP PDF come with the repository, the other raw "
+                 "files are fetched with tools/data/raw_sources.py status (docs/data-sources.md); tools/mock/cache/ is filled by "
+                 "fetch_gisco.py, fetch_sebra.py and extract_bill.py")
 
     ctx = Ctx()
+    set_kfp_pending(ctx.execution)
     errors, skipped = run_steps(ctx)
     blobs = serialise(ctx)
 

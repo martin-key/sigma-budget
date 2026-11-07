@@ -1,0 +1,13 @@
+# Фиксирана среда за обработката на данните (docs/data-acquisition.md, 5.4). Отделна е от requirements-dev.txt, защото
+# PyMuPDF 2.0 оттам разчита 1 от 46 програмни бюджета, а 1.26.5 дава файла от хранилището байт по байт. Python 3.12+.
+#   uv venv .venv-data --python 3.12 && uv pip install --python .venv-data/bin/python --require-hashes -r tools/data/requirements.lock
+#   (без uv: python3.12 -m venv .venv-data && .venv-data/bin/pip install --require-hashes -r tools/data/requirements.lock)
+# Същата среда като образ, по digest: tools/data/Dockerfile. requirements.lock е lock на този файл, с хешовете.
+pymupdf==1.26.5
+xlrd==2.0.2
+pdfplumber==0.11.10
+python-docx==1.2.0
+py7zr==1.1.4
+pyyaml==6.0.3
+# свой пакет сертификати: Python от uv не приема веригата на ec.europa.eu без него (SSL_CERT_FILE=$(python -m certifi))
+certifi==2026.10.23

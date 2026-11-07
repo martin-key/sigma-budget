@@ -5,8 +5,24 @@
 <link>https://budget-na-svetlo.example/</link>
 <description>Събития по данните за държавния бюджет: месечни отчети, законодателен път, ставки и нови набори. Прототип с примерни данни, където е отбелязано.</description>
 <language>bg</language>
-<lastBuildDate>Fri, 09 Oct 2026 12:00:00 +0000</lastBuildDate>
+<lastBuildDate>Thu, 05 Nov 2026 12:00:00 +0000</lastBuildDate>
 <atom:link href="https://budget-na-svetlo.example/data/feed.xml" rel="self" type="application/rss+xml"/>
+<item>
+<title>Евростат: дългът в края на второто тримесечие на 2026 г.</title>
+<link>https://budget-na-svetlo.example/#/dalg?obhvat=maastricht</link>
+<guid isPermaLink="false">eurostat-gov_10q_ggdebt-2026-10-21</guid>
+<pubDate>Wed, 21 Oct 2026 12:00:00 +0000</pubDate>
+<category>Евростат</category>
+<description>Дългът по Маастрихт е 35,40 млрд. € (28,7% от БВП); данните са предварителни.</description>
+</item>
+<item>
+<title>Евростат: дългът на държавното управление за 2025 г.</title>
+<link>https://budget-na-svetlo.example/#/dalg?obhvat=maastricht</link>
+<guid isPermaLink="false">eurostat-gov_10dd_edpt1-2026-10-21</guid>
+<pubDate>Wed, 21 Oct 2026 12:00:00 +0000</pubDate>
+<category>Евростат</category>
+<description>Дългът по Маастрихт е 34,80 млрд. € (29,9% от БВП). Това е друг обхват от държавния дълг в закона.</description>
+</item>
 <item>
 <title>Евростат: населението на 1 януари 2026 г.</title>
 <link>https://budget-na-svetlo.example/#/pari</link>
@@ -14,6 +30,14 @@
 <pubDate>Wed, 30 Sep 2026 12:00:00 +0000</pubDate>
 <category>Евростат</category>
 <description>Населението на България е 6 423 207 души. Ползваме го за показателите „на човек“.</description>
+</item>
+<item>
+<title>Месечен отчет на КФП към края на септември 2026 г.</title>
+<link>https://budget-na-svetlo.example/#/izpalnenie?mesec=9</link>
+<guid isPermaLink="false">kfp-2026-09</guid>
+<pubDate>Wed, 30 Sep 2026 12:00:00 +0000</pubDate>
+<category>Месечен отчет</category>
+<description>От началото на годината приходите са 33,90 млрд. €, разходите — 37,57 млрд. €, дефицитът е 3,67 млрд. €. Приходите са с 11,0% повече от същия период на 2025 г. Това е 68,3% от годишния план за приходите.</description>
 </item>
 <item>
 <title>Евростат: разходите по функции (COFOG) са допълнени до 2024 г.</title>
@@ -29,7 +53,7 @@
 <guid isPermaLink="false">kfp-2026-08</guid>
 <pubDate>Mon, 31 Aug 2026 12:00:00 +0000</pubDate>
 <category>Месечен отчет</category>
-<description>От началото на годината приходите са 30,12 млрд. €, разходите — 33,19 млрд. €, дефицитът е 3,08 млрд. €. Приходите са с 11,9% повече от същия период на 2025 г. Това е 60,7% от годишния план за приходите.</description>
+<description>От началото на годината приходите са 30,12 млрд. €, разходите — 33,19 млрд. €, дефицитът е 3,08 млрд. €. Приходите са с 11,9% повече от същия период на 2025 г.</description>
 </item>
 <item>
 <title>НАП публикува таблицата с осигурителните ставки</title>
@@ -104,14 +128,6 @@
 <description></description>
 </item>
 <item>
-<title>Евростат: дългът в края на първото тримесечие на 2026 г.</title>
-<link>https://budget-na-svetlo.example/#/dalg?obhvat=maastricht</link>
-<guid isPermaLink="false">eurostat-gov_10q_ggdebt-2026-07-21</guid>
-<pubDate>Tue, 21 Jul 2026 12:00:00 +0000</pubDate>
-<category>Евростат</category>
-<description>Дългът по Маастрихт е 34,23 млрд. € (28,5% от БВП); данните са предварителни.</description>
-</item>
-<item>
 <title>Предложения между първо и второ гласуване</title>
 <link>https://budget-na-svetlo.example/#/zakon</link>
 <guid isPermaLink="false">law-2026-07-16-proposals</guid>
@@ -141,7 +157,7 @@
 <guid isPermaLink="false">law-2026-07-07-committees</guid>
 <pubDate>Tue, 07 Jul 2026 12:00:00 +0000</pubDate>
 <category>Законодателен път</category>
-<description>Законопроектът е разпределен на 24 комисии; водеща е Комисия по бюджет и финанси. 23 комисии внасят доклад за първо гласуване. В комисиите постъпват още 70 становища.</description>
+<description>Законопроектът е разпределен на 24 комисии; водеща е Комисия по бюджет и финанси. 22 комисии внасят доклад за първо гласуване. В комисиите постъпват още 70 становища.</description>
 </item>
 <item>
 <title>Законопроектът за държавния бюджет е внесен в Народното събрание</title>
@@ -174,14 +190,6 @@
 <pubDate>Thu, 30 Apr 2026 12:00:00 +0000</pubDate>
 <category>Месечен отчет</category>
 <description>От началото на годината приходите са 14,07 млрд. €, разходите — 15,83 млрд. €, дефицитът е 1,76 млрд. €. Приходите са с 12,4% повече от същия период на 2025 г.</description>
-</item>
-<item>
-<title>Евростат: дългът на държавното управление за 2025 г.</title>
-<link>https://budget-na-svetlo.example/#/dalg?obhvat=maastricht</link>
-<guid isPermaLink="false">eurostat-gov_10dd_edpt1-2026-04-22</guid>
-<pubDate>Wed, 22 Apr 2026 12:00:00 +0000</pubDate>
-<category>Евростат</category>
-<description>Дългът по Маастрихт е 34,63 млрд. € (29,9% от БВП). Това е друг обхват от държавния дълг в закона.</description>
 </item>
 <item>
 <title>Месечен отчет на КФП към края на март 2026 г.</title>

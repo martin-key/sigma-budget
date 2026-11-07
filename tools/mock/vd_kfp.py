@@ -1,5 +1,5 @@
-"""KFP group of validate_data.py: execution.json against the 32 raw monthly reports of the Ministry of Finance (2024: 12,
-2025: 12, 2026: 8).
+"""KFP group of validate_data.py: execution.json against the raw monthly reports of the Ministry of Finance since January 2024
+(12 per year, the last year 1..n; the count comes from execution.json and the raw folders, not from the code).
 
 The reports are re-read here with a separate, minimal xlrd reader (cell positions come from the published `rows[].row`, the
 accounting identities are written out again below), so a wrong row map or a wrong conversion in the extractor cannot hide.
@@ -31,14 +31,22 @@ SUMS = {                                  # parent = sum(children); the fixed ac
     "fin": ["fin.ext", "fin.dom", "fin.priv"],
 }
 MONTH_RE = re.compile(r"КЪМ\s+(\d{2})\.(\d{2})\.(\d{4})\s+ГОДИНА")
-FILE_RE = re.compile(r"EU_funds_(\d{2})(\d{2})_")
+FILE_RE = re.compile(r"EU[ _]funds_(\d{2})(\d{2})_")    # „EU funds“ with a space from the September 2026 report
 CONV_TOL = 0.0006                         # published value vs round(raw / 1.95583, 3): equal up to float noise
-WANT_MONTHS = {"2024": 12, "2025": 12, "2026": 8}
-WANT_CUR = {"2024": "BGN", "2025": "BGN", "2026": "EUR"}
+FIRST_YEAR = 2024                         # every year but the last has 12 reports; the last one 1..12
+
+
+def _want_cur(y):
+    return "BGN" if int(y) <= 2025 else "EUR"     # the euro from 1 January 2026
+
+
+
 # source-internal differences of single raw reports, (check, year, month) -> bound in млн. лв.; everything else keeps the strict bound
 KNOWN_RAW = {("fin=-balance", 2024, 5): 0.0101}
 # headline references (KFP, млн. €, 1 decimal) written out independently of the extractor: rev, exp.total, balance
-HEADLINES = {("2026", 7): (26347.4, 28548.8, -2201.4), ("2026", 8): (30117.8, 33193.2, -3075.5)}
+# September 2026: the MF release of 02.11.2026, https://www.minfin.bg/bg/news/13559
+HEADLINES = {("2026", 7): (26347.4, 28548.8, -2201.4), ("2026", 8): (30117.8, 33193.2, -3075.5),
+             ("2026", 9): (33898.5, 37567.6, -3669.2)}
 # plan2026.kfp keys -> (file, row id): the same Annex 3 numbers as the other datasets
 PLAN_REV = {"rev.tax": "r.tax", "rev.nontax": "r.nontax", "rev.grants": "r.grants"}
 PLAN_EXP = {"exp": "x.exp", "exp.personnel": "x.personnel", "exp.maint": "x.maint", "exp.interest": "x.interest",
@@ -101,8 +109,8 @@ def g_kfp(ctx):
     c.ok([x["id"] for x in ex["cols"]] == ["kfp", "nat", "eu"] and [x["kfpCol"] for x in ex["cols"]] == ["к.2", "к.3", "к.4"],
          "cols must be kfp/nat/eu = к.2/к.3/к.4")
     data = ex["data"]
-    c.ok(sorted(data) == sorted(WANT_MONTHS), "data years %s, expected %s" % (sorted(data), sorted(WANT_MONTHS)))
-    want_months, want_cur = WANT_MONTHS, WANT_CUR
+    years = sorted(data)
+    c.ok(years == [str(y) for y in range(FIRST_YEAR, FIRST_YEAR + len(years))], "data years %s, not consecutive from %d" % (years, FIRST_YEAR))
     max_dev = {}
     known_seen = set()
     compared = 0
@@ -110,10 +118,13 @@ def g_kfp(ctx):
     for y in sorted(data):
         blk = data[y]
         n = blk["months"]
-        c.ok(n == want_months.get(y), "%s: months %s, expected %s" % (y, n, want_months.get(y)))
-        c.ok(blk["currency"] == want_cur.get(y), "%s: currency %s, expected %s" % (y, blk["currency"], want_cur.get(y)))
+        if y != years[-1]:
+            c.ok(n == 12, "%s: months %s, expected 12 (only the last year may be incomplete)" % (y, n))
+        else:
+            c.ok(1 <= n <= 12, "%s: months %s, expected 1..12" % (y, n))
+        c.ok(blk["currency"] == _want_cur(y), "%s: currency %s, expected %s" % (y, blk["currency"], _want_cur(y)))
         c.ok(len(blk["asOf"]) == n and len(blk["files"]) == n, "%s: asOf/files length differs from months" % y)
-        if want_cur.get(y) == "BGN":
+        if _want_cur(y) == "BGN":
             c.ok(blk.get("converted") == "÷1.95583", "%s: converted note %r" % (y, blk.get("converted")))
         for col, _ci, _k in COLS:
             c.ok(set(blk[col]) == set(ids), "%s/%s: row ids differ from rows[]" % (y, col))
@@ -309,12 +320,17 @@ def g_kfp(ctx):
     c.fact("max deviation on the raw numbers (млн.): " + ", ".join("%s %.6f" % (k, v) for k, v in sorted(max_dev.items())))
     # ---- pending month
     pm = ex["pendingMonths"]
-    c.ok(len(pm) == 1 and pm[0]["month"] == n_last + 1 and pm[0]["status"] == "pending" and pm[0]["id"] == "P04", "pendingMonths: the next month must be the single P04 block")
+    c.ok(len(pm) == 1 and pm[0]["month"] == (n_last % 12) + 1 and pm[0]["status"] == "pending" and pm[0]["id"] == "P04", "pendingMonths: the next month must be the single P04 block")
     if pm and n_last < 12:
         c.ok(pm[0]["asOf"] == "%s-%02d-%02d" % (last_y, n_last + 1, calendar.monthrange(int(last_y), n_last + 1)[1]),
              "pendingMonths: asOf %s is not the last day of the next month" % pm[0]["asOf"])
     if RAW_PRESENT:
-        c.ok(files_n == sum(WANT_MONTHS.values()), "%d of %d raw reports found" % (files_n, sum(WANT_MONTHS.values())))
+        want_n = sum(data[y]["months"] for y in years)
+        c.ok(files_n == want_n, "%d of %d raw reports found" % (files_n, want_n))
+        for y in years:                       # a report on disk that execution.json does not have yet: run extract_kfp_full.py
+            on_disk = len([f for f in os.listdir(os.path.join(PROTO, "data", "raw", "kfp_%s" % y)) if f.endswith(".xls")]) \
+                if os.path.isdir(os.path.join(PROTO, "data", "raw", "kfp_%s" % y)) else 0
+            c.ok(on_disk <= data[y]["months"], "%s: %d raw reports on disk, execution.json has %d (extract_kfp_full.py not run?)" % (y, on_disk, data[y]["months"]))
     elif not files_n:
         c.warn("the raw monthly reports are not in the repository (prototype/data/raw, see docs/data-sources.md): the independent re-read was skipped")
     return c

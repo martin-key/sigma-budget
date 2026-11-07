@@ -279,7 +279,7 @@ function readBlock(md) {
     law ? `В закона името на общината е изписано „${law}“.` : ''
   ].filter(Boolean).join(' ');
   return block({
-    id: 's21-chetene', title: 'Как да четем числата', status: false, source: SRC, asOf: md.asOf, share: false,
+    id: 's21-chetene', title: 'Как да четем числата', status: 'real', pill: false, report: false, source: SRC, asOf: md.asOf, share: false,
     body: html`<div class="prose s21-read">
       <p>Показваме основните ${gl('byudzheten-transfer', 'трансфери')} от държавния бюджет по закона за 2026 г. Те са четири вида и отиват в ${gl('obshtinski-byudzhet', 'бюджета на общината')}. „Други целеви трансфери“ са отделна сума, която се дава отгоре. Не я събираме с основните.</p>
       <p>„На жител“ е сумата на общината, разделена на жителите ѝ. Така големи и малки общини се сравняват по равно. Това е ${gl('razhod-na-chovek', 'средна стойност')}: никой не получава тези евро в ръка.</p>
@@ -296,6 +296,7 @@ export function render(ctx) {
   if (!md.m) ctx.notFound();
   return {
     title: M.munName(md.m),
+    docTitle: `${M.munName(md.m)}, област ${md.region}`,                    // two municipalities are called Бяла (js/seo.js: one title per address)
     lede: `Област ${md.region}. Колко пари държавата дава на общината през 2026 г., за какво са те и как сумата се сравнява с областта и с другите общини.`,
     body: html`${moneyBlock(md)}${compareBlock(md, ctx)}${kindsBlock(md)}${mapBlock(md, ctx)}${readBlock(md)}`
   };

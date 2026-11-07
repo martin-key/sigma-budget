@@ -7,6 +7,7 @@
 // The first result is active from the start, so „ДДС“ + Enter is enough. Focus goes back to the opener on close, except after navigating
 // (the router moves focus to the new screen's h1). The engine and the index are in searchlib.js; the full page is S28.
 import { html } from './html.js';
+import { isAppLink } from './loc.js';
 import { icon } from './icons.js';
 import { store } from './store.js';
 import { sheet, popover } from './ui/sheet.js';
@@ -133,7 +134,7 @@ export function openPalette(opener, o = {}) {
     if (chip) { input.value = chip.dataset.palQ; input.focus(); paint(); return; }
     if (t.closest('[data-pal-show-mock]')) { store.set('onlyReal', false); input.focus(); paint(); return; }
     // a plain click on an in-app link: the router follows it (no hashchange for pushState), so the palette goes with the screen
-    if (!e.defaultPrevented && e.button === 0 && !(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) && t.closest('a[href^="#/"]')) { moved = true; dlg.close(); }
+    if (!e.defaultPrevented && e.button === 0 && !(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) && isAppLink(t.closest('a[href]'))) { moved = true; dlg.close(); }
   });
   const onHash = () => { moved = true; if (dlg.open) dlg.close(); else finish(); };
   const finish = () => {
@@ -141,6 +142,7 @@ export function openPalette(opener, o = {}) {
     done = true;
     clearTimeout(tPaint); clearTimeout(tLive);
     window.removeEventListener('hashchange', onHash);
+    window.removeEventListener('popstate', onHash);
     dlg.remove();
     if (back) back.setAttribute('aria-expanded', 'false');
     document.documentElement.classList.remove('has-modal');
@@ -149,6 +151,7 @@ export function openPalette(opener, o = {}) {
   };
   dlg.addEventListener('close', finish);
   window.addEventListener('hashchange', onHash);
+  window.addEventListener('popstate', onHash);                    // path mode: Back is a popstate, not a hashchange
 
   // V6 (26.10): the panel hangs under the header, below the magnifier that opened it (CSS: dialog.palette); the top edge follows the header, also after the page was scrolled
   const hb = document.getElementById('topbar');

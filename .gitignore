@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 .venv/
+.venv-data/
 venv/
 .pytest_cache/
 
@@ -12,9 +13,17 @@ node_modules/
 .pw-browsers/
 render-check/
 
-# Суровите данни не се качват — виж docs/data-sources.md
-prototype/data/raw/
+# Суровите данни не се качват (docs/data-sources.md)…
+prototype/data/raw/*
 data/raw/
+# …освен файловете на МФ (minfin.bg): 33-те месечни отчета по КФП и PDF-а с АСБП, около 4,9 MB. С тях всеки може да сглоби данните
+# от чисто копие. Останалите източници се свалят автоматично (tools/data/raw_sources.py) и остават извън Git.
+!prototype/data/raw/kfp_2024/
+!prototype/data/raw/kfp_2025/
+!prototype/data/raw/kfp_2026/
+!prototype/data/raw/asbp/
+prototype/data/raw/asbp/*
+!prototype/data/raw/asbp/UMTBF-2026-2028-motivi.pdf
 
 # Временни файлове и кешове
 tmp/
@@ -27,3 +36,14 @@ Thumbs.db
 # Тайни
 .env
 .secrets
+
+# Собствените среди: адресите и id-тата на твоя Cloudflare акаунт (docs/release.md, „Среди“)
+wrangler.local.jsonc
+tools/environments.local.json
+
+# Сглобеният сайт (tools/site/build.py), сглобеното SSR приложение (react-router build) и локалното състояние на wrangler
+dist/
+build/
+.react-router/
+.wrangler/
+work/

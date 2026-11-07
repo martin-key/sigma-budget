@@ -9,10 +9,11 @@
 // - `?to=<id>` of something inside a hidden panel: the router (revealTabs) shows the panel and syncs the tab
 // - the `.tabs` element fires a bubbling `tabs:change` event ({detail:{id, key}}) after every user choice
 import { html, raw, cx, plain } from '../html.js';
+import { here, parts as addrParts } from '../loc.js';
 import { num } from '../format.js';
 
 const MEM = new Map();
-const memKey = id => `${location.hash.split('?')[0]}|${id}`;
+const memKey = id => `${addrParts(here()).path}|${id}`;
 const part = k => String(k).replace(/[^\w-]+/g, '_');          // the key as part of an id
 
 export function tabs(o = {}) {

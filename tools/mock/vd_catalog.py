@@ -9,6 +9,7 @@ import os
 import re
 
 import vd_lib as L
+from vd_idx import MONTHS
 from vd_lib import Check, fmt, isnum
 
 SOURCE_KEYS = ("kfp", "asbp", "bill", "zdb", "zbdoo", "zbnzok", "prb", "parliament", "eurostat", "bnb", "nap", "sebra",
@@ -42,7 +43,7 @@ def g_core(ctx):
          "build.kfpMonths2026")
     c.ok(b["kfpMonths2026"] == ex["latest"]["month"] == core["kpis"]["month"], "kfpMonths2026 vs execution.latest.month vs kpis.month")
     nxt = ex["pendingMonths"][0]
-    c.ok(b["kfpNext"] == nxt["asOf"] and nxt["month"] == b["kfpMonths2026"] + 1, "build.kfpNext must be the first pending month of execution.json")
+    c.ok(b["kfpNext"] == nxt["asOf"] and nxt["month"] == b["kfpMonths2026"] % 12 + 1, "build.kfpNext must be the first pending month of execution.json")
     c.ok(b["eurRate"] == 1.95583, "build.eurRate %s" % b["eurRate"])
     c.ok(core["years"]["list"] == o["years"] and [core["years"]["vintage"][str(y)] for y in o["years"]] == o["vintage"], "years must equal outlook")
     # --- sources
@@ -61,6 +62,12 @@ def g_core(ctx):
         c.ok(p["status"] == "pending" and p["id"] == k and all(isinstance(p.get(x), str) and p[x].strip() for x in ("title", "reason", "expected")), "pending %s: shape" % k)
         c.ok(p["source"] and all(x in src for x in p["source"]), "pending %s: source keys" % k)
         c.ok(p["screens"] and all(x in routes for x in p["screens"]), "pending %s: screens %s" % (k, p["screens"]))
+    # P04 names the next report and the last one added (bd_common.set_kfp_pending), never a month written into the code
+    p04, ny = core["pending"].get("P04", {}), nxt["asOf"][:4]
+    c.ok(p04.get("title", "").startswith("Отчетът към %s г." % ".".join(reversed(nxt["asOf"].split("-"))))
+         and "за %s %s г. още не е добавен" % (MONTHS[nxt["month"] - 1], ny) in p04.get("reason", "")
+         and p04.get("reason", "").endswith("е за %s %s г." % (MONTHS[ex["latest"]["month"] - 1], ex["latest"]["asOf"][:4])),
+         "pending P04 must name the pending report %s and the latest %s" % (nxt["asOf"], ex["latest"]["asOf"]))
     # --- counts
     n = core["counts"]
     mfiles = [f for f in L.json_files() if f.startswith("ministries/")]

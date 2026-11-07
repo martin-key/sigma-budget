@@ -8,27 +8,36 @@
 //   renderPng(spec,{watermark})          canvas with title, period, the block, source and short link; „ПРИМЕРНИ ДАННИ“ watermark whenever the data is mock
 // Rules that never bend: the copied text always carries the source; a mock block is never exported without saying so
 // (text line, PNG watermark, CSV status column).
+import { scoped, serverScope } from './env.js';
 import { html, esc } from './html.js';
+import { here, parts as addrParts, absolute } from './loc.js';
 import { icon } from './icons.js';
 import { data } from './data.js';
 import { date, csvCell } from './format.js';
+import { SCOPES } from './store.js';
 import { statusLabel } from './ui/status.js';
 import { srcShort } from './ui/source.js';
 import { popover, sheet } from './ui/sheet.js';
 import { toast } from './ui/toast.js';
 
 /* ---------------------------------------------------------------- registry */
-const registry = new Map();
+const own = new Map();
 const resetHooks = new Set();
 let curRoute = null;
-/** called by the router at the start of every render: clears specs and lets registries (charts…) clear theirs */
-export const reset = route => { registry.clear(); curRoute = route || null; resetHooks.forEach(f => { try { f(); } catch (e) { console.error(e); } }); };
+const registryOf = () => scoped('share', own);              // the server draws each request into its own registry (js/env.js)
+/** called by the router at the start of every render: clears specs and lets registries (charts…) clear theirs. On the server the
+ *  request starts with empty maps of its own and only names its screen */
+export const reset = route => {
+  const sc = serverScope();
+  if (sc) { sc.route = route || null; return; }
+  own.clear(); curRoute = route || null; resetHooks.forEach(f => { try { f(); } catch (e) { console.error(e); } });
+};
 export const onReset = fn => { resetHooks.add(fn); return () => resetHooks.delete(fn); };
-export const register = (id, spec) => { registry.set(id, { id, route: curRoute?.key || null, ...spec }); return id; };
-export const get = id => registry.get(id);
-export const all = () => [...registry.entries()];
 /** the route row of the screen being drawn (ui/block.js and ui/cards.js use its key for „Намерих грешка“ and embeds) */
-export const currentRoute = () => curRoute;
+export const currentRoute = () => { const sc = serverScope(); return sc ? sc.route || null : curRoute; };
+export const register = (id, spec) => { registryOf().set(id, { id, route: currentRoute()?.key || null, ...spec }); return id; };
+export const get = id => registryOf().get(id);
+export const all = () => [...registryOf().entries()];
 
 /** mock when flagged, or when the block on screen contains something hatched as mock (a mock chart/table/KPI inside a „real“ block still exports labelled) */
 const MOCK_INSIDE = '[data-mock-fig="true"],[data-mock-table="true"],[data-kpi-mock="true"]';
@@ -38,14 +47,15 @@ const val = x => (typeof x === 'function' ? x() : x);
 
 /* Charts and tables register what they can export (a table twin for CSV); blocks find them in their own DOM at share time.
    attach(domId, {table:()=>({columns,rows,statuses?}), chart:true}) — cleared with the registry on every navigation. */
-const attached = new Map();
-resetHooks.add(() => attached.clear());
-export const attach = (id, o) => { attached.set(id, o); return id; };
+const ownAttached = new Map();
+const attachedOf = () => scoped('attached', ownAttached);   // one map per server request (js/env.js)
+resetHooks.add(() => ownAttached.clear());
+export const attach = (id, o) => { attachedOf().set(id, o); return id; };
 const blockEl = spec => (spec.id ? document.getElementById(spec.id) : null);
 function attachments(spec) {
   const root = blockEl(spec);
   if (!root) return [];
-  return [...root.querySelectorAll('[data-attach]')].map(n => ({ el: n, vis: n.getClientRects().length > 0, ...attached.get(n.dataset.attach) })).filter(a => a.table || a.chart).sort((x, y) => y.vis - x.vis);
+  return [...root.querySelectorAll('[data-attach]')].map(n => ({ el: n, vis: n.getClientRects().length > 0, ...attachedOf().get(n.dataset.attach) })).filter(a => a.table || a.chart).sort((x, y) => y.vis - x.vis);
 }
 const tableOf = spec => {
   const t = val(spec.table) ?? attachments(spec).find(a => a.table)?.table();
@@ -67,7 +77,7 @@ const canPng = spec => hasChart(spec) || !!tableOf(spec) || hasStat(spec);
 
 /** trigger button for a block header */
 export const shareButton = (id, o = {}) => {
-  const label = o.label || 'Сподели', t = registry.get(id)?.title;
+  const label = o.label || 'Сподели', t = registryOf().get(id)?.title;
   return html`<button type="button" class="btn btn-sm btn-quiet share-btn" data-share="${id}"${t ? html` aria-label="${label}: ${t}"` : ''} aria-haspopup="dialog" aria-expanded="false">${icon('share', { size: 16 })}<span>${label}</span></button>`;
 };
 
@@ -76,15 +86,13 @@ export const shareButton = (id, o = {}) => {
 const PERSONAL = new Set(['demo', 'brutno', 'bruto', 'zaplata', 'dohod', 'neto', 'sum', 'salary', 'gross']);
 /** link to this block on the current screen: keeps the state of the address (?per=, ?g1=…), adds the block's own `link` parameters (the same result on every opening) and ?to=<block> */
 export function linkFor(spec, { to = true } = {}) {
-  const u = new URL(location.href);
-  const [path, qs = ''] = (location.hash.replace(/^#/, '') || '/').split('?');
+  const { path, query: qs } = addrParts(here());
   const q = new URLSearchParams(qs);
   PERSONAL.forEach(k => q.delete(k));
   const own = val(spec?.link);
   if (own && typeof own === 'object') for (const [k, v] of Object.entries(own)) { if (v == null || v === '') q.delete(k); else if (!PERSONAL.has(k)) q.set(k, String(v)); }
   if (to && spec?.id) q.set('to', spec.id); else q.delete('to');
-  u.hash = '#' + path + (q.toString() ? '?' + q : '');
-  return u.href;
+  return absolute(path + (q.toString() ? '?' + q : ''));
 }
 /** the address printed under a picture: no scheme, no ?to= */
 export const shortLink = spec => linkFor(spec, { to: false }).replace(/^https?:\/\//, '');
@@ -106,18 +114,36 @@ export function textFor(spec) {
   lines.push(linkFor(spec));
   return lines.join('\n');
 }
-const csvVal = v => (v == null ? '' : typeof v === 'number' ? (Number.isFinite(v) ? String(v).replace('.', ',') : '') : String(v).replace(/\s*[\r\n]+\s*/g, ' '));   // a cell is one line: a break inside a cell breaks row-by-row tools
-/** CSV: UTF-8 BOM, ";" separator, decimal comma, CRLF; last two columns are „статус“ and „източник“ */
+// spreadsheet formula injection (docs/approach-specification.md, section 9.2): a text cell that begins with = + - @, a tab or a carriage
+// return (or their full-width forms) gets a leading apostrophe, so a spreadsheet shows it as text and never runs it. Numbers are written as
+// numbers (decimal comma) and are not touched: -3,08 stays a number.
+export const FORMULA_START = /^[=+\-@\t\r\uFF1D\uFF0B\uFF0D\uFF20]/;
+const guard = s => (FORMULA_START.test(s) ? "'" + s : s);
+const csvVal = v => (v == null ? '' : typeof v === 'number' ? (Number.isFinite(v) ? String(v).replace('.', ',') : '') : guard(String(v).replace(/\s*[\r\n]+\s*/g, ' ')));   // a cell is one line: a break inside a cell breaks row-by-row tools
+/** what every row of a CSV says about itself (section 9.2): the period, the unit, the budget scope and the release of the data. The period
+ *  line of a block is „януари—септември 2026 г. · млрд. €“: the part after „ · “ is the unit, unless the block names one */
+export function csvMeta(spec) {
+  const [per, ...rest] = String(spec.period || '').split(' · ');
+  const scope = typeof spec.scope === 'string' ? spec.scope : spec.scope?.key;
+  return {
+    period: per || (spec.asOf ? `към ${date(spec.asOf)}` : ''),
+    unit: spec.unit || rest.join(' · '),
+    scope: scope ? SCOPES[scope]?.long || SCOPES[scope]?.label || scope : '',
+    release: data.get('releases/current')?.release_id || '',
+  };
+}
+/** CSV: UTF-8 BOM, ";" separator, decimal comma, CRLF; then „период“, „единица“, „обхват“, „издание“; the last two columns are „статус“ and „източник“ */
 export function csvFor(spec) {
   const t = tableOf(spec);
   if (!t) return '';
   const src = keysOf(spec.source).map(srcShort).join('; ');
   const st = i => statusLabel(t.statuses?.[i] || spec.status || (isMock(spec) ? 'mock' : 'real'));
-  const lines = [[...t.columns, 'статус', 'източник'].map(c => csvCell(csvVal(c))).join(';')];
-  t.rows.forEach((r, i) => lines.push([...r.map(csvVal), st(i), src].map(csvCell).join(';')));
+  const m = csvMeta(spec);
+  const lines = [[...t.columns, 'период', 'единица', 'обхват', 'издание', 'статус', 'източник'].map(c => csvCell(csvVal(c))).join(';')];
+  t.rows.forEach((r, i) => lines.push([...r.map(csvVal), ...[m.period, m.unit, m.scope, m.release].map(csvVal), st(i), src].map(csvCell).join(';')));
   return '\uFEFF' + lines.join('\r\n') + '\r\n';
 }
-/** hash of the embed view (S29): #/embed/<routeKey>.<chartId>[?per=…&<spec.embedParams>]
+/** address of the embed view (S29): /embed/<routeKey>.<chartId>[?per=…&<spec.embedParams>] (internal form, js/loc.js)
  *  embedParams = the host screen's own address parameters ({code:'1000'} for #/vedomstvo/1000): S29 hands them back to the screen as its params.
  *  Keys are plain names (never per/demo), values primitives. */
 export function embedHash(spec) {
@@ -125,21 +151,19 @@ export function embedHash(spec) {
   const key = e === true ? `${pre}.${spec.chart || spec.id}` : typeof e === 'string' && e ? (e.includes('.') ? e : `${pre}.${e}`) : '';
   if (!key) return '';
   const q = new URLSearchParams();
-  const per = new URLSearchParams((location.hash.split('?')[1] || '')).get('per');
+  const per = new URLSearchParams(addrParts(here()).query).get('per');
   if (per) q.set('per', per);
   for (const [k, v] of Object.entries(spec.embedParams || {})) {
     if (/^[A-Za-z][\w-]*$/.test(k) && k !== 'per' && k !== 'demo' && v != null && v !== '' && typeof v !== 'object') q.set(k, String(v));
   }
   const qs = q.toString();
-  return `#/embed/${key}${qs ? '?' + qs : ''}`;
+  return `/embed/${key}${qs ? '?' + qs : ''}`;
 }
 /** iframe code for the embed view (S29) */
 export function embedFor(spec) {
   const h = embedHash(spec);
   if (!h) return '';
-  const u = new URL(location.href);
-  u.hash = h;
-  return `<iframe src="${esc(u.href)}" title="${esc(spec.title)}" width="720" height="440" loading="lazy" style="border:0;max-width:100%" referrerpolicy="no-referrer"></iframe>`;
+  return `<iframe src="${esc(absolute(h))}" title="${esc(spec.title)}" width="720" height="440" loading="lazy" style="border:0;max-width:100%" referrerpolicy="no-referrer"></iframe>`;
 }
 
 /* ---------------------------------------------------------------- clipboard and downloads */

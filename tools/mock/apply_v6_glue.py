@@ -206,7 +206,8 @@ if 'dbp2027' not in core['sources']:
         'url': 'https://economy-finance.ec.europa.eu/economic-governance-framework/stability-and-growth-pact/annual-draft-budgetary-plans-dbps-euro-area-countries/draft-budgetary-plans-2027_en',
         'kind': 'html', 'access': 'open',
         'note': 'Списък на проектите на бюджетни планове за 2027 г. (там е и проектът на България). Комисията ги оценява като съответстващи, съответстващи до голяма степен или с риск от несъответствие (описание на страницата за годишните проекти на бюджетни планове).'}
-    assert core['counts']['terms'] == 64
+    # 64 on the v5 tree; 69 when build_data.py rebuilt core.json and already counted the v6 glossary on disk
+    assert core['counts']['terms'] in (64, 69)
     core['counts']['terms'] = 69
     wr('data/core.json', json.dumps(core, ensure_ascii=False, separators=(',', ':')) + ('\n' if raw_core.endswith('\n') else ''))
     print('  edited           data/core.json (+4 sources, counts.terms 69)')

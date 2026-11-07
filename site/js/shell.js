@@ -6,10 +6,10 @@
 // mono-uppercase band with the three main sections «Начало · Изпълнение · Бюджет» (the current one underlined) and the current section's
 // screens on a second line; «Още» (data and methodology, glossary, learning path, project) opens as a dropdown there. The phone bar has
 // three tabs «Начало · Отчет · Бюджет»; everything else is under «Меню».
-// Light only: no theme switch (СИГМА has no dark theme). Built once at boot from the route table. It follows the store (period, user type, sources) and the router
+// Light and dark (spec 9.3): the footer has the theme switch (system, light, dark; js/theme-boot.js applies it before the first paint). Built once at boot from the route table. It follows the store (period, user type, sources) and the router
 // (current item, period switch hidden on screens that do not depend on a period). Page workers never edit this file.
 import { store, safe } from './store.js';
-import { ROUTES, GROUPS, byId, href as routeHref } from './routes.js';
+import { byId, href as routeHref } from './routes.js';
 import { html, nextId } from './html.js';
 import { icon } from './icons.js';
 import { popover, sheet } from './ui/sheet.js';
@@ -17,34 +17,14 @@ import { openLegend } from './ui/status.js';
 import { data } from './data.js';
 import { date } from './format.js';
 import { router } from './router.js';
+import { here, parts as addrParts, toHref, isAppLink } from './loc.js';
+import { yearOf, statusOf, TABS, NAV_GROUPS, sigmaLink, groupOf, groupItems, navName, navHref, bannerHtml, CTA, topbarHtml, tabbarHtml,
+  footerHtml, THEME_KEY, THEMES, rootOf } from './chrome.js';
 
 const $ = id => document.getElementById(id);
-const MARK = html`<svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect x="3" y="18" width="6" height="11" fill="var(--ink)"/><rect x="12.5" y="12" width="6" height="17" fill="var(--ink)"/><rect x="22" y="6" width="6" height="23" fill="var(--ink)"/><rect x="2" y="29.5" width="28" height="1.5" fill="var(--ink)"/><circle cx="25" cy="2.6" r="2.4" fill="var(--crimson)"/></svg>`;
-const yearOf = p => p.label.split(' · ')[0];
-const statusOf = p => p.label.split(' · ')[1] || '';
 const NEWS_KEY = 'bns.news.seen';
-
-/* The three main sections of the app. The phone bottom bar shows them as tabs, the desktop band as rows (only the current section lists
-   its screens). V6 (25.10): «Моите данъци» (S18) is no longer a permanent masthead button; it lives under «Още» (group «Данъци»), in the phone «Меню» and in the footer. */
-const idsOf = (...groups) => ROUTES.filter(r => groups.includes(r.group)).map(r => r.id);
-const SECTIONS = [
-  { id: 'home', label: 'Начало', tab: 'Начало', icon: 'home', to: 'S01', routes: ['S01'] },
-  { id: 'exec', label: 'Изпълнение', tab: 'Отчет', icon: 'gauge', to: 'S15', routes: idsOf('exec') },
-  { id: 'money', label: 'Бюджет', tab: 'Бюджет', icon: 'wallet', to: 'S07', routes: idsOf('budget') }
-];
-const TABS = SECTIONS;
-/* The five header buttons, the footer groups and the phone «Меню» are ONE list (the real routes of js/routes.js; nav:false screens such as S08/S11/S21 belong to their parents). */
-const NAV_GROUPS = [
-  ['Начало', ['S01', 'S04', 'S03']],
-  ['Изпълнение', ['S15', 'S16']],
-  ['Бюджет', ['S07', 'S06', 'S10', 'S12', 'S13', 'S34', 'S14', 'S20', 'S05']],
-  ['Данъци и контекст', ['S18', 'S17', 'S31']],
-  ['Данни и проект', ['S24', 'S25', 'S26', 'S27']]
-];
-const rootId = r => (r.parent ? rootId(byId[r.parent]) : r.id);
-const groupOf = route => { const root = rootId(route); return NAV_GROUPS.findIndex(([, ids]) => ids.includes(route.id) || ids.includes(root)); };
-const groupItems = ids => ids.map(id => byId[id]).filter(r => r && r.nav);
-const navName = r => r.short || r.title;
+// the pieces of the shell (header, tab bar, footer, banner, the menu lists) are built by js/chrome.js, which the server uses too
+const syncLinks = () => document.querySelectorAll('#tabbar a[data-route], #footer a[data-route]').forEach(a => a.setAttribute('href', navHref(a.dataset.route)));
 
 const openSearch = el => import('./search.js').then(m => m.openPalette(el)).catch(e => { console.error(e); });
 
@@ -67,74 +47,26 @@ function openPeriod(btn) {
   pop.el.querySelector('input:checked')?.focus({ preventScroll: true });
 }
 function openMoreSheet(btn) {
-  const nav = NAV_GROUPS.map(([label, ids]) => html`<section class="more-grp"><h3>${label}</h3><ul class="more-list">${groupItems(ids).map(r => html`<li><a href="${routeHref(r.id)}"${router.current?.route?.id === r.id ? html` aria-current="page"` : ''}>${icon(r.icon, { size: 18 })}<span>${navName(r)}</span></a></li>`)}</ul></section>`);
+  const nav = NAV_GROUPS.map(([label, ids]) => html`<section class="more-grp"><h3>${label}</h3><ul class="more-list">${groupItems(ids).map(r => html`<li><a href="${navHref(r.id)}"${router.current?.route?.id === r.id ? html` aria-current="page"` : ''}>${icon(r.icon, { size: 18 })}<span>${navName(r)}</span></a></li>`)}</ul></section>`);
   const body = html`<div class="more-sheet">
     <p class="more-cta"><a class="nav-cta" href="${routeHref('S34')}">${CTA}</a></p>
     <nav aria-label="Всички раздели">${nav}</nav>
+    <p class="more-sister">${sigmaLink('sister-link')}</p>
   </div>`;
   const s = sheet.open({ title: 'Меню', body, returnFocus: btn, cls: 'sheet-drawer' });
-  s.el.addEventListener('click', e => { if (e.target.closest('a[href^="#/"]')) s.close(); });
+  s.el.addEventListener('click', e => { if (isAppLink(e.target.closest('a[href]'))) s.close(); });
 }
 
 /** a dropdown of the wide header: the screens of one group (the popover closes on Esc, on a click outside and on navigation; focus goes back to the button) */
 function openNavGroup(btn, i) {
   const [label, ids] = NAV_GROUPS[i];
   const cur = router.current?.route;
-  const items = groupItems(ids).map(r => html`<li><a href="${routeHref(r.id)}"${cur && (cur.id === r.id) ? html` aria-current="page"` : ''}><span>${navName(r)}</span></a></li>`);
+  const items = groupItems(ids).map(r => html`<li><a href="${navHref(r.id)}"${cur && (cur.id === r.id) ? html` aria-current="page"` : ''}><span>${navName(r)}</span></a></li>`);
+  if (i === NAV_GROUPS.length - 1) items.push(html`<li class="nav-sister">${sigmaLink('sister-link')}</li>`);
   popover.open(btn, { body: html`<nav class="nav-pop" aria-label="${label}"><ul class="more-list">${items}</ul></nav>`, label, align: 'start' });
 }
 
-/* ------------------------------------------------------------------ pieces */
-function bannerHtml() {
-  return html`<span class="hatch-swatch" aria-hidden="true"></span>
-    <p><strong>Mock прототип:</strong> официални данни, където ги има; примерните са със щриховка. <button type="button" class="link-btn" data-action="legend">Легенда</button></p>
-    <button type="button" class="x" data-action="dismiss-banner" aria-label="Скрий съобщението за тази сесия">${icon('x', { size: 18 })}</button>`;
-}
-const CTA = 'Бюджет 2027';
-function topbarHtml() {
-  const p = store.period;
-  return html`<div class="mast-in"><a class="brand" href="#/" aria-label="Бюджет на светло, към началото">${MARK}<span class="brand-name">Бюджет на светло</span></a>
-    <span class="badge-mock" title="Прототип с официални и примерни данни">Mock</span>
-    <div class="topbar-tools">
-      <button type="button" class="tool-btn period-btn" id="btn-period" aria-haspopup="dialog" aria-expanded="false" aria-label="Година и статус на данните: ${p.label}"><span class="p-year">${yearOf(p)}</span><span class="p-status"> · ${statusOf(p)}</span>${icon('chevronDown', { size: 14 })}</button>
-      <nav class="sidenav" id="sidenav" aria-label="Основна навигация">${navHtml()}</nav>
-      <button type="button" class="menu-btn" id="btn-menu" aria-haspopup="dialog" aria-expanded="false"><span class="menu-box" aria-hidden="true"><span></span><span></span></span><span>Меню</span></button>
-    </div></div>`;
-}
-const NEWS_DOT = label => html`<span class="nav-dot" data-news-dot data-label="${label}" hidden></span>`;
-function navHtml() {
-  const rows = NAV_GROUPS.map(([label], i) => html`<div class="nav-sec" data-sec="g${i}"><button type="button" class="nav-main" data-grp="${i}" aria-haspopup="dialog" aria-expanded="false"><span>${label}</span>${i === 1 ? NEWS_DOT('Изпълнение (има непрочетено)') : ''}${icon('chevronDown', { size: 12, cls: 'nav-chev' })}</button></div>`);
-  const lupa = html`<button type="button" class="nav-search" id="btn-search" data-action="search" aria-haspopup="dialog" aria-expanded="false" aria-keyshortcuts="/ Control+K Meta+K" aria-label="Търсене" title="Търсене (/)">${icon('search', { size: 22 })}</button>`;
-  return html`<div class="nav-in">${rows}${lupa}<a class="nav-cta" href="${routeHref('S34')}" data-nav="S34">${CTA}</a></div>`;
-}
-function tabbarHtml() {
-  return html`${TABS.map(t => html`<a href="${routeHref(t.to)}" data-tab="${t.id}">${icon(t.icon, { size: 20 })}<span>${t.tab}</span></a>`)}`;
-}
-/* V6 footer: every screen of the menu, grouped (the ids are the real routes of js/routes.js; nav:false screens like S08/S11/S21 are children of listed ones).
-   Phones: one collapsible group per heading (native <details>, keyboard-operable); wide screens: all groups open side by side (syncFooter below). */
 const WIDE = '(min-width: 961px)';
-function footerHtml() {
-  const core = data.get('core');
-  const b = core && core.build;
-  const kfp = b && b.kfpLatest ? (/^\d{4}-\d{2}-\d{2}/.test(b.kfpLatest) ? date(b.kfpLatest) : b.kfpLatest) : '';
-  const wide = window.matchMedia && window.matchMedia(WIDE).matches;
-  const cur = router.current?.route?.id;
-  const groups = NAV_GROUPS.map(([label, ids]) => {
-    const items = groupItems(ids);
-    return html`<details class="foot-grp"${wide ? html` open` : ''}><summary>${label}</summary><ul>${items.map(r => html`<li><a href="${routeHref(r.id)}"${r.id === 'S27' ? html` data-feedback-link` : ''}${cur === r.id ? html` aria-current="page"` : ''}>${navName(r)}</a></li>`)}</ul></details>`;
-  });
-  return html`<div class="footer-in">
-    <nav class="foot-nav" aria-label="Всички страници">${groups}</nav>
-    <div class="fine">
-      ${kfp ? html`<span>Данните: КФП към ${kfp}${b.kfpPublished ? html` (обн. ${date(b.kfpPublished)})` : ''}</span>` : ''}
-      ${b && b.dataVersion ? html`<span>Версия на данните: ${b.dataVersion}</span>` : ''}
-      <span>Mock прототип: част от данните са примерни и са със щриховка.</span>
-      <span>Лиценз на данните: предстои решение.</span>
-      <button type="button" class="link-btn" data-action="legend">Легенда: какво означават белезите</button>
-    </div>
-    <p class="small muted">Работна група „Бюджет на светло“</p>
-  </div>`;
-}
 /** wide screens show every footer group open (the summary is then a plain heading, out of the tab order); narrow screens keep what the visitor opened */
 function syncFooter() {
   const f = $('footer');
@@ -148,17 +80,37 @@ function syncFooter() {
 function footClick(e) {
   const sm = e.target.closest && e.target.closest('details.foot-grp > summary');
   if (sm && window.matchMedia(WIDE).matches) e.preventDefault();
+  const t = e.target.closest && e.target.closest('[data-theme-pick]');
+  if (t) pickTheme(t.dataset.themePick);
+}
+
+/* ------------------------------------------------------------------ theme (docs/approach-specification.md, section 9.3) */
+// '' follows the system (prefers-color-scheme), 'light' and 'dark' are the visitor's choice (localStorage bns.theme, read by js/theme-boot.js)
+const DARK = '(prefers-color-scheme: dark)';
+const themeNow = () => { const t = safe.get('localStorage', THEME_KEY); return t === 'light' || t === 'dark' ? t : ''; };
+const isDark = () => (themeNow() ? themeNow() === 'dark' : !!window.matchMedia?.(DARK).matches);
+function applyTheme() {
+  const t = themeNow();
+  if (t) document.documentElement.setAttribute('data-theme', t); else document.documentElement.removeAttribute('data-theme');
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', isDark() ? '#14120F' : '#FDFAF4');
+  document.querySelectorAll('[data-theme-pick]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.themePick === t)));
+}
+function pickTheme(t) {
+  if (t) safe.set('localStorage', THEME_KEY, t); else safe.del('localStorage', THEME_KEY);
+  applyTheme();
+  router.rerender();                                           // the charts read the colours when they draw
+  router.announce(`Тема: ${THEMES.find(x => x[0] === t)[1]}.`);
 }
 
 /* ------------------------------------------------------------------ dynamic state */
 function setCurrent(route) {
-  const root = route.parent ? (function top(r) { return r.parent ? top(byId[r.parent]) : r; })(route) : route;
+  const root = rootOf(route);
   document.querySelectorAll('#sidenav a[data-nav]').forEach(a => {
     if (a.dataset.nav === route.id) a.setAttribute('aria-current', 'page');
     else if (a.dataset.nav === root.id) a.setAttribute('aria-current', 'true');
     else a.removeAttribute('aria-current');
   });
-  document.querySelectorAll('#footer a[href^="#/"]').forEach(a => {      // the footer marks the current screen too
+  document.querySelectorAll('#footer a[href]').forEach(a => {      // the footer marks the current screen too
     if (a.getAttribute('href').split('?')[0] === routeHref(route.id)) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
   });
   const tab = TABS.find(t => t.routes.includes(route.id) || (route.parent && t.routes.includes(root.id)));
@@ -222,6 +174,8 @@ export const shell = {
     shell.refreshFooter();
     $('footer')?.addEventListener('click', footClick);
     window.matchMedia(WIDE).addEventListener?.('change', syncFooter);
+    applyTheme();
+    window.matchMedia?.(DARK).addEventListener?.('change', () => { if (!themeNow()) { applyTheme(); router.rerender(); } });   // the system switched, the visitor follows it
     applySources();
 
     $('btn-period').addEventListener('click', e => openPeriod(e.currentTarget));
@@ -240,20 +194,21 @@ export const shell = {
     });
     router.onNavigate(({ route, demo }) => {
       setCurrent(route);
+      syncLinks();
       const per = router.periods;
       const b = $('btn-period');
       if (b) b.hidden = per === 'none';
       updateOffline(demo);
       if (route.id === 'S16') markNewsSeen();
       const fb = document.querySelector('[data-feedback-link]');
-      if (fb) fb.setAttribute('href', `#/vrazka?type=greshka&from=${encodeURIComponent(location.hash.replace(/^#\/?/, '').split('?')[0])}`);
+      if (fb) fb.setAttribute('href', toHref(`/vrazka?type=greshka&from=${encodeURIComponent(addrParts(here()).path.replace(/^\//, ''))}`));
     });
     window.addEventListener('online', () => updateOffline(router.current?.vm?.demo));
     window.addEventListener('offline', () => updateOffline(router.current?.vm?.demo));
-    updateOffline(new URLSearchParams(location.hash.split('?')[1] || '').get('demo'));
+    updateOffline(new URLSearchParams(addrParts(here()).query).get('demo'));
     checkNews();
   },
-  refreshFooter() { const f = $('footer'); if (f) { f.innerHTML = footerHtml().toString(); syncFooter(); } },
+  refreshFooter() { const f = $('footer'); if (f) { f.innerHTML = footerHtml({ wide: !!window.matchMedia?.(WIDE).matches, cur: router.current?.route?.id, theme: themeNow() }).toString(); syncFooter(); } },
   dismissBanner() {
     store.dismissBanner();
     const b = $('mockbar');

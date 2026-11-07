@@ -5,12 +5,14 @@
 //   - a null/undefined value prints an em dash (never a made-up number); an unknown number prints "—", never NaN
 //   - sortable:true adds header buttons (aria-sort). With query:true the choice is written to ?sort=&dir= (pass ctx.query.sort/dir as sortBy/dir)
 // The table registers itself with share.attach(), so a block's „Изтегли CSV“ finds it without extra code.
+import { scoped } from '../env.js';
 import { html, raw, esc, SafeHtml } from '../html.js';
 import { num, DASH } from '../format.js';
 import { icon } from '../icons.js';
 import * as share from '../share.js';
 
-const specs = new Map();
+const ownSpecs = new Map();
+const specs = { get: id => scoped('table', ownSpecs).get(id), set: (id, v) => scoped('table', ownSpecs).set(id, v), clear: () => ownSpecs.clear() };   // one map per server request (js/env.js)
 share.onReset(() => specs.clear());
 
 const isNum = v => typeof v === 'number';

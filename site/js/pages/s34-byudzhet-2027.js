@@ -62,7 +62,7 @@ function kratkoBlock(f) {
       sub: html`${deficitEur == null ? '' : `Около ${money(Math.abs(deficitEur), { scale: 'mlrd', d: 1 })} (наше пресмятане, планът не го изписва). `}През ${yr(2026)}: ${f.A('n26.DEF_FORECAST')} по прогнозата на МФ.`
     }),
     kpi({
-      label: 'Приходи и разходи през 2027 г.', value: `${N('t4.rev.TR.pct.2027', 1)}${NBSP}/${NBSP}${N('n27.EXP_SHARE', 1)}`, unit: '% от БВП',
+      label: 'Приходи и разходи през 2027 г.', value: `${N('t4.rev.TR.pct.2027', 1)} / ${N('n27.EXP_SHARE', 1)}`, unit: '% от БВП',
       sub: 'Разликата между тях е дефицитът.'
     }),
     kpi({

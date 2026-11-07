@@ -20,7 +20,7 @@
   DERIVED  изчислено тук от други числа на документа
 
 Пускане (от корена на хранилището):
-  .venv/bin/python tools/mock/extract_dbp2027.py
+  .venv-data/bin/python tools/mock/extract_dbp2027.py
 Само stdlib + PyMuPDF (в .venv). Не пише никъде другаде освен в tmp/research/dbp-2027/.
 """
 import hashlib

@@ -166,7 +166,7 @@ def _indicators(ctx, rows):
     rows.add("indicators", "Брутен вътрешен продукт (БВП)", "Макроикономическа прогноза, %s" % Y, fmt_money(k["gdp"]["mln"]), Y,
              href="#/prognoza", kw="бвп икономика размер на икономиката")
     rows.add("indicators", "Капиталови разходи на КФП", "Инвестиции от бюджета, %s" % Y, fmt_money(k["capex"]["planMln"]), Y,
-             href="#/izpalnenie/pera", kw="инвестиции капиталови разходи строителство")
+             href="#/izpalnenie?pera=exp", kw="инвестиции капиталови разходи строителство")
     rows.add("indicators", "Изпълнение на приходите на КФП, %s" % mon, "%s от годишния план" % fmt_pct(k["revenue"]["execPct"]),
              fmt_money(k["revenue"]["execMln"]), Y, href="#/izpalnenie", kw="приходи събрани изпълнение отчет")
     rows.add("indicators", "Изпълнение на разходите на КФП, %s" % mon, "%s от годишния план" % fmt_pct(k["expenditure"]["execPct"]),
@@ -339,8 +339,9 @@ def _datasets(ctx, rows):
         if st not in STATUSES:
             st = "real"
         ids = d.get("contains") or []
-        rows.add("datasets", d["title"], "%s · %s" % (groups[d["group"]], _DS_STATUS[st]), "", "", status=st, href="#/danni/%s" % d["slug"],
-                 kw=_words(d["slug"].replace("-", " "), *ids, d["file"].rsplit("/", 1)[-1]))
+        s = d.get("search", {})
+        rows.add("datasets", d["title"], "%s · %s" % (groups[d["group"]], _DS_STATUS[st]), "", s.get("period", ""), status=st,
+                 href="#/danni/%s" % d["slug"], kw=s.get("kw") or _words(d["slug"].replace("-", " "), *ids, d["file"].rsplit("/", 1)[-1]))
     for pid, p in sorted(PENDING_DEFS.items()):
         rows.add("datasets", p["title"], "Предстои · %s" % _first_sentence(p["reason"]), "", "", status="pending", href="#/danni/%s" % pid.lower(),
                  kw=_words(pid, p["expected"]))

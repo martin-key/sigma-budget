@@ -1,0 +1,574 @@
+# Source registry (docs/approach-specification.md, sections 4 and 5.1): every original the published data is built from, and every
+# intermediate file between the originals and site/data. Checked by `python tools/data/registry.py check` (CI).
+#
+# sources[]       one publisher's document family
+#   id            the key used by site/data (core.sources, catalog.json `source`) and by datasets/registry.yaml `inputs`
+#   page          the official page of the family; files[].url is the exact address when there is one
+#   access        auto | auto-bg (answers only from Bulgaria) | browser-only (403 to scripts) | supplied (by the working group)
+#                 | reference (cited, nothing is read) | generated (example values of build_mock.py)
+#   acquisition   fetch | fetch-bg | import (a person downloads, tools/data/raw_sources.py import checks and records it)
+#                 | supplied | reference | generated
+#   format        the expected kind of file (the magic bytes raw_sources.py checks)
+#   parser        the scripts that read the originals
+#   live          true when the publisher changes the file in place (APIs, pages): a refetch is expected to differ
+#   files[].via   the script that reduces the answer at `url` to the cached file: a refetch cannot compare them byte for byte
+#   files[]       path (a glob for families) of the original as the build reads it; url when it has its own address;
+#                 the sha256 of every file under prototype/data/raw is pinned in tools/mock/prototype.sha256; a file
+#                 elsewhere carries `sha256` here, or `pinned: false` when it has no pin yet
+#   limitations   what the source cannot support, or what is missing
+#
+# intermediates[] files that tools make from the originals and the builders read
+#   producer      the script that makes it (null when there is none: spec, section 4)
+#   inputs        source ids or other intermediate paths
+#   reproducible  true when the producer, run on the pinned inputs, gives the file byte for byte (checked 05.11.2026)
+schema: 1
+sources:
+- id: kfp
+  title: 'Консолидирана фискална програма (КФП): месечна информация за изпълнението'
+  publisher: Министерство на финансите
+  page: https://www.minfin.bg/bg/statistics/5
+  access: browser-only
+  acquisition: import
+  format: xls
+  parser: tools/mock/extract_kfp_full.py
+  period: monthly from January 2024, cumulative since 1 January (the newest is `latest` in site/data/execution.json)
+  unit: млн. лв. (2024–2025), млн. € (2026)
+  live: false
+  files:
+  - path: prototype/data/raw/kfp_2024/*.xls
+    title: 12 monthly reports for 2024
+  - path: prototype/data/raw/kfp_2025/*.xls
+    title: 12 monthly reports for 2025 (December is _4)
+  - path: prototype/data/raw/kfp_2026/*.xls
+    title: monthly reports for 2026
+  limitations:
+  - 'minfin.bg answers 403 to automatic requests: every report is downloaded by a person and imported with tools/data/raw_sources.py import, which
+    checks the sheet, the period and the unit'
+  - the MF release of 02.11.2026 uses a September 2025 base 0.9 млн. € above the archived report (docs/data-sources.md, section 4.1)
+- id: asbp
+  title: 'Мотиви към законопроекта за държавния бюджет 2026: актуализирана средносрочна бюджетна прогноза (АСБП) 2026–2028'
+  publisher: Министерство на финансите
+  page: https://www.minfin.bg/bg/legislation1/609
+  access: browser-only
+  acquisition: import
+  format: pdf
+  parser: tools/prototype/extract_asbp_tables.py, tools/prototype/extract_asbp_pages.py
+  period: 2024–2028 (report 2024, expected 2025, plan 2026, forecast 2027–2028)
+  unit: млн. € and % of GDP
+  live: false
+  files:
+  - path: prototype/data/raw/asbp/UMTBF-2026-2028-motivi.pdf
+    title: Мотиви и АСБП 2026–2028, PDF of the MF
+  - path: prototype/data/raw/asbp/UMTBF-2026-2028-motivi.source.json
+    title: acquisition record of the PDF (who supplied it, from where, when)
+  limitations:
+  - the acquisition record UMTBF-2026-2028-motivi.source.json is pinned but not on the machines checked on 05.11.2026
+  - a second version of the tables is in the bill (parliament 52-602-01-19.docx); the two differ in small rows, at most 4.3 млн. € (docs/data-sources.md,
+    section 4.2)
+- id: bill
+  title: Законопроект за държавния бюджет на Република България за 2026 г. (№ 52-602-01-19)
+  publisher: Министерски съвет; Народно събрание
+  page: https://www.parliament.bg/bills/52/52-602-01-19.docx
+  access: auto
+  acquisition: fetch
+  format: docx
+  parser: tools/mock/bd_rates.py, tools/mock/extract_bill.py
+  period: the 2026 budget bill, submitted 01.07.2026
+  unit: хил. €
+  live: false
+  files:
+  - path: prototype/data/raw/parliament/52-602-01-19.docx
+    url: https://www.parliament.bg/bills/52/52-602-01-19.docx
+    title: Законопроект за държавния бюджет 2026 + мотиви (АСБП 2026–2028), внесен 01.07.2026
+- id: prb
+  title: Програмни бюджети на първостепенните разпоредители (архив към законопроекта)
+  publisher: Министерство на финансите; Народно събрание
+  page: https://www.parliament.bg/bills/52/52-602-01-19.zip
+  access: auto
+  acquisition: fetch
+  format: zip
+  parser: tools/prototype/extract_program_budgets.py
+  period: programme budgets 2023–2028 of the 46 first-level spending units
+  unit: хил. €
+  live: false
+  files:
+  - path: prototype/data/raw/parliament/52-602-01-19.zip
+    url: https://www.parliament.bg/bills/52/52-602-01-19.zip
+    title: 'Архивът към законопроекта: програмните бюджети на ПРБ (папка 7), становища, протоколи'
+  limitations:
+  - the tables of some spending units do not parse reliably (pending P03)
+- id: parliament
+  title: 'Народно събрание: данни за законопроекта и законодателния път'
+  publisher: Народно събрание на Република България
+  page: https://www.parliament.bg/bg/bills/ID/167157
+  access: auto
+  acquisition: fetch
+  format: json
+  parser: tools/mock/bd_law.py
+  period: the legislative path of the three 2026 budget laws
+  live: true
+  files:
+  - path: prototype/data/raw/parliament/bill_167157.json
+    url: https://www.parliament.bg/api/v1/bill/167157
+    title: ЗДБ 2026 — данни за законопроекта
+  - path: prototype/data/raw/parliament/bill_167156.json
+    url: https://www.parliament.bg/api/v1/bill/167156
+    title: ЗБДОО 2026 — данни за законопроекта
+  - path: prototype/data/raw/parliament/bill_167155.json
+    url: https://www.parliament.bg/api/v1/bill/167155
+    title: ЗБНЗОК 2026 — данни за законопроекта
+  limitations:
+  - 'a live API: the answer changes as the parliament updates its records; one НСОРБ opinion is listed twice (tools/mock/bd_law.py, DUPLICATE_OPINIONS)'
+- id: zdb
+  title: Закон за държавния бюджет на Република България за 2026 г.
+  publisher: Народно събрание; Държавен вестник, бр. 69 от 31.07.2026 г.
+  page: https://dv.parliament.bg/DVWeb/showMaterialDV.jsp?idMat=245041
+  access: auto
+  acquisition: fetch
+  format: html
+  parser: tools/prototype/extract_dv_laws.py, tools/mock/extract_bill.py
+  period: ЗДБ 2026, ДВ бр. 69 от 31.07.2026
+  unit: хил. €
+  live: false
+  files:
+  - path: prototype/data/raw/dv/zdb2026_dv69_idMat245041.html
+    url: https://dv.parliament.bg/DVWeb/showMaterialDV.jsp?idMat=245041
+    title: Закон за държавния бюджет на РБ за 2026 г., ДВ бр. 69 от 31.07.2026
+- id: zbdoo
+  title: Закон за бюджета на държавното обществено осигуряване за 2026 г.
+  publisher: Народно събрание; Държавен вестник, бр. 68 от 28.07.2026 г.
+  page: https://dv.parliament.bg/DVWeb/showMaterialDV.jsp?idMat=244982
+  access: auto
+  acquisition: fetch
+  format: html
+  parser: tools/prototype/extract_dv_laws.py, tools/mock/bd_rates.py
+  period: ЗБДОО 2026, ДВ бр. 68 от 28.07.2026
+  unit: хил. € and %
+  live: false
+  files:
+  - path: prototype/data/raw/dv/zbdoo2026_dv68_idMat244982.html
+    url: https://dv.parliament.bg/DVWeb/showMaterialDV.jsp?idMat=244982
+    title: Закон за бюджета на ДОО за 2026 г., ДВ бр. 68 от 28.07.2026
+- id: zbnzok
+  title: Закон за бюджета на Националната здравноосигурителна каса за 2026 г.
+  publisher: Народно събрание; Държавен вестник, бр. 68 от 28.07.2026 г.
+  page: https://dv.parliament.bg/DVWeb/showMaterialDV.jsp?idMat=244981
+  access: auto
+  acquisition: fetch
+  format: html
+  parser: tools/prototype/extract_dv_laws.py, tools/mock/bd_rates.py
+  period: ЗБНЗОК 2026, ДВ бр. 68 от 28.07.2026
+  unit: хил. € and %
+  live: false
+  files:
+  - path: prototype/data/raw/dv/zbnzok2026_dv68_idMat244981.html
+    url: https://dv.parliament.bg/DVWeb/showMaterialDV.jsp?idMat=244981
+    title: Закон за бюджета на НЗОК за 2026 г., ДВ бр. 68 от 28.07.2026
+- id: nap
+  title: 'НАП: размер на осигурителните вноски за 2026 г. и разпределението им (изх. ВК-30-10237 от 12.08.2026 г.)'
+  publisher: Национална агенция за приходите
+  page: https://nap.bg/wps/wcm/connect/nra.bg25863/6f117462-1836-48f8-9e27-a4b02a1e55fb/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5_1_%D0%92%D0%9A-30-10237_12.08.2026.pdf?MOD=AJPERES
+  access: auto-bg
+  acquisition: fetch-bg
+  format: pdf
+  parser: tools/mock/bd_rates.py
+  period: social security contributions 2026
+  unit: '%'
+  live: false
+  files:
+  - path: prototype/data/raw/nap/nap_prilozhenie_1_VK-30-10237_12.08.2026.pdf
+    url: https://nra.bg/wps/wcm/connect/nra.bg25863/6f117462-1836-48f8-9e27-a4b02a1e55fb/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5_1_%D0%92%D0%9A-30-10237_12.08.2026.pdf?MOD=AJPERES
+    title: 'НАП: размери на осигурителните вноски за 2026 г. и разпределението им'
+  limitations:
+  - nra.bg answers only from Bulgaria; from elsewhere it may serve a CAPTCHA page instead of the PDF
+- id: eurostat
+  title: 'Eurostat: държавен дълг, разходи по функции (COFOG), население, БВП по отрасли'
+  publisher: Евростат
+  page: https://ec.europa.eu/eurostat/web/main/data/database
+  access: auto
+  acquisition: fetch
+  format: json
+  parser: tools/mock/bd_debt.py, tools/mock/bd_feed.py, tools/prototype/build_src.py
+  period: 2015–2026
+  unit: млн. €, % of GDP, persons
+  live: true
+  files:
+  - path: prototype/data/raw/eurostat/tps00001_BG.json
+    url: https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/tps00001?geo=BG&sinceTimePeriod=2020
+    title: Население към 1 януари (данни на НСИ)
+  - path: prototype/data/raw/eurostat/demo_gind_BG_JAN.json
+    url: https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/demo_gind?geo=BG&indic_de=JAN&sinceTimePeriod=2020
+    title: Население към 1 януари, demo_gind
+  - path: prototype/data/raw/eurostat/gov_10dd_edpt1_BG_EU.json
+    url: https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/gov_10dd_edpt1?geo=BG&geo=EU27_2020&na_item=GD&sector=S13&unit=MIO_EUR&unit=PC_GDP&sinceTimePeriod=2015
+    title: Консолидиран брутен дълг на сектор „Държавно управление“, млн. € и % от БВП
+  - path: prototype/data/raw/eurostat/gov_10q_ggdebt_BG.json
+    url: https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/gov_10q_ggdebt?geo=BG&na_item=GD&sector=S13&unit=MIO_EUR&unit=PC_GDP&sinceTimePeriod=2024-Q1
+    title: Тримесечен дълг на сектор „Държавно управление“
+  - path: tools/mock/cache/eurostat_pop_nuts3_bg.json
+    via: tools/mock/fetch_gisco.py
+    url: https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/demo_r_pjanaggr3
+    title: population of the 28 oblasts (NUTS 3), written by tools/mock/fetch_gisco.py
+    sha256: c5869aac65138237d190e14c0389f5688c8e5c85af72ac3edb3f5019cb19fc58
+  - path: tmp/sources/eurostat/nama_10_a10_BG.json
+    pinned: false
+    url: https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/nama_10_a10?format=JSON&lang=EN&geo=BG&unit=CP_MEUR&na_item=B1G&sinceTimePeriod=2019
+    title: gross value added by sector (NAMA.json of tools/mock/gva_sectors_v5.py)
+  - path: tmp/sources/eurostat/nama_10_gdp_BG.json
+    pinned: false
+    url: https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/nama_10_gdp?format=JSON&lang=EN&geo=BG&unit=CP_MEUR&na_item=B1GQ&na_item=D21X31&sinceTimePeriod=2019
+    title: GDP and taxes on products (GDP.json of tools/mock/gva_sectors_v5.py)
+  limitations:
+  - 'live API: the files change with every revision (the 21.10.2026 debt revision is in the current files)'
+  - 'the two national-accounts answers behind gva-sectors.json were not saved, and the current ones are revised: the published dataset cannot
+    be reproduced'
+- id: bnb
+  title: 'БНБ: дълг на сектор „Държавно управление“ и на централното управление (SDMX)'
+  publisher: Българска народна банка
+  page: https://www.bnb.bg/bnbweb/groups/public/documents/bnb_sdmx/ggd.xml
+  access: auto
+  acquisition: fetch
+  format: xml
+  parser: tools/mock/bd_debt.py
+  period: quarterly debt, 2015–2026
+  unit: млн. €
+  live: true
+  files:
+  - path: prototype/data/raw/bnb_sdmx/ggd.xml
+    url: https://www.bnb.bg/bnbweb/groups/public/documents/bnb_sdmx/ggd.xml
+    title: Дълг на сектор „Държавно управление“, тримесечно
+  - path: prototype/data/raw/bnb_sdmx/cgd.xml
+    url: https://www.bnb.bg/bnbweb/groups/public/documents/bnb_sdmx/cgd.xml
+    title: Дълг на централното управление, тримесечно
+- id: gisco
+  title: 'Eurostat GISCO: местни административни единици (LAU) 2024, граници и население'
+  publisher: Евростат (GISCO)
+  page: https://ec.europa.eu/eurostat/web/gisco/geodata/administrative-units/local-administrative-units
+  access: auto
+  acquisition: fetch
+  format: json
+  parser: tools/mock/fetch_gisco.py
+  period: LAU 2024
+  unit: persons, km²
+  live: false
+  files:
+  - path: tools/mock/cache/gisco_lau_bg.json
+    via: tools/mock/fetch_gisco.py
+    sha256: b9793b72951e164b5a2bcdbf3004ac13fdbb15a071d5164dfc1d658d58f76208
+    url: https://gisco-services.ec.europa.eu/distribution/v2/lau/
+    title: '265 municipalities: code, name, population, area, borders (streamed from the 100+ MB GeoJSON)'
+  limitations:
+  - 'the raw GeoJSON is streamed and not kept: only the reduced cache file is pinned'
+- id: midt-sebra
+  title: 'СЕБРА: дневни обобщения на плащанията на МИДТ'
+  publisher: Министерство на иновациите и растежа
+  page: https://midt.gov.bg/bg/transparency/sebra/2026
+  access: auto
+  acquisition: fetch
+  format: xlsx
+  parser: tools/mock/bd_sebra.py
+  period: 27–31.08.2026, three days
+  unit: €
+  live: true
+  files:
+  - path: prototype/data/raw/sebra/midt_sebra_2026_page.html
+    url: https://midt.gov.bg/bg/transparency/sebra/2026
+    title: 'МИДТ: страницата „СЕБРА 2026“'
+  - path: prototype/data/raw/sebra/midt_sebra_31.08.2026.xlsx
+    url: https://midt.gov.bg/upload/3788/31.08..2026.xlsx
+    title: 'МИДТ: дневно обобщение за 31.08.2026'
+  - path: tools/mock/cache/sebra_27.08.2026.xlsx
+    url: https://midt.gov.bg/upload/3789/27.08..2026.xlsx
+    sha256: 4a27f0714b8f5812825a9e6181f01dfe91526af8774294a090adb9365774b936
+    title: daily summary for 27.08.2026, written by tools/mock/fetch_sebra.py
+  - path: tools/mock/cache/sebra_28.08.2026.xlsx
+    url: https://midt.gov.bg/upload/3790/28.08..2026.xlsx
+    sha256: 3d3f09e4db49e75040001c4f262cb8a8f055031624a16988377962bffb10af11
+    title: daily summary for 28.08.2026, written by tools/mock/fetch_sebra.py
+  limitations:
+  - 'three days of one ministry: not national, not annual (sebra.json is built but no screen loads it)'
+- id: dataeuropa
+  title: Европейски портал за данни (data.europa.eu)
+  publisher: Службата за публикации на Европейския съюз
+  page: https://data.europa.eu/data/datasets?locale=bg&query=minfin
+  access: auto
+  acquisition: fetch
+  format: json
+  live: true
+  files:
+  - path: prototype/data/raw/data_europa/dataset_20439.jsonld
+    url: https://data.europa.eu/api/hub/repo/datasets/20439?useNormalizedId=true
+    title: 'СЕБРА: индивидуални плащания ≥ 5 000 лв. (МЕУ)'
+  - path: prototype/data/raw/data_europa/dataset_7806.jsonld
+    url: https://data.europa.eu/api/hub/repo/datasets/7806?useNormalizedId=true
+    title: 'МФ: плащания в СЕБРА и други плащания в БНБ (дневно)'
+  - path: prototype/data/raw/data_europa/dataset_19246.jsonld
+    url: https://data.europa.eu/api/hub/repo/datasets/19246?useNormalizedId=true
+    title: 'СЕБРА: исторически плащания от 05.06.2006'
+  - path: prototype/data/raw/data_europa/dataset_4227.jsonld
+    url: https://data.europa.eu/api/hub/repo/datasets/4227?useNormalizedId=true
+    title: 'МФ: КФП — месечна информация'
+  limitations:
+  - 'reference only: metadata of the data.egov.bg sets, not an input of any dataset'
+- id: dbp2027
+  title: Проект на бюджетен план на Република България за 2027 г. (55 стр.)
+  publisher: Министерство на финансите
+  page: https://economy-finance.ec.europa.eu/document/download/efafab61-9647-40f6-8912-6cda9c96964b_bg?filename=2027_dbp_bg_bg.pdf&prefLang=en
+  access: browser-only
+  acquisition: import
+  format: pdf
+  parser: tools/mock/extract_dbp2027.py
+  period: draft budgetary plan 2027, 15.10.2026
+  unit: млн. € and % of GDP
+  live: false
+  files:
+  - path: tmp/sources/bud2027_Draft_Budgetary_Plan_of_the_Republic_of_Bulgaria_for_2027.pdf
+    title: Проект на бюджетен план на Република България за 2027 г., 55 pages
+    sha256: 8c91cdf4778f2864e1eeb167f14b08d1f68a076ea4ad27a8a4305175a73f1182
+  limitations:
+  - not on the machines checked on 05.11.2026, so dbp2027.json cannot be rebuilt here
+- id: wg
+  title: 'Работна група „Бюджет на светло“: редакционни текстове'
+  publisher: Работна група „Бюджет на светло“
+  access: supplied
+  acquisition: supplied
+  format: pdf, txt
+  parser: tools/prototype/extract_glossary.py, tools/mock/build_text.py
+  live: false
+  files:
+  - path: tmp/guide/Budget-na-svetlo-rechnik-64-termina.pdf
+    title: the glossary of 64 terms, as supplied
+    pinned: false
+  - path: tmp/research/guide/guide_raw.txt
+    title: the text of the guide, as supplied
+    pinned: false
+  limitations:
+  - 'editorial texts of the working group: neither file is pinned or on the machines checked on 05.11.2026; glossary.json and guide.json cannot
+    be rebuilt until they are added with their sha256'
+- id: ec-dbp
+  title: 'Европейска комисия: годишни проекти на бюджетни планове на страните от еврозоната'
+  publisher: Европейска комисия
+  page: https://economy-finance.ec.europa.eu/economic-governance-framework/stability-and-growth-pact/annual-draft-budgetary-plans-dbps-euro-area-countries/draft-budgetary-plans-2027_en
+  access: reference
+  acquisition: reference
+  live: false
+  files: []
+- id: ec-edp-bg
+  title: 'Европейска комисия: процедури при прекомерен дефицит, България'
+  publisher: Европейска комисия
+  page: https://economy-finance.ec.europa.eu/economic-governance-framework/stability-and-growth-pact/corrective-arm-excessive-deficit-procedure/excessive-deficit-procedures-overview/bulgaria_en
+  access: reference
+  acquisition: reference
+  live: false
+  files: []
+- id: ec-fiscal-bg
+  title: 'Европейска комисия: фискален надзор, България'
+  publisher: Европейска комисия
+  page: https://economy-finance.ec.europa.eu/economic-surveillance-eu-member-states/country-pages-including-country-reports/bulgaria/fiscal-surveillance-bulgaria_en
+  access: reference
+  acquisition: reference
+  live: false
+  files: []
+- id: minfin
+  title: Министерство на финансите (minfin.bg)
+  publisher: Министерство на финансите
+  page: https://www.minfin.bg/bg/statistics/5
+  access: browser-only
+  acquisition: reference
+  live: false
+  files: []
+  limitations:
+  - named by the pending datasets P01, P02, P05, P06, P07 as the expected publisher; nothing is taken from it yet
+- id: mockgen
+  title: Генератор на примерни данни (фиксирано семе 20261002)
+  publisher: Работна група „Бюджет на светло“
+  access: generated
+  acquisition: generated
+  parser: tools/mock/build_mock.py
+  live: false
+  files: []
+  limitations:
+  - 'not an external source: marks the example values of build_mock.py (seed 20261002)'
+intermediates:
+- path: prototype/data/raw/MANIFEST.json
+  producer: tools/prototype/fetch_sources.py
+  inputs:
+  - network
+  reproducible: false
+  note: the acquisition log of fetch_sources.py (URL, size, sha256, HTTP status, date of each file); build_catalog.py copies the dates into catalog.json
+- path: prototype/data/raw/asbp/asbp_tables.json
+  producer: tools/prototype/extract_asbp_tables.py
+  inputs:
+  - asbp
+  reproducible: true
+  note: re-pinned on 05.11.2026 to the output of the extractor (27b82e1b…), which the image of tools/data/Dockerfile
+    gives byte for byte; the earlier pin (8c1790c4…) was a hand-edited version that is not available, and site/data is identical
+    with the new one
+- path: prototype/data/raw/dv/dv_laws_2026.json
+  producer: tools/prototype/extract_dv_laws.py
+  inputs:
+  - zdb
+  - zbdoo
+  - zbnzok
+  reproducible: true
+- path: prototype/data/raw/program_budgets/*
+  producer: tools/prototype/extract_program_budgets.py
+  inputs:
+  - prb
+  reproducible: true
+  note: the PDFs (and the 7z of the judiciary) unpacked from folder 7 of the bill archive
+- path: tmp/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json
+  producer: tools/prototype/extract_asbp_pages.py
+  inputs:
+  - asbp
+  reproducible: true
+  sha256: 2d80b15c16e0e26f658f057577c1f4bf0badb589cd744781cd94c90a919eeff4
+  note: needs PyMuPDF 1.26.5 (tools/data/requirements.txt)
+- path: tmp/research/dbp-2027/dbp2027_figures.json
+  producer: tools/mock/extract_dbp2027.py
+  inputs:
+  - dbp2027
+  reproducible: true
+  pinned: false
+  note: not on the machines checked on 05.11.2026 (its PDF is missing too)
+- path: tmp/versions/site-v2/data/*
+  producer: tools/mock/rebuild_v6.py
+  inputs:
+  - git tag mock-v2
+  reproducible: true
+  pinned: false
+  note: the old wording of catalog, core and search-index, from the tag mock-v2 (git fetch --tags)
+- path: tmp/versions/site-v4/data/*
+  producer: tools/mock/rebuild_v6.py
+  inputs:
+  - git tag mock-v4
+  reproducible: true
+  pinned: false
+  note: the new wording, from the tag mock-v4
+- path: tools/mock/cache/law_bill.json
+  producer: tools/mock/extract_bill.py
+  inputs:
+  - zdb
+  - bill
+  - prototype/data/raw/dv/dv_laws_2026.json
+  - prototype/src/zdb2026.json
+  reproducible: true
+  sha256: a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291
+- path: prototype/src/program_budgets_2026.json
+  producer: tools/prototype/extract_program_budgets.py
+  inputs:
+  - prb
+  - prototype/src/zdb2026.json
+  reproducible: true
+- path: prototype/src/zdb2026.json
+  producer: tools/prototype/extract_program_budgets.py
+  inputs:
+  - zdb
+  - prb
+  reproducible: true
+- path: prototype/src/glossary.json
+  producer: tools/prototype/extract_glossary.py
+  inputs:
+  - wg
+  reproducible: false
+  note: its input PDF (tmp/guide/Budget-na-svetlo-rechnik-64-termina.pdf) is missing
+- path: prototype/src/kfp_components_2026.json
+  producer: tools/prototype/build_src.py
+  inputs:
+  - kfp
+  - asbp
+  - zbdoo
+  - zbnzok
+  reproducible: false
+  note: build_src.py reads 2026-EU_funds_0726_BG_WEB_2.xls, a July version that a later correction replaced
+- path: prototype/src/municipal_transfers_2026.json
+  producer: tools/prototype/build_src.py
+  inputs:
+  - zdb
+  reproducible: false
+  note: build_src.py stops before it (see kfp_components_2026.json)
+- path: prototype/src/population.json
+  producer: tools/prototype/build_src.py
+  inputs:
+  - eurostat
+  reproducible: false
+  note: 'reads the live tps00001 answer: the current answer (updated 2026-10-27) differs from the committed file (2026-09-30)'
+- path: prototype/src/debt_stock.json
+  producer: tools/prototype/build_src.py
+  inputs:
+  - eurostat
+  reproducible: false
+  note: 'reads the live gov_10dd_edpt1 answer: the 21.10.2026 revision changes it'
+- path: prototype/src/rates_2026.json
+  producer: tools/prototype/build_src.py
+  inputs:
+  - bill
+  - zbdoo
+  reproducible: false
+  note: 'prototype only: no site builder reads it'
+- path: prototype/src/revenue_structure_2026.json
+  producer: tools/prototype/build_src.py
+  inputs:
+  - asbp
+  reproducible: false
+  note: 'prototype only: no site builder reads it'
+- path: prototype/src/home_kpis_2026.json
+  producer: tools/prototype/extract_home_kpis.py
+  inputs:
+  - asbp
+  reproducible: false
+  note: prototype only; the script now writes a different file
+- path: prototype/src/kfp_monthly_2025.json
+  producer: tools/prototype/build_2025_json.py
+  inputs:
+  - kfp
+  reproducible: false
+  note: prototype only; the script stops with IndexError on the current reports
+- path: prototype/src/kfp_monthly_2026.json
+  producer: tools/prototype/extract_2025.py
+  inputs:
+  - kfp
+  reproducible: false
+  note: prototype only; the script stops with IndexError on the current reports
+- path: prototype/src/cofog_bg.json
+  producer: null
+  inputs:
+  - eurostat
+  reproducible: false
+  note: 'no producer and no saved answer (spec, section 4: needs one, with the raw COFOG answer)'
+- path: prototype/src/kfp_functions_2026.json
+  producer: null
+  inputs:
+  - asbp
+  reproducible: false
+  note: no producer (spec, section 4)
+- path: prototype/src/debt_gdp.json
+  producer: null
+  inputs:
+  - eurostat
+  - asbp
+  reproducible: false
+  note: no producer (spec, section 4)
+- path: prototype/src/measures_2026.json
+  producer: null
+  inputs:
+  - asbp
+  reproducible: false
+  note: no producer (spec, section 4)
+- path: prototype/src/cgo_cum.json
+  producer: null
+  inputs:
+  - kfp
+  reproducible: false
+  note: prototype only; no producer
+- path: prototype/src/template.html
+  producer: null
+  inputs: []
+  reproducible: false
+  note: 'prototype only: the HTML template of prototype/site/index.html'
+- path: prototype/site/index.html
+  producer: tools/prototype/gen_inline.py
+  inputs:
+  - prototype/src/template.html
+  reproducible: false
+  note: the single-file prototype; not part of the site

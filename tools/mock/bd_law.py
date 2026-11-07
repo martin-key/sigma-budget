@@ -37,6 +37,11 @@ LAWS = {
     "zbnzok": (167155, "zbnzok2026_dv68_idMat244981.html", "ЗБНЗОК", "zbnzok"),
 }
 BILL_PAGE = "https://www.parliament.bg/bg/bills/ID/%d"
+# opinions the parliament lists twice (A_Cm_Stanid of the copy -> of the first entry): counted once. 24023 is the НСОРБ opinion of
+# 08.07.2026 to the Комисия по регионална политика, благоустройство и местно самоуправление; it appeared between 23.10 and 04.11.2026
+# next to 22976, with the same committee, date, stage and author. Two entries that only look alike (23150 and 23151 of the Комисия по
+# бюджет и финанси, 21.07.2026) are not merged: they may be opinions on two proposals.
+DUPLICATE_OPINIONS = {24023: 22976}
 FILES_URL = "https://www.parliament.bg/bills/52/"
 AREA_SUFFIX = re.compile(r"[,\s]*(?:в\s*)?т\.\s*ч\.:?\s*$")
 
@@ -380,6 +385,8 @@ def _parl(bill_id):
     if len(first) != 1 or len(adopted) != 1 or adopted[0] != d["L_Act_date2"][:10]:
         raise ValueError("bill %s: readings are not as expected: %r %r %r" % (bill_id, first, adopted, d["L_Act_date2"]))
     reports = Counter(x["A_Cm_Stan_date"][:10] for x in d["stan_list"])
+    ids = {x["A_Cm_Stanid"] for x in d["standp_list"]}
+    opinions = [x for x in d["standp_list"] if DUPLICATE_OPINIONS.get(x["A_Cm_Stanid"]) not in ids]
     props = []
     for p in d["proposal_12_list"]:
         files = p["act_files"]
@@ -392,8 +399,8 @@ def _parl(bill_id):
         "first": first[0], "second": second, "adopted": adopted[0], "issue": int(d["L_Act_dv_iss"]),
         "reportDates": dict(sorted(reports.items())), "reports": len(d["stan_list"]),
         "reportAuthors": len({x["A_ns_CL_value"] for x in d["stan_list"]}),
-        "opinionDates": dict(sorted(Counter(x["A_Cm_Stan_date"][:10] for x in d["standp_list"]).items())),
-        "opinions": len(d["standp_list"]), "proposals": sorted(props, key=lambda p: (p["date"], p["no"])),
+        "opinionDates": dict(sorted(Counter(x["A_Cm_Stan_date"][:10] for x in opinions).items())),
+        "opinions": len(opinions), "proposals": sorted(props, key=lambda p: (p["date"], p["no"])),
         "report2": [x["A_Cm_Stan_date"][:10] for x in d["stan_list2_1"]],
         "committees": [{"name": x["A_ns_CL_value"], "role": x["L_Act_DTL_value"]} for x in d["dist_list"]],
         "archive": d.get("static_archive") or None, "pdf": [o["FILENAME"] for o in d["order"]], "docx": [o["FILENAME"] for o in d["file_list"]],
@@ -444,7 +451,10 @@ def build_law(ctx):
     for got, want in fixed:
         if got != want:
             raise ValueError("the parliament or gazette files give %r where this module expects %r" % (got, want))
-    if (z["reports"], z["opinions"], len(z["proposals"]), z["reportAuthors"], len(z["committees"])) != (23, 70, 69, 23, 24):
+    # the parliament's data, checked 2026-11-04: 22 committee reports and 70 opinions. The report of the Комисия по регионална политика,
+    # благоустройство и местно самоуправление is no longer in stan_list (until October 23: 23), and the same committee now lists the НСОРБ
+    # opinion of 08.07.2026 twice (71 entries, one of them in DUPLICATE_OPINIONS). A further change stops the build again, to be reviewed the same way.
+    if (z["reports"], z["opinions"], len(z["proposals"]), z["reportAuthors"], len(z["committees"])) != (22, 70, 69, 22, 24):
         raise ValueError("counts of the budget bill changed: %r" % ((z["reports"], z["opinions"], len(z["proposals"])),))
     by_date = dict(sorted(Counter(p["date"] for p in z["proposals"]).items()))
     leading = [c["name"] for c in z["committees"] if c["role"] == "водеща"]
@@ -553,7 +563,10 @@ def build_law(ctx):
         "committees": {"total": len(z["committees"]), "leading": leading[0], "reported": z["reportAuthors"]},
         "opinionsNote": "Становищата са постъпили в комисиите от организации и институции; докладите са на комисиите.",
     }
-    nxt = {"title": "Бюджет 2027", "status": "pending", "note": "Проектът за бюджет 2027 не е включен в данните към 02.10.2026 г.; ще бъде добавен при публикуването му.",
+    # the wording site/data has carried since d1f0f6c (the plan for 2027 is on the screen S34; the bill comes when it is submitted)
+    nxt = {"title": "Бюджет 2027", "status": "pending",
+           "note": "Бюджетният план за 2027 г. (изпратен на 15.10.2026 г.) е на екрана „Бюджет 2027 (проект)“. Законопроектът за държавния "
+                   "бюджет за 2027 г. ще бъде добавен, когато бъде внесен в Народното събрание.",
            "expected": "минфин.бг, parliament.bg"}
 
     dba = sum(1 for r in rows if r["changed"])

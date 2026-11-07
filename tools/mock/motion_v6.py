@@ -15,7 +15,11 @@ Exit 1 on a failed check."""
 import http.server, json, os, socketserver, sys, threading
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import expect_v6  # noqa: E402
+
 ROOT = Path(__file__).resolve().parents[2]
+PLAN = expect_v6.plan()                               # the plan percentages of the latest report (site/data/execution.json)
 SITE = ROOT / "site"
 os.environ.setdefault("PLAYWRIGHT_BROWSERS_PATH", str(ROOT / ".pw-browsers"))
 fails, checks = [], 0
@@ -64,8 +68,10 @@ def main():
         b = p.chromium.launch()
 
         def ctx(w, reduce):
-            return b.new_context(viewport={"width": w, "height": 900 if w >= 700 else 844}, service_workers="block", has_touch=w < 700,
-                                 reduced_motion="reduce" if reduce else "no-preference")
+            c = b.new_context(viewport={"width": w, "height": 900 if w >= 700 else 844}, service_workers="block", has_touch=w < 700,
+                              reduced_motion="reduce" if reduce else "no-preference")
+            c.add_init_script("window.__HASH_ROUTES__ = true")   # V7: these checks drive the hash addresses (js/loc.js hash mode)
+            return c
 
         # 1. reduced motion
         print("1 reduced motion")
@@ -75,7 +81,7 @@ def main():
         ok(pg.evaluate("document.querySelectorAll('[data-rv],[data-pg],.enter-anim').length") == 0, "reduced: motion hooks are on the page")
         ok(pg.evaluate(RUNNING) == 0, "reduced: animations are running")
         txt = pg.evaluate("[...document.querySelectorAll('#s15-b-plan .s15-prog-cur .prog-text')].map(e => e.textContent)")
-        ok(txt == ["60,7%", "58,4%", "43,2%"], f"reduced: the plan percentages are {txt} at once")
+        ok(txt == PLAN["cur"], f"reduced: the plan percentages are {txt} at once, expected {PLAN['cur']}")
         ok(pg.evaluate("[...document.querySelectorAll('.prog-fill')].every(f => getComputedStyle(f).transform === 'none')"), "reduced: a bar is scaled")
         pg.close()
 
@@ -93,16 +99,16 @@ def main():
         ok(len(set(seen)) > 2, f"motion: the number does not count (saw {sorted(set(seen))[:4]})")
         pg.wait_for_timeout(900)
         txt = pg.evaluate("[...document.querySelectorAll('#s15-b-plan .prog-text')].map(e => e.textContent)")
-        ok(txt == ["60,7%", "61,2%", "58,4%", "62,3%", "43,2%", "53,3%"], f"motion: the counting ended on {txt}")
+        ok(txt == PLAN["bars"], f"motion: the counting ended on {txt}, expected {PLAN['bars']}")
         ok(pg.evaluate("[...document.querySelectorAll('.prog-fill')].every(f => getComputedStyle(f).transform === 'none' && !f.hasAttribute('data-pg'))"), "motion: a bar is left scaled / hooked")
-        ok(pg.evaluate("[...document.querySelectorAll('#s15-b-plan .prog-fill')].map(f => f.style.width).join()") == "60.7%,61.2%,58.4%,62.3%,43.2%,53.3%", "motion: a bar width is not the plan value")
+        ok(pg.evaluate("[...document.querySelectorAll('#s15-b-plan .prog-fill')].map(f => f.style.width).join()") == ",".join(PLAN["widths"]), "motion: a bar width is not the plan value")
         ok(pg.evaluate(RUNNING) == 0, "motion: animations still run 1.5 s after the load")
         ok(pg.evaluate("[...document.querySelectorAll('#s15-b-plan .prog-text')].every(e => !e.style.minWidth && !e.style.display)"), "motion: a pinned min-width / display is left on a counted number")
         # the picture export (share.renderPng) and print call settle(): the final state at once, also in the middle of a count
         pg.goto(U + "?s=1#/"); pg.wait_for_selector("#s15-b-plan .prog-text"); pg.wait_for_timeout(250)
         mid = pg.evaluate("document.querySelector('#s15-b-plan .s15-prog-cur .prog-text').textContent")
         fin = pg.evaluate("async () => { (await import('./js/ui/motion.js')).settle(); return [...document.querySelectorAll('#s15-b-plan .prog-text')].map(e => e.textContent).join(); }")
-        ok(fin == "60,7%,61,2%,58,4%,62,3%,43,2%,53,3%", f"settle: after {mid} the numbers are {fin}")
+        ok(fin == ",".join(PLAN["bars"]), f"settle: after {mid} the numbers are {fin}")
         # 4. scroll reveal
         print("4 scroll reveal")
         pg.goto(U + "#/izpalnenie"); pg.wait_for_selector("#s15-b-plan"); pg.wait_for_timeout(1200)
@@ -167,7 +173,7 @@ def main():
                         ok(max(over) <= 0, f"overflow: {w}px {route} scrolls sideways during the entrance ({max(over)}px)")
                         if route in ("#/", "#/izpalnenie"):
                             t = pg.evaluate("[...document.querySelectorAll('#s15-b-plan .prog-text')].map(e => e.textContent).join()")
-                            ok(t == "60,7%,61,2%,58,4%,62,3%,43,2%,53,3%", f"throttle/{w}: the counting ended on {t}")
+                            ok(t == ",".join(PLAN["bars"]), f"throttle/{w}: the counting ended on {t}")
                     c.close()
                 ok(vals[False] <= vals[True] + 0.01, f"CLS {w}px {route}: motion {vals[False]:.4f} vs no motion {vals[True]:.4f}")   # the site's own CLS (boot placeholder, footer) is not the motion's business: only an INCREASE fails
 

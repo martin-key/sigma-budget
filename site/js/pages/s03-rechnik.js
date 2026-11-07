@@ -16,6 +16,7 @@ import { emptyState } from '../ui/states.js';
 import { ext } from '../ui/cards.js';
 import { srcTag } from '../ui/source.js';
 import * as feedback from '../feedback.js';
+import { siteUrl } from '../seo.js';
 
 export const needs = ['glossary'];
 export const styles = ['s03-rechnik'];
@@ -323,7 +324,8 @@ function sources(g) {
   });
 }
 
-/** „Още не разбирам“: a small form. Nothing is sent: the entry stays in this browser (feedback.js) */
+/** „Още не разбирам“: a small form. The entry stays in this browser (feedback.js); with <meta name="feedback-email"> the visitor gets
+ *  a ready e-mail to send from their own mail app, as on S27 */
 function askForm(id, o) {
   return html`<form class="s03-ask" id="${id}" data-s03-ask data-term="${o.term || ''}" novalidate>
     <div class="field">
@@ -332,8 +334,8 @@ function askForm(id, o) {
       <textarea class="input s03-textarea" id="${id}-text" name="text" rows="3" maxlength="${feedback.MAX_TEXT}" aria-describedby="${id}-text-hint ${id}-text-err" required></textarea>
       <p class="field-error" id="${id}-text-err" role="alert" hidden></p>
     </div>
-    <div class="cluster"><button type="submit" class="btn btn-primary">Изпрати</button></div>
-    <p class="s03-ask-done" data-s03-done hidden>${feedback.SENT}</p>
+    <div class="cluster"><button type="submit" class="btn btn-primary">${feedback.SEND}</button></div>
+    <p class="s03-ask-done" data-s03-done hidden>${feedback.SENT}${feedback.TO ? html` <a data-s03-mail href="mailto:${feedback.TO}">Отвори имейла</a>` : ''}</p>
   </form>`;
 }
 
@@ -354,6 +356,23 @@ export const lede = ctx => {
   if (!g) return undefined;
   if (!ctx.params.term) return g.subtitle;
   return termOf(ctx, indexOf(g))?.def ?? 'Такава дума няма в речника. Потърси я в целия речник.';
+};
+
+/** JSON-LD (js/seo.js): the glossary is a DefinedTermSet, a term's page a DefinedTerm with its definition, as on the screen */
+const termUrl = t => siteUrl(`/rechnik/${encodeURIComponent(t.slug)}`);
+const SET_ID = () => siteUrl('/rechnik') + '#terms';
+export const schema = ctx => {
+  const g = ctx.data?.glossary;
+  if (!g) return [];
+  if (ctx.params.term) {
+    const t = termOf(ctx, indexOf(g));
+    if (!t) return [];
+    const alt = [...new Set([t.name, ...(Array.isArray(t.aliases) ? t.aliases : [])].filter(a => a && a !== t.title))];
+    return [{ '@type': 'DefinedTerm', '@id': termUrl(t) + '#term', url: termUrl(t), name: t.title, alternateName: alt.length ? alt : undefined,
+      description: t.def, termCode: t.slug, inLanguage: 'bg', inDefinedTermSet: { '@id': SET_ID() } }];
+  }
+  return [{ '@type': 'DefinedTermSet', '@id': SET_ID(), url: siteUrl('/rechnik'), name: g.title, description: g.subtitle, inLanguage: 'bg',
+    hasDefinedTerm: (g.terms || []).filter(t => t && t.slug && t.title).map(t => ({ '@type': 'DefinedTerm', '@id': termUrl(t) + '#term', name: t.title, url: termUrl(t) })) }];
 };
 
 export const crumbs = ctx => {
@@ -463,7 +482,7 @@ export function mount(root, ctx) {
   const g = ctx.data.glossary;
   const I = indexOf(g);
 
-  /* „Още не разбирам“ (both views): validate, keep the entry in this browser, say thanks */
+  /* „Още не разбирам“ (both views): validate, keep the entry in this browser, say thanks and, with an address, link the ready e-mail */
   on(root, 'submit', e => {
     const f = e.target.closest('form[data-s03-ask]');
     if (f) {
@@ -480,7 +499,9 @@ export function mount(root, ctx) {
       }
       err.hidden = true; err.textContent = '';
       ta.removeAttribute('aria-invalid');
-      feedback.add({ type: 'unclear', text, route: 'S03', term: f.dataset.term });
+      const rec = feedback.add({ type: 'unclear', text, route: 'S03', term: f.dataset.term });
+      const mail = f.querySelector('[data-s03-mail]');
+      if (mail) mail.href = feedback.mailto(rec);
       ta.value = '';
       done.hidden = false;
       ctx.announce(feedback.SENT);

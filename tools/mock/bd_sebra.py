@@ -113,9 +113,14 @@ def parse_listing():
     """The files the page lists: [{label, day, listedOn, sizeKb}] and the section heading."""
     txt = re.sub(r"<script.*?</script>|<style.*?</style>", " ", PAGE_HTML.read_text(encoding="utf-8"), flags=re.S)
     txt = htmllib.unescape(re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", txt)))
-    head = re.search(r"Документи за (\S+ \d{4}) г\. Публикувани на (\d\d\.\d\d\.\d{4}) Файлове \((\d+)\)", txt)
+    # since October 2026 the page lists the newer months above August: read the section of the month of LATEST, not the first one
+    want = "%s %s" % (next(k for k, v in MONTHS.items() if v == int(LATEST[5:7])), LATEST[:4])
+    heads = list(re.finditer(r"Документи за (\S+ \d{4}) г\. Публикувани на (\d\d\.\d\d\.\d{4}) Файлове \((\d+)\)", txt))
+    at = next((k for k, h in enumerate(heads) if h.group(1) == want), None)
+    head = heads[at] if at is not None else None
+    section = txt[head.end():heads[at + 1].start() if at + 1 < len(heads) else len(txt)] if head else ""
     files = []
-    for mm in re.finditer(r"Име на файла (\d+) (\S+) (\d{4}) г\. Дата (\d\d\.\d\d\.\d{4}) Размер ([\d.]+) KB Формат (\w+)", txt):
+    for mm in re.finditer(r"Име на файла (\d+) (\S+) (\d{4}) г\. Дата (\d\d\.\d\d\.\d{4}) Размер ([\d.]+) KB Формат (\w+)", section):
         day = "%s-%02d-%02d" % (mm.group(3), MONTHS[mm.group(2)], int(mm.group(1)))
         files.append({"label": "%s %s %s г." % (mm.group(1), mm.group(2), mm.group(3)), "day": day,
                       "listedOn": _date(mm.group(4)), "sizeKb": float(mm.group(5)), "format": mm.group(6)})

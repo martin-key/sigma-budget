@@ -558,7 +558,7 @@ function notesBlock(ctx, mm) {
   const note = id => (Array.isArray(F?.notes) ? F.notes.find(n => n.id === id)?.text : F?.notes?.[id]) ?? '';
   const items = [note('base'), note('col2025'), note('drugi'), mm?.M.scopeNote, X?.cofog?.note].filter(Boolean);
   if (X?.meta?.asOf) items.push(html`Числата са от мотивите към проекта на бюджета, към ${date(X.meta.asOf, true)}. Приетият закон може да се различава от проекта: какво е променено, виж в „<a href="${ctx.href('S14', {}, { per: '2026.law' })}">Пътят на бюджета</a>“.`);
-  return block({ id: 's07-notes', title: 'Как да четеш числата', status: false, source: ['asbp'], share: false, body: html`<ul class="s07-notes" data-gl-scan>${items.map(t => html`<li>${t}</li>`)}</ul>` });
+  return block({ id: 's07-notes', title: 'Как да четеш числата', status: 'real', pill: false, report: false, source: ['asbp'], share: false, body: html`<ul class="s07-notes" data-gl-scan>${items.map(t => html`<li>${t}</li>`)}</ul>` });
 }
 
 // ── page contract ──────────────────────────────────────────────────────────────────────────────────────
@@ -619,7 +619,7 @@ export function render(ctx) {
   const intro = same ? html`<p class="s07-intro">Разрезите „За какво“ и „По вид“ са едни и същи разходи, разрязани по различен начин. Функциите (${money(kfp.total, { d: 1 })}) са без вноската в бюджета на ЕС (${money(eco.eu.val, { d: 1 })}), затова разрезът по вид е с толкова повече: ${money(eco.total, { d: 1 })}.</p>` : '';
   return {
     context: 'Консолидирана фискална програма (КФП): разходи',
-    body: html`${explorer(ctx, po === 'vid' ? 'rashodi:vid' : 'rashodi:funkcii')}${unitSwitch(ctx, { name: 's07-unit', note: 'Важи за числата и графиките на този екран.' })}
+    body: html`${explorer(ctx, po === 'vid' ? 'rashodi:vid' : 'rashodi:funkcii')}${unitSwitch(ctx, { name: 's07-unit', note: 'Важи за числата и графиките.' })}
       ${kpiBlock(ctx, main, eco)}${intro}
       <div id="s07-po" class="s07-cut" data-cut="${po}">${po === 'vid' ? vid() : funkcii()}</div>
       ${execPointer(ctx)}${notesBlock(ctx, mm)}`

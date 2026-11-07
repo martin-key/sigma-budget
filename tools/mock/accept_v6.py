@@ -4,8 +4,8 @@
   PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/accept_v6.py [--shots OUTDIR]
 
 NUMBERS  Every number of the comparison table of the home and of #/izpalnenie is read from the screen and compared with the value
-         computed independently from data/execution.json (млн. € / 1000, rounded to two decimals): the reference Jan-Aug 2025 / 2026
-         (the brief's literal figures 26,93 / 30,12 / 29,59 / 33,19 / -2,67 / -3,08 and the differences +3,19 / +3,60 / -0,41), August only
+         computed independently from data/execution.json (млн. € / 1000, rounded to two decimals): the same months of 2025 and 2026 up to the
+         latest report (expect_v6; for August the brief's 26,93 / 30,12 / 29,59 / 33,19 / -2,67 / -3,08 and +3,19 / +3,60 / -0,41), the last month only
          («За месеца»), January, the negative balance, national budget vs EU funds, and 2024 as the earlier year. The month-only mode is
          also compared with the difference of two adjacent cumulative reports.
 LAYOUT   At 1280 / 768 / 390 / 360 and at the two zoom equivalents (640 = 200 % of 1280; 320 = the reflow width of WCAG 1.4.10):
@@ -16,6 +16,9 @@ Exit 1 on any failure; findings that are only advice are printed as NOTE.
 """
 import http.server, json, os, re, socketserver, sys, threading
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import expect_v6                                     # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]            # repository root
 SITE = ROOT / "site"                                 # the Mock application: run this at the tag mock-v6
@@ -43,7 +46,8 @@ def note(msg):
     print("  NOTE", msg)
 
 
-EX = json.load(open(SITE / "data" / "execution.json", encoding="utf-8"))
+import exec_contract                                 # noqa: E402
+EX = exec_contract.load(SITE / "data" / "execution.json")      # contract v2: money as decimal strings, read as floats
 FOLD = {"kfp": "kfp", "nat": "nat", "eu": "eu"}
 ROWS = [("rev", "Приходи"), ("exp.total", "Разходи"), ("balance", "Салдо")]
 
@@ -83,6 +87,7 @@ def read_grid(page):
 def part_numbers(browser, port):
     print("NUMBERS")
     ctx = browser.new_context(viewport={"width": 1280, "height": 900}, service_workers="block", reduced_motion="reduce")
+    ctx.add_init_script("window.__HASH_ROUTES__ = true")   # V7: the app opens on paths (/prihodi); this check drives the hash addresses (js/loc.js hash mode)
     page = ctx.new_page()
     errs = []
     page.on("console", lambda m: errs.append(m.text[:160]) if m.type == "error" else None)
@@ -94,14 +99,15 @@ def part_numbers(browser, port):
     page.goto(base + "#/")
     page.wait_for_selector("#s15-b-plan .s15-plan-row", timeout=8000)
     home = re.sub("[\u00a0\u202f\u2009]", " ", page.evaluate("() => document.querySelector('#s15-b-plan').innerText"))
-    for s in ("30,12 от 49,62", "33,19 от 56,81", "4,04 от 9,36", "60,7%", "58,4%", "43,2%"):
+    P, Q = expect_v6.plan(), expect_v6.compare()          # the figures of the latest report in site/data/execution.json
+    for s in P["sums"] + P["cur"]:
         ok(s in home, f"#/: the plan figure {s} is not in the plan block")
     for hash_ in ("#/izpalnenie",):
         page.goto(base + hash_)
         page.wait_for_selector("table.data", timeout=8000)
         page.wait_for_timeout(300)
         txt = re.sub("[  ]", " ", page.evaluate("() => document.querySelector('main, #main, body').innerText")).replace("−", "-")
-        for s in ("26,93", "30,12", "29,59", "33,19", "-2,67", "-3,08", "+3,19", "+3,60", "0,41"):
+        for s in [x.replace("\u2212", "-") for x in Q["prev"] + Q["cur"] + Q["diff"] + [Q["balanceDiff"]]]:
             ok(s in txt, f"{hash_}: the reference figure {s} is not on the screen")
         ok("дефицит" in txt, f"{hash_}: the word «дефицит» is missing next to the negative balance")
     # a percent on the negative base is never printed
@@ -221,6 +227,7 @@ def part_layout(browser, port):
     for w in (1280, 768, 640, 390, 360, 320):
         touch = w <= 768
         ctx = browser.new_context(viewport={"width": w, "height": 900 if w >= 700 else 800}, service_workers="block", reduced_motion="reduce", has_touch=touch, is_mobile=False)
+        ctx.add_init_script("window.__HASH_ROUTES__ = true")   # V7: the app opens on paths (/prihodi); this check drives the hash addresses (js/loc.js hash mode)
         page = ctx.new_page()
         errs = []
         page.on("console", lambda m: errs.append(m.text[:160]) if m.type == "error" else None)
@@ -252,6 +259,7 @@ def part_layout(browser, port):
     # keyboard: the tab walk, desktop and phone
     for w in (1280, 390):
         ctx = browser.new_context(viewport={"width": w, "height": 900 if w >= 700 else 800}, service_workers="block", reduced_motion="reduce")
+        ctx.add_init_script("window.__HASH_ROUTES__ = true")   # V7: the app opens on paths (/prihodi); this check drives the hash addresses (js/loc.js hash mode)
         page = ctx.new_page()
         for name, h in (("home", "#/"), ("izpalnenie", "#/izpalnenie"), ("danaci", "#/danaci"), ("razhodi", "#/razhodi"), ("tarsene", "#/tarsene")):
             page.goto(base + h)

@@ -13,6 +13,7 @@ What differs from validate_data.py (each point is a deliberate V5 decision, see 
     pattern, reason). They are printed with the reason at the end - nothing is hidden - and a problem not matched by a pattern stays a failure.
     --no-accepted turns the list off and shows the donor's raw verdict.
 """
+import json
 import os
 import re
 import sys
@@ -25,25 +26,31 @@ import vd_lib as L                                    # noqa: E402
 # vd_lib.SITE / DATA already point at site/ (the checked-out version; run this at the tag mock-v6)
 
 import validate_data as V                             # noqa: E402
+import vd_contract                                    # noqa: E402  contract v2 of execution.json (stage B)
 
 GONE_SEBRA = "СЕБРА (daily payments) was taken out of the active interface and of core.sources; data/sebra.json stays on disk, unreferenced, for phase 2"
 GONE_SEARCH = "search shows only active real sets; the 7 pending and 2 mock datasets have no search row (docs/plan.md, search)"
 V6_SRC = "V6 (screen S34): four sources were added to core.sources (dbp2027, ec-edp-bg, ec-fiscal-bg, ec-dbp) that the donor registry does not list"
-V6_DATE = "V6 (screen S34): the new data is dated after the shared data version (build.dataVersion 2026-10-09.1, printed in every footer); the version is NOT bumped, so no existing screen changes"
-V6_GLOSS = "V6 (screen S34): five glossary terms (65-69) were added; the donor plan, the catalog sizes and the catalog schema lengths still say 64 terms. catalog.json is not edited (S24 would change)"
+
+def _feed_counts():
+    """The donor expects 18 feed events plus one per 2026 report; the feed holds exactly one fewer (the СЕБРА event)."""
+    with open(os.path.join(L.DATA, "execution.json"), encoding="utf-8") as fh:
+        n = 18 + int(json.load(fh)["data"]["2026"]["months"])
+    return n, n - 1
+
+
+FEED_WANT, FEED_HAVE = _feed_counts()
+V6_GLOSS = "V6 (screen S34): five glossary terms (65-69) were added; the donor plan still says 64 terms"
 ACCEPTED = (
     ("ENVELOPE", r"^core\.sources keys differ from the registry: \['dbp2027', 'ec-dbp', 'ec-edp-bg', 'ec-fiscal-bg', 'sebra'\]$", GONE_SEBRA + "; " + V6_SRC),
-    ("ENVELOPE", r"^dbp2027\.json: meta\.(asOf|retrieved) '2026-10-1[56]' not an ISO date <= 2026-10-09$", V6_DATE),
-    ("ENVELOPE", r"^glossary\.json: meta\.retrieved '2026-10-16' not an ISO date <= 2026-10-09$", V6_DATE),
     ("GLOSSARY", r"^glossary has 69 terms \(the plan says 64\)$", V6_GLOSS),
     ("ENVELOPE", r"^sebra\.json: meta\.source 'sebra' is not in core\.sources$", GONE_SEBRA),
     ("CORE", r"^sources: keys \[", GONE_SEBRA + " (the donor expects the 'sebra' source key)"),
-    ("FEED", r"^expected 26 events, found 25$", "the single СЕБРА event of the feed was removed with the daily set"),
+    ("FEED", r"^expected %d events, found %d$" % (FEED_WANT, FEED_HAVE), "the single СЕБРА event of the feed was removed with the daily set"),
     ("FEED", r"^event sebra-2026-09-23 is missing$", "the single СЕБРА event of the feed was removed with the daily set"),
-    ("FEED", r"^events: 25, the datasets explain 26$", "the single СЕБРА event of the feed was removed with the daily set"),
+    ("FEED", r"^events: %d, the datasets explain %d$" % (FEED_HAVE, FEED_WANT), "the single СЕБРА event of the feed was removed with the daily set"),
     ("FEED", r"^kinds \[.*\] must be exactly the kinds used by the events$", "the donor derives the 'sebra' kind from sebra.json; V5 feed has no such event"),
     ("CATALOG", r"^files on disk but not in the catalog: \['dbp2027\.json', 'sebra\.json'\]; in the catalog but not on disk: \[\]$", GONE_SEBRA + "; V6: dbp2027.json is not listed in catalog.json (S24 would change)"),
-    ("CATALOG", r"^(glossary|core|search-index): (bytes/gzipBytes \d+/\d+ vs the file \d+/\d+ \(rebuild the catalog\)|schema differs from the top-level keys of the file)$", V6_GLOSS + "; the same holds for core.json (4 sources) and search-index.json (5 rows)"),
     ("CATALOG", r"^counts \{'datasets': \d+, 'files': \d+, .*'files': \d+, ", GONE_SEBRA + " (the catalog counts the listed files, the folder holds one more: sebra.json)"),
     ("SEARCH", r"^datasets: \d+ rows, the catalog and the mock sets hold \d+$", GONE_SEARCH),
     ("SEARCH", r"^mock rows: 0, expected \d+$", GONE_SEARCH),
@@ -100,7 +107,7 @@ def main(argv):
             if flag not in argv:
                 argv.append(flag)                      # see the docstring: they test the donor tree
     orig = V.all_groups
-    V.all_groups = lambda: [(n, wrap(n, fn, use_accepted), d) for n, fn, d in orig()]
+    V.all_groups = lambda: [(n, wrap(n, fn, use_accepted), d) for n, fn, d in list(orig()) + list(vd_contract.GROUPS)]
     code = V.main(argv)
     if use_accepted and _used:
         print("\nACCEPTED V5 DIVERGENCES (%d problems the donor reports; each follows from a deliberate removal, see the docstring):" % len(_used))

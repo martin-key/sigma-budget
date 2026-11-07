@@ -140,7 +140,7 @@ function scene1(ctx, core) {
     <figcaption class="s04-cap">Планирани приходи и разходи на КФП за 2026 г. Пунктираната част е дефицитът: разходи, за които няма приходи.</figcaption>
   </figure>`;
   const deep = deeper(ctx, 1, 1, [
-    { href: href('start'), title: byKey.start.title, text: 'Колко е събрано и похарчено досега, и как се сравнява с миналата година.' },
+    { href: href('izpalnenie'), title: byKey.izpalnenie.title, text: 'Колко е събрано и похарчено досега, и как се сравнява с миналата година.' },
     { href: href('izpalnenie', {}, { pokazatel: 'balance' }), title: 'Салдото месец по месец', text: 'Кога дефицитът расте и кога намалява.' }
   ]);
   return scene(1, {
@@ -383,7 +383,7 @@ function checks(ctx) {
   const body = html`<p class="s04-checks-lead">${c.lead}</p>
     <ol class="s04-checks-list">${c.items.map(it => html`<li><span class="s04-checks-n" aria-hidden="true">${it.n}</span><span class="s04-checks-short">${it.short}<span class="sr-only">: </span></span><span class="s04-checks-text">${it.text}</span></li>`)}</ol>
     <p class="s04-checks-end">${withLink(c.end, 'Откъде са данните?', href('S24'))}</p>`;
-  return block({ id: 's04-checks', title: c.title, level: 2, sub: c.heading, status: false, body, cls: 's04-block s04-checks' });
+  return block({ id: 's04-checks', title: c.title, level: 2, sub: c.heading, status: 'text', body, cls: 's04-block s04-checks' });
 }
 
 /* ------------------------------------------------------------------ the page */

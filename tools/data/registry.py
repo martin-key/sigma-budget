@@ -1,0 +1,263 @@
+#!/usr/bin/env python3
+"""Checks sources/registry.yaml and datasets/registry.yaml against the repository (stage A of docs/approach-specification.md,
+section 11: a clean checkout describes every input, no hidden absolute paths, every mock and pending set is marked).
+
+  python tools/data/registry.py check          errors make the exit code 1; the report also lists the datasets whose chain
+                                                to the originals has a gap (known backlog, spec section 4), which is not an error
+  python tools/data/registry.py check --json   the same as JSON
+
+What it checks, without the raw files (they are not in the repository):
+  * sources: unique ids; every source key of site/data (core.sources, catalog.json) is registered; every file pinned in
+    tools/mock/prototype.sha256 belongs to exactly one source file or intermediate, and every registered file under
+    prototype/data/raw is pinned; a file elsewhere has its own sha256 or says `pinned: false`
+  * intermediates: unique paths; the producer exists; the inputs are known
+  * datasets: every file of site/data belongs to exactly one dataset; every catalog.json dataset is registered with the same
+    id, status, screens, period and unit, and nothing else claims to be in the catalog; producers, layers and inputs exist;
+    a pending set has a reason and no file; meta.status of every JSON file equals its status
+  * the tracked code (tools/, site/, worker/, .github/) has no absolute path of a machine
+Needs PyYAML (requirements-dev.txt, tools/data/requirements.txt).
+"""
+import argparse
+import fnmatch
+import json
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+import yaml
+
+ROOT = Path(__file__).resolve().parents[2]
+SOURCES = ROOT / "sources" / "registry.yaml"
+DATASETS = ROOT / "datasets" / "registry.yaml"
+SUMS = ROOT / "tools" / "mock" / "prototype.sha256"
+DATA = ROOT / "site" / "data"
+ACCESS = {"auto", "auto-bg", "browser-only", "supplied", "reference", "generated"}
+ACQUISITION = {"fetch", "fetch-bg", "import", "supplied", "reference", "generated"}
+STATUS = {"real", "mock", "pending"}
+OTHER_INPUTS = re.compile(r"^(network|git tag mock-v\d+|every output of the release)$")
+ABSOLUTE = re.compile(r"(?<![\w.])(/Users/[^/\s'\"]+/|/home/[a-z][\w-]*/|[A-Za-z]:\\(?:Users|home)\\)")
+CODE = ("tools/", "site/", "worker/", ".github/", "wrangler.jsonc")
+
+
+class Report:
+    def __init__(self):
+        self.errors, self.facts = [], []
+
+    def err(self, msg):
+        self.errors.append(msg)
+
+    def ok(self, cond, msg):
+        if not cond:
+            self.err(msg)
+        return cond
+
+
+def script(entry):
+    """'tools/mock/bd_fiscal.py (build_outlook)' -> 'tools/mock/bd_fiscal.py'"""
+    return entry.split(" ", 1)[0] if entry else entry
+
+
+def pinned():
+    out = {}
+    for ln in SUMS.read_text(encoding="utf-8").splitlines():
+        h, _, p = ln.partition("  ")
+        if p:
+            out[p] = h
+    return out
+
+
+def check_sources(reg, r):
+    ids = [s["id"] for s in reg["sources"]]
+    r.ok(len(ids) == len(set(ids)), "sources: duplicate ids %s" % sorted({i for i in ids if ids.count(i) > 1}))
+    patterns = []                                    # (pattern, owner, entry)
+    for s in reg["sources"]:
+        for k in ("id", "title", "access", "acquisition", "files"):
+            r.ok(k in s, "source %s: no %s" % (s.get("id"), k))
+        r.ok(s.get("access") in ACCESS, "source %s: access %r" % (s["id"], s.get("access")))
+        r.ok(s.get("acquisition") in ACQUISITION, "source %s: acquisition %r" % (s["id"], s.get("acquisition")))
+        for p in (s.get("parser") or "").split(", "):
+            if p:
+                r.ok((ROOT / p).is_file(), "source %s: parser %s does not exist" % (s["id"], p))
+        for f in s.get("files", []):
+            patterns.append((f["path"], "source " + s["id"], f))
+    inter = reg.get("intermediates", [])
+    paths = [i["path"] for i in inter]
+    r.ok(len(paths) == len(set(paths)), "intermediates: duplicate paths")
+    known = set(ids) | set(paths)
+    for i in inter:
+        patterns.append((i["path"], "intermediate", i))
+        prod = i.get("producer")
+        r.ok(prod is None or (ROOT / prod).is_file(), "intermediate %s: producer %s does not exist" % (i["path"], prod))
+        r.ok(isinstance(i.get("reproducible"), bool), "intermediate %s: reproducible must be true or false" % i["path"])
+        r.ok(prod is not None or not i.get("reproducible"), "intermediate %s: reproducible without a producer" % i["path"])
+        for x in i.get("inputs", []):
+            r.ok(x in known or OTHER_INPUTS.match(x), "intermediate %s: unknown input %s" % (i["path"], x))
+
+    pins = pinned()
+    for p in pins:
+        owners = [o for pat, o, _e in patterns if fnmatch.fnmatchcase(p, pat)]
+        r.ok(len(owners) == 1, "%s is pinned in prototype.sha256 but %s" % (p, "registered nowhere" if not owners else
+                                                                           "registered %d times (%s)" % (len(owners), ", ".join(owners))))
+    for pat, owner, e in patterns:
+        hits = [p for p in pins if fnmatch.fnmatchcase(p, pat)]
+        if pat.startswith("prototype/"):
+            r.ok(hits or e.get("pinned") is False, "%s: %s matches no line of prototype.sha256" % (owner, pat))
+        else:
+            r.ok("sha256" in e or e.get("pinned") is False, "%s: %s has no sha256 and does not say `pinned: false`" % (owner, pat))
+    return set(ids), inter
+
+
+def catalog_index():
+    cat = json.loads((DATA / "catalog.json").read_text(encoding="utf-8"))
+    out = {}
+    for d in cat["datasets"]:
+        files = [d["file"]] if d.get("file") else [p["file"] for p in d.get("parts", [])]
+        out[d["slug"]] = (d, ["site/" + f for f in files])
+    return out
+
+
+def data_files():
+    return sorted(p.relative_to(ROOT).as_posix() for p in DATA.rglob("*") if p.is_file())
+
+
+def check_datasets(reg, source_ids, inter, r):
+    ds = reg["datasets"]
+    ids = [d["id"] for d in ds]
+    r.ok(len(ids) == len(set(ids)), "datasets: duplicate ids %s" % sorted({i for i in ids if ids.count(i) > 1}))
+    inter_paths = {i["path"] for i in inter}
+    known = source_ids | inter_paths | set(ids)
+    cat = catalog_index()
+    files = data_files()
+    owner = {f: [] for f in files}
+    for d in ds:
+        did = d["id"]
+        r.ok(d.get("status") in STATUS, "dataset %s: status %r" % (did, d.get("status")))
+        pats = d.get("files") or []
+        for pat in pats:
+            hits = [f for f in files if fnmatch.fnmatchcase(f, pat)]
+            r.ok(hits or d["status"] == "pending", "dataset %s: no file matches %s" % (did, pat))
+            for f in hits:
+                owner[f].append(did)
+        if d["status"] == "pending":
+            r.ok(d.get("reason") and d.get("expected"), "dataset %s: a pending set needs reason and expected" % did)
+            r.ok(not [f for p in pats for f in files if fnmatch.fnmatchcase(f, p)], "dataset %s: pending but has files" % did)
+        else:
+            r.ok((ROOT / script(d.get("producer", ""))).is_file(), "dataset %s: producer %s does not exist" % (did, d.get("producer")))
+            for layer in d.get("layers", []):
+                r.ok((ROOT / layer).is_file(), "dataset %s: layer %s does not exist" % (did, layer))
+            r.ok(d.get("rebuild") or d.get("notRebuilt"), "dataset %s: neither rebuild nor notRebuilt" % did)
+            r.ok(d.get("inputs"), "dataset %s: no inputs" % did)
+            for x in d.get("inputs", []):
+                r.ok(x in known or OTHER_INPUTS.match(x), "dataset %s: unknown input %s" % (did, x))
+            for k in ("schema", "scope"):
+                r.ok(d.get(k), "dataset %s: no %s" % (did, k))
+            if d.get("schema"):
+                r.ok((ROOT / d["schema"]).is_file(), "dataset %s: schema %s does not exist" % (did, d["schema"]))
+        for s in d.get("sources", []):
+            r.ok(s in source_ids, "dataset %s: unknown source %s" % (did, s))
+        # the catalog
+        if d.get("catalogId"):
+            if not r.ok(did in cat, "dataset %s claims catalog id %s but catalog.json has no slug %s" % (did, d["catalogId"], did)):
+                continue
+            c, cfiles = cat[did]
+            r.ok(c["id"] == d["catalogId"], "dataset %s: catalog id %s, catalog.json says %s" % (did, d["catalogId"], c["id"]))
+            r.ok(c["status"] == d["status"], "dataset %s: status %s, catalog.json says %s" % (did, d["status"], c["status"]))
+            r.ok((c.get("screens") or []) == (d.get("screens") or []), "dataset %s: screens differ from catalog.json" % did)
+            for k in ("period", "unit"):
+                if c.get(k):
+                    r.ok(c[k] == d.get(k), "dataset %s: %s %r, catalog.json says %r" % (did, k, d.get(k), c[k]))
+            mine = sorted(f for p in pats for f in files if fnmatch.fnmatchcase(f, p))
+            r.ok(sorted(cfiles) == mine, "dataset %s: files differ from catalog.json" % did)
+        else:
+            r.ok(did not in cat, "dataset %s is in catalog.json but has no catalogId" % did)
+        # the marking inside the files
+        for f in (f for p in pats for f in files if fnmatch.fnmatchcase(f, p) and f.endswith(".json")):
+            meta = json.loads((ROOT / f).read_text(encoding="utf-8")).get("meta")
+            if isinstance(meta, dict) and "status" in meta:
+                r.ok(meta["status"] == d["status"], "%s: meta.status %s, the registry says %s" % (f, meta["status"], d["status"]))
+    for slug in cat:
+        r.ok(slug in ids, "catalog.json dataset %s is not registered" % slug)
+    for f, o in owner.items():
+        r.ok(len(o) == 1, "%s belongs to %s" % (f, "no dataset" if not o else "%d datasets (%s)" % (len(o), ", ".join(o))))
+    return ds
+
+
+def gaps(ds, inter):
+    """dataset -> the inputs on its way to the originals that no working producer makes (spec, section 4)"""
+    by_id = {d["id"]: d for d in ds}
+    by_path = {i["path"]: i for i in inter}
+    out = {}
+    for d in ds:
+        if d["status"] == "pending":
+            continue
+        seen, todo, found = set(), list(d.get("inputs", [])), []
+        while todo:
+            x = todo.pop()
+            if x in seen:
+                continue
+            seen.add(x)
+            if x in by_path:
+                i = by_path[x]
+                if not i.get("reproducible"):
+                    found.append(x)
+                todo.extend(i.get("inputs", []))
+            elif x in by_id and x != d["id"]:
+                todo.extend(by_id[x].get("inputs", []))
+        out[d["id"]] = sorted(set(found))
+    return out
+
+
+def check_paths(r):
+    try:
+        tracked = subprocess.run(["git", "ls-files", "-z"], cwd=ROOT, capture_output=True, check=True).stdout.decode().split("\0")
+    except (OSError, subprocess.CalledProcessError):
+        r.err("git ls-files failed: the absolute-path check needs a git checkout")
+        return
+    for rel in tracked:
+        if not rel.startswith(CODE) or rel.startswith("site/data/") or rel == "tools/data/registry.py":   # this file holds the pattern
+            continue
+        try:
+            text = (ROOT / rel).read_text(encoding="utf-8")
+        except (UnicodeDecodeError, FileNotFoundError, IsADirectoryError):
+            continue
+        for n, line in enumerate(text.splitlines(), 1):
+            if ABSOLUTE.search(line):
+                r.err("%s:%d: an absolute path of a machine: %s" % (rel, n, line.strip()[:120]))
+
+
+def main(argv):
+    ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    ap.add_argument("command", choices=["check"])
+    ap.add_argument("--json", action="store_true")
+    a = ap.parse_args(argv)
+    r = Report()
+    sreg = yaml.safe_load(SOURCES.read_text(encoding="utf-8"))
+    dreg = yaml.safe_load(DATASETS.read_text(encoding="utf-8"))
+    source_ids, inter = check_sources(sreg, r)
+    ds = check_datasets(dreg, source_ids, inter, r)
+    check_paths(r)
+    g = gaps(ds, inter)
+    if a.json:
+        print(json.dumps({"errors": r.errors, "gaps": g}, ensure_ascii=False, indent=1))
+    else:
+        real = [d for d in ds if d["status"] != "pending"]
+        print("registry: %d sources, %d intermediates, %d datasets (%d pending), %d files in site/data"
+              % (len(sreg["sources"]), len(inter), len(ds), len(ds) - len(real), len(data_files())))
+        print("\nrebuilt from the pinned inputs: %d of %d datasets" % (sum(1 for d in real if d.get("rebuild")), len(real)))
+        for d in real:
+            if not d.get("rebuild"):
+                print("  %-22s %s" % (d["id"], d.get("notRebuilt")))
+        print("\nchain to the originals has a gap (an intermediate without a working producer): %d of %d"
+              % (sum(1 for v in g.values() if v), len(g)))
+        for k, v in g.items():
+            if v:
+                print("  %-22s %s" % (k, ", ".join(x.split("/")[-1] for x in v)))
+        for e in r.errors:
+            print("ERROR " + e)
+        print("\nRESULT: %s · %d error(s)" % ("OK" if not r.errors else "FAIL", len(r.errors)))
+    return 1 if r.errors else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

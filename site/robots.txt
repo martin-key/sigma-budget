@@ -1,3 +1,4 @@
-# Прототип: не за индексиране.
+# Изходният код за разработка: не за индексиране.
+# Сглобеният сайт (tools/site/build.py → build/client) има свой robots.txt, отворен за търсачки, със sitemap.xml.
 User-agent: *
 Disallow: /

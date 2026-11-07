@@ -14,6 +14,7 @@
 //   - 'bars' of a donut = horizontal bars of its parts (`axis: fn` formats the value axis); 'bars' of a line = columns (`stackBars: true` stacks the series: only for
 //     series that add up, such as revenue by source); points from `dashFrom` on are a forecast and are drawn paler;
 //   - 'table' hides the picture and opens the table twin; a single-series part-of-a-whole table gets a «Дял» column.
+import { scoped } from '../env.js';
 import { html, raw, esc } from '../html.js';
 import { DASH, NBSP, num } from '../format.js';
 import { emptyState, mockBadge } from './states.js';
@@ -23,7 +24,8 @@ import { seg } from './seg.js';
 import * as share from '../share.js';
 import { loadECharts, buildOption, tailAt } from '../charts.js';
 
-const specs = new Map();
+const ownSpecs = new Map();
+const specs = { get: id => scoped('chart', ownSpecs).get(id), set: (id, v) => scoped('chart', ownSpecs).set(id, v), clear: () => ownSpecs.clear() };   // one map per server request (js/env.js)
 share.onReset(() => specs.clear());
 export const chartSpec = id => specs.get(id);
 

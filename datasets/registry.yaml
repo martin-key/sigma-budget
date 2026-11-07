@@ -1,0 +1,777 @@
+# Dataset registry (docs/approach-specification.md, section 4): every file of site/data, with the files the published catalog does not
+# list and the pending sets that have no file yet. Checked by `python tools/data/registry.py check` (CI).
+#
+# datasets[]      id = the slug in catalog.json (sebra and dbp2027 are not in the catalog)
+#   catalogId     the dataset id of catalog.json (D01 …, M06, P01 …); several files can share one
+#   status        real | mock | pending, as catalog.json says; a pending set has `reason` and `expected` instead of files
+#   files         the paths in site/data (a glob for the 42 ministry files)
+#   producer      the script (and builder function) that writes it
+#   layers        the v5/v6 steps of tools/mock/rebuild_v6.py that change it after the producer
+#   inputs        source ids (sources/registry.yaml), intermediate paths, or ids of other datasets
+#   schema        the document with its data contract
+#   screens, period, unit   as catalog.json says (the checker compares them)
+#   scope         which budget or sector the numbers cover
+#   rebuild       the command that rebuilds it from the pinned inputs; `checked` is the date it gave the file byte for byte,
+#                 `notRebuilt` says why there is no such command
+#   limitations   what is known to be missing or weak
+schema: 1
+datasets:
+- id: outlook
+  catalogId: D01
+  title: Рамка на КФП и макропрогноза 2024–2028
+  status: real
+  files:
+  - site/data/outlook.json
+  producer: tools/mock/bd_fiscal.py (build_outlook)
+  inputs:
+  - prototype/data/raw/asbp/asbp_tables.json
+  - tmp/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json
+  schema: docs/data-spec.md
+  screens:
+  - S05
+  - S13
+  - S17
+  - S31
+  period: 2024–2028
+  scope: 'КФП and сектор „Държавно управление“ (S.13): macro framework and fiscal targets'
+  unit: млн. €
+  rebuild: .venv-data/bin/python tools/mock/rebuild_v6.py --build-date 2026-11-05
+  checked: '2026-11-05'
+  limitations:
+  - reads pdf_pages_clean.json, which extract_asbp_pages.py makes from the asbp PDF (pinned in sources/registry.yaml)
+- id: gva-sectors
+  catalogId: D31
+  title: 'Икономиката по отрасли: добавена стойност и БВП 2019–2025'
+  status: real
+  files:
+  - site/data/gva-sectors.json
+  producer: tools/mock/gva_sectors_v5.py
+  inputs:
+  - eurostat
+  - outlook
+  schema: docs/data-spec.md
+  screens:
+  - S31
+  period: 2019–2025
+  scope: national economy (НСИ via Eurostat)
+  unit: млн. €
+  rebuild: null
+  notRebuilt: the Eurostat answers of October 2026 were not saved; today's answers (05.11.2026) give another GDP and the check fails
+  limitations:
+  - 'the answers of 05.11.2026 give GDP 105 279,0 (2024) and 116 548,5 (2025) млн. €, outlook.json 104 767,2 and 116 018,3: rebuilding it means
+    a new release with the revised national accounts, not a reproduction'
+- id: revenue
+  catalogId: D05
+  title: Приходи на КФП по видове
+  status: real
+  files:
+  - site/data/revenue.json
+  producer: tools/mock/bd_fiscal.py (build_revenue)
+  inputs:
+  - prototype/data/raw/asbp/asbp_tables.json
+  schema: docs/data-spec.md
+  screens:
+  - S05
+  - S06
+  period: 2024–2028
+  scope: КФП, Приложение 3
+  unit: млн. €
+  rebuild: .venv-data/bin/python tools/mock/rebuild_v6.py --build-date 2026-11-05
+  checked: '2026-11-05'
+  limitations: []
+- id: expenditure
+  catalogId: D03
+  title: 'Разходи на КФП: функции, икономически вид и COFOG'
+  status: real
+  files:
+  - site/data/expenditure.json
+  producer: tools/mock/bd_fiscal.py (build_expenditure)
+  inputs:
+  - prototype/data/raw/asbp/asbp_tables.json
+  - prototype/src/cofog_bg.json
+  - prototype/src/kfp_functions_2026.json
+  - prototype/src/population.json
+  - tmp/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json
+  schema: docs/data-spec.md
+  screens:
+  - S05
+  - S07
+  - S08
+  period: 2015–2028
+  scope: КФП by function (COFOG), Приложение 3
+  unit: млн. €
+  rebuild: .venv-data/bin/python tools/mock/rebuild_v6.py --build-date 2026-11-05
+  checked: '2026-11-05'
+  limitations:
+  - prototype/src/cofog_bg.json and kfp_functions_2026.json have no producer (spec, section 4)
+- id: components
+  catalogId: D07
+  title: Съставни бюджети и трансфери
+  status: real
+  files:
+  - site/data/components.json
+  producer: tools/mock/bd_components.py (build_components)
+  inputs:
+  - execution
+  - law
+  - municipalities
+  - outlook
+  - prototype/data/raw/asbp/asbp_tables.json
+  - prototype/src/kfp_components_2026.json
+  - tmp/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json
+  - zbdoo
+  - zbnzok
+  schema: docs/data-spec.md
+  screens:
+  - S15
+  period: 2024–2028
+  scope: the constituent budgets of the КФП
+  unit: хил. €
+  rebuild: .venv-data/bin/python tools/mock/rebuild_v6.py --build-date 2026-11-05
+  checked: '2026-11-05'
+  limitations:
+  - prototype/src/kfp_components_2026.json comes from build_src.py, which no longer runs
+- id: ministries
+  catalogId: D08
+  title: Бюджети на ведомствата за 2026 г.
+  status: real
+  files:
+  - site/data/ministries.json
+  producer: tools/mock/bd_budgets.py (build_budgets)
+  inputs:
+  - prototype/data/raw/program_budgets/*
+  - prototype/src/program_budgets_2026.json
+  - tools/mock/cache/law_bill.json
+  schema: docs/data-spec.md
+  screens:
+  - S05
+  - S07
+  - S08
+  - S10
+  - S11
+  - S14
+  period: '2026'
+  scope: state budget (ЗДБ), first-level spending units
+  unit: хил. €
+  rebuild: .venv-data/bin/python tools/mock/rebuild_v6.py --build-date 2026-11-05
+  checked: '2026-11-05'
+  limitations: []
+- id: ministries-programs
+  catalogId: D09
+  title: Програмни бюджети на ведомствата
+  status: real
+  files:
+  - site/data/ministries/*.json
+  producer: tools/mock/bd_budgets.py (build_budgets)
+  inputs:
+  - prototype/data/raw/program_budgets/*
+  - prototype/src/program_budgets_2026.json
+  - tools/mock/cache/law_bill.json
+  schema: docs/data-spec.md
+  screens:
+  - S11
+  period: 2023–2028
+  scope: state budget, programme budgets of the spending units
+  unit: хил. €
+  rebuild: .venv-data/bin/python tools/mock/rebuild_v6.py --build-date 2026-11-05
+  checked: '2026-11-05'
+  limitations: []
+- id: programs
+  catalogId: D09
+  title: Индекс на програмите
+  status: real
+  files:
+  - site/data/programs.json
+  producer: tools/mock/bd_budgets.py (build_budgets)
+  inputs:
+  - prototype/data/raw/program_budgets/*
+  - prototype/src/program_budgets_2026.json
+  - tools/mock/cache/law_bill.json
+  schema: docs/data-spec.md
+  screens:
+  - S10
+  period: 2025–2026
+  scope: state budget, programmes
+  unit: хил. €
+  rebuild: .venv-data/bin/python tools/mock/rebuild_v6.py --build-date 2026-11-05
+  checked: '2026-11-05'
+  limitations: []
+- id: measures
+  catalogId: D12
+  title: Мерки в бюджета за 2026 г.
+  status: real
+  files:
+  - site/data/measures.json
+  producer: tools/mock/bd_measures.py (build_measures)
+  inputs:
+  - prototype/src/measures_2026.json
+  schema: docs/data-spec.md
+  screens:
+  - S04
+  - S05
+  - S08
+  - S12
+  period: 2026–2028
+  scope: КФП, discretionary measures of the 2026 budget
+  unit: млн. €
+  rebuild: .venv-data/bin/python tools/mock/rebuild_v6.py --build-date 2026-11-05
+  checked: '2026-11-05'
+  limitations:
+  - prototype/src/measures_2026.json has no producer (spec, section 4)
+- id: law
+  catalogId: D10
+  title: 'Законопроект и закон: как се прие бюджетът'
+  status: real
+  files:
+  - site/data/law.json
+  producer: tools/mock/bd_law.py (build_law)
+  inputs:
+  - ministries
+  - parliament
+  - tools/mock/cache/law_bill.json
+  - zbdoo
+  - zbnzok
+  - zdb
+  schema: docs/data-spec.md
+  screens:
+  - S11
+  - S14
+  period: 2025-07-17 … 2026-07-31
+  scope: 'the three 2026 budget laws: bill against adopted law'
+  unit: хил. €
+  rebuild: .venv-data/bin/python tools/mock/rebuild_v6.py --build-date 2026-11-05
+  checked: '2026-11-05'
+  limitations:
+  - 'the parliament API is live: a change in its counts stops the build until reviewed (bd_law.py)'
+- id: execution
+  catalogId: D06
+  title: Месечно изпълнение на КФП
+  status: real
+  files:
+  - site/data/execution.json
+  producer: tools/mock/extract_kfp_full.py
+  inputs:
+  - kfp
+  - prototype/data/raw/asbp/asbp_tables.json
+  - prototype/src/kfp_components_2026.json
+  schema: docs/data-spec.md
+  screens:
+  - S01
+  - S04
+  - S07
+  - S15
+  - S17
+  period: 2024-01 … 2026-09
+  scope: КФП, national budget and EU funds, cash basis
+  unit: млн. €
+  rebuild: .venv-data/bin/python tools/mock/rebuild_v6.py --build-date 2026-11-05
+  checked: '2026-11-05'
+  limitations:
+  - prototype/src/kfp_components_2026.json comes from build_src.py, which no longer runs
+- id: execution-provenance
+  catalogId: execution-provenance
+  title: Произход на числата от месечните отчети
+  status: real
+  files:
+  - site/data/execution-provenance.json
+  producer: tools/mock/extract_kfp_full.py
+  inputs:
+  - kfp
+  - prototype/data/raw/asbp/asbp_tables.json
+  schema: docs/data-spec.md
+  screens:
+  - S15
+  scope: every number of execution.json, and the plan for 2026
+  rebuild: .venv-data/bin/python tools/mock/rebuild_v6.py --build-date 2026-11-05
+  checked: '2026-11-05'
+  limitations:
+  - the national and EU plan (plan2026.nat, plan2026.eu) points into prototype/src/kfp_components_2026.json, whose producer no longer runs
+- id: debt
+  catalogId: D13
+  title: 'Държавен дълг: размер, лихви и лимити'
+  status: real
+  files:
+  - site/data/debt.json
+  producer: tools/mock/bd_debt.py (build_debt)
+  inputs:
+  - bnb
+  - eurostat
+  - execution
+  - prototype/data/raw/asbp/asbp_tables.json
+  - prototype/src/debt_gdp.json
+  - prototype/src/debt_stock.json
+  - tmp/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json
+  - zdb
+  schema: docs/data-spec.md
+  screens:
+  - S04
+  - S13
+  - S17
+  period: 2015–2028
+  scope: government debt (ЗДД) and Maastricht debt (S.13)
+  unit: млн. €
+  rebuild: .venv-data/bin/python tools/mock/rebuild_v6.py --build-date 2026-11-05
+  checked: '2026-11-05'
+  limitations:
+  - prototype/src/debt_gdp.json has no producer; debt_stock.json is a snapshot of an earlier Eurostat answer
+- id: rates
+  catalogId: D17
+  title: 'Данъци и осигуровки: ставки за 2026 г.'
+  status: real
+  files:
+  - site/data/rates.json
+  producer: tools/mock/bd_rates.py (build_rates)
+  inputs:
+  - bill
+  - nap
+  - zbdoo
+  - zbnzok
+  schema: docs/data-spec.md
+  screens:
+  - S18
+  period: '2026'
+  scope: taxes and social security contributions in force in 2026
+  unit: '%'
+  rebuild: .venv-data/bin/python tools/mock/rebuild_v6.py --build-date 2026-11-05
+  checked: '2026-11-05'
+  limitations:
+  - the NAP table (prototype/data/raw/nap/) is downloaded only from Bulgaria; from elsewhere nra.bg may serve a CAPTCHA page
+- id: municipalities
+  catalogId: D19
+  title: 'Общини: трансфери, население и области'
+  status: real
+  files:
+  - site/data/municipalities.json
+  producer: tools/mock/bd_municipal.py (build_municipalities)
+  inputs:
+  - eurostat
+  - gisco
+  - prototype/src/municipal_transfers_2026.json
+  - prototype/src/population.json
+  - tools/mock/cache/law_bill.json
+  schema: docs/data-spec.md
+  screens:
+  - S20
+  - S21
+  period: '2026'
+  scope: transfers from the state budget to the 265 municipalities
+  unit: хил. €
+  rebuild: .venv-data/bin/python tools/mock/rebuild_v6.py --build-date 2026-11-05
+  checked: '2026-11-05'
+  limitations:
+  - municipal_transfers_2026.json and population.json come from build_src.py, which no longer reproduces them
+- id: geo-obshtini
+  catalogId: D20
+  title: Граници на общините (GeoJSON)
+  status: real
+  files:
+  - site/data/geo/obshtini.json
+  producer: tools/mock/bd_municipal.py (build_municipalities)
+  inputs:
+  - eurostat
+  - gisco
+  - prototype/src/municipal_transfers_2026.json
+  - prototype/src/population.json
+  - tools/mock/cache/law_bill.json
+  schema: docs/data-spec.md
+  screens:
+  - S20
+  - S21
+  period: '2024'
+  scope: municipal borders and population (LAU)
+  rebuild: .venv-data/bin/python tools/mock/rebuild_v6.py --build-date 2026-11-05
+  checked: '2026-11-05'
+  limitations:
+  - the borders are simplified from the GISCO GeoJSON, which is streamed and not kept
+- id: glossary
+  catalogId: D22
+  title: Речник
+  status: real
+  files:
+  - site/data/glossary.json
+  producer: tools/mock/build_text.py
+  inputs:
+  - prototype/src/glossary.json
+  - wg
+  schema: docs/data-spec.md
+  screens:
+  - S03
+  - S06
+  - S07
+  scope: editorial
+  rebuild: null
+  notRebuilt: 'build_text.py stops: tmp/research/guide/guide_raw.txt is missing'
+  limitations:
+  - build_text.py reads prototype/src/glossary.json, whose producer needs a PDF of the working group that is missing
+- id: guide
+  catalogId: D23
+  title: Пътеводител
+  status: real
+  files:
+  - site/data/guide.json
+  producer: tools/mock/build_text.py
+  inputs:
+  - wg
+  schema: docs/data-spec.md
+  screens:
+  - S04
+  scope: editorial
+  rebuild: null
+  notRebuilt: 'build_text.py stops: tmp/research/guide/guide_raw.txt is missing'
+  limitations:
+  - the guide text of the working group is not in the repository
+- id: core
+  catalogId: core
+  title: 'Ядро: източници, предстоящи набори и основни числа'
+  status: real
+  files:
+  - site/data/core.json
+  producer: tools/mock/bd_core.py (build_core)
+  layers:
+  - tools/mock/v5_wording.py
+  - tools/mock/v5_data_active.py
+  - tools/mock/apply_v6_glue.py
+  inputs:
+  - execution
+  - expenditure
+  - glossary
+  - measures
+  - ministries
+  - municipalities
+  - outlook
+  - programs
+  - prototype/data/raw/asbp/asbp_tables.json
+  - prototype/src/population.json
+  - revenue
+  - tools/mock/cache/law_bill.json
+  schema: docs/data-spec.md
+  screens:
+  - S01
+  - S03
+  - S04
+  - S05
+  - S06
+  - S07
+  - S08
+  - S10
+  - S11
+  - S12
+  - S13
+  - S14
+  - S15
+  - S16
+  - S17
+  - S18
+  - S20
+  - S21
+  - S24
+  - S25
+  - S26
+  - S27
+  - S28
+  - S29
+  - S31
+  - S34
+  period: 2024–2028
+  scope: 'the shell of the site: figures copied from the datasets'
+  unit: млн. €
+  rebuild: .venv-data/bin/python tools/mock/rebuild_v6.py --build-date 2026-11-05
+  checked: '2026-11-05'
+  limitations:
+  - 'after build_core: the v5 wording, the v5 removal of СЕБРА and the generated sets, and the four S34 sources of v6 (layers)'
+- id: feed
+  catalogId: feed
+  title: Новото в данните
+  status: real
+  files:
+  - site/data/feed.json
+  producer: tools/mock/bd_feed.py (build_feed)
+  layers:
+  - tools/mock/v5_data_active.py
+  inputs:
+  - debt
+  - eurostat
+  - execution
+  - expenditure
+  - law
+  - prototype/src/cofog_bg.json
+  - prototype/src/population.json
+  - rates
+  - sebra
+  schema: docs/data-spec.md
+  screens:
+  - S16
+  period: 2026-01-31 … 2026-10-21
+  scope: the site
+  rebuild: .venv-data/bin/python tools/mock/rebuild_v6.py --build-date 2026-11-05
+  checked: '2026-11-05'
+  limitations: []
+- id: feed-rss
+  catalogId: feed
+  title: 'Новото в данните: RSS'
+  status: real
+  files:
+  - site/data/feed.xml
+  producer: tools/mock/bd_feed.py (build_feed)
+  layers:
+  - tools/mock/v5_data_active.py
+  inputs:
+  - debt
+  - eurostat
+  - execution
+  - expenditure
+  - law
+  - prototype/src/cofog_bg.json
+  - prototype/src/population.json
+  - rates
+  - sebra
+  schema: docs/data-spec.md
+  screens:
+  - S16
+  period: 2026-01-31 … 2026-10-21
+  scope: the site
+  rebuild: .venv-data/bin/python tools/mock/rebuild_v6.py --build-date 2026-11-05
+  checked: '2026-11-05'
+  limitations: []
+- id: search-index
+  catalogId: search-index
+  title: Индекс за търсене
+  status: real
+  files:
+  - site/data/search-index.json
+  producer: tools/mock/build_search.py (build_search)
+  layers:
+  - tools/mock/v5_wording.py
+  - tools/mock/v5_data_active.py
+  inputs:
+  - execution
+  - glossary
+  - guide
+  - gva-sectors
+  - mock-measure-labels
+  - mock-tax-assumptions
+  schema: docs/data-spec.md
+  screens:
+  - S28
+  scope: the site
+  rebuild: .venv-data/bin/python tools/mock/rebuild_v6.py --build-date 2026-11-05
+  checked: '2026-11-05'
+  limitations:
+  - 'after build_search: the v5 wording and removals (layers)'
+- id: catalog
+  catalogId: D25
+  title: Каталог на данните
+  status: real
+  files:
+  - site/data/catalog.json
+  producer: tools/mock/build_catalog.py (build_catalog)
+  layers:
+  - tools/mock/v5_wording.py
+  - tools/mock/v5_data_active.py
+  - tools/mock/catalog_refresh_v5.py
+  inputs:
+  - asbp
+  - components
+  - core
+  - execution
+  - expenditure
+  - feed
+  - glossary
+  - guide
+  - gva-sectors
+  - law
+  - measures
+  - midt-sebra
+  - ministries
+  - mock-measure-labels
+  - mock-tax-assumptions
+  - municipalities
+  - outlook
+  - programs
+  - prototype/data/raw/MANIFEST.json
+  - rates
+  - revenue
+  - sebra
+  schema: docs/data-spec.md
+  screens:
+  - S24
+  - S25
+  scope: the site
+  rebuild: .venv-data/bin/python tools/mock/rebuild_v6.py --build-date 2026-11-05
+  checked: '2026-11-05'
+  limitations:
+  - 'after build_catalog: the v5 wording and removals and catalog_refresh_v5.py (layers)'
+- id: mock-measure-labels
+  catalogId: M06
+  title: Дата и правно основание на мерките
+  status: mock
+  files:
+  - site/data/mock/measure-labels.json
+  producer: tools/mock/build_mock.py (M06)
+  inputs:
+  - measures
+  - mockgen
+  schema: docs/data-spec-mock.md
+  screens:
+  - S08
+  - S12
+  scope: example labels of the measures
+  rebuild: BUILD_DATE=2026-10-09 .venv-data/bin/python tools/mock/build_mock.py --only M06 --check
+  checked: '2026-11-05'
+  limitations:
+  - 'example values: marked mock in the file, the tables, search and exports'
+- id: mock-tax-assumptions
+  catalogId: M07
+  title: Допускания за косвените данъци
+  status: mock
+  files:
+  - site/data/mock/tax-assumptions.json
+  producer: tools/mock/build_mock.py (M07)
+  inputs:
+  - asbp
+  - mockgen
+  schema: docs/data-spec-mock.md
+  screens:
+  - S18
+  scope: example assumptions of the tax calculator
+  unit: €
+  rebuild: BUILD_DATE=2026-10-09 .venv-data/bin/python tools/mock/build_mock.py --only M07 --check
+  checked: '2026-11-05'
+  limitations:
+  - 'example values: marked mock; the official rates in it are typed into build_mock.py from Приложение 2 of the motives'
+- id: p01
+  catalogId: P01
+  title: Изпълнение по видове данъци
+  status: pending
+  files: []
+  reason: Месечният отчет на МФ в .xls дава само общата сума на данъчните приходи. Разбивката по данъци (ДДС, ДДФЛ, корпоративен данък, акцизи)
+    е в месечния бюлетин на МФ във формат PDF, който не се изтегля автоматично.
+  expected: Месечен бюлетин за изпълнението на КФП, minfin.bg
+  sources:
+  - minfin
+  screens:
+  - S06
+  - S15
+- id: p02
+  catalogId: P02
+  title: Месечно изпълнение по съставни бюджети (държавен бюджет, ДОО, НЗОК, общини)
+  status: pending
+  files: []
+  reason: Месечните отчети, които са извлечени, дават консолидираната програма, националния бюджет и европейските средства. Разбивката на националния
+    бюджет по съставни бюджети е в отделни таблици на МФ, които още не са извлечени.
+  expected: Отделни таблици към месечната информация за КФП, minfin.bg
+  sources:
+  - minfin
+  screens:
+  - S15
+- id: p03
+  catalogId: P03
+  title: Програмите на част от ведомствата
+  status: pending
+  files: []
+  reason: За тези бюджети таблиците на програмния бюджет в архива към законопроекта не се разчетоха надеждно (различен формат на документа), затова
+    не показваме числа.
+  expected: Програмни бюджети на ведомствата, архив към законопроекта 52-602-01-19
+  sources:
+  - prb
+  screens:
+  - S10
+  - S11
+- id: p04
+  catalogId: P04
+  title: Отчетът към 31.10.2026 г. и следващите
+  status: pending
+  files: []
+  reason: 'Отчетът за октомври 2026 г. още не е добавен: страницата на МФ с месечните отчети се отваря само през браузър (отказ 403 към автоматични
+    заявки), а последният наличен файл е за септември 2026 г.'
+  expected: Месечна информация за КФП, minfin.bg
+  sources:
+  - minfin
+  screens:
+  - S15
+  - S16
+- id: p05
+  catalogId: P05
+  title: Ориентир 2022–2023
+  status: pending
+  files: []
+  reason: Месечните отчети за 2022–2023 г. не са извлечени; сравнението на изпълнението е със същия период на предходната година (2024 или 2025
+    г.).
+  expected: Месечна информация за КФП за предходните години, minfin.bg
+  sources:
+  - minfin
+  screens:
+  - S15
+- id: p06
+  catalogId: P06
+  title: Падежи и емисии на държавния дълг
+  status: pending
+  files: []
+  reason: Регистърът на държавния дълг на МФ с падежите и емисиите на държавните ценни книжа не е достъпен за автоматично изтегляне.
+  expected: Данни за държавния дълг, minfin.bg
+  sources:
+  - minfin
+  screens:
+  - S17
+- id: p07
+  catalogId: P07
+  title: Съдържанието и ефектът на 69-те предложения между първо и второ четене
+  status: pending
+  files: []
+  reason: Предложенията са PDF документи в сайта на Народното събрание. Публикуваме броя им и връзките; съдържанието и фискалният им ефект не
+    са извлечени.
+  expected: Предложения за второ гласуване, parliament.bg
+  sources:
+  - parliament
+  screens:
+  - S14
+- id: sebra
+  catalogId: null
+  title: 'СЕБРА: дневни плащания на МИДТ'
+  status: real
+  files:
+  - site/data/sebra.json
+  producer: tools/mock/bd_sebra.py (build_sebra)
+  inputs:
+  - midt-sebra
+  schema: docs/data-spec.md
+  screens: []
+  scope: МИДТ only, 27–31.08.2026
+  rebuild: .venv-data/bin/python tools/mock/rebuild_v6.py --build-date 2026-11-05
+  checked: '2026-11-05'
+  limitations:
+  - 'built, but neither listed in catalog.json nor loaded by a screen: three days of one ministry, kept for phase 2'
+- id: dbp2027
+  catalogId: null
+  title: Проект на бюджетен план 2027
+  status: real
+  files:
+  - site/data/dbp2027.json
+  producer: tools/mock/build_dbp2027_site.py
+  inputs:
+  - tmp/research/dbp-2027/dbp2027_figures.json
+  schema: docs/data-spec.md
+  screens: []
+  scope: сектор „Държавно управление“ (S.13), ESA 2010
+  rebuild: null
+  notRebuilt: tmp/research/dbp-2027/dbp2027_figures.json and its PDF are missing
+  limitations:
+  - not listed in catalog.json (the catalog screen would change)
+- id: releases
+  catalogId: null
+  title: Изданията на данните
+  status: real
+  files:
+  - site/data/releases/*
+  producer: tools/budget.py (build --site)
+  inputs:
+  - every output of the release
+  schema: docs/release.md
+  screens:
+  - S15
+  scope: 'the release of site/data: manifest.json and validation.json of every release, current.json points to the current one'
+  rebuild: ./budget build --build-date 2026-11-05 --site
+  checked: '2026-11-05'
+  limitations:
+  - 'the manifest is not in catalog.json: it lists the sha256 of the catalog, and the catalog would have to list the manifest'
+  - 'no environment has the registry yet (it needs the Cloudflare account): the originals are public only from a registry'

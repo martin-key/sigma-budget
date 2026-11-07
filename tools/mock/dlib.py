@@ -29,7 +29,7 @@ RAW = PROTO / "data" / "raw"                     # raw sources, NOT in the repos
 SOURCES = TMP / "sources"                        # documents supplied by hand (the 2027 draft budgetary plan PDF), not in the repository
 RESEARCH = TMP / "research"                      # working extracts, not in the repository
 
-BUILD_DATE = os.environ.get("BUILD_DATE", "2026-10-09")
+BUILD_DATE = os.environ.get("BUILD_DATE", "2026-11-05")
 DATA_VERSION = BUILD_DATE + ".1"
 SEED = 20261002
 EUR = 1.95583                                     # BGN per EUR (fixed conversion rate)

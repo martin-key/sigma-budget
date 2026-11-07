@@ -57,8 +57,8 @@
 .nav-sec[data-current]>.nav-main{color:var(--ink);border-bottom-color:var(--ink)}
 .nav-dot{display:inline-block;width:7px;height:7px;background:var(--crimson)}
 .nav-sec[data-current]>.nav-main .nav-dot{display:none}
-.nav-cta{display:inline-flex;align-items:center;justify-content:center;min-height:40px;margin-left:var(--sp-3);padding:6px 14px;border:1px solid var(--crimson);background:var(--crimson);color:#fff;font:600 var(--fs-xs)/1.2 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;text-decoration:none;white-space:nowrap}
-.nav-cta:hover{background:var(--ink);border-color:var(--ink);color:#fff;text-decoration:none}
+.nav-cta{display:inline-flex;align-items:center;justify-content:center;min-height:40px;margin-left:var(--sp-3);padding:6px 14px;border:1px solid var(--crimson);background:var(--crimson);color:var(--on-accent);font:600 var(--fs-xs)/1.2 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;text-decoration:none;white-space:nowrap}
+.nav-cta:hover{background:var(--ink);border-color:var(--ink);color:var(--on-inv);text-decoration:none}
 .nav-cta[aria-current="page"]{background:var(--ink);border-color:var(--ink)}
 .nav-cta:focus-visible,.nav-main:focus-visible,.nav-search:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 /* the magnifier: an icon button, 44px target; pressed (panel open) = ink frame */
@@ -97,6 +97,7 @@
   .menu-btn{padding-left:var(--sp-1)}
 }
 @media (max-width:479px){.badge-mock{display:none}}
+@media (max-width:399px){.topbar-tools{gap:0 var(--sp-1)}}   /* the year, the magnifier and «Меню» 4px apart: 12px gaps pushed the right-aligned tools over the wordmark at 320–328 and 340–344px, and left 1px at 380px (none with Georgia) */
 @media (max-width:379px){.brand-name{font-size:1rem}.brand{gap:6px}.brand-mark{width:20px;height:20px}.menu-btn>span:last-child{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}.menu-btn{min-width:44px;justify-content:center}}   /* narrowest phones: the two-bar icon alone, the word stays for screen readers */
 @media (max-width:339px){.nav-search{width:40px}.menu-btn{min-width:40px}.period-btn svg{display:none}.mast-in{padding-inline:12px}}
 /* the red button also leads the phone drawer */
@@ -175,6 +176,8 @@ body.bare .page{padding-top:0}
 .footer a[aria-current="page"]{color:var(--ink);text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px;text-decoration-color:var(--crimson)}
 .footer .fine{display:flex;flex-wrap:wrap;gap:var(--sp-1) var(--sp-2);padding-top:var(--sp-3);border-top:1px solid var(--rule)}
 .footer .fine span+span::before{content:"·";margin-right:var(--sp-2);color:var(--ink-soft)}
+.footer .theme-pick{display:inline-flex;flex-wrap:wrap;align-items:baseline;gap:var(--sp-1)}
+.footer .theme-pick [aria-pressed="true"]{color:var(--ink);font-weight:600;text-decoration:none}
 .footer .small{font-size:var(--fs-xs);color:var(--ink-soft)}
 .footer summary:focus-visible,.footer a:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 @media (max-width:960px){

@@ -93,6 +93,8 @@
 .page[data-route="S15"] .s15-defs dd { margin: 0; padding: 2px 0 var(--sp-3); border-bottom: 1px solid var(--rule-soft); color: var(--ink-mid); }
 .page[data-route="S15"] .s15-method { display: grid; gap: var(--sp-2); margin: 0; padding-inline-start: 1.25em; }
 .page[data-route="S15"] .s15-method li::marker { color: var(--ink-soft); font-family: var(--font-mono); }
+.page[data-route="S15"] .s15-proof { display: grid; gap: var(--sp-2); margin: var(--sp-2) 0; padding-inline-start: 1.25em; }
+.page[data-route="S15"] .s15-sha, .page[data-route="S15"] .s15-cmd { font-size: var(--fs-xs); color: var(--ink-mid); overflow-wrap: anywhere; word-break: break-all; user-select: all; }
 
 /* the expert table scrolls inside its own labelled box */
 .page[data-route="S15"] #s15-expert table.data th,

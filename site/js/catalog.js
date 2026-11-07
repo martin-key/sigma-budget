@@ -20,6 +20,7 @@
 //   periodLabel(p) · sizeLabel(bytes) · paras(text) · idPart(s) · cleanQ(text) · kindLabel(kind) · accessLabel(access, hasUrl)
 //   yearSpan(p) · periodYears(M) · coversYear(set, y)   the years a period reaches ([2024, 2028]), the years any set covers (newest first), and whether a set covers a year (FB4: the „Период“ filter of ПРОВЕРИ)
 //   rich(text, M)             text from the catalogue -> SafeHtml: escaped, with `code`, „slug“ (a set of the catalogue) and P01..P07 (a pending set) as links or <code>
+import { ROOT } from './loc.js';
 import { ROUTES, byId, href as routeHref } from './routes.js';
 import { esc, raw } from './html.js';
 import { date, num, monthYear, NBSP } from './format.js';
@@ -49,7 +50,7 @@ export function stemOf(file) {
   return m ? m[1] : null;
 }
 export function fileUrl(file, base) {
-  const b = base ?? (typeof document !== 'undefined' ? document.baseURI : 'http://localhost/');
+  const b = base ?? ROOT.href;
   try { return new URL(file, b).href; } catch { return str(file); }
 }
 /** the name a download gets: the path below data/ with the slashes turned into dashes (data/geo/obshtini.json -> geo-obshtini.json); a part is one file of a multi-file set */

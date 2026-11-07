@@ -164,7 +164,7 @@ function versions(core) {
     Number.isFinite(c.municipalities) && plural(c.municipalities, 'община', 'общини') + ' с годишни трансфери'
   ].filter(Boolean).join(', ');
   return html`
-    <p>Това е Mock прототип. Показва как би работил сайтът, но не е истинското приложение. Нищо от въведеното в него не напуска браузъра ти.</p>
+    <p>Сайтът е в бета версия. Данните са официални, освен няколкото стойности, означени като примерни. Нищо от въведеното в него не напуска браузъра ти: няма бисквитки, проследяване и външни заявки.</p>
     ${facts([
       { k: 'Версия на данните', v: b.dataVersion },
       { k: 'Данните са извлечени на', v: dateG(core.meta?.retrieved) },
@@ -254,7 +254,7 @@ const credits = () => html`
 export function render(ctx) {
   const core = ctx.core || {};
   return html`
-    ${callout({ kind: 'info', title: 'Това е прототип', body: html`<p>Част от данните са официални, а част са примерни и са белязани със щриховка. Пътната карта и въпросите по-долу са предложение, не готови решения.</p>` })}
+    ${callout({ kind: 'info', title: 'Бета версия', body: html`<p>Данните са официални, освен няколкото стойности, белязани със щриховка като примерни. Пътната карта и въпросите по-долу са предложение, не готови решения.</p>` })}
     <nav class="s26-toc" aria-label="На тази страница">${chips({ items: SECTIONS.map(s => ({ label: s.label, href: to(s.id) })) })}</nav>
     ${block('s26-mission', mission(), { scan: true })}
     ${block('s26-pillars', pillars(), { scan: true })}

@@ -239,7 +239,7 @@ function readBlock(md) {
   const n = md.noPop.length;
   const names = n && n <= 4 ? `: ${md.noPop.map(m => m.name).join(', ')}` : '';
   return block({
-    id: 's20-chetene', title: 'Как да четем числата', status: false, source: ['zdb', 'gisco'], asOf: md.asOf, share: false,
+    id: 's20-chetene', title: 'Как да четем числата', status: 'real', pill: false, report: false, source: ['zdb', 'gisco'], asOf: md.asOf, share: false,
     body: html`<div class="prose s20-read">
       <p>Показваме основните ${gl('byudzheten-transfer', 'трансфери')} от държавния бюджет по закона за 2026 г. Те са четири вида: за делегирани дейности, изравнителна субсидия, зимно поддържане и капиталови разходи. Парите отиват в ${gl('obshtinski-byudzhet', 'бюджета на общината')}.</p>
       <p>Не са включени собствените приходи на общината и целевите суми за конкретни местни дейности („други целеви“).</p>

@@ -416,7 +416,7 @@ function notesBlock(f) {
   const disc = vtable ? disclosure({ id: 's13-versions', title: 'Разлики между двете версии на документа', meta: `${vers.length} реда`, body: vtable }) : '';
   if (!rest.length && !two && !disc) return '';
   return block({
-    id: 's13-notes', title: 'Бележки към числата', status: false, source: ['asbp'], share: false, asOf: f.asOf,
+    id: 's13-notes', title: 'Бележки към числата', status: 'real', pill: false, report: false, source: ['asbp'], share: false, asOf: f.asOf,
     body: html`<div class="stack">
       ${rest.length ? html`<ul class="s13-notes" data-gl-scan>${rest.map(n => html`<li>${clean(n.text)}</li>`)}</ul>` : ''}
       ${two ? html`<p class="s13-note-two" data-gl-scan>${clean(two.text)}${disc ? ' Разликите са в таблицата по-долу.' : ''}</p>` : ''}
@@ -426,6 +426,13 @@ function notesBlock(f) {
 }
 
 /* ---------------------------------------------------------------- the screen */
+/** for search and answer engines (js/seo.js): the sentences of the „Накратко“ block */
+export const question = 'Какви са приходите, разходите и дефицитът на бюджета до 2028 г.?';
+export function answer(ctx) {
+  const f = frame(ctx);
+  return f ? points(f, debtOf(ctx, f)).map(t => String(t)).join(' ') : '';
+}
+
 export function render(ctx) {
   const f = frame(ctx), d = debtOf(ctx, f);
   const rev = revExpChart(ctx, f), def = deficitChart(ctx, f), int = interestChart(ctx, f);

@@ -44,7 +44,11 @@ def need(path, what=None):
 
 
 def data(name):
-    return need(os.path.join(L.DATA_DIR, name), "run tools/build_data.py first")
+    obj = need(os.path.join(L.DATA_DIR, name), "run tools/build_data.py first")
+    if name == "execution.json" and obj is not None:
+        import exec_contract                                        # contract v2: money as decimal strings
+        obj = exec_contract.numbers(obj)
+    return obj
 
 
 def k1(t):
@@ -224,7 +228,8 @@ def build_m03():
 # an "ориентировъчно" model.
 
 M07_WHY_MODEL = "Ориентировъчна стойност за примера, не официални данни."
-M07_WHY_REAL = "Ставката е реална (по допусканията в мотивите към бюджета); наборът като цяло е примерен."
+# v5 (10.10.2026) calls real data „официални“; the published file was edited by hand then, the builder follows it since 05.11.2026
+M07_WHY_REAL = "Ставката е официална (по допусканията в мотивите към бюджета); наборът като цяло е примерен."
 
 
 def build_m07():
@@ -232,7 +237,7 @@ def build_m07():
                 "Ставките на ДДС и акциза са от Приложение 2 „Основни допускания“ към мотивите на законопроекта; цената на "
                 "горивото и на цигарите и делът на покупките със стандартна ставка са ориентировъчни, по модел.",
                 unit="€", label="ориентировъчно",
-                why="Калкулаторът пресмята косвените данъци в разходите на семейството приблизително: ставките са реални, "
+                why="Калкулаторът пресмята косвените данъци в разходите на семейството приблизително: ставките са официални, "
                     "цените и дялът на покупките със стандартна ставка са примерни. Резултатът е „ориентировъчно“.",
                 realFields=["vatRatePct", "fuelExcisePerLitreEur", "tobaccoExcisePerPackEur"],
                 modelFields=["vatShareOfPurchases", "fuelPricePerLitreEur", "tobaccoPricePerPackEur"],
@@ -245,7 +250,7 @@ def build_m07():
 
     def rec(id_, group, name, value, unit, kind, basis, since=None, note=None):
         d = {"id": id_, "group": group, "name": name, "value": value, "unit": unit,
-             "kind": "реална ставка" if kind == "real" else "ориентировъчно"}
+             "kind": "официална ставка" if kind == "real" else "ориентировъчно"}
         if since:
             d["since"] = since
         if note:
@@ -1063,7 +1068,7 @@ def build_m06():
         rec["why"] = M06_WHY
         items.append(rec)
     mt = L.meta("M06", "Редакционни етикети на мерките", ["bill", "mockgen"],
-                "Мерките и откъсите са реални (мотивите към законопроект 52-602-01-19 и приложените закони); етикетите "
+                "Мерките и откъсите са официални (мотивите към законопроект 52-602-01-19 и приложените закони); етикетите "
                 "„кого засяга“, „кой плаща“, „кой печели“ и „риск“ са редакционни, изведени само от текста на мярката.",
                 unit=None, label="РЕДАКЦИОННИ ЕТИКЕТИ", notice=M06_NOTICE,
                 personas=[{"label": p, "hint": h} for p, h in ML.M06_PERSONAS],
