@@ -55,7 +55,7 @@
 ```
 
 Връщането е нова ревизия в журнала, а не изтриване: всяко издание, което е било текущо, остава публично на адреса си. Издание, което
-никога не е било текущо, не може да стане текущо по този път. Кодът на сайта се връща отделно: `npx wrangler rollback` към предишната
+никога не е било текущо, не може да стане текущо по този път. Кодът на сайта се връща отделно: `npx wrangler rollback --env <среда>` към предишната
 версия на Worker-а.
 
 ## 5. Инциденти
@@ -81,7 +81,8 @@ npx wrangler d1 time-travel restore DB --env <среда> --timestamp <врем�
 ./budget status --environment <среда>                                      # указател, ревизия, журнал
 ```
 
-От копие: нова база (`npx wrangler d1 create …`), `npx wrangler d1 execute DB --remote --file registry-….sql`, id-то в конфигурацията.
+От копие: нова база (`npx wrangler d1 create …`), id-то ѝ в `env.<среда>.d1_databases` на `wrangler.jsonc`, после
+`npx wrangler d1 execute DB --env <среда> --remote --file registry-….sql`.
 После провери изданието: `./budget reproduce --current <адрес>`.
 
 **Тренировка.** `python tools/restore_drill.py` минава целия път на тестова среда (локален Worker, D1 и R2): копие, промени след него,

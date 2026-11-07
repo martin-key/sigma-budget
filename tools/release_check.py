@@ -15,7 +15,8 @@ tokens with an RSA key made for the run (openssl; the Worker gets the public key
   —  `budget rollback` makes an earlier release current with a new revision; a release that never was current cannot be rolled back to
   —  the public API: the pointer, the journal without operator names, the manifest bytes, the files by the manifest only, ETag/304, Range,
      originals in HTML as a download, unknown and unpublished releases 404, and no public route that writes
-  6  one release: a screen is drawn from the current release and names it with its data base; the stable /data/<file> follows it
+  6  one release: a screen is drawn from the current release and names it with its data base; the stable /data/<file> follows it;
+     the edge cache keys a screen on the query it reads only and never keeps the 404 screen
 Exit code 0 only when every check passes.
 """
 import argparse
@@ -110,7 +111,10 @@ def free_port():
 def make_release(root, name, text, commit="a" * 40):
     """a small release folder and its originals: one data file per dataset, validation.json, an xls-like and an HTML original"""
     rel, orig = root / ("rel-" + name), root / ("orig-" + name)
-    files = {"data/x.json": json.dumps({"meta": {"status": "real"}, "value": text}).encode(), "validation.json": b'{"passed":true}\n'}
+    feed = ('<rss version="2.0"><channel><title>%s</title><link>https://budget-na-svetlo.example/</link>'
+            '<item><link>https://budget-na-svetlo.example/#/izpalnenie?mesec=9</link></item></channel></rss>\n' % text).encode()
+    files = {"data/x.json": json.dumps({"meta": {"status": "real"}, "value": text}).encode(), "data/feed.xml": feed,
+             "validation.json": b'{"passed":true}\n'}
     originals = {"prototype/data/raw/kfp_2026/report.xls": b"\xd0\xcf\x11\xe0" + text.encode() * 8,
                  "prototype/data/raw/dv/law.html": ("<html><script>alert(1)</script>%s</html>" % text).encode()}
     for p, b in files.items():
@@ -119,7 +123,7 @@ def make_release(root, name, text, commit="a" * 40):
     for p, b in originals.items():
         (orig / p).parent.mkdir(parents=True, exist_ok=True)
         (orig / p).write_bytes(b)
-    mime = {".json": "application/json", ".xls": "application/vnd.ms-excel", ".html": "text/html"}
+    mime = {".json": "application/json", ".xls": "application/vnd.ms-excel", ".html": "text/html", ".xml": "application/rss+xml"}
     m = {"manifest_schema": "budget-release/1", "data_schema": {"execution": "execution/2"}, "provenance_format": "provenance/1",
          "processing": {"code": {"commit": commit, "repository": "https://github.com/midt-bg/sigma-budget"}, "parameters": {"build_date": "2026-11-05"}},
          "inputs": [{"path": p, "kind": "source", "source": "test", "acquisition": "fetch", "mime": mime[Path(p).suffix], "bytes": len(b), "sha256": sha(b)}
@@ -333,9 +337,25 @@ def main(argv):
         s3, h3, b3 = req("GET", base + "/izpalnenie", headers={"Accept-Encoding": "gzip"})
         ok(s3 == 200 and h3.get("Content-Encoding") == "gzip" and gzip.decompress(b3) == b and "no-transform" in h3.get("Cache-Control", ""),
            "the document is compressed by the Worker for a visitor that accepts gzip (no-transform keeps the edge from it), the same bytes")
+        s4, h4, b4 = req("GET", base + "/izpalnenie?x=junk&utm_source=feed")
+        ok(s4 == 200 and h4.get("X-Screen-Cache") == "HIT" and b4 == b,
+           "a key the screen does not read (?x=, ?utm_source=) lands on the same cache entry: the same bytes, no new render")
+        s5, h5, _b5 = req("GET", base + "/izpalnenie?mesec=1")
+        ok(s5 == 200 and h5.get("X-Screen-Cache") == "MISS", "a key the screen reads (?mesec=) is an entry of its own")
+        s6, h6, _b6 = req("GET", base + "/ne-e-ekran")
+        time.sleep(1)
+        s7, h7, _b7 = req("GET", base + "/ne-e-ekran")
+        ok(s6 == 404 and s7 == 404 and h7.get("X-Screen-Cache") == "BYPASS", "the 404 screen is never kept in the edge cache")
         s, h, b = req("GET", base + "/data/x.json")
         ok(s == 200 and x is not None and sha(b) == next(o["sha256"] for o in x[3]["outputs"] if o["path"] == "data/x.json") and h.get("X-Release-Id") == rid,
            "the stable address /data/x.json serves the file of the current release")
+        s, h, b = req("GET", base + "/data/feed.xml")
+        feed = b.decode("utf-8", "replace")
+        ok(s == 200 and h.get("X-Release-Id") == rid and "budget-na-svetlo.example" not in feed and "#/" not in feed
+           and "/izpalnenie?mesec=9</link>" in feed, "the stable /data/feed.xml of a registry release links to the site, not to the placeholder host")
+        s, _h, b = req("GET", base + "/data/releases/%s/data/feed.xml" % rid)
+        ok(s == 200 and x is not None and sha(b) == next(o["sha256"] for o in x[3]["outputs"] if o["path"] == "data/feed.xml"),
+           "the feed.xml of the release itself keeps its bytes (its SHA-256 is in the manifest)")
         s, h, b = req("GET", base + "/proverka")
         page = b.decode("utf-8", "replace")
         revs = [e["revision"] for e in jbody(req("GET", base + "/api/releases?limit=50")[2]).get("items", [])]

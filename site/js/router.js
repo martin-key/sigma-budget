@@ -315,8 +315,8 @@ function onStore(key) {
 export function dropStalePrerender() {
   const doc = document.documentElement, at = doc.getAttribute('data-prerendered');
   if (at === null) return;
-  const { found, want } = resolve(here());
-  if (at === '404' ? !found : at === want && !location.hash.startsWith('#/')) return;
+  const { found, screen } = resolve(here());                    // the server draws a screen from its own keys only (js/routes.js screenQuery)
+  if (at === '404' ? !found : at === screen && !location.hash.startsWith('#/')) return;
   doc.removeAttribute('data-prerendered');
   const v = $view();
   if (v) { v.replaceChildren(); v.setAttribute('aria-busy', 'true'); }

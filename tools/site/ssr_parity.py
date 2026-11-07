@@ -8,7 +8,7 @@ lede, the text of the article and its internal links. Byte equality is not the a
 mounted its widgets and drew its charts, the server's is the screen before that. Text that only the browser adds (a chart's own labels,
 a widget's state) is reported as a difference to look at, not hidden.
 
-Exit 0 when every screen matches, 1 when some differ, 2 when the app cannot be reached.
+Exit 0 when every screen matches, 1 when some differ, 2 when the app cannot be reached or --dist has no screen to compare.
 """
 import argparse
 import html
@@ -159,6 +159,9 @@ def main():
             for field, x, y in diffs:
                 print(f'  {field}:\n    prerendered: {html.unescape(str(x))[:240]}\n    server:      {html.unescape(str(y))[:240]}')
     print(f'\n{len(files)} screens · {len(files) - bad} the same · {bad} differ · by field: {json.dumps(counts, ensure_ascii=False)}')
+    if not files:                                             # a wrong --dist compares nothing: that is not a pass
+        print(f'no prerendered screens in {dist}: nothing was compared', file=sys.stderr)
+        return 2
     return 1 if bad else 0
 
 

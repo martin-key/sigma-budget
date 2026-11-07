@@ -5,6 +5,7 @@ import { resolve, build, frameHtml, docTitle, periodsFor, errorVm } from '../../
 import { head } from '../../site/js/seo.js';
 import { bannerHtml, topbarHtml, tabbarHtml, footerHtml } from '../../site/js/chrome.js';
 import { data } from '../../site/js/data.js';
+import { screenQuery } from '../../site/js/routes.js';
 import { toHref, parts, fileHref } from '../../site/js/loc.js';
 import { reset as resetShare } from '../../site/js/share.js';
 import { index as glossaryIndex, link as linkTerms } from '../../site/js/glossary-scan.js';
@@ -58,7 +59,8 @@ export async function renderScreen(url: URL, release: Rel): Promise<ScreenResult
   const address = url.pathname + url.search;
   const r = resolve(address);
   if (r.found && !sameAddress(r.want, address)) return { redirect: r.want };    // /Prihodi, an old address, a default ?per= → the canonical one
-  const { route, params, query } = r;
+  const { route, params } = r;
+  const query = screenQuery(route, r.query);                   // the keys of the screen only: what the edge cache keys it on (workers/app.ts)
 
   resetShare(route);
   try { await data.load('core'); } catch { /* the footer and the source cards degrade without core.json, as in the browser */ }
@@ -69,6 +71,8 @@ export async function renderScreen(url: URL, release: Rel): Promise<ScreenResult
     try { vm = await build(route, params, query, { path: r.segs.join('/') }); }
     catch (e) { console.error(e); vm = errorVm(route, params, query); status = 500; }
     if (vm.route.id === 'S30') status = 404;
+    // a file the screen needs could not be read (the „Опитайте пак“ state of site/js/render.js): a 503 that workers/app.ts never keeps
+    else if (vm.view === 'error' && !vm.demo) status = 503;
   }
   const shown = vm ? vm.route : route;
   const title = vm ? docTitle(vm) : `${route.title} · Бюджет на светло`;
@@ -81,7 +85,7 @@ export async function renderScreen(url: URL, release: Rel): Promise<ScreenResult
       tags: h.tags as HeadTag[],
       ld: h.ld,
       css: [...(mod?.styles || [])].sort(),
-      prerendered: shown.id === 'S30' ? '404' : r.want,
+      prerendered: shown.id === 'S30' ? '404' : r.screen,
       bare: !!route.bare,
       release,
       banner: String(bannerHtml()),

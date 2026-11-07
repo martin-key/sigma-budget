@@ -27,17 +27,27 @@ let pointer: { at: number; rid: string | null } | null = null;
 const texts = new Map<string, string>();                      // sha256 -> text: immutable, so one copy per isolate is safe
 const decoder = new TextDecoder();
 
+/** the registry could not be read: an outage of D1 or R2, not an environment without a registry. The request fails with 503 and nothing
+ *  is cached; it never falls back to the release of the static files, which would mix two releases on one page */
+export class RegistryError extends Error {
+  constructor(what: string, cause?: unknown) { super(`registry unavailable: ${what}`, { cause }); this.name = 'RegistryError'; }
+}
+/** an environment without a registry: no D1 binding, or the tables are not created (a local check, CI, a new environment) */
+export const noRegistry = (env: Env, e: unknown) => !env.DB || /no such table/i.test(String((e as Error)?.message ?? e));
+
 async function currentRelease(env: Env): Promise<string | null> {
   if (pointer && Date.now() - pointer.at < POINTER_MS) return pointer.rid;
   let rid: string | null = null;
-  try { rid = ((await current(env)) as { release_id?: string } | null)?.release_id ?? null; } catch { rid = null; }   // no registry here
+  try { rid = ((await current(env)) as { release_id?: string } | null)?.release_id ?? null; }
+  catch (e) { if (!noRegistry(env, e)) throw new RegistryError('pointer', e); }   // an outage is not remembered: the next request asks again
   pointer = { at: Date.now(), rid };
   return rid;
 }
 
-async function fromRegistry(env: Env, rid: string, origin: string): Promise<ReleaseData | null> {
-  const m = (await manifestOf(env, rid)) as Manifest | null;
-  if (!m) return null;
+async function fromRegistry(env: Env, rid: string, origin: string): Promise<ReleaseData> {
+  let m: Manifest | null;
+  try { m = (await manifestOf(env, rid)) as Manifest | null; } catch (e) { throw new RegistryError(`manifest of ${rid}`, e); }
+  if (!m) throw new RegistryError(`manifest of ${rid} is not in storage`);
   const byPath = new Map(m.json.outputs.map(o => [o.path, o.sha256]));
   const mimes = new Map(m.json.outputs.map(o => [o.path, o.mime]));
   return {
@@ -53,7 +63,8 @@ async function fromRegistry(env: Env, rid: string, origin: string): Promise<Rele
       if (name === 'release/manifest') return m.json;
       if (name === 'release/journal') {
         const url = new URL(JOURNAL_PATH, origin);
-        const res = await publicApi(new Request(url), env, url);
+        let res: Response;
+        try { res = await publicApi(new Request(url), env, url); } catch (e) { throw new LoadError(name, e); }
         if (!res.ok) throw new LoadError(name, res.status);
         return res.json();
       }
@@ -61,7 +72,8 @@ async function fromRegistry(env: Env, rid: string, origin: string): Promise<Rele
       if (!sha) throw new PendingError(name);
       let text = texts.get(sha);
       if (text === undefined) {
-        const buf = await readObject(env, sha);
+        let buf: ArrayBuffer | null;
+        try { buf = await readObject(env, sha); } catch (e) { throw new LoadError(name, e); }
         if (!buf) throw new LoadError(name, 'missing object');
         text = decoder.decode(buf);
         texts.set(sha, text);
@@ -100,12 +112,10 @@ async function assetsReleaseId(env: Env, origin: string): Promise<string> {
   return assetsRelease;
 }
 
-/** the release of this request: the current one in the registry, else the one built into the static assets */
+/** the release of this request: the current one in the registry, else (no registry, or no current release yet) the one built into the
+ *  static assets. Throws RegistryError when the registry is there but cannot be read */
 export async function releaseData(env: Env, origin: string): Promise<ReleaseData> {
   const rid = await currentRelease(env);
-  if (rid) {
-    const r = await fromRegistry(env, rid, origin);
-    if (r) return r;
-  }
+  if (rid) return fromRegistry(env, rid, origin);
   return fromAssets(env, origin, await assetsReleaseId(env, origin));
 }

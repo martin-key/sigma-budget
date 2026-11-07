@@ -10,7 +10,7 @@ import { href } from '../routes.js';
 import { facts, callout, ext } from '../ui/cards.js';
 import { disclosure } from '../ui/disclosure.js';
 import { dataTable } from '../ui/table.js';
-import { statusPill } from '../ui/status.js';
+import { statusPill, STATUS as UI_STATUS } from '../ui/status.js';
 import { siteUrl } from '../seo.js';
 import { dataHref, fromRegistry } from '../data.js';
 import { sizeLabel } from '../catalog.js';
@@ -25,12 +25,13 @@ const code = t => html`<code>${t}</code>`;
 const sha = s => html`<code class="s35-sha" title="${s}">${short(s)}…</code>`;
 const fileName = p => String(p).split('/').pop();
 const KIND = { publish: 'публикуване', rollback: 'връщане' };
-const STATUS = { real: 'real', mock: 'mock', mixed: 'mixed', pending: 'pending' };
+// the status of a set as datasets/registry.yaml gives it (real, mock, pending); one the site does not know is shown as it is, not as „Предстои“
+const statusCell = v => (UI_STATUS[v] ? statusPill(v) : code(v || '—'));
 
 /** a section: the h2 carries the id (the target of ?to=), so a jump lands on a heading */
 const block = (id, title, body) => html`<section class="s35-block" aria-labelledby="${id}"><h2 id="${id}" tabindex="-1">${title}</h2>${body}</section>`;
 
-function releaseBlock(rid, m, journal) {
+function releaseBlock(rid, m, journal, journalFailed) {
   const mine = (journal || []).filter(e => e.release_id === rid);
   const first = mine.length ? mine[mine.length - 1] : null;
   const last = mine.length ? mine[0] : null;
@@ -38,7 +39,7 @@ function releaseBlock(rid, m, journal) {
     ${facts([
       { k: 'Издание', v: html`<code class="s35-rid">${rid}</code>` },
       { k: 'Сглобено', v: m.processing?.parameters?.build_date ? date(m.processing.parameters.build_date) : null },
-      { k: 'Публикувано', v: first ? `${date(first.at.slice(0, 10))}, ревизия ${first.revision}` : 'заедно със сайта (без регистър)' },
+      { k: 'Публикувано', v: first ? `${date(first.at.slice(0, 10))}, ревизия ${first.revision}` : journalFailed ? 'журналът на регистъра не се зареди' : 'заедно със сайта (без регистър)' },
       { k: 'Текущо от', v: last && last !== first ? `${date(last.at.slice(0, 10))} (${KIND[last.kind] || last.kind}), ревизия ${last.revision}` : null },
       { k: 'Манифест', v: html`<a href="/data/releases/${rid}/manifest.json">manifest.json</a> (SHA-256 на манифеста е ID-то на изданието)` }
     ])}
@@ -54,7 +55,7 @@ function coverageBlock(m) {
   return block('s35-coverage', 'Период, обхват и ограничения', html`
     ${m.coverage?.latest ? html`<p>Последните данни: ${typeof m.coverage.latest === 'string' ? m.coverage.latest : Object.entries(m.coverage.latest).map(([k, v]) => `${k}: ${v}`).join(', ')}.</p>` : ''}
     ${dataTable({ id: 's35-sets', caption: `Наборите в изданието (${sets.length})`, captionVisible: true, dense: true,
-      columns: [{ key: 'name', label: 'Набор', fmt: v => code(v) }, { key: 'status', label: 'Статус', fmt: v => statusPill(STATUS[v] || 'pending') },
+      columns: [{ key: 'name', label: 'Набор', fmt: v => code(v) }, { key: 'status', label: 'Статус', fmt: statusCell },
         { key: 'period', label: 'Период' }, { key: 'unit', label: 'Единица' }, { key: 'rebuilt', label: 'Сглобен от оригиналите' }], rows })}
     ${missing.length ? html`<p>Входове, които липсват на това сглобяване (наборите им са пренесени, без да се сглобят):</p>
       <ul class="s35-list">${missing.map(x => html`<li>${code(x.path)}: ${(x.datasets || []).join(', ')}</li>`)}</ul>` : ''}
@@ -111,7 +112,9 @@ function provenanceBlock() {
   </ul>`);
 }
 
-function historyBlock(rid, journal) {
+function historyBlock(rid, journal, journalFailed) {
+  // a registry whose journal could not be read now is not an environment without one (the screen is then not kept in the edge cache)
+  if (!journal && journalFailed) return block('s35-history', 'История на изданията', html`<p>Журналът на публикуванията не може да се зареди в момента. Опитайте отново след малко.</p>`);
   if (!journal) return block('s35-history', 'История на изданията', html`<p>Тази среда няма регистър: изданието е публикувано заедно със сайта, затова няма журнал на публикуванията.</p>`);
   const rows = journal.map(e => ({ revision: e.revision, release: e.release_id, kind: KIND[e.kind] || e.kind, at: e.at, by: [e.role === 'operator' ? 'оператор' : e.role, e.by].filter(Boolean).join(' ') }));
   return block('s35-history', 'История на изданията', html`
@@ -128,11 +131,12 @@ export function render(ctx) {
   const m = ctx.data['release/manifest'];
   if (!rid || !m) ctx.notFound();
   const journal = ctx.data['release/journal']?.items || null;
+  const journalFailed = (ctx.failed || []).includes('release/journal');
   const ins = (m.inputs || []).length, outs = (m.outputs || []).length;
   return {
     lede: `Откъде са данните на тази страница: изданието ${short(rid)} с ${num(ins)} оригинала и ${num(outs)} файла, всеки с SHA-256, кодът, който ги сглобява, проверките и как всеки може да го пресъздаде.`,
     answer: `Данните са от издание ${short(rid)}: ${num(ins)} оригинала и ${num(outs)} файла с данни, сглобени от commit ${short(m.processing?.code?.commit)} и проверими байт по байт.`,
-    body: html`${releaseBlock(rid, m, journal)}${coverageBlock(m)}${filesBlock(rid, m)}${codeBlock(m)}${checksBlock(ctx.data['release/validation'])}${provenanceBlock()}${historyBlock(rid, journal)}`
+    body: html`${releaseBlock(rid, m, journal, journalFailed)}${coverageBlock(m)}${filesBlock(rid, m)}${codeBlock(m)}${checksBlock(ctx.data['release/validation'])}${provenanceBlock()}${historyBlock(rid, journal, journalFailed)}`
   };
 }
 

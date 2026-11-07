@@ -6,7 +6,8 @@
 #   push to main                     -> the same, then deploy the built Worker to staging (noindex)
 # There is no develop branch. This workflow never deploys to production: production comes later, by hand (docs/production-procedure.md).
 # The staging deployment needs the repository secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID and the variable STAGING_ORIGIN
-# (the staging Worker's address); without them the deploy step is skipped.
+# (the staging Worker's address). Without the secrets the deploy step is skipped; with them but without STAGING_ORIGIN it fails, because
+# the compatibility check of the code against the current release (tools/compat_check.py) needs that address.
 name: site
 
 on:
@@ -53,6 +54,8 @@ jobs:
         run: python tools/mock/validate_data_v6.py
       - name: Compatibility of code and data (stage E)
         run: python tools/compat_check.py
+      - name: The query each screen is drawn and cached by (site/js/routes.js)
+        run: python tools/site/query_check.py
       - name: Build the Worker for staging and check every screen
         env:
           ORIGIN: ${{ vars.STAGING_ORIGIN || 'https://sigma-budget.my-data.bg' }}
@@ -128,7 +131,8 @@ jobs:
 
   data-image:
     # the pinned environment of the data processing (tools/data/Dockerfile): it must build from its digest and hash-locked
-    # dependencies. Running it needs the raw files, which are not in the repository.
+    # dependencies. Running it needs the raw files: the ones from minfin.bg are in the repository, the rest are downloaded
+    # (docs/data-sources.md).
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -164,6 +168,11 @@ jobs:
             echo "::notice::Cloudflare secrets are not set: skipping the deployment."
             exit 0
           fi
-          # the new code must read the release that is current on staging (tools/compat_check.py; no release yet passes)
-          if [ -n "$STAGING_ORIGIN" ]; then python3 tools/compat_check.py --env-url "$STAGING_ORIGIN"; fi
+          # the new code must read the release that is current on staging (tools/compat_check.py; no release yet passes). Without the
+          # address that check cannot run, and the code is not deployed unchecked
+          if [ -z "$STAGING_ORIGIN" ]; then
+            echo "::error::The variable STAGING_ORIGIN is not set: the compatibility check cannot run, so nothing is deployed."
+            exit 1
+          fi
+          python3 tools/compat_check.py --env-url "$STAGING_ORIGIN"
           npx wrangler deploy -c build/server/wrangler.json      # built with CLOUDFLARE_ENV=staging: the staging Worker, D1 and R2

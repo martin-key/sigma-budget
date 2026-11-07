@@ -87,7 +87,8 @@ export const data = {
     if (sc) {                                                  // the server: the file of the request's release (workers/release-data.ts)
       if (!OK_NAME.test(name)) return Promise.reject(new PendingError(name));
       if (name === 'releases/current' && sc.releaseId) { const r = releaseRecord(sc.releaseId); sc.data.set(name, r); return Promise.resolve(r); }
-      return sc.load(name).then(j => { sc.data.set(name, j); return j; });
+      // a file that could not be read (not a pending one) makes the screen incomplete: workers/app.ts then does not keep it in the cache
+      return sc.load(name).then(j => { sc.data.set(name, j); return j; }, e => { if (!(e instanceof PendingError)) sc.degraded = true; throw e; });
     }
     let p = cache.get(name);
     if (!p) {

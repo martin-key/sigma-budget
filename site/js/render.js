@@ -7,7 +7,7 @@
 //   prepare(route, params, …)   the page module, its data (`needs`) and the ctx it renders with
 //   build(route, params, …)     the view model {route, view, title, eyebrow, lede, context, body, crumbs, next, …}
 //   frameHtml(vm), docTitle(vm) the article of the screen and the document title
-import { NOT_FOUND, byId, match, href as routeHref, chainOf, GROUPS } from './routes.js';
+import { NOT_FOUND, byId, match, href as routeHref, chainOf, GROUPS, screenQuery } from './routes.js';
 import { store, DEFAULT_PERIOD } from './store.js';
 import { data, PendingError } from './data.js';
 import { html, SafeHtml } from './html.js';
@@ -42,7 +42,8 @@ export function canonQuery(q) {
   if (o.demo && !DEMOS.includes(o.demo)) delete o.demo;
   return o;
 }
-/** the screen of an address ('/x?y' or '#/x?y'): {route, params, query, canon, want, found, segs} */
+/** the screen of an address ('/x?y' or '#/x?y'): {route, params, query, canon, want, screen, found, segs}. `screen` is the address of
+ *  what the server draws for it: the canonical one with only the query of the screen (js/routes.js screenQuery) */
 export function resolve(address) {
   const raw = parseHash(address);
   const red = redirect(raw.segs, raw.query);           // an old address → the matching new screen, context kept (js/redirects.js)
@@ -52,7 +53,7 @@ export function resolve(address) {
   const params = m ? m.params : { path: raw.segs.join('/') };
   const query = canonQuery(raw.query);
   const canon = m ? m.canon : raw.segs;
-  return { route, params, query, canon, want: canonHash(canon, query), found: !!m, segs: raw.segs };
+  return { route, params, query, canon, want: canonHash(canon, query), screen: canonHash(canon, screenQuery(route, query)), found: !!m, segs: raw.segs };
 }
 
 /* ------------------------------------------------------------------ page module + data */
@@ -64,7 +65,7 @@ const noop = () => {};
 function makeCtx(route, params, query, o) {
   const a = o.actions || {};
   return {
-    route, params, query, data: {}, missing: [], period: store.period, store,
+    route, params, query, data: {}, missing: [], failed: [], period: store.period, store,
     get core() { return data.get('core'); },
     signal: o.signal, demo: o.demo || null, kind: o.kind || 'link',
     setQuery: a.setQuery || noop, rerender: a.rerender || noop, announce: a.announce || noop, go: a.go || noop, href: routeHref,
@@ -86,8 +87,9 @@ export async function prepare(route, params, query, o = {}) {
     const e = r.reason;
     if (e && e.name === 'AbortError') throw e;
     ctx.missing.push(n.name);
-    if (n.opt) return;
     const kind = e instanceof PendingError ? 'pending' : 'error';
+    if (kind === 'error') ctx.failed.push(n.name);             // could not be read now (not „Предстои“): an optional file says so itself
+    if (n.opt) return;
     if (!fail || (kind === 'error' && fail.kind === 'pending')) fail = { kind, err: e, file: n.name };
   });
   return { mod, ctx, fail };

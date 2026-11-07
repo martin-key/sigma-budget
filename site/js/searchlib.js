@@ -11,6 +11,7 @@
 // An entry: {group, title, sub, value, period, status: real|mock|pending, href, w, nn, t, nl, tl, mag} (the last six are matching data).
 import { raw, esc } from './html.js';
 import { data } from './data.js';
+import { scoped } from './env.js';
 import { ROUTES, match, href as routeHref } from './routes.js';
 
 export const MAX_QUERY = 120;
@@ -278,9 +279,13 @@ function fromGlossary(doc) {
   }));
 }
 
-let cache = null;
+/* the index of the release being shown: in the browser one per visit (the module's own map; resetIndex() after data.reset()), on the
+   server one per request (js/env.js scoped), because one Worker serves every release in turn and a new release must not show the old index */
+const own = new Map();
 export function getIndex() {
-  if (cache) return cache;
+  const box = scoped('search-index', own);
+  const cached = box.get('index');
+  if (cached) return cached;
   const p = (async () => {
     let doc = null, retry = false;
     try { doc = await data.load('search-index'); } catch (e) { retry = e instanceof data.LoadError; }   // pending: the file is not published yet
@@ -292,15 +297,15 @@ export function getIndex() {
     }
     const present = [...new Set(entries.map(e => e.group))];
     const groups = [...GROUP_ORDER.filter(g => present.includes(g)), ...present.filter(g => !GROUP_ORDER.includes(g))];
-    if (retry) cache = null;                       // offline: try again next time
+    if (retry && box.get('index') === p) box.delete('index');   // offline: try again next time
     return { entries, hasIndex, groups };
   })();
-  cache = p;
-  p.catch(() => { if (cache === p) cache = null; });
+  box.set('index', p);
+  p.catch(() => { if (box.get('index') === p) box.delete('index'); });
   return p;
 }
 /** forget the loaded index (after data.reset()) */
-export const resetIndex = () => { cache = null; };
+export const resetIndex = () => { own.clear(); };
 
 /** the screen a result link opens, or null */
 export function screenOf(href) {

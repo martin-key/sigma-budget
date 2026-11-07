@@ -35,7 +35,7 @@
   "r2_buckets": [{ "binding": "OBJECTS", "bucket_name": "sigma-budget-objects" }],
   "vars": { "ACCESS_ISSUER": "", "ACCESS_AUD": "", "SERVICE_TOKENS": "", "ENVIRONMENT": "production",
     "SITE_ORIGIN": "https://sigma-budget.my-data.bg", "SIGMA_URL": "https://sigma.midt.bg/", "FEEDBACK_EMAIL": "", "NOINDEX": "" },
-  // staging (push to develop, .github/workflows/site.yml): its own Worker, a build with --noindex.
+  // staging (push to main, .github/workflows/site.yml): its own Worker, a build with --noindex.
   // The top level is production: CI never deploys it, that is a separate controlled procedure (docs/approach-specification.md, stage E).
   "env": {
     "staging": {
