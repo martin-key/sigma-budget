@@ -50,6 +50,10 @@ jobs:
         run: pnpm typecheck
       - name: TypeScript tests
         run: pnpm test
+      - name: Warn when the monthly КФП report is overdue (never fails)
+        run: |
+          pnpm --filter @sigma-budget/etl... build
+          pnpm exec budget-ts freshness
       - name: Check the source and dataset registries
         run: python -m budget_pipeline.validate.registry check
       - name: Check the published release (data/release against its manifest)

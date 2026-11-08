@@ -96,3 +96,5 @@ Deploy на кода (`pnpm exec wrangler deploy -c apps/web/build/server/wrangl
 [процедурата](production-procedure.md), не от CI.
 
 Всички команди тук се изпълняват от корена на хранилището. Конфигурацията за собствен акаунт е `apps/web/wrangler.local.jsonc`, до `apps/web/wrangler.jsonc`, така че относителните `main` и `migrations_dir` запазват значението си. За нея се използва `-c apps/web/wrangler.local.jsonc`, а при сглобяване - `WRANGLER_CONFIG=apps/web/wrangler.local.jsonc`. Vite разрешава тази променлива спрямо корена на хранилището. Deploy на сглобен сайт използва `-c apps/web/build/server/wrangler.json`.
+
+Проверка за свежест на КФП: `pnpm exec budget-ts freshness` (след `pnpm build`).
