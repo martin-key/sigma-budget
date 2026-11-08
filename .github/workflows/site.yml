@@ -239,6 +239,25 @@ jobs:
           name: editorial-parity
           path: tmp/ts-migration/candidates/08/diff.json
           if-no-files-found: error
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: pipeline/requirements.lock
+      - name: Verify programme oracle regeneration
+        run: |
+          python -m pip install --require-hashes -r pipeline/requirements.lock
+          PYTHONPATH=pipeline python packages/ingest/test/fixtures/programmes/generate_oracle.py --check
+      - name: Budgets and programmes frozen Python parity
+        env:
+          PROGRAMMES_PARITY_REPORT: ${{ github.workspace }}/tmp/ts-migration/candidates/05/diff.json
+        run: pnpm --filter @sigma-budget/ingest exec vitest run src/build/budgets.test.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: programmes-parity
+          path: tmp/ts-migration/candidates/05/diff.json
+          if-no-files-found: error
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -11,3 +11,20 @@ export * from './common/format.js';
 export * from './common/sources.js';
 export * from './build/law.js';
 export * from './build/editorial.js';
+export * from './build/budgets.js';
+export {
+  loadProgrammes,
+  cleanName,
+  lawPolicyName,
+  type ProgrammeEvidence,
+  type ProgrammeLawArticle,
+  type ProgrammeLawDiff,
+  type ProgrammeLawEvidence,
+  type ProgrammeNode,
+  type ProgrammePolicy,
+  type ProgrammeBudgetDifference,
+  type ProgrammeRecord,
+  type PendingProgrammeRecord,
+  type PublishedProgrammeRecord,
+} from './build/programmes.js';
+export { verifyProgrammeInputs } from './build/programme-fixture.js';
