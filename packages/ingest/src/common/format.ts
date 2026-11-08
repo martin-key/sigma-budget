@@ -37,6 +37,12 @@ function fixed(value: number, places: number): string {
   const digits = rounded.toString().padStart(places + 1, '0');
   return places ? digits.slice(0, -places) + '.' + digits.slice(-places) : digits;
 }
+/** Match Python round(float, places), including binary-float ties. */
+export function pythonRound(value: number, places = 0): number {
+  if (!Number.isFinite(value)) throw new Error('Non-finite number');
+  const rounded = Number(fixed(Math.abs(value), places));
+  return rounded === 0 ? 0 : value < 0 ? -rounded : rounded;
+}
 export function formatNumber(value: unknown, places = 0, sign = false): string {
   if (!isNumber(value)) return '—';
   const formatted = fixed(Math.abs(value), places),

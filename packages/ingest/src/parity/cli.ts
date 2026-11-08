@@ -7,6 +7,7 @@ import {
   realpath,
 } from "node:fs/promises";
 import { resolve, dirname, relative, isAbsolute } from "node:path";
+import { fileURLToPath } from "node:url";
 import { parseYaml } from "../io/registry.js";
 import { object } from "@sigma-budget/dataset-schema";
 import { compare, type Report } from "./compare.js";
@@ -167,9 +168,14 @@ export async function parityCli(
       value = args[i + 1];
     if (
       !key ||
-      !["--oracle", "--candidate", "--scope", "--policy", "--report"].includes(
-        key,
-      ) ||
+      ![
+        "--oracle",
+        "--candidate",
+        "--scope",
+        "--policy",
+        "--report",
+        "--registry",
+      ].includes(key) ||
       !value ||
       value.startsWith("--") ||
       flags[key]
@@ -196,16 +202,26 @@ export async function parityCli(
     }
   }
   const reportPath = await canonical(resolve(flags["--report"]!));
+  const effectiveRegistryPath = flags["--registry"] ?? registryPath;
   for (const input of [
     flags["--oracle"]!,
     flags["--candidate"]!,
     "data/release",
+    fileURLToPath(new URL("../../../../data/release", import.meta.url)),
+    effectiveRegistryPath,
+    flags["--policy"]!,
   ]) {
     const rel = relative(await canonical(resolve(input)), reportPath);
     if (rel === "" || (!rel.startsWith("..") && !isAbsolute(rel)))
       throw new Error("Report must be outside input roots and data/release");
   }
-  const registry = parseRegistry(await readFile(registryPath, "utf8"));
+  try {
+    if ((await stat(reportPath)).nlink > 1)
+      throw new Error("Report must not overwrite a hard-linked file");
+  } catch (e) {
+    if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw e;
+  }
+  const registry = parseRegistry(await readFile(effectiveRegistryPath, "utf8"));
   const policy = parsePolicy(
     JSON.parse(await readFile(flags["--policy"]!, "utf8")),
   );

@@ -255,6 +255,26 @@ jobs:
         env:
           PROGRAMMES_PARITY_REPORT: ${{ github.workspace }}/tmp/ts-migration/candidates/05/diff.json
         run: pnpm --filter @sigma-budget/ingest exec vitest run src/build/budgets.test.ts
+      - name: Fiscal frozen Python oracle and parity
+        env:
+          PYTHONPATH: pipeline
+          FISCAL_PARITY_REPORT: ${{ github.workspace }}/tmp/ts-migration/candidates/candidate03/diff.json
+        run: |
+          python packages/ingest/test/fixtures/fiscal/generate_oracle.py --check
+          python packages/ingest/test/fixtures/fiscal/generate_datasets.py --check
+          pnpm --filter @sigma-budget/etl... build
+          pnpm --filter @sigma-budget/ingest exec vitest run src/build/fiscal.test.ts src/build/fiscal-annual.test.ts src/build/fiscal-build.test.ts src/build/measures.test.ts src/build/debt-text.test.ts
+          pnpm --filter @sigma-budget/etl exec vitest run src/fiscal-build.test.ts
+          pnpm exec budget-ts build --inputs packages/ingest/test/fixtures/fiscal --out tmp/ts-migration/candidates/candidate03 --scope outlook,revenue,expenditure,measures --build-date 2026-11-08
+          pnpm exec budget-ts parity --registry packages/ingest/test/fixtures/fiscal/inputs/datasets.yaml --oracle packages/ingest/test/fixtures/fiscal/oracle --candidate tmp/ts-migration/candidates/candidate03/data --scope outlook,revenue,expenditure,measures --policy packages/ingest/test/fixtures/fiscal/policy.json --report tmp/ts-migration/candidates/candidate03/cli-diff.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fiscal-parity
+          path: |
+            tmp/ts-migration/candidates/candidate03/diff.json
+            tmp/ts-migration/candidates/candidate03/cli-diff.json
+          if-no-files-found: error
       - uses: actions/upload-artifact@v4
         if: always()
         with:
