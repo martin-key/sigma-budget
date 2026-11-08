@@ -1,0 +1,498 @@
+{
+  "groups": [
+    {
+      "id": "start",
+      "label": "Начало"
+    },
+    {
+      "id": "exec",
+      "label": "Изпълнение"
+    },
+    {
+      "id": "budget",
+      "label": "Бюджет"
+    },
+    {
+      "id": "tax",
+      "label": "Данъци"
+    },
+    {
+      "id": "learn",
+      "label": "Научи повече"
+    },
+    {
+      "id": "debt",
+      "label": "Контекст и сравнения"
+    },
+    {
+      "id": "ref",
+      "label": "Данни и проект"
+    },
+    {
+      "id": "util",
+      "label": "Служебни"
+    }
+  ],
+  "routes": [
+    [
+      "S01",
+      "start",
+      "/",
+      "s01-nachalo",
+      "Държавният бюджет на достъпен език",
+      "start",
+      "home",
+      {
+        "short": "Начало",
+        "step": 1,
+        "next": [],
+        "periods": "none",
+        "desc": "Платформата показва държавния бюджет за 2026 г. с прости думи: откъде идват парите, за какво се харчат и как се изпълнява планът."
+      }
+    ],
+    [
+      "S03",
+      "rechnik",
+      "/rechnik/:term?",
+      "s03-rechnik",
+      "Речник",
+      "learn",
+      "book",
+      {
+        "query": ["q", "cat", "l"],
+        "next": ["S04", "S01"],
+        "samples": ["#/rechnik", "#/rechnik/dds"],
+        "desc": "Думите от бюджетния език, обяснени просто.",
+        "periods": "none"
+      }
+    ],
+    [
+      "S04",
+      "5-minuti",
+      "/5-minuti",
+      "s04-5-minuti",
+      "Бюджетът за 5 минути",
+      "learn",
+      "clock",
+      {
+        "short": "За 5 минути",
+        "next": ["S06", "S03"],
+        "desc": "Шест кратки сцени за бюджета; под всяка — връзки към точните екрани с подробности.",
+        "periods": "none"
+      }
+    ],
+    [
+      "S05",
+      "pari",
+      "/pari",
+      "s05-pari",
+      "Годишната рамка",
+      "budget",
+      "wallet",
+      {
+        "short": "Годишната рамка",
+        "next": ["S07"],
+        "desc": "Годишната бюджетна рамка накратко: приходи, разходи, дефицит и как се връзват с месечните отчети."
+      }
+    ],
+    [
+      "S06",
+      "prihodi",
+      "/prihodi/:source?",
+      "s06-prihodi",
+      "Откъде идват парите?",
+      "budget",
+      "trendingUp",
+      {
+        "query": ["sort", "dir", "izgled"],
+        "short": "Приходи",
+        "step": 2,
+        "next": ["S07"],
+        "samples": ["#/prihodi", "#/prihodi/dds"],
+        "desc": "Данъци, осигуровки, неданъчни приходи и помощи: кой колко носи."
+      }
+    ],
+    [
+      "S07",
+      "razhodi",
+      "/razhodi",
+      "s07-razhodi",
+      "Къде отиват парите?",
+      "budget",
+      "pieChart",
+      {
+        "query": ["po", "izbor", "izgled", "top"],
+        "short": "Разходи",
+        "step": 3,
+        "next": ["S12"],
+        "samples": ["#/razhodi", "#/razhodi?po=vid"],
+        "desc": "Разходите по функции, по вид и по ведомства."
+      }
+    ],
+    [
+      "S08",
+      "funkciya",
+      "/razhodi/:fn",
+      "s08-funkciya",
+      "Функция",
+      "budget",
+      "pieChart",
+      {
+        "next": ["S12"],
+        "parent": "S07",
+        "nav": false,
+        "samples": ["#/razhodi/obrazovanie"],
+        "desc": "Какво влиза във функцията и как се променя през годините."
+      }
+    ],
+    [
+      "S10",
+      "vedomstva",
+      "/vedomstva",
+      "s10-vedomstva",
+      "Кой харчи?",
+      "budget",
+      "landmark",
+      {
+        "query": ["tab", "vid", "podredba", "izgled", "ved", "pod", "nivo", "q", "pq"],
+        "short": "Кой харчи",
+        "step": 5,
+        "next": ["S15"],
+        "samples": ["#/vedomstva", "#/vedomstva?tab=programi"],
+        "desc": "Министерствата и другите бюджети, и програмите им.",
+        "periods": ["2026.law"]
+      }
+    ],
+    [
+      "S11",
+      "vedomstvo",
+      "/vedomstvo/:code/:program?",
+      "s11-vedomstvo",
+      "Ведомство",
+      "budget",
+      "landmark",
+      {
+        "next": ["S15", "S10"],
+        "parent": "S10",
+        "nav": false,
+        "samples": ["#/vedomstvo/1300"],
+        "desc": "Бюджет, политики и програми на едно ведомство.",
+        "periods": ["2026.law"]
+      }
+    ],
+    [
+      "S12",
+      "merki",
+      "/merki/:id?",
+      "s12-merki",
+      "Мерки в бюджета 2026",
+      "budget",
+      "fileText",
+      {
+        "query": ["spisak"],
+        "short": "Мерки 2026",
+        "step": 4,
+        "next": ["S10"],
+        "samples": ["#/merki", "#/merki/kr1"],
+        "desc": "Приходните и разходните мерки: какво се променя, от кога и какъв ефект се очаква.",
+        "periods": ["2026.draft", "2026.law"]
+      }
+    ],
+    [
+      "S13",
+      "prognoza",
+      "/prognoza",
+      "s13-prognoza",
+      "Накъде вървим? 2026–2028",
+      "budget",
+      "forecast",
+      {
+        "short": "Прогноза",
+        "next": ["S17"],
+        "desc": "Прогнозата за приходи, разходи и дефицит до 2028 г."
+      }
+    ],
+    [
+      "S31",
+      "bvp",
+      "/bvp",
+      "s31-bvp",
+      "БВП: колко расте икономиката?",
+      "debt",
+      "barChart",
+      {
+        "query": ["y", "sy"],
+        "short": "БВП",
+        "next": ["S13"],
+        "periods": "none",
+        "samples": ["#/bvp"],
+        "desc": "Колко расте икономиката: БВП, потреблението, инвестициите, износът и вносът по години."
+      }
+    ],
+    [
+      "S34",
+      "byudzhet-2027",
+      "/byudzhet-2027",
+      "s34-byudzhet-2027",
+      "Бюджет 2027 (проект)",
+      "budget",
+      "fileText",
+      {
+        "short": "Бюджет 2027 (проект)",
+        "next": ["S13"],
+        "periods": "none",
+        "samples": ["#/byudzhet-2027"],
+        "desc": "Проектът на бюджетен план за 2027 г., изпратен от Министерството на финансите до Европейската комисия: дефицит, приходи, разходи, дълг и процедурата при прекомерен дефицит. Не е приет."
+      }
+    ],
+    [
+      "S14",
+      "zakon",
+      "/zakon",
+      "s14-zakon",
+      "Пътят на бюджета",
+      "budget",
+      "scale",
+      {
+        "short": "Пътят на бюджета",
+        "next": ["S15"],
+        "desc": "Как бюджетът за 2026 стига от внасянето до обнародването и какво се променя между проекта и приетия закон.",
+        "periods": ["2026.draft", "2026.law"]
+      }
+    ],
+    [
+      "S15",
+      "izpalnenie",
+      "/izpalnenie/:sub(byudzheti)?",
+      "s15-izpalnenie",
+      "Месечни отчети",
+      "exec",
+      "gauge",
+      {
+        "query": ["mesec", "obhvat", "rez", "g1", "g2", "pera", "pokazatel", "ed", "prag", "pok"],
+        "short": "Месечни отчети",
+        "step": 6,
+        "next": ["S17"],
+        "periods": "none",
+        "samples": [
+          "#/izpalnenie",
+          "#/izpalnenie?mesec=1",
+          "#/izpalnenie?rez=mesec",
+          "#/izpalnenie?obhvat=nat",
+          "#/izpalnenie?g1=2024&g2=2025",
+          "#/izpalnenie/byudzheti"
+        ],
+        "desc": "Две години един до друг: колко е събрано и изразходвано до избрания месец."
+      }
+    ],
+    [
+      "S16",
+      "novo",
+      "/novo",
+      "s16-novo",
+      "Какво ново?",
+      "exec",
+      "newspaper",
+      {
+        "query": ["vid"],
+        "short": "Какво ново",
+        "next": ["S15"],
+        "desc": "Последните отчети, решения и данни.",
+        "periods": "none"
+      }
+    ],
+    [
+      "S17",
+      "dalg",
+      "/dalg",
+      "s17-dalg",
+      "Колко дължим?",
+      "debt",
+      "banknote",
+      {
+        "query": ["obhvat"],
+        "short": "Колко дължим",
+        "step": 7,
+        "next": ["S18"],
+        "samples": ["#/dalg", "#/dalg?obhvat=maastricht"],
+        "desc": "Държавният дълг по две методики и откъде се финансира дефицитът."
+      }
+    ],
+    [
+      "S18",
+      "danaci",
+      "/danaci",
+      "s18-danaci",
+      "Моите данъци",
+      "tax",
+      "percent",
+      {
+        "step": 8,
+        "next": ["S24", "S01"],
+        "desc": "Колко внасяш ти от трудовата си заплата и къде отиват парите.",
+        "periods": ["2026.draft", "2026.law"]
+      }
+    ],
+    [
+      "S20",
+      "obshtini",
+      "/obshtini",
+      "s20-obshtini",
+      "Моята община",
+      "budget",
+      "map",
+      {
+        "query": ["oblast", "view", "sort", "dir", "q"],
+        "short": "Общини",
+        "next": ["S24"],
+        "desc": "Годишни трансфери от държавния бюджет към общините.",
+        "periods": ["2026.law"]
+      }
+    ],
+    [
+      "S21",
+      "obshtina",
+      "/obshtina/:code",
+      "s21-obshtina",
+      "Община",
+      "budget",
+      "map",
+      {
+        "next": ["S20"],
+        "parent": "S20",
+        "nav": false,
+        "samples": ["#/obshtina/BLG03"],
+        "desc": "Годишни трансфери към една община.",
+        "periods": ["2026.law"]
+      }
+    ],
+    [
+      "S24",
+      "danni",
+      "/danni/:set?",
+      "s24-danni",
+      "Откъде са данните?",
+      "ref",
+      "database",
+      {
+        "query": ["status", "ekran", "izvor", "q"],
+        "short": "Данни и методика",
+        "next": ["S25", "S01"],
+        "samples": ["#/danni", "#/danni/execution"],
+        "desc": "Каталог на наборите, източниците и методиката.",
+        "periods": "none"
+      }
+    ],
+    [
+      "S25",
+      "api",
+      "/api",
+      "s25-api",
+      "Отворени данни и API",
+      "ref",
+      "code",
+      {
+        "query": ["set"],
+        "short": "Отворени данни и API",
+        "next": ["S01"],
+        "desc": "Файловете с данни, схемите и как да ги ползваш.",
+        "periods": "none"
+      }
+    ],
+    [
+      "S35",
+      "proverka",
+      "/proverka",
+      "s35-proverka",
+      "Данни и проверка",
+      "ref",
+      "checkCircle",
+      {
+        "short": "Данни и проверка",
+        "next": ["S24", "S25"],
+        "periods": "none",
+        "desc": "Изданието на данните на сайта: оригиналите и файловете с SHA-256, кодът, проверките, как всеки го пресъздава и историята на изданията."
+      }
+    ],
+    [
+      "S26",
+      "za-proekta",
+      "/za-proekta",
+      "s26-za-proekta",
+      "За проекта",
+      "ref",
+      "info",
+      {
+        "short": "За проекта",
+        "next": ["S27", "S01"],
+        "desc": "Какво е „Бюджет на светло“, кой го прави, откъде са данните и как работи.",
+        "periods": "none"
+      }
+    ],
+    [
+      "S27",
+      "vrazka",
+      "/vrazka",
+      "s27-vrazka",
+      "Обратна връзка",
+      "ref",
+      "message",
+      {
+        "query": ["tab", "type", "src", "from", "val", "block"],
+        "short": "Обратна връзка",
+        "next": ["S01"],
+        "desc": "Намери грешка или предложи подобрение.",
+        "periods": "none"
+      }
+    ],
+    [
+      "S28",
+      "tarsene",
+      "/tarsene",
+      "s28-tarsene",
+      "Търсене",
+      "util",
+      "search",
+      {
+        "query": ["q", "g"],
+        "next": ["S04", "S01"],
+        "nav": false,
+        "samples": ["#/tarsene", "#/tarsene?q=%D0%94%D0%94%D0%A1"],
+        "desc": "Търси показатели, ведомства, общини, мерки и термини.",
+        "periods": "none"
+      }
+    ],
+    [
+      "S29",
+      "embed",
+      "/embed/:chart",
+      "s29-embed",
+      "Вграден изглед",
+      "util",
+      "code",
+      {
+        "next": [],
+        "nav": false,
+        "bare": true,
+        "samples": ["#/embed/selftest", "#/embed/neznajna.grafika"],
+        "desc": "Графика за вграждане в друга страница.",
+        "periods": "none"
+      }
+    ],
+    [
+      "S30",
+      "ne-e-namereno",
+      null,
+      "s30-404",
+      "Няма такава страница",
+      "util",
+      "help",
+      {
+        "next": [],
+        "nav": false,
+        "desc": "Адресът не води до екран от сайта.",
+        "periods": "none"
+      }
+    ]
+  ]
+}

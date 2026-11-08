@@ -46,6 +46,8 @@ jobs:
           python -m pip install --no-deps -e pipeline
           python -m playwright install --with-deps chromium
           pnpm install --frozen-lockfile
+      - name: Check web formatting
+        run: pnpm format:check
       - name: TypeScript
         run: pnpm typecheck
       - name: TypeScript tests

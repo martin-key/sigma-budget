@@ -1,0 +1,9 @@
+**/node_modules/**
+**/build/**
+**/dist/**
+**/.react-router/**
+**/.wrangler/**
+**/.turbo/**
+apps/web/app/routes/__fixtures__/**
+data/**
+tmp/**

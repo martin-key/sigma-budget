@@ -1,5 +1,6 @@
 """Static server for the site with path addresses (/prihodi, /razhodi/obrazovanie): the app in the browser, without the server part.
 
+    pnpm build                                  # compile the React bridge and typed route catalogue
     python3 -m apps.web.scripts.serve              # web assets/ on http://127.0.0.1:8000/  (every unknown path gets the app shell)
     python3 -m apps.web.scripts.serve --port 8080 --dir some/folder
 
@@ -26,9 +27,11 @@ def static_root():
     target = ROOT / 'tmp' / 'static-site'
     target.mkdir(parents=True, exist_ok=True)
     entries = {p.name: p for p in (ROOT / 'apps/web/public').iterdir()}
-    entries.update(js=ROOT / 'apps/web/client', data=ROOT / 'data/release')
+    entries.update(js=ROOT / 'apps/web/build/client/js', data=ROOT / 'data/release')
     for name, source in entries.items():
         dest = target / name
+        if dest.is_symlink() and dest.resolve() != source.resolve():
+            dest.unlink()
         if not dest.exists():
             dest.symlink_to(source, target_is_directory=source.is_dir())
     return target

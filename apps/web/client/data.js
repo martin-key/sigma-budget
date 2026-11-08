@@ -79,6 +79,11 @@ const raceAbort = (p, signal) => (!signal ? p : new Promise((ok, no) => {
 
 export const data = {
   PendingError, LoadError,
+  /** Adopt only the serializable editorial seed. Never seed adapted numeric files. */
+  adoptTextSeed(seed) {
+    if (serverScope()) return;
+    for (const name of ['core', 'glossary']) if (seed?.[name]) { done.set(name, seed[name]); cache.set(name, Promise.resolve(seed[name])); }
+  },
   /** load(name, {signal, demo}) ; demo 'error' | 'pending' simulates a failure for ?demo= */
   load(name, o = {}) {
     if (o.demo === 'error') return Promise.reject(new LoadError(name, 'demo'));

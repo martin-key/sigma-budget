@@ -11,7 +11,7 @@ from the original sources and is never retyped here:
 
 Only the SHAPE changes (slug/categories/aliases/related/see as in DATA_SPEC 3.16, steps/blocks/next/checks as in 3.17).
 The "Виж в бюджета" links of the old single-file frozen input are mapped to the route keys of the new router and every
-href is checked against apps/web/client/routes.js (pattern match + route-param registry). A link that cannot be resolved
+href is checked against apps/web/app/lib/routes.json (pattern match + route-param registry). A link that cannot be resolved
 stops the build; nothing is guessed.
 
 Deterministic (no clock, no randomness): two runs give byte-identical files. Pure Python 3 standard library.
@@ -32,7 +32,7 @@ SITE = os.path.join(ROOT, "apps", "web", "public")                     # the sit
 DATA_DIR = os.path.join(ROOT, "data", "release")
 GLOSSARY_SRC = os.path.join(ROOT, "data", "inputs", "glossary.json")
 GUIDE_SRC = os.path.join(ROOT, "data", "cache", "research", "guide", "guide_raw.txt")   # not in the repository
-ROUTES_JS = os.path.join(ROOT, "apps", "web", "client", "routes.js")
+from budget_pipeline.routes import CATALOGUE, load_routes
 
 BUILD_DATE = os.environ.get("BUILD_DATE", "2026-11-08")   # same default as pipeline/budget_pipeline/build/data_io.py; a constant => byte-identical rebuilds
 TEXT_AS_OF = "2026-10-01"                                  # date of the source documents
@@ -139,34 +139,23 @@ def meta(id_, title, source_note, as_of):
             "asOf": as_of, "retrieved": BUILD_DATE, "mock": False}
 
 
-# --------------------------------------------------------------------------------------------------------- routes.js
-ROUTE_RE = re.compile(r"^R\('(S\d+)', '([^']+)', (null|'[^']*'), '([^']+)', '([^']+)', '([^']+)', '([^']+)'(?:, \{(.*)\})?\),?$")
+# --------------------------------------------------------------------------------------------------------- route metadata
 
-
-def parse_routes(path=ROUTES_JS):
-    """Read the route table of the SHELL (read-only). Returns [{id,key,pattern,title,step,segs}] in file order."""
-    routes = []
-    with open(path, "r", encoding="utf-8") as fh:
-        for line in fh:
-            m = ROUTE_RE.match(line.strip())
-            if not m:
-                continue
-            rid, key, pat, _file, title, _group, _icon, opts = m.groups()
-            pat = None if pat == "null" else pat[1:-1]
-            step = None
-            if opts:
-                sm = re.search(r"\bstep:\s*(\d+)", opts)
-                step = int(sm.group(1)) if sm else None
-            segs = []
-            if pat is not None:
-                for s in [x for x in pat.split("/") if x]:
-                    sm = re.match(r"^:(\w+)(?:\(([^)]+)\))?(\?)?$", s)
-                    if sm:
-                        segs.append({"name": sm.group(1), "re": re.compile("^(?:" + sm.group(2) + ")$") if sm.group(2) else None,
-                                     "opt": bool(sm.group(3))})
-                    else:
-                        segs.append({"lit": s})
-            routes.append({"id": rid, "key": key, "pattern": pat, "title": title, "step": step, "segs": segs})
+def parse_routes(path=CATALOGUE):
+    """Add the link matcher's segments to every record of the shared catalogue."""
+    routes = load_routes(path)
+    for route in routes:
+        segs = []
+        if route["pattern"] is not None:
+            for segment in filter(None, route["pattern"].split("/")):
+                match = re.match(r"^:(\w+)(?:\(([^)]+)\))?(\?)?$", segment)
+                if match:
+                    segs.append({"name": match.group(1),
+                                 "re": re.compile("^(?:" + match.group(2) + ")$") if match.group(2) else None,
+                                 "opt": bool(match.group(3))})
+                else:
+                    segs.append({"lit": segment})
+        route["segs"] = segs
     return routes
 
 
@@ -253,14 +242,14 @@ def build_glossary(routes):
                         lst.append({"slug": by_n[m]["slug"], "note": row["note"]})
         related[t["slug"]] = lst
 
-    # "Виж в бюджета": resolve every href against routes.js
+    # "Виж в бюджета": resolve every href against routes.json
     for slug, href in SEE.items():
         if slug not in by_slug:
             problem("SEE: unknown slug %s" % slug)
             continue
         hit = match_href(routes, href)
         if hit is None:
-            problem("SEE: %s -> %s does not match any route of apps/web/client/routes.js" % (slug, href))
+            problem("SEE: %s -> %s does not match any route of apps/web/app/lib/routes.json" % (slug, href))
             continue
         route, params = hit
         if route["key"] == "prihodi" and params.get("source") not in (None,) + tuple(REVENUE_GROUPS):
@@ -417,7 +406,7 @@ def build_guide(routes):
         verb, label = tm.group(1), tm.group(2)
         route = next((r for r in routes if r["title"] == label and r["step"] == s["n"] and r["pattern"]), None)
         if route is None:
-            problem("guide step %d: no route with title %r and step %d in routes.js" % (s["n"], label, s["n"]))
+            problem("guide step %d: no route with title %r and step %d in routes.json" % (s["n"], label, s["n"]))
             continue
         sample = "#/" + "/".join(x for x in route["pattern"].split("/") if x and not x.startswith(":"))
         if match_href(routes, sample) is None or match_href(routes, sample)[0]["id"] != route["id"]:
@@ -523,8 +512,6 @@ def main(argv):
     args = parser.parse_args(argv)
     check_only = args.check
     routes = parse_routes()
-    if len(routes) < 20:
-        problem("routes.js: only %d routes parsed (expected 30)" % len(routes))
     glossary = build_glossary(routes)
     n_gl = verify_glossary(glossary)
     guide = build_guide(routes)

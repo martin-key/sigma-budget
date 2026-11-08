@@ -1,0 +1,110 @@
+{
+  "referenceCommit": "26f82ea",
+  "capturedFrom": "Unmodified main Worker; same checked-in release",
+  "origin": "https://sigma-budget.my-data.bg",
+  "cases": [
+    {
+      "screen": "S26",
+      "address": "/za-proekta",
+      "query": {},
+      "status": 200
+    },
+    {
+      "screen": "S30",
+      "address": "/nyama-takava-stranitsa",
+      "query": {},
+      "status": 404
+    },
+    {
+      "screen": "S26",
+      "address": "/za-proekta?demo=loading",
+      "query": {
+        "demo": "loading"
+      },
+      "status": 200
+    },
+    {
+      "screen": "S26",
+      "address": "/za-proekta?demo=empty",
+      "query": {
+        "demo": "empty"
+      },
+      "status": 200
+    },
+    {
+      "screen": "S26",
+      "address": "/za-proekta?demo=error",
+      "query": {
+        "demo": "error"
+      },
+      "status": 200
+    },
+    {
+      "screen": "S26",
+      "address": "/za-proekta?demo=pending",
+      "query": {
+        "demo": "pending"
+      },
+      "status": 200
+    },
+    {
+      "screen": "S30",
+      "address": "/nyama-takava-stranitsa?demo=loading",
+      "query": {
+        "demo": "loading"
+      },
+      "status": 404
+    },
+    {
+      "screen": "S30",
+      "address": "/nyama-takava-stranitsa?demo=empty",
+      "query": {
+        "demo": "empty"
+      },
+      "status": 404
+    },
+    {
+      "screen": "S30",
+      "address": "/nyama-takava-stranitsa?demo=error",
+      "query": {
+        "demo": "error"
+      },
+      "status": 404
+    },
+    {
+      "screen": "S30",
+      "address": "/nyama-takava-stranitsa?demo=pending",
+      "query": {
+        "demo": "pending"
+      },
+      "status": 404
+    }
+  ],
+  "sha256": {
+    "S26-empty.html": "1d059656af6b7014cb79a89db634b66a3ae910215ca7bc2bc7ae12d9d7c08908",
+    "S26-error.html": "902a2ea5d115508ba79da9f697934f92aa6abd40db21797e41d13af6933acb15",
+    "S26-loading.html": "bd8e49c63d20a1e407cdb81d0a601248142dcc369b8dbcc15ab20e11d29965ee",
+    "S26-pending.html": "56c28d656682b9115214327621db79efbe673f87b4bbdc17803f6fc45a3d9fc7",
+    "S26.html": "8fb00f319b49f1529c28de65dfb2da7b597014733d50e4d70ae5817288db7472",
+    "S30-empty.html": "6abcfc276e2f133e000c37a04d0920187845c9516ca18063c6f001b225fa6be3",
+    "S30-error.html": "b6b9a828a25418a7e990708a5167682b859b50b4779f5d4a0822b5ecb3ce7fa0",
+    "S30-loading.html": "16648bd8d9d2d827433cdbeb7ab54fbf1304dff0da3f264d402a36a2874cbe89",
+    "S30-pending.html": "f457b2972bcdd7317858c389f2b5c5ba3690d41b6623ccd43a43a2b597df6af4",
+    "S30.html": "44dc6cded752433b1e80a2ee6c17ae7e744689a87ddf83d0e5e754310ce7f595",
+    "core.json": "65036c5fa88af3d4ce52f923ba5d84d9a630eced218c6ebbcf089940e354545d",
+    "glossary.json": "0d88665ab18f66da040adfe6ee525d5a7aacfcc72223df5ccfc7b4276c888a77"
+  },
+  "demoStates": [
+    "loading",
+    "empty",
+    "error",
+    "pending"
+  ],
+  "period": "2026.law",
+  "theme": "system (SSR default)",
+  "dataAvailability": {
+    "core": "present",
+    "glossary": "present"
+  },
+  "datasetVersion": "2026-11-05.1"
+}

@@ -85,7 +85,7 @@ const SKIP = 'a, button, summary, label, select, option, textarea, input, h1, h2
 const MAX = 3;        // links per paragraph; the rest wait for their next mention
 
 let compiled = null;
-function patterns(g) {
+export function patterns(g) {
   if (compiled && compiled.g === g) return compiled.list;
   const list = LINKS.filter(([slug]) => g.by.has(slug))
     .map(([slug, re]) => ({ slug, re: new RegExp(`(?<![\\p{L}\\p{N}])(?:${re})(?![\\p{L}\\p{N}])`, 'giu') }));
@@ -93,7 +93,7 @@ function patterns(g) {
   return list;
 }
 
-function find(p, s) {
+export function find(p, s) {
   p.re.lastIndex = 0;
   for (let m = p.re.exec(s); m; m = p.re.exec(s)) {
     if (!NUM.test(s.slice(Math.max(0, m.index - 24), m.index)) && (!GUARD[p.slug] || GUARD[p.slug](m, s))) return m;

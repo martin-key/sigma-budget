@@ -181,17 +181,14 @@ class Ctx(object):
 
 # ------------------------------------------------------------------------------------------------ route patterns
 class Routes(object):
-    """The route table of apps/web/client/routes.js, parsed from its R('S01', 'key', '/pattern', ...) lines."""
-
-    LINE = re.compile(r"""^\s*R\(\s*'(S\d\d)'\s*,\s*'([^']+)'\s*,\s*(null|'([^']*)')""", re.M)
+    """The shared screen catalogue, compiled for validation of internal links."""
 
     def __init__(self):
-        with open(os.path.join(ROOT, "apps", "web", "client", "routes.js"), "r", encoding="utf-8") as fh:
-            src = fh.read()
+        from budget_pipeline.routes import load_routes
         self.routes = {}                                    # id -> (key, pattern or None)
         self.compiled = []
-        for m in self.LINE.finditer(src):
-            rid, key, pat = m.group(1), m.group(2), m.group(4)
+        for route in load_routes():
+            rid, key, pat = route["id"], route["key"], route["pattern"]
             self.routes[rid] = (key, pat)
             if pat is None:
                 continue

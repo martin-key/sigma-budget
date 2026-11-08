@@ -57,6 +57,10 @@ class Page(HTMLParser):
             self._in = 'lede'
 
     def handle_endtag(self, tag):
+        # HTMLParser dispatches <input/> as start + end. A void end callback must
+        # not pop the surrounding article and discard the remainder of its text.
+        if tag in ('br', 'img', 'input', 'meta', 'link', 'hr', 'wbr', 'source', 'col', 'area', 'base', 'embed', 'track'):
+            return
         while self._stack:
             t, _ = self._stack.pop()
             if t == tag:

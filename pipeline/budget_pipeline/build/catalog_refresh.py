@@ -10,6 +10,8 @@ import os
 import re
 import sys
 
+from budget_pipeline.routes import load_routes
+
 ROOT = str(_Path(__file__).resolve().parents[3])   # repository root
 SITE = os.path.join(ROOT, "apps", "web", "public")                  # the site (run this at the tag mock-previous)
 DATA = os.path.join(ROOT, "data", "release")
@@ -38,8 +40,7 @@ def schema(obj):
 
 
 def active_routes():
-    src = open(os.path.join(ROOT, "apps", "web", "client", "routes.js"), encoding="utf-8").read()
-    return set(re.findall(r"^\s*R\(\s*'(S\d\d)'", src, re.M))
+    return {route["id"] for route in load_routes()}
 
 
 def page_needs():

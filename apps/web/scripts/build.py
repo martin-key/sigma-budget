@@ -444,8 +444,8 @@ def main():
     core = json.loads((ROOT / 'data' / 'release' / 'core.json').read_text(encoding='utf-8'))
     dv = (core.get('build') or {}).get('dataVersion') or ''
     lastmod = dv[:10] if re.match(r'\d{4}-\d{2}-\d{2}', dv) else datetime.date.today().isoformat()
-    routes_js = (ROOT / 'apps' / 'web' / 'client' / 'routes.js').read_text(encoding='utf-8')
-    seeds = ['/'] + sorted({norm_path(urllib.parse.unquote(s.lstrip('#')).split('?')[0]) or '/' for s in re.findall(r"'(#/[^']*)'", routes_js)} - {None})
+    route_samples = json.loads(subprocess.check_output(['node', '--input-type=module', '-e', "import {ROUTES} from './apps/web/app/lib/routes.ts'; console.log(JSON.stringify(ROUTES.flatMap(r=>r.samples)));"], cwd=ROOT))
+    seeds = ['/'] + sorted({norm_path(urllib.parse.unquote(s.lstrip('#')).split('?')[0]) or '/' for s in route_samples} - {None})
 
     stamp_files(out, origin, dv)
     t0 = time.time()

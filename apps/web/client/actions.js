@@ -16,7 +16,7 @@ const plain = e => !(e.defaultPrevented || e.button > 0 || e.metaKey || e.ctrlKe
 
 function onClick(e) {
   const t = e.target;
-  if (!(t instanceof Element)) return;
+  if (!(t instanceof Element) || t.closest('[data-react-owned]')) return;
 
   const src = t.closest('[data-src]');
   if (src) { e.preventDefault(); openSource(src, src.dataset.src.split(',').map(s => s.trim()).filter(Boolean), { asOf: src.dataset.asof }); return; }
@@ -53,7 +53,7 @@ function onClick(e) {
 
 function onChange(e) {
   const t = e.target;
-  if (!(t instanceof Element) || !t.dataset || !t.dataset.query || t.tagName === 'BUTTON' || t.tagName === 'A') return;
+  if (!(t instanceof Element) || t.closest('[data-react-owned]') || !t.dataset || !t.dataset.query || t.tagName === 'BUTTON' || t.tagName === 'A') return;
   const k = t.dataset.query;
   let v = t.value;
   if (t.type === 'checkbox') v = t.checked ? '1' : '';
@@ -75,7 +75,7 @@ function onKey(e) {
 // first touch of a glossary word (pointer or keyboard): fetch the module and the data so the click opens the popover at once
 let warm = false;
 function onWarm(e) {
-  if (warm || !(e.target instanceof Element) || !e.target.closest('a[data-gl]')) return;
+  if (warm || e.target.closest?.('[data-react-owned]') || !(e.target instanceof Element) || !e.target.closest('a[data-gl]')) return;
   warm = true;
   import('./glossary.js').then(m => m.ready()).catch(() => { /* pending data: the click falls back to the full entry */ });
 }

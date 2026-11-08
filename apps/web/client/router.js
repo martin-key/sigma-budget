@@ -33,7 +33,9 @@ const listeners = new Set();
 const sigOf = (route, params, query) => `${route.id}|${JSON.stringify(params)}|${JSON.stringify(Object.entries(query).filter(([k]) => k !== 'to'))}`;
 const ensureKey = () => { if (!history.state || !history.state.k) history.replaceState({ k: ++histK }, ''); return history.state.k; };
 const saveScroll = () => { if (curK) scrollPos.set(curK, window.scrollY); };
-const runCleanups = () => { motion.cleanup(); const c = cleanups; cleanups = []; for (const f of c) { try { f(); } catch (e) { console.error(e); } } };
+const bridgeModule = './react-bridge.js';
+let reactBridge;
+const runCleanups = () => { reactBridge?.dispose(); motion.cleanup(); const c = cleanups; cleanups = []; for (const f of c) { try { f(); } catch (e) { console.error(e); } } };
 
 /* ------------------------------------------------------------------ public helpers (also on ctx) */
 export function announce(msg) {
@@ -214,8 +216,23 @@ async function render(kind) {
   $view()?.setAttribute('aria-busy', 'true');
 
   let vm;
+  let reactOwned = false;
   try {
-    vm = await build(route, params, query, { signal, kind, path: segs.join('/'), stale: () => seq !== navSeq, loadStyle, actions: { setQuery, rerender, announce, go } });
+    const seedNode = pre ? document.getElementById('react-screen-seed') : null;
+    const seed = seedNode ? JSON.parse(seedNode.textContent) : null;
+    if ((route.id === 'S26' || route.id === 'S30')) {
+      clearTimeout(timer);
+      reactBridge = await import(/* @vite-ignore */ bridgeModule);
+      const model = seed?.screen === route.id ? seed : await reactBridge.loadModel(route.id,params,query,signal);
+      if (!model.view || model.view === 'ready') await loadStyle(route.file);
+      if (seq !== navSeq) return;
+      await reactBridge.mount(model,{go,announce,retry:rerender},!!seed);
+      seedNode?.remove();
+      reactOwned = true;
+      vm = reactBridge.metadata(model);
+      document.title = docTitle(vm);
+      if (!seed) seo.apply(vm,docTitle(vm));
+    } else vm = await build(route, params, query, { signal, kind, path: segs.join('/'), stale: () => seq !== navSeq, loadStyle, actions: { setQuery, rerender, announce, go } });
     if (seq !== navSeq) return;
   } catch (e) {
     if (e?.name === 'AbortError' || seq !== navSeq) return;
@@ -223,7 +240,15 @@ async function render(kind) {
     vm = errorVm(route, params, query);
   } finally { clearTimeout(timer); }
 
-  paint(vm);
+  if (!reactOwned && vm.route.id === 'S30' && vm.view === 'ready') {
+    reactBridge = await import(/* @vite-ignore */ bridgeModule);
+    const model = await reactBridge.loadModel('S30',vm.params,query,signal);
+    if (seq !== navSeq) return;
+    await reactBridge.mount(model,{go,announce,retry:rerender});
+    document.title=docTitle(vm);seo.apply(vm,docTitle(vm));
+    reactOwned=true;
+  }
+  if (!reactOwned) paint(vm);
   cur = { route: vm.route, params: vm.params, query, sig: sigOf(vm.route, vm.params, query), ok: vm.view === 'ready' || vm.view === 'loading' || vm.view === 'empty' || vm.view === 'pending', vm, ctx: vm.ctx, kind, seq };
   for (const f of listeners) { try { f({ route: vm.route, params: vm.params, query, demo: vm.demo, kind, view: vm.view, title: vm.title }); } catch (e) { console.error(e); } }
 
@@ -239,6 +264,8 @@ async function render(kind) {
   if (!pre) motion.enter(article, kind);                         // V6: the screen rises in; blocks further down appear on scroll (nothing on a 'rerender'; off for reduced motion)
   if (kind === 'rerender') { if (fk) document.querySelector(fk)?.focus({ preventScroll: true }); }
   else if (kind !== 'load' && !query.to) h1.focus({ preventScroll: true });
+
+  if (reactOwned) return;
 
   // hydrate + mount
   const own = [];

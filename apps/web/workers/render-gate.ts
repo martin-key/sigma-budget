@@ -21,7 +21,7 @@ export function inFlight(key: string): Promise<void> | undefined {
   const left = flight ? flight.at + FLIGHT_MS - Date.now() : 0;
   if (!flight || left <= 0) return undefined;
   let timer: ReturnType<typeof setTimeout> | undefined;
-  const timeout = new Promise<void>(resolve => (timer = setTimeout(resolve, left)));
+  const timeout = new Promise<void>((resolve) => (timer = setTimeout(resolve, left)));
   return Promise.race([flight.done, timeout]).finally(() => clearTimeout(timer));
 }
 
@@ -30,10 +30,10 @@ export function claim(key: string): () => void {
   const now = flights.get(key);
   if (now && Date.now() - now.at < FLIGHT_MS) return () => {};
   let settle!: () => void;
-  const flight = { done: new Promise<void>(resolve => (settle = resolve)), at: Date.now() };
+  const flight = { done: new Promise<void>((resolve) => (settle = resolve)), at: Date.now() };
   flights.set(key, flight);
   return () => {
-    if (flights.get(key) === flight) flights.delete(key);     // a late settle of a timed-out flight must not drop the one that replaced it
+    if (flights.get(key) === flight) flights.delete(key); // a late settle of a timed-out flight must not drop the one that replaced it
     settle();
   };
 }
@@ -42,6 +42,9 @@ export function claim(key: string): () => void {
 export async function withinCap<T>(render: () => Promise<T>): Promise<T | null> {
   if (rendering >= MAX_RENDERING) return null;
   rendering += 1;
-  try { return await render(); }
-  finally { rendering -= 1; }
+  try {
+    return await render();
+  } finally {
+    rendering -= 1;
+  }
 }

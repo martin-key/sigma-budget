@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Check that the query lists of apps/web/client/routes.js are complete: the edge cache keys a drawn screen on them alone (apps/web/workers/app.ts).
+"""Check that the typed query lists of apps/web/app/lib/routes.ts are complete: the edge cache keys a drawn screen on them alone (apps/web/workers/app.ts).
 
     python -m apps.web.scripts.query_check
 
-The server draws a screen from the keys of its route only (`query` in the route table and SCREEN_QUERY, apps/web/client/routes.js
+The server draws a screen from the keys of its route only (`query` in the route table and SCREEN_QUERY, apps/web/app/lib/query-params.ts
 screenSearch), as СИГМА does (midt-bg/sigma, apps/web/app/lib/query-params.ts and its drift test). A key that a page reads but its
 route does not list still works in the browser, but the first paint from the server ignores it. This check reads every page module
 of a route and finds the keys it reads or writes:
@@ -56,24 +56,20 @@ def keys_of(src):
 
 
 def main():
-    routes_src = (JS / 'routes.js').read_text(encoding='utf-8')
-    m = re.search(r"export const SCREEN_QUERY = \[([^\]]*)\]", routes_src)
-    if not m:
-        print('apps/web/client/routes.js: SCREEN_QUERY not found')
-        return 1
-    every = set(STRINGS.findall(m.group(1)))
+    import json, subprocess
+    metadata = json.loads(subprocess.check_output(['node', '--input-type=module', '-e', "import {ROUTES} from './apps/web/app/lib/routes.ts'; import {SCREEN_QUERY} from './apps/web/app/lib/query-params.ts'; console.log(JSON.stringify({routes:ROUTES,every:SCREEN_QUERY}));"], cwd=ROOT))
+    every = set(metadata['every'])
     bad, n = [], 0
-    for rid, pattern, file, rest in ROUTE.findall(routes_src):
-        lm = LIST.search(rest)
-        listed = set(STRINGS.findall(lm.group(1))) if lm else set()
+    for route in metadata['routes']:
+        rid, pattern, file = route['id'], route['pattern'], route['file']
+        listed = set(route['query'])
         page = JS / 'pages' / (file + '.js')
         if not page.exists():
             bad.append('%s: no page module %s' % (rid, page.relative_to(ROOT)))
             continue
         n += 1
         found = keys_of(page.read_text(encoding='utf-8'))
-        sm = SAMPLES.search(rest)
-        for sample in STRINGS.findall(sm.group(1)) if sm else []:
+        for sample in route['samples']:
             q = sample.split('?', 1)[1] if '?' in sample else ''
             found.update(k for k, _v in urllib.parse.parse_qsl(q, keep_blank_values=True))
         found.discard('to')                                   # the scroll target: the browser's, never part of the screen

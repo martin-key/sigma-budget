@@ -21,10 +21,11 @@ import { here, parts as addrParts, toHref, isAppLink } from './loc.js';
 import { yearOf, statusOf, TABS, NAV_GROUPS, sigmaLink, groupOf, groupItems, navName, navHref, bannerHtml, CTA, topbarHtml, tabbarHtml,
   footerHtml, THEME_KEY, THEMES, rootOf } from './chrome.js';
 
+let reactChrome;
 const $ = id => document.getElementById(id);
 const NEWS_KEY = 'bns.news.seen';
 // the pieces of the shell (header, tab bar, footer, banner, the menu lists) are built by js/chrome.js, which the server uses too
-const syncLinks = () => document.querySelectorAll('#tabbar a[data-route], #footer a[data-route]').forEach(a => a.setAttribute('href', navHref(a.dataset.route)));
+const syncLinks = () => reactChrome ? reactChrome() : document.querySelectorAll('#tabbar a[data-route], #footer a[data-route]').forEach(a => a.setAttribute('href', navHref(a.dataset.route)));
 
 const openSearch = el => import('./search.js').then(m => m.openPalette(el)).catch(e => { console.error(e); });
 
@@ -69,6 +70,7 @@ function openNavGroup(btn, i) {
 const WIDE = '(min-width: 961px)';
 /** wide screens show every footer group open (the summary is then a plain heading, out of the tab order); narrow screens keep what the visitor opened */
 function syncFooter() {
+  if (reactChrome) { reactChrome(); return; }
   const f = $('footer');
   if (!f) return;
   const wide = window.matchMedia(WIDE).matches;
@@ -93,7 +95,7 @@ function applyTheme() {
   const t = themeNow();
   if (t) document.documentElement.setAttribute('data-theme', t); else document.documentElement.removeAttribute('data-theme');
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', isDark() ? '#14120F' : '#FDFAF4');
-  document.querySelectorAll('[data-theme-pick]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.themePick === t)));
+  if (reactChrome) reactChrome(); else document.querySelectorAll('[data-theme-pick]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.themePick === t)));
 }
 function pickTheme(t) {
   if (t) safe.set('localStorage', THEME_KEY, t); else safe.del('localStorage', THEME_KEY);
@@ -104,6 +106,7 @@ function pickTheme(t) {
 
 /* ------------------------------------------------------------------ dynamic state */
 function setCurrent(route) {
+  if (reactChrome) { reactChrome(); return; }
   const root = rootOf(route);
   document.querySelectorAll('#sidenav a[data-nav]').forEach(a => {
     if (a.dataset.nav === route.id) a.setAttribute('aria-current', 'page');
@@ -126,6 +129,7 @@ function setCurrent(route) {
   });
 }
 function refreshPeriod() {
+  if (reactChrome) { reactChrome(); return; }
   const p = store.period, b = $('btn-period');
   if (!b) return;
   b.querySelector('.p-year').textContent = yearOf(p);
@@ -166,11 +170,13 @@ function markNewsSeen() {
 
 /* ------------------------------------------------------------------ boot */
 export const shell = {
-  init() {
+  init(adapter) {
+    reactChrome = adapter;
+    if (reactChrome) reactChrome();
     const bar = $('mockbar');
-    if (bar) { bar.innerHTML = bannerHtml().toString(); bar.hidden = store.bannerDismissed(); }
-    $('topbar').innerHTML = topbarHtml().toString();
-    $('tabbar').innerHTML = tabbarHtml().toString();
+    if (bar) { if (!reactChrome) bar.innerHTML = bannerHtml().toString(); bar.hidden = store.bannerDismissed(); }
+    if (!reactChrome) $('topbar').innerHTML = topbarHtml().toString();
+    if (!reactChrome) $('tabbar').innerHTML = tabbarHtml().toString();
     shell.refreshFooter();
     $('footer')?.addEventListener('click', footClick);
     window.matchMedia(WIDE).addEventListener?.('change', syncFooter);
@@ -178,10 +184,13 @@ export const shell = {
     window.matchMedia?.(DARK).addEventListener?.('change', () => { if (!themeNow()) { applyTheme(); router.rerender(); } });   // the system switched, the visitor follows it
     applySources();
 
-    $('btn-period').addEventListener('click', e => openPeriod(e.currentTarget));
-    $('sidenav').addEventListener('click', e => { const b = e.target.closest('.nav-main'); if (b) openNavGroup(b, Number(b.dataset.grp)); });
-    $('btn-menu').addEventListener('click', e => {
-      const b = e.currentTarget;
+    $('topbar').addEventListener('click', e => {
+      const period = e.target.closest('#btn-period');
+      if (period) { openPeriod(period); return; }
+      const group = e.target.closest('.nav-main');
+      if (group) { openNavGroup(group, Number(group.dataset.grp)); return; }
+      const b = e.target.closest('#btn-menu');
+      if (!b) return;
       b.setAttribute('aria-expanded', 'true');
       openMoreSheet(b);
       const d = document.querySelector('dialog.sheet-drawer');
@@ -197,7 +206,7 @@ export const shell = {
       syncLinks();
       const per = router.periods;
       const b = $('btn-period');
-      if (b) b.hidden = per === 'none';
+      if (b && !reactChrome) b.hidden = per === 'none';
       updateOffline(demo);
       if (route.id === 'S16') markNewsSeen();
       const fb = document.querySelector('[data-feedback-link]');
@@ -208,7 +217,8 @@ export const shell = {
     updateOffline(new URLSearchParams(addrParts(here()).query).get('demo'));
     checkNews();
   },
-  refreshFooter() { const f = $('footer'); if (f) { f.innerHTML = footerHtml({ wide: !!window.matchMedia?.(WIDE).matches, cur: router.current?.route?.id, theme: themeNow() }).toString(); syncFooter(); } },
+  refreshFooter() {
+    if (reactChrome) { reactChrome(); return; } const f = $('footer'); if (f) { f.innerHTML = footerHtml({ wide: !!window.matchMedia?.(WIDE).matches, cur: router.current?.route?.id, theme: themeNow() }).toString(); syncFooter(); } },
   dismissBanner() {
     store.dismissBanner();
     const b = $('mockbar');

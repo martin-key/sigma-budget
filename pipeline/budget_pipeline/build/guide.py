@@ -7,7 +7,7 @@ import json, os, re, sys
 ROOT = str(_Path(__file__).resolve().parents[3])   # repository root
 SITE = os.path.join(ROOT, "apps", "web", "public")                  # the site (current site)
 GUIDE = os.path.join(ROOT, "data", "release", "guide.json")
-ROUTES = os.path.join(ROOT, "apps", "web", "client", "routes.js")
+from budget_pipeline.routes import load_routes
 
 # step n -> (new quoted screen name, new intro or None to keep, new «Следва» text of the step BEFORE it or None to keep)
 RENAMED = {
@@ -21,16 +21,6 @@ RENAMED = {
 }
 NOTE = ('Текстът на пътеводителя на работна група „Бюджет на светло“ е дословно от оригинала: въведение, осем стъпки и „Преди да използваш или споделиш число“. Препратките към екраните на сайта са добавени. В тази версия имената на екраните в стъпки 1, 6 и 8 следват преименуваните екрани („Държавният бюджет на достъпен език“, „Месечни отчети“, „Моите данъци“), а уводът на стъпки 1 и 6 е съобразен с тях. Пътеводителят вече не е отделен екран: бележките „На какво да внимаваш“ и петте проверки се показват в „Бюджетът за 5 минути“.')
 TITLE_RE = re.compile(r"^(.*?)\s*„(.+)“\s*$")
-
-
-def routes():
-    src = open(ROUTES, encoding="utf-8").read()
-    out = []
-    for m in re.finditer(r"R\('(S\d+)',\s*'([^']*)',\s*(null|'[^']*'),\s*'([^']*)',\s*'([^']*)',\s*'[^']*',\s*'[^']*',\s*(\{.*?\})\s*\)", src):
-        o = m.group(6)
-        st = re.search(r"\bstep:\s*(\d+)", o)
-        out.append({"id": m.group(1), "pattern": None if m.group(3) == "null" else m.group(3).strip("'"), "title": m.group(5), "step": int(st.group(1)) if st else None})
-    return out
 
 
 def sample(pattern):
@@ -56,7 +46,7 @@ def apply(g):
 
 def check(g):
     probs = []
-    rs = routes()
+    rs = load_routes()
     if len(g["steps"]) != 8:
         probs.append("guide: %d steps, expected 8" % len(g["steps"]))
     for i, s in enumerate(g["steps"]):
@@ -66,7 +56,7 @@ def check(g):
         label = m.group(2)
         r = next((x for x in rs if x["title"] == label and x["step"] == s["n"] and x["pattern"]), None)
         if r is None:
-            probs.append("guide step %d: no route with title %r and step %d in routes.js" % (s["n"], label, s["n"])); continue
+            probs.append("guide step %d: no route with title %r and step %d in routes.json" % (s["n"], label, s["n"])); continue
         if s["screen"]["id"] != r["id"] or s["screen"]["label"] != label or s["screen"]["href"] != sample(r["pattern"]):
             probs.append("guide step %d: screen %r does not match route %s (%s)" % (s["n"], s["screen"], r["id"], sample(r["pattern"])))
         nxt = s.get("next")
