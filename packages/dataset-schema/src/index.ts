@@ -1,5 +1,7 @@
 import {
   shape,
+  optionalPeriods,
+  budgetProvenanceGuard,
   string,
   number,
   boolean,
@@ -37,6 +39,8 @@ const ministryGuard = shape({
   doc: record,
 });
 export const datasetGuards = {
+  "budget2027.json": shape({ meta: metaGuard, schema: string, publication: string, defaultVariant: string, budgets: record, municipal: record, projects: array, forecast: record, gaps: record }),
+  "budget2027-provenance.json": budgetProvenanceGuard,
   "catalog.json": shape({
     meta: metaGuard,
     groups: array,
@@ -370,7 +374,10 @@ export function isDataset<K extends DatasetName>(
   name: K,
   value: unknown,
 ): value is DatasetMap[K] {
-  return datasetGuards[name](value);
+  const guard = datasetGuards[name] ?? (
+    /^releases\/[a-f0-9]{64}\/manifest\.json$/.test(name) ? releaseManifestGuard :
+    /^releases\/[a-f0-9]{64}\/validation\.json$/.test(name) ? shape({ groups: array, passed: boolean, result: string, tool: string }) : undefined);
+  return !!guard && guard(value) && (!(name === "outlook.json" || name === "revenue.json" || name === "expenditure.json") || optionalPeriods(value));
 }
 export type ReleasePointer = DatasetMap["releases/current.json"];
 export type ReleaseManifest =
