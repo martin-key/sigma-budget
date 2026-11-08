@@ -1,3 +1,5 @@
+import { billOverview } from './bill-views.js';
+import { periodByKey } from '../periods.js';
 // S34 · Бюджет 2027 (проект) · #/byudzhet-2027 · next S13 · periods none
 // Data: dbp2027.json (D34), built by pipeline/budget_pipeline/build/budget_plan.py from the Draft Budgetary Plan of Bulgaria for 2027 (Министерство на финансите, 15.10.2026).
 // Every number printed here is read from `figures` (each has the page of the plan, the unit and the basis) or is a plain sum/difference of two such numbers
@@ -15,7 +17,7 @@ import { gl } from '../ui/gl.js';
 import { byId } from '../routes.js';
 import { num, pct, delta, money, moneyParts, date, NBSP } from '../format.js';
 
-export const needs = ['core', 'dbp2027'];
+export const needs = ctx => ctx.query.dokument === 'plan' ? ['core', 'dbp2027'] : ['core', 'budget2027?'];
 export const styles = ['s34-byudzhet-2027'];
 
 /* ---------------------------------------------------------------- helpers */
@@ -438,9 +440,11 @@ function missingBlock(f) {
 
 /* ---------------------------------------------------------------- the screen */
 export function render(ctx) {
+  if (ctx.query.dokument !== 'plan') return billOverview({ ...ctx, period: periodByKey('2027.draft') });
   const f = fx(ctx);
   const when = date(f.d.doc.date);
   return {
+    title: 'Проект на бюджетен план до ЕК за 2027 (15.10.2026)',
     lede: `Това е проектът на плана, който България изпрати на Европейската комисия на ${when}${NBSP}г. Не е приет бюджет и не е законът за 2027${NBSP}г. Числата са прогноза на Министерството на финансите.`,
     context: `Проект, не е прието · ЕСС 2010 (не КФП) · МФ, ${when}`,
     body: html`

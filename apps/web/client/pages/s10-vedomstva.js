@@ -1,3 +1,5 @@
+import { isFramework } from '../budget-2027.js';
+import { institutionView, mountBillSearch } from './bill-views.js';
 // S10 · Кой харчи? · #/vedomstva · next S15 · period 2026.law only (the data is the law of 31.07.2026 and the programme budgets of the bill)
 // Data, only through `needs`:
 //   ministries  D08+D09, REAL   the 46 budgets of the first-level spenders by the 2026 law (хил. €): spending, own revenue, the change against
@@ -27,9 +29,9 @@ import { emptyState, errorState, pendingState } from '../ui/states.js';
 import { gl } from '../ui/gl.js';
 import { unitSwitch, bindUnitSwitch } from '../ui/unit-switch.js';
 
-export const needs = ['core', 'ministries', 'programs?'];
+export const needs = ctx => isFramework(ctx) ? ['core', 'budget2027?'] : ['core', 'ministries', 'programs?'];
 export const styles = ['s10-vedomstva'];
-export const periods = ['2026.law'];
+export const periods = ['2026.law', '2027.draft', '2028.forecast', '2029.forecast'];
 
 const ok = v => typeof v === 'number' && Number.isFinite(v);
 const bg = (a, b) => String(a).localeCompare(String(b), 'bg');
@@ -502,6 +504,7 @@ function topLine(md) {
   return `Ведомствата харчат общо ${money(md.total, { d: 2 })} по закона за 2026 г. Най-големи са бюджетите на ${names}: заедно ${pct(topShare, 1)} от сбора.`;
 }
 export function answer(ctx) {
+  if (isFramework(ctx)) return '';
   if (!ctx.data?.ministries) return '';
   const md = model(ctx);
   return md.ok ? topLine(md) : '';
@@ -637,6 +640,7 @@ function pPanel(md, pm, ctx) {
 
 /* ---------------------------------------------------------------- render */
 export function render(ctx) {
+  if (isFramework(ctx)) return institutionView(ctx);
   const md = model(ctx);
   if (!md.ok) return pendingState({ title: 'Бюджетите на ведомствата предстоят', text: 'Данните за ведомствата още не са заредени.' });
   const pm = pModel(md, ctx);
@@ -698,6 +702,7 @@ function liveSearch(input, key, ctx, paint, onEnter) {
 const openMatches = (el, q) => { if (q) el.querySelectorAll('details.rank-det').forEach(d => { d.open = true; }); };
 
 export function mount(root, ctx) {
+  if (isFramework(ctx)) return mountBillSearch(root, ctx);
   const md = model(ctx);
   if (!md.ok) return undefined;
   const pm = pModel(md, ctx);

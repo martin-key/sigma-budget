@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { parseHTML } from 'linkedom';
@@ -6,6 +6,15 @@ import { MigratedScreen, safeJSON } from '../migration/registry';
 import core from './__fixtures__/core.json';
 import glossary from './__fixtures__/glossary.json';
 import type { TextScreenModel } from '../lib/screen-state';
+// The route descriptions are source input to the frozen migration oracle too.
+vi.mock('../lib/routes.json', async () => ({
+  default: JSON.parse(
+    (await import('node:fs')).readFileSync(
+      new URL('./__fixtures__/routes-05d6f6e.json', import.meta.url),
+      'utf8',
+    ),
+  ),
+}));
 const fixture = (id: string) =>
   // The shared route catalogue now extends the fiscal screen through 2029; the frozen files stay intact.
   readFileSync(new URL(`./__fixtures__/${id}.html`, import.meta.url), 'utf8').replaceAll(

@@ -7,7 +7,7 @@
 //   prepare(route, params, …)   the page module, its data (`needs`) and the ctx it renders with
 //   build(route, params, …)     the view model {route, view, title, eyebrow, lede, context, body, crumbs, next, …}
 //   frameHtml(vm), docTitle(vm) the article of the screen and the document title
-import { NOT_FOUND, byId, match, href as routeHref, chainOf, GROUPS, screenQuery } from './routes.js';
+import { NOT_FOUND, byId, byKey, match, href as routeHref, chainOf, GROUPS, screenQuery } from './routes.js';
 import { annualView, annualCore } from './annual.js';
 import { annualGap } from './ui/annual.js';
 import { selectPeriod, periodByKey, PERIODS } from './periods.js';
@@ -66,7 +66,7 @@ export function resolve(address) {
     delete query.y;
   }
   const canon = m ? m.canon : raw.segs;
-  return { periodResolution: resolvePeriod(query.per), route, params, query, canon, want: canonHash(canon, query), screen: canonHash(canon, screenQuery(route, query)), found: !!m, segs: raw.segs };
+  return { periodResolution: resolvePeriod(query.per ?? (Array.isArray(route.periods) && route.periods.length === 1 ? route.periods[0] : undefined)), route, params, query, canon, want: canonHash(canon, query), screen: canonHash(canon, screenQuery(route, query)), found: !!m, segs: raw.segs };
 }
 
 /* ------------------------------------------------------------------ page module + data */
@@ -77,11 +77,17 @@ function parseNeeds(mod, ctx) {
 const noop = () => {};
 function makeCtx(route, params, query, o) {
   const a = o.actions || {};
+  const selectedPeriod = route.id === 'S04' ? periodByKey(DEFAULT_PERIOD) : query.per == null && Array.isArray(route.periods) && route.periods.length === 1 ? periodByKey(route.periods[0]) : store.period;
+  const href = (id, params = {}, q = {}) => {
+    const target = byId[id] || byKey[id];
+    const preserve = ['S10','S11','S12','S20','S21'].includes(route.id) && selectedPeriod.key !== DEFAULT_PERIOD && (target?.periods === 'all' || target?.periods?.includes?.(selectedPeriod.key));
+    return routeHref(id, params, { ...(preserve ? {per:selectedPeriod.key} : {}), ...q });
+  };
   return {
-    route, params, query, data: {}, missing: [], failed: [], period: route.id === 'S04' ? periodByKey(DEFAULT_PERIOD) : store.period, store,
+    route, params, query, data: {}, missing: [], failed: [], period: selectedPeriod, store,
     get core() { return this.data.core || data.get('core'); },
     signal: o.signal, demo: o.demo || null, kind: o.kind || 'link',
-    setQuery: a.setQuery || noop, rerender: a.rerender || noop, announce: a.announce || noop, go: a.go || noop, href: routeHref,
+    setQuery: a.setQuery || noop, rerender: a.rerender || noop, announce: a.announce || noop, go: a.go || noop, href,
     notFound() { throw new NotFound(); }
   };
 }
@@ -107,7 +113,7 @@ export async function prepare(route, params, query, o = {}) {
   });
   const annualScreens = ['S04','S05','S06','S07','S08','S13','S31'];
   if (annualScreens.includes(route.id)) {
-    ctx.annualRaw = { outlook: ctx.data.outlook, revenue: ctx.data.revenue, expenditure: ctx.data.expenditure };
+    ctx.annualRaw = { core: ctx.data.core, outlook: ctx.data.outlook, revenue: ctx.data.revenue, expenditure: ctx.data.expenditure };
     if (route.id === 'S04') ctx.data.core = annualCore(ctx.data.core, ctx.data.outlook, ctx.data.revenue, ctx.data.expenditure, ctx.period.key);
     for (const key of ['outlook','revenue','expenditure']) if (ctx.data[key]) ctx.data[key] = annualView(ctx.data[key], key, ctx.annualRaw.outlook, ctx.period.key);
   }

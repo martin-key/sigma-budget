@@ -200,6 +200,14 @@ def _data_events(ctx):
              "href": "#/plashtania", "status": "real", "source": ["sebra"]}]
 
 
+def budget_publication_events(ctx):
+    publication = _need(ctx, "budget2027.json")
+    return [{"id": "mf-budget-2027", "date": publication["publication"], "dateKind": "published", "kind": "data",
+             "title": "Проектът за бюджет 2027 и АСБП 2027–2029 са публикувани от МФ",
+             "text": "Налични са проектът за държавния бюджет за 2027 г. и средносрочната рамка за 2027–2029 г.: ведомствени бюджети, общини и предложени граници на дълга. Проектът не е приет закон.",
+             "href": "#/byudzhet-2027", "status": "real", "source": ["budget2027"]}]
+
+
 # ------------------------------------------------------------------------------------------------ highlights
 def _highlights(ctx):
     ex = ctx.execution
@@ -270,7 +278,7 @@ def rss(feed, base):
 # ------------------------------------------------------------------------------------------------ build
 def build_feed(ctx):
     events = []
-    for fam in (_report_events(ctx), _law_events(ctx), _rates_events(ctx), _eurostat_events(ctx), _data_events(ctx)):
+    for fam in (_report_events(ctx), _law_events(ctx), _rates_events(ctx), _eurostat_events(ctx), _data_events(ctx), budget_publication_events(ctx)):
         events.extend(fam)
     ids = [e["id"] for e in events]
     if len(set(ids)) != len(ids):

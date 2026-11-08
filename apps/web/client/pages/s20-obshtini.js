@@ -1,3 +1,5 @@
+import { isFramework } from '../budget-2027.js';
+import { municipalityView, mountBillSearch } from './bill-views.js';
 // S20 · Моята община · #/obshtini · next S24 · period 2026.law only (D19 is the law; there is no table for the bill)
 // Data, only through `needs`:
 //   municipalities          D19, REAL   the main transfers of the 2026 state budget law to each municipality (хил. €), inhabitants, € per person
@@ -19,9 +21,9 @@ import { gl } from '../ui/gl.js';
 import { num, plural, eur, leva, money, moneyParts, NBSP, EUR_RATE } from '../format.js';
 import * as M from '../muni.js';
 
-export const needs = ['core', 'municipalities', 'geo/obshtini?'];
+export const needs = ctx => isFramework(ctx) ? ['core', 'budget2027?', 'municipalities'] : ['core', 'municipalities', 'geo/obshtini?'];
 export const styles = ['s20-obshtini'];
-export const periods = ['2026.law'];
+export const periods = ['2026.law', '2027.draft', '2028.forecast', '2029.forecast'];
 export const lede = () => 'Виж колко пари държавата дава на твоята община през 2026 г. — общо и на жител. Намери общината по име, на картата или в списъка.';
 
 const ok = v => typeof v === 'number' && Number.isFinite(v);
@@ -252,6 +254,7 @@ function readBlock(md) {
 
 /* ---------------------------------------------------------------- render */
 export function render(ctx) {
+  if (isFramework(ctx)) return municipalityView(ctx);
   const md = model(ctx);
   if (!md.ok) return pendingState({ title: 'Списъкът на общините предстои', text: 'Данните за общините още не са заредени.' });
   const q = clean(ctx.query.q);
@@ -261,6 +264,7 @@ export function render(ctx) {
 
 /* ---------------------------------------------------------------- behaviour: the search filters the map and the list in place */
 export function mount(root, ctx) {
+  if (isFramework(ctx)) return mountBillSearch(root, ctx);
   const md = model(ctx);
   const input = root.querySelector('#s20-q');
   if (!md.ok || !input) return undefined;

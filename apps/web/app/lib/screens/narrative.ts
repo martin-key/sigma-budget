@@ -7,6 +7,7 @@ import type {
 } from './narrative-types';
 import { textModel } from './text';
 import { byId } from '../legacy';
+import { resolvePeriod } from '../../../client/periods.js';
 import { PERIODS, DEFAULT_PERIOD } from '../../../client/store.js';
 export async function narrativeModel(
   screen: NarrativeModel['screen'],
@@ -15,8 +16,9 @@ export async function narrativeModel(
   reader: ReleaseReader,
 ): Promise<NarrativeModel> {
   const editorial = await textModel('S26', params, query, reader);
-  const period =
-    PERIODS.find((p) => p.key === query.per) || PERIODS.find((p) => p.key === DEFAULT_PERIOD)!;
+  const defaultKey = screen === 'S14' ? '2026.law' : DEFAULT_PERIOD;
+  const key = query.per == null ? defaultKey : resolvePeriod(query.per).resolved;
+  const period = PERIODS.find((p) => p.key === key)!;
   const model: NarrativeModel = { ...editorial, screen, content: {}, period, failed: [] };
   if (model.view !== 'ready') return model;
   const load = async <T>(name: string, required = false): Promise<T | undefined> => {

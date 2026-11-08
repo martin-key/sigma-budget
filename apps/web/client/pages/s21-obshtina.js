@@ -1,3 +1,5 @@
+import { isFramework } from '../budget-2027.js';
+import { municipalityView, mountBillSearch } from './bill-views.js';
 // S21 · Община · #/obshtina/:code · next S20 · period 2026.law only (D19 is the law; there is no table for the bill)
 // Data, only through `needs`:
 //   municipalities          D19, REAL   the main transfers of the 2026 state budget law to each municipality (хил. €), inhabitants, € per person
@@ -19,9 +21,9 @@ import { gl } from '../ui/gl.js';
 import { num, pct, plural, eur, leva, money, moneyParts, NBSP, EUR_RATE } from '../format.js';
 import * as M from '../muni.js';
 
-export const needs = ['core', 'municipalities', 'geo/obshtini?'];
+export const needs = ctx => isFramework(ctx) ? ['core', 'budget2027?', 'municipalities'] : ['core', 'municipalities', 'geo/obshtini?'];
 export const styles = ['s21-obshtina'];
-export const periods = ['2026.law'];
+export const periods = ['2026.law', '2027.draft', '2028.forecast', '2029.forecast'];
 
 const SIMILAR_N = 10;
 const KINDS = M.TYPES.filter(t => t.inTotal);
@@ -291,6 +293,7 @@ function readBlock(md) {
 
 /* ---------------------------------------------------------------- render */
 export function render(ctx) {
+  if (isFramework(ctx)) return municipalityView(ctx);
   const md = model(ctx);
   if (!md.ok) return pendingState({ title: 'Данните за общините предстоят', text: 'Данните за общините още не са заредени.' });
   if (!md.m) ctx.notFound();

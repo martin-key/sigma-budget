@@ -114,8 +114,13 @@ function graph(vm, { url, title, desc, question, answer }) {
 export function head(vm, docTitle) {
   const o = origin();
   const { path } = addrParts(here());
-  const per = resolvePeriod(vm.query?.per).resolved;
-  const url = o + (path === '/' ? '/' : path) + (vm.route.periods !== 'none' && per !== DEFAULT_PERIOD ? '?per=' + encodeURIComponent(per) : '');
+  const defaultPeriod = Array.isArray(vm.route.periods) && vm.route.periods.length === 1 ? vm.route.periods[0] : DEFAULT_PERIOD;
+  const per = resolvePeriod(vm.query?.per ?? defaultPeriod).resolved;
+  const qs = new URLSearchParams();
+  if (vm.route.periods !== 'none' && per !== defaultPeriod) qs.set('per', per);
+  if (vm.query?.variant === 'billMc') qs.set('variant', 'billMc');
+  if (vm.query?.dokument === 'plan') qs.set('dokument', 'plan');
+  const url = o + (path === '/' ? '/' : path) + (qs.size ? '?' + qs : '');
   const title = plain(vm.docTitle || vm.title) || vm.route.title;
   const heading = plain(vm.title);
   const lede = plain(vm.lede);

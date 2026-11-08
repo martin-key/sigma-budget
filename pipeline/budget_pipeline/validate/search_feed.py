@@ -236,10 +236,16 @@ def _feed_events(c, f, ctx):
     days = [x["day"][8:10] + "." + x["day"][5:7] for x in files]
     pretty = days[0] if len(days) == 1 else ", ".join(days[:-1]) + " и " + days[-1]
     ov = seb["overall"]
-    if listed:
+    sebra_active = "sebra" in core.get("sources", {})
+    if listed and sebra_active:
         _event(c, evs, "sebra-" + listed[0], {"date": listed[0], "dateKind": "published", "kind": "data", "href": "#/plashtania", "status": "real", "source": ["sebra"]},
                eur=[ov["eur"]], has=["%d дневни файла" % len(files), re.escape("(" + pretty + ")"), "%d плащания" % ov["count"]])
-    c.ok(len(evs) == len(want_ids) + n + 2 + 4 + 1, "events: %d, the datasets explain %d" % (len(evs), len(want_ids) + n + 2 + 4 + 1))
+    if not sebra_active:
+        c.ok(not any(e.startswith("sebra-") for e in evs), "the retired SEBRA dataset must have no active feed event")
+
+    publication = ctx.get("budget2027.json")
+    _event(c, evs, "mf-budget-2027", {"date": publication["publication"], "dateKind": "published", "kind": "data", "href": "#/byudzhet-2027", "status": "real", "source": ["budget2027"]}, has=["не е приет закон"])
+    c.ok(len(evs) == len(want_ids) + n + 2 + 4 + int(sebra_active) + 1, "events: %d, the datasets explain %d" % (len(evs), len(want_ids) + n + 2 + 4 + int(sebra_active) + 1))
 
 
 def _feed_rest(c, f, ctx):
@@ -613,13 +619,18 @@ def g_search(ctx):
     c.ok(s["groups"] == S_GROUPS and s["fields"] == S_FIELDS, "groups/fields differ from the contract of searchlib.js")
     mi, mu, me = ctx.get("ministries.json"), ctx.get("municipalities.json"), ctx.get("measures.json")
     gl, cat, pr = ctx.get("glossary.json"), ctx.get("catalog.json"), ctx.get("programs.json")
+    bill = ctx.get("budget2027.json")
+    article_codes = {b["art"] + (1 if b["art"] >= 32 else 0): b["id"] for b in mi["items"]}
+    current_budgets = {article_codes.get(int(a), "art" + a): b for a, b in bill["budgets"]["bill"].items() if int(a) >= 2}
     ids = {"vedomstvo": {b["id"] for b in mi["items"]}, "obshtina": {m["id"] for m in mu["items"]}, "merki": {m["id"] for m in me["items"]},
            "rechnik": {t["slug"] for t in gl["terms"]}, "danni": {d["slug"] for d in cat["datasets"]}}
+    ids["vedomstvo"].update(current_budgets)
     f = {n: i for i, n in enumerate(pr["fields"])}
     codes = {p[f["code"]] for p in pr["items"]}
     routes = ctx.routes()
     seen, per, n_mock, rows5 = set(), [0] * len(S_GROUPS), 0, {}
     items = s["items"]
+    seen_current = set()
     for i, r in enumerate(items):
         tag = "row %d %r" % (i, r[1] if isinstance(r, list) and len(r) > 1 else r)
         if not c.ok(isinstance(r, list) and len(r) == len(S_FIELDS) and isinstance(r[0], int) and 0 <= r[0] < len(S_GROUPS)
@@ -633,6 +644,13 @@ def g_search(ctx):
         m = _ID_RE.match(r[6])
         if m:
             c.ok(m.group(2) in ids[m.group(1)], "%s: %s id %r is not in its dataset" % (tag, m.group(1), m.group(2)))
+            if r[0] == 1 and r[4] == "Проект 2027" and m.group(1) == "vedomstvo":
+                budget = current_budgets.get(m.group(2))
+                c.ok(budget is not None and "per=2027.draft" in r[6], "%s: current bill budget or period missing" % tag)
+                if budget:
+                    cell = next((x["cell"] for x in budget["rows"] if x["no"] == "II."), None)
+                    amounts(c, tag, r[3], money=[cell["value"] / 1000] if cell else [])
+                    seen_current.add(m.group(2))
             if m.group(3) and m.group(1) == "vedomstvo":
                 c.ok(m.group(3) in codes, "%s: programme code %r is not in programs.json" % (tag, m.group(3)))
         key = (r[0], r[1], r[6])
@@ -644,8 +662,9 @@ def g_search(ctx):
             n_mock += 1
             c.ok(r[0] == 5, "%s: a mock row outside the datasets group" % tag)
     n_prog = sum(1 for p in pr["items"] if p[f["name"]])
-    for g, n in ((1, len(mi["items"]) + n_prog), (2, len(mu["items"])), (3, len(me["items"])), (4, len(gl["terms"]))):
+    for g, n in ((1, len(current_budgets) + n_prog), (2, len(mu["items"])), (3, len(me["items"])), (4, len(gl["terms"]))):
         c.ok(per[g] == n, "%s: %d rows, the datasets hold %d" % (S_GROUPS[g], per[g], n))
+    c.ok(seen_current == set(current_budgets), "current bill budgets: missing or extra search rows")
     c.ok(per[0] >= 15, "indicators: only %d rows" % per[0])
     real = [d for d in cat["datasets"] if d["status"] == "real"]
     c.ok(per[5] == len(real), "datasets: %d rows, the catalog has %d real datasets" % (per[5], len(real)))
@@ -661,7 +680,7 @@ def g_search(ctx):
         hits, _hidden, _fz = run(entries, parse(q))
         c.ok(len(hits) > 0, "the popular query %r finds nothing" % q)
     top = {q: run(entries, parse(q))[0][:1] for q in ("МВР", "дълг")}
-    c.ok(top["МВР"] and top["МВР"][0]["href"] == "#/vedomstvo/1300", "МВР: the first hit is not the ministry of the interior")
+    c.ok(top["МВР"] and top["МВР"][0]["href"] == "#/vedomstvo/1300?per=2027.draft", "МВР: the first hit is not the ministry of the interior")
     c.ok(top["дълг"] and top["дълг"][0]["href"].startswith("#/dalg"), "дълг: the first hit is not a debt screen")
     c.fact("%d rows (%s), %d mock" % (len(items), " + ".join("%d %s" % (n, S_GROUPS[g]) for g, n in enumerate(per)), n_mock))
     return c

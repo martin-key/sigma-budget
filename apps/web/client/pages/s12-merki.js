@@ -1,3 +1,5 @@
+import { isFramework } from '../budget-2027.js';
+import { measuresView } from './bill-views.js';
 // S12 · Мерки в бюджета 2026 · #/merki[/<мярка>] · next S10 · periods 2026.draft, 2026.law (both set on the route)
 // Data: source-checked excerpts in measures.json.
 import { html } from '../html.js';
@@ -10,7 +12,7 @@ import { callout, ext, facts, linkCard } from '../ui/cards.js';
 import { gl } from '../ui/gl.js';
 import { num, date, plural, EUR_RATE, DASH, NBSP } from '../format.js';
 
-export const needs = ['measures'];
+export const needs = ctx => isFramework(ctx) ? ['core', 'budget2027?'] : ['measures'];
 export const styles = ['s12-merki'];
 
 const TABS = ['short', 'discretionary', 'laws'];
@@ -378,22 +380,26 @@ const found = ctx => {
 
 /** the same measure can stand in two lists (short-term and discretionary): the document title names the list (js/seo.js) */
 export function docTitle(ctx) {
+  if (isFramework(ctx)) return undefined;
   const it = found(ctx), lbl = it && ctx.data.measures?.tabLabels?.[it.tab];
   return it ? `${it.name}${lbl ? ` · ${lbl}` : ''}` : null;
 }
 
 export function crumbs(ctx) {
+  if (isFramework(ctx)) return undefined;
   const it = found(ctx);
   return it ? [{ label: 'Мерки в бюджета 2026', href: ctx.href('merki') }, { label: it.name }] : null;
 }
 
 export function next(ctx) {
+  if (isFramework(ctx)) return ['S10'];
   const it = found(ctx);
   if (!it) return ['S10'];
   return [{ kicker: 'Мерки', title: 'Всички мерки в бюджета', text: 'Върни се към списъците с мерки.', href: ctx.href('merki', {}, { spisak: it.tab, to: `m-${it.id}` }) }, 'S10'];
 }
 
 export function render(ctx) {
+  if (isFramework(ctx)) return measuresView(ctx);
   const M = model(ctx);
   if (ctx.params && ctx.params.id) {
     const it = M.byId.get(ctx.params.id);

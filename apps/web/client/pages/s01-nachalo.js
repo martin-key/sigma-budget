@@ -28,9 +28,9 @@ const ASK = [
 export function title() { return 'Държавният бюджет на достъпен език'; }
 export function next() { return []; }          // nothing after the last card: the page ends with the questions
 
-/** the lede, word for word as in the working-group text of 25.10 (V6) */
+/** Primary bill context; monthly execution keeps its actual year. */
 export function lede(ctx) {
-  return html`Платформата показва държавния бюджет за <span class="nowrap">2026 г.</span> с прости думи: <a href="${ctx.href('S06')}">откъде идват парите</a>, <a href="${ctx.href('S07')}">за какво се харчат</a> и <a href="${ctx.href('S15')}">как се изпълнява планът</a>.`;
+  return html`Виж <a href="${ctx.href('S06')}">приходите</a> и <a href="${ctx.href('S07')}">разходите</a> по проекта за <span class="nowrap">2027 г.</span> и прогнозата за 2027–2029 г., както и <a href="${ctx.href('S15')}">изпълнението за 2026 г.</a>`;
 }
 
 export function render(ctx) {

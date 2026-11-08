@@ -175,7 +175,7 @@ const focusKey = () => {
 };
 
 async function render(kind) {
-  const { route, params, query, want, segs } = resolve(here());     // an old address → the matching new screen, context kept (js/redirects.js)
+  const { route, params, query, want, segs, periodResolution } = resolve(here());     // an old address → the matching new screen, context kept (js/redirects.js)
   if (want !== hereHref() || (!HASH && location.hash.startsWith('#/'))) history.replaceState(history.state || { k: ++histK }, '', want);   // path mode: an old #/x link becomes /x
   const k = ensureKey();
   lastHref = location.href;
@@ -205,7 +205,7 @@ async function render(kind) {
   curK = k;
 
   applying = true;
-  try { store.set('periodRequested', query.per ?? null); store.set('periodNotice', ''); store.set('period', resolvePeriod(query.per).resolved); } finally { applying = false; }
+  try { store.set('periodRequested', query.per ?? null); store.set('periodNotice', ''); store.set('period', periodResolution.resolved); } finally { applying = false; }
 
   // the first render over a page the server drew (app/, apps/web/workers/app.ts; data-prerendered names its address): its HTML is already the screen, so no skeleton in between and no rise-in or count-up of what is already shown
   // (dropStalePrerender has taken the mark off an HTML that is the screen of another address)

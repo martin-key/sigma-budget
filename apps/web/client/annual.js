@@ -1,4 +1,5 @@
 // Presentation projections of the keyed annual DTO. Legacy column arrays are historical input only.
+import { FRAMEWORK } from './budget-2027.js';
 import { PERIODS, selectPeriod } from './periods.js';
 const value = cell => cell?.value ?? null;
 const sum = cells => cells.every(v => typeof v === 'number') ? cells.reduce((a, b) => a + b, 0) : null;
@@ -15,10 +16,10 @@ const pctOf = (v, gdp) => v != null && gdp > 0 ? v / gdp * 100 : null;
 /** Arrays here are chart columns keyed by periodKeys; never a lookup by fiscal year. */
 export function annualView(dataset, kind, outlook, key) {
   if (!dataset) return dataset;
-  const records = PERIODS.map(p => selectPeriod(dataset, p.key)).filter(p => p.available);
+  const records = PERIODS.filter(p => !FRAMEWORK.includes(key) || FRAMEWORK.includes(p.key)).map(p => selectPeriod(dataset, p.key)).filter(p => p.available);
   const periodKeys = records.map(p => p.periodKey), years = records.map(p => p.year);
   const vintage = records.map(p => p.legacy ? p.vintage : p.status);
-  const meta = { ...dataset.meta, source: dataset.byPeriod ? [...new Set([...(dataset.meta?.source || []), 'budget2027'])] : dataset.meta?.source,
+  const meta = { ...dataset.meta, ...(FRAMEWORK.includes(key) ? { title: {outlook:'Рамка на КФП и макропрогноза 2027–2029',revenue:'Приходи на КФП 2027–2029',expenditure:'Разходи на КФП 2027–2029'}[kind], sourceNote:'МФ, АСБП 2027–2029, публикация от 06.11.2026. Проект за 2027 и прогнози за 2028–2029.' } : {}), source: FRAMEWORK.includes(key) ? ['budget2027'] : dataset.byPeriod ? [...new Set([...(dataset.meta?.source || []), 'budget2027'])] : dataset.meta?.source,
     asOf: selectPeriod(dataset, key).publication || dataset.meta?.asOf };
   const base = { ...dataset, meta, periodKeys, years, vintage, records, notes: [], versions: [] };
   const chartSeries = (fn, legacy) => records.map(p => p.legacy ? legacy(p.column) ?? null : fn(p) ?? null);

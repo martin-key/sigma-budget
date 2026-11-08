@@ -418,6 +418,19 @@ def ctx_raw(bill_id):
 
 
 # ----------------------------------------------------------------------------------------------------- build
+def next_budget(publication=None):
+    if publication:
+        date = ".".join(reversed(publication["publication"].split("-")))
+        return {"title": "Законодателният път на бюджет 2027", "status": "pending",
+                "note": "Проектът за държавния бюджет за 2027 г. и АСБП 2027–2029, публикувани от МФ на %s, вече са на екрана „Бюджет 2027 (проект)“. "
+                        "Хронологията на обсъждането и решенията на Народното събрание за 2027 г. още не е извлечена. Проектът не е приет закон." % date,
+                "expected": "parliament.bg"}
+    return {"title": "Бюджет 2027", "status": "pending",
+            "note": "Бюджетният план за 2027 г. (изпратен на 15.10.2026 г.) е на екрана „Бюджет 2027 (проект)“. Законопроектът за държавния "
+                    "бюджет за 2027 г. ще бъде добавен, когато бъде внесен в Народното събрание.",
+            "expected": "минфин.бг, parliament.bg"}
+
+
 def build_law(ctx):
     L = ctx.law
     for key, (bid, _f, _s, _k) in LAWS.items():
@@ -566,11 +579,8 @@ def build_law(ctx):
         "committees": {"total": len(z["committees"]), "leading": leading[0], "reported": z["reportAuthors"]},
         "opinionsNote": "Становищата са постъпили в комисиите от организации и институции; докладите са на комисиите.",
     }
-    # the wording data/release has carried since d1f0f6c (the plan for 2027 is on the screen S34; the bill comes when it is submitted)
-    nxt = {"title": "Бюджет 2027", "status": "pending",
-           "note": "Бюджетният план за 2027 г. (изпратен на 15.10.2026 г.) е на екрана „Бюджет 2027 (проект)“. Законопроектът за държавния "
-                   "бюджет за 2027 г. ще бъде добавен, когато бъде внесен в Народното събрание.",
-           "expected": "минфин.бг, parliament.bg"}
+    # Only the current publication changes this navigation pointer; the 2026 history remains intact.
+    nxt = next_budget(ctx.out.get("budget2027.json"))
 
     dba = sum(1 for r in rows if r["changed"])
     note = ("„Законопроект“ е текстът, внесен на 01.07.2026 г. (№ %s); „закон“ е приетият на 24.07.2026 г. текст (ДВ бр. 69 от 31.07.2026 г.). "
