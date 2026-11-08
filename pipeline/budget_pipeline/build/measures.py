@@ -3,8 +3,7 @@
 Source: data/inputs/measures_2026.json (normalised from the .docx of the motives submitted on 01.07.2026):
 the introduction (8 revenue + 9 expenditure measures with an estimate, 4 + 3 without), Табл. II-8 and II-9 (discretionary
 measures on an accrual basis) and Част VIII (8 changes to other laws). Everything is copied or summed from that file;
-the `related` links are hand-coded and asserted to carry equal numbers. The editorial labels (who is affected, who pays)
-are mock M06, keyed by item id, and live in mock/measure-labels.json (DATA2).
+the `related` links are hand-coded and asserted to carry equal numbers. Source-checked effective-date and legal excerpts are optional fields with bill-stage evidence.
 """
 
 from pathlib import Path as _Path
@@ -175,6 +174,20 @@ def build_measures(ctx):
     for it in items:
         if related[it["id"]]:
             it["related"] = sorted(set(related[it["id"]]))
+
+    excerpts = ctx.src("measure_excerpts")
+    for mid, fields in excerpts.items():
+        it = byid[mid]
+        for field, evidence in fields["excerptEvidence"].items():
+            candidates = [(it.get("quote", ""), it["page"]),
+                          (it.get("context", {}).get("quote", ""), it.get("context", {}).get("page"))]
+            if not any(evidence["quote"] in q and evidence["page"] == p for q, p in candidates):
+                raise ValueError("unverified measure excerpt: " + mid + ":" + field)
+            if field != "since" and fields[field] != evidence["quote"]:
+                raise ValueError("excerpt differs from evidence: " + mid)
+            if field == "since" and fields[field] != it.get("from"):
+                raise ValueError("effective date differs from source: " + mid)
+        it.update(fields)
 
     # ---------------------------------------------------------------- totals
     short_rev = [x for x in items if x["tab"] == "short" and x["kind"] == "revenue" and x["hasEstimate"]]

@@ -5,6 +5,7 @@ import { relative } from "node:path";
 import { describe, it, expect } from "vitest";
 import {
   datasetGuards,
+  isPublishedDataset,
   isDataset,
   canonicalDecimal,
   metaGuard,
@@ -28,6 +29,12 @@ describe("published contracts", () => {
           metaGuard({ ...(value.meta as object), status: "invented" }),
         ).toBe(false);
     });
+  it("validates all content-addressed release files", () => {
+    for (const e of readdirSync(root, { recursive: true, withFileTypes: true }).filter(e => e.isFile())) {
+      const name = relative(root, `${e.parentPath}/${e.name}`);
+      if (/^releases\/[a-f0-9]{64}\//.test(name)) expect(isPublishedDataset(name, JSON.parse(readFileSync(root + name, "utf8")))).toBe(true);
+    }
+  });
   it("rejects bad decimal encodings", () => {
     for (const v of ["01", "1e3", "NaN", "-0", "-0.00", 1, null, "+1", ".1"])
       expect(() => canonicalDecimal(v)).toThrow();

@@ -384,7 +384,7 @@ def search(ctx):
     srcs = set()
     for rel in ("core.json", "outlook.json", "ministries.json", "programs.json", "municipalities.json", "measures.json", "debt.json", "rates.json"):
         srcs.update(_obj(ctx, rel)["meta"].get("source") or [])
-    srcs.update(["wg", "mockgen"])
+    srcs.update(["wg"])
     sources = [s for s in definitions.SOURCES if s in srcs]
     doc = {
         "meta": meta("search-index", "Индекс за търсене: показатели, институции, общини, мерки, понятия и набори от данни",

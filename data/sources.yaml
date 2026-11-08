@@ -387,16 +387,78 @@ sources:
   files: []
   limitations:
   - named by the pending datasets P01, P02, P05, P06, P07 as the expected publisher; nothing is taken from it yet
-- id: mockgen
-  title: Генератор на примерни данни (фиксирано семе 20261002)
-  publisher: Работна група „Бюджет на светло“
-  access: generated
-  acquisition: generated
-  parser: python -m budget_pipeline.build.examples
+- id: ec-oil
+  title: 'ЕК, ГД „Енергетика“: седмичен бюлетин за цените на петролните продукти'
+  publisher: ЕК, ГД „Енергетика“
+  page: https://energy.ec.europa.eu/data-and-analysis/weekly-oil-bulletin_en
+  access: auto
+  acquisition: auto
+  format: xlsx
+  parser: python -m budget_pipeline.build.indirect_taxes
+  period: '2026-11-02'
+  unit: €/1000 л; %
   live: false
-  files: []
-  limitations:
-  - 'not an external source: marks the example values of build_mock.py (seed 20261002)'
+  licence: CC BY 4.0, с посочване на ЕК; преобразуванията са наши
+  files:
+  - path: data/originals/ec-oil/weekly-prices-2026-11-02.xlsx
+    title: weekly-prices-2026-11-02.xlsx
+    url: https://energy.ec.europa.eu/document/download/264c2d0f-f161-4ea3-a777-78faae59bea0_en?filename=Weekly%20Oil%20Bulletin%20Weekly%20prices%20with%20Taxes%20-%202026-09-21.xlsx
+    acquired: '2026-11-07'
+  - path: data/originals/ec-oil/duties-and-taxes-2026-11-07.xlsx
+    title: duties-and-taxes-2026-11-07.xlsx
+    url: https://energy.ec.europa.eu/document/download/ccdc6e96-6792-40cb-b0b4-b6609f1e30d0_en?filename=Oil_Bulletin_Duties_and_taxes.xlsx
+    acquired: '2026-11-07'
+- id: excise-law
+  title: 'Държавен вестник, бр. 69 от 31.07.2026 г.: промени в ЗАДС (§31)'
+  publisher: Народно събрание, „Държавен вестник“
+  page: https://dv.parliament.bg/DVWeb/showMaterialDV.jsp?idMat=245041
+  access: auto
+  acquisition: auto
+  format: html
+  parser: python -m budget_pipeline.build.indirect_taxes
+  period: от 01.08.2026 г.
+  unit: €/1000 къса; % от продажната цена
+  live: false
+  licence: Нормативен акт; не е обект на авторско право (ЗАПСП, чл. 4, т. 1)
+  files:
+  - path: data/originals/excise-law/dv-69-2026-budget.html
+    title: dv-69-2026-budget.html
+    url: https://dv.parliament.bg/DVWeb/showMaterialDV.jsp?idMat=245041
+    acquired: '2026-11-07'
+- id: customs-excise-law
+  title: 'Агенция „Митници“: ЗАДС, консолидация до ДВ, бр. 54 от 2025 г.'
+  publisher: Агенция „Митници“
+  page: https://customs.bg/wps/wcm/connect/customs.bg28892/e0225cb0-6caf-4dda-ba61-030cf90298b3/%D0%97%D0%90%D0%94%D0%A1%D0%BA%D0%BB%D0%B0%D0%B4_2005.2025054+(1).pdf?MOD=AJPERES
+  access: auto
+  acquisition: auto
+  format: pdf
+  parser: python -m budget_pipeline.build.indirect_taxes
+  period: консолидация до ДВ, бр. 54/2025
+  unit: лв./1000 л (моторни горива)
+  live: false
+  licence: Нормативен акт; не е обект на авторско право (ЗАПСП, чл. 4, т. 1)
+  files:
+  - path: data/originals/excise-law/excise-law-dv54-2025.pdf
+    title: excise-law-dv54-2025.pdf
+    url: https://customs.bg/wps/wcm/connect/customs.bg28892/e0225cb0-6caf-4dda-ba61-030cf90298b3/%D0%97%D0%90%D0%94%D0%A1%D0%BA%D0%BB%D0%B0%D0%B4_2005.2025054+(1).pdf?MOD=AJPERES
+    acquired: '2026-11-07'
+- id: nsi-pack
+  title: 'НСИ: Статистически годишник 2025'
+  publisher: Национален статистически институт
+  page: https://www.nsi.bg/file/35970/God2025.pdf
+  access: auto
+  acquisition: auto
+  format: pdf
+  parser: python -m budget_pipeline.build.indirect_taxes
+  period: '2025'
+  unit: лв./кутия
+  live: false
+  licence: Лиценз на НСИ v2.0; оригиналното наблюдение се пази отделно от преобразуването
+  files:
+  - path: data/originals/nsi-pack/statistical-yearbook-2025.pdf
+    title: statistical-yearbook-2025.pdf
+    url: https://www.nsi.bg/file/35970/God2025.pdf
+    acquired: '2026-11-07'
 intermediates:
 - path: data/originals/MANIFEST.json
   producer: python -m budget_pipeline.sources.download
@@ -626,3 +688,21 @@ intermediates:
   producer: python -m budget_pipeline.extract.budget_bill_2027
   inputs: [budget2027]
   reproducible: true
+- path: data/inputs/measure_excerpts.json
+  producer: python -m budget_pipeline.build.measures
+  inputs:
+  - bill
+  pinned: false
+  note: Дословни откъси, сверявани с всяка мярка; без числови изменения.
+  reproducible: false
+  sha256: f81bf8ad007f9e3f6692b4e0cd8d3764cfdc8f0b06367f2c2c5a6068f948ccda
+- path: data/inputs/indirect_tax_evidence.json
+  producer: python -m budget_pipeline.extract.indirect_tax_evidence
+  inputs:
+  - ec-oil
+  - excise-law
+  - customs-excise-law
+  - nsi-pack
+  - bill
+  reproducible: true
+  note: Independent verification extraction from six pinned originals; no release data input.

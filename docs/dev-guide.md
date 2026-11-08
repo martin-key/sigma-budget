@@ -244,9 +244,9 @@ CSS куки (компонентите ги задават; задавай ги 
 | `mock/activities` | S09 | `search-index` | S28 |
 | `mock/indicators` | S11 | `mock/payments` | S23 |
 | `mock/municipal-finance` | S20 S21 | `mock/projects` | S22 |
-| `mock/measure-labels` | S12 S08 S01 | `mock/tax-assumptions` | S18 |
+| `indirect-tax-parameters` | S18 | | |
 
-Идентификатори в маршрутите: групи приходи `dds osiguritelni nedanachni pomoshti ddfl akcizi korporativen drugi`; функции `obshti-sluzhbi otbrana-sigurnost obrazovanie zdraveopazvane sotsialni zhilishtno-sreda kultura-sport ikonomika drugi`; код на ведомство = 4-цифрен ЕБК (`1300`), програма `1300.01.01`; мерки `kr1…kr8 kx1…kx9 kn1… d8-1… d9-1… p8-1…p8-8`; общини `BLG03`; проекти `pr-01…`; плащания по измислен ЕИК `999…`; набори по slug. Ключове на източниците: `kfp forecast_tables bill zdb zbdoo zbnzok prb parliament eurostat bnb nap sebra gisco dataeuropa minfin wg mockgen`.
+Идентификатори в маршрутите: групи приходи `dds osiguritelni nedanachni pomoshti ddfl akcizi korporativen drugi`; функции `obshti-sluzhbi otbrana-sigurnost obrazovanie zdraveopazvane sotsialni zhilishtno-sreda kultura-sport ikonomika drugi`; код на ведомство = 4-цифрен ЕБК (`1300`), програма `1300.01.01`; мерки `kr1…kr8 kx1…kx9 kn1… d8-1… d9-1… p8-1…p8-8`; общини `BLG03`; проекти `pr-01…`; плащания по измислен ЕИК `999…`; набори по slug. Ключове на източниците: `kfp forecast_tables bill zdb zbdoo zbnzok prb parliament eurostat bnb nap sebra gisco dataeuropa minfin wg ec-oil excise-law nsi-pack`.
 Идентификатори на „предстои“: P01 (изпълнение по вид данък) S06 S15 · P02 S15 · P03 (програми на ~15 ведомства) S10 S11 · P04 S15 S16 · P05 S15 · P06 S17 · P07 S14.
 
 Населението за „на човек“ е `ctx.core.population.persons`. Курсът евро/лев е `format.EUR_RATE`.
@@ -580,8 +580,8 @@ employmentCalc(gross, sc, { rules:'from' | 'until' | 'year', tzpb })   // → {g
                                                                        //    employeeParts{doo,upf,health}, employerParts{doo,upf,health,tzpb}}  или null
 ruleSets(sc)                                                           // [{id:'until'|'from', from, to, months, maxInsurableEur}] за етикетите на превключвателя
 receiptByFunction(yearlyEur, functions, { index:1, decimals:2, days:365 })   // functions = ctx.core.functions (поле mln) → [{id, name, short, yearEur, dayEur, sharePct}], редовете се сумират до общото
-indirectTaxes(input, assumptions)                                      // input: месечни покупки (число) или {purchasesEur, fuelEur|fuelLitres, tobaccoEur|tobaccoPacks}
-                                                                       // assumptions = mock/tax-assumptions.json → {vat, fuelExcise, tobaccoExcise, total, vatParts, approx:true}; null, където липсва допускане
+indirectTaxes(input, parameters)                                      // input: {vat20Eur, vat9Eur, vat0Eur, fuelType, fuelLitres, fuelPrice, tobaccoPacks, tobaccoPrice, sticksPerPack, date}
+                                                                       // parameters = indirect-tax-parameters.json → {vat, fuelExcise, tobaccoExcise, total, vatParts, approx:true}; null, където липсва вход
 apportion(values, total, decimals)                                     // закръгля пропорционални дялове така, че закръглените части да се сумират до закръгленото общо (метод на най-големия остатък)
 ```
 `employmentCalc` връща `null` (→ покажи подсказка или „предстои“, никога число), когато брутото не е число над 0 или сценарият е „предстои“/непълен. `indirectTaxes` винаги е оценка (`approx:true`): формулирай го „ориентировъчно“.
@@ -1047,3 +1047,9 @@ pnpm exec budget-ts parity --oracle data/release --candidate tmp/candidate --sco
 Началната политика за точно сравнение е `{"precision":[],"accepted":[]}`. Примерно правило за точност е `{"dataset":"outlook","pointer":"/gdp/*","decimals":1,"unit":"million EUR"}`; `*` съвпада с един сегмент от JSON Pointer. Правилата следват публикуваната точност. Бройките, идентификаторите, годините и целочислените парични единици остават точни. Прието различие задава `dataset`, `file`, `pointer`, `expected`, `actual` и непразно основание `rationale`; структурни разлики и невалидни числа не могат да се приемат. Изходните кодове са 0 (успех), 1 (неприето различие или невалидно извикване) и 2 (липсващи доказателства). Адаптерите за останалите формати предстоят; техните обхвати връщат `unverified`.
 
 `FixtureManifest` в `packages/test-support` съдържа `schema: 1`, пълна ревизия `baselineRevision`, дата `buildDate`, `inputs: [{path, sha256}]` и `datasets: [{id, eligibility, rationale}]`. Допустимите стойности за `eligibility` са `reproducible`, `frozen-only` и `unverified`. Resolver-ът проверява инвентара, ограничението на пътищата и контролните суми. Доказателствата се заснемат от Python; очакванията не се генерират от кандидата.
+
+### Косвени данъци след 08.11.2026 г.
+
+S12 чете проверените откъси направо от `measures`; S08 няма редакционни връзки към мерки. S18 зарежда `indirect-tax-parameters` и приема отделни разходи по ДДС 20%, 9% и 0%/освободени, литри и вид гориво, кутии и късове, действителни цени и дата. Цените от ЕК и НСИ са датирани, редактируеми справки. Липсващ вход дава null; липса на покупки се задава с 0. Годишното умножение е сценарий. „Само реални данни“ не скрива оценката върху официални параметри.
+
+S18 запазва отделни състояния за невалиден вход, липсващ вход и дата без проверени ставки. Грешката остава до полето с `aria-invalid`. Референтните цени се показват с десетична запетая и подходяща точност; до първата редакция сметката използва стойността от източника. След редакция използва въведената цена.

@@ -98,7 +98,7 @@ function rowMeta(set, M) {
   if (set.status === 'pending') {
     return [{ k: 'Откъде ще дойдат', v: set.expected || publishers(set, M) }, { k: 'Засяга', v: set.screenRoutes.length ? screenLinks(set) : '' }];
   }
-  const real = set.source.filter(k => k !== 'mockgen');
+  const real = set.source;
   return [
     set.mock ? { k: 'Източник', v: 'Няма: стойностите са измислени', wide: true } : { k: set.source.length > 1 ? 'Източници' : 'Източник', v: set.source.length ? srcCell(set, M, set.source) : '', wide: true },
     set.mock && real.length ? { k: 'Свързан с данни от', v: srcCell(set, M, real), wide: true } : null,
@@ -301,7 +301,7 @@ const srcBlock = (keys, M) => html`<ul class="s24-srcs" role="list">${keys.map(k
 
 function passportRows(set, M) {
   const pend = set.status === 'pending';
-  const real = set.mock ? set.source.filter(k => k !== 'mockgen') : set.source;
+  const real = set.source;
   const screens = set.screenRoutes.length ? { k: pend ? 'Засяга' : 'Къде се ползва', v: set.screenRoutes.length > 8
     ? disclosure({ id: 's24-d-screens', title: 'Екрани', meta: plural(set.screenRoutes.length, 'екран', 'екрана'), body: chips({ items: set.screenRoutes.map(r => ({ label: r.title, href: href(r.key) })) }) })
     : chips({ label: 'Екрани, които ползват набора', items: set.screenRoutes.map(r => ({ label: r.title, href: href(r.key) })) }) } : null;

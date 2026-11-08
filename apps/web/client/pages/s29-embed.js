@@ -3,8 +3,8 @@
 //   export const embeds = { 'my-chart-id': ctx => ({ chart: <chart spec>, source: ['kfp'], asOf: '2026-07-31', status: 'real' }) }
 // The host screen's own `needs` are loaded with router.prepare() and the builder receives that screen's ctx (data, core, period, store, query).
 // Parameters of the host screen (:code, :fn …) travel as query parameters of the same name (share.embedHash adds them from spec.embedParams);
-// ?per=<period> is the period, as everywhere. `selftest` (no dot) is a built-in, obviously synthetic chart: it lets a site owner check that
-// the frame loads, without a single real number.
+// ?per=<period> is the period, as everywhere. `selftest` (no dot) opens the official spending chart: it lets a site owner check that
+// the frame loads using the official spending data.
 // Inside the frame nothing navigates the frame itself: the source and the „Бюджет на светло →“ links are absolute and open a new tab.
 import { html } from '../html.js';
 import { absolute } from '../loc.js';
@@ -21,15 +21,6 @@ import { srcShort } from '../ui/source.js';
 export const needs = ['core?'];                                    // source names and links; the host screen loads its own data
 export const styles = ['s29-embed'];
 
-/** the built-in check chart: round artificial numbers in „условни единици“, mock all the way (hatch, badge, watermark) */
-const SELFTEST = {
-  chart: {
-    id: 's29-selftest', type: 'bar', title: 'Проверка на вграждането', sub: 'условни единици', unit: 'у.е.', d: 0, mock: true,
-    categories: ['А', 'Б', 'В', 'Г'], series: [{ name: 'Примерна серия', data: [10, 20, 30, 40] }],
-    desc: 'Измислени числа, само за проверка, че рамката се зарежда.'
-  },
-  source: ['mockgen'], status: 'mock'
-};
 
 /** the host screen's params from same-named query params; null when a required one is missing */
 function paramsOf(host, query) {
@@ -44,8 +35,8 @@ function paramsOf(host, query) {
 
 /** -> {ok:true, e, host, params} | {ok:false, kind:'unknown'|'pending'|'error'} */
 async function load(ctx) {
-  const addr = String(ctx.params.chart ?? '');
-  if (addr === 'selftest') return { ok: true, e: SELFTEST, host: null, params: {} };
+  const requested = String(ctx.params.chart ?? '');
+  const addr = requested === 'selftest' ? 'razhodi.s07-fn' : requested;
   const dot = addr.indexOf('.');
   const key = dot < 0 ? addr : addr.slice(0, dot), id = dot < 0 ? '' : addr.slice(dot + 1);
   const host = Object.hasOwn(byKey, key) ? byKey[key] : null;           // byKey is a plain object: „constructor“ must not match

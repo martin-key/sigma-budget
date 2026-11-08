@@ -35,6 +35,7 @@ STEPS = [
     ("budgets", "build_budgets"),            # ministries.json, ministries/<code>.json, programs.json
     ("debt", "build_debt"),
     ("rates", "build_rates"),
+    ("indirect_taxes", "build_indirect_taxes"),
     ("municipalities", "build_municipalities"),   # municipalities.json, geo/obshtini.json
     ("law", "build_law"),
     ("components", "build_components"),

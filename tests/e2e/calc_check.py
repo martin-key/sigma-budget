@@ -83,8 +83,8 @@ JS_COMPUTE = """async cases => {
   const m = await import('./js/pages/s18-danaci.js');
   const rates = await (await fetch('./data/rates.json')).json();
   const core = await (await fetch('./data/core.json')).json();
-  const assum = await (await fetch('./data/mock/tax-assumptions.json')).json();
-  const ctx = { data: { rates, core, 'mock/tax-assumptions': assum }, core, store: { get: () => false }, period: {} };
+  const assum = await (await fetch('./data/indirect-tax-parameters.json')).json();
+  const ctx = { data: { rates, core, 'indirect-tax-parameters': assum }, core, store: { get: () => false }, period: {} };
   const env = m.getEnv(ctx);
   return cases.map(c => {
     const r = m.compute({ gross: String(c.gross), rules: c.rules, tzpb: c.tzpb ?? null, ind: false, purchases: '', fuel: '', tobacco: '' }, env);
@@ -228,10 +228,31 @@ def part_b(browser, port, shots):
         ok(not page.is_checked("#s18-ind"), f"{w}: the indirect estimate is on by default")
         main = tx()
         page.check("#s18-ind", force=True)
+        ok(page.input_value('#s18-fuelPrice')=='1,605' and page.input_value('#s18-tobaccoPrice')=='3,51', f'{w}: displayed source prices are not Bulgarian decimals')
+        for key, value in [('purchases','120'),('reduced','109'),('exempt','0'),('fuel','0'),('tobacco','0')]:
+            page.fill('#s18-'+key, value)
         page.wait_for_timeout(250)
         ind = re.sub("[    ]", " ", page.evaluate("() => document.getElementById('s18-ind-view').textContent"))
         ok("ориентировъчно" in ind.lower(), f"{w}: the indirect result is not marked as an estimate")
         ok(tx() == main, f"{w}: the indirect estimate changed the main result")
+        # Every numeric field must expose parsing errors through the field and accessibility attributes.
+        for key in ['purchases','reduced','exempt','fuel','tobacco','fuelPrice','tobaccoPrice','sticks']:
+            selector='#s18-'+key
+            previous=page.input_value(selector)
+            page.fill(selector,'-1')
+            ok(page.get_attribute(selector,'aria-invalid')=='true', f'{w} {key}: invalid input lacks aria-invalid')
+            ok(page.locator(selector+'-err').count()==1, f'{w} {key}: invalid input lacks its field error')
+            ok('Поправи' in page.locator('#s18-ind-view').inner_text(), f'{w} {key}: invalid input was labelled missing')
+            page.fill(selector,previous)
+            ok(page.get_attribute(selector,'aria-invalid') is None, f'{w} {key}: corrected input retains aria-invalid')
+        page.fill('#s18-reduced','')
+        ok('Липсва' in page.locator('#s18-ind-view').inner_text() and page.get_attribute('#s18-reduced','aria-invalid') is None, f'{w}: blank input is not a separate state')
+        page.fill('#s18-reduced','109')
+        page.fill('#s18-tobacco','1');page.fill('#s18-sticks','20')
+        page.fill('#s18-date','2026-07-31')
+        ok(page.get_attribute('#s18-date','aria-invalid')=='true' and 'проверени ставки' in page.locator('#s18-ind-view').inner_text(), f'{w}: unsupported date is not explained')
+        page.fill('#s18-date','2026-11-08');page.fill('#s18-tobacco','0');page.fill('#s18-sticks','')
+
         h = page.evaluate("() => location.href")
         ok("?" not in h.split("#", 1)[1], f"{w}: the address carries a query after the toggles: {h}")
         # no horizontal scroll of the page
@@ -245,6 +266,75 @@ def part_b(browser, port, shots):
             page.wait_for_timeout(150)
             page.screenshot(path=str(Path(shots) / f"danaci-{w}.png"), full_page=True)
         ctx.close()
+
+
+def indirect_cases(page):
+    results = page.evaluate("""async () => {
+      const { indirectTaxes } = await import('./js/calc.js');
+      const { getEnv, compute, resetMem, applyReferencePrices } = await import('./js/pages/s18-danaci.js');
+      const a = await (await fetch('./data/indirect-tax-parameters.json')).json();
+      const base = { vat20Eur: 120, vat9Eur: 109, vat0Eur: 50, fuelType: 'petrol', fuelLitres: 10, fuelPrice: 2,
+        tobaccoPacks: 1, tobaccoPrice: 3, sticksPerPack: 20, date: '2027-02-28' };
+      const cases = [{}, { fuelType: 'diesel' }, { tobaccoPrice: 10 }, { date: '2027-03-01' },
+        { date: '2027-03-01', tobaccoPrice: 10 }, { fuelPrice: null }, { fuelLitres: null },
+        { tobaccoPrice: null }, { tobaccoPacks: null }, { vat20Eur: 0, vat9Eur: 0, vat0Eur: 0, fuelLitres: 0, tobaccoPacks: 0 }];
+      const rows = cases.map(c => indirectTaxes({...base, ...c}, a));
+      const rates = await (await fetch('./data/rates.json')).json();
+      const core = await (await fetch('./data/core.json')).json();
+      const state = { gross: '1500', ind: true, purchases: '120', reduced: '109', exempt: '50', fuel: '10', fuelPrice: '2',
+        tobacco: '1', tobaccoPrice: '3', sticks: '20', date: '2027-02-28', fuelType: 'petrol' };
+      const views = [false,true].map(real => compute(state, getEnv({data:{rates,core,'indirect-tax-parameters':a},core,store:{get:k=>k==='onlyReal'&&real},period:{}})).ind);
+      const env = getEnv({data:{rates,core,'indirect-tax-parameters':a},core,store:{get:()=>false},period:{}});
+      const errors = ['purchases','reduced','exempt','fuel','tobacco','fuelPrice','tobaccoPrice','sticks'].map(key => {
+        const c = compute({...state,[key]:'-1'},env); return {key,error:c.errors[key],status:c.ind.status,total:c.ind.total};
+      });
+      const dateCases = ['', '2027-02-30', '2026-07-31'].map(date => {
+        const c=compute({...state,date},env);return {status:c.ind.status,error:c.errors.date,total:c.ind.total};
+      });
+      const blank=compute({...state,reduced:''},env);
+      const fractional=compute({...state,sticks:'1,5'},env);
+      const zeroPrice=compute({...state,fuelPrice:'0'},env);
+      const unknownFuel=compute({...state,fuelType:'lpg'},env);
+      const decimalPrices=compute({...state,fuelPrice:'1.605',tobaccoPrice:'3.512'},env).ind.inp;
+      const reference = resetMem(); applyReferencePrices(reference,a);
+      Object.assign(reference,{...state,fuelPrice:reference.fuelPrice,tobaccoPrice:reference.tobaccoPrice});
+      const before=compute(reference,env).ind.inp;
+      const shown=[reference.fuelPrice,reference.tobaccoPrice];
+      const edited=compute({...reference,fuelPriceEdited:true,tobaccoPriceEdited:true},env).ind.inp;
+      reference.fuelType='diesel';applyReferencePrices(reference,a);
+      const diesel=compute(reference,env).ind.inp;
+      return { untaxed:a.vat.untaxed, hasExtractedZero:Object.hasOwn(a.vat,'zeroPct'), rows, views, errors, dateCases, blank:{status:blank.ind.status,error:blank.errors.reduced}, fractional:fractional.errors.sticks,
+        zeroPrice:zeroPrice.errors.fuelPrice, unknownFuel:unknownFuel.errors.fuelType, decimalPrices,
+        references:{before,edited,shown,diesel,expected:[a.fuels.petrol.pricePerLitre,a.references.pack.priceEur,a.fuels.diesel.pricePerLitre]} };
+    }""")
+    ok(results['untaxed']['kind']=='definition' and results['untaxed']['basis'].startswith('ЗДДС'), 'untaxed bucket is a definition with a ZDDS basis')
+    ok(not results['hasExtractedZero'], 'zero VAT is not presented as an extracted coefficient')
+    rows=results['rows']
+    def near(a,b): return a is not None and abs(a-b)<1e-8
+    ok(near(rows[0]['fuelExcise'],3.6302), 'petrol statutory litre coefficient')
+    ok(near(rows[1]['fuelExcise'],3.3029), 'diesel statutory litre coefficient')
+    ok(near(rows[0]['vat'],20+9+20/6+3/6), 'gross VAT buckets and excisable purchases')
+    for idx, expected in [(0,2.4),(2,3.64),(3,2.52),(4,3.69)]:
+        ok(near(rows[idx]['tobaccoExcise'],expected), f'cigarette dated formula case {idx}')
+    for idx in (5,6,7,8): ok(rows[idx]['total'] is None, f'missing price or quantity {idx} gives null')
+    ok(rows[9]['total']==0, 'explicit zero spending gives zero')
+    ok(all(v and not v['unavailable'] for v in results['views']), 'S18 keeps sourced estimate with only-real on and off')
+    for row in results['errors']:
+        ok(bool(row['error']) and row['status']=='invalid' and row['total'] is None, f"{row['key']}: invalid input retains its error")
+    ok(results['blank']=={'status':'missing','error':None}, 'blank and invalid inputs are distinct')
+    for row, status in zip(results['dateCases'], ['missing','invalid','unsupported']):
+        ok(row['status']==status and row['total'] is None, f'date state {status} remains explicit')
+    ok(bool(results['dateCases'][1]['error']) and bool(results['dateCases'][2]['error']), 'invalid and unsupported dates identify the field')
+    ok(bool(results['fractional']), 'fractional stick count is invalid')
+    ok(bool(results['zeroPrice']), 'zero unit price is invalid')
+    ok(bool(results['unknownFuel']), 'unsupported fuel type retains a field error')
+    ok(near(results['decimalPrices']['fuelPrice'],1.605) and near(results['decimalPrices']['tobaccoPrice'],3.512), 'dot-decimal unit prices are not read as thousands')
+    refs=results['references']
+    ok(refs['shown']==['1,605','3,51'], 'official reference defaults use Bulgarian display precision')
+    ok(near(refs['before']['fuelPrice'],refs['expected'][0]) and near(refs['before']['tobaccoPrice'],refs['expected'][1]), 'unedited displays keep source precision in computation')
+    ok(near(refs['edited']['fuelPrice'],1.605) and near(refs['edited']['tobaccoPrice'],3.51), 'editing a reference uses the entered precision')
+    ok(near(refs['diesel']['fuelPrice'],refs['expected'][2]), 'fuel switch keeps the selected reference precision')
+
 
 
 def main():
@@ -265,6 +355,7 @@ def main():
         page.goto(f"http://127.0.0.1:{port}/index.html#/danaci")
         page.wait_for_selector("#s18-view", timeout=8000)
         part_a(page)
+        indirect_cases(page)
         ctx.close()
         part_b(b, port, shots)
         b.close()

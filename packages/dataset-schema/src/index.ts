@@ -2,6 +2,8 @@ import {
   shape,
   optionalPeriods,
   budgetProvenanceGuard,
+  list,
+  literal,
   string,
   number,
   boolean,
@@ -38,6 +40,8 @@ const ministryGuard = shape({
   skippedTotal: number,
   doc: record,
 });
+const fuelTaxGuard = shape({ legalEvidence: shape({ source: literal("customs-excise-law"), quote: string, basis: string, note: string, originalBgnPer1000: number, conversionRate: number }), excisePerLitre: number, originalExcise: number, originalUnit: literal("EUR/1000 l"), unit: literal("EUR/l"), validFrom: string, source: literal("ec-oil"), basis: string, pricePerLitre: number, originalPrice: number, priceDate: string, priceSource: literal("ec-oil") });
+const cigaretteTaxGuard = shape({ validFrom: string, specificPer1000: number, adValoremPct: number, minimumPer1000: number, unit: literal("EUR/1000 sticks"), source: literal("excise-law"), basis: string, quote: string });
 export const datasetGuards = {
   "budget2027.json": shape({ meta: metaGuard, schema: string, publication: string, defaultVariant: string, budgets: record, municipal: record, projects: array, forecast: record, gaps: record }),
   "budget2027-provenance.json": budgetProvenanceGuard,
@@ -263,18 +267,11 @@ export const datasetGuards = {
     scopeNote: string,
     items: array,
   }),
-  "mock/measure-labels.json": shape({ meta: metaGuard, items: array }),
-  "mock/tax-assumptions.json": shape({
-    meta: metaGuard,
-    vatRatePct: number,
-    vatShareOfPurchases: number,
-    fuelPricePerLitreEur: number,
-    fuelExcisePerLitreEur: number,
-    tobaccoPricePerPackEur: number,
-    tobaccoExcisePerPackEur: number,
-    flatKeysNote: string,
-    items: array,
-  }),
+  "indirect-tax-parameters.json": shape({ meta: metaGuard,
+    vat: shape({ standardPct: number, standardSince: string, reducedPct: number, untaxed: shape({ kind: literal("definition"), label: string, basis: string, note: string }), source: array, basis: string, reducedQuote: string, unit: literal("%") }),
+    fuels: shape({ petrol: fuelTaxGuard, diesel: fuelTaxGuard }),
+    cigarettes: list(cigaretteTaxGuard),
+    references: shape({ pack: shape({ originalValue: number, originalUnit: literal("BGN/pack"), priceEur: number, conversionRate: number, period: string, yearHeaders: list(number), published: string, source: literal("nsi-pack"), page: number, printedPage: number, table: string, quote: string, unit: literal("EUR/pack"), note: string }) }) }),
   "municipalities.json": shape({
     meta: metaGuard,
     year: number,
@@ -382,3 +379,9 @@ export function isDataset<K extends DatasetName>(
 export type ReleasePointer = DatasetMap["releases/current.json"];
 export type ReleaseManifest =
   DatasetMap["releases/d5ae4869b0e1dc9b0be1b39371aa1f2b3827379c3118ea8ef23d044092b88bcb/manifest.json"];
+
+export function isPublishedDataset(name: string, value: unknown): boolean {
+  if (/^releases\/[a-f0-9]{64}\/manifest\.json$/.test(name)) return releaseManifestGuard(value);
+  if (/^releases\/[a-f0-9]{64}\/validation\.json$/.test(name)) return shape({ groups: array, passed: boolean, result: string, tool: string })(value);
+  return Object.hasOwn(datasetGuards, name) && isDataset(name as DatasetName, value);
+}
