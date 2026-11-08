@@ -147,7 +147,7 @@ export function eyebrowFor(route) {
 function contextFor(route, ctx, extra, own) {
   if (route.bare) return '';
   const parts = [];
-  if (route.periods !== 'none' && ctx.period.key === '2026.law') {
+  if ((route.periods === 'all' || Array.isArray(route.periods) && route.periods.includes('2026.expected')) && ctx.period.key === '2026.law') {
     parts.push(html`<a href="${routeHref(route.id, ctx.params || {}, { ...ctx.query, per: '2026.expected' })}">Виж очакваното изпълнение на МФ</a>`);
   }
   if (route.periods !== 'none' && !own) parts.push(html`<span class="ctx-period"><strong>${ctx.period.label}</strong> <span class="muted">· ${ctx.period.desc}</span></span>`);

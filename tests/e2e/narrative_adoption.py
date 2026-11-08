@@ -3,7 +3,10 @@
     python -m tests.e2e.narrative_adoption --url http://127.0.0.1:8899
 """
 import argparse
+import csv
+import io
 import json
+import re
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
@@ -70,7 +73,19 @@ def main():
         check('law share offers image, link, CSV and report', page.locator('.share-menu [data-act]').evaluate_all('els => els.map(e => e.dataset.act)') == ['png', 'copy-link', 'csv', 'report'])
         with page.expect_download() as downloaded:
             page.locator('[data-act="csv"]').click()
-        check('law CSV is byte-identical to main', Path(downloaded.value.path()).read_bytes() == (FIXTURES / 'S14-budgets.csv').read_bytes())
+        actual_csv = Path(downloaded.value.path()).read_bytes()
+        visit_release = page.locator('meta[name="release-id"]').get_attribute('content') or ''
+        fixture_release = json.loads((FIXTURES / 'narrative-manifest.json').read_text())['releaseId']
+        expected_csv = (FIXTURES / 'S14-budgets.csv').read_bytes().replace(
+            b';' + fixture_release.encode() + b';', b';' + visit_release.encode() + b';')
+        rows = list(csv.reader(io.StringIO(actual_csv.decode('utf-8-sig')), delimiter=';'))
+        release_column = rows[0].index('издание')
+        check('law CSV names the HTML visit release in every row',
+              bool(re.fullmatch('[0-9a-f]{64}', visit_release)) and len(rows) > 1
+              and all(row[release_column] == visit_release for row in rows[1:]))
+        # Only the edition metadata changes; amounts, labels, source, encoding,
+        # decimal precision and line endings still match the independent capture.
+        check('law CSV matches the independent table for this visit', actual_csv == expected_csv)
         page.keyboard.press('Escape')
         page.locator('#s14-t-bjudzheti [data-key="law"]').click()
         expected = browser.new_page()
