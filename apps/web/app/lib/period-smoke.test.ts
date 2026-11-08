@@ -1,5 +1,7 @@
 import { expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
+import { parseHTML } from 'linkedom';
+import { date } from '../../client/format.js';
 import { provideScope } from '../../client/env.js';
 import { parse } from '../../client/data.js';
 import { requestState } from '../../client/store.js';
@@ -13,6 +15,61 @@ const load = async (name: string) =>
     name,
     readFileSync(new URL(`../../../../data/release/${name}.json`, import.meta.url), 'utf8'),
   );
+
+async function annualDocument(address: string) {
+  const url = new URL(address, 'https://budget.test');
+  const r = resolve(address);
+  const scope = {
+    url,
+    origin: url.origin,
+    state: requestState(r.query.per),
+    data: new Map(),
+    load,
+  };
+  provideScope(() => scope);
+  try {
+    const vm = await build(r.route, r.params, r.query);
+    return parseHTML(String(frameHtml(vm))).document;
+  } finally {
+    provideScope(() => null);
+  }
+}
+
+it('does not attach July function notes to the newer annual series', async () => {
+  const oldNotes = (await load('expenditure')).functions.notes;
+  for (const path of ['/razhodi', '/razhodi/drugi', '/razhodi/obrazovanie']) {
+    const document = await annualDocument(path + '?per=2028.forecast');
+    const text = document.querySelector('article')?.textContent;
+    for (const note of oldNotes) expect(text).not.toContain(note.text);
+    expect(text).not.toContain('е програмата от таблицата към проекта');
+    expect(document.querySelector('article[data-view="ready"]')).not.toBeNull();
+  }
+});
+
+for (const per of ['2026.law', '2026.expected']) {
+  it(`does not relabel the old core debt figure as ${per}`, async () => {
+    const document = await annualDocument('/prognoza?per=' + per);
+    const debt = [...document.querySelectorAll('#s13-kpis .kpi')].find((tile) =>
+      tile.textContent?.includes('Държавен дълг'),
+    );
+    expect(debt?.querySelector('.kpi-num')?.textContent).toBe('Предстои');
+    expect(debt?.textContent).toContain('Няма съпоставими данни за дълга за избрания период.');
+  });
+}
+
+it('GDP controls, tiles and publication date follow the same selected record', async () => {
+  const current = await annualDocument('/bvp?y=2025&per=2029.forecast');
+  expect(current.querySelector('#s31-kpis h2')?.textContent).toContain('2029');
+  expect(current.querySelector('.s31-controls input[checked]')?.getAttribute('value')).toBe(
+    '2029.forecast',
+  );
+  expect(current.querySelector('.s31-controls input')?.getAttribute('data-query')).toBe('per');
+  const historical = await annualDocument('/bvp?per=2025.report');
+  expect(historical.querySelector('#s31-kpis h2')?.textContent).toContain('2025');
+  expect(historical.querySelector('#s31-kpis .block-asof')?.textContent).toContain(
+    date((await load('outlook')).meta.asOf),
+  );
+});
 for (const path of [
   '/pari',
   '/prihodi',

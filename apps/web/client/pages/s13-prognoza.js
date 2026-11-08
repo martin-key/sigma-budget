@@ -296,10 +296,9 @@ function kpiBlock(ctx, f, debt) {
     : ok(bal) && bal < 0 ? tile('Дефицит', f.bal.mln, f.bal.pg, { sign: -1, gl: 'byudzheten-defitsit' })
       : tile('Салдо', f.bal.mln, f.bal.pg, { gl: 'byudzhetno-saldo' });
 
-  // government debt: the series of debt.json; until it lands, the one 2026 figure of core.json, and only for that year
-  let dm = null, dg = null, dpm = null, dpg = null, dsub = null;
-  if (debt) { dm = debt.mln[i]; dg = debt.pg[i]; dpm = p >= 0 ? debt.mln[p] : null; dpg = p >= 0 ? debt.pg[p] : null; }
-  else { const k = ctx.core?.kpis?.debt; if (k && k.year === f.years[i]) { dm = k.zddMln; dg = k.pctGdp; } else dsub = 'Числата за дълга по години още не са включени.'; }
+  // A matching year alone cannot establish the publication or status of debt.
+  let dm = null, dg = null, dpm = null, dpg = null, dsub = 'Няма съпоставими данни за дълга за избрания период.';
+  if (debt) { dm = debt.mln[i]; dg = debt.pg[i]; dpm = p >= 0 ? debt.mln[p] : null; dpg = p >= 0 ? debt.pg[p] : null; dsub = null; }
   const dShow = inPct && ok(dg);
   const debtTile = kpi({
     label: 'Държавен дълг', gl: 'darzhaven-dalg', scope: 'zdd', mln: dm, pctGdp: dg,

@@ -144,7 +144,7 @@ function yearsBlock(ctx, M) {
     }
   };
   const f = M.kinds.indexOf('forecast');
-  const sub = [`${yr(M.years[0])} е програмата от таблицата към проекта, а не предварителният отчет.`, f > 0 ? `${M.years.slice(f).join(' и ')} са прогноза на Министерството на финансите, не приет план.` : ''].filter(Boolean).join(' ');
+  const sub = f >= 0 ? `${M.years.slice(f).join(' и ')} са прогноза на Министерството на финансите, не приет план.` : '';
   return block({ id: 's08-godini', title: 'По години', scope: 'kfp', status: periodStatus(ctx), source: ctx.data.expenditure.meta.source, asOf: M.asOf, sub, body: chart(spec) });
 }
 

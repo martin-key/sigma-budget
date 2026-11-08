@@ -6,7 +6,7 @@ import { annualGap } from '../ui/annual.js';
 // `gdp.mln` is the LEVEL of БВП in млн. €; `macroRows` gdpGrowth / consumption / gfcf / exports / imports are
 // REAL growth rates in % against the previous year (never levels); `macroVintage` says per year whether the number is a report or a forecast;
 // `kfp` and core.kpis.debt give the 2026 plan shares of БВП for the „Защо БВП е важен“ block. Every figure on the screen is read or computed
-// from those files. The screen has its own year switch (?y=), because the shell shows no period line here (periods: none). The block „От какво е съставена
+// from those files. The local year switch uses the same period as the shell. The block „От какво е съставена
 // икономиката“ has its own year switch (?sy=): shares of gross value added by branch (ten branches; manufacturing is shown inside industry); the
 // branches add up to the gross value added, which together with the taxes on products less subsidies gives БВП (checked by tools/gva_sectors.py).
 import { html, esc } from '../html.js';
@@ -50,7 +50,7 @@ function frame(ctx) {
   const raw = ctx.data.outlook;
   const keep = raw.periodKeys.map((key, i) => i).filter(i => ok(raw.gdp?.mln?.[i]));
   const aligned = values => keep.map(i => values?.[i] ?? null);
-  const o = { ...raw, periodKeys: aligned(raw.periodKeys), years: aligned(raw.years), vintage: aligned(raw.vintage),
+  const o = { ...raw, records: aligned(raw.records), periodKeys: aligned(raw.periodKeys), years: aligned(raw.years), vintage: aligned(raw.vintage),
     macroVintage: aligned(raw.macroVintage), gdp: { ...raw.gdp, mln: aligned(raw.gdp.mln) },
     macroRows: raw.macroRows.map(row => ({ ...row, values: aligned(row.values) })),
     kfp: Object.fromEntries(Object.entries(raw.kfp).map(([key, row]) => [key, { ...row, mln: aligned(row.mln), pctGdp: aligned(row.pctGdp) }])) };
@@ -61,10 +61,10 @@ function frame(ctx) {
   const g = Object.fromEntries(ROWS.map(r => [r.id, list(rows.find(x => x.id === r.id)?.values, n)]));
   const plan = periodIndex(o, ctx);     // the year of the budget bill (2026)
   const firstFc = kinds.indexOf('forecast');
-  const at = ctx.query?.y ? o.periodKeys.findIndex((key, i) => key.startsWith(ctx.query.y + '.') && ok(o.gdp?.mln?.[i])) : plan;
+  const sel = plan >= 0 ? plan : Math.max(firstFc, 0);
   return {
-    o, years, n, kinds, g, plan, firstFc, gdp: list(o.gdp?.mln, n), asOf: o.macroAsOf || o.meta?.asOf,
-    sel: at >= 0 ? at : plan >= 0 ? plan : Math.max(firstFc, 0),
+    o, years, n, kinds, g, plan, firstFc, gdp: list(o.gdp?.mln, n), asOf: o.records[sel]?.publication || o.meta?.asOf,
+    sel,
     span: n ? `${years[0]}–${years[n - 1]}` : ''
   };
 }
@@ -152,7 +152,7 @@ function growthSpec(f) {
 function controls(f) {
   return html`<div class="s31-controls">
     <span class="s31-controls-label">Покажи числата за:</span>
-    ${seg({ name: 's31-y', label: 'Година', value: String(f.years[f.sel]), query: 'y', options: f.years.map(y => ({ value: String(y), label: String(y) })) })}
+    ${seg({ name: 's31-y', label: 'Година', value: f.o.periodKeys[f.sel], query: 'per', options: f.o.periodKeys.map((key, i) => ({ value: key, label: String(f.years[i]) })) })}
     <p class="s31-howto small muted">Под всяка година в графиките пише дали числата са отчет или прогноза. Пунктирът в линиите и сивите колони показват прогноза.</p>
   </div>`;
 }

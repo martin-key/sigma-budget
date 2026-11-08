@@ -69,7 +69,7 @@ export function annualView(dataset, kind, outlook, key) {
   return { ...base, economic: { ...dataset.economic, rows, years, vintage, periodKeys }, functions: {
     ...F, items, years, vintage, periodKeys, yearLabels: records.map(p => PERIODS.find(x => x.key === p.periodKey)?.label || p.periodKey),
     totalMln: rows.find(r => r.id === 'x.exp')?.mln || [], totalPctGdp: rows.find(r => r.id === 'x.exp')?.pctGdp || [],
-    reconcile: {},
+    reconcile: {}, notes: [], versions: [],
   } };
 }
 

@@ -10,7 +10,7 @@
 import { NOT_FOUND, byId, match, href as routeHref, chainOf, GROUPS, screenQuery } from './routes.js';
 import { annualView, annualCore } from './annual.js';
 import { annualGap } from './ui/annual.js';
-import { selectPeriod, periodByKey } from './periods.js';
+import { selectPeriod, periodByKey, PERIODS } from './periods.js';
 import { resolvePeriod } from './periods.js';
 import { store, DEFAULT_PERIOD } from './store.js';
 import { data, PendingError } from './data.js';
@@ -60,6 +60,11 @@ export function resolve(address) {
   const route = m ? m.route : NOT_FOUND;
   const params = m ? m.params : { path: raw.segs.join('/') };
   const query = canonQuery(raw.query);
+  if (route.id === 'S31' && query.y != null) {
+    const legacy = PERIODS.find(p => String(p.year) === query.y && p.status !== 'law');
+    if (query.per == null && legacy) query.per = legacy.key;
+    delete query.y;
+  }
   const canon = m ? m.canon : raw.segs;
   return { periodResolution: resolvePeriod(query.per), route, params, query, canon, want: canonHash(canon, query), screen: canonHash(canon, screenQuery(route, query)), found: !!m, segs: raw.segs };
 }

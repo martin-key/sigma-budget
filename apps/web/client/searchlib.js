@@ -270,7 +270,7 @@ export function annualSearch(outlook, revenue, expenditure) {
       const metadata=(expenditure.functions?.items || []).find(item=>normal(item.name)===normal(fn.label));
       if (metadata) add(o,fn.label,fn.cell,'S08',{fn:metadata.id});
     }
-    for (const macro of o.macro || []) add(o,macro.label,macro.cell,'S31');
+    for (const macro of o.macro || []) add({...o,status:'forecast'},macro.label,macro.cell,'S31');
   }
   return entries;
 }

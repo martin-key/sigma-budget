@@ -230,6 +230,19 @@ it('search entries use this releases annual values and canonical period URLs', a
   ).toBe(true);
   expect(entries.some((e) => e.stage === 'Закон 2026' && e.title === 'ДДС')).toBe(false);
   expect(entries.filter((e) => e.stage === 'Закон 2026')).toHaveLength(4);
+  const macro = entries.filter(
+    (e) => e.href.includes('/bvp?') && e.href.includes('per=2027.draft'),
+  );
+  expect(macro.length).toBeGreaterThan(0);
+  expect(macro.every((e) => e.stage === 'Прогноза 2027')).toBe(true);
+});
+
+it('canonicalizes the old GDP year bookmark and lets an explicit period win', () => {
+  expect(resolve('/bvp?y=2025').want).toBe('/bvp?per=2025.report');
+  const current = resolve('/bvp?y=2025&per=2029.forecast');
+  expect(current.want).toBe('/bvp?per=2029.forecast');
+  expect(current.query.per).toBe('2029.forecast');
+  expect(current.query.y).toBeUndefined();
 });
 
 it('an explicitly empty or prototype-named period is unknown and never redirects', () => {
