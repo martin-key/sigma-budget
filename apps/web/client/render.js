@@ -8,6 +8,10 @@
 //   build(route, params, …)     the view model {route, view, title, eyebrow, lede, context, body, crumbs, next, …}
 //   frameHtml(vm), docTitle(vm) the article of the screen and the document title
 import { NOT_FOUND, byId, match, href as routeHref, chainOf, GROUPS, screenQuery } from './routes.js';
+import { annualView, annualCore } from './annual.js';
+import { annualGap } from './ui/annual.js';
+import { selectPeriod, periodByKey, PERIODS } from './periods.js';
+import { resolvePeriod } from './periods.js';
 import { store, DEFAULT_PERIOD } from './store.js';
 import { data, PendingError } from './data.js';
 import { html, SafeHtml } from './html.js';
@@ -16,6 +20,7 @@ import { breadcrumbs } from './ui/breadcrumbs.js';
 import { nextCard } from './ui/next.js';
 import { pageSkeleton, emptyState, errorState, pendingState } from './ui/states.js';
 import { redirect } from './redirects.js';
+import { here } from './loc.js';
 import { toHref } from './loc.js';
 
 export class NotFound extends Error { constructor(msg) { super(msg || 'not found'); this.name = 'NotFound'; } }
@@ -35,10 +40,13 @@ export function parseHash(h) {
   const segs = path.split('/').filter(Boolean).map(x => { try { return decodeURIComponent(x); } catch { return x; } });
   return { segs, query };
 }
-export const canonHash = (canon, q) => toHref('/' + canon.map(encodeURIComponent).join('/') + buildQuery(q));
+export const canonHash = (canon, q) => {
+  const query = new URLSearchParams(Object.entries(q || {}).filter(([key,value]) => value != null && (value !== '' || key === 'per'))).toString();
+  return toHref('/' + canon.map(encodeURIComponent).join('/') + (query ? '?' + query : ''));
+};
 export function canonQuery(q) {
   const o = { ...q };
-  if (o.per && (!store.periodByKey(o.per) || o.per === DEFAULT_PERIOD)) delete o.per;
+  // Raw per is part of the first-paint notice and the Worker cache identity.
   if (o.demo && !DEMOS.includes(o.demo)) delete o.demo;
   return o;
 }
@@ -52,8 +60,13 @@ export function resolve(address) {
   const route = m ? m.route : NOT_FOUND;
   const params = m ? m.params : { path: raw.segs.join('/') };
   const query = canonQuery(raw.query);
+  if (route.id === 'S31' && query.y != null) {
+    const legacy = PERIODS.find(p => String(p.year) === query.y && p.status !== 'law');
+    if (query.per == null && legacy) query.per = legacy.key;
+    delete query.y;
+  }
   const canon = m ? m.canon : raw.segs;
-  return { route, params, query, canon, want: canonHash(canon, query), screen: canonHash(canon, screenQuery(route, query)), found: !!m, segs: raw.segs };
+  return { periodResolution: resolvePeriod(query.per), route, params, query, canon, want: canonHash(canon, query), screen: canonHash(canon, screenQuery(route, query)), found: !!m, segs: raw.segs };
 }
 
 /* ------------------------------------------------------------------ page module + data */
@@ -65,8 +78,8 @@ const noop = () => {};
 function makeCtx(route, params, query, o) {
   const a = o.actions || {};
   return {
-    route, params, query, data: {}, missing: [], failed: [], period: store.period, store,
-    get core() { return data.get('core'); },
+    route, params, query, data: {}, missing: [], failed: [], period: route.id === 'S04' ? periodByKey(DEFAULT_PERIOD) : store.period, store,
+    get core() { return this.data.core || data.get('core'); },
     signal: o.signal, demo: o.demo || null, kind: o.kind || 'link',
     setQuery: a.setQuery || noop, rerender: a.rerender || noop, announce: a.announce || noop, go: a.go || noop, href: routeHref,
     notFound() { throw new NotFound(); }
@@ -92,6 +105,12 @@ export async function prepare(route, params, query, o = {}) {
     if (n.opt) return;
     if (!fail || (kind === 'error' && fail.kind === 'pending')) fail = { kind, err: e, file: n.name };
   });
+  const annualScreens = ['S04','S05','S06','S07','S08','S13','S31'];
+  if (annualScreens.includes(route.id)) {
+    ctx.annualRaw = { outlook: ctx.data.outlook, revenue: ctx.data.revenue, expenditure: ctx.data.expenditure };
+    if (route.id === 'S04') ctx.data.core = annualCore(ctx.data.core, ctx.data.outlook, ctx.data.revenue, ctx.data.expenditure, ctx.period.key);
+    for (const key of ['outlook','revenue','expenditure']) if (ctx.data[key]) ctx.data[key] = annualView(ctx.data[key], key, ctx.annualRaw.outlook, ctx.period.key);
+  }
   return { mod, ctx, fail };
 }
 
@@ -128,7 +147,12 @@ export function eyebrowFor(route) {
 function contextFor(route, ctx, extra, own) {
   if (route.bare) return '';
   const parts = [];
+  if ((route.periods === 'all' || Array.isArray(route.periods) && route.periods.includes('2026.expected')) && ctx.period.key === '2026.law') {
+    parts.push(html`<a href="${routeHref(route.id, ctx.params || {}, { ...ctx.query, per: '2026.expected' })}">Виж очакваното изпълнение на МФ</a>`);
+  }
   if (route.periods !== 'none' && !own) parts.push(html`<span class="ctx-period"><strong>${ctx.period.label}</strong> <span class="muted">· ${ctx.period.desc}</span></span>`);
+  const coverage = ctx.annualRaw?.outlook && selectPeriod(ctx.annualRaw.outlook, ctx.period.key);
+  if (coverage?.gaps?.gdp) parts.push(html`<span>${coverage.gaps.gdp}</span>`);
   if (extra) parts.push(extra);
   if (!parts.length) return '';
   return html`<div class="context">${parts.map(p => html`<span class="ctx-part">${p}</span>`)}</div>`;   // v4: the divider between parts is drawn by CSS and is clipped at the start of a wrapped line, so it never dangles
@@ -138,7 +162,7 @@ const safeCall = (fn, ctx, fallback) => { try { const v = fn(ctx); return v ?? f
 
 /** the frame of a state that is not the screen itself (loading, an error) */
 export function frameVm(route, params, query, view, body, extra = {}) {
-  const ctxLite = { period: store.period };
+  const ctxLite = { period: store.period, query, route, params };
   return {
     route, params, query, demo: null, view, body, title: route.title, eyebrow: eyebrowFor(route), lede: route.desc,
     context: contextFor(route, ctxLite), crumbs: defaultCrumbs(route, route.title), next: buildNext(route, null, ctxLite), mod: null, ctx: null, ...extra
@@ -168,7 +192,7 @@ export async function build(route, params, query, o = {}) {
     const sup = periodsFor(route, mod).map(k => store.periodByKey(k)).filter(Boolean);
     return frame('empty', emptyState({
       title: `Няма данни за ${ctx.period.label} на този екран`,
-      text: `Този екран показва ${sup.map(p => p.label).join(' и ')}.`,
+      text: `Това издание няма този период за данните на този екран. Няма извлечени съпоставими данни за избраното издание и статус. Налични: ${sup.map(p => p.label).join(' и ')}.`,
       actions: sup.map((p, i) => ({ label: `Покажи ${p.label}`, action: 'set-period', value: p.key, primary: i === 0 }))
     }), { ctx, mod });
   }
@@ -178,6 +202,10 @@ export async function build(route, params, query, o = {}) {
       : errorState(), { ctx, mod });
   }
 
+  const primary = { S04:'outlook', S05:'outlook', S06:'revenue', S07:'expenditure', S08:'expenditure', S13:'outlook', S31:'outlook' }[route.id];
+  if (primary && ctx.annualRaw?.[primary] && !selectPeriod(ctx.annualRaw[primary], ctx.period.key).available) {
+    return frame('empty', annualGap(ctx, ctx.annualRaw[primary]), { ctx, mod });
+  }
   let out;
   try {
     if (typeof mod.render !== 'function') throw new Error(`pages/${route.file}.js has no render()`);

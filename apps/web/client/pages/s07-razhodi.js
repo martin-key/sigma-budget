@@ -1,3 +1,6 @@
+import { periodIndex, previousPeriodIndex } from '../annual.js';
+import { selectPeriod } from '../periods.js';
+import { annualGap } from '../ui/annual.js';
 // S07 · Къде отиват парите? · #/razhodi · step 3 of 8 · next S12 · periods all
 // Expenditure of the КФП in three cuts of the same total: by function (D03 Табл. III-1), by economic kind (D03 Annex 3) and by budget holder
 // (D04, the 46 budgets of the 2026 law), plus the Eurostat COFOG history. Every number is computed from the data files, none is typed in;
@@ -24,7 +27,7 @@ import { apportion } from '../calc.js';
 import { yIndex, change, chartUnit, moneyCol, amount, amountParts, perCapita, periodStatus } from '../view.js';
 import { num, pct, money, delta, date, DASH, NBSP, MINUS } from '../format.js';
 
-export const needs = ['core', 'expenditure', 'ministries?', 'execution?', 'glossary?'];
+export const needs = ['core', 'outlook', 'expenditure', 'ministries?', 'execution?', 'glossary?'];
 export const styles = ['s07-razhodi'];
 
 const yr = y => `${y}${NBSP}г.`;
@@ -33,8 +36,8 @@ const upper = s => (s ? s[0].toUpperCase() + s.slice(1) : s);
 const tidy = (x, k = 1) => Math.round(x * 10 ** k) / 10 ** k;
 const shareOf = (a, b) => (ok(a) && ok(b) && b > 0 ? (a / b) * 100 : null);
 const slot = i => (i < 8 ? i + 1 : 'other');
-const WORD = { actual: 'отчет', prelim: 'предв.\nотчет', plan: 'план', forecast: 'прогноза' };
-const FLAT = { actual: 'отчет', prelim: 'предв. отчет', plan: 'план', forecast: 'прогноза' };
+const WORD = { law: 'закон', expected: 'очаквано', draft: 'проект', actual: 'отчет', prelim: 'предв.\nотчет', plan: 'план', forecast: 'прогноза' };
+const FLAT = { law: 'закон', expected: 'очаквано', draft: 'проект', actual: 'отчет', prelim: 'предв. отчет', plan: 'план', forecast: 'прогноза' };
 const VS = { actual: 'отчета', prelim: 'предварителния отчет', plan: 'плана', forecast: 'прогнозата' };
 const MIN_BASE = 100;           // млн. € of the 2025 base under which a percentage ranking is not shown: a tiny budget would top it with a tiny sum
 const TOP = 10;                 // budgets shown in „Кой харчи“
@@ -106,9 +109,9 @@ const stepOf = (val, before) => ({ yoy: change(val, before), diff: ok(val) && ok
 function kfpModel(ctx) {
   const F = ctx.data?.expenditure?.functions;
   if (!F || !Array.isArray(F.years) || !Array.isArray(F.items) || !F.items.length) return null;
-  const sel = yIndex(F.years, ctx);
-  if (sel < 0) return null;
-  const prev = sel > 0 ? sel - 1 : -1;
+  const sel = periodIndex(F, ctx);
+  if (sel < 0 || !F.items.some(it => ok(it.mln?.[sel]))) return null;
+  const prev = previousPeriodIndex(F, ctx);
   const labels = F.yearLabels || F.years.map(String);
   const items = F.items.map((it, i) => {
     const mln = it.mln || [], pg = it.pctGdp || [];
@@ -156,9 +159,9 @@ function cofogModel(ctx) {
 function ecoModel(ctx) {
   const X = ctx.data?.expenditure?.economic;
   if (!X || !Array.isArray(X.years) || !Array.isArray(X.rows)) return null;
-  const sel = yIndex(X.years, ctx);
+  const sel = periodIndex(X, ctx);
   if (sel < 0) return null;
-  const prev = sel > 0 ? sel - 1 : -1;
+  const prev = previousPeriodIndex(X, ctx);
   const kinds = X.vintage || [];
   const rows = new Map(X.rows.map(r => [r.id, r]));
   const exp = rows.get('x.exp'), all = rows.get('x.total');
@@ -191,6 +194,7 @@ function ecoModel(ctx) {
 
 /** the budgets of the 2026 law (D04): the TOP largest and the rest, always 2026 (the law has no other period) */
 function minModel(ctx) {
+  if (ctx.period.key !== '2026.law') return null;
   const M = ctx.data?.ministries, gdp = ctx.core?.kpis?.gdp?.mln;
   if (!M || !Array.isArray(M.items) || !M.items.length || !ok(M.totals?.expKhil)) return null;
   // „Закон 2025“ is a like-for-like base only when change.basis is 'law'; for the three programme-budget rows the published percentage is on the
@@ -437,7 +441,7 @@ function fnBlock(ctx, fm) {
   const hist = fm.kind === 'cofog';
   return block({
     id: 's07-fn', title: `${hist ? 'Разходи по функции на държавното управление' : 'За какво отиват парите'}, ${yr(fm.year)}`,
-    scope: hist ? COFOG_SCOPE : 'kfp', status: hist ? 'real' : periodStatus(ctx), source: hist ? ['eurostat'] : ['asbp'], asOf: fm.asOf,
+    scope: hist ? COFOG_SCOPE : 'kfp', status: hist ? 'real' : periodStatus(ctx), source: hist ? ['eurostat'] : ctx.data.expenditure.meta.source, asOf: fm.asOf,
     sub: hist ? 'За тази година разбивка по функции има само от Евростат, по друга методика от тази на бюджета.' : 'Деветте функции на бюджета. Натисни правоъгълник, за да видиш подробности.',
     share: { embed: 's07-fn' },
     body: views(ctx, 'funkcii', 'Изглед на разходите по функции', [
@@ -458,7 +462,7 @@ function vidPane(ctx, fm, x, hidden) {
   return pane(x, hidden, { what: x.what, rows: factRows(ctx, fm, x), parts: partsList(x.parts), foot });
 }
 const vidBlock = (ctx, fm) => block({
-  id: 's07-vid', title: `На какво отиват парите, ${yr(fm.year)}`, scope: 'kfp', status: periodStatus(ctx), source: ['asbp'], asOf: fm.asOf,
+  id: 's07-vid', title: `На какво отиват парите, ${yr(fm.year)}`, scope: 'kfp', status: periodStatus(ctx), source: ctx.data.expenditure.meta.source, asOf: fm.asOf,
   sub: 'Същите разходи, разрязани по вид: заплати, помощи, лихви и т.н., а не по функция. Включена е вноската в бюджета на ЕС.',
   share: { embed: 's07-vid' },
   body: views(ctx, 'vid', 'Изглед на разходите по вид', [
@@ -546,7 +550,7 @@ function kpiBlock(ctx, main, eco) {
   const cap = eco?.byId.get('kapitalovi');
   if (cap && ok(cap.val)) tiles.push(kpi({ label: 'Капиталови разходи', mln: cap.val, pctGdp: cap.pgSel, delta: eco.prevYear ? dl(cap.val, cap.before, eco.prevYear) : null, sub: 'Пътища, сгради, оборудване', gl: 'kapitalovi-razhodi', status: st }));
   if (!tiles.length) return '';
-  return block({ id: 's07-kpis', title: 'Разходите накратко', scope: main?.kind === 'cofog' ? COFOG_SCOPE : 'kfp', status: periodStatus(ctx), source: main?.kind === 'cofog' ? ['eurostat'] : ['asbp'], asOf: main?.asOf, body: kpiGrid(tiles, { label: 'Разходите накратко' }) });
+  return block({ id: 's07-kpis', title: 'Разходите накратко', scope: main?.kind === 'cofog' ? COFOG_SCOPE : 'kfp', status: periodStatus(ctx), source: main?.kind === 'cofog' ? ['eurostat'] : ctx.data.expenditure.meta.source, asOf: main?.asOf, body: kpiGrid(tiles, { label: 'Разходите накратко' }) });
 }
 
 // ── the monthly execution is not shown here: this screen is the ANNUAL budget (law or draft), the reports live on «Изпълнение» ──────────────
@@ -558,7 +562,7 @@ function notesBlock(ctx, mm) {
   const note = id => (Array.isArray(F?.notes) ? F.notes.find(n => n.id === id)?.text : F?.notes?.[id]) ?? '';
   const items = [note('base'), note('col2025'), note('drugi'), mm?.M.scopeNote, X?.cofog?.note].filter(Boolean);
   if (X?.meta?.asOf) items.push(html`Числата са от мотивите към проекта на бюджета, към ${date(X.meta.asOf, true)}. Приетият закон може да се различава от проекта: какво е променено, виж в „<a href="${ctx.href('S14', {}, { per: '2026.law' })}">Пътят на бюджета</a>“.`);
-  return block({ id: 's07-notes', title: 'Как да четеш числата', status: 'real', pill: false, report: false, source: ['asbp'], share: false, body: html`<ul class="s07-notes" data-gl-scan>${items.map(t => html`<li>${t}</li>`)}</ul>` });
+  return block({ id: 's07-notes', title: 'Как да четеш числата', status: 'real', pill: false, report: false, source: ctx.data.expenditure.meta.source, share: false, body: html`<ul class="s07-notes" data-gl-scan>${items.map(t => html`<li>${t}</li>`)}</ul>` });
 }
 
 // ── page contract ──────────────────────────────────────────────────────────────────────────────────────
@@ -588,12 +592,12 @@ function barSpec(ctx, id, title, items, o) {
 const emptyBars = (id, title) => ({ id, type: 'barh', title, categories: [], series: [], emptyTitle: `${title} не са налични`, emptyText: 'Данните не се заредиха.' });
 export const embeds = {
   's07-fn': ctx => {
-    const fm = kfpModel(ctx) ?? cofogModel(ctx), hist = fm?.kind === 'cofog';
-    return { chart: fm ? barSpec(ctx, 's07-fn', `Разходи по функции, ${yr(fm.year)}`, fm.ranked, { hist, cat: KIND_TXT[fm.kind].cat }) : emptyBars('s07-fn', 'Разходите по функции'), source: hist ? ['eurostat'] : ['asbp'], asOf: fm?.asOf, status: fm ? (hist ? 'real' : periodStatus(ctx)) : 'pending' };
+    const fm = kfpModel(ctx), hist = false;
+    return { chart: fm ? barSpec(ctx, 's07-fn', `Разходи по функции, ${yr(fm.year)}`, fm.ranked, { hist, cat: KIND_TXT[fm.kind].cat }) : emptyBars('s07-fn', 'Разходите по функции'), source: hist ? ['eurostat'] : ctx.data.expenditure.meta.source, asOf: fm?.asOf, status: fm ? (hist ? 'real' : periodStatus(ctx)) : 'pending' };
   },
   's07-vid': ctx => {
     const fm = ecoModel(ctx);
-    return { chart: fm ? barSpec(ctx, 's07-vid', `Разходи по вид, ${yr(fm.year)}`, fm.ranked, { cat: KIND_TXT.eco.cat }) : emptyBars('s07-vid', 'Разходите по вид'), source: ['asbp'], asOf: fm?.asOf, status: fm ? periodStatus(ctx) : 'pending' };
+    return { chart: fm ? barSpec(ctx, 's07-vid', `Разходи по вид, ${yr(fm.year)}`, fm.ranked, { cat: KIND_TXT.eco.cat }) : emptyBars('s07-vid', 'Разходите по вид'), source: ctx.data.expenditure.meta.source, asOf: fm?.asOf, status: fm ? periodStatus(ctx) : 'pending' };
   },
   's07-top10': ctx => {
     const mm = minModel(ctx);
@@ -602,18 +606,19 @@ export const embeds = {
 };
 
 export function render(ctx) {
+  if (selectPeriod(ctx.annualRaw?.expenditure, ctx.period.key).gaps?.functions) return annualGap(ctx, ctx.annualRaw.expenditure, ['functions','economicDetails']);
   const kfp = kfpModel(ctx), eco = ecoModel(ctx), cof = cofogModel(ctx), mm = minModel(ctx);
-  const main = kfp ?? cof;
+  const main = kfp;
   if (!main && !eco && !mm) return pendingState({ title: 'Разходи', text: 'Данните за разходите не са налични в момента.' });
   const po = String(ctx.query.po) === 'vid' ? 'vid' : 'funkcii';          // «Кой харчи» is the screen /vedomstva (old ?po=vedomstva links are redirected there)
   const hist = main?.kind === 'cofog';
   const nodata = txt => pendingState({ title: 'Разходи', text: txt });
 
   const funkcii = () => main        // built only for the cut that is shown: a block registers its share spec when it is built
-    ? html`${fnBlock(ctx, main)}${topBlock(ctx, 'funkcii', main.items, { fm: main, kind: main.kind, what: 'Функции', cat: KIND_TXT[main.kind].cat, scope: hist ? COFOG_SCOPE : 'kfp', status: hist ? 'real' : periodStatus(ctx), source: hist ? ['eurostat'] : ['asbp'], asOf: main.asOf, sub: 'Кои функции са най-големи и кои растат най-бързо.' })}${kfp && cof ? histBlock(ctx, cof) : ''}`
+    ? html`${fnBlock(ctx, main)}${topBlock(ctx, 'funkcii', main.items, { fm: main, kind: main.kind, what: 'Функции', cat: KIND_TXT[main.kind].cat, scope: hist ? COFOG_SCOPE : 'kfp', status: hist ? 'real' : periodStatus(ctx), source: hist ? ['eurostat'] : ctx.data.expenditure.meta.source, asOf: main.asOf, sub: 'Кои функции са най-големи и кои растат най-бързо.' })}${kfp && cof ? histBlock(ctx, cof) : ''}`
     : nodata('Разбивката по функции не е налична в момента.');
   const vid = () => eco
-    ? html`${vidBlock(ctx, eco)}${topBlock(ctx, 'vid', eco.items, { fm: eco, kind: 'eco', what: 'Видове разход', cat: KIND_TXT.eco.cat, scope: 'kfp', status: periodStatus(ctx), source: ['asbp'], asOf: eco.asOf, sub: 'Кои видове разход са най-големи и кои растат най-бързо.' })}`
+    ? html`${vidBlock(ctx, eco)}${topBlock(ctx, 'vid', eco.items, { fm: eco, kind: 'eco', what: 'Видове разход', cat: KIND_TXT.eco.cat, scope: 'kfp', status: periodStatus(ctx), source: ctx.data.expenditure.meta.source, asOf: eco.asOf, sub: 'Кои видове разход са най-големи и кои растат най-бързо.' })}`
     : callout({ kind: 'info', body: `За ${yr(ctx.period.year)} няма разбивка по вид разход. Избери ${ctx.period.year < 2025 ? 'година от 2025 нататък' : 'друг период'}.` });
   const same = kfp && eco && ok(eco.eu?.val) && Math.abs(kfp.total + eco.eu.val - eco.total) < 0.25;
   const intro = same ? html`<p class="s07-intro">Разрезите „За какво“ и „По вид“ са едни и същи разходи, разрязани по различен начин. Функциите (${money(kfp.total, { d: 1 })}) са без вноската в бюджета на ЕС (${money(eco.eu.val, { d: 1 })}), затова разрезът по вид е с толкова повече: ${money(eco.total, { d: 1 })}.</p>` : '';
@@ -622,7 +627,7 @@ export function render(ctx) {
     body: html`${explorer(ctx, po === 'vid' ? 'rashodi:vid' : 'rashodi:funkcii')}${unitSwitch(ctx, { name: 's07-unit', note: 'Важи за числата и графиките.' })}
       ${kpiBlock(ctx, main, eco)}${intro}
       <div id="s07-po" class="s07-cut" data-cut="${po}">${po === 'vid' ? vid() : funkcii()}</div>
-      ${execPointer(ctx)}${notesBlock(ctx, mm)}`
+      ${!kfp && cof ? histBlock(ctx, cof) : ''}${execPointer(ctx)}${notesBlock(ctx, mm)}`
   };
 }
 

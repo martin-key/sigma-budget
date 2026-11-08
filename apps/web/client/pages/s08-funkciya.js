@@ -1,3 +1,6 @@
+import { periodIndex, previousPeriodIndex } from '../annual.js';
+import { selectPeriod } from '../periods.js';
+import { annualGap } from '../ui/annual.js';
 // S08 · Функция · #/razhodi/:fn · next S12 · periods all
 // One of the nine functions of the КФП: its size, its parts and its years (Табл. III-1 of the motives, D03), the Eurostat history of the same kind of
 // spending (D05), the budgets of its main spenders (D04) . Every number is computed from the data files;
@@ -19,7 +22,7 @@ import { apportion } from '../calc.js';
 import { yIndex, change, chartUnit, perCapita, periodStatus } from '../view.js';
 import { num, pct, money, moneyParts, delta, date, DASH, NBSP } from '../format.js';
 
-export const needs = ['core', 'expenditure', 'ministries?'];
+export const needs = ['core', 'outlook', 'expenditure', 'ministries?'];
 export const styles = ['s08-funkciya'];
 
 const yr = y => `${y}${NBSP}г.`;
@@ -27,7 +30,7 @@ const ok = v => typeof v === 'number' && Number.isFinite(v);
 const tidy = (x, k = 1) => Math.round(x * 10 ** k) / 10 ** k;
 const upper = s => (s ? s[0].toUpperCase() + s.slice(1) : s);
 const lower = s => (s ? s[0].toLowerCase() + s.slice(1) : s);
-const WORD = { actual: 'отчета', prelim: 'предварителния отчет', plan: 'плана', forecast: 'прогнозата' };
+const WORD = { law: 'закон', expected: 'очаквано', draft: 'проект', actual: 'отчета', prelim: 'предварителния отчет', plan: 'плана', forecast: 'прогнозата' };
 const COFOG_SCOPE = { key: 'cofog', label: 'Евростат · COFOG', note: 'друг разрез от КФП', gl: 'sektor-darzhavno-upravlenie' };
 const MIN_SCOPE = { key: 'dbudget', label: 'Държавен бюджет', note: 'не цялата КФП' };
 
@@ -59,7 +62,7 @@ function modelOf(ctx, strict) {
   const at = F.items.findIndex(x => x && x.id === String(ctx.params?.fn ?? ''));
   if (at < 0) { if (strict) ctx.notFound(); return null; }
   const it = F.items[at];
-  const sel = yIndex(F.years, ctx), prev = sel > 0 ? sel - 1 : -1;
+  const sel = periodIndex(F, ctx), prev = previousPeriodIndex(F, ctx);
   const mln = Array.isArray(it.mln) ? it.mln : [], pg = Array.isArray(it.pctGdp) ? it.pctGdp : [];
   const val = sel >= 0 ? mln[sel] ?? null : null, before = prev >= 0 ? mln[prev] ?? null : null;
   const pgSel = sel >= 0 ? pg[sel] ?? null : null;
@@ -92,12 +95,12 @@ function kpiBlock(ctx, M) {
       sub: ok(M.diff) ? `${up ? 'Повече' : 'По-малко'} с ${money(Math.abs(M.diff))} спрямо ${M.prevWord ? `${M.prevWord} за ` : ''}${yr(M.prevYear)}` : ''
     }));
   }
-  return block({ id: 's08-kpis', title: 'Функцията накратко', scope: 'kfp', status: periodStatus(ctx), source: ['asbp'], asOf: M.asOf, body: kpiGrid(tiles, { label: 'Функцията накратко' }) });
+  return block({ id: 's08-kpis', title: 'Функцията накратко', scope: 'kfp', status: periodStatus(ctx), source: ctx.data.expenditure.meta.source, asOf: M.asOf, body: kpiGrid(tiles, { label: 'Функцията накратко' }) });
 }
 
 function partsBlock(ctx, M) {
   const title = `Какво влиза във функцията, ${yr(M.year)}`;
-  const base = { id: 's08-pera', title, scope: 'kfp', status: periodStatus(ctx), source: ['asbp'], asOf: M.asOf, sub: FN_WHAT[M.id] };
+  const base = { id: 's08-pera', title, scope: 'kfp', status: periodStatus(ctx), source: ctx.data.expenditure.meta.source, asOf: M.asOf, sub: FN_WHAT[M.id] };
   if (!M.parts.length) {
     return block({
       ...base,
@@ -141,8 +144,8 @@ function yearsBlock(ctx, M) {
     }
   };
   const f = M.kinds.indexOf('forecast');
-  const sub = [`${yr(M.years[0])} е програмата от таблицата към проекта, а не предварителният отчет.`, f > 0 ? `${M.years.slice(f).join(' и ')} са прогноза на Министерството на финансите, не приет план.` : ''].filter(Boolean).join(' ');
-  return block({ id: 's08-godini', title: 'По години', scope: 'kfp', status: periodStatus(ctx), source: ['asbp'], asOf: M.asOf, sub, body: chart(spec) });
+  const sub = f >= 0 ? `${M.years.slice(f).join(' и ')} са прогноза на Министерството на финансите, не приет план.` : '';
+  return block({ id: 's08-godini', title: 'По години', scope: 'kfp', status: periodStatus(ctx), source: ctx.data.expenditure.meta.source, asOf: M.asOf, sub, body: chart(spec) });
 }
 
 /** the Eurostat divisions that overlap this function, 2015–2024 (independent of the selected period) */
@@ -170,6 +173,7 @@ function cofogBlock(ctx, M) {
 
 /** the main spenders of the function (the budgets of the 2026 law) and the two budgets that sit beside the state budget */
 function vedBlock(ctx, M) {
+  if (ctx.period.key !== '2026.law') return pendingState({ title: 'Ведомства', text: 'Няма извлечени ведомствени бюджети за избрания период.' });
   const title = 'Кой харчи тези пари';
   const doc = ctx.data?.ministries;
   if (!doc || !Array.isArray(doc.items)) return block({ id: 's08-vedomstva', title, status: 'pending', body: pendingState({ title, text: 'Бюджетите на ведомствата не са налични в момента. Опитай пак по-късно.' }) });
@@ -198,7 +202,7 @@ function notesBlock(ctx, M) {
   const note = id => (Array.isArray(F.notes) ? F.notes.find(n => n.id === id)?.text : F.notes?.[id]) ?? '';
   const items = [note('base'), note('col2025'), M.id === 'drugi' ? note('drugi') : ''].filter(Boolean);
   if (X.meta?.asOf) items.push(html`Числата са от мотивите към проекта на бюджета, към ${date(X.meta.asOf, true)}. Приетият закон може да се различава от проекта: какво е променено, виж в „<a href="${ctx.href('S14', {}, { per: '2026.law' })}">Пътят на бюджета</a>“.`);
-  return block({ id: 's08-notes', title: 'Как да четеш числата', status: 'real', pill: false, report: false, source: ['asbp'], share: false, body: html`<ul class="s08-notes" data-gl-scan>${items.map(t => html`<li>${t}</li>`)}</ul>` });
+  return block({ id: 's08-notes', title: 'Как да четеш числата', status: 'real', pill: false, report: false, source: ctx.data.expenditure.meta.source, share: false, body: html`<ul class="s08-notes" data-gl-scan>${items.map(t => html`<li>${t}</li>`)}</ul>` });
 }
 
 // ── page contract ──────────────────────────────────────────────────────────────────────────────────────
@@ -218,6 +222,8 @@ export function crumbs(ctx) {
 }
 
 export function render(ctx) {
+  if (ctx.params?.fn && !ctx.data.expenditure.functions.items.some(item => item.id === ctx.params.fn)) ctx.notFound();
+  if (selectPeriod(ctx.annualRaw?.expenditure, ctx.period.key).gaps?.functions) return { title: ctx.data.expenditure.functions.items.find(item => item.id === ctx.params.fn)?.name || 'Функция', body: annualGap(ctx, ctx.annualRaw.expenditure, ['functions']) };
   const M = modelOf(ctx, true);
   if (!M) return pendingState({ title: 'Функция', text: 'Данните за разходите не са налични в момента.' });
   const intro = html`<p class="s08-read" data-gl-scan>Бюджетът дели разходите на девет ${gl('byudzhetna-funktsiya', 'функции')}: показва за какво са парите, а не кое ведомство ги харчи. Тук е една от тях. Всичките девет са на екрана „<a href="${ctx.href('S07')}">Къде отиват парите?</a>“.</p>`;
@@ -226,7 +232,7 @@ export function render(ctx) {
     title: M.name, eyebrow: 'Функция на бюджета', lede: ledeOf(ctx, M), context: 'Консолидирана фискална програма (КФП): разходи по функции',
     body: html`${unitSwitch(ctx, { name: 's08-unit', note: 'Важи за списъците и графиките.' })}
       ${intro}
-      ${M.sel >= 0 ? html`${kpiBlock(ctx, M)}${partsBlock(ctx, M)}` : noCol}
+      ${ok(M.val) ? html`${kpiBlock(ctx, M)}${partsBlock(ctx, M)}` : noCol}
       ${yearsBlock(ctx, M)}${cofogBlock(ctx, M)}${vedBlock(ctx, M)}${notesBlock(ctx, M)}`
   };
 }

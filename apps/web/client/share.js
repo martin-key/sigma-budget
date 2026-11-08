@@ -1,3 +1,4 @@
+import { resolvePeriod } from './periods.js';
 // Sharing: registry of shareable blocks + the ONE block menu „Сподели“ (V5: „Изтегли изображение“ and „Копирай връзка“; the table file for experts; „Намерих грешка“).
 // A block registers a spec while its screen renders (ui/block.js does this for you); the router clears the registry on every navigation.
 //   share.register(id, {title, sub, text, source:['kfp'], asOf, status, mock, chart:'chartDomId', table:{columns,rows,statuses?} | ()=>…, embed:true|'routeKey.chartId', embedParams:{code:'1000'}, report:'#/vrazka?…',
@@ -91,6 +92,7 @@ export function linkFor(spec, { to = true } = {}) {
   PERSONAL.forEach(k => q.delete(k));
   const own = val(spec?.link);
   if (own && typeof own === 'object') for (const [k, v] of Object.entries(own)) { if (v == null || v === '') q.delete(k); else if (!PERSONAL.has(k)) q.set(k, String(v)); }
+  if (q.has('per')) q.set('per', resolvePeriod(q.get('per')).resolved);
   if (to && spec?.id) q.set('to', spec.id); else q.delete('to');
   return absolute(path + (q.toString() ? '?' + q : ''));
 }
@@ -152,7 +154,7 @@ export function embedHash(spec) {
   if (!key) return '';
   const q = new URLSearchParams();
   const per = new URLSearchParams(addrParts(here()).query).get('per');
-  if (per) q.set('per', per);
+  if (per) q.set('per', resolvePeriod(per).resolved);
   for (const [k, v] of Object.entries(spec.embedParams || {})) {
     if (/^[A-Za-z][\w-]*$/.test(k) && k !== 'per' && k !== 'demo' && v != null && v !== '' && typeof v !== 'object') q.set(k, String(v));
   }

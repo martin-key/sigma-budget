@@ -6,7 +6,8 @@ import { textModel, textMetadata } from './screens/text';
 import type { TextScreenModel } from './screen-state';
 import { resolve, build, frameHtml, docTitle, periodsFor, errorVm } from '../../client/render.js';
 import { head } from '../../client/seo.js';
-import { bannerHtml, topbarHtml, tabbarHtml, footerHtml } from '../../client/chrome.js';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { bannerHtml, topbarHtml, tabbarHtml, footerHtml } from '../components/chrome/chrome';
 import { data } from '../../client/data.js';
 import { screenQuery } from '../../client/routes.js';
 import { toHref, parts, fileHref } from '../../client/loc.js';
@@ -135,10 +136,12 @@ export async function renderScreen(url: URL, release: Rel): Promise<ScreenResult
       prerendered: shown.id === 'S30' ? '404' : r.screen,
       bare: !!route.bare,
       release,
-      banner: model ? '' : String(bannerHtml()),
+      banner: model ? '' : renderToStaticMarkup(bannerHtml()),
       topbar: model
         ? ''
-        : fixLinks(String(topbarHtml({ route: shown, periods: periodsFor(shown, mod) }))),
+        : fixLinks(
+            renderToStaticMarkup(topbarHtml({ route: shown, periods: periodsFor(shown, mod) })),
+          ),
       view: model
         ? ''
         : vm
@@ -151,7 +154,7 @@ export async function renderScreen(url: URL, release: Rel): Promise<ScreenResult
       footer: model
         ? ''
         : fixLinks(
-            String(
+            renderToStaticMarkup(
               footerHtml({
                 wide: true,
                 cur: shown.id,
@@ -160,7 +163,7 @@ export async function renderScreen(url: URL, release: Rel): Promise<ScreenResult
               }),
             ),
           ),
-      tabbar: model ? '' : fixLinks(String(tabbarHtml(shown))),
+      tabbar: model ? '' : fixLinks(renderToStaticMarkup(tabbarHtml(shown))),
     },
   };
 }

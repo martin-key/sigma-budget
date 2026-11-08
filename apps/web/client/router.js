@@ -11,6 +11,7 @@
 //   to    in-page anchor: scroll + highlight (+ opens an ancestor <details>); changing only `to` does not re-render
 //   demo  loading | empty | error | pending | offline: renders that state component on any URL
 import { ROUTES, match, href as routeHref } from './routes.js';
+import { resolvePeriod } from './periods.js';
 import { store, DEFAULT_PERIOD, ROLE_SELECTOR } from './store.js';
 import * as motion from './ui/motion.js';
 import * as share from './share.js';
@@ -48,7 +49,8 @@ export function announce(msg) {
 /** go('/prihodi/dds') (or the old '#/prihodi/dds') — in-app navigation (history entry); the same address = scroll to top + refocus the h1 */
 export function go(addr, o = {}) {
   let target = internal(addr || '/');
-  const { query } = parseHash(target);
+  const { query, segs } = parseHash(target);
+  if (query.per != null) target = internal(canonHash(segs, { ...query, per: resolvePeriod(query.per).resolved }));
   const per = store.get('period');
   if (!query.per && per !== DEFAULT_PERIOD) target += (target.includes('?') ? '&' : '?') + 'per=' + per;
   target = toHref(target);
@@ -203,7 +205,7 @@ async function render(kind) {
   curK = k;
 
   applying = true;
-  try { store.set('period', query.per && store.periodByKey(query.per) ? query.per : DEFAULT_PERIOD); } finally { applying = false; }
+  try { store.set('periodRequested', query.per ?? null); store.set('periodNotice', ''); store.set('period', resolvePeriod(query.per).resolved); } finally { applying = false; }
 
   // the first render over a page the server drew (app/, apps/web/workers/app.ts; data-prerendered names its address): its HTML is already the screen, so no skeleton in between and no rise-in or count-up of what is already shown
   // (dropStalePrerender has taken the mark off an HTML that is the screen of another address)
@@ -303,6 +305,7 @@ function onLocation(kind) {
 function onClick(e) {
   if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
   const a = e.target.closest && e.target.closest('a[href]');
+  if (a?.hasAttribute('data-current-release')) return;
   if (!a || (a.getAttribute('target') || '_self') !== '_self' || a.hasAttribute('download')) return;     // getAttribute: an SVG <a> (the map) has an object as .target
   const h = a.getAttribute('href');
   if (h === '#main') { e.preventDefault(); const mn = document.getElementById('main'); mn?.focus({ preventScroll: false }); return; }

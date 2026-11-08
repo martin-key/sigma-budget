@@ -1,9 +1,12 @@
+import { periodIndex } from '../annual.js';
+import { selectPeriod } from '../periods.js';
+import { annualGap } from '../ui/annual.js';
 // S31 · БВП: колко расте икономиката? · #/bvp · next S13 · periods none
 // Data: outlook.json (D01+D02+D15) and gva-sectors.json (D31, Eurostat copy of the NSI national accounts: gross value added by branch, 2019–2025).
 // `gdp.mln` is the LEVEL of БВП in млн. €; `macroRows` gdpGrowth / consumption / gfcf / exports / imports are
 // REAL growth rates in % against the previous year (never levels); `macroVintage` says per year whether the number is a report or a forecast;
 // `kfp` and core.kpis.debt give the 2026 plan shares of БВП for the „Защо БВП е важен“ block. Every figure on the screen is read or computed
-// from those files. The screen has its own year switch (?y=), because the shell shows no period line here (periods: none). The block „От какво е съставена
+// from those files. The local year switch uses the same period as the shell. The block „От какво е съставена
 // икономиката“ has its own year switch (?sy=): shares of gross value added by branch (ten branches; manufacturing is shown inside industry); the
 // branches add up to the gross value added, which together with the taxes on products less subsidies gives БВП (checked by tools/gva_sectors.py).
 import { html, esc } from '../html.js';
@@ -25,8 +28,8 @@ export const styles = ['s31-bvp'];
 /* ---------------------------------------------------------------- words and small helpers */
 const ok = v => typeof v === 'number' && Number.isFinite(v);
 /** under the year on the axis (a line break keeps five categories readable on a phone) */
-const WORD = { actual: 'отчет', forecast: 'прогноза' };
-const LONG = { actual: 'Отчет', forecast: 'Прогноза' };
+const WORD = { law: 'закон', expected: 'очаквано', draft: 'проект', actual: 'отчет', forecast: 'прогноза' };
+const LONG = { law: 'Приет закон', expected: 'Оценка на МФ, не отчет', draft: 'Проект на МФ', actual: 'Отчет', forecast: 'Прогноза' };
 const list = (a, n) => (Array.isArray(a) && a.length === n ? a : Array.from({ length: n }, () => null));
 const pick = (a, i) => (Array.isArray(a) && ok(a[i]) ? a[i] : null);
 /** „2026 г.“ with a no-break space, so that „г.“ never stands alone on a line */
@@ -44,18 +47,24 @@ const ROWS = [
 
 /** everything the screen needs from outlook.json, in one place; arrays are aligned to `years` */
 function frame(ctx) {
-  const o = ctx.data.outlook;
+  const raw = ctx.data.outlook;
+  const keep = raw.periodKeys.map((key, i) => i).filter(i => ok(raw.gdp?.mln?.[i]));
+  const aligned = values => keep.map(i => values?.[i] ?? null);
+  const o = { ...raw, records: aligned(raw.records), periodKeys: aligned(raw.periodKeys), years: aligned(raw.years), vintage: aligned(raw.vintage),
+    macroVintage: aligned(raw.macroVintage), gdp: { ...raw.gdp, mln: aligned(raw.gdp.mln) },
+    macroRows: raw.macroRows.map(row => ({ ...row, values: aligned(row.values) })),
+    kfp: Object.fromEntries(Object.entries(raw.kfp).map(([key, row]) => [key, { ...row, mln: aligned(row.mln), pctGdp: aligned(row.pctGdp) }])) };
   const years = Array.isArray(o.years) ? o.years : [];
   const n = years.length;
   const kinds = years.map((_, i) => (o.macroVintage?.[i] === 'actual' ? 'actual' : 'forecast'));
   const rows = Array.isArray(o.macroRows) ? o.macroRows : [];
   const g = Object.fromEntries(ROWS.map(r => [r.id, list(rows.find(x => x.id === r.id)?.values, n)]));
-  const plan = Array.isArray(o.vintage) ? o.vintage.indexOf('plan') : -1;     // the year of the budget bill (2026)
+  const plan = periodIndex(o, ctx);     // the year of the budget bill (2026)
   const firstFc = kinds.indexOf('forecast');
-  const at = years.indexOf(Number(ctx.query?.y));
+  const sel = plan >= 0 ? plan : Math.max(firstFc, 0);
   return {
-    o, years, n, kinds, g, plan, firstFc, gdp: list(o.gdp?.mln, n), asOf: o.macroAsOf || o.meta?.asOf,
-    sel: at >= 0 ? at : plan >= 0 ? plan : Math.max(firstFc, 0),
+    o, years, n, kinds, g, plan, firstFc, gdp: list(o.gdp?.mln, n), asOf: o.records[sel]?.publication || o.meta?.asOf,
+    sel,
     span: n ? `${years[0]}–${years[n - 1]}` : ''
   };
 }
@@ -143,7 +152,7 @@ function growthSpec(f) {
 function controls(f) {
   return html`<div class="s31-controls">
     <span class="s31-controls-label">Покажи числата за:</span>
-    ${seg({ name: 's31-y', label: 'Година', value: String(f.years[f.sel]), query: 'y', options: f.years.map(y => ({ value: String(y), label: String(y) })) })}
+    ${seg({ name: 's31-y', label: 'Година', value: f.o.periodKeys[f.sel], query: 'per', options: f.o.periodKeys.map((key, i) => ({ value: key, label: String(f.years[i]) })) })}
     <p class="s31-howto small muted">Под всяка година в графиките пише дали числата са отчет или прогноза. Пунктирът в линиите и сивите колони показват прогноза.</p>
   </div>`;
 }
@@ -155,7 +164,7 @@ function tilesBlock(f) {
   return block({
     id: 's31-kpis', title: `Числата за ${yr(y)}`, status: kind === 'forecast' ? 'forecast' : 'real', statusLabel: LONG[kind],
     sub: 'Растежът е реален: спрямо предходната година и без поскъпването.',
-    source: ['asbp'], asOf: f.asOf,
+    source: f.o.meta.source, asOf: f.asOf,
     share: { text: `${yr(y)} (${LONG[kind].toLowerCase()}): БВП ${money(gdp)}, реален растеж ${pct(pick(f.g.gdpGrowth, i), 1)}.` },
     body: kpiGrid([
       kpi({ label: 'БВП', gl: 'bvp', mln: gdp, sub: 'Размерът на икономиката за годината.' }),
@@ -182,7 +191,7 @@ function levelBlock(ctx, f) {
   const spec = levelSpec(ctx, f);
   return block({
     id: 's31-b-level', title: 'Колко е голям БВП', sub: 'Стойността на всичко, което страната създава за година, в евро.',
-    status: 'forecast', statusLabel: 'Отчет и прогноза', source: ['asbp'], asOf: f.asOf, share: { text: spec.desc },
+    status: 'forecast', statusLabel: 'Отчет и прогноза', source: f.o.meta.source, asOf: f.asOf, share: { text: spec.desc },
     body: html`<div class="stack">${chart(spec)}${nominalNote(f)}</div>`
   });
 }
@@ -191,7 +200,7 @@ function growthBlock(f) {
   const spec = growthSpec(f);
   return block({
     id: 's31-b-growth', title: 'Как расте икономиката и нейните части', sub: 'Реален растеж по години: БВП общо, потребление, инвестиции, износ и внос.',
-    status: 'forecast', statusLabel: 'Отчет и прогноза', source: ['asbp'], asOf: f.asOf, share: { text: spec.desc },
+    status: 'forecast', statusLabel: 'Отчет и прогноза', source: f.o.meta.source, asOf: f.asOf, share: { text: spec.desc },
     body: html`<div class="stack">${chart(spec)}<p class="s31-note small muted">Процентите не се събират: растежът на БВП не е сборът от растежа на частите.</p></div>`
   });
 }
@@ -284,13 +293,13 @@ function whyBlock(ctx, f) {
   const s = key => ({ mln: pick(f.o.kfp?.[key]?.mln, p), pg: pick(f.o.kfp?.[key]?.pctGdp, p) });
   const rev = s('revenue'), exp = s('expenditure'), bal = s('balance'), y = f.years[p];
   const withPg = x => (x.mln == null ? null : `${money(x.mln, { d: 1 })}${x.pg == null ? '' : ` · ${pct(Math.abs(x.pg), 1)} от БВП`}`);
-  const dk = ctx.core?.kpis?.debt;
+  const dk = null; // No debt vintage for these annual periods yet.
   const debt = dk && dk.year === y && ok(dk.zddMln) ? html`${withPg({ mln: dk.zddMln, pg: ok(dk.pctGdp) ? dk.pctGdp : null })} ${scopeChip('zdd')}` : null;
   const gdp = pick(f.gdp, p);
   const deficit = bal.mln != null && bal.mln < 0 && bal.pg != null && gdp != null
     ? html`<p class="s31-note">Пример: дефицитът от ${money(-bal.mln, { d: 1 })} е ${pct(Math.abs(bal.pg), 1)} от БВП за ${yr(y)} (БВП е ${money(gdp, { d: 1 })}).</p>` : '';
   return block({
-    id: 's31-why', title: 'Защо БВП е важен за бюджета', scope: 'kfp', status: 'forecast', statusLabel: 'План и прогноза', source: ['asbp'], asOf: f.asOf,
+    id: 's31-why', title: 'Защо БВП е важен за бюджета', scope: 'kfp', status: 'forecast', statusLabel: 'План и прогноза', source: f.o.meta.source, asOf: f.asOf,
     share: { text: `Бюджетните суми често се дават като дял от БВП (${yr(y)}): приходи ${pct(rev.pg, 1)}, разходи ${pct(exp.pg, 1)} от БВП.` },
     body: html`<div class="stack">
       <p class="s31-note">БВП е мярка за размера на икономиката. Затова бюджетните суми често се дават като дял от него: ${gl('dyal-ot-bvp', '% от БВП')}. Така можем да сравняваме държави с различна големина.</p>
@@ -308,10 +317,11 @@ function whyBlock(ctx, f) {
 
 /* ---------------------------------------------------------------- the screen */
 export function render(ctx) {
+  if (selectPeriod(ctx.annualRaw?.outlook, ctx.period.key).gaps?.macro) return html`${annualGap(ctx, ctx.annualRaw.outlook, ['macro','gdp'])}${sectorsBlock(ctx)}`;
   const f = frame(ctx);
   return {
     lede: 'БВП е стойността на стоките и услугите, които страната създава за година. Не е сумата в държавната каса. Тук виждаш колко расте, как растат потреблението, инвестициите, износът и вносът и от кои отрасли е съставена икономиката.',
-    context: `Числата са по проекта на бюджета, към ${date(f.asOf)}${NBSP}г.`,
+    context: `${ctx.period.label}. Публикация на МФ от ${date(f.asOf)}${NBSP}г.`,
     body: html`
       ${controls(f)}
       ${tilesBlock(f)}

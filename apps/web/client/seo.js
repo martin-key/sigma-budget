@@ -1,3 +1,4 @@
+import { resolvePeriod, DEFAULT_PERIOD } from './periods.js';
 // The <head> of a screen for search engines, social cards and answer engines (SEO/GEO/AEO). The router calls apply() after every paint;
 // the server writes the same head into the first response (apps/web/app/root.tsx, head()), so one place decides what a crawler reads.
 //   description   the screen's short answer (parts.answer / mod.answer), else its lede, else the route's desc; at most ~160 characters
@@ -113,7 +114,8 @@ function graph(vm, { url, title, desc, question, answer }) {
 export function head(vm, docTitle) {
   const o = origin();
   const { path } = addrParts(here());
-  const url = o + (path === '/' ? '/' : path);
+  const per = resolvePeriod(vm.query?.per).resolved;
+  const url = o + (path === '/' ? '/' : path) + (vm.route.periods !== 'none' && per !== DEFAULT_PERIOD ? '?per=' + encodeURIComponent(per) : '');
   const title = plain(vm.docTitle || vm.title) || vm.route.title;
   const heading = plain(vm.title);
   const lede = plain(vm.lede);

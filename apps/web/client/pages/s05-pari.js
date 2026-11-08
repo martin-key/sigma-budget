@@ -1,3 +1,5 @@
+import { periodIndex } from '../annual.js';
+import { selectPeriod } from '../periods.js';
 // S05 · Парите · #/pari · next S06 · periods all (G3, taken over from G1)
 // The money overview: five big cards, each a question, one number and one short answer, each a link to the screen that answers it.
 //   1 Откъде идват парите?     → S06  total revenue of the chosen period and its two biggest sources (D01, D05)
@@ -26,7 +28,7 @@ const PENDING = 'Тези данни предстоят.';
 /** a name inside a sentence: „Социални и здравни осигуровки“ -> „социални и здравни осигуровки“, an acronym such as „ДДС“ stays */
 const lc = s => { const t = String(s); return /^[А-ЯA-Z]{2,}(?![а-яa-z])/.test(t) ? t : t.charAt(0).toLowerCase() + t.slice(1); };
 /** the value of a by-year series in one year; null when the year or the value is missing */
-const pick = (years, series, y) => { const v = arr(series)[arr(years).indexOf(y)]; return ok(v) ? v : null; };
+const pick = (years, series, y) => { const v = arr(series)[arr(years).findIndex(key => key === y)]; return ok(v) ? v : null; };
 /** the two biggest of [{n, v}] with their share of the total, as [{n, s}] ("социални осигуровки", "25%"); null when there are not two */
 function topTwo(items, total) {
   const t = items.filter(x => ok(x.v)).sort((a, b) => b.v - a.v).slice(0, 2);
@@ -36,14 +38,14 @@ function topTwo(items, total) {
 /** 1 · where the money comes from: КФП revenue of the chosen year, the two biggest groups of revenue */
 function cardIncome(ctx, O, R, Y) {
   const K = O.kfp && O.kfp.revenue;
-  let text = PENDING;
+  let text = selectPeriod(ctx.annualRaw?.revenue, ctx.period.key).gaps?.groups || PENDING;
   if (R) {
-    const t = topTwo(arr(R.groups).map(g => ({ n: g.name, v: pick(R.years, g.mln, Y) })), pick(R.years, R.total && R.total.mln, Y));
+    const t = topTwo(arr(R.groups).map(g => ({ n: g.name, v: pick(R.periodKeys, g.mln, ctx.period.key) })), pick(R.periodKeys, R.total && R.total.mln, ctx.period.key));
     if (t) text = `Най-голям дял от приходите идва от ${t[0].n} (${t[0].s}) и от ${t[1].n} (${t[1].s}).`;
   }
   return {
     ic: 'trendingUp', q: 'Откъде идват парите?', href: ctx.href('S06'), text,
-    kpi: { label: `Общо приходи през ${yr(Y)}`, mln: pick(O.years, K && K.mln, Y), pctGdp: pick(O.years, K && K.pctGdp, Y), scope: 'kfp', status: periodStatus(ctx), source: ['asbp'], asOf: O.meta && O.meta.asOf }
+    kpi: { label: `Общо приходи през ${yr(Y)}`, mln: pick(O.periodKeys, K && K.mln, ctx.period.key), pctGdp: pick(O.periodKeys, K && K.pctGdp, ctx.period.key), scope: 'kfp', status: periodStatus(ctx), source: O.meta.source, asOf: O.meta && O.meta.asOf }
   };
 }
 
@@ -52,23 +54,24 @@ const ECON = ['x.personnel', 'x.maint', 'x.scholarships', 'x.subsidies', 'x.soci
 function cardSpend(ctx, O, X, Y) {
   const K = O.kfp && O.kfp.expenditure, F = X && X.functions, E = X && X.economic;
   let t = null;
-  if (F && Y >= 2026) t = topTwo(arr(F.items).map(it => ({ n: it.short || it.name, v: pick(F.years, it.mln, Y) })), pick(F.years, F.totalMln, Y));
-  else if (E) {
+  if (F?.items?.some(it => ok(it.mln?.[periodIndex(F, ctx)]))) t = topTwo(arr(F.items).map(it => ({ n: it.short || it.name, v: pick(F.periodKeys, it.mln, ctx.period.key) })), pick(F.periodKeys, F.totalMln, ctx.period.key));
+  else if (E && !selectPeriod(ctx.annualRaw?.expenditure, ctx.period.key).gaps?.economicDetails) {
     const rows = arr(E.rows), tot = rows.find(r => r.id === 'x.total');
-    t = topTwo(rows.filter(r => ECON.includes(r.id)).map(r => ({ n: String(r.label).replace(/\s+-\s+общо$/, ''), v: pick(E.years, r.mln, Y) })), pick(E.years, tot && tot.mln, Y));
+    t = topTwo(rows.filter(r => ECON.includes(r.id)).map(r => ({ n: String(r.label).replace(/\s+-\s+общо$/, ''), v: pick(E.periodKeys, r.mln, ctx.period.key) })), pick(E.periodKeys, tot && tot.mln, ctx.period.key));
   }
   return {
     ic: 'pieChart', q: 'Къде отиват парите?', href: ctx.href('S07'),
-    text: t ? `Най-голям дял от разходите отива за ${t[0].n} (${t[0].s}) и за ${t[1].n} (${t[1].s}).` : PENDING,
-    kpi: { label: `Общо разходи през ${yr(Y)}`, mln: pick(O.years, K && K.mln, Y), pctGdp: pick(O.years, K && K.pctGdp, Y), scope: 'kfp', status: periodStatus(ctx), source: ['asbp'], asOf: O.meta && O.meta.asOf }
+    text: t ? `Най-голям дял от разходите отива за ${t[0].n} (${t[0].s}) и за ${t[1].n} (${t[1].s}).` : selectPeriod(ctx.annualRaw?.expenditure, ctx.period.key).gaps?.functions || PENDING,
+    kpi: { label: `Общо разходи през ${yr(Y)}`, mln: pick(O.periodKeys, K && K.mln, ctx.period.key), pctGdp: pick(O.periodKeys, K && K.pctGdp, ctx.period.key), scope: 'kfp', status: periodStatus(ctx), source: O.meta.source, asOf: O.meta && O.meta.asOf }
   };
 }
 
 /** 3 · who spends: the biggest own budget among the budgets of the 2026 law (хил. € in the data, млн. € here) */
 function cardAgencies(ctx, O, M) {
+  if (ctx.period.key !== '2026.law') return { ic: 'landmark', q: 'Кой харчи парите?', href: ctx.href('S10'), text: 'Няма извлечени ведомствени бюджети за избрания период.', kpi: { label: ctx.period.label, value: null, status: 'pending' } };
   const items = arr(M && M.items).filter(it => ok(it.expKhil));
   const top = items.slice().sort((a, b) => b.expKhil - a.expKhil)[0];
-  const gdp = pick(O.years, O.gdp && O.gdp.mln, 2026), mln = top ? top.expKhil / 1000 : null;
+  const gdp = pick(O.periodKeys, O.gdp && O.gdp.mln, '2026.law'), mln = top ? top.expKhil / 1000 : null;
   return {
     ic: 'landmark', q: 'Кой харчи парите?', href: ctx.href('S10', {}, { per: '2026.law' }),
     text: top ? `Това е бюджетът на ${top.name}. Общо по закона са ${items.length} бюджета на министерства и други ведомства.` : PENDING,
@@ -81,7 +84,7 @@ function cardAgencies(ctx, O, M) {
 
 /** 4 · what the measures change: how many, and what they add to revenue and take from expenditure (without the two indicative ones) */
 function cardMeasures(ctx, O, MS) {
-  const T = MS && MS.totals, C = MS && MS.counts, gdp = pick(O.years, O.gdp && O.gdp.mln, 2026);
+  const T = MS && MS.totals, C = MS && MS.counts, gdp = pick(O.periodKeys, O.gdp && O.gdp.mln, '2026.law');
   const part = v => amount(ctx, { mln: Math.abs(v), pctGdp: ok(gdp) ? (Math.abs(v) / gdp) * 100 : null, scale: 'mln' });
   const r = T && T.revenueMln, e = T && T.expenditureMlnWithoutIndicative;
   return {
@@ -95,17 +98,18 @@ function cardMeasures(ctx, O, MS) {
 
 /** 5 · where we are heading: the balance in 2028 against 2026 (a deficit is shown as a positive number under the label „Дефицит“); yr() ends with a full stop, so these sentences add none */
 function cardOutlook(ctx, O) {
+  const publication = selectPeriod(ctx.annualRaw?.outlook, '2029.forecast');
   const B = O.kfp && O.kfp.balance;
-  const b26 = pick(O.years, B && B.mln, 2026), b28 = pick(O.years, B && B.mln, 2028);
-  const p26 = pick(O.years, B && B.pctGdp, 2026), p28 = pick(O.years, B && B.pctGdp, 2028);
+  const b26 = pick(O.periodKeys, B && B.mln, '2026.law'), b28 = pick(O.periodKeys, B && B.mln, '2029.forecast');
+  const p26 = pick(O.periodKeys, B && B.pctGdp, '2026.law'), p28 = pick(O.periodKeys, B && B.pctGdp, '2029.forecast');
   const both = ok(b26) && ok(b28);
   const A = (v, p) => amount(ctx, { mln: v, pctGdp: p });
   let text = PENDING;
-  if (both && b26 < 0 && b28 < 0) text = `Прогнозата е дефицитът да ${b28 > b26 ? 'намалее' : 'нарасне'} от ${A(-b26, -p26)} през ${yr(2026)} до ${A(-b28, -p28)} през ${yr(2028)}`;
-  else if (both) text = `Салдото е ${A(b26, p26)} през ${yr(2026)} и ${A(b28, p28)} през ${yr(2028)}`;
+  if (both && b26 < 0 && b28 < 0) text = `Прогнозата е дефицитът да ${b28 > b26 ? 'намалее' : 'нарасне'} от ${A(-b26, -p26)} през ${yr(2026)} до ${A(-b28, -p28)} през ${yr(2029)}`;
+  else if (both) text = `Салдото е ${A(b26, p26)} през ${yr(2026)} и ${A(b28, p28)} през ${yr(2029)}`;
   return {
     ic: 'forecast', q: 'Накъде вървим?', href: ctx.href('S13'), text,
-    kpi: { label: `${ok(b28) ? (b28 < 0 ? 'Дефицит' : 'Излишък') : 'Салдо'} през ${yr(2028)}`, mln: ok(b28) ? Math.abs(b28) : null, pctGdp: ok(p28) ? Math.abs(p28) : null, scope: 'kfp', status: 'forecast', source: ['asbp'], asOf: O.meta && O.meta.asOf }
+    kpi: { label: `${ok(b28) ? (b28 < 0 ? 'Дефицит' : 'Излишък') : 'Салдо'} през ${yr(2029)}`, mln: ok(b28) ? Math.abs(b28) : null, pctGdp: ok(p28) ? Math.abs(p28) : null, scope: 'kfp', status: 'forecast', source: publication.sourceRefs || [], asOf: publication.publication }
   };
 }
 

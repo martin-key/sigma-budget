@@ -46,7 +46,7 @@ export function NarrativeContent({
     const supported = PERIODS.filter((p) => Array.isArray(allowed) && allowed.includes(p.key));
     body = emptyState({
       title: `Няма данни за ${model.period.label} на този екран`,
-      text: `Този екран показва ${supported.map((p) => p.label).join(' и ')}.`,
+      text: `Това издание няма този период за данните на този екран. Няма извлечени съпоставими данни за избраното издание и статус. Налични: ${supported.map((p) => p.label).join(' и ')}.`,
       actions: supported.map((p, i) => (
         <p className="state-act" key={p.key}>
           <button

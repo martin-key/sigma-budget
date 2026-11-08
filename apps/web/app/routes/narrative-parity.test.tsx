@@ -2,6 +2,8 @@ import { rejectReactKeyWarnings } from './metadata-test-warnings';
 import { createHash } from 'node:crypto';
 import { expect, it, afterEach } from 'vitest';
 import { readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { renderToString } from 'react-dom/server';
 import { parseHTML } from 'linkedom';
 import { MigratedScreen } from '../migration/registry';
@@ -108,6 +110,19 @@ it('frozen server documents and inputs match their recorded checksums', () => {
       .update(readFileSync(new URL('./__fixtures__/narrative-inputs.json', import.meta.url)))
       .digest('hex'),
   ).toBe(manifest.inputsSha256);
+});
+
+it('period vocabulary fixtures regenerate from the independent legacy renderer', () => {
+  expect(() =>
+    execFileSync(
+      process.execPath,
+      [
+        fileURLToPath(new URL('./__fixtures__/refresh-period-fixtures.mjs', import.meta.url)),
+        '--check',
+      ],
+      { stdio: 'pipe' },
+    ),
+  ).not.toThrow();
 });
 
 rejectReactKeyWarnings();
