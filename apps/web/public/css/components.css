@@ -604,3 +604,8 @@ h4.block-title{font-size:var(--fs-1)}
   .page[data-route] .s15-prog .prog-track { border: 1px solid CanvasText; }
   .page[data-route] .s15-plan-row[data-kind] .prog-fill, .page[data-route] .s15-prog-prev .prog-fill { forced-color-adjust: none; background: Highlight; }
 }
+
+/* Periods share one year group; notices are part of the server-rendered chrome. */
+.period-year{border:0;padding:0;margin:var(--sp-2) 0;min-width:0}
+.period-year>legend{padding:0;margin-bottom:var(--sp-1);font-weight:600;color:var(--ink-mid)}
+.period-notice{margin:0;padding:var(--sp-3) var(--gutter);border-bottom:1px solid var(--rule-soft);background:var(--paper-warm);color:var(--ink);font-size:var(--fs-s);overflow-wrap:anywhere}

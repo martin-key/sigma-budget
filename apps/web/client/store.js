@@ -3,14 +3,8 @@
 // the current screen for period / userType / unit / perPerson / leva / onlyReal.
 import { serverScope } from './env.js';
 
-export const PERIODS = [
-  { key: '2024.report', year: 2024, status: 'report', vintage: 'actual', label: '2024 · Отчет', desc: 'Отчетени данни' },
-  { key: '2025.report', year: 2025, status: 'report', vintage: 'prelim', label: '2025 · Отчет', desc: 'Предварителен отчет' },
-  { key: '2026.draft', year: 2026, status: 'draft', vintage: 'plan', label: '2026 · Проект', desc: 'Проектът, внесен от Министерския съвет' },
-  { key: '2026.law', year: 2026, status: 'law', vintage: 'plan', label: '2026 · Закон', desc: 'Приетият Закон за държавния бюджет' },
-  { key: '2027.forecast', year: 2027, status: 'forecast', vintage: 'forecast', label: '2027 · Прогноза', desc: 'Средносрочна прогноза' },
-  { key: '2028.forecast', year: 2028, status: 'forecast', vintage: 'forecast', label: '2028 · Прогноза', desc: 'Средносрочна прогноза' }
-];
+import { PERIODS, DEFAULT_PERIOD, resolvePeriod, periodByKey } from './periods.js';
+export { PERIODS, DEFAULT_PERIOD } from './periods.js';
 export const USER_TYPES = [
   { id: 'citizen', label: 'Гражданин', hint: 'Колко плащам и за какво отиват парите.' },
   { id: 'journalist', label: 'Журналист', hint: 'Какво се променя спрямо 2025 г. и кои са най-големите промени.' },
@@ -24,14 +18,14 @@ export const SCOPES = {
   maastricht: { label: 'Маастрихт', long: 'Дълг на сектор „Държавно управление“ по методиката на Маастрихт', gl: 'sektor-darzhavno-upravlenie' },
   esa: { label: 'ЕСС · начислено', long: 'ЕСС 2010: начислена основа, сектор „Държавно управление“ (не е КФП, не е касова основа)', gl: 'ess-2010', variant: 'esa' }
 };
-export const DEFAULT_PERIOD = '2026.law';
 /** Roles «гражданин / журналист / експерт». OPEN DECISION (V5): the UX V2 PDF recommends no role selector in the main flow, the team has not decided.
     false = no selector in the menu, every screen keeps the citizen view and a saved role is ignored. Set true to bring the selector back: it is
     listed in the settings again (js/shell.js), the saved choice is read again and a change re-renders the screen (js/router.js). */
 export const ROLE_SELECTOR = false;
 const KEY = 'bns.prefs.v1';
-const DEFAULTS = { period: DEFAULT_PERIOD, userType: 'citizen', scope: 'kfp', unit: 'eur', perPerson: false, leva: false, onlyReal: false, sources: false };
+const DEFAULTS = { period: DEFAULT_PERIOD, userType: 'citizen', scope: 'kfp', unit: 'eur', perPerson: false, leva: false, onlyReal: false, sources: false, periodRequested: null, periodNotice: '' };
 const VALID = {
+  periodRequested: v => v == null || typeof v === 'string', periodNotice: v => typeof v === 'string',
   period: v => PERIODS.some(p => p.key === v),
   userType: v => USER_TYPES.some(t => t.id === v),
   scope: v => typeof v === 'string' && Object.hasOwn(SCOPES, v),          // own keys only: 'constructor' / 'toString' are not scopes
@@ -53,7 +47,7 @@ const S = () => serverScope()?.state || own;
 const state = new Proxy({}, { get: (_, k) => S()[k], set: (_, k, v) => { S()[k] = v; return true; }, has: (_, k) => k in S(),
   ownKeys: () => Reflect.ownKeys(S()), getOwnPropertyDescriptor: (_, k) => Object.getOwnPropertyDescriptor(S(), k) });
 /** the view state a server request starts from: the defaults, and the period of the address when it is a valid one */
-export const requestState = per => ({ ...DEFAULTS, period: VALID.period(per) ? per : DEFAULT_PERIOD });
+export const requestState = per => ({ ...DEFAULTS, period: resolvePeriod(per).resolved, periodRequested: per ?? null });
 try {
   const saved = JSON.parse(safe.get('localStorage', KEY) || '{}');
   for (const k of PERSIST) if (Object.hasOwn(saved, k) && VALID[k](saved[k]) && (k !== 'userType' || ROLE_SELECTOR)) state[k] = saved[k];
@@ -73,7 +67,7 @@ export const store = {
   },
   /** subscribe(fn(key, value)) -> unsubscribe */
   subscribe(fn) { subs.add(fn); return () => subs.delete(fn); },
-  get period() { return PERIODS.find(p => p.key === state.period) || PERIODS[3]; },
+  get period() { return periodByKey(state.period); },
   get userTypeInfo() { return USER_TYPES.find(t => t.id === state.userType) || USER_TYPES[0]; },
   snapshot: () => ({ ...state }),
   /** the share link of a view carries the period only when it is not the default */

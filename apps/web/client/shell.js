@@ -34,10 +34,10 @@ function openPeriod(btn) {
   const sup = router.periods;
   const allowed = k => !Array.isArray(sup) || sup.includes(k);
   const name = nextId('per');
-  const body = html`<fieldset class="opt-list"><legend class="sr-only">Година и статус на данните</legend>${store.PERIODS.map(p => {
+  const body = html`<fieldset class="opt-list"><legend class="sr-only">Година и статус на данните</legend>${[...new Set(store.PERIODS.map(p => p.year))].map(year => html`<fieldset class="period-year"><legend>${year}</legend>${store.PERIODS.filter(p => p.year === year).map(p => {
     const ok = allowed(p.key);
     return html`<label class="opt${ok ? '' : ' opt-off'}"><input type="radio" name="${name}" value="${p.key}"${p.key === store.get('period') ? html` checked` : ''}${ok ? '' : html` disabled`}><span class="opt-main"><span class="opt-label">${p.label}</span><span class="opt-desc">${p.desc}${ok ? '' : ' · не се показва на този екран'}</span></span></label>`;
-  })}</fieldset>`;
+  })}</fieldset>`)}</fieldset>`;
   const pop = popover.open(btn, { title: 'Година и статус', body, label: 'Година и статус на данните' });
   pop.el.addEventListener('change', e => {
     const t = e.target;

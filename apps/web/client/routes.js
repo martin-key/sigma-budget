@@ -1,3 +1,4 @@
+import { resolvePeriod } from './periods.js';
 import { toHref } from './loc.js';
 import { ROUTES, GROUPS } from '../app/lib/routes.ts';
 export { ROUTES, GROUPS } from '../app/lib/routes.ts';
@@ -47,6 +48,7 @@ export function href(idOrKey, params = {}, query = {}) {
     const m = /^:(\w+)/.exec(s);
     return m ? params[m[1]] : s;
   }).filter(v => v != null && v !== '');
+  if (query.per != null) query = { ...query, per: resolvePeriod(query.per).resolved };
   const q = new URLSearchParams(Object.entries(query).filter(([, v]) => v != null && v !== '')).toString();
   return toHref('/' + parts.map(encodeURIComponent).join('/') + (q ? '?' + q : ''));
 }

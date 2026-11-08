@@ -1,4 +1,6 @@
 // Boot: core data (small, eager) -> shell -> router.  Everything else loads lazily.
+import { store } from './store.js';
+import { migratePeriod, resolvePeriod } from './periods.js';
 import { data } from './data.js';
 import { router, dropStalePrerender } from './router.js';
 import { shell } from './shell.js';
@@ -9,6 +11,9 @@ import { watchLinks, ROOT } from './loc.js';
 const wait = ms => new Promise(r => setTimeout(r, ms));
 
 async function boot() {
+  const initial = router.parseHash(location.hash.startsWith('#/') ? location.hash : location.pathname + location.search).query;
+  store.set('period', resolvePeriod(initial.per).resolved);
+  store.set('periodRequested', initial.per ?? null);
   dropStalePrerender();                                           // the HTML of another address is not shown while the data loads
   if (document.documentElement.hasAttribute('data-prerendered')) {
     const seed = document.getElementById('react-screen-seed');
@@ -29,6 +34,11 @@ async function boot() {
   coreP.then(() => { shell.refreshFooter(); });
   data.prefetch('releases/current');                            // the release ID that every CSV names (js/share.js csvMeta)
   await router.start();
+  const beforeMigration = location.href;
+  const migration = migratePeriod({ address: location.href,
+    get: key => localStorage.getItem(key), set: (key, value) => localStorage.setItem(key, value),
+    replace: url => history.replaceState(history.state, '', url) });
+  if (location.href !== beforeMigration) { await router.rerender(); store.set('periodNotice', migration?.notice || ''); refreshChrome(); }
   registerWorker();
 }
 

@@ -120,11 +120,13 @@ def _period(slug, obj, ctx):
     if obj is None:
         return None
     if slug in ("outlook", "revenue", "gva-sectors"):
-        return _yrs(obj["years"][0], obj["years"][-1])
+        ys = obj["years"] + [p["year"] for p in obj.get("byPeriod", {}).values()]
+        return _yrs(min(ys), max(ys))
     if slug == "core":
         return _yrs(obj["years"]["list"][0], obj["years"]["list"][-1])
     if slug == "expenditure":
         ys = obj["functions"]["years"] + obj["economic"]["years"] + obj["cofog"]["years"]
+        ys += [p["year"] for p in obj.get("byPeriod", {}).values()]
         return _yrs(min(ys), max(ys))
     if slug == "components":
         return _yrs(obj["nationalVsEu"]["years"][0], obj["nationalVsEu"]["years"][-1])

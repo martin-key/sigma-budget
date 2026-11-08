@@ -1,3 +1,5 @@
+import { PERIODS, selectPeriod } from './periods.js';
+import { money, pct } from './format.js';
 // The search engine shared by the palette (search.js) and the S28 page: pure functions plus the index loader, no DOM.
 // Ported from the v3.6 prototype (Bulgarian/Latin folding, synonyms, stop words, stems, scoring) and fed from
 //   data/search-index.json (DATA_SPEC 3.21)  +  the screens of the route table  +  the glossary terms (only until the index has its own).
@@ -248,6 +250,32 @@ function fromDoc(doc) {
   return out;
 }
 
+/** Search the annual values of this same release, not the retired positional 2026 publication. */
+export function annualSearch(outlook, revenue, expenditure) {
+  const entries = [];
+  const add = (p, title, cell, screen, params = {}) => {
+    if (cell?.value == null) return;
+    entries.push(entry('indicators', title, {value: cell.unit === 'млн. €' ? money(cell.value) : pct(cell.value, 1),
+      period: String(p.year), stage: `${{law:'Закон',expected:'Очаквано',draft:'Проект',forecast:'Прогноза'}[p.status]} ${p.year}`,
+      sub: `МФ, публикация ${p.publication}`, kw: PERIODS.find(x => x.key === p.periodKey)?.label,
+      href: routeHref(screen, params, {per:p.periodKey})}));
+  };
+  const normal = text => String(text).toLowerCase().replace(/^р-ди/, 'разходи').replace(/[^а-яa-z0-9]/g, '');
+  for (const period of PERIODS) {
+    const o=selectPeriod(outlook,period.key), r=selectPeriod(revenue,period.key), x=selectPeriod(expenditure,period.key);
+    if (!o.available || o.legacy) continue;
+    for (const [key,title] of [['revenue','Приходи на КФП'],['expenditure','Разходи на КФП'],['balance','Бюджетно салдо на КФП'],['interest','Лихви на КФП']]) add(o,title,o.series?.[key],'S13');
+    for (const [id,cell] of Object.entries(r.groups || {})) add(o,(revenue.groups || []).find(g=>g.id===id)?.name || id,cell,'S06',{source:id});
+    for (const fn of x.functions || []) {
+      const metadata=(expenditure.functions?.items || []).find(item=>normal(item.name)===normal(fn.label));
+      if (metadata) add(o,fn.label,fn.cell,'S08',{fn:metadata.id});
+    }
+    for (const macro of o.macro || []) add(o,macro.label,macro.cell,'S31');
+  }
+  return entries;
+}
+const oldAnnual = e => e.group === 'indicators' && (/бюджет 2026|КФП по (видове|функции|икономически вид), 2026|Макроикономическа прогноза, 2026/.test(e.sub));
+
 // Words people may use for a screen that its title and description do not contain.
 const SCREEN_KW = {
   S01: 'начало начална страница държавният бюджет достъпен език', S03: 'речник термини понятия думи обяснение',
@@ -290,7 +318,16 @@ export function getIndex() {
     let doc = null, retry = false;
     try { doc = await data.load('search-index'); } catch (e) { retry = e instanceof data.LoadError; }   // pending: the file is not published yet
     const hasIndex = !!doc && Array.isArray(doc.items);
-    const entries = hasIndex ? fromDoc(doc) : [];
+    let entries = hasIndex ? fromDoc(doc) : [];
+    const annual = await Promise.allSettled(['outlook','revenue','expenditure'].map(name=>data.load(name)));
+    retry = retry || annual.some(result=>result.status === 'rejected' && result.reason instanceof data.LoadError);
+    const available = annual.every(result=>result.status === 'fulfilled' && result.value?.byPeriod);
+    if (available) {
+      entries = entries.filter(e=>!oldAnnual(e));
+      entries.push(...annualSearch(...annual.map(result=>result.value)));
+    } else {
+      entries = entries.map(e=>oldAnnual(e) ? entry(e.group,e.title,{...e,sub:`Историческа публикация: АСБП 2026–2028. ${e.sub}`,stage:'Исторически проект 2026'}) : e);
+    }
     entries.push(...fromRoutes());
     if (!entries.some(e => e.group === 'terms')) {
       try { entries.push(...fromGlossary(await data.load('glossary'))); } catch (e) { retry = retry || e instanceof data.LoadError; }

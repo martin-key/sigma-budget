@@ -2,7 +2,7 @@ schema: 1
 datasets:
 - id: outlook
   catalogId: D01
-  title: Рамка на КФП и макропрогноза 2024–2028
+  title: Рамка на КФП и макропрогноза 2024–2029
   status: real
   files:
   - data/release/outlook.json
@@ -13,11 +13,15 @@ datasets:
   - data/inputs/budget_forecast_2027.json
   schema: docs/data-spec.md
   screens:
+  - S04
   - S05
+  - S06
+  - S07
+  - S08
   - S13
   - S17
   - S31
-  period: 2024–2028
+  period: 2024–2029
   scope: 'КФП and сектор „Държавно управление“ (S.13): macro framework and fiscal targets'
   unit: млн. €
   rebuild: python -m budget_pipeline.build.rebuild --build-date 2026-11-05
@@ -57,9 +61,10 @@ datasets:
   - data/inputs/budget_forecast_2027.json
   schema: docs/data-spec.md
   screens:
+  - S04
   - S05
   - S06
-  period: 2024–2028
+  period: 2024–2029
   scope: КФП, Приложение 3
   unit: млн. €
   rebuild: python -m budget_pipeline.build.rebuild --build-date 2026-11-05
@@ -81,10 +86,11 @@ datasets:
   - data/inputs/budget_forecast_2027.json
   schema: docs/data-spec.md
   screens:
+  - S04
   - S05
   - S07
   - S08
-  period: 2015–2028
+  period: 2015–2029
   scope: КФП by function (COFOG), Приложение 3
   unit: млн. €
   rebuild: python -m budget_pipeline.build.rebuild --build-date 2026-11-05

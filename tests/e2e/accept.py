@@ -293,7 +293,7 @@ def retired_examples(browser, port):
     ctx = browser.new_context(service_workers="block")
     ctx.add_init_script("window.__HASH_ROUTES__ = true")
     page = ctx.new_page()
-    page.goto(f"http://127.0.0.1:{port}/index.html#/razhodi/obrazovanie")
+    page.goto(f"http://127.0.0.1:{port}/index.html#/razhodi/obrazovanie?per=2026.expected")
     page.wait_for_selector('#s08-godini')
     ok(page.locator('#s08-merki').count() == 0, 'S08 has no editorial linked-measures section')
     # Check the actual registered route through the module, independent of a route spelling.

@@ -10,6 +10,7 @@
 // Numbers: only from core (kpis, functions, revenueGroups), execution (the 2025 pace), debt (limits, ZDD) and measures; all through the
 // format helpers and view.amount, so „% от БВП“, „на човек“ and „и в лева“ apply. A failed optional file turns only its own scene into a note.
 // Motion: bars and cells grow once when their scene scrolls into view; nothing moves under prefers-reduced-motion, and nothing is hidden first.
+import { selectPeriod } from '../periods.js';
 import { planBasis } from '../exec.js';
 import { html, raw } from '../html.js';
 import { num, pct, money, date, monthName, NBSP } from '../format.js';
@@ -23,7 +24,7 @@ import { scopeChip } from '../ui/scope.js';
 import { errorState } from '../ui/states.js';
 import { gl } from '../ui/gl.js';
 
-export const needs = ['core', 'execution?', 'measures?', 'debt?', 'guide?'];
+export const needs = ['core', 'outlook', 'revenue?', 'expenditure?', 'execution?', 'measures?', 'debt?', 'guide?'];
 export const styles = ['s04-5-minuti'];
 
 const SCENES = [
@@ -145,7 +146,7 @@ function scene1(ctx, core) {
     { href: href('izpalnenie', {}, { pokazatel: 'balance' }), title: 'Салдото месец по месец', text: 'Кога дефицитът расте и кога намалява.' }
   ]);
   return scene(1, {
-    text, visual, deep, scope: 'kfp', source: ['asbp'], asOf: ctx.data.execution?.plan2026?.asOf,
+    text, visual, deep, scope: 'kfp', source: ['budget2027'], asOf: ctx.data.execution?.plan2026?.asOf,
     share: `През 2026 г. държавата планира приходи от ${money(rev, { d: 1 })} и разходи от ${money(exp, { d: 1 })}; разликата е дефицит от ${money(gap, { d: 1 })}.`
   });
 }
@@ -154,7 +155,7 @@ function scene1(ctx, core) {
 
 function scene2(ctx, core) {
   const groups = core.revenueGroups;
-  if (!Array.isArray(groups) || !groups.length) return failed(2, 'Няма данни за приходите.');
+  if (!Array.isArray(groups) || !groups.length) return block({ id: 's04-scene2', title: SCENES[1].title, status: 'pending', body: html`<p>${selectPeriod(ctx.annualRaw?.revenue, '2026.law').gaps?.groups || 'Няма данни за приходите.'}</p>` });
   const gdp = core.kpis.gdp?.mlnPrecise;
   const cells = cells100(groups.map(g => g.share ?? g.mln));
   let c = 0;
@@ -182,7 +183,7 @@ function scene2(ctx, core) {
     { href: href('prihodi', { source: a.id }), title: a.name, text: 'Най-големият източник: кой го плаща и какво значи за теб.' }
   ]);
   return scene(2, {
-    text, visual, deep, scope: 'kfp', source: ['asbp'], asOf: ctx.data.execution?.plan2026?.asOf,
+    text, visual, deep, scope: 'kfp', source: ['budget2027'], asOf: ctx.data.execution?.plan2026?.asOf,
     share: `От всеки 100 € приходи на КФП през 2026 г.: ${groups.map((g, i) => `${cells[i]} € — ${g.name}`).join('; ')}.`
   });
 }
@@ -191,7 +192,7 @@ function scene2(ctx, core) {
 
 function scene3(ctx, core) {
   const fns = [...(core.functions || [])].filter(f => ok(f.mln)).sort((x, y) => y.mln - x.mln);
-  if (!fns.length) return failed(3, 'Няма данни за разходите по функции.');
+  if (!fns.length) return block({ id: 's04-scene3', title: SCENES[2].title, status: 'pending', body: html`<p>${selectPeriod(ctx.annualRaw?.expenditure, '2026.law').gaps?.functions || 'Няма данни за разходите по функции.'}</p>` });
   const k = core.kpis, gdp = k.gdp?.mlnPrecise;
   const top = fns[0];
   const sum = fns.reduce((s, f) => s + f.mln, 0);
@@ -215,7 +216,7 @@ function scene3(ctx, core) {
     { href: href('vedomstva'), title: byKey.vedomstva.title, text: 'Министерствата и другите бюджети, и програмите им.' }
   ]);
   return scene(3, {
-    text, visual, deep, scope: 'kfp', source: ['asbp'], asOf: ctx.data.execution?.plan2026?.asOf,
+    text, visual, deep, scope: 'kfp', source: ['budget2027'], asOf: ctx.data.execution?.plan2026?.asOf,
     share: `Най-голямата функция на разходите за 2026 г. е „${top.short || top.name}“: ${money(top.mln, { d: 1 })} (${pct(top.share, 1)} от разходите по функции).`
   });
 }
@@ -399,7 +400,7 @@ export function render(ctx) {
   return html`<div class="s04">
     <div class="s04-top" data-gl-scan>
       <p class="s04-lead">Държавният бюджет на България за 2026 г. — от общата сметка до изпълнението. Чете се за около пет минути.</p>
-      <p class="s04-basis">Числата са в евро и са по проекта на бюджета, освен където е казано друго. Какво промени приетият закон — на екрана <a href="${href('zakon')}">„${byKey.zakon.title}“</a>.</p>
+      <p class="s04-basis">Числата са в евро. Годишните агрегати са по приетия закон; липсващите законови разбивки са обозначени. Какво промени приетият закон — на екрана <a href="${href('zakon')}">„${byKey.zakon.title}“</a>.</p>
     </div>
     ${nav}
     ${guard(1, () => scene1(ctx, core))}

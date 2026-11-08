@@ -1,3 +1,4 @@
+import { selectPeriod } from '../periods.js';
 // S29 · Вграден изглед (#/embed/<routeKey>.<chartId>[?per=…&<host params>]): ONE chart on a bare page (no top bar, no menu) for an <iframe> on another site.
 // How the chart is found: the part before the first dot is a route key (routes.js), the rest is a chart id that screen exports:
 //   export const embeds = { 'my-chart-id': ctx => ({ chart: <chart spec>, source: ['kfp'], asOf: '2026-07-31', status: 'real' }) }
@@ -36,7 +37,7 @@ function paramsOf(host, query) {
 /** -> {ok:true, e, host, params} | {ok:false, kind:'unknown'|'pending'|'error'} */
 async function load(ctx) {
   const requested = String(ctx.params.chart ?? '');
-  const addr = requested === 'selftest' ? 'razhodi.s07-fn' : requested;
+  const addr = requested === 'selftest' ? 'prognoza.s13-rev-exp' : requested;
   const dot = addr.indexOf('.');
   const key = dot < 0 ? addr : addr.slice(0, dot), id = dot < 0 ? '' : addr.slice(dot + 1);
   const host = Object.hasOwn(byKey, key) ? byKey[key] : null;           // byKey is a plain object: „constructor“ must not match
@@ -48,6 +49,13 @@ async function load(ctx) {
   try { prep = await prepare(host, params, ctx.query, { signal: ctx.signal, kind: 'embed' }); }
   catch (err) { if (err?.name === 'AbortError') throw err; console.error(err); return { ok: false, kind: 'error' }; }
   const { mod, ctx: hctx, fail } = prep;
+  const primary = { S06: 'revenue', S07: 'expenditure', S08: 'expenditure', S13: 'outlook' }[host.id];
+  if (primary && hctx.annualRaw?.[primary]) {
+    const period = selectPeriod(hctx.annualRaw[primary], hctx.period.key);
+    const field = host.id === 'S06' ? 'groups' : id === 's07-fn' ? 'functions' : id === 's07-vid' ? 'economicDetails' : null;
+    if (!period.available || (field && period.gaps?.[field])) return { ok: false, kind: 'pending', reason: period.reason || period.gaps[field] };
+  }
+
   if (fail) return { ok: false, kind: fail.kind };                      // the host's required data is pending / failed
   if (!Object.hasOwn(mod.embeds || {}, id) || typeof mod.embeds[id] !== 'function') return { ok: false, kind: 'unknown' };
   let e;
@@ -89,18 +97,18 @@ function foot(e, link) {
 
 const FAIL = {
   unknown: () => emptyState({ icon: 'search', title: 'Графиката не е намерена', text: 'Адресът не води до графика от „Бюджет на светло“. Провери кода за вграждане.' }),
-  pending: () => pendingState({ title: 'Графиката предстои', text: 'Данните за нея още не са включени.' }),
+  pending: reason => pendingState({ title: 'Няма графика за избрания период', text: reason || 'Данните за нея още не са включени.' }),
   error: () => errorState({ link: false, title: 'Графиката не се зареди.' })
 };
 
 export async function render(ctx) {
   const r = await load(ctx);
-  if (!r.ok) return { body: html`<div class="s29-embed">${FAIL[r.kind]()}${foot(null, absolute('#/'))}</div>` };
+  if (!r.ok) return { body: html`<div class="s29-embed">${FAIL[r.kind](r.reason)}${foot(null, absolute('#/'))}</div>` };
   const { e, host, params } = r;
   // the title is the page heading; `label` still names the figure for assistive tech. A host that declares status 'mock' gets the hatch and the badge too.
   const spec = { ...e.chart, title: '', label: e.chart.title, ...(e.status === 'mock' ? { mock: true } : {}) };
   const mock = isMockSpec(e.chart) || e.status === 'mock';
-  const link = absolute(host ? routeHref(host.id, params) : '#/');
+  const link = absolute(host ? routeHref(host.id, params, { per: ctx.period.key }) : '#/');
   return {
     title: e.chart.title || 'Графика',
     body: html`<div class="s29-embed">

@@ -5,7 +5,7 @@ import tempfile
 import unittest
 
 from budget_pipeline.routes import CATALOGUE, load_routes
-from budget_pipeline.build import catalog_refresh, editorial, guide
+from budget_pipeline.build import catalog, catalog_refresh, editorial, guide
 from budget_pipeline.validate.checks import Routes
 
 
@@ -56,3 +56,16 @@ class RouteCatalogue(unittest.TestCase):
             path.write_text(json.dumps({"routes": [record, record]}))
             with self.assertRaisesRegex(ValueError, "unique screen ids"):
                 load_routes(path)
+
+
+class AnnualCatalogue(unittest.TestCase):
+    def test_span_includes_keyed_periods_without_relabelling_legacy_columns(self):
+        old = {"years": [2024, 2025, 2026, 2027, 2028]}
+        keyed = {**old, "byPeriod": {"2026.law": {"year": 2026}, "2029.forecast": {"year": 2029}}}
+        for slug in ("outlook", "revenue"):
+            self.assertEqual(catalog._period(slug, old, None), "2024–2028")
+            self.assertEqual(catalog._period(slug, keyed, None), "2024–2029")
+        expenditure = {"functions": {"years": [2026, 2027, 2028]}, "economic": old,
+                       "cofog": {"years": [2015, 2024]}, "byPeriod": keyed["byPeriod"]}
+        self.assertEqual(catalog._period("expenditure", expenditure, None), "2015–2029")
+        self.assertEqual(old["years"], [2024, 2025, 2026, 2027, 2028])

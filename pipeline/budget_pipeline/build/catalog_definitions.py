@@ -24,10 +24,10 @@ GROUPS = [
 # One row per file. `file` is relative to data/release/. `{…}` placeholders are filled by catalog.facts().
 DEFS = [
     # ---------------------------------------------------------------------------------------------- budget
-    {"slug": "outlook", "file": "outlook.json", "group": "budget", "title": "Рамка на КФП и макропрогноза 2024–2028",
-     "desc": "Приходите, разходите, салдото, лихвите и финансирането на консолидираната фискална програма (КФП) за 2024–2028 г. "
+    {"slug": "outlook", "file": "outlook.json", "group": "budget", "title": "Рамка на КФП и макропрогноза 2024–2029",
+     "desc": "Приходите, разходите, салдото, лихвите и финансирането на консолидираната фискална програма (КФП) за 2024–2029 г. "
              "в млн. € и като дял от БВП, макроикономическата прогноза (БВП, инфлация, безработица) и сравнение на двете "
-             "версии на Приложение 3 към мотивите на законопроекта.",
+             "версии на Приложение 3 към мотивите на законопроекта. Законът за 2026, очакваното изпълнение, проектът за 2027 и прогнозите са отделни периоди.",
      "screens": ["S01", "S04", "S13", "S17"]},
     # previous: built by gva_sectors.py from two saved Eurostat answers (catalog.GVA_FILES); its search row has its own words
     {"slug": "gva-sectors", "file": "gva-sectors.json", "group": "budget",
@@ -38,7 +38,7 @@ DEFS = [
      "screens": ["S31"],
      "search": {"period": "2019–2025", "kw": "gva-sectors gva-sectors.json отрасли сектори добавена стойност бвп икономика"}},
     {"slug": "revenue", "file": "revenue.json", "group": "budget", "title": "Приходи на КФП по видове",
-     "desc": "Приходите на КФП за 2024–2028 г.: {n_rev_groups} групи и {n_rev_rows} реда от Приложение 3 към мотивите, "
+     "desc": "Приходите на КФП за 2024–2029 г.: {n_rev_groups} групи и {n_rev_rows} реда от Приложение 3 към мотивите, "
              "в млн. € и като дял от БВП. Изпълнението по видове данъци предстои (P01).",
      "screens": ["S04", "S06", "S07", "S13", "S15", "S19"]},
     {"slug": "expenditure", "file": "expenditure.json", "group": "budget", "title": "Разходи на КФП: функции, икономически вид и COFOG",

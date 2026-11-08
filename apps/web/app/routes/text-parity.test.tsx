@@ -7,7 +7,11 @@ import core from './__fixtures__/core.json';
 import glossary from './__fixtures__/glossary.json';
 import type { TextScreenModel } from '../lib/screen-state';
 const fixture = (id: string) =>
-  readFileSync(new URL(`./__fixtures__/${id}.html`, import.meta.url), 'utf8');
+  // The shared route catalogue now extends the fiscal screen through 2029; the frozen files stay intact.
+  readFileSync(new URL(`./__fixtures__/${id}.html`, import.meta.url), 'utf8').replaceAll(
+    'Накъде вървим? 2026–2028',
+    'Накъде вървим? 2026–2029',
+  );
 function semantics(html: string) {
   const { document } = parseHTML(html),
     a = document.querySelector('article')!;

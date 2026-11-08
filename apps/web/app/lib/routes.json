@@ -92,7 +92,13 @@
       {
         "short": "Годишната рамка",
         "next": ["S07"],
-        "desc": "Годишната бюджетна рамка накратко: приходи, разходи, дефицит и как се връзват с месечните отчети."
+        "desc": "Годишната бюджетна рамка накратко: приходи, разходи, дефицит и как се връзват с месечните отчети.",
+        "samples": [
+          "#/pari",
+          "#/pari?per=2026.expected",
+          "#/pari?per=2027.draft",
+          "#/pari?per=2029.forecast"
+        ]
       }
     ],
     [
@@ -108,7 +114,13 @@
         "short": "Приходи",
         "step": 2,
         "next": ["S07"],
-        "samples": ["#/prihodi", "#/prihodi/dds"],
+        "samples": [
+          "#/prihodi",
+          "#/prihodi/dds",
+          "#/prihodi?per=2026.expected",
+          "#/prihodi?per=2027.draft",
+          "#/prihodi?per=2029.forecast"
+        ],
         "desc": "Данъци, осигуровки, неданъчни приходи и помощи: кой колко носи."
       }
     ],
@@ -125,7 +137,13 @@
         "short": "Разходи",
         "step": 3,
         "next": ["S12"],
-        "samples": ["#/razhodi", "#/razhodi?po=vid"],
+        "samples": [
+          "#/razhodi",
+          "#/razhodi?po=vid",
+          "#/razhodi?per=2026.expected",
+          "#/razhodi?per=2027.draft",
+          "#/razhodi?per=2029.forecast"
+        ],
         "desc": "Разходите по функции, по вид и по ведомства."
       }
     ],
@@ -141,7 +159,12 @@
         "next": ["S12"],
         "parent": "S07",
         "nav": false,
-        "samples": ["#/razhodi/obrazovanie"],
+        "samples": [
+          "#/razhodi/obrazovanie",
+          "#/razhodi/obrazovanie?per=2026.expected",
+          "#/razhodi/obrazovanie?per=2027.draft",
+          "#/razhodi/obrazovanie?per=2029.forecast"
+        ],
         "desc": "Какво влиза във функцията и как се променя през годините."
       }
     ],
@@ -195,7 +218,7 @@
         "next": ["S10"],
         "samples": ["#/merki", "#/merki/kr1"],
         "desc": "Приходните и разходните мерки: какво се променя, от кога и какъв ефект се очаква.",
-        "periods": ["2026.draft", "2026.law"]
+        "periods": ["2026.law"]
       }
     ],
     [
@@ -203,13 +226,19 @@
       "prognoza",
       "/prognoza",
       "s13-prognoza",
-      "Накъде вървим? 2026–2028",
+      "Накъде вървим? 2026–2029",
       "budget",
       "forecast",
       {
         "short": "Прогноза",
         "next": ["S17"],
-        "desc": "Прогнозата за приходи, разходи и дефицит до 2028 г."
+        "desc": "Проектът за 2027 и прогнозата до 2029 г., със закон и очаквано изпълнение за 2026 г.",
+        "samples": [
+          "#/prognoza",
+          "#/prognoza?per=2026.expected",
+          "#/prognoza?per=2027.draft",
+          "#/prognoza?per=2029.forecast"
+        ]
       }
     ],
     [
@@ -224,8 +253,13 @@
         "query": ["y", "sy"],
         "short": "БВП",
         "next": ["S13"],
-        "periods": "none",
-        "samples": ["#/bvp"],
+        "periods": "all",
+        "samples": [
+          "#/bvp",
+          "#/bvp?per=2026.expected",
+          "#/bvp?per=2027.draft",
+          "#/bvp?per=2029.forecast"
+        ],
         "desc": "Колко расте икономиката: БВП, потреблението, инвестициите, износът и вносът по години."
       }
     ],
@@ -257,7 +291,7 @@
         "short": "Пътят на бюджета",
         "next": ["S15"],
         "desc": "Как бюджетът за 2026 стига от внасянето до обнародването и какво се променя между проекта и приетия закон.",
-        "periods": ["2026.draft", "2026.law"]
+        "periods": ["2026.law"]
       }
     ],
     [
@@ -315,7 +349,8 @@
         "step": 7,
         "next": ["S18"],
         "samples": ["#/dalg", "#/dalg?obhvat=maastricht"],
-        "desc": "Държавният дълг по две методики и откъде се финансира дефицитът."
+        "desc": "Държавният дълг по две методики и откъде се финансира дефицитът.",
+        "periods": ["2024.report", "2025.report", "2026.law"]
       }
     ],
     [
@@ -330,7 +365,7 @@
         "step": 8,
         "next": ["S24", "S01"],
         "desc": "Колко внасяш ти от трудовата си заплата и къде отиват парите.",
-        "periods": ["2026.draft", "2026.law"]
+        "periods": ["2026.law"]
       }
     ],
     [

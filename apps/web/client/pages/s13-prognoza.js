@@ -1,4 +1,7 @@
-// S13 · Накъде вървим? 2026–2028 · #/prognoza · next S17 · periods all
+import { periodIndex, previousPeriodIndex } from '../annual.js';
+import { selectPeriod } from '../periods.js';
+import { annualGap } from '../ui/annual.js';
+// S13 · Накъде вървим? 2026–2029 · #/prognoza · next S17 · periods all
 // Data: outlook.json (D01+D02+D15: the fiscal frame 2024–2028 and the macro forecast, from the motives of the bill) and, when it
 // exists, debt.json (D13: government debt, `zdd`). Every figure on the screen is read or computed from those files; a missing
 // file gives a „Предстои“ state, never a number. The charts and the tiles honour „% от БВП“ / „на човек“ (view.chartUnit, kpi).
@@ -22,8 +25,8 @@ export const styles = ['s13-prognoza'];
 /* ---------------------------------------------------------------- words and small helpers */
 const ok = v => typeof v === 'number' && Number.isFinite(v);
 /** under the year on the axis (a line break keeps five categories readable on a phone) */
-const WORD = { actual: 'отчет', prelim: 'предв.\nотчет', plan: 'план', forecast: 'прогноза' };
-const LONG = { actual: 'Отчет', prelim: 'Предварителен отчет', plan: 'План по проекта', forecast: 'Прогноза' };
+const WORD = { law: 'закон', expected: 'очаквано', draft: 'проект', actual: 'отчет', prelim: 'предв.\nотчет', plan: 'план', forecast: 'прогноза' };
+const LONG = { law: 'Приет закон', expected: 'Оценка на МФ, не отчет', draft: 'Проект на МФ', actual: 'Отчет', prelim: 'Предварителен отчет', plan: 'План по проекта', forecast: 'Прогноза' };
 const list = (a, n) => (Array.isArray(a) && a.length === n ? a : Array.from({ length: n }, () => null));
 const pick = (a, i) => (Array.isArray(a) && ok(a[i]) ? a[i] : null);
 const maxAbs = (...lists) => Math.max(0, ...lists.flat().filter(ok).map(Math.abs));
@@ -39,23 +42,17 @@ function frame(ctx) {
   const n = years.length;
   const kinds = years.map((_, i) => (WORD[o.vintage?.[i]] ? o.vintage[i] : 'forecast'));
   const ser = key => ({ mln: list(o.kfp?.[key]?.mln, n), pg: list(o.kfp?.[key]?.pctGdp, n) });
-  const plan = kinds.indexOf('plan');
-  const at = yIndex(years, ctx);
+  const plan = periodIndex(o, ctx);
+  const at = plan;
   return {
-    o, years, n, kinds, plan, sel: at >= 0 ? at : Math.max(plan, 0), asOf: o.meta?.asOf,
+    o, sources: o.meta.source, years, n, kinds, plan, sel: at >= 0 ? at : Math.max(plan, 0), asOf: o.meta?.asOf,
     gdp: list(o.gdp?.mln, n), rev: ser('revenue'), exp: ser('expenditure'), bal: ser('balance'), int: ser('interest'),
     span: n ? `${years[0]}–${years[n - 1]}` : ''
   };
 }
 
 /** government debt aligned to the years of the outlook; null while debt.json is missing or has no usable series */
-function debtOf(ctx, f) {
-  const z = ctx.data.debt?.zdd;
-  if (!z || !Array.isArray(z.years)) return null;
-  const align = a => f.years.map(y => { const j = z.years.indexOf(y); return j >= 0 && ok(a?.[j]) ? a[j] : null; });
-  const d = { mln: align(z.totalMln), pg: align(z.pctGdp) };
-  return d.mln.some(ok) || d.pg.some(ok) ? d : null;
-}
+function debtOf() { return null; }
 
 /** the year on the axis, then what kind of numbers it is */
 const cats = f => f.years.map((y, i) => `${y}\n${WORD[f.kinds[i]]}`);
@@ -133,20 +130,21 @@ export function revExpChart(ctx, f = frame(ctx)) {
 }
 
 /** columns by the kind of numbers: reported (отчет, предварителен отчет), plan of the bill, forecast */
-const grpOf = k => (k === 'actual' || k === 'prelim' ? 'rep' : k === 'plan' ? 'plan' : 'fc');
+const grpOf = k => (k === 'actual' || k === 'prelim' ? 'rep' : ['plan','law','draft'].includes(k) ? 'plan' : k === 'expected' ? 'expected' : 'fc');
 function groupNames(f) {
   const rep = new Set(f.kinds.filter(k => grpOf(k) === 'rep'));
-  const planYears = f.years.filter((_, i) => f.kinds[i] === 'plan');
+  const planYears = f.years.filter((_, i) => ['plan','law','draft'].includes(f.kinds[i]));
   return {
     rep: rep.size === 2 ? 'Отчет и предварителен отчет' : rep.has('prelim') ? LONG.prelim : LONG.actual,
-    plan: planYears.length === 1 ? `План за ${yr(planYears[0])}` : LONG.plan,
+    plan: planYears.length === 1 ? `План за ${yr(planYears[0])}` : 'Закон и проект',
+    expected: LONG.expected,
     fc: LONG.forecast
   };
 }
 function barsByKind(ctx, f, o) {
   const u = chartUnit(ctx, { pct: true, max: maxAbs(o.s.mln) });
   const vals = cv(u, o.s), names = groupNames(f), tx = v => unitTxt(u, v);
-  const groups = [{ g: 'rep', color: '--data' }, { g: 'plan', color: 1 }, { g: 'fc', color: 'other' }].filter(x => f.kinds.some(k => grpOf(k) === x.g));
+  const groups = [{ g: 'rep', color: '--data' }, { g: 'plan', color: 1 }, { g: 'expected', color: 2 }, { g: 'fc', color: 'other' }].filter(x => f.kinds.some(k => grpOf(k) === x.g));
   return {
     id: o.id, type: 'bar', stack: true, title: `${o.title}, ${f.span}`, sub: u.unit,
     categories: cats(f), categoryLabel: 'Година', min: o.min, d: u.d, fmt: u.fmt, height: 300,
@@ -182,10 +180,10 @@ export function debtChart(ctx, f = frame(ctx), d = debtOf(ctx, f)) {
 const noDebt = { id: 's13-debt', type: 'line', title: 'Държавен дълг', categories: [], series: [{ name: 'Държавен дълг', data: [] }], emptyText: 'Числата за дълга по години още не са включени.' };
 
 export const embeds = {
-  's13-rev-exp': ctx => ({ chart: revExpChart(ctx), source: ['asbp'], asOf: ctx.data.outlook.meta?.asOf, status: 'forecast' }),
-  's13-deficit': ctx => ({ chart: deficitChart(ctx), source: ['asbp'], asOf: ctx.data.outlook.meta?.asOf, status: 'forecast' }),
-  's13-interest': ctx => ({ chart: interestChart(ctx), source: ['asbp'], asOf: ctx.data.outlook.meta?.asOf, status: 'forecast' }),
-  's13-debt': ctx => ({ chart: debtChart(ctx) || noDebt, source: ['asbp'], asOf: ctx.data.outlook.meta?.asOf, status: 'forecast' })
+  's13-rev-exp': ctx => ({ chart: revExpChart(ctx), source: ctx.data.outlook.meta.source, asOf: ctx.data.outlook.meta?.asOf, status: 'forecast' }),
+  's13-deficit': ctx => ({ chart: deficitChart(ctx), source: ctx.data.outlook.meta.source, asOf: ctx.data.outlook.meta?.asOf, status: 'forecast' }),
+  's13-interest': ctx => ({ chart: interestChart(ctx), source: ctx.data.outlook.meta.source, asOf: ctx.data.outlook.meta?.asOf, status: 'forecast' }),
+  's13-debt': ctx => ({ chart: debtChart(ctx) || noDebt, source: ctx.data.outlook.meta.source, asOf: ctx.data.outlook.meta?.asOf, status: 'forecast' })
 };
 
 /* ---------------------------------------------------------------- „Накратко“: plain sentences computed from the numbers */
@@ -249,7 +247,7 @@ function summaryBlock(ctx, f, d) {
     body: html`<p>Числата са от мотивите към проекта на бюджета${py ? ` за ${yr(py)}` : ''}, към ${date(f.asOf, true)}. Приетият закон може да се различава от проекта. Какво е променено, виж в „<a href="${ctx.href('S14', {}, { per: '2026.law' })}">Пътят на бюджета</a>“.</p>`
   });
   return block({
-    id: 's13-sum', title: 'Накратко', scope: 'kfp', status: 'forecast', statusLabel: 'План и прогноза', source: ['asbp'], asOf: f.asOf,
+    id: 's13-sum', title: 'Накратко', scope: 'kfp', status: 'forecast', statusLabel: 'План и прогноза', source: f.sources, asOf: f.asOf,
     share: { text: pts.join(' ') },
     body: html`<div class="s13-sum stack">
       ${pts.length ? html`<ul class="s13-points" data-gl-scan>${pts.map(t => html`<li>${t}</li>`)}</ul>` : pendingState({ title: 'Накратко', text: 'Числата за приходите и разходите още не са налични.' })}
@@ -277,7 +275,7 @@ function tileDelta(showPct, cur, prev, curG, prevG, prevYear) {
 }
 
 function kpiBlock(ctx, f, debt) {
-  const i = f.sel, p = i > 0 ? i - 1 : -1, kind = f.kinds[i], inPct = ctx.store.get('unit') === 'pct';
+  const i = f.sel, p = previousPeriodIndex(f.o, ctx), kind = f.kinds[i], inPct = ctx.store.get('unit') === 'pct';
   const prevYear = p >= 0 ? f.years[p] : null;
   /** one tile from a млн. € series (+ % от БВП); `sign` turns a negative balance into the size of the deficit */
   const tile = (label, mln, pg, o = {}) => {
@@ -314,7 +312,7 @@ function kpiBlock(ctx, f, debt) {
   return block({
     id: 's13-kpis', title: `Числата за ${yr(year)}`, scope: 'kfp', status: kind === 'forecast' ? 'forecast' : 'real', statusLabel: LONG[kind],
     sub: `${LONG[kind]}.${p >= 0 ? ` Сравнението е с ${yr(prevYear)} (${LONG[f.kinds[p]].toLowerCase()}).` : ''}`,
-    source: ['asbp'], asOf: f.asOf,
+    source: f.sources, asOf: f.asOf,
     share: { text: `${yr(year)} (${LONG[kind].toLowerCase()}): приходи ${money(f.rev.mln[i])}, разходи ${money(f.exp.mln[i])}.` },
     body: kpiGrid([
       tile('Приходи', f.rev.mln, f.rev.pg),
@@ -331,21 +329,20 @@ function kpiBlock(ctx, f, debt) {
 function chartBlock(f, spec, o) {
   return block({
     id: o.id, title: o.title, sub: o.sub, scope: o.scope || 'kfp', status: 'forecast', statusLabel: 'Отчет, план и прогноза',
-    source: ['asbp'], asOf: f.asOf, share: { text: spec.desc || o.sub, embed: spec.id },
+    source: f.sources, asOf: f.asOf, share: { text: spec.desc || o.sub, embed: spec.id },
     body: chart(spec)
   });
 }
 function debtBlock(ctx, f, d) {
   const spec = debtChart(ctx, f, d);
   if (spec) return chartBlock(f, spec, { id: 's13-b-debt', title: 'Държавен дълг', scope: 'zdd', sub: 'Колко е държавният дълг по години и как се променя спрямо БВП.' });
-  const k = ctx.core?.kpis?.debt;
   return block({
-    id: 's13-b-debt', title: 'Държавен дълг', scope: 'zdd', status: 'pending', source: ['asbp'],
+    id: 's13-b-debt', title: 'Държавен дълг', scope: 'zdd', status: 'pending', source: f.sources,
     sub: 'Колко е държавният дълг по години.',
     body: pendingState({
-      id: 's13-debt-pending', title: 'Числата за дълга по години предстоят',
-      text: ok(k?.zddMln) ? `За ${yr(k.year)} имаме само едно число: държавният дълг е ${money(k.zddMln)}${ok(k.pctGdp) ? ` (${pct(k.pctGdp, 1)} от БВП)` : ''}. Редът по години още не е включен.` : 'Редът по години още не е включен.',
-      source: ['asbp'], action: { href: ctx.href('S17'), label: 'Към екрана за дълга', primary: false }
+      title: 'Няма съпоставим периоден ред за дълга',
+      text: 'Периодните данни за дълга още не са включени. Историческите публикации и законовите тавани са на отделния екран за дълга.',
+      source: f.sources, action: { href: ctx.href('S17'), label: 'Към екрана за дълга', primary: false }
     })
   });
 }
@@ -353,7 +350,8 @@ function debtBlock(ctx, f, d) {
 /* ---------------------------------------------------------------- macro frame */
 const macroKind = (f, i) => (f.o.macroVintage?.[i] === 'actual' ? 'отчет' : 'прогноза');
 function macroBlock(ctx, f) {
-  const o = f.o, i = f.sel, p = i > 0 ? i - 1 : -1;
+  if (selectPeriod(ctx.annualRaw?.outlook, ctx.period.key).gaps?.macro) return annualGap(ctx, ctx.annualRaw.outlook, ['macro']);
+  const o = f.o, i = f.sel, p = previousPeriodIndex(f.o, ctx);
   const rows = Array.isArray(o.macroRows) ? o.macroRows : [];
   const row = id => rows.find(r => r.id === id);
   const real = o.macroVintage?.[i] === 'actual';
@@ -381,7 +379,7 @@ function macroBlock(ctx, f) {
   return block({
     id: 's13-macro', title: 'Макроикономическа рамка', scope: 'kfp', status: real ? 'real' : 'forecast', statusLabel: real ? 'Отчет' : 'Прогноза',
     sub: `Очакванията за икономиката, на които се основава проектът на бюджет. Показани са числата за ${yr(f.years[i])} (${macroKind(f, i)}).`,
-    source: ['asbp'], asOf: o.macroAsOf || f.asOf,
+    source: f.sources, asOf: o.macroAsOf || f.asOf,
     share: { text: `Макроикономическа рамка, ${f.span}: реален растеж на БВП, инфлация (ХИПЦ) и безработица по години.` },
     body: html`<div class="stack">
       ${kpiGrid([
@@ -416,7 +414,7 @@ function notesBlock(f) {
   const disc = vtable ? disclosure({ id: 's13-versions', title: 'Разлики между двете версии на документа', meta: `${vers.length} реда`, body: vtable }) : '';
   if (!rest.length && !two && !disc) return '';
   return block({
-    id: 's13-notes', title: 'Бележки към числата', status: 'real', pill: false, report: false, source: ['asbp'], share: false, asOf: f.asOf,
+    id: 's13-notes', title: 'Бележки към числата', status: 'real', pill: false, report: false, source: f.sources, share: false, asOf: f.asOf,
     body: html`<div class="stack">
       ${rest.length ? html`<ul class="s13-notes" data-gl-scan>${rest.map(n => html`<li>${clean(n.text)}</li>`)}</ul>` : ''}
       ${two ? html`<p class="s13-note-two" data-gl-scan>${clean(two.text)}${disc ? ' Разликите са в таблицата по-долу.' : ''}</p>` : ''}
@@ -427,7 +425,7 @@ function notesBlock(f) {
 
 /* ---------------------------------------------------------------- the screen */
 /** for search and answer engines (js/seo.js): the sentences of the „Накратко“ block */
-export const question = 'Какви са приходите, разходите и дефицитът на бюджета до 2028 г.?';
+export const question = 'Какви са приходите, разходите и дефицитът на бюджета до 2029 г.?';
 export function answer(ctx) {
   const f = frame(ctx);
   return f ? points(f, debtOf(ctx, f)).map(t => String(t)).join(' ') : '';
@@ -437,7 +435,7 @@ export function render(ctx) {
   const f = frame(ctx), d = debtOf(ctx, f);
   const rev = revExpChart(ctx, f), def = deficitChart(ctx, f), int = interestChart(ctx, f);
   return {
-    context: `Числата са по проекта на бюджета, към ${date(f.asOf)}${NBSP}г.`,
+    context: `${ctx.period.label}. Публикация на МФ от ${date(f.asOf)}${NBSP}г.`,
     body: html`
       ${summaryBlock(ctx, f, d)}
       ${controls(ctx)}

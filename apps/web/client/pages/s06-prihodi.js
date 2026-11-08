@@ -1,3 +1,6 @@
+import { periodIndex, previousPeriodIndex } from '../annual.js';
+import { selectPeriod } from '../periods.js';
+import { annualGap } from '../ui/annual.js';
 // S06 · Откъде идват парите? · #/prihodi/:source? · step 2 of 8 · next S07 · periods all
 // Revenue of the КФП by source: the eight groups of Annex 3 (D05 revenue.json), and a thin
 // editorial layer (who pays, what the visitor can do about it). Every number is computed from the data files, none is typed in.
@@ -20,12 +23,12 @@ import { apportion } from '../calc.js';
 import { yIndex, change, chartUnit, moneyCol, amount, periodStatus } from '../view.js';
 import { num, pct, money, delta, date, DASH, NBSP } from '../format.js';
 
-export const needs = ['core', 'revenue', 'glossary?'];
+export const needs = ['core', 'outlook', 'revenue', 'glossary?'];
 export const styles = ['s06-prihodi'];
 
 const yr = y => `${y}${NBSP}г.`;
-const WORD = { actual: 'отчет', prelim: 'предв.\nотчет', plan: 'план', forecast: 'прогноза' };
-const FLAT = { actual: 'отчет', prelim: 'предв. отчет', plan: 'план', forecast: 'прогноза' };
+const WORD = { law: 'закон', expected: 'очаквано', draft: 'проект', actual: 'отчет', prelim: 'предв.\nотчет', plan: 'план', forecast: 'прогноза' };
+const FLAT = { law: 'закон', expected: 'очаквано', draft: 'проект', actual: 'отчет', prelim: 'предв. отчет', plan: 'план', forecast: 'прогноза' };
 const ok = v => typeof v === 'number' && Number.isFinite(v);
 const upper = s => (s ? s[0].toUpperCase() + s.slice(1) : s);
 
@@ -63,9 +66,9 @@ function model(ctx) {
   const rev = ctx.data?.revenue;
   if (!rev || !Array.isArray(rev.years) || !Array.isArray(rev.groups) || !rev.groups.length || !rev.total?.mln) return null;
   const years = rev.years, kinds = rev.vintage || [];
-  let sel = yIndex(years, ctx);
-  if (sel < 0) sel = Math.max(0, kinds.indexOf('plan'));
-  const prev = sel > 0 ? sel - 1 : -1;
+  const sel = periodIndex(rev, ctx);
+  if (sel < 0) return null;
+  const prev = previousPeriodIndex(rev, ctx);
 
   const rows = new Map((rev.rows || []).map(r => [r.id, r]));
   const kids = new Map();
@@ -125,7 +128,7 @@ function stripBlock(ctx, m) {
   return block({
     id: 's06-strip', title: `От всеки 100${NBSP}€ приходи през ${yr(m.year)}`, scope: 'kfp', status: periodStatus(ctx),
     sub: 'Колко от всеки 100 евро приходи идват от всеки източник. Натисни име, за да прочетеш повече за източника.',
-    source: ['asbp'], asOf: m.rev.meta?.asOf, body
+    source: m?.rev.meta?.source || [], asOf: m.rev.meta?.asOf, body
   });
 }
 
@@ -142,7 +145,7 @@ function kpiBlock(ctx, m) {
     kpi({ label: 'Помощи и дарения', mln: m.grants?.mln, pctGdp: m.grants?.pg, delta: dl(m.grants?.mln, m.grants?.before), sub: [of(m.grants?.mln), 'основно европейски средства'].filter(Boolean).join(' · '), status: st })
   ];
   return block({
-    id: 's06-kpis', title: 'Приходите накратко', scope: 'kfp', status: periodStatus(ctx), source: ['asbp'], asOf: m.rev.meta?.asOf,
+    id: 's06-kpis', title: 'Приходите накратко', scope: 'kfp', status: periodStatus(ctx), source: m?.rev.meta?.source || [], asOf: m.rev.meta?.asOf,
     body: kpiGrid(tiles, { label: 'Приходите накратко' })
   });
 }
@@ -222,7 +225,7 @@ function yearsTable(ctx, m, u) {
 function viewsBlock(ctx, m) {
   const yc = yearsChartSpec(ctx, m);
   return block({
-    id: 's06-views', title: 'Приходите по видове', scope: 'kfp', status: periodStatus(ctx), source: ['asbp'], asOf: m.rev.meta?.asOf,
+    id: 's06-views', title: 'Приходите по видове', scope: 'kfp', status: periodStatus(ctx), source: m?.rev.meta?.source || [], asOf: m.rev.meta?.asOf,
     share: { embed: 's06-by-source' },
     body: tabs({
       id: 's06-view', label: 'Изглед на приходите по видове', active: ctx.query.izgled, query: 'izgled',
@@ -281,7 +284,7 @@ function sourcesBlock(ctx, m, sel) {
     body: sourceBody(ctx, m, x)
   }));
   return block({
-    id: 's06-sources', title: 'Осемте източника поотделно', scope: 'kfp', status: periodStatus(ctx), source: ['asbp'], asOf: m.rev.meta?.asOf,
+    id: 's06-sources', title: 'Осемте източника поотделно', scope: 'kfp', status: periodStatus(ctx), source: m?.rev.meta?.source || [], asOf: m.rev.meta?.asOf,
     sub: 'Отвори източник, за да видиш какво е, кой го плаща, как се променя и от какво се състои.',
     share: { table: () => ({ columns: ['Източник', ...m.flat.map(l => `${l}, млн. €`)], rows: m.ranked.map(x => [x.short, ...x.mln.map(v => (ok(v) ? v : null))]) }) },
     body: html`<div class="s06-sources">${items}</div>`
@@ -301,7 +304,7 @@ function notesBlock(ctx, m) {
   if (m.firstForecast > 0) items.push(`${m.years.slice(m.firstForecast).join(' и ')} са прогноза на Министерството на финансите, не приет план.`);
   if (m.rev.meta?.asOf) items.push(html`Числата са от мотивите към проекта на бюджета, към ${date(m.rev.meta.asOf, true)}. Приетият закон може да се различава от проекта: какво е променено, виж в „<a href="${ctx.href('S14', {}, { per: '2026.law' })}">Пътят на бюджета</a>“.`);
   return block({
-    id: 's06-notes', title: 'Как да четеш числата', status: 'real', pill: false, report: false, source: ['asbp'], share: false,
+    id: 's06-notes', title: 'Как да четеш числата', status: 'real', pill: false, report: false, source: m?.rev.meta?.source || [], share: false,
     body: html`<ul class="s06-notes" data-gl-scan>${items.map(t => html`<li>${t}</li>`)}</ul>`
   });
 }
@@ -348,11 +351,13 @@ export const embeds = {
   's06-by-source': ctx => {
     const m = model(ctx);
     const empty = { id: 's06-by-source', type: 'barh', title: 'Приходи по видове', categories: [], series: [], emptyTitle: 'Приходите по видове не са налични', emptyText: 'Данните не се заредиха.' };
-    return { chart: m ? sourcesChartSpec(ctx, m) : empty, source: ['asbp'], asOf: m?.rev.meta?.asOf, status: m ? periodStatus(ctx) : 'pending' };
+    return { chart: m ? sourcesChartSpec(ctx, m) : empty, source: m?.rev.meta?.source || [], asOf: m?.rev.meta?.asOf, status: m ? periodStatus(ctx) : 'pending' };
   }
 };
 
 export function render(ctx) {
+  if (ctx.params?.source && !ctx.data.revenue.groups.some(item => item.id === ctx.params.source)) ctx.notFound();
+  if (selectPeriod(ctx.annualRaw?.revenue, ctx.period.key).gaps?.groups) return annualGap(ctx, ctx.annualRaw.revenue, ['groups']);
   const m = model(ctx);
   if (!m) return pendingState({ title: 'Приходи по видове', text: 'Данните за приходите не са налични в момента.' });
   const asked = ctx.params?.source;

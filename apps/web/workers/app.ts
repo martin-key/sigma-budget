@@ -1,3 +1,4 @@
+import { screenCacheKey } from '../app/lib/cache';
 // The Worker of the site (docs/adr/0002-react-router-ssr.md). The platform serves the static files of the client build first (css/, js/,
 // data/, vendor/, images); the Worker answers the rest:
 //   /admin/*                            the operator API (apps/web/workers/api/admin.js), behind Cloudflare Access and checked again there
@@ -61,8 +62,7 @@ const handler = createRequestHandler(
 declare const __BUILD__: string;
 const BUILD = typeof __BUILD__ !== 'undefined' ? __BUILD__ : 'dev';
 const edge = () => (globalThis as unknown as { caches?: { default?: Cache } }).caches?.default;
-const cacheKey = (rid: string, url: URL) =>
-  new Request(`https://ssr.cache/${BUILD}/${rid || 'none'}${url.pathname}${url.search}`);
+const cacheKey = (rid: string, url: URL) => screenCacheKey(BUILD, rid, url);
 const RELEASES = /^\/(api\/releases(\/|$)|data\/releases\/)/;
 const DATA_FILE = /^\/data\/(?!releases\/)[A-Za-z0-9_\-./]+$/;
 

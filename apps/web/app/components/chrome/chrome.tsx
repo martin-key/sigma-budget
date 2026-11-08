@@ -1,3 +1,5 @@
+import { resolvePeriod } from '../../../client/periods.js';
+import { store as periodStore } from '../../../client/store.js';
 import type { Period } from '../../lib/legacy';
 import type { WebRoute } from '../../lib/routes';
 // The HTML of the app shell around a screen: the banner, the header with its section buttons, the phone tab bar and the footer
@@ -143,8 +145,15 @@ export function topbarHtml(
   } = {},
 ) {
   const p = store.period;
+  const notice =
+    resolvePeriod(periodStore.get('periodRequested')).notice || periodStore.get('periodNotice');
   return (
     <>
+      {notice ? (
+        <p className="period-notice" role="status">
+          {notice}
+        </p>
+      ) : null}
       <div className="mast-in">
         <a className="brand" href={routeHref('S01')} aria-label="Бюджет на светло, към началото">
           {MARK}
