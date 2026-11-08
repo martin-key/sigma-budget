@@ -1,0 +1,16 @@
+{
+  "name": "@sigma-budget/ingest",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "exports": "./dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@sigma-budget/dataset-schema": "workspace:*",
+    "yaml": "2.9.1"
+  }
+}

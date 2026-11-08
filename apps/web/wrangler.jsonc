@@ -1,8 +1,8 @@
 // The site on Cloudflare Workers (docs/adr/0002-react-router-ssr.md): React Router draws every screen in the Worker (apps/web/workers/app.ts) from
 // the current release; the files of site/ (css, js, data, images) are the static assets of the client build.
-//   npm run build                                    # react-router build: build/client (the static files) and build/server (the Worker)
-//   npx wrangler dev                                 # after the build: the Worker on http://localhost:8787 (wrangler reads the built config)
-//   CLOUDFLARE_ENV=staging npm run build && npx wrangler deploy     # staging; production is not deployed from here (stage E)
+//   pnpm build                                       # react-router build: build/client (the static files) and build/server (the Worker)
+//   pnpm exec wrangler dev                           # after the build: the Worker on http://localhost:8787 (wrangler reads the built config)
+//   CLOUDFLARE_ENV=staging pnpm build && pnpm exec wrangler deploy     # staging; production is not deployed from here (stage E)
 // The Vite plugin (@cloudflare/vite-plugin) sets the assets directory to the client build and picks the environment from CLOUDFLARE_ENV.
 // html_handling "auto-trailing-slash", not_found_handling "none": a path without a file goes to the Worker (every screen, the release API,
 // /admin/*). run_worker_first: /data/* reaches the Worker first, so the stable addresses /data/<file> follow the current release of the
@@ -16,7 +16,7 @@
 // A deployment in your own account keeps its ids and hostname in wrangler.local.jsonc, which is not in git (docs/release.md, „Среди“).
 // ACCESS_ISSUER and ACCESS_AUD come from the Access application of the environment; empty, the operator API answers 503.
 // SERVICE_TOKENS lists the Access service tokens that may publish. OPERATORS, the operators' emails, is a Worker secret
-// (`npx wrangler secret put OPERATORS --env staging`), so the addresses stay out of this public repository.
+// (`pnpm exec wrangler secret put OPERATORS --env staging`), so the addresses stay out of this public repository.
 {
   "name": "sigma-budget",
   "main": "./workers/app.ts",

@@ -18,17 +18,19 @@ docs/           спецификации, ръководства и архите
 ## Локално стартиране
 
 ```bash
-npm ci
-npm run typecheck
-npm run build
-npm run dev -- --port 8814
+pnpm install --frozen-lockfile
+pnpm typecheck
+pnpm build
+pnpm dev -- --port 8814
 # http://127.0.0.1:8814/
 
 # Браузърната част без SSR; временната директория съчетава public/, client/ и data/release/
 python3 -m apps.web.scripts.serve
 ```
 
-npm зависимостите се инсталират в корена с един `package-lock.json`. Сглобеният сайт е в `apps/web/build/`. Клиентът се публикува под `/js/`, а данните от `data/release/` под `/data/`; публичните адреси са запазени. SSR чете текущото издание от D1/R2; без регистър използва включеното в сглобяването издание.
+Зависимостите на Node се инсталират в корена с един `pnpm-lock.yaml` (pnpm workspace). Сглобеният сайт е в `apps/web/build/`. Клиентът се публикува под `/js/`, а данните от `data/release/` под `/data/`; публичните адреси са запазени. SSR чете текущото издание от D1/R2; без регистър използва включеното в сглобяването издание.
+
+Нужни са Node 24 и pnpm 10.33.0. `pnpm test` пуска тестовете на TypeScript пакетите. Сравнението `budget-ts parity` и фикстурите са описани в [ръководството за разработка](docs/dev-guide.md); `./budget` още изпълнява Python.
 
 ## Среда и проверки
 
@@ -41,14 +43,14 @@ uv venv tmp/venv-data --python 3.12
 uv pip install --python tmp/venv-data/bin/python --require-hashes -r pipeline/requirements.lock
 uv pip install --python tmp/venv-data/bin/python --no-deps -e pipeline
 
-npm run typecheck
+pnpm typecheck
 python -m budget_pipeline.validate.registry check
 ./budget validate --site
 python -m budget_pipeline.validate.datasets
 tmp/venv/bin/python -m tests.release.compat_check
 tmp/venv/bin/python -m apps.web.scripts.query_check
 PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers tmp/venv/bin/python -m apps.web.scripts.build --env staging --noindex
-# След това Worker-ът се стартира с npm run dev; пълната проверка върви срещу него:
+# След това Worker-ът се стартира с pnpm dev; пълната проверка върви срещу него:
 PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers tmp/venv/bin/python -m tests.e2e.screens --url http://127.0.0.1:8814/
 ```
 

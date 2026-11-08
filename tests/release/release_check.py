@@ -5,7 +5,7 @@
     python -m tests.release.release_check --real DIR       also publish the release of `budget build` in DIR and reproduce it from the Worker
 
 It builds the site (react-router build: the Worker of apps/web/workers/app.ts and the static files, docs/adr/0002-react-router-ssr.md) and starts
-`wrangler dev` on it (node_modules, package-lock.json) with a fresh local D1 and R2, applies migrations/, and signs Cloudflare Access
+`wrangler dev` on it (node_modules, pnpm-lock.yaml) with a fresh local D1 and R2, applies migrations/, and signs Cloudflare Access
 tokens with an RSA key made for the run (openssl; the Worker gets the public key as ACCESS_JWKS). Then:
   9  operator: no token, a foreign key, a wrong audience, an expired token and a person who is not an operator are refused
   3  damaged upload: wrong bytes, an object missing, an unsafe path, a too large object: nothing becomes current
@@ -150,7 +150,7 @@ def main(argv):
     a = ap.parse_args(argv)
     wrangler = ROOT / "node_modules" / ".bin" / "wrangler"
     if not wrangler.exists():
-        sys.exit("release_check: run `npm ci` first (wrangler from package-lock.json)")
+        sys.exit("release_check: run `pnpm install --frozen-lockfile` first (wrangler from pnpm-lock.yaml)")
     tmp = Path(tempfile.mkdtemp(prefix="release-check-"))
     state = tmp / "state"
     built = ROOT / "apps" / "web" / "build" / "server" / "wrangler.json"

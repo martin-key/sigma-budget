@@ -4,7 +4,7 @@
     python3 -m apps.web.scripts.serve --port 8080 --dir some/folder
 
 Every path without a file extension gets apps/web/public/index.html, so the router builds the screen in the browser. The v6 checks (pipeline/budget_pipeline/build/) run
-the app this way. The host itself draws every screen on the server (docs/adr/0002-react-router-ssr.md): npm run build, then npx wrangler dev.
+the app this way. The host itself draws every screen on the server (docs/adr/0002-react-router-ssr.md): pnpm build, then pnpm exec wrangler dev.
 """
 
 from pathlib import Path as _Path

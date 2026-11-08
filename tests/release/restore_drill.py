@@ -2,7 +2,7 @@
 """The restore drill of acceptance scenario 10 (docs/approach-specification.md, section 11) on a test environment: the built Worker
 with a local D1 and R2, as tests/release/release_check.py runs it.
 
-    python -m tests.release.restore_drill            (npm ci first; the Worker is built with react-router build)
+    python -m tests.release.restore_drill            (pnpm install --frozen-lockfile first; the Worker is built with react-router build)
 
   1  releases A and B are published; B is current at revision 2
   2  backup: the registry as an SQL dump (schema, triggers and rows: what `wrangler d1 export --remote` gives in Cloudflare; locally
@@ -90,7 +90,7 @@ class Worker:
 
 def main():
     if not WRANGLER.exists():
-        sys.exit("restore_drill: run `npm ci` first")
+        sys.exit("restore_drill: run `pnpm install --frozen-lockfile` first")
     b = subprocess.run([str(ROOT / "node_modules" / ".bin" / "react-router"), "build"], cwd=ROOT / "apps/web", capture_output=True, text=True)
     if b.returncode != 0 or not BUILT.exists():
         sys.exit("restore_drill: react-router build failed:\n" + (b.stdout + b.stderr)[-2000:])

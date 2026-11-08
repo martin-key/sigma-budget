@@ -2,7 +2,7 @@
 
     python3 -m apps.web.scripts.ssr_parity --dist dist --url http://127.0.0.1:8791 [--limit 50] [--show 5]
 
-For every HTML file of dist/ the same address is fetched from the running SSR app (npx wrangler dev -c build/server/wrangler.json),
+For every HTML file of dist/ the same address is fetched from the running SSR app (pnpm exec wrangler dev -c build/server/wrangler.json),
 and what a crawler and a reader get is compared: the title, the description, robots, the canonical path, the JSON-LD types, the h1, the
 lede, the text of the article and its internal links. Byte equality is not the aim: the prerendered file is the page after the browser
 mounted its widgets and drew its charts, the server's is the screen before that. Text that only the browser adds (a chart's own labels,

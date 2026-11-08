@@ -1,6 +1,6 @@
 {
   "_comment": "Where `budget upload|publish|rollback|status --environment NAME` sends its requests (docs/release.md, „Среди“). There is no default: every command names its environment. url null means the environment is not provisioned yet (it needs the Cloudflare account, docs/approach-specification.md, section 12).",
-  "local": {"url": "http://127.0.0.1:8787", "note": "npx wrangler dev, with the local D1 and R2 of .wrangler/state"},
+  "local": {"url": "http://127.0.0.1:8787", "note": "pnpm exec wrangler dev, with the local D1 and R2 of .wrangler/state"},
   "staging": {"url": null, "note": "the staging Worker; set its address when the environment is provisioned"},
   "production": {"url": null, "note": "production; only through the documented production procedure"}
 }

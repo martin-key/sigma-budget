@@ -116,13 +116,13 @@ token в `CF_ACCESS_CLIENT_ID` и `CF_ACCESS_CLIENT_SECRET`. Токените н
 **Среди.** Създаването на среда е отделно от deploy-а на кода и иска Cloudflare акаунта (раздел 12):
 
 ```bash
-npx wrangler d1 create sigma-budget-staging-registry -c apps/web/wrangler.jsonc          # id-то влиза в env.staging
-npx wrangler r2 bucket create sigma-budget-staging-objects -c apps/web/wrangler.jsonc
-npx wrangler d1 migrations apply DB --env staging --remote -c apps/web/wrangler.jsonc
+pnpm exec wrangler d1 create sigma-budget-staging-registry -c apps/web/wrangler.jsonc          # id-то влиза в env.staging
+pnpm exec wrangler r2 bucket create sigma-budget-staging-objects -c apps/web/wrangler.jsonc
+pnpm exec wrangler d1 migrations apply DB --env staging --remote -c apps/web/wrangler.jsonc
 ```
 
 После: Access приложение за `/admin/*` с allow политика за операторите; `ACCESS_ISSUER` и `ACCESS_AUD` в `env.staging.vars`;
-`OPERATORS` като таен ключ на Worker-а (`npx wrangler secret put OPERATORS --env staging -c apps/web/wrangler.jsonc`), за да не са имейлите в публичното
+`OPERATORS` като таен ключ на Worker-а (`pnpm exec wrangler secret put OPERATORS --env staging -c apps/web/wrangler.jsonc`), за да не са имейлите в публичното
 хранилище; адресът на staging в `pipeline/environments.json`. Production следва същите стъпки по-късно, ръчно (етап E).
 
 Zero Trust организацията има нужда от метод за вход (**Integrations → Identity providers**: One-time PIN или Cloudflare); без него
@@ -136,10 +136,10 @@ Zero Trust организацията има нужда от метод за в�
 wrangler получават `-c apps/web/wrangler.local.jsonc`:
 
 ```bash
-npx wrangler d1 migrations apply DB --env staging --remote -c apps/web/wrangler.local.jsonc
-CLOUDFLARE_ENV=staging WRANGLER_CONFIG=apps/web/wrangler.local.jsonc npm run build    # build/: Worker-ът на staging от собствения акаунт
-npx wrangler deploy -c apps/web/build/server/wrangler.json
-npx wrangler secret put OPERATORS --env staging -c apps/web/wrangler.local.jsonc
+pnpm exec wrangler d1 migrations apply DB --env staging --remote -c apps/web/wrangler.local.jsonc
+CLOUDFLARE_ENV=staging WRANGLER_CONFIG=apps/web/wrangler.local.jsonc pnpm build    # build/: Worker-ът на staging от собствения акаунт
+pnpm exec wrangler deploy -c apps/web/build/server/wrangler.json
+pnpm exec wrangler secret put OPERATORS --env staging -c apps/web/wrangler.local.jsonc
 ```
 
 Таен ключ не може да носи името на обикновена променлива на качената версия (код 10053), затова `secret put` идва след deploy-а.

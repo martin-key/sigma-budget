@@ -18,9 +18,9 @@
 ## 1. Създаване на средата (веднъж)
 
 ```bash
-npx wrangler d1 create sigma-budget-registry -c apps/web/wrangler.jsonc                 # id-то → apps/web/wrangler.jsonc, горното ниво (d1_databases)
-npx wrangler r2 bucket create sigma-budget-objects -c apps/web/wrangler.jsonc
-npx wrangler d1 migrations apply DB --remote -c apps/web/wrangler.jsonc
+pnpm exec wrangler d1 create sigma-budget-registry -c apps/web/wrangler.jsonc                 # id-то → apps/web/wrangler.jsonc, горното ниво (d1_databases)
+pnpm exec wrangler r2 bucket create sigma-budget-objects -c apps/web/wrangler.jsonc
+pnpm exec wrangler d1 migrations apply DB --remote -c apps/web/wrangler.jsonc
 ```
 
 - [ ] В `apps/web/wrangler.jsonc`, горното ниво: `routes` с адреса като custom domain, `workers_dev: false`, `preview_urls: false` (Access пази
@@ -34,11 +34,11 @@ npx wrangler d1 migrations apply DB --remote -c apps/web/wrangler.jsonc
 От commit в `main`, за който CI е минал:
 
 ```bash
-git switch --detach <commit> && npm ci
+git switch --detach <commit> && pnpm install --frozen-lockfile
 PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers tmp/venv/bin/python -m apps.web.scripts.build --origin https://<адрес>   # build/ с проверка на всеки екран
 python3 -m tests.release.compat_check
-npx wrangler deploy -c apps/web/build/server/wrangler.json
-npx wrangler secret put OPERATORS -c apps/web/wrangler.jsonc                            # след deploy-а: таен ключ не може да носи името на променлива (код 10053)
+pnpm exec wrangler deploy -c apps/web/build/server/wrangler.json
+pnpm exec wrangler secret put OPERATORS -c apps/web/wrangler.jsonc                            # след deploy-а: таен ключ не може да носи името на променлива (код 10053)
 ```
 
 **Проверка:**
@@ -67,14 +67,14 @@ cloudflared access login https://<адрес>/admin/operations
 
 1. CI е минал на commit-а в `main`.
 2. `python3 -m tests.release.compat_check --env-url https://<адрес>`: новият код чете текущото издание на production.
-3. `apps/web/scripts/build.py --origin https://<адрес>`, после `npx wrangler deploy -c apps/web/build/server/wrangler.json`.
+3. `apps/web/scripts/build.py --origin https://<адрес>`, после `pnpm exec wrangler deploy -c apps/web/build/server/wrangler.json`.
 4. Проверката от стъпка 2.
 
 ## 5. Връщане назад
 
 | Какво | Как |
 |---|---|
-| Кодът | `npx wrangler deployments list -c apps/web/wrangler.jsonc`, после `npx wrangler rollback <version-id> -c apps/web/wrangler.jsonc` |
+| Кодът | `pnpm exec wrangler deployments list -c apps/web/wrangler.jsonc`, после `pnpm exec wrangler rollback <version-id> -c apps/web/wrangler.jsonc` |
 | Данните | `./budget rollback --release-id <по-ранно издание> --environment production` |
 | Регистърът | D1 Time Travel или копие ([ръководството на оператора](operator-guide.md), раздел 6) |
 

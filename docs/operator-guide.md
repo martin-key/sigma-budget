@@ -8,7 +8,7 @@
 
 | Какво | Как |
 |---|---|
-| Оператор | Имейлът ти е в `OPERATORS`, таен ключ на Worker-а на средата (`npx wrangler secret put OPERATORS --env <среда> -c apps/web/wrangler.jsonc`). Имейлите не са в хранилището. |
+| Оператор | Имейлът ти е в `OPERATORS`, таен ключ на Worker-а на средата (`pnpm exec wrangler secret put OPERATORS --env <среда> -c apps/web/wrangler.jsonc`). Имейлите не са в хранилището. |
 | Вход | `cloudflared access login https://<адрес на средата>/admin/operations`. Отваря браузъра; влизаш с метода на Zero Trust организацията (One-time PIN или Cloudflare). Командата `budget` после сама взима токена. |
 | Автоматизация | Access service token: Client ID в `SERVICE_TOKENS` на средата, двойката в `CF_ACCESS_CLIENT_ID` и `CF_ACCESS_CLIENT_SECRET`. |
 | Средите | `pipeline/environments.json`, а своите (собствен акаунт) в `pipeline/environments.local.json`, който не е в git. Средата се казва винаги изрично. |
@@ -55,7 +55,7 @@
 ```
 
 Връщането е нова ревизия в журнала, а не изтриване: всяко издание, което е било текущо, остава публично на адреса си. Издание, което
-никога не е било текущо, не може да стане текущо по този път. Кодът на сайта се връща отделно: `npx wrangler rollback --env <среда> -c apps/web/wrangler.jsonc` към предишната
+никога не е било текущо, не може да стане текущо по този път. Кодът на сайта се връща отделно: `pnpm exec wrangler rollback --env <среда> -c apps/web/wrangler.jsonc` към предишната
 версия на Worker-а.
 
 ## 5. Инциденти
@@ -69,20 +69,20 @@
 ## 6. Резервни копия и възстановяване
 
 - **Регистърът (D1).** Cloudflare пази D1 Time Travel: всяка минута от последните 30 дни. Поне веднъж седмично и преди всяка промяна на
-  схемата се прави и копие: `npx wrangler d1 export DB --env <среда> --remote --output registry-ГГГГ-ММ-ДД.sql -c apps/web/wrangler.jsonc`.
+  схемата се прави и копие: `pnpm exec wrangler d1 export DB --env <среда> --remote --output registry-ГГГГ-ММ-ДД.sql -c apps/web/wrangler.jsonc`.
 - **Обектите (R2).** Ключът на обект е неговият SHA-256, а операторският API не презаписва и не трие публикувани обекти: кофата е
   собствената си история. Копие на кофата се пази извън Cloudflare при всяко ново издание.
 
 **Възстановяване на регистъра в Cloudflare:**
 
 ```bash
-npx wrangler d1 time-travel info DB --env <среда> -c apps/web/wrangler.jsonc                          # текущата отметка (bookmark)
-npx wrangler d1 time-travel restore DB --env <среда> --timestamp <време> -c apps/web/wrangler.jsonc   # до момент преди проблема; командата дава отметка за отмяна
+pnpm exec wrangler d1 time-travel info DB --env <среда> -c apps/web/wrangler.jsonc                          # текущата отметка (bookmark)
+pnpm exec wrangler d1 time-travel restore DB --env <среда> --timestamp <време> -c apps/web/wrangler.jsonc   # до момент преди проблема; командата дава отметка за отмяна
 ./budget status --environment <среда>                                      # указател, ревизия, журнал
 ```
 
-От копие: нова база (`npx wrangler d1 create … -c apps/web/wrangler.jsonc`), id-то ѝ в `env.<среда>.d1_databases` на `apps/web/wrangler.jsonc`, после
-`npx wrangler d1 execute DB --env <среда> --remote --file registry-….sql -c apps/web/wrangler.jsonc`.
+От копие: нова база (`pnpm exec wrangler d1 create … -c apps/web/wrangler.jsonc`), id-то ѝ в `env.<среда>.d1_databases` на `apps/web/wrangler.jsonc`, после
+`pnpm exec wrangler d1 execute DB --env <среда> --remote --file registry-….sql -c apps/web/wrangler.jsonc`.
 После провери изданието: `./budget reproduce --current <адрес>`.
 
 **Тренировка.** `python -m tests.release.restore_drill` минава целия път на тестова среда (локален Worker, D1 и R2): копие, промени след него,
@@ -91,7 +91,7 @@ npx wrangler d1 time-travel restore DB --env <среда> --timestamp <врем�
 
 ## 7. Код и данни са отделни
 
-Deploy на кода (`npx wrangler deploy -c apps/web/build/server/wrangler.json`) не сменя изданието, а публикуването на данни не сменя кода. Преди deploy на код в среда CI проверява,
+Deploy на кода (`pnpm exec wrangler deploy -c apps/web/build/server/wrangler.json`) не сменя изданието, а публикуването на данни не сменя кода. Преди deploy на код в среда CI проверява,
 че новият код чете текущото ѝ издание (`tests/release/compat_check.py --env-url`). Production се качва само по
 [процедурата](production-procedure.md), не от CI.
 

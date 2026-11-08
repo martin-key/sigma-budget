@@ -52,3 +52,7 @@ work/
 data/cache/
 
 *.egg-info/
+
+# Turbo task cache
+.turbo/
+coverage/
