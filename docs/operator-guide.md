@@ -8,10 +8,10 @@
 
 | Какво | Как |
 |---|---|
-| Оператор | Имейлът ти е в `OPERATORS`, таен ключ на Worker-а на средата (`npx wrangler secret put OPERATORS --env <среда>`). Имейлите не са в хранилището. |
+| Оператор | Имейлът ти е в `OPERATORS`, таен ключ на Worker-а на средата (`npx wrangler secret put OPERATORS --env <среда> -c apps/web/wrangler.jsonc`). Имейлите не са в хранилището. |
 | Вход | `cloudflared access login https://<адрес на средата>/admin/operations`. Отваря браузъра; влизаш с метода на Zero Trust организацията (One-time PIN или Cloudflare). Командата `budget` после сама взима токена. |
 | Автоматизация | Access service token: Client ID в `SERVICE_TOKENS` на средата, двойката в `CF_ACCESS_CLIENT_ID` и `CF_ACCESS_CLIENT_SECRET`. |
-| Средите | `tools/environments.json`, а своите (собствен акаунт) в `tools/environments.local.json`, който не е в git. Средата се казва винаги изрично. |
+| Средите | `pipeline/environments.json`, а своите (собствен акаунт) в `pipeline/environments.local.json`, който не е в git. Средата се казва винаги изрично. |
 
 `403 „not an operator of this environment“` значи, че Access те е пуснал, но имейлът в токена не е в `OPERATORS`. При вход с Cloudflare
 това е имейлът на Cloudflare акаунта ти, който може да не е служебният. `503` значи, че средата няма `ACCESS_ISSUER` и `ACCESS_AUD`.
@@ -55,7 +55,7 @@
 ```
 
 Връщането е нова ревизия в журнала, а не изтриване: всяко издание, което е било текущо, остава публично на адреса си. Издание, което
-никога не е било текущо, не може да стане текущо по този път. Кодът на сайта се връща отделно: `npx wrangler rollback --env <среда>` към предишната
+никога не е било текущо, не може да стане текущо по този път. Кодът на сайта се връща отделно: `npx wrangler rollback --env <среда> -c apps/web/wrangler.jsonc` към предишната
 версия на Worker-а.
 
 ## 5. Инциденти
@@ -64,33 +64,35 @@
 |---|---|---|
 | `storage incident` в отговор, ред в таблицата `incidents` | Обект в R2 не се хешира до ключа си | Не публикувай. Качи изданието отново: обектът се проверява и подменя само ако качването съвпада. Опиши инцидента. |
 | Сайтът показва „Предстои“ за набор, който е в изданието | Файлът липсва в манифеста или R2 не го дава | `GET /api/releases/<id>/datasets/<набор>`; сравни с манифеста. |
-| Страниците не се изобразяват (500) | Кодът не чете данните | `python tools/compat_check.py --env-url <адрес>`; върни кода или изданието. |
+| Страниците не се изобразяват (500) | Кодът не чете данните | `python -m tests.release.compat_check --env-url <адрес>`; върни кода или изданието. |
 
 ## 6. Резервни копия и възстановяване
 
 - **Регистърът (D1).** Cloudflare пази D1 Time Travel: всяка минута от последните 30 дни. Поне веднъж седмично и преди всяка промяна на
-  схемата се прави и копие: `npx wrangler d1 export DB --env <среда> --remote --output registry-ГГГГ-ММ-ДД.sql`.
+  схемата се прави и копие: `npx wrangler d1 export DB --env <среда> --remote --output registry-ГГГГ-ММ-ДД.sql -c apps/web/wrangler.jsonc`.
 - **Обектите (R2).** Ключът на обект е неговият SHA-256, а операторският API не презаписва и не трие публикувани обекти: кофата е
   собствената си история. Копие на кофата се пази извън Cloudflare при всяко ново издание.
 
 **Възстановяване на регистъра в Cloudflare:**
 
 ```bash
-npx wrangler d1 time-travel info DB --env <среда>                          # текущата отметка (bookmark)
-npx wrangler d1 time-travel restore DB --env <среда> --timestamp <време>   # до момент преди проблема; командата дава отметка за отмяна
+npx wrangler d1 time-travel info DB --env <среда> -c apps/web/wrangler.jsonc                          # текущата отметка (bookmark)
+npx wrangler d1 time-travel restore DB --env <среда> --timestamp <време> -c apps/web/wrangler.jsonc   # до момент преди проблема; командата дава отметка за отмяна
 ./budget status --environment <среда>                                      # указател, ревизия, журнал
 ```
 
-От копие: нова база (`npx wrangler d1 create …`), id-то ѝ в `env.<среда>.d1_databases` на `wrangler.jsonc`, после
-`npx wrangler d1 execute DB --env <среда> --remote --file registry-….sql`.
+От копие: нова база (`npx wrangler d1 create … -c apps/web/wrangler.jsonc`), id-то ѝ в `env.<среда>.d1_databases` на `apps/web/wrangler.jsonc`, после
+`npx wrangler d1 execute DB --env <среда> --remote --file registry-….sql -c apps/web/wrangler.jsonc`.
 После провери изданието: `./budget reproduce --current <адрес>`.
 
-**Тренировка.** `python tools/restore_drill.py` минава целия път на тестова среда (локален Worker, D1 и R2): копие, промени след него,
+**Тренировка.** `python -m tests.release.restore_drill` минава целия път на тестова среда (локален Worker, D1 и R2): копие, промени след него,
 загуба на регистъра, възстановяване, проверка на указателя, ревизията, журнала и SHA-256 на всеки файл, ново публикуване и връщане
 към по-ранно издание (сценарий 10 на спецификацията, раздел 11).
 
 ## 7. Код и данни са отделни
 
-Deploy на кода (`npx wrangler deploy`) не сменя изданието, а публикуването на данни не сменя кода. Преди deploy на код в среда CI проверява,
-че новият код чете текущото ѝ издание (`tools/compat_check.py --env-url`). Production се качва само по
+Deploy на кода (`npx wrangler deploy -c apps/web/build/server/wrangler.json`) не сменя изданието, а публикуването на данни не сменя кода. Преди deploy на код в среда CI проверява,
+че новият код чете текущото ѝ издание (`tests/release/compat_check.py --env-url`). Production се качва само по
 [процедурата](production-procedure.md), не от CI.
+
+Всички команди тук се изпълняват от корена на хранилището. Конфигурацията за собствен акаунт е `apps/web/wrangler.local.jsonc`, до `apps/web/wrangler.jsonc`, така че относителните `main` и `migrations_dir` запазват значението си. За нея се използва `-c apps/web/wrangler.local.jsonc`, а при сглобяване - `WRANGLER_CONFIG=apps/web/wrangler.local.jsonc`. Vite разрешава тази променлива спрямо корена на хранилището. Deploy на сглобен сайт използва `-c apps/web/build/server/wrangler.json`.

@@ -1,0 +1,52 @@
+[
+ {
+  "file": "ZDBRB-2027.zip",
+  "title": "Проект на Решение на Министерския съвет за одобряване на законопроект за държавния бюджет на Република България за 2027 г. и материалите към него",
+  "url": "https://www.minfin.bg/upload/65611/ZDBRB-2027.zip",
+  "page": "https://www.minfin.bg/bg/1802",
+  "retrieved": "2026-11-07T23:30:09Z",
+  "bytes": 7383713,
+  "sha256": "6e0aeaab774eb5a0c5b10888b49bc4e9f8c72220188def8989e4ebdc3241b517",
+  "members": [
+   {
+    "name": "ZDBRB-2027/1-Doklad-ministar-ZDBRB-2027.pdf",
+    "bytes": 769291,
+    "sha256": "974985eb98b4725b43f9b126dbd7ecef3fee1d51f6ba3344cea4a3a25abe3ba2"
+   },
+   {
+    "name": "ZDBRB-2027/2-RMS-ZDBRB-2027.pdf",
+    "bytes": 272838,
+    "sha256": "4e5f10f84edf613553c69bd56f1db19063e028ba9bfc55a0b8a643e59b4d7e6b"
+   },
+   {
+    "name": "ZDBRB-2027/3-PZDBRB-2027.pdf",
+    "bytes": 3539581,
+    "sha256": "7d8dae763e9a69080f1c9a5e98666bd7dd08ca6162f1da9107de121170d5c119"
+   },
+   {
+    "name": "ZDBRB-2027/4-UMTBF-2027-2029-motivi.pdf",
+    "bytes": 3397712,
+    "sha256": "8d0c4577efd9ca8805ce785fb5a2144518a30cb285d2a217744322bb646c10ac"
+   },
+   {
+    "name": "ZDBRB-2027/5-FO-RMS_ZDBRB-2027.pdf",
+    "bytes": 285951,
+    "sha256": "b0070298adc2cb0412295af1464457cac819e095448a7cb7d94d40c10a7b4d27"
+   },
+   {
+    "name": "ZDBRB-2027/6-Press-ZDBRB-2027.pdf",
+    "bytes": 487658,
+    "sha256": "5a0aaef1fb90e2b574564b5494907e8489cb9648e15334846a2ff76100fe6c73"
+   }
+  ]
+ },
+ {
+  "file": "Draft_Budgetary_Plan_of_the_Republic_of_Bulgaria_for_2027.pdf",
+  "title": "Проект на бюджетен план на Република България за 2027 година",
+  "url": "https://www.minfin.bg/upload/65334/Draft+Budgetary+Plan+of+the+Republic+of+Bulgaria+for+2027.pdf",
+  "page": "https://www.minfin.bg/bg/1802",
+  "retrieved": "2026-11-07T23:31:48Z",
+  "bytes": 1237582,
+  "sha256": "8c91cdf4778f2864e1eeb167f14b08d1f68a076ea4ad27a8a4305175a73f1182"
+ }
+]

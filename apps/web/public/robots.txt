@@ -1,0 +1,4 @@
+# Изходният код за разработка: не за индексиране.
+# Сглобеният сайт (apps/web/scripts/build.py → build/client) има свой robots.txt, отворен за търсачки, със sitemap.xml.
+User-agent: *
+Disallow: /

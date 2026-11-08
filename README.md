@@ -1,120 +1,70 @@
-# Бюджет на светло
+# СИГМА Бюджет
 
-Прототип и Mock приложение за интерактивен, разбираем за гражданите поглед към държавния бюджет на България за 2026 г.
-Проектът обяснява бюджета на прост език и по официални данни: откъде идват парите, къде отиват, изпълнява ли се планът, колко дължим и колко плащам аз.
-До всяко число стоят източникът, обхватът, статусът (проект, закон, отчет, прогноза) и датата.
+Сайтът представя държавния бюджет на България на разбираем език и по официални данни. До числата стоят източникът, обхватът, статусът и датата. Примерните данни са означени като такива; неизвлечените данни се показват като „предстои“.
 
-> **Състояние:** бета. Всеки екран има собствен адрес и се изобразява предварително за търсачки и езикови модели. Всичко, което е примерно, е означено като „Примерни данни“ (значка, щриховка ▨, воден знак); данните, които съществуват, но още не са извлечени, се показват като „предстои“, без измислени числа.
+## Структура
 
-## Съдържание на хранилището
-
-```
-prototype/          старият прототип (v3.6): един самостоятелен HTML файл с вградени данни
-  site/index.html     самото приложение — отваря се направо или през статичен сървър
-  src/                извлечените набори (JSON), които скриптът gen_inline.py вгражда в index.html
-app/ workers/       приложението на сървъра: React Router (SSR) в Cloudflare Worker, TypeScript (ADR 0002)
-site/               браузърната част: ES модули, стилове и данни; екраните се изобразяват със същия код и на сървъра
-  index.html          скелетът на обвивката (за проверките и офлайн)
-  js/ css/ vendor/    код, стилове, ECharts и шрифтове
-  data/               набори с данни (JSON), от които зарежда приложението
-tools/
-  prototype/          скриптове за извличане и сглобяване на данните на прототипа
-  mock/               скриптове за сглобяване и проверка на данните и приложението на Mock
-  site/               сглобяване и проверка на всеки екран (сървър и браузър), sitemap, llms.txt; сървър за разработка; картинките
-worker/             операторският API и публичният API на изданията (D1, R2, Cloudflare Access)
-wrangler.jsonc      хостингът: Cloudflare Workers със Static Assets
-docs/               документация (на български): ръководство за разработка, спецификации на данните, план
-  data-sources.md     откъде идват суровите данни и как се свалят отново (суровите файлове не са качени)
+```text
+apps/web/       React Router SSR на Cloudflare Workers; app/, workers/api/, client/, public/, migrations/, scripts/
+pipeline/       Python пакет budget_pipeline: sources/, extract/, build/, validate/; Dockerfile и зависимости
+data/           originals/, inputs/, cache/ (извън git), release/, sources.yaml, datasets.yaml, originals.sha256
+tests/          e2e/, release/, requirements-dev.txt и requirements-dev.lock
+reference/      исторически prototype/ и mock/; не се сглобяват и изпълняват в CI
+docs/           спецификации, ръководства и архитектурни решения
 ```
 
-## Как се пуска локално
+Правилата за нов код и данни са в [ADR 0003](docs/adr/0003-repository-layout.md). Клиентските екрани остават JavaScript модули до етап 2 на [ADR 0002](docs/adr/0002-react-router-ssr.md).
 
-Сайтът е Cloudflare Worker: React Router изобразява всеки екран на сървъра от текущото издание, а браузърът го поема
-([ADR 0002](docs/adr/0002-react-router-ssr.md)).
+## Локално стартиране
 
 ```bash
-# Сайтът както в Cloudflare: сървърът изобразява екраните (без регистър данните са тези от site/data)
-npm ci && npm run build && npx wrangler dev
-# после отворете http://127.0.0.1:8787/
+npm ci
+npm run typecheck
+npm run build
+npm run dev -- --port 8814
+# http://127.0.0.1:8814/
 
-# Само браузърната част, без сглобяване (проверките в tools/mock/ я ползват така)
-python3 tools/site/serve.py
-# http://127.0.0.1:8000/
-
-# Старият прототип
-python3 -m http.server 8001 --directory prototype/site
-# http://127.0.0.1:8001/
+# Браузърната част без SSR; временната директория съчетава public/, client/ и data/release/
+python3 -m apps.web.scripts.serve
 ```
 
-Приложението не прави външни заявки: ECharts и шрифтовете са вградени, няма бисквитки и проследяване. Връзката към сестринската платформа „СИГМА — обществени поръчки“ е в менюто и в долния край на страницата. Периодът и параметрите на конкретния изглед са в адреса. Локалното хранилище пази обхвата и единицата; изборът на тип потребител остава изключен. Контролите „Само официални данни“, „На човек“, „Сумите и в лева“ и „Източници до числата“ са премахнати, а старите им записи се игнорират.
+npm зависимостите се инсталират в корена с един `package-lock.json`. Сглобеният сайт е в `apps/web/build/`. Клиентът се публикува под `/js/`, а данните от `data/release/` под `/data/`; публичните адреси са запазени. SSR чете текущото издание от D1/R2; без регистър използва включеното в сглобяването издание.
 
-Горната лента събира навигацията в пет падащи групи, бутон „Бюджет 2027“ и лупа за търсене. Под 1241 px групите са в „Меню“; лупата остава видима и отваря панел под хедъра (`/` или Ctrl/Cmd+K също работят). Блокът „Изпълнение на плана“ сравнява 2026 и 2025 г. с равни черни и червени барове. Преходите и броенето на числата се изключват при предпочитание за намалено движение; печатът и PNG износът показват крайните стойности.
-
-## Сглобяване и публикуване
-
-Данните се сглобяват като издание с командата `budget` ([`docs/release.md`](docs/release.md)): `./budget build --build-date ГГГГ-ММ-ДД --site` сглобява един commit в закования образ на `tools/data/Dockerfile`, пише `site/data` и манифеста с `release_id` в `site/data/releases/`. `./budget reproduce` сглобява изданието отново от оригиналите и сравнява всеки файл. Нужни са суровите файлове (`docs/data-sources.md`). `./budget publish --release work/candidate --environment staging` го качва в R2, записва го в регистъра в D1 и го прави текущо през операторския API зад Cloudflare Access; `python tools/release_check.py` проверява това на локален Worker (`npm ci` преди това).
-
-Сайтът е React Router в framework режим със SSR в Cloudflare Worker ([ADR 0002](docs/adr/0002-react-router-ssr.md)): всеки екран
-се изобразява на сървъра от текущото издание в регистъра (D1 и R2), така че ново издание се вижда без ново сглобяване. Сървърният
-HTML на всяка страница има текста и таблиците, заглавие, описание, каноничен адрес, Open Graph и JSON-LD; браузърът го поема и
-дозарежда файловете на същото издание. `tools/site/build.py` сглобява Worker-а (`react-router build` в `build/`), пуска го и проверява
-всеки екран два пъти: както го праща сървърът и както го показва браузърът. Пише и `sitemap.xml`, `robots.txt`, `llms.txt`,
-`llms-full.txt` и `_headers`, а при грешка спира. Предложението сайтът да остане статичен ([ADR 0001](docs/adr/0001-static-prerender.md))
-е отхвърлено.
+## Среда и проверки
 
 ```bash
-PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/site/build.py                  # build/ за https://sigma-budget.my-data.bg, с проверките
-PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/site/build.py --env staging --noindex   # за staging
-npx wrangler deploy -c build/server/wrangler.json                                                 # каченото е сглобеното (нужен е акаунт)
+uv venv tmp/venv --python 3.12
+uv pip install --python tmp/venv/bin/python --require-hashes -r tests/requirements-dev.lock
+uv pip install --python tmp/venv/bin/python --no-deps -e pipeline
+PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers tmp/venv/bin/python -m playwright install chromium
+uv venv tmp/venv-data --python 3.12
+uv pip install --python tmp/venv-data/bin/python --require-hashes -r pipeline/requirements.lock
+uv pip install --python tmp/venv-data/bin/python --no-deps -e pipeline
+
+npm run typecheck
+python -m budget_pipeline.validate.registry check
+./budget validate --site
+python -m budget_pipeline.validate.datasets
+tmp/venv/bin/python -m tests.release.compat_check
+tmp/venv/bin/python -m apps.web.scripts.query_check
+PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers tmp/venv/bin/python -m apps.web.scripts.build --env staging --noindex
+# След това Worker-ът се стартира с npm run dev; пълната проверка върви срещу него:
+PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers tmp/venv/bin/python -m tests.e2e.screens --url http://127.0.0.1:8814/
 ```
 
-Производственият адрес е `SITE_ORIGIN` в `wrangler.jsonc`; `sigma-budget.my-data.bg` още не е потвърден. Адресът за обратна връзка е в `<meta name="feedback-email">`, а адресът на оригиналната СИГМА е `SIGMA_URL` в `wrangler.jsonc`. Файлът CSV на всяка таблица казва на всеки ред периода, единицата, обхвата, изданието, статуса и източника; текстова клетка, която започва с `=`, `+`, `-` или `@`, получава апостроф, за да не я изпълни електронна таблица. GitHub Actions (`.github/workflows/site.yml`) проверява и сглобява всеки PR. Push към `main` качва staging, щом са зададени секретите на Cloudflare. Production не се качва от CI: това е отделна контролирана процедура (етап E в [спецификацията](docs/approach-specification.md)). Готовността за production е в [`docs/production-readiness.md`](docs/production-readiness.md). Картинките (`og.png`, иконите) се рисуват с `tools/site/make_images.py`.
+Останалите браузърни проверки са `redirects.py`, `calc_check.py`, `share_check.py`, `accept.py` и `motion.py` в `tests/e2e/`. Те използват временния статичен сайт. `overlap.py` и `perf.py` проверяват припокриване и работа при ограничен процесор. Очакваните числа се четат от текущите данни чрез `expect.py`. Интеграционните проверки `tests/release/release_check.py` и `restore_drill.py` изискват Node, OpenSSL и локален Worker.
 
-## Проверки
+## Данни и издания
 
-Проверките са безглави (Playwright + Chromium) и обхождат всеки маршрут при 1280 px и 400 px, в светла и в тъмна тема. Тъмната следва системата, докато посетителят не избере тема в долния край на страницата (`site/css/tokens.css`, `site/js/theme-boot.js`). Проверките на приложението (`check_mock_v6`, `redirects_v6`, `calc_check_v6`, `share_check_v6`, `accept_v6`, `motion_v6`, `overlap_v6`) го пускат в хеш режим (`#/prihodi`), а цифрите, които очакват, четат от `site/data/execution.json` (`tools/mock/expect_v6.py`). Шестте първи са в CI и спират PR-а. Адресите с пътища се проверяват от `tools/site/build.py`.
+`./budget` е входната команда за придобиване, сглобяване, проверка и възпроизвеждане на данните. Референтната среда е `docker build -t sigma-budget-data pipeline` (Python 3.12, зависимости с хешове). Оригиналите са в `data/originals/`; файловете на МФ остават в git, останалите се придобиват според [източниците](docs/data-sources.md). Ръчно поддържаните и замразените входове са в `data/inputs/`, а междинните резултати в игнорирания `data/cache/`.
 
-```bash
-# среда (еднократно, Python 3.12+): python3 -m venv .venv && .venv/bin/pip install --require-hashes -r requirements-dev.lock
-# и Chromium: PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python -m playwright install chromium
+`./budget build --build-date ГГГГ-ММ-ДД --site` сглобява издание от commit и записва данните и манифеста в `data/release/`. `./budget reproduce` го възпроизвежда и сравнява байтовете. Слоят за терминология още използва историческите тагове; редът на строителите е запазен. Подробности: [издания](docs/release.md), [придобиване](docs/data-acquisition.md), [операторско ръководство](docs/operator-guide.md).
 
-PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/check_mock_v6.py --quick     # финалната проверка, около минута
-PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/check_mock_v6.py             # пълната
-PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/check_mock_v6.py --route S06 # един екран
-python3 tools/mock/validate_data_v6.py                                                               # проверка на наборите с данни
-.venv/bin/python tools/data/registry.py check                                                       # регистрите на източниците и наборите
-./budget validate --site                                                                            # site/data срещу манифеста на изданието
-```
-
-За анимациите, припокриването на контроли и работата при ограничен процесор има отделни проверки:
-
-```bash
-PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/motion_v6.py
-PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/overlap_v6.py
-PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/perf_v6.py
-```
-
-`accept_v6.py` включва бързия вариант на проверката за припокриване. Основните проверки работят с намалено движение; `motion_v6.py` проверява и включените анимации. Service worker презаверява заявките към хостинга; сглобяването дава на кеша му ново име (данни + commit), а старият кеш се изтрива. Посетител със стар работник може да се нуждае от още едно зареждане, за да се обновят последователно всички модули.
-
-Всички опции са описани в началото на `tools/mock/check_mock_v6.py` и в раздел 14 на [`docs/dev-guide.md`](docs/dev-guide.md). Проверките без `_v6` в името (`check_mock.py`, `validate_data.py`, `validate_mock.py` и `_v2`…`_v5`) са за по-старите версии и се пускат на съответния таг (`mock-v1` … `mock-v5`): на последното дърво очакваният резултат е различен.
-
-> **Пътища.** Скриптовете в `tools/mock/` намират хранилището от собственото си местоположение (`site/`, `prototype/`, `docs/`) и пишат само в `tmp/` (в `.gitignore`) и в `tools/mock/cache/`. Скриптовете с наставка `_v2` … `_v6` (проверките, снимките, валидаторите на отделна версия) са за съответния таг (`mock-v2` … `mock-v6`): извадете тага и ги пуснете там; сравненията на две версии четат по-старата от `tmp/versions/`. Суровите файлове (`prototype/data/raw/`), текстът на ръководството и PDF-ът на проекта на бюджетния план не са в хранилището — виж [`docs/data-sources.md`](docs/data-sources.md); без тях скриптовете спират със съобщение кое липсва.
-
-## Данни
-
-Суровите данни (около 143 MB: месечни отчети на Министерството на финансите, законопроектът и законите за 2026 г., програмни бюджети, данни на Eurostat, БНБ, НАП и др.) са извън хранилището, освен ръчно получените файлове от minfin.bg (около 5 MB). [`docs/data-sources.md`](docs/data-sources.md) описва за всеки набор институцията, точния адрес, начина на изтегляне (автоматично или ръчно), размера, контролната сума и скрипта, който го обработва — достатъчно, за да се възстановят при нужда.
-Формите на готовите данни са в [`docs/data-spec.md`](docs/data-spec.md) и [`docs/data-spec-mock.md`](docs/data-spec-mock.md).
+GitHub Actions проверява PR и сглобява staging. Push към main може да публикува сайта на staging при конфигурирани Cloudflare секрети. Production е отделна контролирана процедура. Конфигурацията е в `apps/web/wrangler.jsonc`; собствена среда използва игнориран `wrangler.local.jsonc`. Готовността е описана в [production-readiness](docs/production-readiness.md).
 
 ## Документация
 
-- [`docs/approach-specification.md`](docs/approach-specification.md) — спецификацията на Sigma Budget: насока за архитектурата (React Router SSR, R2, D1, Access), данните и изданията, с четирите задължителни правила в раздел 1.
-- [`docs/dev-guide.md`](docs/dev-guide.md) — как се прави екран: договорът на модула, компоненти, данни, диаграми, споделяне, CSS, маршрути, достъпност, проверки.
-- [`docs/data-spec.md`](docs/data-spec.md) и [`docs/data-spec-mock.md`](docs/data-spec-mock.md) — формите на файловете в `site/data/`.
-- [`docs/plan.md`](docs/plan.md) — кратко резюме на плана: цели, потребители, екрани, етапи, версии.
-- [`docs/production-readiness.md`](docs/production-readiness.md) — оценка на готовността за production: какво е проверено, какво е нужно от човек преди пускането и какво остава след него.
-- [`docs/adr/`](docs/adr/) — архитектурни решения (0001: статичен сайт вместо React Router SSR, отхвърлено; 0002: React Router SSR на два етапа).
-- [`docs/data-sources.md`](docs/data-sources.md) — произход на данните.
-- [`docs/data-acquisition.md`](docs/data-acquisition.md) — придобиване на данните: кои източници се свалят от къде, работят ли скриптовете, ръчният импорт и Claude skill. Пробата за достъп е `python3 tools/data/probe_sources.py`.
+[Спецификация](docs/approach-specification.md), [ръководство за разработка](docs/dev-guide.md), [данни](docs/data-spec.md), [формати на наборите](docs/example-datasets.md), [план](docs/plan.md) и [архитектурни решения](docs/adr/).
 
 ## История и версии
 
@@ -122,7 +72,7 @@ PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers .venv/bin/python tools/mock/perf_v6.p
 
 - ранните commit-и на прототипа (`prototype/`) са оригиналните — със съдържанието и времето, в което са направени;
 - по-късните етапи са възстановени от запазени снимки на работните копия и от времената в дневника на работата. Съдържанието на файловете във всеки commit е крайното състояние на файла за съответния етап, а времето на commit-а е най-доброто възможно приближение;
-- версиите са отбелязани с тагове: `proto-v3.6` (старият прототип), `mock-v1` … `mock-v6` (Mock приложението, виж [`docs/plan.md`](docs/plan.md));
+- версиите са отбелязани с тагове: `proto-v3.6` (старият прототип), `mock-v1` … `mock-v6` (сайтът, виж [`docs/plan.md`](docs/plan.md));
 - страничната линия `kfp-2024` (допълване на отчетите по КФП за 2024 г.) е в отделен клон и е слята в началото на v5.
 
 Съобщенията на commit-ите са на английски (Conventional Commits), документацията е на български.

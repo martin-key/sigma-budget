@@ -1,51 +1,51 @@
 # Източници на данните
 
-Този файл описва откъде идват всички суровите данни, на които стъпват прототипът и Mock приложението, как се свалят отново и кой скрипт ги обработва.
+Този файл описва откъде идват всички суровите данни, на които стъпват прототипът и сайтът, как се свалят отново и кой скрипт ги обработва.
 Суровите файлове (общо около 143 MB) са извън хранилището, освен ръчно получените файлове от minfin.bg (около 5 MB) — вижте раздел 5. Всичко, което е нужно, за да се
 възстановят, е тук: адрес, начин за изтегляне, очаквано име на файла, размер и контролна сума (sha256).
 
-Машинночетимата версия е в два регистъра. `sources/registry.yaml` описва източниците и междинните файлове, а `datasets/registry.yaml` описва всеки файл на `site/data`: производител, входове, екрани, период, обхват, единица, статус и как се сглобява отново. `python3 tools/data/registry.py check` ги сверява с хранилището в CI и показва наборите, чиято верига до оригиналите има празнина.
+Машинночетимата версия е в два регистъра. `data/sources.yaml` описва източниците и междинните файлове, а `data/datasets.yaml` описва всеки файл на `data/release`: производител, входове, екрани, период, обхват, единица, статус и как се сглобява отново. `python -m budget_pipeline.validate.registry check` ги сверява с хранилището в CI и показва наборите, чиято верига до оригиналите има празнина.
 
 ## 1. Обобщение
 
-| набор (папка в `prototype/data/raw/`) | институция | как се получава | файлове | консумира се от | произвежда |
+| набор (папка в `data/originals/`) | институция | как се получава | файлове | консумира се от | произвежда |
 |---|---|---|---|---|---|
-| `asbp/` — мотиви и АСБП 2026–2028 (PDF) | Министерство на финансите | **ръчно** (изтегляне през браузър; предоставен от работната група) | 1 PDF, 3,4 MB | `extract_asbp_tables.py`, `extract_home_kpis.py`, `tools/mock/asbp.py` | `asbp/asbp_tables.json`, `prototype/src/home_kpis_2026.json`, данните на Mock |
-| `bnb_sdmx/` — дълг по SDDS Plus | Българска народна банка | автоматично, `fetch_sources.py` | 2 XML, 86 KB | `tools/mock/bd_debt.py` | `site/data/debt.json` |
-| `data_europa/` — метаданни на отворени набори | Европейски портал за данни (data.europa.eu) | автоматично, `fetch_sources.py` | 4 JSON-LD, 178 KB | не е вход на сглобяването — справка за наборите на портала за отворени данни; ключът `dataeuropa` в регистъра на източниците (`site/data/core.json`) сочи към този портал | — |
-| `dv/` — приетите закони за 2026 г. | „Държавен вестник“ (Народно събрание) | автоматично, `fetch_sources.py` | 3 HTML, 7,5 MB | `extract_dv_laws.py`, `build_src.py`, `tools/mock/bd_law.py` | `dv/dv_laws_2026.json`, `prototype/src/*.json`, `site/data/law.json` и др. |
-| `eurostat/` — население и дълг | Eurostat | автоматично, `fetch_sources.py` | 4 JSON, 14 KB | `build_src.py`, `tools/mock/bd_debt.py`, `bd_fiscal.py` | `prototype/src/population.json`, `debt_stock.json`, `site/data/debt.json` |
-| `kfp_2024/` — месечни отчети по КФП 2024 | Министерство на финансите | **ръчно** (предоставени от работната група) | 12 XLS, 527 KB | `tools/mock/extract_kfp_full.py` | `site/data/execution.json` |
-| `kfp_2025/` — месечни отчети по КФП 2025 | Министерство на финансите | **ръчно** (предоставени от работната група) | 12 XLS, 531 KB | `extract_2025.py` → `build_2025_json.py`, `tools/mock/extract_kfp_full.py` | `prototype/src/kfp_monthly_2025.json`, `site/data/execution.json` |
-| `kfp_2026/` — месечни отчети по КФП 2026 (до 30.09) | Министерство на финансите | **ръчно** (предоставени от работната група) | 9 XLS, 413 KB | `build_src.py`, `extract_home_kpis.py`, `tools/mock/extract_kfp_full.py` | `prototype/src/kfp_components_2026.json`, `home_kpis_2026.json`, `site/data/execution.json` |
-| `nap/` — осигурителни вноски за 2026 г. | Национална агенция за приходите | автоматично, `fetch_sources.py` | 1 PDF, 410 KB | `build_src.py`, `tools/mock/bd_rates.py` | `prototype/src/rates_2026.json`, `site/data/rates.json` |
-| `parliament/` — законопроект за бюджета и данни от API | Народно събрание | автоматично, `fetch_sources.py` | 1 DOCX, 1 ZIP (63 MB), 3 JSON | `extract_asbp_tables.py`, `extract_home_kpis.py`, `build_src.py`, `extract_program_budgets.py`, `tools/mock/extract_bill.py`, `bd_law.py` | `asbp_tables.json`, `program_budgets/`, `site/data/law.json` и др. |
-| `program_budgets/` — програмни бюджети на ПРБ | Първостепенни разпоредители (чрез архива към законопроекта) | **извлича се** от `parliament/52-602-01-19.zip` | 46 PDF + 1 архив 7z, 70 MB | `extract_program_budgets.py`, `tools/mock/bd_prb_pdf.py` | `prototype/src/program_budgets_2026.json`, `site/data/ministries/*.json` |
-| `sebra/` — дневно обобщение на плащания | МИДТ (midt.gov.bg) | автоматично, `fetch_sources.py` (+ `tools/mock/fetch_sebra.py` за още два дни) | 1 XLSX + 1 HTML, 54 KB | `tools/mock/bd_sebra.py` | `site/data/sebra.json` |
+| `asbp/` — мотиви и АСБП 2026–2028 (PDF) | Министерство на финансите | **ръчно** (изтегляне през браузър; предоставен от работната група) | 1 PDF, 3,4 MB | `asbp_tables.py`, `home_kpis.py`, `pipeline/budget_pipeline/build/forecast_tables.py` | `asbp/asbp_tables.json`, `data/inputs/home_kpis_2026.json`, данните на сайта |
+| `bnb_sdmx/` — дълг по SDDS Plus | Българска народна банка | автоматично, `download.py` | 2 XML, 86 KB | `pipeline/budget_pipeline/build/debt.py` | `data/release/debt.json` |
+| `data_europa/` — метаданни на отворени набори | Европейски портал за данни (data.europa.eu) | автоматично, `download.py` | 4 JSON-LD, 178 KB | не е вход на сглобяването — справка за наборите на портала за отворени данни; ключът `dataeuropa` в регистъра на източниците (`data/release/core.json`) сочи към този портал | — |
+| `dv/` — приетите закони за 2026 г. | „Държавен вестник“ (Народно събрание) | автоматично, `download.py` | 3 HTML, 7,5 MB | `dv_laws.py`, `build_src.py`, `pipeline/budget_pipeline/build/law.py` | `dv/dv_laws_2026.json`, `data/inputs/*.json`, `data/release/law.json` и др. |
+| `eurostat/` — население и дълг | Eurostat | автоматично, `download.py` | 4 JSON, 14 KB | `build_src.py`, `pipeline/budget_pipeline/build/debt.py`, `fiscal.py` | `data/inputs/population.json`, `debt_stock.json`, `data/release/debt.json` |
+| `kfp_2024/` — месечни отчети по КФП 2024 | Министерство на финансите | **ръчно** (предоставени от работната група) | 12 XLS, 527 KB | `pipeline/budget_pipeline/extract/kfp_full.py` | `data/release/execution.json` |
+| `kfp_2025/` — месечни отчети по КФП 2025 | Министерство на финансите | **ръчно** (предоставени от работната група) | 12 XLS, 531 KB | `extract_2025.py` → `build_2025_json.py`, `pipeline/budget_pipeline/extract/kfp_full.py` | `data/inputs/kfp_monthly_2025.json`, `data/release/execution.json` |
+| `kfp_2026/` — месечни отчети по КФП 2026 (до 30.09) | Министерство на финансите | **ръчно** (предоставени от работната група) | 9 XLS, 413 KB | `build_src.py`, `home_kpis.py`, `pipeline/budget_pipeline/extract/kfp_full.py` | `data/inputs/kfp_components_2026.json`, `home_kpis_2026.json`, `data/release/execution.json` |
+| `nap/` — осигурителни вноски за 2026 г. | Национална агенция за приходите | автоматично, `download.py` | 1 PDF, 410 KB | `build_src.py`, `pipeline/budget_pipeline/build/rates.py` | `data/inputs/rates_2026.json`, `data/release/rates.json` |
+| `parliament/` — законопроект за бюджета и данни от API | Народно събрание | автоматично, `download.py` | 1 DOCX, 1 ZIP (63 MB), 3 JSON | `asbp_tables.py`, `home_kpis.py`, `build_src.py`, `program_budgets.py`, `pipeline/budget_pipeline/extract/bill.py`, `law.py` | `asbp_tables.json`, `program_budgets/`, `data/release/law.json` и др. |
+| `program_budgets/` — програмни бюджети на ПРБ | Първостепенни разпоредители (чрез архива към законопроекта) | **извлича се** от `parliament/52-602-01-19.zip` | 46 PDF + 1 архив 7z, 70 MB | `program_budgets.py`, `pipeline/budget_pipeline/build/program_budget_pdf.py` | `data/inputs/program_budgets_2026.json`, `data/release/ministries/*.json` |
+| `sebra/` — дневно обобщение на плащания | МИДТ (midt.gov.bg) | автоматично, `download.py` (+ `pipeline/budget_pipeline/sources/payments.py` за още два дни) | 1 XLSX + 1 HTML, 54 KB | `pipeline/budget_pipeline/build/payments.py` | `data/release/sebra.json` |
 
-Допълнителни източници, ползвани само от Mock приложението (не са в `prototype/data/raw/`):
+Допълнителни източници, ползвани само от сайтът (не са в `data/originals/`):
 
 | набор | институция | как се получава | консумира се от | произвежда |
 |---|---|---|---|---|
-| Eurostat GISCO — граници и население на общините (LAU 2024) и Eurostat `demo_r_pjanaggr3` | Eurostat | автоматично, `tools/mock/fetch_gisco.py` (кеш в `tools/mock/cache/`) | `tools/mock/bd_municipal.py` | `site/data/municipalities.json`, `site/data/geo/obshtini.json` |
-| СЕБРА — дневни обобщения за 27.08 и 28.08.2026 | МИДТ | автоматично, `tools/mock/fetch_sebra.py` (кеш в `tools/mock/cache/`) | `tools/mock/bd_sebra.py` | `site/data/sebra.json` |
-| „Проект на бюджетен план на Република България за 2027 г.“ (PDF, 55 страници, МФ, октомври 2026) | Министерство на финансите | **ръчно** (предоставен от работната група) | `extract_dbp2027.py` → `build_dbp2027_site.py`, `verify_dbp2027_numbers.py` | `site/data/dbp2027.json` (екранът „Бюджет 2027 (проект)“ във v6) |
+| Eurostat GISCO — граници и население на общините (LAU 2024) и Eurostat `demo_r_pjanaggr3` | Eurostat | автоматично, `pipeline/budget_pipeline/sources/boundaries.py` (кеш в `data/cache/`) | `pipeline/budget_pipeline/build/municipalities.py` | `data/release/municipalities.json`, `data/release/geo/obshtini.json` |
+| СЕБРА — дневни обобщения за 27.08 и 28.08.2026 | МИДТ | автоматично, `pipeline/budget_pipeline/sources/payments.py` (кеш в `data/cache/`) | `pipeline/budget_pipeline/build/payments.py` | `data/release/sebra.json` |
+| „Проект на бюджетен план на Република България за 2027 г.“ (PDF, 55 страници, МФ, октомври 2026) | Министерство на финансите | **ръчно** (предоставен от работната група) | `dbp2027.py` → `budget_plan.py`, `budget_plan_check.py` | `data/release/dbp2027.json` (екранът „Бюджет 2027 (проект)“ във v6) |
 
 ## 2. Начало: как се възстановяват данните
 
-Редът е важен. Скриптовете намират хранилището от собственото си местоположение: константите в началото на файла (`ROOT`, `RAW`, `SITE`, `TMP`) сочат към `prototype/data/raw/`, `site/` и `tmp/`; кешът на Mock приложението е `tools/mock/cache/`. Ръчно доставяните входове, които не са в хранилището, са `tmp/sources/` (PDF на проекта на бюджетния план) и `tmp/research/` (междинните извлечения).
+Редът е важен. Скриптовете намират хранилището от собственото си местоположение: константите в началото на файла (`ROOT`, `RAW`, `SITE`, `TMP`) сочат към `data/originals/`, `apps/web/` и `tmp/`; кешът на сайта е `data/cache/`. Ръчно доставяните входове, които не са в хранилището, са в `data/cache/research/` (междинните извлечения).
 
-1. **Среда.** Обработката е в `tools/data/requirements.lock` (PyMuPDF 1.26.5, `xlrd`, `pdfplumber`, `python-docx`, `py7zr`, PyYAML, с хешове) или в образа `tools/data/Dockerfile` (Python 3.12.10 по digest). В образа `rebuild_v6.py` дава `site/data` байт по байт (05.11.2026). Проверките и сглобяването на сайта са в `requirements-dev.lock` (`playwright` с Chromium, `xlrd`, PyYAML).
-2. **Автоматичното сваляне.** `python3 tools/prototype/fetch_sources.py` (само стандартна библиотека, иска мрежа) сваля в `prototype/data/raw/<папка>/` всичко, отбелязано „автоматично“, и пише `prototype/data/raw/MANIFEST.json` (адрес, размер, sha256, HTTP код, дата на сваляне). Неуспешните заявки също се записват в манифеста.
+1. **Среда.** Обработката е в `pipeline/requirements.lock` (PyMuPDF 1.26.5, `xlrd`, `pdfplumber`, `python-docx`, `py7zr`, PyYAML, с хешове) или в образа `pipeline/Dockerfile` (Python 3.12.10 по digest). В образа `rebuild.py` дава `data/release` байт по байт (05.11.2026). Проверките и сглобяването на сайта са в `tests/requirements-dev.lock` (`playwright` с Chromium, `xlrd`, PyYAML).
+2. **Автоматичното сваляне.** `python -m budget_pipeline.sources.download` (само стандартна библиотека, иска мрежа) сваля в `data/originals/<папка>/` всичко, отбелязано „автоматично“, и пише `data/originals/MANIFEST.json` (адрес, размер, sha256, HTTP код, дата на сваляне). Неуспешните заявки също се записват в манифеста.
 3. **Ръчните набори.** Месечните отчети по КФП (`kfp_2024/`, `kfp_2025/`, `kfp_2026/`) и PDF-ът на АСБП (`asbp/UMTBF-2026-2028-motivi.pdf`) се получават на ръка (раздел 4) и вече са в хранилището (раздел 5). Нов отчет се добавя там. Проверете файловете със sha256 от таблиците по-долу.
-4. **Извличане.** `extract_asbp_tables.py`, `extract_dv_laws.py`, `extract_program_budgets.py` → `asbp/asbp_tables.json`, `dv/dv_laws_2026.json`, `prototype/src/program_budgets_2026.json` (и разархивираните програмни бюджети).
-5. **Сглобяване на прототипа.** Към 05.11.2026 `build_src.py`, `extract_2025.py`, `build_2025_json.py` и `extract_glossary.py` не минават (`sources/registry.yaml`, `intermediates`). `build_src.py` и `extract_home_kpis.py` (+ `extract_2025.py` → `build_2025_json.py` за КФП 2025) → `prototype/src/*.json`; `gen_inline.py` ги вгражда в `prototype/site/index.html`. Речникът (`prototype/src/glossary.json`) идва от PDF на работната група чрез `extract_glossary.py` и е готов в `prototype/src/`.
-6. **Mock приложението.** `tools/mock/run_all.sh` изпълнява по ред: `fetch_gisco.py`, `fetch_sebra.py`, `extract_kfp_full.py`, `extract_bill.py`, `build_data.py`, `build_text.py`, `build_mock.py`, пак `build_data.py`, и накрая `validate_data.py` и `validate_mock.py`. Ако в `tools/mock/cache/` вече има кеширани файлове, сглобяването е без мрежа. Екранът „Бюджет 2027 (проект)“ (v6) се строи отделно с `extract_dbp2027.py` → `build_dbp2027_site.py` и се сверява с `verify_dbp2027_numbers.py`.
+4. **Извличане.** `asbp_tables.py`, `dv_laws.py`, `program_budgets.py` → `asbp/asbp_tables.json`, `dv/dv_laws_2026.json`, `data/inputs/program_budgets_2026.json` (и разархивираните програмни бюджети).
+5. **Замразени входове.** `data/inputs/` съдържа ръчно поддържаните входове и замразените извлечения. Произходът им е в `data/sources.yaml`; историческите производители са само справочни бележки и не се изпълняват.
+6. **Текущо сглобяване.** `./budget build` изпълнява `python -m budget_pipeline.build.rebuild`: извличане на КФП, строители на наборите, терминология, активен слой, източници и каталог. Няма втори производствен ред на сглобяване. Новите PDF извлечения се добавят като модули в `budget_pipeline.extract`, а строителите - в `budget_pipeline.build`.
 
 ## 3. Автоматично свалените набори
 
 ### 3.1 Държавен вестник — `dv/`
-Приетите бюджетни закони за 2026 г. (HTML страници на `dv.parliament.bg`). Обработва ги `extract_dv_laws.py` → `dv/dv_laws_2026.json` (сурови таблици и цитати), после `build_src.py`.
+Приетите бюджетни закони за 2026 г. (HTML страници на `dv.parliament.bg`). Обработва ги `dv_laws.py` → `dv/dv_laws_2026.json` (сурови таблици и цитати), после `build_src.py`.
 
 | закон | адрес |
 |---|---|
@@ -79,7 +79,7 @@
 | `bill_167157.json` | 201 434 | `6ca68e171f639e9e15905774a13f2c0eb15816b3d8aa7ea0a15398c1ed432ff9` |
 
 ### 3.3 Програмни бюджети — `program_budgets/`
-Не се свалят отделно: `extract_program_budgets.py` ги разархивира от `parliament/52-602-01-19.zip` (папка „7.Програмни формати на бюджети на ПРБ с бюджет по ДБ“: 4 вложени zip-а и един архив 7z за съдебната власт) в `prototype/data/raw/program_budgets/` и от PDF-ите (таблиците „Код | Области на политики и бюджетни програми“) пише `prototype/src/program_budgets_2026.json`, като сверява сумите със ЗДБ 2026. Файловете са именувани `<код на бюджета>_<съкращение>.pdf`.
+Не се свалят отделно: `program_budgets.py` ги разархивира от `parliament/52-602-01-19.zip` (папка „7.Програмни формати на бюджети на ПРБ с бюджет по ДБ“: 4 вложени zip-а и един архив 7z за съдебната власт) в `data/originals/program_budgets/` и от PDF-ите (таблиците „Код | Области на политики и бюджетни програми“) пише `data/inputs/program_budgets_2026.json`, като сверява сумите със ЗДБ 2026. Файловете са именувани `<код на бюджета>_<съкращение>.pdf`.
 
 | файл | байтове | sha256 |
 |---|---:|---|
@@ -132,7 +132,7 @@
 | `8600_ДАТО.pdf` | 512 781 | `d6f21ac9838bf371e28106fa3a813758b0776eb15a52e1c598f991619238ca57` |
 
 ### 3.4 Национална агенция за приходите — `nap/`
-Таблица с размерите на осигурителните вноски за 2026 г. и разпределението им (приложение към писмо ВК-30-10237 от 12.08.2026). Обработват я `build_src.py` и `tools/mock/bd_rates.py`. Сървърът затваря връзката към `urllib`, затова `fetch_sources.py` пада обратно на `curl`.
+Таблица с размерите на осигурителните вноски за 2026 г. и разпределението им (приложение към писмо ВК-30-10237 от 12.08.2026). Обработват я `build_src.py` и `pipeline/budget_pipeline/build/rates.py`. Сървърът затваря връзката към `urllib`, затова `download.py` пада обратно на `curl`.
 
 - Адрес: https://nra.bg/wps/wcm/connect/nra.bg25863/6f117462-1836-48f8-9e27-a4b02a1e55fb/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5_1_%D0%92%D0%9A-30-10237_12.08.2026.pdf?MOD=AJPERES
 
@@ -169,7 +169,7 @@ SDMX файлове на МФ по стандарта SDDS Plus, публику�
 | `ggd.xml` | 42 862 | `447b174a28e8b7ef2ab8ead01fb2e38607bc6d948fd0e6899e01a75153f84fa8` |
 
 ### 3.7 data.europa.eu — `data_europa/`
-Метаданни (JSON-LD) за наборите на портала за отворени данни. Самият `data.egov.bg` връща 403, затова се ползва европейският портал, който ги огледално отразява. Не са вход на сглобяването: пазят се като справка кои набори съществуват на портала (автоматичният достъп до самия портал на правителството е блокиран); регистърът на източниците в `site/data/core.json` има ключ `dataeuropa` за тях.
+Метаданни (JSON-LD) за наборите на портала за отворени данни. Самият `data.egov.bg` връща 403, затова се ползва европейският портал, който ги огледално отразява. Не са вход на сглобяването: пазят се като справка кои набори съществуват на портала (автоматичният достъп до самия портал на правителството е блокиран); регистърът на източниците в `data/release/core.json` има ключ `dataeuropa` за тях.
 
 | файл | адрес | набор |
 |---|---|---|
@@ -193,26 +193,26 @@ SDMX файлове на МФ по стандарта SDDS Plus, публику�
 - https://midt.gov.bg/bg/transparency/sebra/2026
 - https://midt.gov.bg/upload/3788/31.08..2026.xlsx
 
-Още два дни от същата страница (27.08 и 28.08.2026) сваля `tools/mock/fetch_sebra.py` в `tools/mock/cache/`: `https://midt.gov.bg/upload/3789/27.08..2026.xlsx` и `https://midt.gov.bg/upload/3790/28.08..2026.xlsx`.
+Още два дни от същата страница (27.08 и 28.08.2026) сваля `pipeline/budget_pipeline/sources/payments.py` в `data/cache/`: `https://midt.gov.bg/upload/3789/27.08..2026.xlsx` и `https://midt.gov.bg/upload/3790/28.08..2026.xlsx`.
 
 | файл | байтове | sha256 |
 |---|---:|---|
 | `midt_sebra_2026_page.html` | 72 258 | `677aab28b65b7eef4b5b2e3ced49cd8c77d72c2bd17c3ead3bf77fa976a14ad8` |
 | `midt_sebra_31.08.2026.xlsx` | 12 173 | `2fd48d3af2bc2cd77bf3175a748ea8f7c7bb44fdfcee810063891a1a13e4614f` |
 
-| кеш файл (`tools/mock/cache/`) | байтове | sha256 |
+| кеш файл (`data/cache/`) | байтове | sha256 |
 |---|---:|---|
 | `sebra_27.08.2026.xlsx` | 12 180 | `4a27f0714b8f5812825a9e6181f01dfe91526af8774294a090adb9365774b936` |
 | `sebra_28.08.2026.xlsx` | 12 434 | `3d3f09e4db49e75040001c4f262cb8a8f055031624a16988377962bffb10af11` |
 
-### 3.9 Кешове на Mock приложението — `tools/mock/cache/`
+### 3.9 Кешове на сайта — `data/cache/`
 Генерират се от скриптовете и могат да се пресъздадат; пазят се само за да върви сглобяването без мрежа.
 
 | файл | как се получава | байтове | sha256 |
 |---|---|---:|---|
-| `gisco_lau_bg.json` | `fetch_gisco.py`: поток от `https://gisco-services.ec.europa.eu/distribution/v2/lau/` (LAU 2024; сурови 100+ MB не се пазят) — 265 общини: код, име, население, площ, граници | 466 699 | `b9793b72951e164b5a2bcdbf3004ac13fdbb15a071d5164dfc1d658d58f76208` |
-| `eurostat_pop_nuts3_bg.json` | `fetch_gisco.py`: Eurostat `demo_r_pjanaggr3`, 28-те области (NUTS 3) | 16 312 | `c5869aac65138237d190e14c0389f5688c8e5c85af72ac3edb3f5019cb19fc58` |
-| `law_bill.json` | `extract_bill.py`: сравнение на законопроекта със закона (от `parliament/52-602-01-19.docx` и `dv/`) | 233 378 | `a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291` |
+| `gisco_lau_bg.json` | `boundaries.py`: поток от `https://gisco-services.ec.europa.eu/distribution/v2/lau/` (LAU 2024; сурови 100+ MB не се пазят) — 265 общини: код, име, население, площ, граници | 466 699 | `b9793b72951e164b5a2bcdbf3004ac13fdbb15a071d5164dfc1d658d58f76208` |
+| `eurostat_pop_nuts3_bg.json` | `boundaries.py`: Eurostat `demo_r_pjanaggr3`, 28-те области (NUTS 3) | 16 312 | `c5869aac65138237d190e14c0389f5688c8e5c85af72ac3edb3f5019cb19fc58` |
+| `law_bill.json` | `bill.py`: сравнение на законопроекта със закона (от `parliament/52-602-01-19.docx` и `dv/`) | 233 378 | `a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291` |
 
 ## 4. Ръчно получавани набори
 
@@ -222,7 +222,7 @@ SDMX файлове на МФ по стандарта SDDS Plus, публику�
 - Засега файловете се свалят през браузър и се проверяват със sha256 по-долу. Начинът на сваляне е свободен; нужни са байтовете, sha256, адресът и датата.
 
 ### 4.1 Месечни отчети по КФП (лист „стартова“)
-Име на файла: `<ГГГГ>-EU_funds_<ММ><ГГ>_BG_WEB.xls` (при коригирана версия — със суфикс `_1`, `_2`, `_4`). От отчета за септември 2026 г. министерството дава името с интервал (`EU funds`); `tools/data/raw_sources.py import` записва файла под името с долна черта. Отчетите за 01.2025, 06.2025, 02.2026 и 07.2026 са свалени отново на 04.11.2026 г.: министерството ги е записало наново, числата са същите, байтовете и sha256 са други, а юли вече е без суфикс `_2`. Отчетите за 2024 и 2025 г. са в млн. лв., за 2026 г. — в млн. евро. Колона B на листа „стартова“ е консолидираната фискална програма (к.2 = к.3 национален бюджет + к.4 европейски средства). Скриптовете ги четат по етикет на реда, не по номер.
+Име на файла: `<ГГГГ>-EU_funds_<ММ><ГГ>_BG_WEB.xls` (при коригирана версия — със суфикс `_1`, `_2`, `_4`). От отчета за септември 2026 г. министерството дава името с интервал (`EU funds`); `pipeline/budget_pipeline/sources/originals.py import` записва файла под името с долна черта. Отчетите за 01.2025, 06.2025, 02.2026 и 07.2026 са свалени отново на 04.11.2026 г.: министерството ги е записало наново, числата са същите, байтовете и sha256 са други, а юли вече е без суфикс `_2`. Отчетите за 2024 и 2025 г. са в млн. лв., за 2026 г. — в млн. евро. Колона B на листа „стартова“ е консолидираната фискална програма (к.2 = к.3 национален бюджет + к.4 европейски средства). Скриптовете ги четат по етикет на реда, не по номер.
 
 **2024 (12 отчета):**
 
@@ -277,22 +277,22 @@ SDMX файлове на МФ по стандарта SDDS Plus, публику�
 - МФ дава ръст 3 344,9 млн. €. Значи базата му е 30 553,6 млн. €, а ръстът е 10,948%.
 - Архивният отчет към 30.09.2025 г. (`2025-EU_funds_0925_BG_WEB.xls`, ред „Приходи, помощи и дарения“, к.2) дава 59 755,8 млн. лв., тоест 30 552,7 млн. € по курса 1,95583. Ръстът с тази база е 10,951% и се закръгля нагоре.
 
-Базата на МФ е с 0,9 млн. € (1,8 млн. лв.) по-голяма. Проверено на 06.11.2026 г.: отчетът към 30.09.2026 г. няма колона за същия период на 2025 г., а базата на МФ (59 757,6 млн. лв.) я няма нито в него, нито в архивния отчет към 30.09.2025 г. Най-вероятният ѝ източник е по-късна, коригирана версия на септемврийския отчет за 2025 г. (`…_0925_BG_WEB_1.xls` или подобен). Потвърждението иска този файл от minfin.bg, който се сваля само ръчно; ако го има, `raw_sources.py import --replace` го внася и `rebuild_v6.py` сглобява наново. Дотогава сайтът показва числото от архивния отчет и то не се поправя на ръка. Двата ръста се различават с 0,003 процентни пункта (10,948% и 10,951%) и попадат от двете страни на закръглянето.
+Базата на МФ е с 0,9 млн. € (1,8 млн. лв.) по-голяма. Проверено на 06.11.2026 г.: отчетът към 30.09.2026 г. няма колона за същия период на 2025 г., а базата на МФ (59 757,6 млн. лв.) я няма нито в него, нито в архивния отчет към 30.09.2025 г. Най-вероятният ѝ източник е по-късна, коригирана версия на септемврийския отчет за 2025 г. (`…_0925_BG_WEB_1.xls` или подобен). Потвърждението иска този файл от minfin.bg, който се сваля само ръчно; ако го има, `originals.py import --replace` го внася и `rebuild.py` сглобява наново. Дотогава сайтът показва числото от архивния отчет и то не се поправя на ръка. Двата ръста се различават с 0,003 процентни пункта (10,948% и 10,951%) и попадат от двете страни на закръглянето.
 
 ### 4.2 Мотиви и АСБП 2026–2028 (PDF на МФ) — `asbp/`
 - Файл: `asbp/UMTBF-2026-2028-motivi.pdf` — 3 393 872 байта, sha256 `d951d866da468ae439ecbfc4131cf5005e28be39e3fcbb70d8660ca93337ac9b`.
 - Официална страница: `https://www.minfin.bg/bg/legislation1/609`.
-- Съдържа Приложение 3 (КФП 2024–2028), таблиците на дълга, макрорамката и допусканията. Обработва се от `extract_asbp_tables.py` (текстовият слой на PDF-а; числата са отделни „span“ с координати) → `asbp/asbp_tables.json`. Приложение 3 се сверява число по число с вградените в `parliament/52-602-01-19.docx` таблици.
-- Има втора версия на АСБП (в законопроекта в парламента). Двете се различават в малки подредове (най-много 4,3 млн. €); разликата е оповестена в данните на Mock приложението.
+- Съдържа Приложение 3 (КФП 2024–2028), таблиците на дълга, макрорамката и допусканията. Обработва се от `asbp_tables.py` (текстовият слой на PDF-а; числата са отделни „span“ с координати) → `asbp/asbp_tables.json`. Приложение 3 се сверява число по число с вградените в `parliament/52-602-01-19.docx` таблици.
+- Има втора версия на АСБП (в законопроекта в парламента). Двете се различават в малки подредове (най-много 4,3 млн. €); разликата е оповестена в данните на сайта.
 
 ### 4.3 „Проект на бюджетен план на Република България за 2027 г.“
-- Файл: `bud2027_Draft_Budgetary_Plan_of_the_Republic_of_Bulgaria_for_2027.pdf` — 1 237 582 байта, sha256 `8c91cdf4778f2864e1eeb167f14b08d1f68a076ea4ad27a8a4305175a73f1182` (55 страници, МФ, 15.10.2026).
-- Обработва се от `extract_dbp2027.py` (всяко число носи страница и цитат) → `build_dbp2027_site.py` → `site/data/dbp2027.json`; `verify_dbp2027_numbers.py` търси всяко отпечатано число на страницата му.
+- Файл: `budget_2027/Draft_Budgetary_Plan_of_the_Republic_of_Bulgaria_for_2027.pdf` — 1 237 582 байта, sha256 `8c91cdf4778f2864e1eeb167f14b08d1f68a076ea4ad27a8a4305175a73f1182` (55 страници, МФ, 15.10.2026), от `https://www.minfin.bg/bg/1802`.
+- Обработва се от `dbp2027.py` (всяко число носи страница и цитат) → `budget_plan.py` → `data/release/dbp2027.json`; `budget_plan_check.py` търси всяко отпечатано число на страницата му.
 
 ## 5. Кои сурови данни са в хранилището
 
-- **Файловете от minfin.bg са в хранилището.** 33-те отчета по КФП и PDF-ът с мотивите и АСБП, около 4,9 MB, са в `prototype/data/raw/kfp_*/` и `asbp/`. Скрипт не може да ги свали, а МФ понякога записва отчетите наново с други байтове. Без тях чисто копие не сглобява данните. Добавят се по около 45 KB на месец.
+- **Файловете от minfin.bg са в хранилището.** 33-те отчета по КФП, PDF-ът с мотивите и АСБП и материалите за бюджет 2027, около 13 MB, са в `data/originals/kfp_*/`, `asbp/` и `budget_2027/`. Скрипт не може да ги свали, а МФ понякога записва отчетите наново с други байтове. Без тях чисто копие не сглобява данните. Добавят се по около 45 KB на месец.
 - **Останалите не са, заради размера.** Суровите файлове са 105 на брой и около 143 MB; само ZIP архивът на законопроекта е 63 MB, а извлечените от него програмни бюджети — още 70 MB. Хранилището е за код и документация.
-- **Не са нужни за работа.** Прототипът е един самостоятелен файл (`prototype/site/index.html`) с вградени данни, а Mock приложението зарежда само собствените си `site/data/*.json`. Суровите файлове са входове само на сглобяващите скриптове.
+- **Не са нужни за работа.** Прототипът е един самостоятелен файл (`reference/prototype/site/index.html`) с вградени данни, а сайтът зарежда само собствените си `data/release/*.json`. Суровите файлове са входове само на сглобяващите скриптове.
 - **Публични са и се свалят отново.** Всичко, получавано автоматично, е публично; адресите и контролните суми са по-горе.
-- **Контролни суми.** Всеки числов набор в `site/data/` носи в каталога (`catalog.json`, поле `files`) sha256 на първичните си файлове, а `execution.json` — sha256 на всеки месечен отчет, от който идва.
+- **Контролни суми.** Всеки числов набор в `data/release/` носи в каталога (`catalog.json`, поле `files`) sha256 на първичните си файлове, а `execution.json` — sha256 на всеки месечен отчет, от който идва.
