@@ -288,11 +288,10 @@ def g_components(ctx):
                           ("eu", "rev", "rev"), ("eu", "exp", "exp.total"), ("eu", "balance", "balance")):
         got = dig(ex, grp, key)
         c.ok(got == dig(lat, "nat" if grp == "national" else "eu", src), "exec.%s.%s equals execution.json latest" % (grp, key))
-        plan = dig(got, "plan")
-        want = {"rev": "revMln", "exp": "expMln", "balance": "balanceMln"}[key]
-        c.near(plan, dig({"national": nat, "eu": eu}[grp], want, 2), 0.011, "exec.%s.%s plan equals the 2026 figure of the table" % (grp, key))
-        if key != "balance" and isinstance(got, dict) and isnum(got.get("cum")) and isnum(plan) and plan:
-            c.near(got.get("pctPlan"), 100.0 * got["cum"] / plan, 0.0051, "exec.%s.%s: pctPlan" % (grp, key))
+        c.ok(isinstance(got, dict) and 'plan' not in got and 'pctPlan' not in got,
+             'exec.%s.%s: no unevidenced law denominator or percent' % (grp, key))
+        c.ok(execu['plan2026']['coverage']['nat' if grp == 'national' else 'eu'],
+             'execution split has an explicit law coverage reason')
 
     # ---- the pending monthly split
     mb = d["monthlyByBudget"]

@@ -240,7 +240,9 @@ datasets:
   inputs:
   - kfp
   - data/originals/asbp/asbp_tables.json
-  - data/inputs/kfp_components_2026.json
+  - budget2027
+  - data/inputs/budget_forecast_2027.json
+  - data/inputs/budget_bill_2027.json
   schema: docs/data-spec.md
   screens:
   - S01
@@ -254,7 +256,7 @@ datasets:
   rebuild: python -m budget_pipeline.build.rebuild --build-date 2026-11-05
   checked: '2026-11-05'
   limitations:
-  - data/inputs/kfp_components_2026.json comes from build_src.py, which no longer runs
+  - Adopted-law denominators from MF annex 1; unavailable detailed and national/EU denominators are absent.
 - id: execution-provenance
   catalogId: execution-provenance
   title: Произход на числата от месечните отчети
@@ -265,6 +267,9 @@ datasets:
   inputs:
   - kfp
   - data/originals/asbp/asbp_tables.json
+  - budget2027
+  - data/inputs/budget_forecast_2027.json
+  - data/inputs/budget_bill_2027.json
   schema: docs/data-spec.md
   screens:
   - S15
@@ -272,8 +277,7 @@ datasets:
   rebuild: python -m budget_pipeline.build.rebuild --build-date 2026-11-05
   checked: '2026-11-05'
   limitations:
-  - the national and EU plan (plan2026.nat, plan2026.eu) points into data/inputs/kfp_components_2026.json, whose producer no longer
-    runs
+  - No adopted-law national/EU plan split in annex 1.
 - id: debt
   catalogId: D13
   title: 'Държавен дълг: размер, лихви и лимити'

@@ -166,7 +166,8 @@ def g_numbers(ctx):
                     bad.setdefault("empty string", []).append(p)
             elif isinstance(v, str) and NUMSTR.match(v):
                 numstr += 1
-                printed = f == 'budget2027-provenance.json' and p.endswith('.printed')
+                printed = (f == 'budget2027-provenance.json' or
+                           (f == 'execution-provenance.json' and p.startswith('$.plan2026.kfp.rows.'))) and p.endswith('.printed')
                 if not printed and not _allowed(NUMSTR_OK, f, pattern(p)):
                     bad.setdefault("number as string", []).append(p)
             elif isinstance(v, float):

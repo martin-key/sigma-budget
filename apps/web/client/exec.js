@@ -78,3 +78,9 @@ export function headline(E) {
 
 /** "дефицит" / "излишък" for a balance value */
 export const balanceWord = v => (!fin(v) ? '' : v < 0 ? 'дефицит' : v > 0 ? 'излишък' : 'нула');
+
+/** Adopted-law percent, only for positive denominators and comparable flow rows. */
+export const lawPercent = (ex, scope, row) => {
+  const value = ex.latest?.[scope]?.[row];
+  return value && !['balance', 'fin', 'transfers'].includes(row) && fin(value.plan) && value.plan > 0 && fin(value.pctPlan) ? value.pctPlan : null;
+};
