@@ -1,0 +1,224 @@
+{
+  "referenceCommit": "f6e616b",
+  "releaseId": "da608aab01f58dd40794a350f2b6a8d2d0518f844490fb359fac67c1efce173f",
+  "origin": "https://sigma-budget.my-data.bg",
+  "inputsSha256": "01368ca51353ede2aecfc247e8ef724bd0ad77e54c6f015a4f504d7779183d58",
+  "cases": [
+    {
+      "screen": "S16",
+      "address": "/novo",
+      "query": {},
+      "status": 200,
+      "file": "S16.html",
+      "sha256": "529605f0eb621ff679a6a872d4d846bd24cfb4bbbcb6a58d28b922971db9808b"
+    },
+    {
+      "screen": "S16",
+      "address": "/novo?demo=loading",
+      "query": {
+        "demo": "loading"
+      },
+      "status": 200,
+      "file": "S16-loading.html",
+      "sha256": "4a314f5a3843c26d1d0c4851f9420be9aafafa6eeb2aa6c96f102a142e8aea1c"
+    },
+    {
+      "screen": "S16",
+      "address": "/novo?demo=empty",
+      "query": {
+        "demo": "empty"
+      },
+      "status": 200,
+      "file": "S16-empty.html",
+      "sha256": "64e87ca333faa87b49a8a7367c11e8079da25dcb56fffb2141ac0c9e07c4d151"
+    },
+    {
+      "screen": "S16",
+      "address": "/novo?demo=error",
+      "query": {
+        "demo": "error"
+      },
+      "status": 200,
+      "file": "S16-error.html",
+      "sha256": "1b71c13725a1c4599c0b1ecd49e8b48b868f259b702fad4a04485a994ff53e0b"
+    },
+    {
+      "screen": "S16",
+      "address": "/novo?demo=pending",
+      "query": {
+        "demo": "pending"
+      },
+      "status": 200,
+      "file": "S16-pending.html",
+      "sha256": "66cf28e07ca66bf00bf3a720f6a33e99ea202f45c6fa128cc9b63ad6e7a0b7e6"
+    },
+    {
+      "screen": "S16",
+      "address": "/novo?per=2026.draft",
+      "query": {
+        "per": "2026.draft"
+      },
+      "status": 200,
+      "file": "S16-draft.html",
+      "sha256": "c9453e2ce1bfd040c29c956296c070dbcc4b8ed2fff209d8a3e1530a15dd700c"
+    },
+    {
+      "screen": "S16",
+      "address": "/novo?vid=report",
+      "query": {
+        "vid": "report"
+      },
+      "status": 200,
+      "file": "S16-report.html",
+      "sha256": "f8d57992cec31552b3b5e1d1bbc393ac13956f6ded20fa05f0a60cb707d16a3a"
+    },
+    {
+      "screen": "S16",
+      "address": "/novo?vid=law",
+      "query": {
+        "vid": "law"
+      },
+      "status": 200,
+      "file": "S16-law.html",
+      "sha256": "047eca864410905b9da2acfe52851d4216cd23b3e186bd402174b29bdc26b5e2"
+    },
+    {
+      "screen": "S16",
+      "address": "/novo?vid=plenary",
+      "query": {
+        "vid": "plenary"
+      },
+      "status": 200,
+      "file": "S16-plenary.html",
+      "sha256": "d7676bf4a9ceb4153acbfc261176b4d25bc7ce92d009bd115d2de9abdd035821"
+    },
+    {
+      "screen": "S16",
+      "address": "/novo?vid=rates",
+      "query": {
+        "vid": "rates"
+      },
+      "status": 200,
+      "file": "S16-rates.html",
+      "sha256": "730c4169b92e30468cef52a832e5d3c9d735c203febe60e9c5f384bb7cfe1328"
+    },
+    {
+      "screen": "S16",
+      "address": "/novo?vid=eurostat",
+      "query": {
+        "vid": "eurostat"
+      },
+      "status": 200,
+      "file": "S16-eurostat.html",
+      "sha256": "5f41f830e3b0bbb2d033ebe7f1ed97e53ae4bb3a0955e9096b2fc68795e26426"
+    },
+    {
+      "screen": "S16",
+      "address": "/novo?vid=data",
+      "query": {
+        "vid": "data"
+      },
+      "status": 200,
+      "file": "S16-data.html",
+      "sha256": "91cf0a1e84ea0a15d165bce55acc3b96a46c5d40dc1c2e05b3df6a2694dc9dcc"
+    },
+    {
+      "screen": "S16",
+      "address": "/novo?vid=unknown",
+      "query": {
+        "vid": "unknown"
+      },
+      "status": 200,
+      "file": "S16-unknown.html",
+      "sha256": "a4c95e29cb77e8ea409039831eed6dcdac27f0d98b26422147f92509251b885f"
+    },
+    {
+      "screen": "S14",
+      "address": "/zakon",
+      "query": {},
+      "status": 200,
+      "file": "S14.html",
+      "sha256": "3dca023c1c7c0d69cc10e5516f93690c0f5b9ec2d1334db93da7b9bcd733ebde"
+    },
+    {
+      "screen": "S14",
+      "address": "/zakon?demo=loading",
+      "query": {
+        "demo": "loading"
+      },
+      "status": 200,
+      "file": "S14-loading.html",
+      "sha256": "acdc1370693c3124e57d11405a1ff4b4c306b1970519cf811f3fda108392a8ff"
+    },
+    {
+      "screen": "S14",
+      "address": "/zakon?demo=empty",
+      "query": {
+        "demo": "empty"
+      },
+      "status": 200,
+      "file": "S14-empty.html",
+      "sha256": "5348604026b83520e8d91a394af94f2a8d9846e359c6f6bf83f3b1f1486a8808"
+    },
+    {
+      "screen": "S14",
+      "address": "/zakon?demo=error",
+      "query": {
+        "demo": "error"
+      },
+      "status": 200,
+      "file": "S14-error.html",
+      "sha256": "63d172d22bf24ba343c389bdcfa77907717a7aaef97b8edaff9ee888e1281ab9"
+    },
+    {
+      "screen": "S14",
+      "address": "/zakon?demo=pending",
+      "query": {
+        "demo": "pending"
+      },
+      "status": 200,
+      "file": "S14-pending.html",
+      "sha256": "13f83e8794880ad034be9907a99ad6b87c0ab8c097af4f4d9b681ef9efcdd7d6"
+    },
+    {
+      "screen": "S14",
+      "address": "/zakon?per=2026.draft",
+      "query": {
+        "per": "2026.draft"
+      },
+      "status": 200,
+      "file": "S14-draft.html",
+      "sha256": "ffb2df107796f90f6d0103f35c73be28155905e9b37d97da34acda925b84c30a"
+    },
+    {
+      "screen": "S14",
+      "address": "/zakon?per=2024.report",
+      "query": {
+        "per": "2024.report"
+      },
+      "status": 200,
+      "file": "S14-unsupported.html",
+      "sha256": "967b04486ea49c5a8e9967649f6470093a069094df5805dac0e7d190d2a29fff"
+    }
+  ],
+  "browserCases": [
+    {
+      "file": "S14-pct.browser.html",
+      "case": "pct",
+      "sha256": "384449cfcaec81eff29b5f5847b94b0aaa65a33ab3055f900088ed152450bcf5"
+    },
+    {
+      "file": "S14-sort.browser.html",
+      "case": "sort",
+      "sha256": "90b835a3df38ddd29ec79bc3bd7c149a704465fa43e71204c7332b83a3300de1"
+    }
+  ],
+  "exportCases": [
+    {
+      "file": "S14-budgets.csv",
+      "address": "/zakon",
+      "block": "s14-bjudzheti",
+      "sha256": "a181bda62eb9f2a2d2b83074b197a124eb15f7b6b582905f17e045c0ae284875"
+    }
+  ]
+}

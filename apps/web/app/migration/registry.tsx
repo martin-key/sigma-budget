@@ -1,3 +1,4 @@
+import { NarrativeContent } from '../routes/narrative-content';
 import { MetadataContent } from '../routes/metadata-content';
 import { TextState } from '../components/TextState';
 import { byId } from '../lib/legacy';
@@ -7,7 +8,7 @@ import { PageFrame } from '../components/PageFrame';
 import type { TextScreenModel, Navigation } from '../lib/screen-state';
 export { textModel, textMetadata } from '../lib/screens/text';
 export const migrated = (id: string): id is TextScreenModel['screen'] =>
-  ['S26', 'S30', 'S25', 'S35'].includes(id);
+  ['S26', 'S30', 'S25', 'S35', 'S14', 'S16'].includes(id);
 export function MigratedScreen({
   model,
   navigation,
@@ -15,6 +16,7 @@ export function MigratedScreen({
   model: TextScreenModel;
   navigation: Navigation;
 }) {
+  if ('content' in model) return <NarrativeContent model={model} navigation={navigation} />;
   if (model.view && model.view !== 'ready')
     return (
       <PageFrame model={model}>

@@ -20,4 +20,5 @@ export interface Navigation {
 
 export type TextScreenModel =
   | EditorialScreenModel
-  | import('./screens/metadata-types').MetadataModel;
+  | import('./screens/metadata-types').MetadataModel
+  | import('./screens/narrative-types').NarrativeModel;

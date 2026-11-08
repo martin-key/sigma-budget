@@ -1,3 +1,7 @@
+import { narrativeModel } from './narrative';
+import { metadata as lawMetadata, question as lawQuestion } from '../../routes/zakon-content';
+import { lede as feedLede } from '../../routes/novo-content';
+import { href } from '../legacy';
 import { metadataModel } from './metadata';
 import { render as apiContent } from '../../routes/api-content';
 import { render as proofContent } from '../../routes/proverka-content';
@@ -15,6 +19,7 @@ export async function textModel(
   query: Record<string, string>,
   reader: ReleaseReader,
 ): Promise<TextScreenModel> {
+  if (screen === 'S14' || screen === 'S16') return narrativeModel(screen, params, query, reader);
   if (screen === 'S25' || screen === 'S35') return metadataModel(screen, params, query, reader);
   let core: EditorialCore = {},
     glossary: unknown = {};
@@ -49,6 +54,28 @@ export function textMetadata(model: TextScreenModel) {
           : 'Този адрес'}
         не води до екран от сайта. Може да е изписан грешно или страницата да е преместена.`
       : route.desc;
+  const narrative =
+    'content' in model && view === 'ready'
+      ? model.screen === 'S14'
+        ? lawMetadata({
+            data: model.content,
+            core: model.core,
+            query: model.query,
+            unit: 'eur',
+            origin: model.release.origin,
+            href,
+          })
+        : {
+            lede: feedLede({
+              data: model.content,
+              core: model.core,
+              query: model.query,
+              unit: 'eur',
+              origin: model.release.origin,
+              href,
+            }),
+          }
+      : undefined;
   return {
     route,
     params: model.params,
@@ -56,8 +83,10 @@ export function textMetadata(model: TextScreenModel) {
     demo: model.query.demo,
     view,
     title,
+    question: narrative && model.screen === 'S14' ? lawQuestion : undefined,
     lede:
-      'documents' in model && view === 'ready'
+      narrative?.lede ??
+      ('documents' in model && view === 'ready'
         ? (model.screen === 'S25' ? apiContent : proofContent)({
             data: model.documents,
             core: model.core,
@@ -65,7 +94,7 @@ export function textMetadata(model: TextScreenModel) {
             failed: model.failed,
             fileMeta: model.fileMeta,
           }).lede
-        : lede,
+        : lede),
     answer:
       'documents' in model && model.screen === 'S35' && view === 'ready'
         ? proofContent({
@@ -77,6 +106,8 @@ export function textMetadata(model: TextScreenModel) {
         : '',
 
     crumbs: [{ label: 'Начало', href: toHref('/') }, { label: title }],
-    mod: { styles: view === 'ready' ? [route.file] : [] },
+    mod: {
+      styles: view === 'ready' || ('content' in model && !model.query.demo) ? [route.file] : [],
+    },
   };
 }

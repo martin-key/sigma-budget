@@ -296,7 +296,7 @@ export default {
         const copy = new Response(res.clone().body, { status: res.status, headers: res.headers });
         copy.headers.set(
           'Cache-Control',
-          `public, max-age=${screenUrl.pathname === '/proverka' ? 60 : 86400}`,
+          `public, max-age=${['/proverka', '/novo'].includes(screenUrl.pathname) ? 60 : 86400}`,
         );
         stored = cache.put(key, copy).catch(() => {});
         ctx.waitUntil(stored);
