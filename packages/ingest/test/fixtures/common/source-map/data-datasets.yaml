@@ -1,0 +1,11 @@
+schema: 1
+datasets:
+- id: first
+  status: real
+  inputs: [a, data/originals/a/one.txt, skip, other-dataset]
+- id: second
+  status: real
+  inputs: [a]
+- id: pending
+  status: pending
+  inputs: [a]

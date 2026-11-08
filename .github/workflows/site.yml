@@ -164,7 +164,7 @@ jobs:
       - run: docker run --rm -v "$PWD":/repo:ro sigma-budget-data python -m budget_pipeline.environment
 
   deploy:
-    needs: [build, check, release]
+    needs: [build, check, release, common-parity]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -200,3 +200,30 @@ jobs:
           fi
           python3 -m tests.release.compat_check --env-url "$STAGING_ORIGIN"
           pnpm exec wrangler deploy -c apps/web/build/server/wrangler.json      # built with CLOUDFLARE_ENV=staging: the staging Worker, D1 and R2
+
+  common-parity:
+    # Offline common-layer translation against Python-produced frozen evidence.
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - name: Common layer and Python parity
+        env:
+          COMMON_PARITY_REPORT: ${{ github.workspace }}/tmp/ts-migration/candidates/02/diff.json
+        run: pnpm --filter @sigma-budget/ingest exec vitest run src/common/common.test.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: common-parity
+          path: tmp/ts-migration/candidates/02/diff.json
+          if-no-files-found: error
+      - name: Release remains unchanged
+        if: always()
+        run: git diff --exit-code -- data/release

@@ -1,0 +1,1 @@
+{"cells":[{"coords":{"time":"2024","geo":"BG"},"value":1,"status":null},{"coords":{"time":"2024","geo":"EU"},"value":3,"status":"p"},{"coords":{"time":"2025","geo":"EU"},"value":4,"status":null}],"series":{"2024":[3,"p"],"2025":[4,null]}}

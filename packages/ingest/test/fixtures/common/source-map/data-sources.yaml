@@ -1,0 +1,14 @@
+schema: 1
+sources:
+- id: a
+  acquisition: import
+  files:
+  - path: data/originals/a/*.txt
+  - path: data/cache/missing.json
+- id: skip
+  acquisition: generated
+  files:
+  - path: data/cache/not-read.json
+intermediates:
+- path: data/originals/a/one.txt
+  description: reused

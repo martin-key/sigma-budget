@@ -7,7 +7,7 @@ import {
   realpath,
 } from "node:fs/promises";
 import { resolve, dirname, relative, isAbsolute } from "node:path";
-import { parseDocument } from "yaml";
+import { parseYaml } from "../io/registry.js";
 import { object } from "@sigma-budget/dataset-schema";
 import { compare, type Report } from "./compare.js";
 import { parsePolicy } from "./policy.js";
@@ -16,10 +16,7 @@ export interface RegistryEntry {
   files: string[];
 }
 export function parseRegistry(text: string): RegistryEntry[] {
-  const doc = parseDocument(text, { uniqueKeys: true });
-  if (doc.errors.length)
-    throw new Error(doc.errors.map((e) => e.message).join("\n"));
-  const v: unknown = doc.toJS();
+  const v: unknown = parseYaml(text);
   if (!object(v) || v.schema !== 1 || !Array.isArray(v.datasets))
     throw new Error("Invalid dataset registry");
   const ids = new Set<string>();
