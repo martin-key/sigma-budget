@@ -337,10 +337,11 @@ def _national_vs_eu(ctx):
         ex[name] = {}
         for rid, out in (("rev", "rev"), ("exp.total", "exp"), ("balance", "balance")):
             ex[name][out] = {p: L[key][rid][p] for p in pick if p in L[key][rid]}
-    i26 = YEARS.index(2026)
-    for name, plan in (("national", n), ("eu", u)):
-        for out, key in (("rev", "revMln"), ("exp", "expMln"), ("balance", "balanceMln")):
-            _same("%s %s: plan in execution.json = Табл. II-3/II-4" % (name, out), ex[name][out]["plan"], plan[key][i26], 0.0001)
+    # Monthly execution has no evidenced adopted-law national/EU denominators.
+    for name in ('national', 'eu'):
+        for item in ex[name].values():
+            if 'plan' in item or 'pctPlan' in item:
+                raise ValueError('national/EU execution must not use the draft split as a law denominator')
     for out in ("rev", "exp", "balance"):
         _same("cumulative %s: national + EU = KFP" % out, ex["national"][out]["cum"] + ex["eu"][out]["cum"], L["kfp"]["exp.total" if out == "exp" else out]["cum"], TOL_MLN)
     return {

@@ -9,7 +9,7 @@ import { num, pct, date, monthName, EUR_RATE, NBSP, DASH } from '../format.js';
 import { block } from './block.js';
 import { progress } from './progress.js';
 import { store } from '../store.js';
-import { fin } from '../exec.js';
+import { fin, planPercent, planBasis } from '../exec.js';
 
 const B = v => (fin(v) ? num(v / 1000, 2) : DASH);
 const monthsTo = month => (month === 1 ? 'януари' : `януари${DASH}${monthName(month)}`);
@@ -25,20 +25,24 @@ export function planModel(C) {
   if (!K || !fin(L.month)) return null;
   const rows = PLAN_ROWS.map(r => {
     const v = K[r.id] || {};
-    const share = fin(v.cum) && fin(v.plan) && v.plan > 0 ? (v.cum / v.plan) * 100 : null;
+    const share = planPercent(C.ex, 'kfp', r.id);
     const earlier = ['2025'].map(y => {   // V6: only the previous year, as the second bar
       const a = C.ex.pace && C.ex.pace[y] && C.ex.pace[y][r.id];
       return Array.isArray(a) && fin(a[L.month - 1]) ? { year: y, share: a[L.month - 1] } : null;
     }).filter(Boolean);
-    return { ...r, cum: v.cum, plan: v.plan, share, earlier };
+    const canonical = C.ex.canonical?.latest?.kfp?.[r.id] || v;
+    return { ...r, cum: v.cum, plan: v.plan, share, earlier, canonical };
   });
-  return rows.every(r => fin(r.share)) ? { month: L.month, asOf: L.asOf, rows } : null;
+  return { month: L.month, asOf: L.asOf, rows, basis: planBasis(C.ex) };
 }
-const planCsv = P => ({
-  columns: ['Показател', `Отчет към ${P.asOf}, млрд. €`, 'План за 2026 г., млрд. €', 'Дял от плана, %'],
-  rows: P.rows.map(r => [r.name, Math.round(r.cum) / 1000, Math.round(r.plan) / 1000, Math.round(r.share * 10) / 10]),
+export const planCsv = P => ({
+  columns: ['Показател', `Отчет към ${P.asOf}, ${P.basis.adopted ? 'млн.' : 'млрд.'} €`, P.basis.csvPlan, 'Дял от плана, %'],
+  rows: P.rows.map(r => [r.name, ...(P.basis.adopted
+    ? [r.canonical.cum, r.canonical.plan ?? null]
+    : [r.canonical.cum == null ? null : Number(r.canonical.cum) / 1000, r.canonical.plan == null ? null : Number(r.canonical.plan) / 1000]), r.share]),
 });
 function planRow(P, r) {
+  if (!fin(r.share)) return html`<li class="s15-plan-row"><p>${r.name}</p><p>Няма наличен знаменател за този ред.</p></li>`;
   const lev = store.get('leva') ? html`<span class="s15-lev">≈${NBSP}${num((r.cum / 1000) * EUR_RATE, 2)} от ${num((r.plan / 1000) * EUR_RATE, 2)}${NBSP}млрд. лв.</span>` : '';
   const id = `s15-plan-${r.id.replace('.', '-')}`;
   const year = label => html`<span class="sr-only">${r.name}, </span>${label}`;
@@ -54,12 +58,12 @@ function planRow(P, r) {
 export function planBlock(C, o = {}) {
   const P = planModel(C);
   if (!P) return '';
-  const words = `КФП, ${monthsTo(P.month)} 2026 г.: ${P.rows.map(r => `${r.name.toLowerCase()} ${pct(r.share, 1)} от плана`).join(', ')}.`;
+  const words = `${P.basis.citation}. КФП, ${monthsTo(P.month)} 2026 г.: ${P.rows.map(r => `${r.name.toLowerCase()} ${pct(r.share, 1)} от плана`).join(', ')}.`;
   const blockHtml = block({
-    id: 's15-b-plan', level: 2, cls: 's15-planblock', scope: 'kfp', source: ['kfp', 'asbp'], asOf: P.asOf, status: 'real', statusLabel: 'Отчет спрямо проект',
+    id: 's15-b-plan', level: 2, cls: 's15-planblock', scope: 'kfp', source: P.basis.source, asOf: P.asOf, status: 'real', statusLabel: P.basis.statusLabel,
     title: 'Изпълнение на плана за 2026 г.',
-    share: { text: words, table: () => planCsv(P), link: o.link, period: `${monthsTo(P.month)} 2026 г. · млрд. €` },
-    body: html`<div class="s15-plan-wrap"><ul class="s15-plan" aria-label="Изпълнение на плана за 2026 г.">${P.rows.map(r => planRow(P, r))}</ul></div>`,
+    share: { text: words, table: () => planCsv(P), link: o.link, period: `${monthsTo(P.month)} 2026 г. · ${P.basis.adopted ? 'млн.' : 'млрд.'} €` },
+    body: html`<p>${P.basis.citation}</p><div class="s15-plan-wrap"><ul class="s15-plan" aria-label="Изпълнение на плана за 2026 г.">${P.rows.map(r => planRow(P, r))}</ul></div>`,
   });
   return blockHtml;
 }

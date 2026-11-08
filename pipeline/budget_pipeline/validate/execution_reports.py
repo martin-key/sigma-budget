@@ -51,13 +51,6 @@ KNOWN_RAW = {("fin=-balance", 2024, 5): 0.0101}
 # September 2026: the MF release of 02.11.2026, https://www.minfin.bg/bg/news/13559
 HEADLINES = {("2026", 7): (26347.4, 28548.8, -2201.4), ("2026", 8): (30117.8, 33193.2, -3075.5),
              ("2026", 9): (33898.5, 37567.6, -3669.2)}
-# plan2026.kfp keys -> (file, row id): the same Annex 3 numbers as the other datasets
-PLAN_REV = {"rev.tax": "r.tax", "rev.nontax": "r.nontax", "rev.grants": "r.grants"}
-PLAN_EXP = {"exp": "x.exp", "exp.personnel": "x.personnel", "exp.maint": "x.maint", "exp.interest": "x.interest",
-            "exp.interest.ext": "x.interest.ext", "exp.interest.dom": "x.interest.dom", "exp.subsidies": "x.subsidies",
-            "exp.abroad": "x.abroad", "exp.capex": "x.capex", "exp.reserve": "x.reserve",
-            "exp.contingency": "x.contingency", "eucontrib": "x.eucontrib", "exp.total": "x.total"}
-
 
 def _norm(s):
     return re.sub(r"\s+", " ", str(s).replace("\xa0", " ")).strip().lower()
@@ -244,7 +237,7 @@ def g_kfp(ctx):
             c.ok(("plan" in d) == (pv is not None), "latest %s/%s: plan present only where plan2026 has the row" % (col, rid))
             if "plan" in d:
                 c.near(d["plan"], pv, 0.0001, "latest %s/%s plan" % (col, rid))
-            c.ok(("pctPlan" in d) == ("plan" in d and rid != "balance"), "latest %s/%s: pctPlan present exactly for plan rows other than balance" % (col, rid))
+            c.ok(("pctPlan" in d) == (pv is not None and pv > 0 and rid not in ("balance", "fin", "transfers")), "latest %s/%s: pctPlan present exactly for plan rows other than balance" % (col, rid))
             if "pctPlan" in d:
                 c.near(d["pctPlan"], 100.0 * cum / pv, 0.0051, "latest %s/%s pctPlan" % (col, rid))
             c.ok(("yoyPct" in d) == (prev >= 50.0 and cum >= 0), "latest %s/%s: yoyPct only on a base of 50+ млн. €" % (col, rid))
@@ -267,29 +260,9 @@ def g_kfp(ctx):
                 cum = data[y][col][rid]
                 for i in range(len(cum)):
                     c.near(arr[i], cum[i] - (cum[i - 1] if i else 0.0), CONV_TOL, "monthly %s/%s/%s month %d" % (y, col, rid, i + 1))
-    # ---- plan 2026 against the other Annex 3 datasets
-    pk = plan["kfp"]
-    ec = L.by_id(exp_["economic"]["rows"])
+    validate_law(c, ex, out_)
     rr = L.by_id(rev_["rows"])
-    c.near(pk["rev"], out_["kfp"]["revenue"]["mln"][2], 0.0001, "plan2026 rev vs outlook")
-    c.near(pk["exp.total"], out_["kfp"]["expenditure"]["mln"][2], 0.0001, "plan2026 exp.total vs outlook")
-    c.near(pk["balance"], out_["kfp"]["balance"]["mln"][2], 0.0001, "plan2026 balance vs outlook")
-    c.near(pk["fin"], out_["kfp"]["financing"]["mln"][2], 0.0001, "plan2026 fin vs outlook")
-    for k, rid in PLAN_REV.items():
-        c.near(pk[k], _rowval(rr, rid, 2), 0.0001, "plan2026 %s vs revenue.json" % k)
-    for k, rid in PLAN_EXP.items():
-        c.near(pk[k], _rowval(ec, rid, 2), 0.0001, "plan2026 %s vs expenditure.json economic" % k)
-    c.near(pk["exp.social"], round(_rowval(ec, "x.social", 2) + _rowval(ec, "x.scholarships", 2), 1), 0.0001, "plan2026 exp.social (social + scholarships)")
-    c.ok(abs(pk["rev.tax"] + pk["rev.nontax"] + pk["rev.grants"] - pk["rev"]) <= 0.3, "plan2026: revenue parts do not add up")
-    c.ok(abs(sum(pk[k] for k in ("exp.personnel", "exp.maint", "exp.interest", "exp.social", "exp.subsidies", "exp.abroad",
-                                  "exp.capex", "exp.reserve", "exp.contingency")) - pk["exp"]) <= 0.3, "plan2026: expenditure parts do not add up")
-    c.near(pk["exp"] + pk["eucontrib"], pk["exp.total"], 0.15, "plan2026 exp + eucontrib vs exp.total")
-    c.near(pk["rev"] - pk["exp.total"], pk["balance"], 0.15, "plan2026 rev - exp.total vs balance")
-    c.near(plan["nat"]["exp.total"] + plan["eu"]["exp.total"], pk["exp.total"], 0.15, "plan2026 national + EU expenditure")
-    c.near(plan["nat"]["rev"] + plan["eu"]["rev"], pk["rev"], 0.15, "plan2026 national + EU revenue")
-    c.near(plan["nat"]["balance"] + plan["eu"]["balance"], pk["balance"], 0.15, "plan2026 national + EU balance")
-    c.ok(plan.get("source") == ["asbp"] and plan.get("asOf") and plan.get("unit") == "млн. €", "plan2026 must carry source/asOf/unit")
-    c.ok("Приложение 3 е публикувано в две версии" in plan["note"], "plan2026.note must disclose the two Annex 3 versions")
+    ec = L.by_id(exp_["economic"]["rows"])
     # ---- reconcile: the December reports against Annex 3 ("2024 Отчет" = column 0, "2025 Предв. отчет" = column 1)
     bigs = {}
     for key, y, ai in (("dec2024VsAnnex3", "2024", 0), ("dec2025VsAnnex3", "2025", 1)):
@@ -338,3 +311,54 @@ def g_kfp(ctx):
     elif not files_n:
         c.warn("the raw monthly reports are not in the repository (data/originals, see docs/data-sources.md): the independent re-read was skipped")
     return c
+
+
+def validate_law(c, ex, outlook):
+    from decimal import Decimal, ROUND_HALF_UP
+    from budget_pipeline.build.execution_law import law_plan, LAW_ROWS, COVERAGE
+    from budget_pipeline.build.data_io import SRC, jload
+    expected, _ = law_plan()
+    plan = ex['plan2026']
+    for key in ('periodKey', 'basis', 'source', 'asOf', 'unit', 'coverage'):
+        c.ok(plan.get(key) == expected[key], 'law plan metadata/coverage: ' + key)
+    for scope in ('kfp', 'nat', 'eu'):
+        c.ok(plan[scope] == expected[scope], 'law map exact: ' + scope)
+        for rid, item in ex['latest'][scope].items():
+            pv = expected[scope].get(rid)
+            c.ok(item.get('plan') == pv, 'latest law denominator: ' + scope + '/' + rid)
+            has_pct = pv is not None and pv > 0 and rid not in ('balance', 'fin', 'transfers')
+            c.ok(('pctPlan' in item) == has_pct, 'latest law percent availability: ' + scope + '/' + rid)
+            if has_pct:
+                cum = ex['data']['2026'][scope][rid][ex['latest']['month']-1]
+                want = float((Decimal(str(cum))*100/Decimal(str(pv))).quantize(Decimal('.01'), rounding=ROUND_HALF_UP))
+                c.ok(item.get('pctPlan') == want, 'latest canonical law percent: ' + rid)
+    for name, rid in (('revenue','rev'), ('expenditure','exp.total'), ('balance','balance'), ('interest','exp.interest')):
+        c.ok(outlook['byPeriod']['2026.law']['series'][name]['value'] == expected['kfp'][rid], 'outlook law: ' + name)
+    rows = jload(SRC / 'budget_forecast_2027.json')['tables']['annex1_execution2026']['rows']
+    D = lambda v: Decimal(str(v))
+    for index, row in enumerate(rows):
+        has_printed_percent = index in (*range(13), 14, 15)
+        available = row['values'][4] is not None
+        c.ok(available == has_printed_percent, 'annex1 printed percent availability: row ' + str(index))
+        if available and has_printed_percent:
+            law, sept, printed = map(D, (row['values'][0], row['values'][1], row['values'][4]))
+            lower = 100*(sept-D('.05'))/(law+D('.05'))
+            upper = 100*(sept+D('.05'))/(law-D('.05'))
+            c.ok(lower < printed+D('.05') and upper > printed-D('.05'), 'annex1 printed percent interval: row ' + str(index))
+    for rid, index in LAW_ROWS.items():
+        row = rows[index]
+        if row['values'][1] is None:
+            c.ok(rid == 'exp.contingency', 'only contingency has no September execution cell')
+            continue
+        law, sept = map(D, (row['values'][0], row['values'][1]))
+        # Each independently printed amount has a half-unit interval at 0.1 mln.
+        actual = D(ex['data']['2026']['kfp'][rid][8]) if rid in ex['data']['2026']['kfp'] else None
+        if rid == 'exp.capex':
+            # PDF p.174 ** explicitly includes the net increase of the state reserve.
+            actual += D(ex['data']['2026']['kfp']['exp.reserve'][8])
+        if actual is not None:
+            c.ok(sept-D('.05') <= actual < sept+D('.05'), 'annex1 September XLS: ' + rid)
+    # Printed subtotal identities, with only the rounding intervals of participating cells.
+    for parent, children in ((0,(1,6,7)), (8,(9,14,15)), (9,(10,11,12,13))):
+        v = D(rows[parent]['values'][0]); total = sum(D(rows[i]['values'][0]) for i in children)
+        c.ok(abs(v-total) < D('.05')*(len(children)+1), 'annex1 law subtotal: ' + str(parent))

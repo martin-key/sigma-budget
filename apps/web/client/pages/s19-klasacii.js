@@ -239,7 +239,7 @@ function lagModel(ctx) {
   const at = (a, i) => (Array.isArray(a) && fin(a[i]) ? a[i] : null);
   const rows = [...REV_ROWS, ...EXP_ROWS, 'eucontrib'].map(id => {
     const c = at(cur.kfp[id], m - 1), p = fin(plan[id]) ? plan[id] : null;
-    const pc = fin(c) && fin(p) && p !== 0 ? (c / p) * 100 : null;
+    const pc = fin(c) && fin(p) && p > 0 ? (c / p) * 100 : null;
     const pa = Array.isArray(pace[id]) && pace[id].length === 12 ? pace[id] : null;
     const ps = pa ? at(pa, m - 1) : null;
     const diff = fin(pc) && fin(ps) ? r1(r1(pc) - r1(ps)) : null;

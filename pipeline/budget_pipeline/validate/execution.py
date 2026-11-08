@@ -55,7 +55,7 @@ def g_contract(ctx):
     for name, b in blocks.items():
         c.ok(b.get("evidence") in EVIDENCE and b.get("budget") in BUDGET and b.get("value") in VALUE,
              "contract.blocks.%s: evidence/budget/value %r/%r/%r" % (name, b.get("evidence"), b.get("budget"), b.get("value")))
-    c.ok(blocks.get("plan2026", {}).get("budget") == "draft", "the plan is the draft budget (budget status draft)")
+    c.ok(blocks.get("plan2026", {}).get("budget") == "law", "the plan is the adopted law (budget status law)")
     c.ok(blocks.get("monthly", {}).get("value") == "derived", "the monthly values are derived from the cumulative ones")
 
     # money: every value of every money block
@@ -123,8 +123,11 @@ def g_contract(ctx):
         have = set((plan.get(col) or {}).get("rows") or {})
         c.ok(have == set(ex["plan2026"][col]), "%s: a locator for every plan2026.%s item" % (pname, col))
     kfp_plan = plan.get("kfp") or {}
-    c.ok(kfp_plan.get("source") == "asbp" and re.match(r"^[0-9a-f]{64}$", kfp_plan.get("sha256", "")),
+    c.ok(kfp_plan.get("source") == "budget2027" and re.match(r"^[0-9a-f]{64}$", kfp_plan.get("sha256", "")),
          "%s: plan2026.kfp points to the forecast_tables PDF by sha256" % pname)
+    from budget_pipeline.build.execution_law import law_plan
+    _, expected_provenance = law_plan()
+    c.ok(plan == expected_provenance, "plan provenance must match pinned annex1 law cells and operations")
     for rid, loc in (kfp_plan.get("rows") or {}).items():
         cells = loc.get("cells", [loc])
         c.ok(all(isinstance(x.get("page"), int) and x.get("row") for x in cells), "%s: plan2026.kfp.%s needs a page and a row" % (pname, rid))

@@ -38,7 +38,7 @@ DATE_KINDS = {
 }
 _PLENARY = {"plenary-1", "plenary-2", "adopted"}
 _ORDINAL = {1: "първото", 2: "второто", 3: "третото", 4: "четвъртото"}
-SOURCE_ORDER = ["kfp", "parliament", "zdb", "zbdoo", "zbnzok", "nap", "eurostat", "sebra"]       # every source an event cites
+SOURCE_ORDER = ["kfp", "budget2027", "parliament", "zdb", "zbdoo", "zbnzok", "nap", "eurostat", "sebra"]       # every source an event cites
 
 
 def _need(ctx, rel):
@@ -57,9 +57,16 @@ def _more(v):
     return "с %s %s" % (fmt_pct(abs(v)), "повече" if v >= 0 else "по-малко")
 
 
+def _plan_basis(ex):
+    plan = ex['plan2026']
+    return {'periodKey': plan['periodKey'], 'basis': plan['basis'], 'source': plan['source'],
+            'citation': 'Програма по ЗДБРБ 2026, МФ, приложение 1'}
+
+
 # ------------------------------------------------------------------------------------------------ events
 def _report_events(ctx):
     ex = ctx.execution
+    denominator = _plan_basis(ex)
     d26, d25 = ex["data"]["2026"], ex["data"]["2025"]
     n = int(d26["months"])
     out = []
@@ -74,10 +81,12 @@ def _report_events(ctx):
             lat = ex["latest"]["kfp"]
             if abs(lat["rev"]["yoyPct"] - yoy) > 0.05:
                 raise ValueError("feed: YoY of the latest month differs from execution.latest (%s vs %s)" % (yoy, lat["rev"]["yoyPct"]))
-            text += " Това е %s от годишния план за приходите." % fmt_pct(lat["rev"]["pctPlan"])
+            text += " Това е %s от годишния план за приходите. %s." % (fmt_pct(lat["rev"]["pctPlan"]), denominator["citation"])
         out.append({"id": "kfp-2026-%02d" % m, "date": d26["asOf"][m - 1], "dateKind": "asOf", "kind": "report",
                     "title": "Месечен отчет на КФП към края на %s 2026 г." % month_name(m), "text": text,
-                    "href": "#/izpalnenie?mesec=%d" % m, "status": "real", "source": ["kfp"]})
+                    "href": "#/izpalnenie?mesec=%d" % m, "status": "real",
+                    "source": ["kfp"] + (denominator["source"] if m == n else []),
+                    **({"planBasis": denominator} if m == n else {})})
     return out
 
 
@@ -201,7 +210,7 @@ def _highlights(ctx):
         "revenueMln": k["rev"]["cum"], "revenueYoyPct": k["rev"]["yoyPct"],
         "expenditureMln": k["exp.total"]["cum"], "expenditureYoyPct": k["exp.total"]["yoyPct"],
         "deficitMln": -k["balance"]["cum"], "deficitPrevYearMln": -k["balance"]["prevYearCum"],
-        "capexPctPlan": k["exp.capex"]["pctPlan"],
+        "capexPctPlan": k["exp.capex"]["pctPlan"], "planBasis": _plan_basis(ex),
         "newBorrowingMln": k["fin.ext.markets"]["cum"], "newBorrowingPrevYearMln": k["fin.ext.markets"]["prevYearCum"],
     }
 
@@ -212,7 +221,7 @@ def _sentences(h):
         "Приходите на консолидираната фискална програма %s са %s — %s от година по-рано." % (when, fmt_money(h["revenueMln"]), _more(h["revenueYoyPct"])),
         "Разходите (с вноската в бюджета на ЕС) са %s — %s." % (fmt_money(h["expenditureMln"]), _more(h["expenditureYoyPct"])),
         "Дефицитът е %s, при %s година по-рано." % (fmt_money(h["deficitMln"]), fmt_money(h["deficitPrevYearMln"])),
-        "Капиталовите разходи са %s от годишния план." % fmt_pct(h["capexPctPlan"]),
+        "Капиталовите разходи са %s от годишния план. %s." % (fmt_pct(h["capexPctPlan"]), h["planBasis"]["citation"]),
         "Нетното външно финансиране от международните капиталови пазари е %s, при %s година по-рано."
         % (fmt_money(h["newBorrowingMln"]), fmt_money(h["newBorrowingPrevYearMln"])),
     ]

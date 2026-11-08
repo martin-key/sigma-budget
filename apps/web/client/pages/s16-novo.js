@@ -61,7 +61,7 @@ export function fiveSentences(M) {
     if (fin(p)) prev = (p < 0) === surplus ? html`, при ${A(Math.abs(p))} година по-рано` : html`, при ${p < 0 ? 'излишък' : 'дефицит'} от ${A(Math.abs(p))} година по-рано`;
     out.push(html`${term} е ${A(Math.abs(h.deficitMln))}${prev}.`);
   }
-  if (fin(h.capexPctPlan)) out.push(html`${gl('kapitalovi-razhodi', 'Капиталовите разходи')} са ${pct(h.capexPctPlan, 1)} от годишния план.`);
+  if (fin(h.capexPctPlan)) out.push(html`${gl('kapitalovi-razhodi', 'Капиталовите разходи')} са ${pct(h.capexPctPlan, 1)} от годишния план.${h.planBasis?.citation ? html` ${h.planBasis.citation}.` : ''}`);
   if (fin(h.newBorrowingMln)) {
     const p = h.newBorrowingPrevYearMln;
     out.push(html`Новите заеми от международните капиталови пазари (нето) са ${A(h.newBorrowingMln)}${fin(p) ? html`, при ${A(p)} година по-рано` : ''}.`);
@@ -84,7 +84,7 @@ export function summaryBlock(M) {
   const body = html`<ol class="s16-five">${items.map(t => html`<li>${t}</li>`)}</ol>
     <p class="s16-more"><a href="${ctx.href('S15')}">Всички числа и графики: „Месечни отчети“</a></p>`;
   const share = { text: items.map(plain).join(' ') };
-  return block({ id: 's16-b-summary', level: 2, title, sub, scope: 'kfp', status: 'real', source: ['kfp'], asOf: h.asOf, share, body });
+  return block({ id: 's16-b-summary', level: 2, title, sub, scope: 'kfp', status: 'real', source: ['kfp', ...(h.planBasis?.source || [])], asOf: h.asOf, share, body });
 }
 
 /* ------------------------------------------------------------------ „Очаква се“ */

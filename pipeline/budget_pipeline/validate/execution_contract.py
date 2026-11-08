@@ -39,9 +39,9 @@ CONTRACT = {
         "data": {"evidence": "real", "budget": "report", "value": "observed",
                  "note": "cumulative since 1 January; 2024 and 2025 are derived by the conversion from BGN"},
         "monthly": {"evidence": "real", "budget": "report", "value": "derived", "rule": "cumulative(m) − cumulative(m − 1); January = cumulative(1)"},
-        "plan2026": {"evidence": "real", "budget": "draft", "value": "observed", "note": "Приложение 3 to the bill and Табл. II-3/II-4 of the motives"},
+        "plan2026": {"evidence": "real", "budget": "law", "value": "observed", "note": "Програма по ЗДБРБ 2026, МФ, приложение 1"},
         "latest": {"evidence": "real", "budget": "report", "value": "derived",
-                   "rule": "cum and prevYearCum: data at the latest month, rounded to 1 place; plan: plan2026 (budget status draft); "
+                   "rule": "cum and prevYearCum: data at the latest month, rounded to 1 place; plan: plan2026 (budget status law); "
                            "pctPlan and yoyPct: % from the unrounded cumulative values"},
         "pace": {"evidence": "real", "budget": "report", "value": "derived", "rule": "% of the year's December cumulative value"},
         "reconcile": {"evidence": "real", "budget": "report", "value": "derived",

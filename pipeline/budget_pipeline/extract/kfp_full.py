@@ -291,16 +291,6 @@ def tenth(x):
     return 0.0 if r == 0 else r
 
 
-PLAN_ANNEX = {"rev": "r.total", "rev.tax": "r.tax", "rev.nontax": "r.nontax", "rev.grants": "r.grants", "exp": "x.exp",
-              "exp.personnel": "x.personnel", "exp.maint": "x.maint", "exp.interest": "x.interest", "exp.interest.ext": "x.interest.ext",
-              "exp.interest.dom": "x.interest.dom", "exp.social": ("x.social", "x.scholarships"), "exp.subsidies": "x.subsidies",
-              "exp.abroad": "x.abroad", "exp.capex": "x.capex", "exp.reserve": "x.reserve", "exp.contingency": "x.contingency",
-              "eucontrib": "x.eucontrib", "exp.total": "x.total", "balance": "x.balance", "fin": "x.fin"}
-PLAN_COMPONENTS = {"nat": "national", "eu": "eu"}
-PLAN_COMPONENT_KEYS = {"rev": "rev", "exp.total": "exp_incl_eu_contribution", "balance": "balance",
-                       "transfers": {"nat": "transfer_to_eu_accounts_net", "eu": "transfer_from_state_budget_net"}}
-
-
 def provenance(by_year, rows_out, plan2026, a3, as_of):
     """execution-provenance.json: a compact index from every number of execution.json to its place in the original (spec, section 6.2).
     A record `data/2026-09/kfp/rev` is the original of 2026-09, sheet „стартова“, column of kfp, row of rev."""
@@ -309,28 +299,11 @@ def provenance(by_year, rows_out, plan2026, a3, as_of):
         for rep, f in lst:
             originals["%04d-%02d" % (year, rep["month"])] = {"source": "kfp", "file": os.path.basename(f), "sha256": sha256_file(f),
                                                              "asOf": rep["asOf"], "unit": rep["unit"]}
-    tables = jload(RAW / "asbp" / "asbp_tables.json")
-    annex_rows = dict(zip([s[0] for s in forecast_tables.REVENUE + forecast_tables.EXPENDITURE], forecast_tables._content_rows(tables["tables"]["annex3_mln"])))
-    pdf = {"source": "asbp", "file": tables["source"]["file"], "sha256": tables["source"]["sha256"],
-           "table": tables["tables"]["annex3_mln"]["title"], "column": tables["tables"]["annex3_mln"]["columns"][2]}
-
-    def annex(key):
-        r = annex_rows[key]
-        return {"page": r["page"], "row": r["label"].strip(), "y": r["y"]}
-
-    plan = {"kfp": {}}
-    for rid in plan2026["kfp"]:
-        keys = PLAN_ANNEX[rid]
-        plan["kfp"][rid] = ({"cells": [annex(k) for k in keys], "rule": "the sum of the rows, rounded to 1 place"} if isinstance(keys, tuple)
-                            else annex(keys))
-    for col, part in PLAN_COMPONENTS.items():
-        plan[col] = {}
-        for rid in plan2026[col]:
-            k = PLAN_COMPONENT_KEYS[rid]
-            plan[col][rid] = {"path": "national_vs_eu_2026.plan.%s.%s" % (part, k[col] if isinstance(k, dict) else k)}
+    from budget_pipeline.build.execution_law import law_plan
+    _, law_provenance = law_plan()
     return {
-        "meta": meta("execution-provenance", "Произход на числата в execution.json", "real", ["kfp", "asbp"],
-                     "клетката в оригиналния отчет на МФ за всяко число на месечното изпълнение и страницата на Приложение 3 за плана",
+        "meta": meta("execution-provenance", "Произход на числата в execution.json", "real", ["kfp", "budget2027"],
+                     "клетката в оригиналния отчет на МФ за всяко число на месечното изпълнение и страницата на Приложение 1 за плана",
                      as_of),
         "schema": "provenance/1",
         "dataset": "execution",
@@ -348,13 +321,7 @@ def provenance(by_year, rows_out, plan2026, a3, as_of):
             "reconcile": "data(12) of 2024 and 2025 against the columns 2024 Отчет and 2025 Предв. отчет of Приложение 3",
         },
         "originals": originals,
-        # Historical provenance labels of the frozen components input are public output.
-        # Runtime reads use SRC (data/inputs); these labels preserve its acquisition history.
-        "plan2026": {"kfp": dict(pdf, rows=plan["kfp"]),
-                     "nat": {"source": "prototype/src/kfp_components_2026.json", "rows": plan["nat"],
-                             "note": "made by tools/prototype/build_src.py from the motives (Табл. II-3/II-4); see sources/registry.yaml"},
-                     "eu": {"source": "prototype/src/kfp_components_2026.json", "rows": plan["eu"],
-                            "note": "made by tools/prototype/build_src.py from the motives (Табл. II-3/II-4); see sources/registry.yaml"}},
+        "plan2026": law_provenance,
     }
 
 
@@ -475,48 +442,11 @@ def build():
             my[col] = mc
         monthly[str(year)] = my
 
-    # ---- plan 2026 from Annex 3 (+ national/EU split from the components file)
+    # Historical Annex 3 remains only for the December reconciliation.
     a3 = forecast_tables.load()
-    pl = {k: v[2] for k, v in a3["mln"].items()}          # 2026 project column
-    plan_kfp = {
-        "rev": pl["r.total"], "rev.tax": pl["r.tax"], "rev.nontax": pl["r.nontax"], "rev.grants": pl["r.grants"],
-        "exp": pl["x.exp"], "exp.personnel": pl["x.personnel"], "exp.maint": pl["x.maint"],
-        "exp.interest": pl["x.interest"], "exp.interest.ext": pl["x.interest.ext"], "exp.interest.dom": pl["x.interest.dom"],
-        "exp.social": rnd(pl["x.social"] + pl["x.scholarships"], 1), "exp.subsidies": pl["x.subsidies"],
-        "exp.abroad": pl["x.abroad"], "exp.capex": pl["x.capex"], "exp.reserve": pl["x.reserve"],
-        "exp.contingency": pl["x.contingency"], "eucontrib": pl["x.eucontrib"], "exp.total": pl["x.total"],
-        "balance": pl["x.balance"], "fin": pl["x.fin"],
-    }
-    # the plan items must add up to the plan totals
-    s_exp = sum(plan_kfp[k] for k in ("exp.personnel", "exp.maint", "exp.interest", "exp.social", "exp.subsidies",
-                                      "exp.abroad", "exp.capex", "exp.reserve", "exp.contingency"))
-    if abs(s_exp - plan_kfp["exp"]) > 0.3:
-        prob.error("plan2026: items sum %.1f != exp %.1f" % (s_exp, plan_kfp["exp"]))
-    if abs(plan_kfp["rev.tax"] + plan_kfp["rev.nontax"] + plan_kfp["rev.grants"] - plan_kfp["rev"]) > 0.3:
-        prob.error("plan2026: revenue items do not add up")
-    comp = jload(SRC / "kfp_components_2026.json")["national_vs_eu_2026"]
-    pn, pe = comp["plan"]["national"], comp["plan"]["eu"]
-    plan_nat = {"rev": pn["rev"], "exp.total": pn["exp_incl_eu_contribution"], "balance": pn["balance"],
-                "transfers": pn["transfer_to_eu_accounts_net"]}
-    plan_eu = {"rev": pe["rev"], "exp.total": pe["exp_incl_eu_contribution"], "balance": pe["balance"],
-               "transfers": pe["transfer_from_state_budget_net"]}
-    if abs(plan_nat["exp.total"] + plan_eu["exp.total"] - plan_kfp["exp.total"]) > 0.15:
-        prob.error("plan2026: national + EU expenditure != KFP expenditure")
-    # Annex 3 exists in two versions (PDF = June base; .docx submitted on 01.07.2026): disclose how far they differ
-    diff_rows = jload(RAW / "asbp" / "asbp_tables.json")["docx_check"]["differing_rows"]
-    max_diff = max(abs(d - p) for r in diff_rows for p, d in zip(r["pdf"], r["docx"]))
-    plan2026 = {
-        "kfp": plan_kfp, "nat": plan_nat, "eu": plan_eu,
-        "note": "Съпоставката на перата на отчета с Приложение 3 предстои да бъде проверена от експерт по публични финанси. "
-                "Планът е „Проект“ към законопроекта (мотиви на МФ, Приложение 3 и Табл. II-3/II-4); окончателните числа по приетия закон може да се различават. "
-                "Приложение 3 е публикувано в две версии: числата са от PDF версията на мотивите (проект от юни 2026 г.); внесеният на 01.07.2026 г. "
-                "документ (.docx) се различава в %d подреда само за 2026–2028 г., най-много с %s млн. €, при еднакви общи суми. "
-                "„Резерв за непредвидени разходи“ няма отделен ред в месечния отчет." % (len(diff_rows), ("%.1f" % max_diff).replace(".", ",")),
-        "mapping": {"exp.social": "Социални и здравноосигурителни плащания + Стипендии", "exp.maint": "Издръжка - общо",
-                    "exp.subsidies": "Субсидии и други текущи трансфери - общо", "rev.tax": "Данъчно-осигурителни приходи",
-                    "rev.grants": "Помощи и дарения", "exp.reserve": "Прираст на държавния резерв и изкупуване на земеделска продукция"},
-        "source": ["asbp"], "asOf": "2026-07-01", "unit": "млн. €",
-    }
+    from budget_pipeline.build.execution_law import law_plan
+    plan2026, _ = law_plan()
+    plan_kfp, plan_nat, plan_eu = (plan2026[c] for c in ("kfp", "nat", "eu"))
 
     # ---- latest (headline of the last report) and pace
     last_year = max(all_series)
@@ -531,7 +461,7 @@ def build():
             cum = all_series[last_year][col][rid][n_last - 1]
             d = {"cum": tenth(cum)}
             plan_v = plan_by_col[col].get(rid)
-            if plan_v is not None and rid != "balance":
+            if plan_v is not None and plan_v > 0 and rid not in ("balance", "fin", "transfers"):
                 d["plan"] = plan_v
                 d["pctPlan"] = pct(cum, plan_v, 2)
             elif plan_v is not None:
