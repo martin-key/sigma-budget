@@ -218,6 +218,17 @@ jobs:
         env:
           COMMON_PARITY_REPORT: ${{ github.workspace }}/tmp/ts-migration/candidates/02/diff.json
         run: pnpm --filter @sigma-budget/ingest exec vitest run src/common/common.test.ts
+      - name: Law builder and frozen Python parity
+        env:
+          LAW_PARITY_REPORT: ${{ github.workspace }}/tmp/ts-migration/candidates/04/diff.json
+        run: |
+          pnpm --filter @sigma-budget/ingest exec vitest run src/build/law-evidence.test.ts src/build/law-articles.test.ts src/build/law-changes.test.ts src/build/law.test.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: law-parity
+          path: tmp/ts-migration/candidates/04/diff.json
+          if-no-files-found: error
       - uses: actions/upload-artifact@v4
         if: always()
         with:

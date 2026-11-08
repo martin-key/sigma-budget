@@ -1,0 +1,1 @@
+[{"text":"[{'FILENAME': 'proposal.pdf'}]","expected":[{"FILENAME":"proposal.pdf"}]},{"text":"[]","expected":[]},{"text":"[{'FILENAME': 'a.pdf'}, {'FILENAME': 'b.pdf'}]","expected":[{"FILENAME":"a.pdf"},{"FILENAME":"b.pdf"}]}]
