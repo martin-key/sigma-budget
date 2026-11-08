@@ -159,3 +159,51 @@ export const executionColumnsGuard = shape({
 });
 const rows1 = mapOf(nullable(decimalPlaces(1)));
 export const executionPlanGuard = shape({ kfp: rows1, nat: rows1, eu: rows1 });
+
+export const annualCellGuard = shape({ value: number, unit: string, provenance: string });
+export const annualPeriodGuard = shape({
+  periodKey: string, year: number, status: string, vintage: string,
+  publication: string, sourceRefs: strings, series: mapOf(annualCellGuard), rows: list(record), gaps: mapOf(string),
+});
+// Older releases predate byPeriod and remain readable.
+export const optionalPeriods = (v: unknown): boolean =>
+  object(v) && (!Object.hasOwn(v, 'byPeriod') || validPeriodRecords(v.byPeriod));
+
+const periodMetadata: Record<string, [number, string, string]> = {
+  '2026.law': [2026, 'law', 'plan'],
+  '2026.expected': [2026, 'expected', 'expected'],
+  '2027.draft': [2027, 'draft', 'plan'],
+  '2028.forecast': [2028, 'forecast', 'forecast'],
+  '2029.forecast': [2029, 'forecast', 'forecast'],
+};
+export function validPeriodRecords(v: unknown): boolean {
+  if (!object(v)) return false;
+  return Object.entries(v).every(([key, row]) => {
+    const expected = periodMetadata[key];
+    return !!expected && annualPeriodGuard(row) && row.periodKey === key &&
+      row.year === expected[0] && row.status === expected[1] && row.vintage === expected[2];
+  });
+}
+
+
+export const budgetDocumentGuard = shape({
+  source: string,
+  archive: string,
+  archiveSha256: sha256,
+  member: string,
+  memberSha256: sha256,
+  input: string,
+});
+const budgetDocumentName: Guard<"forecast" | "bill"> = (v): v is "forecast" | "bill" =>
+  v === "forecast" || v === "bill";
+const budgetProvenanceShape = shape({
+  meta: metaGuard,
+  schema: literal("budget2027-provenance/1"),
+  documents: shape({ forecast: budgetDocumentGuard, bill: budgetDocumentGuard }),
+  entries: mapOf(shape({ document: budgetDocumentName, output: string, period: string, unit: string })),
+});
+export const budgetProvenanceGuard: typeof budgetProvenanceShape = (
+  v,
+): v is Infer<typeof budgetProvenanceShape> =>
+  budgetProvenanceShape(v) && Object.values(v.entries).every(entry =>
+    !["source", "archive", "archiveSha256", "member", "memberSha256", "input"].some(key => Object.hasOwn(entry, key)));

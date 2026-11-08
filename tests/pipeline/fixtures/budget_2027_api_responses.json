@@ -1,0 +1,85 @@
+[
+  {
+    "id": "7253caabe5212a862ada11d1",
+    "expected": {
+      "release_id": "RELEASE_ID",
+      "record": "budget2027/7253caabe5212a862ada11d1",
+      "value": 49615.3,
+      "unit": "млн. €",
+      "provenance": "7253caabe5212a862ada11d1",
+      "output": "outlook.json#/byPeriod/2026.law/series/revenue",
+      "source": "budget2027",
+      "archive": "data/originals/budget_2027/ZDBRB-2027.zip",
+      "archiveSha256": "6e0aeaab774eb5a0c5b10888b49bc4e9f8c72220188def8989e4ebdc3241b517",
+      "member": "ZDBRB-2027/4-UMTBF-2027-2029-motivi.pdf",
+      "memberSha256": "8d0c4577efd9ca8805ce785fb5a2144518a30cb285d2a217744322bb646c10ac",
+      "extraction": "/tables/annex1_execution2026/rows/0/values/0",
+      "input": "budget_forecast_2027.json",
+      "period": "2026.law",
+      "table": "annex1_execution2026",
+      "row": 0,
+      "label": "ПРИХОДИ, ПОМОЩИ И ДАРЕНИЯ",
+      "column": {
+        "scope": "КФП",
+        "unit": "млн. €",
+        "vintage": "програма",
+        "year": 2026
+      },
+      "page": 174,
+      "printed": "49 615,3",
+      "original": {
+        "download": "/data/releases/RELEASE_ID/data/originals/budget_2027/ZDBRB-2027.zip",
+        "member": "ZDBRB-2027/4-UMTBF-2027-2029-motivi.pdf",
+        "memberSha256": "8d0c4577efd9ca8805ce785fb5a2144518a30cb285d2a217744322bb646c10ac",
+        "page": 174
+      }
+    }
+  },
+  {
+    "id": "dc6a19ed2e010e62794cbe47",
+    "expected": {
+      "release_id": "RELEASE_ID",
+      "record": "budget2027/dc6a19ed2e010e62794cbe47",
+      "value": -6132.7,
+      "unit": "млн. €",
+      "provenance": "dc6a19ed2e010e62794cbe47",
+      "output": "outlook.json#/byPeriod/2026.law/series/primaryBalance",
+      "period": "2026.law",
+      "operation": "sum",
+      "operands": [
+        "123469d6bc097e08db67f4cd",
+        "65f5f368de8b888cc1c40ae5"
+      ]
+    }
+  },
+  {
+    "id": "0068a037e1d4d10e98eb77eb",
+    "expected": {
+      "release_id": "RELEASE_ID",
+      "record": "budget2027/0068a037e1d4d10e98eb77eb",
+      "value": 2.6,
+      "unit": "млрд. €",
+      "provenance": "0068a037e1d4d10e98eb77eb",
+      "output": "budget2027.json#/debtLimits/66",
+      "source": "budget2027",
+      "archive": "data/originals/budget_2027/ZDBRB-2027.zip",
+      "archiveSha256": "6e0aeaab774eb5a0c5b10888b49bc4e9f8c72220188def8989e4ebdc3241b517",
+      "member": "ZDBRB-2027/3-PZDBRB-2027.pdf",
+      "memberSha256": "7d8dae763e9a69080f1c9a5e98666bd7dd08ca6162f1da9107de121170d5c119",
+      "input": "budget_bill_2027.json",
+      "extraction": "/articles/66/0/text",
+      "operation": "parse-billion-euro",
+      "period": "2027.draft",
+      "variant": "bill",
+      "page": 104,
+      "printed": "2,6 млрд. евро",
+      "label": "Чл. 66. Минималният размер на фискалния резерв към 31 декември 2027 г. е в размер на 2,6 млрд. евро.",
+      "original": {
+        "download": "/data/releases/RELEASE_ID/data/originals/budget_2027/ZDBRB-2027.zip",
+        "member": "ZDBRB-2027/3-PZDBRB-2027.pdf",
+        "memberSha256": "7d8dae763e9a69080f1c9a5e98666bd7dd08ca6162f1da9107de121170d5c119",
+        "page": 104
+      }
+    }
+  }
+]

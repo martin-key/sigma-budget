@@ -57,12 +57,82 @@ async function serveObject(request, env, rid, entry) {
   return new Response(request.method === 'HEAD' ? null : buf, { headers: enc ? headers : { ...headers, 'Content-Length': String(entry.bytes) } });
 }
 
+// Only verified immutable JSON is cached. Promise entries coalesce concurrent reads; at most four objects survive.
+const JSON_CACHE_LIMIT = 4;
+const parsedObjects = new Map();
+async function readJsonObject(env, sha) {
+  if (parsedObjects.has(sha)) {
+    const cached = parsedObjects.get(sha);
+    parsedObjects.delete(sha);
+    parsedObjects.set(sha, cached);
+    return cached;
+  }
+  const pending = (async () => {
+    const bytes = await readObject(env, sha);
+    if (!bytes) throw new Error('JSON object missing: ' + sha);
+    return JSON.parse(new TextDecoder().decode(bytes));
+  })();
+  parsedObjects.set(sha, pending);
+  while (parsedObjects.size > JSON_CACHE_LIMIT) parsedObjects.delete(parsedObjects.keys().next().value);
+  try {
+    return await pending;
+  } catch (error) {
+    if (parsedObjects.get(sha) === pending) parsedObjects.delete(sha);
+    throw error;
+  }
+}
+
+function sourceDocuments(provenance, identifier, ancestors = new Set(), found = new Set()) {
+  if (ancestors.has(identifier)) throw new Error('cyclic provenance operands');
+  const entry = provenance.entries?.[identifier];
+  if (!entry || !Object.hasOwn(provenance.documents || {}, entry.document)) throw new Error('provenance document does not resolve');
+  found.add(entry.document);
+  const next = new Set(ancestors).add(identifier);
+  for (const operand of entry.operands || []) sourceDocuments(provenance, operand, next, found);
+  return found;
+}
+
 async function provenance(env, rid, man, record) {
   const out = id => man.json.outputs.find(o => o.dataset === id);
+  if (record.startsWith('budget2027/')) {
+    const index = out('budget2027-provenance');
+    if (!index) return json({ error: 'this release has no budget2027 provenance index' }, 404);
+    const id = record.slice('budget2027/'.length);
+    const provenance = await readJsonObject(env, index.sha256);
+    const entry = provenance.entries?.[id];
+    if (!entry) return json({ error: 'no such budget2027 provenance record' }, 404);
+    let documents;
+    try {
+      documents = sourceDocuments(provenance, id);
+    } catch (error) {
+      return json({ error: error.message }, 404);
+    }
+    // Manifest membership is release-specific and must be checked even when the parsed object is cached.
+    for (const name of documents) {
+      const document = provenance.documents[name];
+      const original = man.json.inputs.find(input => input.path === document.archive && input.sha256 === document.archiveSha256);
+      if (!original) return json({ error: 'provenance original is not in this manifest' }, 404);
+    }
+    const document = provenance.documents[entry.document];
+    const { document: documentReference, ...details } = entry;
+    // Printed/extracted records retain the original API fields; derived records retain only their operation and operands.
+    const resolved = entry.extraction ? { ...document, ...details } : details;
+    const [file, pointer] = resolved.output.split('#');
+    const output = man.json.outputs.find(o => o.path === `data/${file}`);
+    if (!output) return json({ error: 'provenance output is not in this manifest' }, 404);
+    const dataset = await readJsonObject(env, output.sha256);
+    const cell = pointer.split('/').slice(1).reduce((value, key) => value?.[key.replace(/~1/g, '/').replace(/~0/g, '~')], dataset);
+    if (!cell || cell.provenance !== id) return json({ error: 'provenance output pointer does not resolve' }, 404);
+    const original = resolved.archive ? man.json.inputs.find(i => i.path === resolved.archive && i.sha256 === resolved.archiveSha256) : null;
+    if (resolved.archive && !original) return json({ error: 'provenance original is not in this manifest' }, 404);
+    return json({ release_id: rid, record, ...cell, ...resolved,
+      original: original ? { download: `/data/releases/${rid}/${original.path}`, member: resolved.member, memberSha256: resolved.memberSha256, page: entry.page } : undefined,
+    }, 200, { 'Cache-Control': IMMUTABLE });
+  }
   const pe = out('execution-provenance'), ee = out('execution');
   if (!pe || !ee) return json({ error: 'this release has no provenance index' }, 404);
-  const p = JSON.parse(new TextDecoder().decode(await readObject(env, pe.sha256)));
-  const ex = JSON.parse(new TextDecoder().decode(await readObject(env, ee.sha256)));
+  const p = await readJsonObject(env, pe.sha256);
+  const ex = await readJsonObject(env, ee.sha256);
   const r = /^(data|monthly)\/(\d{4})-(\d{2})\/(kfp|nat|eu)\/([a-z.]+)$/.exec(record);
   if (!r) return json({ error: 'a record is <data|monthly>/<YYYY-MM>/<kfp|nat|eu>/<row>, e.g. data/2026-09/kfp/rev' }, 400);
   const [, block, y, mm, col, row] = r;

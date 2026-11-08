@@ -15,7 +15,7 @@ OUT_DIR = os.path.join(DATA_DIR, "mock")
 
 SEED = 20261002
 
-BUILD_DATE = os.environ.get("BUILD_DATE", "2026-11-05")
+BUILD_DATE = os.environ.get("BUILD_DATE", "2026-11-08")
 
 FILES = {                            # dataset id -> published file name under data/release/mock/
     "M06": "measure-labels.json",

@@ -12,15 +12,15 @@ import traceback
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 import budget_pipeline.validate.checks as L                                       # noqa: E402
-from budget_pipeline.validate import foundations, fiscal, budgets, groups
+from budget_pipeline.validate import foundations, fiscal, budgets, groups, budget_2027
 
-MODULES = (foundations, fiscal, budgets, groups)
+MODULES = (foundations, fiscal, budgets, groups, budget_2027)
 
 
 # Run order of the groups (a group missing here still runs, after these): foundations, then the data in the order of the plan,
 # the catalog (which describes everything) near the end, and the two groups that run other programs last.
 ORDER = ("INPUTS", "ENVELOPE", "NUMBERS", "SIZES", "PRIVACY", "GLOSSARY", "CORE", "KFP", "ANNEX3", "REVENUE", "EXPENDITURE", "MEASURES",
-         "LAW", "BUDGETS", "PROGRAMS", "DEBT", "MUNIC", "SEBRA", "COMPONENTS", "RATES", "SEARCH", "FEED", "CATALOG")
+         "BUDGET2027", "LAW", "BUDGETS", "PROGRAMS", "DEBT", "MUNIC", "SEBRA", "COMPONENTS", "RATES", "SEARCH", "FEED", "CATALOG")
 
 
 def all_groups():
