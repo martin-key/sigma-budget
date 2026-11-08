@@ -35,3 +35,6 @@ export * from './build/fiscal-build.js';
 export * from './build/fiscal-fixture.js';
 export * from './build/measures.js';
 export * from './build/debt-text.js';
+export * from './build/components.js';
+export * from './build/rates.js';
+export { verifyComponentsRatesInputs } from './build/components-rates-fixture.js';

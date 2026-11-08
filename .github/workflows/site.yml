@@ -251,6 +251,18 @@ jobs:
         run: |
           python -m pip install --require-hashes -r pipeline/requirements.lock
           PYTHONPATH=pipeline python packages/ingest/test/fixtures/programmes/generate_oracle.py --check
+      - name: Verify components and rates frozen Python evidence
+        run: PYTHONPATH=pipeline python packages/ingest/test/fixtures/components-rates/generate_oracle.py --check
+      - name: Components and rates frozen Python parity
+        env:
+          COMPONENTS_RATES_PARITY_REPORT: ${{ github.workspace }}/tmp/ts-migration/candidates/06/diff.json
+        run: pnpm --filter @sigma-budget/ingest exec vitest run src/build/components-rates.test.ts src/build/components.test.ts src/build/components-social.test.ts src/build/components-tables.test.ts src/build/rates.test.ts src/build/rates-sources.test.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: components-rates-parity
+          path: tmp/ts-migration/candidates/06/diff.json
+          if-no-files-found: error
       - name: Budgets and programmes frozen Python parity
         env:
           PROGRAMMES_PARITY_REPORT: ${{ github.workspace }}/tmp/ts-migration/candidates/05/diff.json

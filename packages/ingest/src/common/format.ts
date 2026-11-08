@@ -43,6 +43,12 @@ export function pythonRound(value: number, places = 0): number {
   const rounded = Number(fixed(Math.abs(value), places));
   return rounded === 0 ? 0 : value < 0 ? -rounded : rounded;
 }
+/** Match Python round(value, places) using the same exact binary-float formatter. */
+export function roundForPython(value: number, places: number): number {
+  if (!Number.isFinite(value)) throw new Error('Invalid number');
+  const rounded = Number(fixed(Math.abs(value), places));
+  return rounded === 0 ? 0 : value < 0 ? -rounded : rounded;
+}
 export function formatNumber(value: unknown, places = 0, sign = false): string {
   if (!isNumber(value)) return '—';
   const formatted = fixed(Math.abs(value), places),
