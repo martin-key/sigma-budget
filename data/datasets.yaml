@@ -10,6 +10,7 @@ datasets:
   inputs:
   - data/originals/asbp/asbp_tables.json
   - data/cache/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json
+  - data/inputs/budget_forecast_2027.json
   schema: docs/data-spec.md
   screens:
   - S05
@@ -53,6 +54,7 @@ datasets:
   producer: python -m budget_pipeline.build.fiscal (build_revenue)
   inputs:
   - data/originals/asbp/asbp_tables.json
+  - data/inputs/budget_forecast_2027.json
   schema: docs/data-spec.md
   screens:
   - S05
@@ -76,6 +78,7 @@ datasets:
   - data/inputs/kfp_functions_2026.json
   - data/inputs/population.json
   - data/cache/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json
+  - data/inputs/budget_forecast_2027.json
   schema: docs/data-spec.md
   screens:
   - S05
@@ -757,3 +760,41 @@ datasets:
   limitations:
   - 'the manifest is not in catalog.json: it lists the sha256 of the catalog, and the catalog would have to list the manifest'
   - 'no environment has the registry yet (it needs the Cloudflare account): the originals are public only from a registry'
+- id: budget2027
+  catalogId: D34
+  title: 'Бюджет 2027: проект на МФ'
+  status: real
+  files:
+  - data/release/budget2027.json
+  producer: python -m budget_pipeline.build.budget_2027
+  inputs:
+  - budget2027
+  - data/inputs/budget_forecast_2027.json
+  - data/inputs/budget_bill_2027.json
+  schema: docs/data-spec.md
+  screens: []
+  period: 2026–2029
+  scope: MF publication 2026-11-06; bill and forecast are separate
+  unit: хил. € / млн. € / %
+  rebuild: python -m budget_pipeline.build.rebuild --build-date 2026-11-08
+  limitations:
+  - Additive offline contract; no UI reader until PR 2.
+- id: budget2027-provenance
+  catalogId: D35
+  title: Произход на бюджетните числа за 2027
+  status: real
+  files:
+  - data/release/budget2027-provenance.json
+  producer: python -m budget_pipeline.build.budget_2027
+  inputs:
+  - budget2027
+  - data/inputs/budget_forecast_2027.json
+  - data/inputs/budget_bill_2027.json
+  schema: docs/data-spec.md
+  screens: []
+  period: 2026–2029
+  scope: MF publication 2026-11-06; bill and forecast are separate
+  unit: хил. € / млн. € / %
+  rebuild: python -m budget_pipeline.build.rebuild --build-date 2026-11-08
+  limitations:
+  - Additive offline contract; no UI reader until PR 2.

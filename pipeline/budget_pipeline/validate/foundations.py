@@ -14,7 +14,7 @@ from budget_pipeline.validate.catalog import g_core, g_catalog
 from budget_pipeline.validate.checks import Check, isnum, pattern, walk
 
 STATUSES = ("real", "mock", "pending")
-SOURCE_KEYS = ("kfp", "asbp", "bill", "zdb", "zbdoo", "zbnzok", "prb", "parliament", "eurostat", "bnb", "nap", "sebra",
+SOURCE_KEYS = ("budget2027", "kfp", "asbp", "bill", "zdb", "zbdoo", "zbnzok", "prb", "parliament", "eurostat", "bnb", "nap", "sebra",
                "gisco", "dataeuropa", "minfin", "wg", "mockgen")
 
 
@@ -91,6 +91,11 @@ def g_envelope(ctx):
             for p, v in walk(d):
                 if p == "$.meta" or not isinstance(v, dict) or "status" not in v:
                     continue
+                if p.startswith('$.byPeriod.'):
+                    from budget_pipeline.build.annual_periods import PERIODS
+                    key = p.split('.')[2] + '.' + p.split('.')[3]
+                    c.ok(key in PERIODS and v['status'] == PERIODS[key][0], '%s %s: period status' % (f,p))
+                    continue
                 c.ok(v["status"] in STATUSES, "%s %s: status %r" % (f, p, v["status"]))
                 if v["status"] == "pending":
                     nums = [(q, x) for q, x in walk(v) if isnum(x) and not q.endswith(".month")]
@@ -161,7 +166,8 @@ def g_numbers(ctx):
                     bad.setdefault("empty string", []).append(p)
             elif isinstance(v, str) and NUMSTR.match(v):
                 numstr += 1
-                if not _allowed(NUMSTR_OK, f, pattern(p)):
+                printed = f == 'budget2027-provenance.json' and p.endswith('.printed')
+                if not printed and not _allowed(NUMSTR_OK, f, pattern(p)):
                     bad.setdefault("number as string", []).append(p)
             elif isinstance(v, float):
                 biggest = max(biggest, abs(v))
@@ -186,6 +192,11 @@ def g_sizes(ctx):
     c = Check("SIZES")
 
     def limit(f):
+        # New lazy files have separate payload budgets; existing file budgets are unchanged.
+        if f == "budget2027.json":
+            return 800, "raw"
+        if f == "budget2027-provenance.json":
+            return 3000, "raw"
         if f == "core.json":
             return 40, "raw"
         if f == "search-index.json":

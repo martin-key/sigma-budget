@@ -29,6 +29,8 @@ STEPS = [
     ("fiscal", "build_outlook"),
     ("fiscal", "build_revenue"),
     ("fiscal", "build_expenditure"),
+    ("annual_periods", "build_annual_periods"),
+    ("budget_2027", "build_budget_2027"),
     ("measures", "build_measures"),
     ("budgets", "build_budgets"),            # ministries.json, ministries/<code>.json, programs.json
     ("debt", "build_debt"),

@@ -91,6 +91,7 @@ def span(values):
 # --------------------------------------------------------------------------------------------- sources
 # core.sources: key -> {title, publisher, url, kind, access, note}. `url` is the PUBLIC address of the publisher.
 SOURCES = {
+    "budget2027": {"title": "Законопроект за държавния бюджет за 2027 г. и АСБП 2027–2029", "publisher": "Министерство на финансите", "url": "https://www.minfin.bg/bg/1802", "kind": "pdf", "access": "browser-only", "note": "Публикация от 06.11.2026: законопроектът и мотивите със средносрочната прогноза."},
     "kfp": {
         "title": "Консолидирана фискална програма (КФП): месечна информация за изпълнението",
         "publisher": "Министерство на финансите",

@@ -326,6 +326,15 @@ sources:
       финансова обосновка, прессъобщение'
   - path: data/originals/budget_2027/acquisition.json
     title: acquisition record of the files in budget_2027 (address, time, sha256 of the archive and its members)
+  members:
+  - role: forecast
+    archive: data/originals/budget_2027/ZDBRB-2027.zip
+    member: ZDBRB-2027/4-UMTBF-2027-2029-motivi.pdf
+    sha256: 8d0c4577efd9ca8805ce785fb5a2144518a30cb285d2a217744322bb646c10ac
+  - role: bill
+    archive: data/originals/budget_2027/ZDBRB-2027.zip
+    member: ZDBRB-2027/3-PZDBRB-2027.pdf
+    sha256: 7d8dae763e9a69080f1c9a5e98666bd7dd08ca6162f1da9107de121170d5c119
 - id: wg
   title: 'Работна група „Бюджет на светло“: редакционни текстове'
   publisher: Работна група „Бюджет на светло“

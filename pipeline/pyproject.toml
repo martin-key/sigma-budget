@@ -13,3 +13,6 @@ dependencies = {file = ["requirements.txt"]}
 
 [tool.setuptools.packages.find]
 include = ["budget_pipeline*"]
+
+[tool.setuptools.package-data]
+"budget_pipeline.validate" = ["fixtures/*.json"]

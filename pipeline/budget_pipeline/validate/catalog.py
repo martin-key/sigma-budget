@@ -15,7 +15,7 @@ import budget_pipeline.validate.checks as L
 from budget_pipeline.validate.search_feed import MONTHS
 from budget_pipeline.validate.checks import Check, fmt, isnum
 
-SOURCE_KEYS = ("kfp", "asbp", "bill", "zdb", "zbdoo", "zbnzok", "prb", "parliament", "eurostat", "bnb", "nap", "sebra",
+SOURCE_KEYS = ("budget2027", "kfp", "asbp", "bill", "zdb", "zbdoo", "zbnzok", "prb", "parliament", "eurostat", "bnb", "nap", "sebra",
                "gisco", "dataeuropa", "minfin", "wg", "mockgen")
 SOURCE_KINDS = ("xls", "pdf", "html", "doc", "api", "generator")
 SOURCE_ACCESS = ("open", "browser-only", "none")
