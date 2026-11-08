@@ -207,6 +207,9 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -223,6 +226,19 @@ jobs:
           LAW_PARITY_REPORT: ${{ github.workspace }}/tmp/ts-migration/candidates/04/diff.json
         run: |
           pnpm --filter @sigma-budget/ingest exec vitest run src/build/law-evidence.test.ts src/build/law-articles.test.ts src/build/law-changes.test.ts src/build/law.test.ts
+      - name: Editorial builder and frozen Python parity
+        env:
+          EDITORIAL_PARITY_REPORT: ${{ github.workspace }}/tmp/ts-migration/candidates/08/diff.json
+          PYTHONPATH: pipeline
+        run: |
+          python3 packages/ingest/test/fixtures/editorial/generate_oracle.py --check
+          pnpm --filter @sigma-budget/ingest exec vitest run src/build/editorial.test.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: editorial-parity
+          path: tmp/ts-migration/candidates/08/diff.json
+          if-no-files-found: error
       - uses: actions/upload-artifact@v4
         if: always()
         with:

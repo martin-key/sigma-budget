@@ -10,3 +10,4 @@ export * from './build/annex.js';
 export * from './common/format.js';
 export * from './common/sources.js';
 export * from './build/law.js';
+export * from './build/editorial.js';

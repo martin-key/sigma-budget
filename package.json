@@ -8,7 +8,8 @@
     "dev": "turbo run dev",
     "test": "turbo run test",
     "registry:local": "pnpm --filter @sigma-budget/web registry:local",
-    "format:check": "prettier --check \"apps/web/app/**/*.{ts,tsx}\" \"apps/web/*.ts\" \"apps/web/workers/**/*.ts\""
+    "format:check": "prettier --check \"apps/web/app/**/*.{ts,tsx}\" \"apps/web/*.ts\" \"apps/web/workers/**/*.ts\"",
+    "editorial:compare-live": "pnpm --filter @sigma-budget/etl... build && pnpm exec budget-ts build --inputs packages/ingest/test/fixtures/editorial/inputs --routes apps/web/app/lib/routes.json --out tmp/ts-migration/candidates/08-live --scope glossary,guide --build-date 2026-11-08 && pnpm exec budget-ts parity --oracle data/release --candidate tmp/ts-migration/candidates/08-live/data --scope glossary,guide --policy packages/ingest/test/fixtures/editorial/policy.json --report tmp/ts-migration/candidates/08-live/diff.json"
   },
   "packageManager": "pnpm@10.33.0",
   "engines": {

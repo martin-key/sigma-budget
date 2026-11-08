@@ -1,0 +1,1 @@
+packages/ingest/test/fixtures/editorial/inputs/synthetic-guide-crlf.txt -text whitespace=cr-at-eol
