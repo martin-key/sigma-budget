@@ -315,6 +315,7 @@ sources:
   access: browser-only
   acquisition: import
   format: zip
+  parser: python -m budget_pipeline.extract.budget_forecast_2027, python -m budget_pipeline.extract.budget_bill_2027
   period: the draft State Budget Act 2027 and the medium-term budget forecast 2027–2029, 06.11.2026
   unit: хил. € (the bill), млн. € and % of GDP (АСБП)
   live: false
@@ -608,3 +609,11 @@ intermediates:
     blob: d41851da551dd9eb70dad52e7e82371c274954e7
   note: Frozen published editorial content. Original supplied editorial text unavailable; copying is reproducible, original authorship
     is not regenerated.
+- path: data/inputs/budget_forecast_2027.json
+  producer: python -m budget_pipeline.extract.budget_forecast_2027
+  inputs: [budget2027]
+  reproducible: true
+- path: data/inputs/budget_bill_2027.json
+  producer: python -m budget_pipeline.extract.budget_bill_2027
+  inputs: [budget2027]
+  reproducible: true
