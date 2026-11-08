@@ -35,6 +35,9 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../../..');
 const fixtures = join(root, 'packages/ingest/test/fixtures/common');
 const load = (p: string) => JSON.parse(readFileSync(p, 'utf8'));
 const fixture = (p: string) => load(join(fixtures, p));
+// The inputs the oracle was generated from, frozen so data changes do not move the expectations.
+const inputs = join(fixtures, 'inputs');
+const execution = () => load(join(inputs, 'execution.json'));
 const diffs: Difference[] = [];
 const checked = new Set<string>();
 const expectedComparisons = [
@@ -112,7 +115,7 @@ describe('common Python parity', () => {
   });
   it('converts money exactly like the Python numeric adapter', () => {
     const cases = fixture('money-cases.json');
-    const document = load(join(root, 'data/release/execution.json'));
+    const document = execution();
     const rowKey = Object.keys(document.data['2026'].kfp)[0]!;
     const convert = (value: unknown): number | null => {
       const input = structuredClone(document);
@@ -145,9 +148,9 @@ describe('common Python parity', () => {
     );
     expect(cases.map((c: any) => result(() => pythonFloat(c.input)))).toEqual(expected);
   });
-  it('reads both real registries with Python scalar semantics', () => {
+  it('reads both registries with Python scalar semantics', () => {
     const parsed = ['sources', 'datasets'].map((n) =>
-      parseYaml(readFileSync(join(root, `data/${n}.yaml`), 'utf8')),
+      parseYaml(readFileSync(join(inputs, `${n}.yaml`), 'utf8')),
     );
     parity('registries.json', fixture('registries.json'), parsed);
     const [s, d] = registries(parsed[0]!, parsed[1]!);
@@ -174,7 +177,7 @@ describe('common Python parity', () => {
         extra: { custom: 3 },
       }),
     ]);
-    const input = load(join(root, 'data/release/execution.json'));
+    const input = execution();
     parity('execution-numbers.json', fixture('execution-numbers.json'), executionNumbers(input));
     expect((Object.values(input.data['2026'].kfp)[0] as unknown[])[0]).toEqual(expect.any(String));
     const old = { contract: { schema: 1 } };
@@ -182,7 +185,7 @@ describe('common Python parity', () => {
   });
   it('preserves source and pending maps against Python', () => {
     const pending = structuredClone(pendingDefinitions);
-    pendingForExecution(pending, load(join(root, 'data/release/execution.json')));
+    pendingForExecution(pending, execution());
     parity('source-definitions.json', fixture('source-definitions.json'), {
       sources,
       pending,
@@ -220,7 +223,7 @@ describe('common Python parity', () => {
         'cache/law_bill.json': inputs.law,
         'cache/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json': inputs.pages,
         'originals/asbp/asbp_tables.json': fixture('asbp-tables.json'),
-        'release/execution.json': load(join(root, 'data/release/execution.json')),
+        'release/execution.json': execution(),
       };
       for (const [file, value] of Object.entries(files))
         writeFileSync(join(temp, file), JSON.stringify(value));
