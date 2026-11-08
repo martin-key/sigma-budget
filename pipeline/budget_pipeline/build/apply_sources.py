@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Apply the source records and shared metadata needed by the budget 2027 screen. Repeated application is idempotent; existing client and stylesheet markers are preserved."""
+"""Apply the source records and shared metadata needed by the budget 2027 screen. Repeated application is idempotent. Frontend migrations are historical and are not replayed."""
 
 from pathlib import Path as _Path
 ROOT = _Path(__file__).resolve().parents[3]
@@ -9,13 +9,11 @@ import re
 import sys
 
 W = pathlib.Path(__file__).resolve().parents[3]       # repository root
-S = W / 'apps/web/public'                                         # the site
-
-
 def target(rel):
     group, name = rel.split('/', 1)
-    base = {'js': W / 'apps/web/client', 'data': W / 'data/release'}.get(group)
-    return base / name if base else S / rel
+    if group != 'data':
+        raise ValueError('source glue only writes data')
+    return W / 'data/release' / name
 
 
 def rd(rel):
@@ -26,59 +24,7 @@ def wr(rel, text):
     target(rel).write_text(text, encoding='utf-8')
 
 
-def sub_once(rel, old, new, marker):
-    """Replace `old` by `new` exactly once; skip when `marker` is already present."""
-    t = rd(rel)
-    if marker in t:
-        print('  skip (already)  ', rel)
-        return
-    if t.count(old) != 1:
-        sys.exit('FAIL %s: anchor found %d times: %r' % (rel, t.count(old), old[:80]))
-    wr(rel, t.replace(old, new))
-    print('  edited          ', rel)
-
-
 def main():
-    # ---------------------------------------------------------------------------------------------- 1. route
-    ROUTE = ("  R('S34', 'byudzhet-2027', '/byudzhet-2027', 's34-byudzhet-2027', 'Бюджет 2027 (проект)', 'budget', 'fileText', "
-             "{ short: 'Бюджет 2027 (проект)', next: ['S13'], periods: 'none', samples: ['#/byudzhet-2027'], "
-             "desc: 'Проектът на бюджетен план за 2027 г., изпратен от Министерството на финансите до Европейската комисия: дефицит, приходи, разходи, дълг и процедурата при прекомерен дефицит. Не е приет.' }),\n")
-    t = rd('js/routes.js')
-    m = re.search(r"^  R\('S31',.*\n", t, re.M)
-    if not m:
-        sys.exit('FAIL routes.js: S31 row not found')
-    if "R('S34'" not in t:
-        wr('js/routes.js', t[:m.end()] + ROUTE + t[m.end():])
-        print('  edited           js/routes.js')
-    else:
-        print('  skip (already)   js/routes.js')
-
-    # ---------------------------------------------------------------------------------------------- 2. nav
-    sub_once('js/shell.js', "order: ['S07', 'S06', 'S10', 'S12', 'S13', 'S14', 'S20', 'S05']",
-             "order: ['S07', 'S06', 'S10', 'S12', 'S13', 'S34', 'S14', 'S20', 'S05']", "'S13', 'S34'")
-
-    # ---------------------------------------------------------------------------------------------- 3. scope
-    sub_once('js/store.js',
-             "  maastricht: { label: 'Маастрихт', long: 'Дълг на сектор „Държавно управление“ по методиката на Маастрихт', gl: 'sektor-darzhavno-upravlenie' }\n};",
-             "  maastricht: { label: 'Маастрихт', long: 'Дълг на сектор „Държавно управление“ по методиката на Маастрихт', gl: 'sektor-darzhavno-upravlenie' },\n"
-             "  esa: { label: 'ЕСС · начислено', long: 'ЕСС 2010: начислена основа, сектор „Държавно управление“ (не е КФП, не е касова основа)', gl: 'ess-2010', variant: 'esa' }\n};",
-             "esa: {")
-
-    sub_once('js/ui/scope.js',
-             "  return gl\n    ? html`<a class=\"scope\" href=\"#/rechnik/${gl}\" data-gl=\"${gl}\" title=\"${long}\">${inner}</a>`\n    : html`<span class=\"scope\" title=\"${long}\">${inner}</span>`;",
-             "  const kind = s?.variant ? html` data-scope=\"${s.variant}\"` : '';           // a scope with its own look (esa) says so; the others render exactly as before\n"
-             "  return gl\n    ? html`<a class=\"scope\"${kind} href=\"#/rechnik/${gl}\" data-gl=\"${gl}\" title=\"${long}\">${inner}</a>`\n    : html`<span class=\"scope\"${kind} title=\"${long}\">${inner}</span>`;",
-             "const kind =")
-
-    # ---------------------------------------------------------------------------------------------- 5. css
-    sub_once('css/tokens.css', "  --series-5:#2E4E6E;", "  --esa:#2E4E6E; --esa-soft:#E4EBF2;\n  --series-5:#2E4E6E;", "--esa:")
-    sub_once('css/components.css', ".scope-note{font-weight:400;color:var(--ink-mid);text-transform:none;letter-spacing:.02em}\n",
-             ".scope-note{font-weight:400;color:var(--ink-mid);text-transform:none;letter-spacing:.02em}\n"
-             ".scope[data-scope=\"esa\"]{border-color:var(--esa);background:var(--esa-soft);color:var(--esa)}\n"
-             "a.scope[data-scope=\"esa\"]:hover{border-color:var(--crimson);color:var(--crimson)}\n",
-             "data-scope=\"esa\"")
-
-    # ---------------------------------------------------------------------------------------------- 6. glossary
     CAT = {'id': 'byudzhet-2027', 'title': 'Бюджет 2027 и правилата на ЕС', 'short': 'Бюджет 2027 и ЕС', 'from': 65, 'to': 69}
     SEE = [{'label': 'Виж в бюджета', 'href': '#/byudzhet-2027'}]
     NOTE_BASIS = 'Различната основа дава различни числа за един и същи разход.'

@@ -313,3 +313,21 @@ python -m budget_pipeline.sources.access_probe --label "София, домашн
 Резултатът от САЩ, 4.11.2026: всички отворени източници са `ok`. БНБ е нестабилна. minfin.bg дава `challenge`, data.egov.bg дава `forbidden`, а nra.bg дава `network`.
 
 Резултатът от България, 4.11.2026: всички отворени източници са `ok`, data.egov.bg също. nra.bg е `ok` с curl и `network` с urllib. minfin.bg пак дава `challenge`.
+
+
+## 11. Възстановяване на суровите файлове за сглобяване
+
+Сглобяването от чисто копие иска суровите файлове, които не са в Git: снимките на живите източници и офлайн кешовете, без пароли. Те са в архива `release-build-inputs.tar.gz` (SHA-256 `1fa327738fb8fd2af276bcfca7ca5a4dfdcb6057b516f7f54564a1dd05f1963c`), който се пази отделно от хранилището. Ново сваляне не го заменя: живите страници се променят, а смяната на снимка иска ново придобиване, сравнение на производните данни и преглед на новия pin.
+
+```sh
+uv venv --python 3.12 tmp/venv-data
+uv pip install --python tmp/venv-data/bin/python --require-hashes -r pipeline/requirements.lock -r tests/requirements-dev.lock
+uv pip install --python tmp/venv-data/bin/python --no-deps -e pipeline
+sha256sum release-build-inputs.tar.gz
+tar -xzf release-build-inputs.tar.gz
+tmp/venv-data/bin/python -m budget_pipeline.sources.prepare_inputs
+./budget build --env local --build-date 2026-11-05
+./budget validate --release work/candidate
+```
+
+Архивът съдържа `data/originals/` и `data/cache/`. Ръководството, речникът и замените на термините са замразени входове в `data/inputs`; произходът им е в `data/sources.yaml`. Изгубените оригинални текстове и старите записи за придобиване не са възстановени. Записът за АСБП описва взимането от PDF-а в хранилището, а не сваляне от издателя.

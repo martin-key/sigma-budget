@@ -20,8 +20,6 @@ from fnmatch import fnmatchcase
 ROOT = Path(__file__).resolve().parents[2]
 MANIFEST_SCHEMA = "budget-release/1"
 INPUT_DIRS = ("data/originals", "data/cache")
-WORDING_TAGS = ("mock-v2", "mock-v4")
-WORDING_FILES = ("catalog.json", "core.json", "search-index.json")
 RELEASES = "releases"
 UA = "budget-na-svetlo-data-pipeline/1.0 (+public data; contact: working group)"
 MIME = {".xls": "application/vnd.ms-excel", ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -181,11 +179,6 @@ def export_commit(commit, dest):
     data = git("archive", "--format=tar", commit, binary=True)
     with tarfile.open(fileobj=io.BytesIO(data)) as tf:
         tf.extractall(dest, filter="data") if hasattr(tarfile, "data_filter") else tf.extractall(dest)
-    for tag in WORDING_TAGS:
-        out = dest / "tmp" / "versions" / ("site-" + tag.split("-")[1]) / "data"
-        out.mkdir(parents=True, exist_ok=True)
-        for f in WORDING_FILES:
-            (out / f).write_bytes(git("show", "%s:%s/%s" % (tag, "site" + "/data", f), binary=True))
 
 def stage_inputs(found, inputs_dir, view):
     """only the inputs the registries declare, linked (or copied) into a view the build sees: an input that the registry forgets makes the
@@ -226,7 +219,11 @@ def run_in_env(env, src, inputs_dir, cmd, extra_env=None):
             raise Fail(EXIT_INVALID, "--env local needs tmp/venv-data (pipeline/requirements.lock)")
         for d in INPUT_DIRS:
             target = src / d
-            if (inputs_dir / d).is_dir() and not target.exists():
+            if (inputs_dir / d).is_dir():
+                if target.is_symlink():
+                    target.unlink()
+                elif target.exists():
+                    shutil.rmtree(target)
                 target.parent.mkdir(parents=True, exist_ok=True)
                 target.symlink_to((inputs_dir / d).resolve())
         r = subprocess.run([str(py)] + cmd, cwd=str(src), capture_output=True, env=dict(os.environ, PYTHONPATH=str(src / "pipeline"), **extra_env))
@@ -284,7 +281,7 @@ def build_release(commit, inputs_dir, out, build_date, env, log=print):
             raise Fail(EXIT_INVALID, "inputs differ from their pins (data/originals.sha256, data/sources.yaml):\n  " + "\n  ".join(bad))
         view = work / "inputs"
         stage_inputs(found, inputs_dir, view)
-        args = ["-m", "budget_pipeline.build.rebuild", "--versions-ready"] + (["--build-date", build_date] if build_date else [])
+        args = ["-m", "budget_pipeline.build.rebuild"] + (["--build-date", build_date] if build_date else [])
         rc, output = run_in_env(env, src, view, args)
         (work / "build.log").write_text(output, encoding="utf-8")
         if rc:
@@ -342,16 +339,15 @@ def make_manifest(src, commit, inputs, missing, out, build_date):
         if d["status"] == "pending":
             e["reason"] = d.get("reason")
         coverage.append(e)
-    tags = {t: git("rev-parse", t + "^{commit}") for t in WORDING_TAGS}
     return {
         "manifest_schema": MANIFEST_SCHEMA,
         "data_schema": {"execution": exe["meta"]["schema"], "execution-provenance": prov["schema"], "other": "docs/data-spec.md"},
         "provenance_format": prov["schema"],
         "processing": {
-            "code": {"repository": "https://github.com/midt-bg/sigma-budget", "commit": commit, "tags": tags},
+            "code": {"repository": "https://github.com/midt-bg/sigma-budget", "commit": commit},
             "environment": {"dockerfile": "pipeline/Dockerfile", "dockerfile_sha256": sha256_file(src / "pipeline" / "Dockerfile"),
                             "lock": "pipeline/requirements.lock", "lock_sha256": sha256_file(src / "pipeline" / "requirements.lock")},
-            "command": "python -m budget_pipeline.build.rebuild --versions-ready" + (" --build-date " + build_date if build_date else ""),
+            "command": "python -m budget_pipeline.build.rebuild" + (" --build-date " + build_date if build_date else ""),
             "parameters": {"build_date": build_date},
             "registries": {"data/sources.yaml": sha256_file(src / "data" / "sources.yaml"),
                            "data/datasets.yaml": sha256_file(src / "data" / "datasets.yaml")},

@@ -1,19 +1,3 @@
-# Dataset registry (docs/approach-specification.md, section 4): every file of data/release, with the files the published catalog does not
-# list and the pending sets that have no file yet. Checked by `python -m budget_pipeline.validate.registry check` (CI).
-#
-# datasets[]      id = the slug in catalog.json (sebra and dbp2027 are not in the catalog)
-#   catalogId     the dataset id of catalog.json (D01 …, M06, P01 …); several files can share one
-#   status        real | mock | pending, as catalog.json says; a pending set has `reason` and `expected` instead of files
-#   files         the paths in data/release (a glob for the 42 ministry files)
-#   producer      the script (and builder function) that writes it
-#   layers        the v5/v6 steps of python -m budget_pipeline.build.rebuild that change it after the producer
-#   inputs        source ids (data/sources.yaml), intermediate paths, or ids of other datasets
-#   schema        the document with its data contract
-#   screens, period, unit   as catalog.json says (the checker compares them)
-#   scope         which budget or sector the numbers cover
-#   rebuild       the command that rebuilds it from the pinned inputs; `checked` is the date it gave the file byte for byte,
-#                 `notRebuilt` says why there is no such command
-#   limitations   what is known to be missing or weak
 schema: 1
 datasets:
 - id: outlook
@@ -58,8 +42,8 @@ datasets:
   rebuild: null
   notRebuilt: the Eurostat answers of October 2026 were not saved; today's answers (05.11.2026) give another GDP and the check fails
   limitations:
-  - 'the answers of 05.11.2026 give GDP 105 279,0 (2024) and 116 548,5 (2025) млн. €, outlook.json 104 767,2 and 116 018,3: rebuilding it means
-    a new release with the revised national accounts, not a reproduction'
+  - 'the answers of 05.11.2026 give GDP 105 279,0 (2024) and 116 548,5 (2025) млн. €, outlook.json 104 767,2 and 116 018,3: rebuilding
+    it means a new release with the revised national accounts, not a reproduction'
 - id: revenue
   catalogId: D05
   title: Приходи на КФП по видове
@@ -285,7 +269,8 @@ datasets:
   rebuild: python -m budget_pipeline.build.rebuild --build-date 2026-11-05
   checked: '2026-11-05'
   limitations:
-  - the national and EU plan (plan2026.nat, plan2026.eu) points into data/inputs/kfp_components_2026.json, whose producer no longer runs
+  - the national and EU plan (plan2026.nat, plan2026.eu) points into data/inputs/kfp_components_2026.json, whose producer no longer
+    runs
 - id: debt
   catalogId: D13
   title: 'Държавен дълг: размер, лихви и лимити'
@@ -389,37 +374,34 @@ datasets:
   status: real
   files:
   - data/release/glossary.json
-  producer: python -m budget_pipeline.build.editorial
+  producer: python -m budget_pipeline.build.frozen_editorial
   inputs:
-  - data/inputs/glossary.json
-  - wg
+  - data/inputs/editorial/glossary.json
   schema: docs/data-spec.md
   screens:
   - S03
   - S06
   - S07
   scope: editorial
-  rebuild: null
-  notRebuilt: 'editorial.py stops: data/cache/research/guide/guide_raw.txt is missing'
+  rebuild: python -m budget_pipeline.build.rebuild
   limitations:
-  - editorial.py reads data/inputs/glossary.json, whose producer needs a PDF of the working group that is missing
+  - Published editorial snapshot; original supplied raw text unavailable.
 - id: guide
   catalogId: D23
   title: Пътеводител
   status: real
   files:
   - data/release/guide.json
-  producer: python -m budget_pipeline.build.editorial
+  producer: python -m budget_pipeline.build.frozen_editorial
   inputs:
-  - wg
+  - data/inputs/editorial/guide.json
   schema: docs/data-spec.md
   screens:
   - S04
   scope: editorial
-  rebuild: null
-  notRebuilt: 'editorial.py stops: data/cache/research/guide/guide_raw.txt is missing'
+  rebuild: python -m budget_pipeline.build.rebuild
   limitations:
-  - the guide text of the working group is not in the repository
+  - Published editorial snapshot; original supplied raw text unavailable.
 - id: core
   catalogId: core
   title: 'Ядро: източници, предстоящи набори и основни числа'
@@ -644,8 +626,8 @@ datasets:
   title: Изпълнение по видове данъци
   status: pending
   files: []
-  reason: Месечният отчет на МФ в .xls дава само общата сума на данъчните приходи. Разбивката по данъци (ДДС, ДДФЛ, корпоративен данък, акцизи)
-    е в месечния бюлетин на МФ във формат PDF, който не се изтегля автоматично.
+  reason: Месечният отчет на МФ в .xls дава само общата сума на данъчните приходи. Разбивката по данъци (ДДС, ДДФЛ, корпоративен данък,
+    акцизи) е в месечния бюлетин на МФ във формат PDF, който не се изтегля автоматично.
   expected: Месечен бюлетин за изпълнението на КФП, minfin.bg
   sources:
   - minfin
@@ -657,8 +639,8 @@ datasets:
   title: Месечно изпълнение по съставни бюджети (държавен бюджет, ДОО, НЗОК, общини)
   status: pending
   files: []
-  reason: Месечните отчети, които са извлечени, дават консолидираната програма, националния бюджет и европейските средства. Разбивката на националния
-    бюджет по съставни бюджети е в отделни таблици на МФ, които още не са извлечени.
+  reason: Месечните отчети, които са извлечени, дават консолидираната програма, националния бюджет и европейските средства. Разбивката
+    на националния бюджет по съставни бюджети е в отделни таблици на МФ, които още не са извлечени.
   expected: Отделни таблици към месечната информация за КФП, minfin.bg
   sources:
   - minfin
@@ -669,8 +651,8 @@ datasets:
   title: Програмите на част от ведомствата
   status: pending
   files: []
-  reason: За тези бюджети таблиците на програмния бюджет в архива към законопроекта не се разчетоха надеждно (различен формат на документа), затова
-    не показваме числа.
+  reason: За тези бюджети таблиците на програмния бюджет в архива към законопроекта не се разчетоха надеждно (различен формат на документа),
+    затова не показваме числа.
   expected: Програмни бюджети на ведомствата, архив към законопроекта 52-602-01-19
   sources:
   - prb
@@ -682,8 +664,8 @@ datasets:
   title: Отчетът към 31.10.2026 г. и следващите
   status: pending
   files: []
-  reason: 'Отчетът за октомври 2026 г. още не е добавен: страницата на МФ с месечните отчети се отваря само през браузър (отказ 403 към автоматични
-    заявки), а последният наличен файл е за септември 2026 г.'
+  reason: 'Отчетът за октомври 2026 г. още не е добавен: страницата на МФ с месечните отчети се отваря само през браузър (отказ 403
+    към автоматични заявки), а последният наличен файл е за септември 2026 г.'
   expected: Месечна информация за КФП, minfin.bg
   sources:
   - minfin
@@ -695,8 +677,8 @@ datasets:
   title: Ориентир 2022–2023
   status: pending
   files: []
-  reason: Месечните отчети за 2022–2023 г. не са извлечени; сравнението на изпълнението е със същия период на предходната година (2024 или 2025
-    г.).
+  reason: Месечните отчети за 2022–2023 г. не са извлечени; сравнението на изпълнението е със същия период на предходната година (2024
+    или 2025 г.).
   expected: Месечна информация за КФП за предходните години, minfin.bg
   sources:
   - minfin
@@ -718,8 +700,8 @@ datasets:
   title: Съдържанието и ефектът на 69-те предложения между първо и второ четене
   status: pending
   files: []
-  reason: Предложенията са PDF документи в сайта на Народното събрание. Публикуваме броя им и връзките; съдържанието и фискалният им ефект не
-    са извлечени.
+  reason: Предложенията са PDF документи в сайта на Народното събрание. Публикуваме броя им и връзките; съдържанието и фискалният им
+    ефект не са извлечени.
   expected: Предложения за второ гласуване, parliament.bg
   sources:
   - parliament
@@ -750,11 +732,11 @@ datasets:
   producer: python -m budget_pipeline.build.budget_plan
   inputs:
   - data/cache/research/dbp-2027/dbp2027_figures.json
+  - dbp2027
   schema: docs/data-spec.md
   screens: []
   scope: сектор „Държавно управление“ (S.13), ESA 2010
-  rebuild: null
-  notRebuilt: data/cache/research/dbp-2027/dbp2027_figures.json and its PDF are missing
+  rebuild: python -m budget_pipeline.build.rebuild
   limitations:
   - not listed in catalog.json (the catalog screen would change)
 - id: releases

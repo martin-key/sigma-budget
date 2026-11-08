@@ -348,11 +348,13 @@ def provenance(by_year, rows_out, plan2026, a3, as_of):
             "reconcile": "data(12) of 2024 and 2025 against the columns 2024 Отчет and 2025 Предв. отчет of Приложение 3",
         },
         "originals": originals,
+        # Historical provenance labels of the frozen components input are public output.
+        # Runtime reads use SRC (data/inputs); these labels preserve its acquisition history.
         "plan2026": {"kfp": dict(pdf, rows=plan["kfp"]),
-                     "nat": {"source": "data/inputs/kfp_components_2026.json", "rows": plan["nat"],
-                             "note": "made by the archived extraction of the motives from the motives (Табл. II-3/II-4); see data/sources.yaml"},
-                     "eu": {"source": "data/inputs/kfp_components_2026.json", "rows": plan["eu"],
-                            "note": "made by the archived extraction of the motives from the motives (Табл. II-3/II-4); see data/sources.yaml"}},
+                     "nat": {"source": "prototype/src/kfp_components_2026.json", "rows": plan["nat"],
+                             "note": "made by tools/prototype/build_src.py from the motives (Табл. II-3/II-4); see sources/registry.yaml"},
+                     "eu": {"source": "prototype/src/kfp_components_2026.json", "rows": plan["eu"],
+                            "note": "made by tools/prototype/build_src.py from the motives (Табл. II-3/II-4); see sources/registry.yaml"}},
     }
 
 
