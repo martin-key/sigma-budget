@@ -12,7 +12,17 @@ export default [
   ...ROUTES.filter((r) => r.pattern).map((r) =>
     r.pattern === '/'
       ? index(SCREEN, { id: r.id })
-      : route(toPath(r.pattern!), r.id === 'S26' ? 'routes/za-proekta.tsx' : SCREEN, { id: r.id }),
+      : route(
+          toPath(r.pattern!),
+          (
+            {
+              S26: 'routes/za-proekta.tsx',
+              S25: 'routes/api.tsx',
+              S35: 'routes/proverka.tsx',
+            } as Record<string, string>
+          )[r.id] || SCREEN,
+          { id: r.id },
+        ),
   ),
   route('*', 'routes/not-found.tsx', { id: 'other' }),
 ] satisfies RouteConfig;

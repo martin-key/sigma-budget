@@ -1,3 +1,6 @@
+import { metadataModel } from './metadata';
+import { render as apiContent } from '../../routes/api-content';
+import { render as proofContent } from '../../routes/proverka-content';
 import type { EditorialCore } from '../editorial-types';
 import type { ReleaseReader } from '../release-types';
 import type { TextScreenModel } from '../screen-state';
@@ -12,6 +15,7 @@ export async function textModel(
   query: Record<string, string>,
   reader: ReleaseReader,
 ): Promise<TextScreenModel> {
+  if (screen === 'S25' || screen === 'S35') return metadataModel(screen, params, query, reader);
   let core: EditorialCore = {},
     glossary: unknown = {};
   try {
@@ -52,7 +56,26 @@ export function textMetadata(model: TextScreenModel) {
     demo: model.query.demo,
     view,
     title,
-    lede,
+    lede:
+      'documents' in model && view === 'ready'
+        ? (model.screen === 'S25' ? apiContent : proofContent)({
+            data: model.documents,
+            core: model.core,
+            query: model.query,
+            failed: model.failed,
+            fileMeta: model.fileMeta,
+          }).lede
+        : lede,
+    answer:
+      'documents' in model && model.screen === 'S35' && view === 'ready'
+        ? proofContent({
+            data: model.documents,
+            core: model.core,
+            query: model.query,
+            failed: model.failed,
+          }).answer
+        : '',
+
     crumbs: [{ label: 'Начало', href: toHref('/') }, { label: title }],
     mod: { styles: view === 'ready' ? [route.file] : [] },
   };

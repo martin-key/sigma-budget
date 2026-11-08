@@ -7,6 +7,7 @@ export interface ReleaseIdentity {
   feedbackEmail: string;
 }
 export interface ReleaseReader {
+  get?<T = unknown>(name: string): T | undefined;
   release: ReleaseIdentity;
   load<T = unknown>(name: string, options?: { signal?: AbortSignal }): Promise<T>;
 }

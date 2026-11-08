@@ -126,6 +126,7 @@ export function loadModel(
       sigmaUrl: meta('sigma-url'),
       feedbackEmail: meta('feedback-email'),
     },
+    get: <T,>(name: string) => data.get(name) as T | undefined,
     load: (name) => data.load(name, { signal }),
   });
 }

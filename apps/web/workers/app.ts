@@ -294,7 +294,10 @@ export default {
       const cacheable = !!cache && res.status === 200 && !scope.degraded;
       if (cacheable) {
         const copy = new Response(res.clone().body, { status: res.status, headers: res.headers });
-        copy.headers.set('Cache-Control', 'public, max-age=86400');
+        copy.headers.set(
+          'Cache-Control',
+          `public, max-age=${screenUrl.pathname === '/proverka' ? 60 : 86400}`,
+        );
         stored = cache.put(key, copy).catch(() => {});
         ctx.waitUntil(stored);
       }

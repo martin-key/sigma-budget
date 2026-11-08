@@ -1,0 +1,134 @@
+{
+  "referenceCommit": "851e90f",
+  "releaseId": "daebcb0cb63cf5997bd825a8ffa81111f848fea57e30da5b24fec6d68cbacae4",
+  "origin": "https://sigma-budget.my-data.bg",
+  "cases": [
+    {
+      "screen": "S25",
+      "address": "/api",
+      "query": {},
+      "status": 200,
+      "file": "S25.html",
+      "sha256": "2ec4a5d7de2f140372f86de1c140a3c892b9f6c8c2e85307773d553b2a897d5e"
+    },
+    {
+      "screen": "S25",
+      "address": "/api?demo=loading",
+      "query": {
+        "demo": "loading"
+      },
+      "status": 200,
+      "file": "S25-loading.html",
+      "sha256": "2e30777936444f8dead33762b2680da576b5b4473674b61a3d13153375202671"
+    },
+    {
+      "screen": "S25",
+      "address": "/api?demo=empty",
+      "query": {
+        "demo": "empty"
+      },
+      "status": 200,
+      "file": "S25-empty.html",
+      "sha256": "c8551aa1a66a084cb6790db1f708c958de67e41a1a23f2eb5ed7574b7be9dc34"
+    },
+    {
+      "screen": "S25",
+      "address": "/api?demo=error",
+      "query": {
+        "demo": "error"
+      },
+      "status": 200,
+      "file": "S25-error.html",
+      "sha256": "a6b6901a5027c48115d6a0dd291895121ffa32944bc1d02dfb96ddec61ad965f"
+    },
+    {
+      "screen": "S25",
+      "address": "/api?demo=pending",
+      "query": {
+        "demo": "pending"
+      },
+      "status": 200,
+      "file": "S25-pending.html",
+      "sha256": "6c8b2ac17a3c26cfaba4145c81c93c416b8b1ae2b2aaf1b1b01d007771c71676"
+    },
+    {
+      "screen": "S25",
+      "address": "/api?set=execution",
+      "query": {
+        "set": "execution"
+      },
+      "status": 200,
+      "file": "S25-set.html",
+      "sha256": "7711027717755aaf51a016c4a557c63286800c7b3450e381ac7a4376c434df37"
+    },
+    {
+      "screen": "S25",
+      "address": "/api?set=feed-rss",
+      "query": {
+        "set": "feed-rss"
+      },
+      "status": 200,
+      "file": "S25-rss.html",
+      "sha256": "62aebe6e2aa2a1317634e223c48725e56bd7f2502b34fc1a87989e17100bf27d"
+    },
+    {
+      "screen": "S25",
+      "address": "/api?set=ministries-programs",
+      "query": {
+        "set": "ministries-programs"
+      },
+      "status": 200,
+      "file": "S25-parts.html",
+      "sha256": "af97b841131b9785db59cfdcc6f06ed579c1db8ea495bcd147b2411a20745782"
+    },
+    {
+      "screen": "S35",
+      "address": "/proverka",
+      "query": {},
+      "status": 200,
+      "file": "S35.html",
+      "sha256": "0a65f94b9b1800ee122128d2182140bda39683d5b0c4b8e740479e0346f9d700"
+    },
+    {
+      "screen": "S35",
+      "address": "/proverka?demo=loading",
+      "query": {
+        "demo": "loading"
+      },
+      "status": 200,
+      "file": "S35-loading.html",
+      "sha256": "bfa3ca8fbdaa0339bee096026c17252fd64e4fffbbe4f5a03611a13e22ec00eb"
+    },
+    {
+      "screen": "S35",
+      "address": "/proverka?demo=empty",
+      "query": {
+        "demo": "empty"
+      },
+      "status": 200,
+      "file": "S35-empty.html",
+      "sha256": "3d4ce2378d104fbe366987cbdd796cec9417d3f73e8fca1042ff68e64c2b2610"
+    },
+    {
+      "screen": "S35",
+      "address": "/proverka?demo=error",
+      "query": {
+        "demo": "error"
+      },
+      "status": 200,
+      "file": "S35-error.html",
+      "sha256": "95cd828bdb13dece7347c82ef67a91fd5c79f280838ea90ce1f24c59da4e2f77"
+    },
+    {
+      "screen": "S35",
+      "address": "/proverka?demo=pending",
+      "query": {
+        "demo": "pending"
+      },
+      "status": 200,
+      "file": "S35-pending.html",
+      "sha256": "f6e25d8d70fe4ec40fac348b5c6623fed9594844fdaf20c6d6b23c73813b976b"
+    }
+  ],
+  "inputsSha256": "b0744d67b1dbd70a46aaaa4e6692f5c108f06270433a9d389ce981a5f5007d23"
+}

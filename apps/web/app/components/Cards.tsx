@@ -53,13 +53,16 @@ export function callout(
     </div>
   );
 }
-export function facts(items: { k: string; v: ReactNode }[] = [], o: { cls?: string } = {}) {
+export function facts(
+  items: ({ k: ReactNode; v: ReactNode } | null)[] = [],
+  o: { cls?: string } = {},
+) {
   return (
     <dl className={['facts', o.cls].filter(Boolean).join(' ')}>
       {items
-        .filter((i) => i && i.v != null && i.v !== '')
-        .map((i) => (
-          <div className="facts-row" key={i.k}>
+        .filter((i): i is { k: ReactNode; v: ReactNode } => !!i && i.v != null && i.v !== '')
+        .map((i, index) => (
+          <div className="facts-row" key={index}>
             <dt>{i.k}</dt>
             <dd>{i.v}</dd>
           </div>

@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 // The „Следва“ card at the end of every screen (F09). The router builds it from the route table (route.next),
 // a page can override it with its own export next(ctx) -> ['S12'] | [{href, title, text, kicker}].
 
@@ -38,10 +39,10 @@ export function nextCard(o: {
             <p className="next-more">
               Или:{' '}
               {o.more.map((m, i) => (
-                <>
+                <Fragment key={m.href}>
                   {i ? ' · ' : ''}
                   <a href={m.href}>{m.label}</a>
-                </>
+                </Fragment>
               ))}
             </p>
           </>

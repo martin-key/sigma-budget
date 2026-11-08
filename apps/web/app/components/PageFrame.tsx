@@ -15,7 +15,7 @@ export function PageFrame({
   const [ready, setReady] = useState(false);
   useEffect(() => setReady(true), []);
   const r = byId[model.screen],
-    accent = model.screen === 'S26' ? 'проекта' : 'страница',
+    accent = { S26: 'проекта', S30: 'страница', S25: 'данни', S35: '' }[model.screen],
     i = r.title.lastIndexOf(accent);
   const targets = r.next.map((id: string) => byId[id]);
   const first = targets[0];
@@ -34,7 +34,7 @@ export function PageFrame({
       ) : null}
       <h1 className="page-title" id="page-title" tabIndex={-1}>
         {r.title.slice(0, i)}
-        <em>{accent}</em>
+        {accent ? <em>{accent}</em> : null}
         {r.title.slice(i + accent.length)}
       </h1>
       <p className="lede">{lede ?? r.desc}</p>
@@ -44,9 +44,9 @@ export function PageFrame({
       {first
         ? nextCard({
             href: href(first.id),
-            title: first.title,
-            kicker: GROUPS.find((g) => g.id === first.group)?.label,
-            text: first.desc,
+            title: first.id === 'S01' ? 'Към началото' : first.title,
+            kicker: first.id === 'S01' ? 'Начало' : GROUPS.find((g) => g.id === first.group)?.label,
+            text: first.id === 'S01' ? '' : first.desc,
             more: targets.slice(1).map((t: typeof r) => ({
               href: href(t.id),
               label: t.id === 'S01' ? 'Към началото' : t.title,
