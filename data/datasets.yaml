@@ -192,11 +192,11 @@ datasets:
   producer: python -m budget_pipeline.build.measures (build_measures)
   inputs:
   - data/inputs/measures_2026.json
+  - data/inputs/measure_excerpts.json
   schema: docs/data-spec.md
   screens:
   - S04
   - S05
-  - S08
   - S12
   period: 2026–2028
   scope: КФП, discretionary measures of the 2026 budget
@@ -533,8 +533,7 @@ datasets:
   - glossary
   - guide
   - gva-sectors
-  - mock-measure-labels
-  - mock-tax-assumptions
+  - indirect-tax-parameters
   schema: docs/data-spec.md
   screens:
   - S28
@@ -568,8 +567,6 @@ datasets:
   - measures
   - midt-sebra
   - ministries
-  - mock-measure-labels
-  - mock-tax-assumptions
   - municipalities
   - outlook
   - programs
@@ -577,6 +574,7 @@ datasets:
   - rates
   - revenue
   - sebra
+  - indirect-tax-parameters
   schema: docs/data-spec.md
   screens:
   - S24
@@ -586,44 +584,6 @@ datasets:
   checked: '2026-11-05'
   limitations:
   - 'after catalog: the v5 wording and removals and catalog_refresh.py (layers)'
-- id: mock-measure-labels
-  catalogId: M06
-  title: Дата и правно основание на мерките
-  status: mock
-  files:
-  - data/release/mock/measure-labels.json
-  producer: python -m budget_pipeline.build.examples (M06)
-  inputs:
-  - measures
-  - mockgen
-  schema: docs/example-datasets.md
-  screens:
-  - S08
-  - S12
-  scope: example labels of the measures
-  rebuild: python -m budget_pipeline.build.examples --only M06 --check --build-date 2026-10-09
-  checked: '2026-11-05'
-  limitations:
-  - 'example values: marked mock in the file, the tables, search and exports'
-- id: mock-tax-assumptions
-  catalogId: M07
-  title: Допускания за косвените данъци
-  status: mock
-  files:
-  - data/release/mock/tax-assumptions.json
-  producer: python -m budget_pipeline.build.examples (M07)
-  inputs:
-  - asbp
-  - mockgen
-  schema: docs/example-datasets.md
-  screens:
-  - S18
-  scope: example assumptions of the tax calculator
-  unit: €
-  rebuild: python -m budget_pipeline.build.examples --only M07 --check --build-date 2026-10-09
-  checked: '2026-11-05'
-  limitations:
-  - 'example values: marked mock; the official rates in it are typed into examples.py from Приложение 2 of the motives'
 - id: p01
   catalogId: P01
   title: Изпълнение по видове данъци
@@ -798,3 +758,24 @@ datasets:
   rebuild: python -m budget_pipeline.build.rebuild --build-date 2026-11-08
   limitations:
   - Additive offline contract; no UI reader until PR 2.
+- id: indirect-tax-parameters
+  catalogId: D26
+  title: Параметри на косвените данъци
+  status: real
+  files:
+  - data/release/indirect-tax-parameters.json
+  producer: python -m budget_pipeline.build.indirect_taxes
+  inputs:
+  - ec-oil
+  - excise-law
+  - customs-excise-law
+  - nsi-pack
+  - bill
+  - data/inputs/indirect_tax_evidence.json
+  schema: docs/data-spec.md
+  screens:
+  - S18
+  scope: България; ставки и датирани наблюдения, без потребителски тегла
+  rebuild: python -m budget_pipeline.build.rebuild
+  limitations:
+  - Цените са исторически справки; изчисленията са сценарий. Без LPG и периоди преди 01.08.2026.

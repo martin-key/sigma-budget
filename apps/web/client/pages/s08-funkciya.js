@@ -1,6 +1,6 @@
 // S08 · Функция · #/razhodi/:fn · next S12 · periods all
 // One of the nine functions of the КФП: its size, its parts and its years (Табл. III-1 of the motives, D03), the Eurostat history of the same kind of
-// spending (D05), the budgets of its main spenders (D04) and the measures that touch it (M06, mock). Every number is computed from the data files;
+// spending (D05), the budgets of its main spenders (D04) . Every number is computed from the data files;
 // the editorial layer is only the one-line explanations, which measures touch which function and the pointers to the two budgets outside the state budget.
 //   units  млн. € / % от БВП through the unit switch for the list and the charts; „на човек“ and „и в лева“ through view.js. The five tiles at the top
 //          are fixed (sum · share · % от БВП · на човек · change) because the screen shows all of them at once. The Eurostat history ignores „на човек“.
@@ -19,7 +19,7 @@ import { apportion } from '../calc.js';
 import { yIndex, change, chartUnit, perCapita, periodStatus } from '../view.js';
 import { num, pct, money, moneyParts, delta, date, DASH, NBSP } from '../format.js';
 
-export const needs = ['core', 'expenditure', 'ministries?', 'measures?', 'mock/measure-labels?'];
+export const needs = ['core', 'expenditure', 'ministries?'];
 export const styles = ['s08-funkciya'];
 
 const yr = y => `${y}${NBSP}г.`;
@@ -45,19 +45,6 @@ const FN_WHAT = {
 };
 /** short names of the Eurostat COFOG divisions (the data carries the long official ones) */
 const COFOG_SHORT = { GF01: 'Общи държавни служби', GF02: 'Отбрана', GF03: 'Ред и сигурност', GF04: 'Икономически дейности', GF05: 'Околна среда', GF06: 'Жилищно и комунално', GF07: 'Здравеопазване', GF08: 'Култура и отдих', GF09: 'Образование', GF10: 'Социална защита' };
-/** Editorial: which measures (ids in measures.json) touch which function. Names, texts and labels come from the data; an id the data lacks is skipped. */
-const FN_MEASURES = {
-  'obshti-sluzhbi': ['kx5', 'p8-4'],
-  'otbrana-sigurnost': ['p8-8'],
-  obrazovanie: ['p8-6', 'p8-7'],
-  zdraveopazvane: [],
-  sotsialni: ['kx3', 'kx6', 'kx7', 'd9-3', 'p8-5'],
-  'zhilishtno-sreda': ['p8-1'],
-  'kultura-sport': ['kx4'],
-  ikonomika: ['kx8', 'd9-4'],
-  drugi: []
-};
-const WIDE = ['d9-1', 'd9-2'];                          // pay and staff-cost measures: they touch every function
 /** the budgets that sit next to the state budget but inside the КФП */
 const OWN = {
   zdraveopazvane: { src: 'zbnzok', text: html`Освен бюджета на министерството, парите за лечение минават и през Националната здравноосигурителна каса (НЗОК). Нейният бюджет е отделен закон, но влиза в ${gl('kfp', 'консолидираната програма')}.` },
@@ -206,31 +193,6 @@ function vedBlock(ctx, M) {
   });
 }
 
-/** the measures that touch the function: the measures are real, the link to the function is editorial (M06, mock). The „кого засяга / кой плаща / кой печели“ labels are not shown any more (working-group feedback, 2026-10-09) */
-function measuresBlock(ctx, M) {
-  const title = 'Мерки, които засягат функцията';
-  const ms = ctx.data?.measures, lb = ctx.data?.['mock/measure-labels'];
-  if (!Array.isArray(ms?.items) || !Array.isArray(lb?.items)) return block({ id: 's08-merki', title, status: 'pending', body: pendingState({ title, text: 'Мерките не са налични в момента. Опитай пак по-късно.' }) });
-  const ids = [...new Set([...(FN_MEASURES[M.id] || []), ...WIDE])];
-  const byId = new Map(ms.items.map(x => [x.id, x]));
-  const list = ids.map(id => byId.get(id)).filter(Boolean);
-  const why = 'Кои мерки засягат функцията, е редакционна преценка по текста на мярката; не е официална класификация и не е проверена.';
-  const rows = list.map(m => {
-    return disclosure({
-      id: `s08-m-${m.id}`, title: m.name, meta: [ms.tabLabels?.[m.tab], WIDE.includes(m.id) ? 'за всички функции' : ''].filter(Boolean).join(' · '),
-      body: html`<div class="s08-meas">
-        ${m.text ? html`<p class="s08-meas-text" data-gl-scan>${m.text}</p>` : ''}
-        <p class="s08-meas-go"><a href="${ctx.href('S12', { id: m.id })}">Всичко за мярката</a></p>
-      </div>`
-    });
-  });
-  return block({
-    id: 's08-merki', title, mock: true, why, source: ['bill', 'mockgen'], asOf: lb.meta?.asOf,
-    sub: 'Мерките са от мотивите към проекта на бюджета. Кои от тях засягат функцията, е редакционна преценка.',
-    body: rows.length ? html`<div class="s08-stack">${rows}</div>` : emptyState({ title: 'Няма свързани мерки', text: 'В проекта на бюджета няма мярка, която засяга само тази функция.', icon: 'info' })
-  });
-}
-
 function notesBlock(ctx, M) {
   const F = M.F, X = ctx.data.expenditure;
   const note = id => (Array.isArray(F.notes) ? F.notes.find(n => n.id === id)?.text : F.notes?.[id]) ?? '';
@@ -265,7 +227,7 @@ export function render(ctx) {
     body: html`${unitSwitch(ctx, { name: 's08-unit', note: 'Важи за списъците и графиките.' })}
       ${intro}
       ${M.sel >= 0 ? html`${kpiBlock(ctx, M)}${partsBlock(ctx, M)}` : noCol}
-      ${yearsBlock(ctx, M)}${cofogBlock(ctx, M)}${vedBlock(ctx, M)}${measuresBlock(ctx, M)}${notesBlock(ctx, M)}`
+      ${yearsBlock(ctx, M)}${cofogBlock(ctx, M)}${vedBlock(ctx, M)}${notesBlock(ctx, M)}`
   };
 }
 

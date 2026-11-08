@@ -317,17 +317,19 @@ python -m budget_pipeline.sources.access_probe --label "София, домашн
 
 ## 11. Възстановяване на суровите файлове за сглобяване
 
-Сглобяването от чисто копие иска суровите файлове, които не са в Git: снимките на живите източници и офлайн кешовете, без пароли. Те са в архива `release-build-inputs.tar.gz` (SHA-256 `1fa327738fb8fd2af276bcfca7ca5a4dfdcb6057b516f7f54564a1dd05f1963c`), който се пази отделно от хранилището. Ново сваляне не го заменя: живите страници се променят, а смяната на снимка иска ново придобиване, сравнение на производните данни и преглед на новия pin.
+Сглобяването от чисто копие иска суровите файлове, които не са в Git: снимките на живите източници и офлайн кешовете, без пароли. Те са в архива `release-build-inputs-2026-11-08-indirect-tax-sources.tar.gz` (SHA-256 `5f8e6a98b05919dc776fb68f40615a544b585e1a1690e29cf2f6f3b0e0648701`), който се пази отделно от хранилището. Ново сваляне не го заменя: живите страници се променят, а смяната на снимка иска ново придобиване, сравнение на производните данни и преглед на новия pin.
 
 ```sh
 uv venv --python 3.12 tmp/venv-data
 uv pip install --python tmp/venv-data/bin/python --require-hashes -r pipeline/requirements.lock -r tests/requirements-dev.lock
 uv pip install --python tmp/venv-data/bin/python --no-deps -e pipeline
-sha256sum release-build-inputs.tar.gz
-tar -xzf release-build-inputs.tar.gz
+sha256sum release-build-inputs-2026-11-08-indirect-tax-sources.tar.gz
+tar -xzf release-build-inputs-2026-11-08-indirect-tax-sources.tar.gz
 tmp/venv-data/bin/python -m budget_pipeline.sources.prepare_inputs
-./budget build --env local --build-date 2026-11-05
+./budget build --env local --build-date 2026-11-08
 ./budget validate --release work/candidate
 ```
 
 Архивът съдържа `data/originals/` и `data/cache/`. Ръководството, речникът и замените на термините са замразени входове в `data/inputs`; произходът им е в `data/sources.yaml`. Изгубените оригинални текстове и старите записи за придобиване не са възстановени. Записът за АСБП описва взимането от PDF-а в хранилището, а не сваляне от издателя.
+
+Архивът от 08.11.2026 г. е надмножество на предишния: всички негови файлове са запазени без промяна и са добавени петте заковани файла на ЕК, ДВ, Агенция „Митници“ и НСИ за D26. Те остават извън Git. `acquisition: auto` включва точните им адреси в `sources.download`, `./budget collect` и `./budget refetch`; ново сваляне не променя pin автоматично.

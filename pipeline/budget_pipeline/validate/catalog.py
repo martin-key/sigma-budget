@@ -16,7 +16,7 @@ from budget_pipeline.validate.search_feed import MONTHS
 from budget_pipeline.validate.checks import Check, fmt, isnum
 
 SOURCE_KEYS = ("budget2027", "kfp", "asbp", "bill", "zdb", "zbdoo", "zbnzok", "prb", "parliament", "eurostat", "bnb", "nap", "sebra",
-               "gisco", "dataeuropa", "minfin", "wg", "mockgen")
+               "gisco", "dataeuropa", "minfin", "wg", "ec-oil", "excise-law", "customs-excise-law", "nsi-pack")
 SOURCE_KINDS = ("xls", "pdf", "html", "doc", "api", "generator")
 SOURCE_ACCESS = ("open", "browser-only", "none")
 SHA = re.compile(r"^[0-9a-f]{64}$")

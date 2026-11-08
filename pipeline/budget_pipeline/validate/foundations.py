@@ -15,7 +15,7 @@ from budget_pipeline.validate.checks import Check, isnum, pattern, walk
 
 STATUSES = ("real", "mock", "pending")
 SOURCE_KEYS = ("budget2027", "kfp", "asbp", "bill", "zdb", "zbdoo", "zbnzok", "prb", "parliament", "eurostat", "bnb", "nap", "sebra",
-               "gisco", "dataeuropa", "minfin", "wg", "mockgen")
+               "gisco", "dataeuropa", "minfin", "wg", "ec-oil", "excise-law", "customs-excise-law", "nsi-pack")
 
 
 # ------------------------------------------------------------------------------------------------------- INPUTS

@@ -92,6 +92,10 @@ def span(values):
 # core.sources: key -> {title, publisher, url, kind, access, note}. `url` is the PUBLIC address of the publisher.
 SOURCES = {
     "budget2027": {"title": "Законопроект за държавния бюджет за 2027 г. и АСБП 2027–2029", "publisher": "Министерство на финансите", "url": "https://www.minfin.bg/bg/1802", "kind": "pdf", "access": "browser-only", "note": "Публикация от 06.11.2026: законопроектът и мотивите със средносрочната прогноза."},
+    'ec-oil': {'title': 'ЕК, ГД „Енергетика“: седмичен бюлетин за цените на петролните продукти', 'publisher': 'ЕК, ГД „Енергетика“', 'url': 'https://energy.ec.europa.eu/data-and-analysis/weekly-oil-bulletin_en', 'kind': 'xls', 'access': 'open', 'note': 'CC BY 4.0, с посочване на ЕК; преобразуванията са наши'},
+    'excise-law': {'title': 'Държавен вестник, бр. 69 от 31.07.2026 г.: промени в ЗАДС (§31)', 'publisher': 'Народно събрание, „Държавен вестник“', 'url': 'https://dv.parliament.bg/DVWeb/showMaterialDV.jsp?idMat=245041', 'kind': 'html', 'access': 'open', 'note': 'Нормативен акт; не е обект на авторско право (ЗАПСП, чл. 4, т. 1)'},
+    'customs-excise-law': {'title': 'Агенция „Митници“: ЗАДС, консолидация до ДВ, бр. 54 от 2025 г.', 'publisher': 'Агенция „Митници“', 'url': 'https://customs.bg/wps/wcm/connect/customs.bg28892/e0225cb0-6caf-4dda-ba61-030cf90298b3/%D0%97%D0%90%D0%94%D0%A1%D0%BA%D0%BB%D0%B0%D0%B4_2005.2025054+(1).pdf?MOD=AJPERES', 'kind': 'pdf', 'access': 'open', 'note': 'Нормативен акт; не е обект на авторско право (ЗАПСП, чл. 4, т. 1)'},
+    'nsi-pack': {'title': 'НСИ: Статистически годишник 2025', 'publisher': 'Национален статистически институт', 'url': 'https://www.nsi.bg/file/35970/God2025.pdf', 'kind': 'pdf', 'access': 'open', 'note': 'Лиценз на НСИ v2.0; оригиналното наблюдение се пази отделно от преобразуването'},
     "kfp": {
         "title": "Консолидирана фискална програма (КФП): месечна информация за изпълнението",
         "publisher": "Министерство на финансите",
@@ -186,11 +190,6 @@ SOURCES = {
         "publisher": "Работна група „Бюджет на светло“",
         "kind": "doc", "access": "none",
         "note": "Речник, пътеводител и редакционни етикети. Не са официални данни."},
-    "mockgen": {
-        "title": "Генератор на примерни данни (фиксирано семе 20261002)",
-        "publisher": "Работна група „Бюджет на светло“",
-        "kind": "generator", "access": "none",
-        "note": "Примерните набори са означени „примерни данни“; сборовете им са свързани с реалните числа, които разбиват."},
 }
 
 # --------------------------------------------------------------------------------------------- pending registry

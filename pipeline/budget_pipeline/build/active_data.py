@@ -92,7 +92,6 @@ def main():
     si = json.load(open(data / "search-index.json", encoding="utf8"))
     n = len(si["items"])
     si["items"] = [i for i in si["items"] if i[5] == "real" and not i[6].startswith(GONE_ROUTES) and "СЕБРА" not in i[1]]
-    si["meta"]["source"] = [s for s in si["meta"]["source"] if s not in ("mockgen",)]
     si["meta"]["sourceNote"] = si["meta"]["sourceNote"].replace(
         "Редовете с примерни данни са отбелязани и се скриват при „Само официални данни“. ", "")
     out["search-index.json"] = dump(si)

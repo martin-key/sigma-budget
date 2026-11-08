@@ -12,7 +12,7 @@ import { popover } from './sheet.js';
 const SHORT = {
   kfp: 'МФ · КФП', asbp: 'МФ · АСБП', bill: 'Законопроект', zdb: 'ЗДБРБ · ДВ', zbdoo: 'ЗБДОО · ДВ', zbnzok: 'ЗБНЗОК · ДВ', prb: 'Програмни бюджети',
   parliament: 'Парламент', eurostat: 'Евростат', bnb: 'БНБ', nap: 'НАП', sebra: 'СЕБРА', gisco: 'GISCO', dataeuropa: 'data.europa.eu',
-  minfin: 'МФ', wg: 'Редакционно', mockgen: 'Примерни данни'
+  minfin: 'МФ', wg: 'Редакционно'
 };
 const KIND = { xls: 'Таблица (xls)', pdf: 'Документ (PDF)', html: 'Уеб страница', api: 'API', doc: 'Документ (Word)', generator: 'Генериран набор' };
 const ACCESS = { open: 'Отворен достъп', 'browser-only': 'Достъпен само през браузър', none: 'Няма публичен достъп' };

@@ -65,8 +65,6 @@ jobs:
           python -m unittest discover -s tests/pipeline -t .
           python -m budget_pipeline.extract.budget_forecast_2027 --check
           python -m budget_pipeline.extract.budget_bill_2027 --check
-      - name: Validate the two published example datasets
-        run: python -m budget_pipeline.validate.examples
       - name: Compatibility of code and data (stage E)
         run: python -m tests.release.compat_check
       - name: The query each screen is drawn and cached by (apps/web/client/routes.js)

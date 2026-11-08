@@ -1,12 +1,5 @@
 // S12 · Мерки в бюджета 2026 · #/merki[/<мярка>] · next S10 · periods 2026.draft, 2026.law (both set on the route)
-// Data: D12 measures.json (real: 52 measures from the bill's motives, three lists) + M06 mock/measure-labels.json: only its verbatim text of
-// the measure is used here (`since`, `sinceText`, `legal`). The editorial labels (who is affected / who pays / who gains, the group filter) are
-// NOT shown any more (working-group feedback 2026-10-09): the data stays in the file, nothing reads it.
-// List page : callout („по законопроекта, не по приетия закон“) → „Как да четеш числата“ → tabs (?spisak=short|discretionary|laws).
-//             Cards carry the effect, the date, the legal basis, the status and the quote.
-// Measure page (#/merki/<id>): what changes · what the motives say · related. An unknown id → ctx.notFound().
-// Amounts are formatted here from each measure's own numbers (млн. €, signed, optionally also лева). The per-person and
-// „% от БВП“ switches do not make sense for single measures, so they are ignored here and the page says so.
+// Data: source-checked excerpts in measures.json.
 import { html } from '../html.js';
 import { block } from '../ui/block.js';
 import { kpi, kpiGrid } from '../ui/kpi.js';
@@ -17,7 +10,7 @@ import { callout, ext, facts, linkCard } from '../ui/cards.js';
 import { gl } from '../ui/gl.js';
 import { num, date, plural, EUR_RATE, DASH, NBSP } from '../format.js';
 
-export const needs = ['measures', 'mock/measure-labels?'];
+export const needs = ['measures'];
 export const styles = ['s12-merki'];
 
 const TABS = ['short', 'discretionary', 'laws'];
@@ -43,15 +36,12 @@ const yr = y => `${y}${NBSP}г.`;
 /** everything the builders need, derived once per render */
 function model(ctx) {
   const D = ctx.data.measures || {};
-  const L = ctx.data['mock/measure-labels'];
   const items = arr(D.items);
   const byId = new Map(items.map(i => [i.id, i]));
-  const label = new Map(arr(L && L.items).map(i => [i.id, i]));
-  const hasLabels = label.size > 0;                                           // M06 is read only for the verbatim `since`, `sinceText`, `legal`
   const rel = new Map(items.map(i => [i.id, new Set()]));                     // „related“ read both ways
   for (const i of items) for (const r of arr(i.related)) if (byId.has(r)) { rel.get(i.id).add(r); rel.get(r).add(i.id); }
   const lists = Object.fromEntries(TABS.map(t => [t, items.filter(i => i.tab === t)]));
-  return { D, L, items, byId, label, hasLabels, rel, lists };
+  return { D, items, byId, rel, lists };
 }
 
 /** an amount in млн. €, optionally signed; with „и в лева“ on the same amount follows in лева */
@@ -93,9 +83,9 @@ function yearsHtml(ctx, it) {
       : html`<span class="muted" title="Няма оценка за тази година">${DASH}<span class="sr-only"> няма оценка</span></span>`}</dd></div>`)}</dl></div>`;
 }
 
-/** „От кога“: the date of the data, else the date or the phrase of the text (M06 repeats them verbatim), else „не е посочено“ */
+/** „От кога“: the date of the data, else the date or the phrase of the text (source excerpts), else „не е посочено“ */
 function fromHtml(M, it) {
-  const lab = M.hasLabels ? M.label.get(it.id) : null;
+  const lab = it;
   const iso = it.from || (lab && lab.since);
   if (iso) return html`${date(iso, true)}`;
   if (lab && lab.sinceText) return html`<span class="s12-phrase">„${lab.sinceText}“</span> <span class="muted small">(по текста)</span>`;
@@ -112,7 +102,7 @@ function quoteHtml(it) {
 
 /** one measure as a card (list pages) */
 function card(ctx, M, it) {
-  const lab = M.hasLabels ? M.label.get(it.id) : null;
+  const lab = it;
   const dk = it.tab === 'discretionary';
   const rows = [
     dk ? null : { k: 'Ефект през 2026 г.', v: effectHtml(ctx, M, it) },
@@ -144,14 +134,15 @@ function twin(ctx, id, caption, columns, rows, o = {}) {
 function shortRows(ctx, M, list) {
   return list.map(it => ({
     name: it.name, eff: ok(it.effectMln && it.effectMln['2026']) ? it.effectMln['2026'] : null, kind: kindText(M, it),
-    from: it.from || (M.hasLabels && M.label.get(it.id)?.since) || null, page: it.page?.docx ?? null, _href: ctx.href('merki', { id: it.id })
+    from: it.from || it.since || it.sinceText || null, legal: it.legal || null, page: it.page?.docx ?? null, _href: ctx.href('merki', { id: it.id })
   }));
 }
 const SHORT_COLS = [
   { key: 'name', label: 'Мярка' },
   { key: 'eff', label: 'Ефект през 2026', unit: 'млн. €', fmt: sgn },
   { key: 'kind', label: 'Вид на сумата', sort: true },
-  { key: 'from', label: 'От кога', fmt: v => (v ? date(v) : DASH) },
+  { key: 'legal', label: 'Правно основание' },
+  { key: 'from', label: 'От кога', fmt: v => (v ? (/^\d{4}-\d{2}-\d{2}$/.test(v) ? date(v) : v) : DASH) },
   { key: 'page', label: 'Страница', fmt: v => (ok(v) ? String(v) : DASH) }
 ];
 function discRows(ctx, M, list) {
@@ -251,7 +242,7 @@ function discPanel(ctx, M) {
 function lawsPanel(ctx, M) {
   const all = M.lists.laws;
   const count = `${plural(all.length, 'промяна', 'промени')}.`;
-  const rows = all.map(it => ({ name: it.name, law: (M.hasLabels && M.label.get(it.id)?.legal) || null, page: it.page?.docx ?? null, _href: ctx.href('merki', { id: it.id }) }));
+  const rows = all.map(it => ({ name: it.name, law: it.legal || null, page: it.page?.docx ?? null, _href: ctx.href('merki', { id: it.id }) }));
   const body = html`${cardsGrid(ctx, M, all)}${twin(ctx, 's12-t-laws', 'Промени в други закони', [
     { key: 'name', label: 'Промяна' }, { key: 'law', label: 'Правно основание', fmt: v => v || DASH }, { key: 'page', label: 'Страница', fmt: v => (ok(v) ? String(v) : DASH) }], rows)}`;
   return html`<div class="stack-lg">
@@ -315,7 +306,7 @@ function balanceHtml(ctx, it) {
 }
 
 function whatBlock(ctx, M, it) {
-  const lab = M.hasLabels ? M.label.get(it.id) : null;
+  const lab = it;
   const dk = it.tab === 'discretionary';
   const bal = balanceHtml(ctx, it);
   const pg = pageText(it.page);

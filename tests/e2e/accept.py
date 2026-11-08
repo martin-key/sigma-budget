@@ -289,6 +289,25 @@ def part_layout(browser, port):
         ctx.close()
 
 
+def retired_examples(browser, port):
+    ctx = browser.new_context(service_workers="block")
+    ctx.add_init_script("window.__HASH_ROUTES__ = true")
+    page = ctx.new_page()
+    page.goto(f"http://127.0.0.1:{port}/index.html#/razhodi/obrazovanie")
+    page.wait_for_selector('#s08-godini')
+    ok(page.locator('#s08-merki').count() == 0, 'S08 has no editorial linked-measures section')
+    # Check the actual registered route through the module, independent of a route spelling.
+    result = page.evaluate("""async () => {
+      const s08 = await import('./js/pages/s08-funkciya.js');
+      const s12 = await import('./js/pages/s12-merki.js');
+      const s18 = await import('./js/pages/s18-danaci.js');
+      return { a:s08.needs, b:s12.needs, c:s18.needs };
+    }""")
+    ok('measures?' not in result['a'] and all('mock/' not in v for arr in result.values() for v in arr), 'screens have no retired dependencies or editorial S08 mapping')
+    ok('measures' in result['b'] and 'indirect-tax-parameters?' in result['c'], 'S12/S18 load official replacements')
+    ctx.close()
+
+
 def main():
     from playwright.sync_api import sync_playwright
     srv = socketserver.ThreadingTCPServer(("127.0.0.1", 0), H)
@@ -302,6 +321,7 @@ def main():
             part_numbers(b, port)
         if not only or "layout" in only:
             part_layout(b, port)
+        retired_examples(b, port)
         b.close()
     srv.shutdown()
     if not only or "overlap" in only:                           # Current (27.10): no interactive element on another, no sideways scroll, on every screen (tests/e2e/overlap.py --quick)

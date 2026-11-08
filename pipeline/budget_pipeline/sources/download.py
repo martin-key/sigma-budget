@@ -7,7 +7,7 @@ data/originals/MANIFEST.json (адрес, файл, размер, sha256, HTTP �
 се записват в манифеста — така причината „няма данни“ е проверима.
 
 Входове: няма (само мрежа). Изходи: data/originals/** и MANIFEST.json.
-Мрежа: Bash с изключен sandbox. Само stdlib.
+Среда: стандартната библиотека и PyYAML от закованата Python среда.
 
 Източници, които НЕ са тук:
 - PDF-ът на МФ UMTBF-2026-2028-motivi.pdf — предоставен от работната група (виж docs/data-sources.md);
@@ -79,6 +79,28 @@ SOURCES = [
     ("probes", "data_egov_bg.html", "https://data.egov.bg/", "Портал за отворени данни (проба за достъп)", {}),
     ("probes", "nsi_bg.html", "https://www.nsi.bg/", "НСИ (проба за достъп)", {}),
 ]
+
+
+def registered_auto_sources(registry=None):
+    """Use exact registry URLs for auto-acquired snapshots, including the indirect-tax evidence."""
+    from pathlib import Path
+    import yaml
+    path = Path(registry) if registry else Path(__file__).resolve().parents[3] / "data/sources.yaml"
+    sources = yaml.safe_load(path.read_text(encoding="utf-8"))["sources"]
+    out = []
+    for source in sources:
+        if source.get("acquisition") != "auto":
+            continue
+        for entry in source.get("files", []):
+            rel = entry["path"]
+            if not rel.startswith("data/originals/") or "*" in rel or entry.get("via"):
+                continue
+            folder, name = rel.removeprefix("data/originals/").rsplit("/", 1)
+            out.append((folder, name, entry["url"], entry.get("title", source["title"]), {}))
+    return out
+
+
+SOURCES += registered_auto_sources()
 
 
 def fetch(url, headers):

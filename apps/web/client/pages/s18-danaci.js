@@ -22,7 +22,7 @@ const SLIDER_MAX = 6000;
 const SLIDER_STEP = 50;
 const ERR_POSITIVE = 'Въведи сума над 0';
 const ERR_NONNEG = 'Въведи сума от 0 нагоре';
-const DEFAULTS = { gross: '1500', rules: 'from', tzpb: null, ind: false, purchases: '800', fuel: '', tobacco: '' };
+const DEFAULTS = { gross: '1500', rules: 'from', tzpb: null, ind: false, purchases: '', reduced: '', exempt: '', fuel: '', tobacco: '', fuelType: 'petrol', fuelPrice: null, tobaccoPrice: null, fuelPriceEdited: false, tobaccoPriceEdited: false, sticks: '', date: '2026-11-08' };
 
 // Input memory across 'rerender' only (period / unit / leva / only-real switches). A documented exception to the
 // "no module state" rule: it is written only by input handlers and reset on every other navigation.
@@ -59,6 +59,26 @@ export function parseAmount(text) {
   return Number.isFinite(value) ? { value } : { error: true };
 }
 
+const INDIRECT_FIELDS = ['purchases', 'reduced', 'exempt', 'fuel', 'tobacco', 'fuelPrice', 'tobaccoPrice', 'sticks', 'date', 'fuelType'];
+const PRICE_DIGITS = { fuelPrice: 3, tobaccoPrice: 2 };
+const priceReference = (key, st, A) => key === 'fuelPrice' ? A?.fuels?.[st.fuelType]?.pricePerLitre : A?.references?.pack?.priceEur;
+const priceDisplay = (key, value) => Number.isFinite(value) ? num(value, PRICE_DIGITS[key]) : '';
+
+export function applyReferencePrices(st, A) {
+  for (const key of Object.keys(PRICE_DIGITS)) {
+    if (st[key] === null || st[`${key}Edited`] === false) {
+      st[key] = priceDisplay(key, priceReference(key, st, A));
+      st[`${key}Edited`] = false;
+    }
+  }
+}
+
+function validDate(text) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(text || '')) return false;
+  const parsed = new Date(`${text}T00:00:00Z`);
+  return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === text;
+}
+
 /* ------------------------------------------------------------------ environment (data) */
 export function getEnv(ctx) {
   const rates = ctx.data.rates || null;
@@ -73,7 +93,7 @@ export function getEnv(ctx) {
   const yr = Number(String(last?.to || last?.from || '').slice(0, 4));
   return {
     rates, scenarios, emp, sets, ready: sets.length > 0,
-    assum: ctx.data['mock/tax-assumptions'] || null,
+    assum: ctx.data['indirect-tax-parameters'] || null,
     fns: Array.isArray(core.functions) ? core.functions : [],
     persons: core.population?.persons ?? null,
     onlyReal: !!ctx.store.get('onlyReal'),
@@ -101,7 +121,7 @@ function fundSplit(r, emp, er) {
 }
 
 export function compute(st, env) {
-  const errors = { gross: null, purchases: null, fuel: null, tobacco: null };
+  const errors = Object.fromEntries(['gross', ...INDIRECT_FIELDS].map(key => [key, null]));
   if (!env.ready) return { kind: 'pending', errors };
   const g = parseAmount(st.gross);
   if (g.blank) return { kind: 'empty', errors };
@@ -141,31 +161,52 @@ export function compute(st, env) {
   const shares = apportion([net, emp, tax, er], 100, 1) || [net, emp, tax, er].map(v => round2((v / labour) * 100));
   const funds = fundSplit(r, emp, er);
 
-  // optional indirect taxes (model data: only when asked for and not hidden by "only real data")
   let ind = null;
-  if (st.ind && !env.onlyReal && env.assum) {
-    const inp = {};
-    for (const [k, key] of [['purchases', 'purchasesEur'], ['fuel', 'fuelEur'], ['tobacco', 'tobaccoEur']]) {
-      const a = parseAmount(st[k]);
-      if (a.blank) continue;
-      if (a.error) { errors[k] = ERR_NONNEG; continue; }
-      if (a.value > 0) inp[key] = a.value;
+  if (st.ind && env.assum) {
+    const value = (key, positive = false, integer = false) => {
+      const text = String(st[key] ?? '').replace(/[\s€]/g, '');
+      const parsed = Object.hasOwn(PRICE_DIGITS, key) && /^\d+\.\d+$/.test(text)
+        ? (Number.isFinite(Number(text)) ? { value: Number(text) } : { error: true }) : parseAmount(st[key]);
+      if (parsed.blank) return null;
+      if (parsed.error || (positive && parsed.value <= 0) || (integer && !Number.isInteger(parsed.value))) {
+        errors[key] = integer ? 'Въведи цял брой късове над 0' : positive ? ERR_POSITIVE : ERR_NONNEG;
+        return null;
+      }
+      const reference = priceReference(key, st, env.assum);
+      return Object.hasOwn(PRICE_DIGITS, key) && st[`${key}Edited`] === false && st[key] === priceDisplay(key, reference)
+        ? reference : parsed.value;
+    };
+    const inp = { vat20Eur: value('purchases'), vat9Eur: value('reduced'), vat0Eur: value('exempt'),
+      fuelLitres: value('fuel'), tobaccoPacks: value('tobacco'), fuelPrice: value('fuelPrice', true), tobaccoPrice: value('tobaccoPrice', true),
+      sticksPerPack: value('sticks', true, true), fuelType: st.fuelType, date: st.date };
+    const missing = [];
+    for (const [key, input] of [['purchases', 'vat20Eur'], ['reduced', 'vat9Eur'], ['exempt', 'vat0Eur'], ['fuel', 'fuelLitres'], ['tobacco', 'tobaccoPacks']]) {
+      if (inp[input] === null && !errors[key]) missing.push(key);
     }
-    ind = { any: Object.keys(inp).length > 0, inp, unavailable: false, rows: [], total: 0, yTotal: 0 };
-    if (ind.any) {
-      const t = indirectTaxes(inp, env.assum);
-      const rows = [];
-      if (t && t.vat != null) rows.push({ id: 'vat', label: 'ДДС', month: round2(t.vat) });
-      if (t && inp.fuelEur && t.fuelExcise != null) rows.push({ id: 'fuel', label: 'Акциз върху горивата', month: round2(t.fuelExcise) });
-      if (t && inp.tobaccoEur && t.tobaccoExcise != null) rows.push({ id: 'tobacco', label: 'Акциз върху тютюневите изделия', month: round2(t.tobaccoExcise) });
-      const wanted = 1 + (inp.fuelEur ? 1 : 0) + (inp.tobaccoEur ? 1 : 0);
-      if (!t || t.total == null || rows.length < wanted) ind.unavailable = true;
-      else {
-        ind.rows = rows.map(x => ({ ...x, year: round2(x.month * 12) }));
-        ind.total = round2(rows.reduce((s, x) => s + x.month, 0));
-        ind.yTotal = round2(ind.rows.reduce((s, x) => s + x.year, 0));
+    for (const [key, input, needed] of [['fuelPrice', 'fuelPrice', inp.fuelLitres > 0], ['tobaccoPrice', 'tobaccoPrice', inp.tobaccoPacks > 0], ['sticks', 'sticksPerPack', inp.tobaccoPacks > 0]]) {
+      if (needed && inp[input] === null && !errors[key]) missing.push(key);
+    }
+    if (!st.date) missing.push('date');
+    else if (!validDate(st.date)) errors.date = 'Въведи валидна дата';
+    if (!st.fuelType && inp.fuelLitres > 0) missing.push('fuelType');
+    else if (st.fuelType && !env.assum.fuels?.[st.fuelType]) errors.fuelType = 'Избери бензин 95 или дизел';
+    const invalid = Object.values(errors).some(Boolean);
+    let unsupported = false;
+    if (!invalid && st.date) {
+      const fuel = env.assum.fuels?.[st.fuelType];
+      const cigarette = env.assum.cigarettes?.find(row => st.date >= row.validFrom && (!row.validTo || st.date <= row.validTo));
+      if ((inp.fuelLitres > 0 && fuel && (st.date < fuel.validFrom || (fuel.validTo && st.date > fuel.validTo))) ||
+          (inp.tobaccoPacks > 0 && !cigarette) || (inp.vat20Eur > 0 && st.date < env.assum.vat.standardSince)) {
+        unsupported = true;
+        errors.date = 'За тази дата липсват проверени ставки за избраните покупки';
       }
     }
+    const t = indirectTaxes(inp, env.assum);
+    const status = invalid ? 'invalid' : unsupported ? 'unsupported' : missing.length ? 'missing' : t.total == null ? 'unsupported' : 'ok';
+    ind = { any: true, status, missing, inp, unavailable: status !== 'ok', rows: [
+      { label: 'ДДС', month: t.vat }, { label: 'Акциз върху горивата', month: t.fuelExcise }, { label: 'Акциз върху цигарите', month: t.tobaccoExcise }
+    ].map(x => ({ ...x, month: x.month == null ? null : round2(x.month), year: x.month == null ? null : round2(x.month * 12) })),
+      total: status === 'ok' ? round2(t.total) : null, yTotal: status === 'ok' ? round2(t.total * 12) : null };
   }
   return { kind: 'ok', errors, gross, r, rules: opts.rules, year, periods, emp, tax, er, net, total, yEmp, yTax, yEr, yTotal, yGross, yNet, labour, statePct, shares, funds, ind };
 }
@@ -427,49 +468,52 @@ export function receiptMarkup(c, st, env, ctx) {
 
 /* ------------------------------------------------------------------ indirect taxes: an explicit optional estimate */
 function assumptionsText(A) {
-  if (!A) return '';
-  const bits = [];
-  if (Number.isFinite(A.vatRatePct)) bits.push(`ДДС ${pctTrim(A.vatRatePct, 0)}%, вграден в цените${Number.isFinite(A.vatShareOfPurchases) ? ` на ${pctTrim(A.vatShareOfPurchases * 100, 0)}% от покупките` : ''}`);
-  if (Number.isFinite(A.fuelPricePerLitreEur)) bits.push(`гориво ${num(A.fuelPricePerLitreEur, 2)} € на литър${Number.isFinite(A.fuelExcisePerLitreEur) ? ` с акциз ${num(A.fuelExcisePerLitreEur, 3)} € на литър` : ''}`);
-  if (Number.isFinite(A.tobaccoPricePerPackEur)) bits.push(`цигари ${num(A.tobaccoPricePerPackEur, 2)} € кутия${Number.isFinite(A.tobaccoExcisePerPackEur) ? ` с акциз ${num(A.tobaccoExcisePerPackEur, 2)} €` : ''}`);
-  return bits.join('; ');
+  return A ? `ЕК: горива към ${date(A.fuels.petrol.priceDate)}. НСИ: цена на кутия за ${A.references.pack.period} г. Справочните цени могат да се променят.` : '';
 }
 
 export function indirectView(c, env) {
   const ind = c.ind;
   if (!ind) return '';
   if (!ind.any) return html`<p class="field-hint">Въведи сума за покупки, гориво или тютюн, за да видиш ориентировъчна оценка.</p>`;
-  if (ind.unavailable) return mockNote('Оценка не може да се направи: липсват допускания за част от стоките.');
+  if (ind.status === 'invalid') return html`<p class="field-hint">Поправи отбелязаните полета.</p>`;
+  if (ind.status === 'unsupported') return html`<p class="field-hint">За избраната дата няма достатъчно проверени ставки.</p>`;
+  if (ind.unavailable) return html`<p class="field-hint">Липсва дата, количество, цена, брой късове или разход по ставка. За липса на покупки се въвежда 0.</p>`;
   return html`${dataTable({
-    id: 's18-indirect-table', caption: 'Ориентировъчни косвени данъци, които плащаш чрез цените', status: 'mock',
-    columns: [{ key: 'label', label: 'Данък' }, { key: 'month', label: 'На месец', unit: '€', d: 2 }, { key: 'year', label: 'На година', unit: '€', d: 2 }],
-    rows: ind.rows.map(x => ({ ...x, _mock: true })),
+    id: 's18-indirect-table', caption: 'Ориентировъчни косвени данъци, които плащаш чрез цените',
+    columns: [{ key: 'label', label: 'Данък' }, { key: 'month', label: 'На месец', unit: '€', d: 2 }, { key: 'year', label: 'Годишен сценарий', unit: '€', d: 2 }],
+    rows: ind.rows,
     total: { label: 'Общо косвени данъци', values: { month: ind.total, year: ind.yTotal } },
   })}
-  <p class="field-hint">Ориентировъчно: по примерни допускания, не по твоите разходи. Не е част от сметката по-горе.</p>`;
+  <p class="field-hint">Ориентировъчно по въведените разходи. Годишният сценарий е 12 еднакви месеца с избраните ставки и цени.</p>`;
 }
 
 function indirectBlock(st, c, env) {
-  if (env.onlyReal) return mockHidden('Скрити са косвените данъци: те са с примерни данни.');
   const A = env.assum;
   const on = !!st.ind && !!A;
   const body = html`
     <p>В цените на стоките има вграден ${gl('dds', 'ДДС')} и ${gl('aktsiz', 'акциз')}. Оценката е по желание и отделно от сметката по-горе.</p>
-    ${A ? html`<p class="field-hint">Ставките на ДДС и акциза са официални. Цените и дялът на облагаемите покупки са допускания, а не данни, затова оценката е ориентировъчна.</p>` : ''}
-    ${A ? html`<p class="s18-assume"><strong>Допускания:</strong> ${assumptionsText(A)}.</p>` : ''}
+    ${A ? html`<p class="field-hint">ДДС се изчислява отделно за всяка ставка. Разходите за покупки не включват гориво и цигари. Цигарите се смятат за една цена и един размер на кутия.</p>` : ''}
+    ${A ? html`<p class="s18-assume"><strong>Справочни цени:</strong> ${assumptionsText(A)}.</p>` : ''}
     ${toggle({ id: 's18-ind', label: 'Добави оценка на косвените данъци', checked: on, attrs: raw(` aria-controls="s18-ind-fields"${A ? '' : ' disabled'}`) })}
-    ${A ? '' : html`<p class="field-hint">Допусканията за косвените данъци още не са заредени.</p>`}
+    ${A ? '' : html`<p class="field-hint">Параметрите за косвените данъци още не са заредени.</p>`}
     <div id="s18-ind-fields" class="s18-ind-fields"${on ? '' : raw(' hidden')}>
-      ${moneyField('s18-purchases', 'Покупки на месец, €', 'Стоки и услуги с ДДС, без гориво и тютюн.', st.purchases, c.errors.purchases)}
-      ${moneyField('s18-fuel', 'Гориво на месец, €', 'Остави празно, ако не купуваш.', st.fuel, c.errors.fuel)}
-      ${moneyField('s18-tobacco', 'Тютюневи изделия на месец, €', 'Остави празно, ако не купуваш.', st.tobacco, c.errors.tobacco)}
+      ${moneyField('s18-purchases', 'Покупки с ДДС 20%, €', 'Без гориво и цигари.', st.purchases, c.errors.purchases)}
+      ${moneyField('s18-reduced', 'Покупки с ДДС 9%, €', 'Месечна сума.', st.reduced, c.errors.reduced)}
+      ${moneyField('s18-exempt', 'Покупки без ДДС / 0 %, €', 'Категория по определение: без начислен ДДС (ЗДДС).', st.exempt, c.errors.exempt)}
+      ${field({ id: 's18-date', label: 'Дата на ставките', error: c.errors.date, control: textInput({ id: 's18-date', type: 'date', value: st.date, error: c.errors.date }) })}
+      ${field({ id: 's18-fuelType', label: 'Гориво', error: c.errors.fuelType, control: selectInput({ id: 's18-fuelType', value: st.fuelType, error: c.errors.fuelType, options: [{ value: 'petrol', label: 'Бензин 95' }, { value: 'diesel', label: 'Дизел' }] }) })}
+      ${field({ id: 's18-fuel', label: 'Литри на месец', error: c.errors.fuel, control: textInput({ id: 's18-fuel', value: st.fuel, error: c.errors.fuel, inputmode: 'decimal' }) })}
+      ${moneyField('s18-fuelPrice', 'Цена на литър, €', 'Справка от ЕК; може да се промени.', st.fuelPrice, c.errors.fuelPrice)}
+      ${field({ id: 's18-tobacco', label: 'Кутии цигари на месец', error: c.errors.tobacco, control: textInput({ id: 's18-tobacco', value: st.tobacco, error: c.errors.tobacco, inputmode: 'decimal' }) })}
+      ${moneyField('s18-tobaccoPrice', 'Цена на кутия, €', 'Справка на НСИ за 2025 г.; може да се промени.', st.tobaccoPrice, c.errors.tobaccoPrice)}
+      ${field({ id: 's18-sticks', label: 'Късове в кутия', error: c.errors.sticks, control: textInput({ id: 's18-sticks', value: st.sticks, error: c.errors.sticks, inputmode: 'numeric' }) })}
     </div>
     <div id="s18-ind-view" class="s18-ind-view">${on ? indirectView(c, env) : ''}</div>`;
-  return disclosure({ id: 's18-indirect', title: 'Косвени данъци: оценка по избор', meta: mockBadge(), open: on, body });
+  return disclosure({ id: 's18-indirect', title: 'Косвени данъци: оценка по избор', meta: 'Ориентировъчно', open: on, body });
 }
 
 /* ------------------------------------------------------------------ page */
-export const needs = ['core', 'rates?', 'mock/tax-assumptions?'];
+export const needs = ['core', 'rates?', 'indirect-tax-parameters?'];
 export const styles = ['s18-danaci'];
 export const lede = () => 'Въведи брутната си заплата. Ще видиш колко остава в ръката ти, колко внасяш ти и колко внася работодателят. Всичко се смята в браузъра ти. Нищо не се записва и не се изпраща.';
 
@@ -477,6 +521,7 @@ export function render(ctx) {
   if (ctx.kind !== 'rerender') resetMem();
   const env = getEnv(ctx);
   const st = mem;
+  if (env.assum) applyReferencePrices(st, env.assum);
   const c = compute(st, env);
   const calc = env.ready
     ? html`<div class="s18-layout">
@@ -567,20 +612,20 @@ export function mount(root, ctx) {
     paint('s18-funds-view', fundsMarkup(c));
     paint('s18-how-view', howMarkup(c, env));
     paint('s18-receipt-view', receiptMarkup(c, mem, env, ctx));
-    paint('s18-ind-view', mem.ind && !env.onlyReal ? indirectView(c, env) : '');
+    paint('s18-ind-view', mem.ind ? indirectView(c, env) : '');
     const quick = q('s18-quick');
     if (quick) quick.innerHTML = String(quickMarkup(c));
     setErr('s18-gross', c.errors.gross);
-    for (const k of ['purchases', 'fuel', 'tobacco']) setErr(`s18-${k}`, c.errors[k]);
+    for (const k of INDIRECT_FIELDS) setErr(`s18-${k}`, c.errors[k]);
     syncSlider();
     queueLive(c);
   };
 
-  const FIELD = { 's18-gross': 'gross', 's18-purchases': 'purchases', 's18-fuel': 'fuel', 's18-tobacco': 'tobacco' };
+  const FIELD = { 's18-gross': 'gross', 's18-purchases': 'purchases', 's18-fuel': 'fuel', 's18-tobacco': 'tobacco', ...Object.fromEntries(['reduced','exempt','fuelPrice','tobaccoPrice','sticks','date'].map(k => [`s18-${k}`, k])) };
   const onInput = e => {
     const t = e.target;
     if (!(t instanceof HTMLInputElement)) return;
-    if (FIELD[t.id]) { mem[FIELD[t.id]] = t.value; refresh(); }
+    if (FIELD[t.id]) { const key = FIELD[t.id]; mem[key] = t.value; if (Object.hasOwn(PRICE_DIGITS, key)) mem[`${key}Edited`] = true; refresh(); }
     else if (t.id === 's18-slider') {
       mem.gross = String(t.value);
       const g = q('s18-gross');
@@ -589,6 +634,13 @@ export function mount(root, ctx) {
     }
   };
   const onChange = e => {
+    if (e.target.id === 's18-fuelType') {
+      mem.fuelType = e.target.value;
+      const reference = env.assum.fuels[mem.fuelType]?.pricePerLitre;
+      mem.fuelPrice = priceDisplay('fuelPrice', reference);
+      mem.fuelPriceEdited = false;
+      q('s18-fuelPrice').value = mem.fuelPrice; refresh(); return;
+    }
     const t = e.target;
     if (!(t instanceof HTMLInputElement || t instanceof HTMLSelectElement)) return;
     if (t.name === 's18-rules' && t.checked) { mem.rules = t.value; refresh(); }

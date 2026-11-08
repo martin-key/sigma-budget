@@ -363,6 +363,10 @@ def make_manifest(src, commit, inputs, missing, out, build_date):
 def publish_to_site(out, rid):
     """--site: the outputs into data/release, the manifest under data/release/releases/<id>/ and the pointer current.json"""
     data = ROOT / "data" / "release"
+    # The exported build retires these files; --site must also remove copies left
+    # by an older checkout, rather than only overlaying the new package.
+    for name in ("measure-labels.json", "tax-assumptions.json"):
+        (data / "mock" / name).unlink(missing_ok=True)
     for p in (out / "data").rglob("*"):
         if p.is_file():
             t = data / p.relative_to(out / "data")
@@ -522,7 +526,7 @@ def cmd_refetch(a):
         url = i.get("url")
         if i.get("via"):
             row["result"] = "derived: %s reduces the answer; rerun it to compare" % i["via"]
-        elif i.get("acquisition") not in ("fetch", "fetch-bg") or not url:
+        elif i.get("acquisition") not in ("auto", "fetch", "fetch-bg") or not url:
             row["result"] = "manual: %s, not refetched" % i.get("acquisition")
         else:
             try:
@@ -552,7 +556,7 @@ def cmd_collect(a):
     for s in sreg["sources"]:
         for f in s.get("files", []):
             url = f.get("url")
-            if s["acquisition"] not in ("fetch", "fetch-bg") or not url or "*" in f["path"] or f.get("via"):
+            if s["acquisition"] not in ("auto", "fetch", "fetch-bg") or not url or "*" in f["path"] or f.get("via"):
                 continue
             row = {"source": s["id"], "path": f["path"], "url": url}
             try:

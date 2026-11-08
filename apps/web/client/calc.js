@@ -161,36 +161,26 @@ const pick = (o, ...paths) => {
   }
   return NaN;
 };
-// spend (EUR) and units (litres/packs) from either one, using the unit price when both are needed; NaN = cannot be derived
-const spendUnits = (spend, units, price) => {
-  if (isNum(spend)) return { spend: Math.max(0, spend), units: isNum(price) && price > 0 ? Math.max(0, spend) / price : NaN };
-  if (isNum(units)) return { spend: isNum(price) ? Math.max(0, units) * price : NaN, units: Math.max(0, units) };
-  return { spend: 0, units: 0 };
-};
-
-/**
- * Indirect taxes inside everyday spending, monthly EUR, always an estimate (result.approx is true: the page must say „ориентировъчно“).
- * input: a number (monthly purchases in EUR) or { purchasesEur, fuelEur | fuelLitres, tobaccoEur | tobaccoPacks } (purchases without fuel and tobacco).
- * assumptions (mock/tax-assumptions.json): vatRatePct (20), vatShareOfPurchases (share of purchases at the standard rate, 0..1),
- * fuelPricePerLitreEur, fuelExcisePerLitreEur, tobaccoPricePerPackEur, tobaccoExcisePerPackEur; nested spellings ("vat.ratePct", "fuel.excisePerLitreEur") are read too.
- * vat = VAT already inside the prices: price x rate / (100 + rate), on purchases x share, on fuel and on tobacco; vatParts { purchases, fuel, tobacco } is the same by item.
- * fuelExcise = litres x excise per litre; tobaccoExcise = packs x excise per pack. A figure that needs an assumption that is missing is null (never 0); an item not asked for is 0.
+/** Monthly indirect-tax scenario. Unknown inputs remain null. Prices include VAT and excise.
+ * Separate VAT buckets exclude fuel and cigarettes; cigarettes use a single registered pack price.
  */
-export function indirectTaxes(input, assumptions) {
-  const a = assumptions && typeof assumptions === 'object' ? assumptions : {};
-  const inp = isNum(input) ? { purchasesEur: input } : input && typeof input === 'object' ? input : {};
-  const vatPct = pick(a, 'vatRatePct', 'vat.ratePct', 'vatPct');
-  let share = pick(a, 'vatShareOfPurchases', 'vat.shareOfPurchases', 'vatShare');
-  if (share > 1) share /= 100;
-  const fuel = spendUnits(inp.fuelEur, inp.fuelLitres, pick(a, 'fuelPricePerLitreEur', 'fuel.pricePerLitreEur'));
-  const tobacco = spendUnits(inp.tobaccoEur, inp.tobaccoPacks, pick(a, 'tobaccoPricePerPackEur', 'tobacco.pricePerPackEur'));
-  const purchases = isNum(inp.purchasesEur) && inp.purchasesEur > 0 ? inp.purchasesEur : 0;
-  const inside = spend => (spend === 0 ? 0 : isNum(spend) && isNum(vatPct) ? (spend * vatPct) / (100 + vatPct) : null);
-  const vatParts = { purchases: purchases === 0 ? 0 : isNum(share) ? inside(purchases * share) : null, fuel: inside(fuel.spend), tobacco: inside(tobacco.spend) };
-  const excise = (u, perUnit) => (u === 0 ? 0 : isNum(u) && isNum(perUnit) ? u * perUnit : null);
-  const vat = Object.values(vatParts).some(v => v === null) ? null : Object.values(vatParts).reduce((s, v) => s + v, 0);
-  const fuelExcise = excise(fuel.units, pick(a, 'fuelExcisePerLitreEur', 'fuel.excisePerLitreEur'));
-  const tobaccoExcise = excise(tobacco.units, pick(a, 'tobaccoExcisePerPackEur', 'tobacco.excisePerPackEur'));
-  const all = [vat, fuelExcise, tobaccoExcise];
-  return { vat, fuelExcise, tobaccoExcise, total: all.every(isNum) ? all.reduce((s, v) => s + v, 0) : null, vatParts, approx: true };
+export function indirectTaxes(input, parameters) {
+  const i = input || {}, a = parameters || {};
+  const positive = v => isNum(v) && v > 0;
+  const nonnegative = v => isNum(v) && v >= 0;
+  const sum = values => values.every(isNum) ? values.reduce((s, v) => s + v, 0) : null;
+  const inside = (spend, rate) => nonnegative(spend) && isNum(rate) ? spend * rate / (100 + rate) : null;
+  const f = a.fuels?.[i.fuelType];
+  const fuelSpend = i.fuelLitres === 0 ? 0 : nonnegative(i.fuelLitres) && positive(i.fuelPrice) ? i.fuelLitres * i.fuelPrice : null;
+  const packSpend = i.tobaccoPacks === 0 ? 0 : nonnegative(i.tobaccoPacks) && positive(i.tobaccoPrice) ? i.tobaccoPacks * i.tobaccoPrice : null;
+  const schedule = a.cigarettes?.find(r => i.date >= r.validFrom && (!r.validTo || i.date <= r.validTo));
+  const vatParts = { purchases: sum([inside(i.vat20Eur, a.vat?.standardPct), inside(i.vat9Eur, a.vat?.reducedPct), inside(i.vat0Eur, a.vat?.untaxed?.kind === 'definition' ? 0 : null)]),
+    fuel: inside(fuelSpend, a.vat?.standardPct), tobacco: inside(packSpend, a.vat?.standardPct) };
+  const fuelExcise = i.fuelLitres === 0 ? 0 : f && i.date >= f.validFrom && nonnegative(i.fuelLitres) ? i.fuelLitres * f.excisePerLitre : null;
+  const tobaccoExcise = i.tobaccoPacks === 0 ? 0 : schedule && nonnegative(i.tobaccoPacks) && positive(i.tobaccoPrice) && positive(i.sticksPerPack)
+    ? i.tobaccoPacks * Math.max(schedule.specificPer1000 * i.sticksPerPack / 1000 + schedule.adValoremPct * i.tobaccoPrice / 100,
+      schedule.minimumPer1000 * i.sticksPerPack / 1000) : null;
+  const vat = sum(Object.values(vatParts));
+  return { vat, fuelExcise, tobaccoExcise, total: sum([vat, fuelExcise, tobaccoExcise]), vatParts, approx: true,
+    provenance: { fuel: f?.source || null, cigarettes: schedule?.source || null, prices: 'user input', annualisation: 'scenario' } };
 }

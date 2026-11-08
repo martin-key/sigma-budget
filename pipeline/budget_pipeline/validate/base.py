@@ -12,9 +12,9 @@ import traceback
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 import budget_pipeline.validate.checks as L                                       # noqa: E402
-from budget_pipeline.validate import foundations, fiscal, budgets, groups, budget_2027
+from budget_pipeline.validate import foundations, fiscal, budgets, groups, budget_2027, indirect_taxes
 
-MODULES = (foundations, fiscal, budgets, groups, budget_2027)
+MODULES = (foundations, fiscal, budgets, groups, budget_2027, indirect_taxes)
 
 
 # Run order of the groups (a group missing here still runs, after these): foundations, then the data in the order of the plan,
