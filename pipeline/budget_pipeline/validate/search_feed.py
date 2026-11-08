@@ -27,7 +27,7 @@ from budget_pipeline.validate.checks import Check, isnum
 
 NNBSP, NBSP, MINUS = "\u202f", "\u00a0", "\u2212"
 MONTHS = ("януари", "февруари", "март", "април", "май", "юни", "юли", "август", "септември", "октомври", "ноември", "декември")
-SRC_ORDER = ("kfp", "parliament", "zdb", "zbdoo", "zbnzok", "nap", "eurostat", "sebra")
+SRC_ORDER = ("kfp", "budget2027", "parliament", "zdb", "zbdoo", "zbnzok", "nap", "eurostat", "sebra")
 BASE_DEFAULT = "https://budget-na-svetlo.example/"
 
 # a number as the site prints it: typographic minus, narrow no-break space between thousands, decimal comma
@@ -122,13 +122,15 @@ def _event(c, evs, eid, want, money=(), eur=(), pct=(), has=()):
 def _feed_events(c, f, ctx):
     """Shape of the events (18 + one per monthly report of 2026) and their recomputation from the datasets."""
     core, ex, law = ctx.get("core.json"), ctx.get("execution.json"), ctx.get("law.json")
+    denominator = {'periodKey': ex['plan2026']['periodKey'], 'basis': ex['plan2026']['basis'],
+                   'source': ex['plan2026']['source'], 'citation': 'Програма по ЗДБРБ 2026, МФ, приложение 1'}
     rates, debt, exp, seb = ctx.get("rates.json"), ctx.get("debt.json"), ctx.get("expenditure.json"), ctx.get("sebra.json")
     evs_list = f["events"]
     kinds = [k.get("id") for k in f["kinds"]]
     ids = [e.get("id") for e in evs_list]
     evs = {e["id"]: e for e in evs_list if isinstance(e, dict) and "id" in e}
     c.ok(len(set(ids)) == len(ids) and all(isinstance(i, str) and re.match("^[a-z0-9][a-z0-9_.-]*$", i) for i in ids), "event ids: duplicates or odd characters")
-    allowed = {"id", "date", "dateTo", "dateKind", "kind", "title", "text", "href", "status", "source"}
+    allowed = {"id", "date", "dateTo", "dateKind", "kind", "title", "text", "href", "status", "source", "planBasis"}
     for e in evs_list:
         eid = e.get("id")
         c.ok(set(e) <= allowed and {"id", "date", "dateKind", "kind", "title", "href", "status", "source"} <= set(e), "event %s: keys %s" % (eid, sorted(e)))
@@ -162,10 +164,16 @@ def _feed_events(c, f, ctx):
         yoy = 100.0 * (rev / prev - 1.0)
         pct = [abs(yoy)] + ([lat["kfp"]["rev"]["pctPlan"]] if m == n else [])
         _event(c, evs, "kfp-2026-%02d" % m,
-               {"date": d26["asOf"][m - 1], "dateKind": "asOf", "kind": "report", "href": "#/izpalnenie?mesec=%d" % m, "status": "real", "source": ["kfp"],
+               {"date": d26["asOf"][m - 1], "dateKind": "asOf", "kind": "report", "href": "#/izpalnenie?mesec=%d" % m, "status": "real", "source": ["kfp"] + (denominator["source"] if m == n else []),
                 "title": "Месечен отчет на КФП към края на %s 2026 г." % MONTHS[m - 1]},
                money=[rev, expd, abs(bal)], pct=pct,
                has=["дефицитът" if bal < 0 else "излишъкът", "повече" if yoy >= 0 else "по-малко"])
+
+    for event in evs_list:
+        c.ok(('planBasis' in event) == (event['id'] == 'kfp-2026-%02d' % n), 'denominator metadata only on the event with a plan percent')
+    latest_event = evs['kfp-2026-%02d' % n]
+    c.ok(latest_event.get('planBasis') == denominator, 'latest report denominator provenance')
+    c.ok(denominator['citation'] in latest_event['text'], 'latest report percent cites the denominator')
 
     # --- legislative path: the 11 parliament steps of law.json
     par = [t for t in law["timeline"] if t.get("phase") == "parliament"]
@@ -237,6 +245,8 @@ def _feed_events(c, f, ctx):
 def _feed_rest(c, f, ctx):
     """kinds, dateKinds, meta, highlights, sentences, expected."""
     core, ex, law = ctx.get("core.json"), ctx.get("execution.json"), ctx.get("law.json")
+    denominator = {'periodKey': ex['plan2026']['periodKey'], 'basis': ex['plan2026']['basis'],
+                   'source': ex['plan2026']['source'], 'citation': 'Програма по ЗДБРБ 2026, МФ, приложение 1'}
     evs = f["events"]
     # --- meta
     m = f["meta"]
@@ -263,7 +273,7 @@ def _feed_rest(c, f, ctx):
     h = f["highlights"]
     want = {"month": lat["month"], "asOf": lat["asOf"], "revenueMln": kf["rev"]["cum"], "revenueYoyPct": kf["rev"]["yoyPct"],
             "expenditureMln": kf["exp.total"]["cum"], "expenditureYoyPct": kf["exp.total"]["yoyPct"], "deficitMln": -kf["balance"]["cum"],
-            "deficitPrevYearMln": -kf["balance"]["prevYearCum"], "capexPctPlan": kf["exp.capex"]["pctPlan"],
+            "deficitPrevYearMln": -kf["balance"]["prevYearCum"], "capexPctPlan": kf["exp.capex"]["pctPlan"], "planBasis": denominator,
             "newBorrowingMln": kf["fin.ext.markets"]["cum"], "newBorrowingPrevYearMln": kf["fin.ext.markets"]["prevYearCum"]}
     c.ok(set(h) == set(want), "highlights keys %s" % sorted(h))
     for key, v in want.items():
@@ -289,6 +299,7 @@ def _feed_rest(c, f, ctx):
         amounts(c, "sentence 1", s[1], money=[h["expenditureMln"]], pct=[abs(h["expenditureYoyPct"])])
         amounts(c, "sentence 2", s[2], money=[h["deficitMln"], h["deficitPrevYearMln"]])
         amounts(c, "sentence 3", s[3], pct=[h["capexPctPlan"]])
+        c.ok(denominator["citation"] in s[3], "summary percent cites the denominator")
         amounts(c, "sentence 4", s[4], money=[h["newBorrowingMln"], h["newBorrowingPrevYearMln"]])
         c.ok(re.search("към края на %s 2026 г\\." % MONTHS[h["month"] - 1], s[0]) is not None, "sentence 0 must name the month of the latest report")
         c.ok(more(h["revenueYoyPct"]) in s[0] and more(h["expenditureYoyPct"]) in s[1], "sentences 0-1: more / less than a year earlier")

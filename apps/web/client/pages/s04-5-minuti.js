@@ -10,6 +10,7 @@
 // Numbers: only from core (kpis, functions, revenueGroups), execution (the 2025 pace), debt (limits, ZDD) and measures; all through the
 // format helpers and view.amount, so „% от БВП“, „на човек“ and „и в лева“ apply. A failed optional file turns only its own scene into a note.
 // Motion: bars and cells grow once when their scene scrolls into view; nothing moves under prefers-reduced-motion, and nothing is hidden first.
+import { planBasis } from '../exec.js';
 import { html, raw } from '../html.js';
 import { num, pct, money, date, monthName, NBSP } from '../format.js';
 import { byKey, href } from '../routes.js';
@@ -332,9 +333,10 @@ function scene5(ctx) {
 /* ------------------------------------------------------------------ 6 · the execution to the latest month */
 
 function scene6(ctx, core) {
+  const basis = planBasis(ctx.data.execution || {});
   const k = core.kpis, r = k.revenue, e = k.expenditure, b = k.balance;
   if (![r.execMln, e.execMln].every(ok)) return failed(6, 'Няма данни за изпълнението.');
-  if (![r.execPct, e.execPct].every(ok)) return failed(6, 'Няма наличен положителен законов знаменател за процента на изпълнение.');
+  if (![r.execPct, e.execPct].every(ok)) return failed(6, 'Няма наличен положителен знаменател за процента на изпълнение.');
   const gdp = k.gdp?.mlnPrecise;
   const g = mln => (ok(gdp) ? (mln / gdp) * 100 : undefined);
   const mi = ok(k.month) ? k.month - 1 : -1;
@@ -359,15 +361,15 @@ function scene6(ctx, core) {
   });
   const visual = html`<figure class="s04-fig" data-attach="${id}">
     <div class="s04-bars">${row('Приходи', 'rev', r, paceRev, 'rev')}${row('Разходи', 'exp', e, paceExp, 'exp.total')}</div>
-    <figcaption class="s04-cap">Програма по ЗДБРБ 2026, МФ, приложение 1. Изпълнение на плана към ${date(asOf, true)}. ${ok(paceRev) && ok(paceExp) ? ' Чертата: делът от 2025 г. до същия месец.' : ''}${next ? ` Отчетът към ${next} още не е добавен.` : ''}</figcaption>
+    <figcaption class="s04-cap">${basis.citation}. Изпълнение на плана към ${date(asOf, true)}. ${ok(paceRev) && ok(paceExp) ? ' Чертата: делът от 2025 г. до същия месец.' : ''}${next ? ` Отчетът към ${next} още не е добавен.` : ''}</figcaption>
   </figure>`;
   const deep = deeper(ctx, 6, 6, [
     { href: href('izpalnenie'), title: byKey.izpalnenie.title, text: 'Две години един до друг за един и същ период.' },
     { href: href('izpalnenie', {}, { to: 's15-b-plan' }), title: 'Изпълнява ли се планът', text: 'Приходи, разходи и капиталови разходи: план срещу изпълнение.' }
   ]);
   return scene(6, {
-    text, visual, deep, scope: 'kfp', source: ['kfp', 'budget2027'], asOf,
-    share: `Към ${date(asOf, true)} са изпълнени ${pct(r.execPct, 1)} от плана за приходите и ${pct(e.execPct, 1)} от плана за разходите.`
+    text, visual, deep, scope: 'kfp', source: basis.source, asOf,
+    share: `${basis.citation}. Към ${date(asOf, true)} са изпълнени ${pct(r.execPct, 1)} от плана за приходите и ${pct(e.execPct, 1)} от плана за разходите.`
   });
 }
 

@@ -336,13 +336,21 @@ def validate_law(c, ex, outlook):
         c.ok(outlook['byPeriod']['2026.law']['series'][name]['value'] == expected['kfp'][rid], 'outlook law: ' + name)
     rows = jload(SRC / 'budget_forecast_2027.json')['tables']['annex1_execution2026']['rows']
     D = lambda v: Decimal(str(v))
+    for index, row in enumerate(rows):
+        has_printed_percent = index in (*range(13), 14, 15)
+        available = row['values'][4] is not None
+        c.ok(available == has_printed_percent, 'annex1 printed percent availability: row ' + str(index))
+        if available and has_printed_percent:
+            law, sept, printed = map(D, (row['values'][0], row['values'][1], row['values'][4]))
+            lower = 100*(sept-D('.05'))/(law+D('.05'))
+            upper = 100*(sept+D('.05'))/(law-D('.05'))
+            c.ok(lower < printed+D('.05') and upper > printed-D('.05'), 'annex1 printed percent interval: row ' + str(index))
     for rid, index in LAW_ROWS.items():
         row = rows[index]
         if row['values'][1] is None:
             c.ok(rid == 'exp.contingency', 'only contingency has no September execution cell')
             continue
         law, sept = map(D, (row['values'][0], row['values'][1]))
-        printed = D(row['values'][4]) if row['values'][4] is not None else None
         # Each independently printed amount has a half-unit interval at 0.1 mln.
         actual = D(ex['data']['2026']['kfp'][rid][8]) if rid in ex['data']['2026']['kfp'] else None
         if rid == 'exp.capex':
@@ -350,10 +358,6 @@ def validate_law(c, ex, outlook):
             actual += D(ex['data']['2026']['kfp']['exp.reserve'][8])
         if actual is not None:
             c.ok(sept-D('.05') <= actual < sept+D('.05'), 'annex1 September XLS: ' + rid)
-        if law > 0 and printed is not None:
-            lower = 100*(sept-D('.05'))/(law+D('.05'))
-            upper = 100*(sept+D('.05'))/(law-D('.05'))
-            c.ok(lower < printed+D('.05') and upper > printed-D('.05'), 'annex1 printed percent interval: ' + rid)
     # Printed subtotal identities, with only the rounding intervals of participating cells.
     for parent, children in ((0,(1,6,7)), (8,(9,14,15)), (9,(10,11,12,13))):
         v = D(rows[parent]['values'][0]); total = sum(D(rows[i]['values'][0]) for i in children)

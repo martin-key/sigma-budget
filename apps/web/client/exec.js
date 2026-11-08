@@ -79,8 +79,16 @@ export function headline(E) {
 /** "дефицит" / "излишък" for a balance value */
 export const balanceWord = v => (!fin(v) ? '' : v < 0 ? 'дефицит' : v > 0 ? 'излишък' : 'нула');
 
-/** Adopted-law percent, only for positive denominators and comparable flow rows. */
-export const lawPercent = (ex, scope, row) => {
+/** The denominator belongs to the selected release, independently of the UI's default period. */
+export const planBasis = ex => {
+  const adopted = ex.plan2026?.periodKey === '2026.law' && ex.plan2026?.basis === 'adopted-law';
+  return adopted
+    ? { adopted, statusLabel: 'Отчет спрямо закон', source: ['kfp', 'budget2027'], citation: 'Програма по ЗДБРБ 2026, МФ, приложение 1', csvPlan: 'План по ЗДБРБ 2026, млн. €' }
+    : { adopted, statusLabel: 'Отчет спрямо проект', source: ['kfp', 'asbp'], citation: 'Проект за 2026 г., МФ, приложение 3', csvPlan: 'План за 2026 г., млрд. €' };
+};
+
+/** Percent of the release's plan, only for positive denominators and comparable flow rows. */
+export const planPercent = (ex, scope, row) => {
   const value = ex.latest?.[scope]?.[row];
   return value && !['balance', 'fin', 'transfers'].includes(row) && fin(value.plan) && value.plan > 0 && fin(value.pctPlan) ? value.pctPlan : null;
 };
