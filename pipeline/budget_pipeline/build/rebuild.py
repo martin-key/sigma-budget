@@ -12,7 +12,7 @@ WORDING_FILES = ["catalog.json", "core.json", "search-index.json"]
 
 def run(args, env):
     print("== " + " ".join(args), flush=True)
-    rc = subprocess.run([sys.executable] + args, cwd=str(ROOT), env=env).returncode
+    rc = subprocess.run([sys.executable, "-m", "budget_pipeline.offline", args[1]] + args[2:], cwd=str(ROOT), env=env).returncode
     if rc:
         sys.exit("rebuild: failed (exit %d): %s" % (rc, " ".join(args)))
 
@@ -26,6 +26,8 @@ def main(argv):
         env["BUILD_DATE"] = args.build_date
     for name in ("measure-labels", "tax-assumptions"):
         (ROOT / "data/release/mock" / (name + ".json")).unlink(missing_ok=True)
+    run(["-m", "budget_pipeline.extract.legacy_inputs", "municipal", "--check"], env)
+    run(["-m", "budget_pipeline.extract.legacy_inputs", "functions", "--check"], env)
     run(["-m", "budget_pipeline.extract.kfp_full"], env)
     os.environ.update({k: v for k, v in env.items() if k == "BUILD_DATE"})
     run(["-m", "budget_pipeline.build.frozen_editorial"], env)

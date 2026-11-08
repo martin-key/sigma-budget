@@ -1,0 +1,30 @@
+name: Automatic source drift
+on:
+  schedule:
+    - cron: '23 6 * * 1'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --require-hashes -r pipeline/requirements.lock
+      - name: Acquire in a disposable directory and compare pins
+        env:
+          PYTHONPATH: pipeline
+        run: python -m budget_pipeline.cli collect --out "$RUNNER_TEMP/acquisition" --check-drift --summary "$RUNNER_TEMP/drift.md"
+      - name: Report drift and unavailable sources
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/drift.md" ]; then
+            cat "$RUNNER_TEMP/drift.md" >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Acquisition leaves the checkout unchanged
+        if: always()
+        run: test -z "$(git status --porcelain --untracked-files=normal)"

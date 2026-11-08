@@ -192,12 +192,10 @@ sources:
     url: https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/demo_r_pjanaggr3
     title: population of the 28 oblasts (NUTS 3), written by python -m budget_pipeline.sources.boundaries
     sha256: c5869aac65138237d190e14c0389f5688c8e5c85af72ac3edb3f5019cb19fc58
-  - path: tmp/sources/eurostat/nama_10_a10_BG.json
-    pinned: false
+  - path: data/originals/eurostat/nama_10_a10_BG.json
     url: https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/nama_10_a10?format=JSON&lang=EN&geo=BG&unit=CP_MEUR&na_item=B1G&sinceTimePeriod=2019
     title: gross value added by sector (NAMA.json of python -m budget_pipeline.build.gva_sectors)
-  - path: tmp/sources/eurostat/nama_10_gdp_BG.json
-    pinned: false
+  - path: data/originals/eurostat/nama_10_gdp_BG.json
     url: https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/nama_10_gdp?format=JSON&lang=EN&geo=BG&unit=CP_MEUR&na_item=B1GQ&na_item=D21X31&sinceTimePeriod=2019
     title: GDP and taxes on products (GDP.json of python -m budget_pipeline.build.gva_sectors)
   limitations:
@@ -541,12 +539,12 @@ intermediates:
   reproducible: false
   note: build_src.py reads 2026-EU_funds_0726_BG_WEB_2.xls, a July version that a later correction replaced
 - path: data/inputs/municipal_transfers_2026.json
-  producer: null
-  historical_producer: reference/prototype/tools/build_src.py
+  producer: python -m budget_pipeline.extract.legacy_inputs municipal
   inputs:
-  - zdb
-  reproducible: false
-  note: build_src.py stops before it (see kfp_components_2026.json)
+  - data/originals/dv/dv_laws_2026.json
+  - data/originals/asbp/asbp_tables.json
+  reproducible: true
+  note: Byte-identical; checks every column against the law total and ASBP annex 9.
 - path: data/inputs/population.json
   producer: null
   historical_producer: reference/prototype/tools/build_src.py
@@ -604,11 +602,11 @@ intermediates:
   reproducible: false
   note: 'no producer and no saved answer (spec, section 4: needs one, with the raw COFOG answer)'
 - path: data/inputs/kfp_functions_2026.json
-  producer: null
+  producer: python -m budget_pipeline.extract.legacy_inputs functions
   inputs:
-  - asbp
-  reproducible: false
-  note: no producer (spec, section 4)
+  - bill
+  reproducible: true
+  note: Nested DOCX table III-1, byte-identical; child rows reconcile with each function.
 - path: data/inputs/debt_gdp.json
   producer: null
   inputs:
@@ -662,6 +660,8 @@ intermediates:
   producer: null
   inputs: []
   reproducible: false
+  category: described-input
+  decision: docs/reproducibility.md
   sha256: 9a808bca21b3817350f1032d469e9dc242f397012be93a4b09d976557be05b09
   provenance:
     commit: 838c64c
@@ -673,6 +673,8 @@ intermediates:
   producer: null
   inputs: []
   reproducible: false
+  category: described-input
+  decision: docs/reproducibility.md
   sha256: 0d88665ab18f66da040adfe6ee525d5a7aacfcc72223df5ccfc7b4276c888a77
   provenance:
     commit: 838c64c

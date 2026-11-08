@@ -42,7 +42,8 @@ class AutomaticSourcesTest(unittest.TestCase):
             first.write_bytes(b'previous snapshot')
             urls = []
 
-            def fetch(url):
+            def fetch(url, **kwargs):
+                self.assertEqual(kwargs, {"timeout": 30, "tries": 1})
                 urls.append(url)
                 return b'%PDF-snapshot' if url.endswith('.pdf') or 'AJPERES' in url else b'PK-snapshot' if 'ec.europa.eu/document/' in url else b'<html>snapshot</html>'
 

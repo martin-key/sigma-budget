@@ -33,6 +33,8 @@ def main():
         missing = [p for p in outputs if not (ROOT / p).is_file()]
         if missing:
             sys.exit('producer did not write: ' + ', '.join(missing))
+    subprocess.run([sys.executable, "-m", "budget_pipeline.extract.legacy_inputs", "municipal", "--check"],
+                   cwd=ROOT, check=True)
     return 0
 
 

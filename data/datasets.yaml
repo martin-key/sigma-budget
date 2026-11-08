@@ -117,7 +117,7 @@ datasets:
   rebuild: python -m budget_pipeline.build.rebuild --build-date 2026-11-05
   checked: '2026-11-05'
   limitations:
-  - data/inputs/kfp_components_2026.json comes from build_src.py, which no longer runs
+  - data/inputs/kfp_components_2026.json needs the missing July WEB_2 original; see docs/reproducibility.md
 - id: ministries
   catalogId: D08
   title: Бюджети на ведомствата за 2026 г.

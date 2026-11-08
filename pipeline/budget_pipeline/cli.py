@@ -128,7 +128,17 @@ def registry_inputs(root, inputs_dir):
     for d in dreg["datasets"]:
         if d["status"] == "pending":
             continue
-        for x in d.get("inputs", []):
+        todo, seen = list(d.get("inputs", [])), set()
+        datasets = {item["id"]: item for item in dreg["datasets"]}
+        while todo:
+            x = todo.pop()
+            if x in seen:
+                continue
+            seen.add(x)
+            if x in datasets:
+                todo.extend(datasets[x].get("inputs", []))
+            if x in inter:
+                todo.extend(inter[x].get("inputs", []))
             if x in sources:
                 s = sources[x]
                 if s["acquisition"] in ("reference", "generated"):
@@ -157,6 +167,11 @@ def acquisition_records(inputs_dir):
     if m.is_file():
         for rel, e in json.loads(m.read_text(encoding="utf-8")).items():
             out["data/originals/" + rel] = {"retrieved": e.get("retrieved"), "url": e.get("url"), "method": "fetch"}
+    snapshot = inputs_dir / "snapshot.json"
+    if snapshot.is_file():
+        for entry in json.loads(snapshot.read_text(encoding="utf-8"))["collected"]:
+            if entry.get("status") == "ok":
+                out[entry["path"]] = {"retrieved": entry.get("retrieved"), "url": entry.get("url"), "method": "fetch"}
     log = inputs_dir / "tmp" / "sources" / "ACQUISITIONS.jsonl"
     if log.is_file():
         for ln in log.read_text(encoding="utf-8").splitlines():
@@ -184,7 +199,7 @@ def stage_inputs(found, inputs_dir, view):
     """only the inputs the registries declare, linked (or copied) into a view the build sees: an input that the registry forgets makes the
     build fail at once, so the inputs of the manifest are all the build read"""
     for path in found:
-        src, dst = inputs_dir / path, view / path
+        src, dst = inputs_dir / found[path].get("file", path), view / path
         dst.parent.mkdir(parents=True, exist_ok=True)
         try:
             os.link(src, dst)
@@ -205,7 +220,7 @@ def run_in_env(env, src, inputs_dir, cmd, extra_env=None):
         b = subprocess.run(["docker", "build", "-q", "-t", image, str(src / "pipeline")], capture_output=True)
         if b.returncode:
             raise Fail(EXIT_INVALID, "docker build: " + b.stderr.decode("utf-8", "replace")[-400:])
-        args = ["docker", "run", "--rm", "-v", "%s:/repo" % src]
+        args = ["docker", "run", "--rm", "--network", "none", "-v", "%s:/repo" % src]
         for d in INPUT_DIRS:
             if (inputs_dir / d).is_dir():
                 args += ["-v", "%s:/repo/%s:ro" % ((inputs_dir / d).resolve(), d)]
@@ -253,11 +268,18 @@ def build_release(commit, inputs_dir, out, build_date, env, log=print):
         log("build: commit %s, inputs %s, env %s" % (commit[:12], inputs_dir, env))
         export_commit(commit, src)
         found, missing, sources = registry_inputs(src, inputs_dir)
+        snapshot = inputs_dir / "snapshot.json"
+        if snapshot.is_file():
+            for row in json.loads(snapshot.read_text(encoding="utf-8"))["collected"]:
+                if row["status"] != "ok":
+                    raise Fail(EXIT_MISSING, "snapshot acquisition failed: " + row["path"])
+                if row["path"] in found:
+                    found[row["path"]]["file"] = row.get("file", row["path"])
         pinned = pins(src)
         acq = acquisition_records(inputs_dir)
         inputs, bad = [], []
         for path, rec in sorted(found.items()):
-            p = inputs_dir / path
+            p = inputs_dir / rec.get("file", path)
             h = sha256_file(p)
             pin = pinned.get(path) or rec["entry"].get("sha256")
             if pin and pin != h:
@@ -281,7 +303,7 @@ def build_release(commit, inputs_dir, out, build_date, env, log=print):
             raise Fail(EXIT_INVALID, "inputs differ from their pins (data/originals.sha256, data/sources.yaml):\n  " + "\n  ".join(bad))
         view = work / "inputs"
         stage_inputs(found, inputs_dir, view)
-        args = ["-m", "budget_pipeline.build.rebuild"] + (["--build-date", build_date] if build_date else [])
+        args = ["-m", "budget_pipeline.offline", "budget_pipeline.build.rebuild"] + (["--build-date", build_date] if build_date else [])
         rc, output = run_in_env(env, src, view, args)
         (work / "build.log").write_text(output, encoding="utf-8")
         if rc:
@@ -550,34 +572,18 @@ def cmd_refetch(a):
     return code, {"release_id": sha256_bytes(mbytes), "sources": rows, "changed": len(changed), "unverified": len(unverified)}
 
 def cmd_collect(a):
-    sreg = yaml_load(ROOT / "data" / "sources.yaml")
-    out = Path(a.out).resolve()
-    rows = []
-    for s in sreg["sources"]:
-        for f in s.get("files", []):
-            url = f.get("url")
-            if s["acquisition"] not in ("auto", "fetch", "fetch-bg") or not url or "*" in f["path"] or f.get("via"):
-                continue
-            row = {"source": s["id"], "path": f["path"], "url": url}
-            try:
-                b = fetch(url)
-                if not kind_ok(f["path"], b[:4096]):
-                    row["status"] = "invalid: the answer is not a %s file" % Path(f["path"]).suffix
-                else:
-                    t = out / f["path"]
-                    if t.exists() and sha256_file(t) != sha256_bytes(b):
-                        t = t.with_name(t.name + "." + sha256_bytes(b)[:12])      # never overwrite an earlier download
-                    t.parent.mkdir(parents=True, exist_ok=True)
-                    t.write_bytes(b)
-                    row.update({"status": "ok", "file": t.relative_to(out).as_posix(), "bytes": len(b), "sha256": sha256_bytes(b),
-                                "retrieved": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())})
-            except Fail as e:
-                row["status"] = "unavailable: %s" % e
-            rows.append(row)
-    out.mkdir(parents=True, exist_ok=True)
-    (out / "snapshot.json").write_text(json.dumps({"collected": rows}, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    from budget_pipeline.sources.collect import collect
+    rows = collect(ROOT, Path(a.out), Path(getattr(a, "seed", ROOT)), fetch, kind_ok, sha256_file, sha256_bytes, yaml_load)
     bad = [r for r in rows if r["status"] != "ok"]
-    return (EXIT_MISSING if bad else EXIT_OK), {"out": str(out), "ok": len(rows) - len(bad), "notOk": [r["path"] + ": " + r["status"] for r in bad]}
+    changed = [r for r in rows if r.get("drift") != "same" and r["status"] == "ok"]
+    if getattr(a, "summary", None):
+        lines = ["| Source | File | Result | SHA-256 | Expected | Detail |", "|---|---|---|---|---|---|"]
+        for r in rows:
+            lines.append("| %s | %s | %s | %s | %s | %s |" % (r["source"], r["path"], r.get("drift", r["status"]), r.get("sha256", "—"), r.get("expected", "—"), r.get("error", "").replace("|", "/").replace("\n", " ")))
+        Path(a.summary).write_text("\n".join(lines) + "\n", encoding="utf-8")
+    code = EXIT_MISSING if bad else EXIT_DIFF if getattr(a, "check_drift", False) and changed else EXIT_OK
+    return code, {"out": str(a.out), "ok": len(rows)-len(bad), "changed": len(changed), "notOk": bad}
+
 
 def cmd_import_source(a):
     if a.source != "kfp":
@@ -869,6 +875,9 @@ def main(argv):
         else:
             p.add_argument("--out", help="keep the changed originals here")
     c = sub.add_parser("collect")
+    c.add_argument("--seed", default=str(ROOT), help="release input tree supplying manual and historical inputs")
+    c.add_argument("--check-drift", action="store_true")
+    c.add_argument("--summary", help="Markdown drift report")
     c.add_argument("--out", default=str(ROOT / "work" / "acquisition"))
     i = sub.add_parser("import-source")
     i.add_argument("--source", required=True)
