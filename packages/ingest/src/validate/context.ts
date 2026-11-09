@@ -90,7 +90,29 @@ export function strictJson(text: string): unknown {
       throw error;
     }
   }
-  return JSON.parse(text);
+  try {
+    return JSON.parse(text);
+  } catch (cause) {
+    if (!(cause instanceof SyntaxError)) throw cause;
+    const position = /position (\d+)/.exec(cause.message);
+    let pos = position ? Number(position[1]) : text.length;
+    let message = 'Expecting value';
+    if (/property name|double-quoted property name/.test(cause.message))
+      message = 'Expecting property name enclosed in double quotes';
+    else if (/after property name/.test(cause.message)) message = "Expecting ':' delimiter";
+    else if (/after property value|after array element/.test(cause.message))
+      message = "Expecting ',' delimiter";
+    else if (/Unterminated string/.test(cause.message)) {
+      message = 'Unterminated string starting at';
+      pos = text.lastIndexOf('"');
+    } else if (/non-whitespace character after JSON/.test(cause.message)) message = 'Extra data';
+    const before = text.slice(0, pos),
+      line = before.split('\n').length;
+    const column = pos - before.lastIndexOf('\n');
+    const error = new Error(`${message}: line ${line} column ${column} (char ${pos})`);
+    error.name = 'JSONDecodeError';
+    throw error;
+  }
 }
 
 export class Context {
@@ -143,11 +165,18 @@ export class Context {
   }
 }
 export class Routes {
+  readonly ids: Set<string>;
   private entries: {
     id: string;
     segments: { literal?: string; re?: RegExp; optional: boolean }[];
   }[];
   constructor(catalog: any) {
+    this.ids = new Set(catalog.routes.map((r: any[]) => r[0]));
+    if (!catalog.routes.length || this.ids.size !== catalog.routes.length) {
+      const error = new Error('route catalogue must contain unique screen ids');
+      error.name = 'ValueError';
+      throw error;
+    }
     this.entries = catalog.routes
       .filter((r: any[]) => r[2] !== null)
       .map((r: any[]) => ({

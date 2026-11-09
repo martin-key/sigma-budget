@@ -242,6 +242,43 @@ jobs:
         if: always()
         run: git diff --exit-code -- data/release
 
+  validation-wave17a:
+    # Offline donor evidence; production Python validation remains authoritative.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Regenerate frozen Python results
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          python packages/ingest/test/fixtures/validate17a/generate_oracle.py --check
+          python packages/ingest/test/fixtures/validate17a/generate_oracle.py --extra --check
+          python packages/ingest/test/fixtures/validate17a/wrapper/generate.py --check
+      - run: pnpm --filter @sigma-budget/ingest... build
+      - name: Scoped differential and CLI safety tests
+        env:
+          WAVE17A_PARITY_REPORT: tmp/ts-migration/candidates/17a/report.json
+        run: pnpm --filter @sigma-budget/ingest exec vitest run src/validate/catalog.test.ts src/validate/cli17a.test.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: validation-wave17a-parity
+          path: tmp/ts-migration/candidates/17a/report.json
+          if-no-files-found: error
+      - name: Release remains unchanged
+        if: always()
+        run: git diff --exit-code -- data/release
+
   common-parity:
     # Offline common-layer translation against Python-produced frozen evidence.
     runs-on: ubuntu-latest
