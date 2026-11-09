@@ -1,0 +1,697 @@
+{
+  "cases": [
+    {
+      "name": "missing-status-0",
+      "ops": [
+        {
+          "op": "delete",
+          "file": "catalog.json",
+          "path": [
+            "datasets",
+            0,
+            "status"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'status'"
+      }
+    },
+    {
+      "name": "missing-status-26",
+      "ops": [
+        {
+          "op": "delete",
+          "file": "catalog.json",
+          "path": [
+            "datasets",
+            26,
+            "status"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'status'"
+      }
+    },
+    {
+      "name": "missing-status-32",
+      "ops": [
+        {
+          "op": "delete",
+          "file": "catalog.json",
+          "path": [
+            "datasets",
+            32,
+            "status"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'status'"
+      }
+    },
+    {
+      "name": "ministries.json-key-[]",
+      "ops": [
+        {
+          "op": "set",
+          "file": "ministries.json",
+          "path": [
+            "items",
+            0,
+            "id"
+          ],
+          "value": []
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: unhashable type: 'list'"
+      }
+    },
+    {
+      "name": "ministries.json-key-{}",
+      "ops": [
+        {
+          "op": "set",
+          "file": "ministries.json",
+          "path": [
+            "items",
+            0,
+            "id"
+          ],
+          "value": {}
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: unhashable type: 'dict'"
+      }
+    },
+    {
+      "name": "ministries.json-key-None",
+      "ops": [
+        {
+          "op": "set",
+          "file": "ministries.json",
+          "path": [
+            "items",
+            0,
+            "id"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 313 'Народното събрание': vedomstvo id '0100' is not in its dataset",
+          "row 313 'Народното събрание': current bill budget or period missing",
+          "current bill budgets: missing or extra search rows"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11306
+      }
+    },
+    {
+      "name": "ministries.json-key-True",
+      "ops": [
+        {
+          "op": "set",
+          "file": "ministries.json",
+          "path": [
+            "items",
+            0,
+            "id"
+          ],
+          "value": true
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 313 'Народното събрание': vedomstvo id '0100' is not in its dataset",
+          "row 313 'Народното събрание': current bill budget or period missing",
+          "current bill budgets: missing or extra search rows"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11306
+      }
+    },
+    {
+      "name": "municipalities.json-key-[]",
+      "ops": [
+        {
+          "op": "set",
+          "file": "municipalities.json",
+          "path": [
+            "items",
+            0,
+            "id"
+          ],
+          "value": []
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: unhashable type: 'list'"
+      }
+    },
+    {
+      "name": "municipalities.json-key-{}",
+      "ops": [
+        {
+          "op": "set",
+          "file": "municipalities.json",
+          "path": [
+            "items",
+            0,
+            "id"
+          ],
+          "value": {}
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: unhashable type: 'dict'"
+      }
+    },
+    {
+      "name": "municipalities.json-key-None",
+      "ops": [
+        {
+          "op": "set",
+          "file": "municipalities.json",
+          "path": [
+            "items",
+            0,
+            "id"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 353 'Айтос': obshtina id 'BGS01' is not in its dataset"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "municipalities.json-key-True",
+      "ops": [
+        {
+          "op": "set",
+          "file": "municipalities.json",
+          "path": [
+            "items",
+            0,
+            "id"
+          ],
+          "value": true
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 353 'Айтос': obshtina id 'BGS01' is not in its dataset"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "measures.json-key-[]",
+      "ops": [
+        {
+          "op": "set",
+          "file": "measures.json",
+          "path": [
+            "items",
+            0,
+            "id"
+          ],
+          "value": []
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: unhashable type: 'list'"
+      }
+    },
+    {
+      "name": "measures.json-key-{}",
+      "ops": [
+        {
+          "op": "set",
+          "file": "measures.json",
+          "path": [
+            "items",
+            0,
+            "id"
+          ],
+          "value": {}
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: unhashable type: 'dict'"
+      }
+    },
+    {
+      "name": "measures.json-key-None",
+      "ops": [
+        {
+          "op": "set",
+          "file": "measures.json",
+          "path": [
+            "items",
+            0,
+            "id"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 724 'Максимален осигурителен доход 2 300 €': merki id 'kr1' is not in its dataset"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "measures.json-key-True",
+      "ops": [
+        {
+          "op": "set",
+          "file": "measures.json",
+          "path": [
+            "items",
+            0,
+            "id"
+          ],
+          "value": true
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 724 'Максимален осигурителен доход 2 300 €': merki id 'kr1' is not in its dataset"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "glossary.json-key-[]",
+      "ops": [
+        {
+          "op": "set",
+          "file": "glossary.json",
+          "path": [
+            "terms",
+            0,
+            "slug"
+          ],
+          "value": []
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: unhashable type: 'list'"
+      }
+    },
+    {
+      "name": "glossary.json-key-{}",
+      "ops": [
+        {
+          "op": "set",
+          "file": "glossary.json",
+          "path": [
+            "terms",
+            0,
+            "slug"
+          ],
+          "value": {}
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: unhashable type: 'dict'"
+      }
+    },
+    {
+      "name": "glossary.json-key-None",
+      "ops": [
+        {
+          "op": "set",
+          "file": "glossary.json",
+          "path": [
+            "terms",
+            0,
+            "slug"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 776 'Бюджет': rechnik id 'byudzhet' is not in its dataset"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "glossary.json-key-True",
+      "ops": [
+        {
+          "op": "set",
+          "file": "glossary.json",
+          "path": [
+            "terms",
+            0,
+            "slug"
+          ],
+          "value": true
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 776 'Бюджет': rechnik id 'byudzhet' is not in its dataset"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "catalog.json-key-[]",
+      "ops": [
+        {
+          "op": "set",
+          "file": "catalog.json",
+          "path": [
+            "datasets",
+            26,
+            "slug"
+          ],
+          "value": []
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: unhashable type: 'list'"
+      }
+    },
+    {
+      "name": "catalog.json-key-{}",
+      "ops": [
+        {
+          "op": "set",
+          "file": "catalog.json",
+          "path": [
+            "datasets",
+            26,
+            "slug"
+          ],
+          "value": {}
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: unhashable type: 'dict'"
+      }
+    },
+    {
+      "name": "catalog.json-key-None",
+      "ops": [
+        {
+          "op": "set",
+          "file": "catalog.json",
+          "path": [
+            "datasets",
+            26,
+            "slug"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "catalog.json-key-True",
+      "ops": [
+        {
+          "op": "set",
+          "file": "catalog.json",
+          "path": [
+            "datasets",
+            26,
+            "slug"
+          ],
+          "value": true
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "program-field-[]",
+      "ops": [
+        {
+          "op": "set",
+          "file": "programs.json",
+          "path": [
+            "fields"
+          ],
+          "value": [
+            "ministry",
+            "code",
+            "name",
+            "level",
+            "policy",
+            "y2026",
+            "y2025",
+            "growthPct",
+            "isNew",
+            "prb2026",
+            "prb2025",
+            []
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: unhashable type: 'list'"
+      }
+    },
+    {
+      "name": "program-code-[]",
+      "ops": [
+        {
+          "op": "set",
+          "file": "programs.json",
+          "path": [
+            "items",
+            0,
+            1
+          ],
+          "value": []
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: unhashable type: 'list'"
+      }
+    },
+    {
+      "name": "program-field-{}",
+      "ops": [
+        {
+          "op": "set",
+          "file": "programs.json",
+          "path": [
+            "fields"
+          ],
+          "value": [
+            "ministry",
+            "code",
+            "name",
+            "level",
+            "policy",
+            "y2026",
+            "y2025",
+            "growthPct",
+            "isNew",
+            "prb2026",
+            "prb2025",
+            {}
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: unhashable type: 'dict'"
+      }
+    },
+    {
+      "name": "program-code-{}",
+      "ops": [
+        {
+          "op": "set",
+          "file": "programs.json",
+          "path": [
+            "items",
+            0,
+            1
+          ],
+          "value": {}
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: unhashable type: 'dict'"
+      }
+    },
+    {
+      "name": "catalog-status-None",
+      "ops": [
+        {
+          "op": "set",
+          "file": "catalog.json",
+          "path": [
+            "datasets",
+            0,
+            "status"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "datasets: 26 rows, the catalog has 25 real datasets",
+          "datasets: outlook is None and must have no search row"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "catalog-status-[]",
+      "ops": [
+        {
+          "op": "set",
+          "file": "catalog.json",
+          "path": [
+            "datasets",
+            0,
+            "status"
+          ],
+          "value": []
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "datasets: 26 rows, the catalog has 25 real datasets",
+          "datasets: outlook is [] and must have no search row"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "catalog-status-{}",
+      "ops": [
+        {
+          "op": "set",
+          "file": "catalog.json",
+          "path": [
+            "datasets",
+            0,
+            "status"
+          ],
+          "value": {}
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "datasets: 26 rows, the catalog has 25 real datasets",
+          "datasets: outlook is {} and must have no search row"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "catalog-status-True",
+      "ops": [
+        {
+          "op": "set",
+          "file": "catalog.json",
+          "path": [
+            "datasets",
+            0,
+            "status"
+          ],
+          "value": true
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "datasets: 26 rows, the catalog has 25 real datasets",
+          "datasets: outlook is True and must have no search row"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    }
+  ]
+}

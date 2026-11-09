@@ -121,6 +121,14 @@ function floatRepr(n: number): string {
 function equal(a: unknown, b: unknown): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }
+function hashable<T>(value: T): T {
+  if (value !== null && typeof value === 'object')
+    throw new TypeError(`unhashable type: '${Array.isArray(value) ? 'list' : 'dict'}'`);
+  return value;
+}
+function stringAt(holder: object, key: string, value: unknown): string {
+  return typeof value === 'string' ? value : reprAt(holder, key, value);
+}
 function articleNumber(s: string): number {
   const value = asciiDigits(trim(s));
   if (!/^[+-]?[0-9]+(?:_[0-9]+)*$/.test(value)) {
@@ -197,19 +205,22 @@ export function search(ctx: Context): Check {
   const terms = executionIterable(executionRequired(gl, 'terms'));
   const datasets = executionIterable(executionRequired(cat, 'datasets'));
   const ids: Record<string, Set<string>> = {
-    vedomstvo: new Set(miItems.map((x: any) => executionRequired(x, 'id'))),
-    obshtina: new Set(muItems.map((x: any) => executionRequired(x, 'id'))),
-    merki: new Set(meItems.map((x: any) => executionRequired(x, 'id'))),
-    rechnik: new Set(terms.map((x: any) => executionRequired(x, 'slug'))),
-    danni: new Set(datasets.map((x: any) => executionRequired(x, 'slug'))),
+    vedomstvo: new Set(miItems.map((x: any) => hashable(executionRequired(x, 'id')))),
+    obshtina: new Set(muItems.map((x: any) => hashable(executionRequired(x, 'id')))),
+    merki: new Set(meItems.map((x: any) => hashable(executionRequired(x, 'id')))),
+    rechnik: new Set(terms.map((x: any) => hashable(executionRequired(x, 'slug')))),
+    danni: new Set(datasets.map((x: any) => hashable(executionRequired(x, 'slug')))),
   };
   for (const id of budgets.keys()) ids.vedomstvo!.add(id);
   const fields: Record<string, number> = Object.fromEntries(
-    executionIterable(executionRequired(pr, 'fields')).map((n: string, i: number) => [n, i]),
+    executionIterable(executionRequired(pr, 'fields')).map((n: string, i: number) => [
+      hashable(n),
+      i,
+    ]),
   );
   const programs = executionIterable(executionRequired(pr, 'items'));
   const codes = new Set(
-    programs.map((p: any) => executionRequired(p, executionRequired(fields, 'code'))),
+    programs.map((p: any) => hashable(executionRequired(p, executionRequired(fields, 'code')))),
   );
   const routes = ctx.routes(),
     seen = new Set<string>(),
@@ -335,17 +346,20 @@ export function search(ctx: Context): Check {
   c.ok(sameSet(seenCurrent, budgets.keys()), 'current bill budgets: missing or extra search rows');
   c.ok(sameSet(seenMeasures, measures.keys()), 'current measures: missing or extra search rows');
   c.ok(per[0]! >= 15, `indicators: only ${per[0]} rows`);
-  const real = datasets.filter((d: any) => d.status === 'real');
+  const real = datasets.filter((d: any) => executionRequired(d, 'status') === 'real');
   c.ok(
     per[5] === real.length,
     `datasets: ${per[5]} rows, the catalog has ${real.length} real datasets`,
   );
   c.ok(mock === 0, `mock rows: ${mock}, expected none`);
   for (const d of datasets) {
-    const r = rows5.get(`#/danni/${d.slug}`);
-    if (d.status === 'real')
-      c.ok(r && r[5] === 'real', `datasets: ${d.slug} has no row or a different status`);
-    else c.ok(!r, `datasets: ${d.slug} is ${d.status} and must have no search row`);
+    const slug = stringAt(d, 'slug', executionRequired(d, 'slug'));
+    const r = rows5.get(`#/danni/${slug}`);
+    const status = executionRequired(d, 'status');
+    if (status === 'real')
+      c.ok(r && r[5] === 'real', `datasets: ${slug} has no row or a different status`);
+    else
+      c.ok(!r, `datasets: ${slug} is ${stringAt(d, 'status', status)} and must have no search row`);
   }
   const entries = items.map((r: any) => {
     const index = executionInteger(executionRequired(r, 0), 'index', r, '0');
