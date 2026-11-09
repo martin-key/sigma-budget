@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { dbpGvaBuildCli } from './dbp-gva-build.js';
 import { parityCli } from '@sigma-budget/ingest';
 import { lawBuildCli } from './law-build.js';
 import { editorialBuildCli } from './editorial-build.js';
@@ -9,7 +10,7 @@ import { fiscalBuildCli } from './fiscal-build.js';
 
 const USAGE = [
   'Usage: budget-ts parity --oracle <dir> --candidate <dir> --scope <ids> --policy <file> --report <file>',
-  '       budget-ts build --inputs <fixture-root> --out <candidate-dir> --scope law|glossary,guide|ministries,ministries-programs,programs|outlook,revenue,expenditure,measures|components,rates --build-date YYYY-MM-DD',
+  '       budget-ts build --inputs <fixture-root> --out <candidate-dir> --scope law|glossary,guide|ministries,ministries-programs,programs|outlook,revenue,expenditure,measures|components,rates|dbp2027,gva-sectors --build-date YYYY-MM-DD',
   '       budget-ts freshness [--release <dir>] [--today YYYY-MM-DD]',
 ].join('\n');
 
@@ -19,15 +20,17 @@ try {
   const scope = scopeIndex < 0 ? undefined : args[scopeIndex + 1];
   if (command === 'build')
     process.exitCode =
-      scope === 'outlook,revenue,expenditure,measures'
-        ? await fiscalBuildCli(args)
-        : scope === 'glossary,guide'
-          ? await editorialBuildCli(args)
-          : scope === 'components,rates'
-            ? await componentsRatesBuildCli(args)
-            : scope === 'ministries,ministries-programs,programs'
-              ? await programmesBuildCli(args)
-              : await lawBuildCli(args);
+      scope === 'dbp2027,gva-sectors'
+        ? await dbpGvaBuildCli(args)
+        : scope === 'outlook,revenue,expenditure,measures'
+          ? await fiscalBuildCli(args)
+          : scope === 'glossary,guide'
+            ? await editorialBuildCli(args)
+            : scope === 'components,rates'
+              ? await componentsRatesBuildCli(args)
+              : scope === 'ministries,ministries-programs,programs'
+                ? await programmesBuildCli(args)
+                : await lawBuildCli(args);
   else if (command === 'parity') process.exitCode = await parityCli(args);
   else if (command === 'freshness') process.exitCode = await freshnessCli(args);
   else throw new Error(USAGE);
