@@ -1,3 +1,4 @@
+import { debtProseMatches, debtProseNumber } from './budget-prose.js';
 import { metadata } from '../common/metadata.js';
 import { catalogPythonStringAt } from './catalog-editorial.js';
 import { pythonFloat } from './context.js';
@@ -55,6 +56,17 @@ type Physical = {
 };
 function physicalFinder(bill: BillExtraction) {
   const numeric = new Map<string | null, number | null>();
+  // Matching revisits printed cells for every semantic column. Cache only the
+  // pure string normalization; source reads and their failure order stay intact.
+  const normalized = new Map<string, string>();
+  const normalizedText = (value: string): string => {
+    let result = normalized.get(value);
+    if (result === undefined) {
+      result = normalize(value);
+      normalized.set(value, result);
+    }
+    return result;
+  };
   const printedValues = new Map<string, Map<string, string>>();
   return (row: any, path: string, column: number | null): Physical => {
     const { value, text } = valueAt(bill, path);
@@ -69,7 +81,7 @@ function physicalFinder(bill: BillExtraction) {
         for (const raw of table.rawCells)
           for (const cell of raw) {
             if (cell) {
-              const key = normalize(cell).replaceAll(',', '.');
+              const key = normalizedText(cell).replaceAll(',', '.');
               if (!values.has(key)) values.set(key, cell);
             }
           }
@@ -88,7 +100,9 @@ function physicalFinder(bill: BillExtraction) {
       for (const [rowIndex, raw] of table.rawCells.entries()) {
         if (
           truth(identity) &&
-          !raw.some((cell: string | null) => normalize(identity) === normalize(cell || ''))
+          !raw.some(
+            (cell: string | null) => normalizedText(identity) === normalizedText(cell || ''),
+          )
         )
           continue;
         let ordinal = 0;
@@ -295,11 +309,7 @@ export function buildBudgetDebtLimits(lineage: AnnualLineage): Record<string, an
   for (const article of ['66', '67', '68']) {
     const row = bill.articles[article]?.[0];
     if (!row) throw new Error(`Missing debt limit article ${article}`);
-    const matches = [
-      ...row.text.matchAll(
-        /(\p{Decimal_Number}+(?:,\p{Decimal_Number}+)?)[\u0009-\u000d\u001c-\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]+млрд\. евро/gu,
-      ),
-    ];
+    const matches = debtProseMatches(row.text);
     if (matches.length !== 1) throw new Error(`Ambiguous debt limit prose: ${article}`);
     const match = matches[0]!,
       output = `budget2027.json#/debtLimits/${article}`;
@@ -315,7 +325,7 @@ export function buildBudgetDebtLimits(lineage: AnnualLineage): Record<string, an
       label: pyOr(row.text, 'Без отпечатан етикет'),
     });
     budget.debtLimits[article] = {
-      value: pythonFloat(match[1]!.replace(',', '.')),
+      value: debtProseNumber(match[0]),
       unit: 'млрд. €',
       provenance,
     };

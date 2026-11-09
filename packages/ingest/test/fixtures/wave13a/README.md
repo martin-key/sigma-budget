@@ -65,8 +65,21 @@ pinned publication still verifies its real archive, member and physical cells.
 All preceding oracle bytes, input hashes and six final/published outputs remain
 unchanged.
 
-The debt-prose oracle adds 44 cases from the unchanged `add_debt_limits` donor.
+The debt-prose oracle adds 49 cases from the unchanged `add_debt_limits` donor.
 They cover every Python whitespace character, BOM/zero-width exclusions, the
 required literal space in `млрд. евро`, and Unicode decimal digits. Matching
 retains the exact printed substring; numeric conversion and provenance
 verification use the same Python-compatible digit handling.
+
+Debt digit matching is pinned to Python 3.12's Unicode 15.0 repertoire rather
+than Node's Unicode version. The frozen donor regex enumerates all 680 decimal
+characters; the TypeScript prefix reader is checked over the complete Unicode
+code-point range against that independent capture. Newer Unicode digits also
+appear before, within and after amounts in the prose cases, including the
+Garay prefix that would otherwise change 1.25 into 31.25.
+
+The physical matcher memoizes only its pure string normalization within each
+reader instance. Source fields, candidate order, ambiguity checks and evidence
+records are still read and checked in the same order. This avoids repeating
+normalization for every numeric column without changing CLI assertions or test
+deadlines.

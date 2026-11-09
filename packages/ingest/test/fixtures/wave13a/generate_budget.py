@@ -257,6 +257,13 @@ with tempfile.TemporaryDirectory(prefix='sigma13a-') as tmp:
     texts += [('no-space', '31,25млрд. евро')]
     texts += [('digits-' + name, amount + ' млрд. евро') for name, amount in [('arabic', '٣١,٢٥'), ('devanagari', '३१,२५'), ('fullwidth', '３１,２５'), ('astral', '𝟛𝟙,𝟚𝟝'), ('mixed', '3１,٢५'), ('integer', '31')]]
     texts += [('currency-U+%04X' % code, '31,25 млрд.' + chr(code) + 'евро') for code in (32, 133, 160, 8239, 65279)]
+    texts += [('new-unicode-' + name, text) for name, text in [
+        ('prefix', '\U00010d431,25 млрд. евро'),
+        ('all', '\U00010d43\U00010d41,\U00010d42\U00010d45 млрд. евро'),
+        ('suffix', '31,25 млрд. евро и \U00010d43\U00010d41,\U00010d42\U00010d45 млрд. евро'),
+        ('infix', '3\U00010d431,25 млрд. евро'),
+        ('second-block', '\U0001e5f31,25 млрд. евро'),
+    ]]
     for name, amount in texts:
         probe = annual_periods.Lineage()
         probe.inputs['B']['articles']['67'][0]['text'] = text = 'Граничен размер ' + amount + '.'
@@ -270,6 +277,9 @@ with tempfile.TemporaryDirectory(prefix='sigma13a-') as tmp:
             captured.update(error=type(error).__name__, message=str(error))
         debt_cases.append(captured)
     output['debt-prose-cases.json'] = debt_cases
+    # Freeze the actual donor regex repertoire, independently of Node's Unicode version.
+    output['debt-digits.json'] = [[code, float(chr(code))] for code in range(0x110000)
+        if budget_2027.BILLION_EURO_AMOUNT.fullmatch(chr(code) + ' млрд. евро')]
     hashes = {name: emit('oracle/' + name, value) for name, value in output.items()}
 
     law_source = (HERE / 'law-donor.py').read_bytes()

@@ -1,3 +1,4 @@
+import { debtProseNumber } from './budget-prose.js';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
@@ -342,5 +343,23 @@ it('retains Python numeric and pointer semantics and rejects ambiguous cells', (
   typed.bill['1']!.rows[0]!.value = 42;
   expect(() => physicalBillCell(typed, row, '/bill/1/rows/0/value', null)).toThrow(
     /printed numeric evidence/,
+  );
+});
+
+it('uses exactly the frozen Python 3.12 decimal digit repertoire', () => {
+  const expected = new Map<number, number>(oracle('debt-digits.json'));
+  expect(expected.size).toBe(680);
+  const differences: { code: number; actual: number | null; expected: number | null }[] = [];
+  for (let code = 0; code < 0x110000; code++) {
+    const wanted = expected.get(code) ?? null;
+    const actual = debtProseNumber(String.fromCodePoint(code));
+    if (actual !== wanted) differences.push({ code, actual, expected: wanted });
+  }
+  expect(differences).toEqual([]);
+});
+
+it('rejects a non-string printed amount instead of coercing it', () => {
+  expect(() => debtProseNumber(['31,25 млрд. евро'] as unknown as string)).toThrow(
+    /Invalid debt prose/,
   );
 });

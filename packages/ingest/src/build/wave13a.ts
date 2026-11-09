@@ -9,7 +9,7 @@ import { buildAnnualPeriods } from './fiscal-annual.js';
 import { buildBudget2027 } from './budget-2027.js';
 import { next2027 } from './law-evidence.js';
 import { decimalSum } from './fiscal-annual.js';
-import { pythonFloat } from './context.js';
+import { debtProseNumber } from './budget-prose.js';
 
 export type Wave13aOwner = 'outlook' | 'revenue' | 'expenditure' | 'law';
 export type LegacyOwners = Record<Wave13aOwner, Record<string, any>>;
@@ -89,11 +89,7 @@ export function validateProvenance(outputs: Wave13aOutputs, lineage?: AnnualLine
         if (
           typeof extracted !== 'string' ||
           !extracted.includes(entry.printed) ||
-          pythonFloat(
-            entry.printed
-              .match(/^(\p{Decimal_Number}+(?:,\p{Decimal_Number}+)?)/u)?.[1]
-              ?.replace(',', '.') ?? null,
-          ) !== cell.value
+          debtProseNumber(entry.printed) !== cell.value
         )
           throw new Error('Invalid prose provenance');
       } else if (extracted !== cell.value) throw new Error('Invalid source provenance');
