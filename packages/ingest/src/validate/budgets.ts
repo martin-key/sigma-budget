@@ -10,6 +10,8 @@ import {
   pyEqual,
   pyIntAt,
   pySum,
+  pyMap,
+  pyTypedSum,
 } from './python-error.js';
 const TOL = 0.06,
   TOL_SUM = 0.15,
@@ -77,16 +79,19 @@ const n = (o: any, k: string | number): PythonNumber => {
   const v = o[k];
   if (v === undefined && Array.isArray(o))
     throw new PythonError('IndexError', 'list index out of range');
-  if (v === null)
-    throw new PythonError('TypeError', "unsupported operand type(s) for +: 'int' and 'NoneType'");
+  if (v === undefined) throw new PythonError('KeyError', pyRepr(String(k)));
   if (typeof v === 'boolean') return { value: Number(v), kind: 'int' };
   return pythonNumberAt(o, String(k), v);
 };
-const sum = (xs: PythonNumber[]) => pySum(xs);
+const sum = (xs: Iterable<PythonNumber>) => pySum(xs);
 const pyfloat = floatRepr;
 const fixed = (v: number, n: number) => fmt(v, n).replaceAll(' ', '').replace(',', '.');
 const disp = (o: any, k: string | number) =>
-  isnum(o[k]) && n(o, k).kind === 'float' ? pyfloat(o[k]) : pyRepr(o[k]);
+  isnum(o[k]) && n(o, k).kind === 'float'
+    ? pyfloat(o[k])
+    : typeof o[k] === 'string'
+      ? o[k]
+      : pyRepr(o[k]);
 const iso = (x: any) =>
   typeof x === 'string' &&
   /^\p{Decimal_Number}{4}-\p{Decimal_Number}{2}-\p{Decimal_Number}{2}$/u.test(x);
@@ -96,6 +101,25 @@ function near(c: Check, a: any, b: any, tol: number, msg: string, ar?: string, b
   return c.ok(
     isnum(a) && isnum(b) && Math.abs(a - b) <= tol + 1e-9,
     `${msg}: ${ar ?? pyRepr(a)} vs ${br ?? pyRepr(b)} (tolerance ${tol})`,
+  );
+}
+function nearSum(
+  c: Check,
+  values: Iterable<PythonNumber>,
+  b: any,
+  tolerance: number,
+  message: string,
+  renderedTarget: string,
+) {
+  const result = pyTypedSum(values);
+  return near(
+    c,
+    result.value,
+    b,
+    tolerance,
+    message,
+    result.kind === 'float' ? pyfloat(result.value) : String(result.value),
+    renderedTarget,
   );
 }
 function optional(c: Check, a: any, b: any, msg: string, ar?: string, br?: string) {
@@ -237,12 +261,13 @@ export function budgets(ctx: Context): Check {
       pols.every((q: any) => cleanName(q.name) && isnum(q.khil)),
       `${w}: policy names / amounts`,
     );
-    near(
+    nearSum(
       c,
-      sum(pols.map((q: any) => n(q, 'khil'))),
+      pyMap(pols, (q: any) => n(q, 'khil')),
       x.policyTotalKhil,
       TOL_SUM,
       `${w}: policies sum to policyTotalKhil`,
+      disp(x, 'policyTotalKhil'),
     );
     near(
       c,
@@ -255,12 +280,13 @@ export function budgets(ctx: Context): Check {
     );
     for (const q of pols)
       if (pyTruth(q.parts)) {
-        near(
+        nearSum(
           c,
-          sum(q.parts.map((p: any) => n(p, 'khil'))),
+          pyMap(q.parts, (p: any) => n(p, 'khil')),
           q.khil,
           TOL_SUM,
           `${w} policy ${q.n}: parts sum`,
+          disp(q, 'khil'),
         );
         c.ok(
           q.parts.every((p: any) => cleanName(p.name)),
@@ -268,12 +294,13 @@ export function budgets(ctx: Context): Check {
         );
       }
     if ('bodies' in x)
-      near(
+      nearSum(
         c,
-        sum(x.bodies.map((q: any) => n(q, 'khil'))),
+        pyMap(x.bodies, (q: any) => n(q, 'khil')),
         x.expKhil,
         TOL_SUM,
         `${w}: bodies sum to the expenditure`,
+        disp(x, 'expKhil'),
       );
     const pb = x.programBudgetVsLaw,
       ch = x.change;
@@ -381,7 +408,7 @@ export function budgets(ctx: Context): Check {
           disp(b.bill, 'exp'),
         );
         c.ok(
-          pb.matchesBill === Math.abs(pb.prbKhil - pb.billKhil) <= 0.05,
+          pyEqual(pb.matchesBill, Math.abs(pb.prbKhil - pb.billKhil) <= 0.05),
           `${w}: programBudgetVsLaw.matchesBill`,
         );
         c.ok(Math.abs(pb.diffKhil) > 0.05, `${w}: a 'differs' tier needs a difference`);
@@ -599,7 +626,7 @@ function checkFile(c: Check, ctx: Context, item: any, d: any): Row[] {
       tol = Math.min(0.3, 0.05 * (pols.length + 1) + 0.01);
     for (let k = 0; k < 9; k++) {
       const s = sum(
-        pols.map((p: any) =>
+        pyMap(pols, (p: any) =>
           Object.hasOwn(p.values, ys) ? n(p.values[ys], k) : { value: 0, kind: 'float' },
         ),
       );
@@ -614,7 +641,7 @@ function checkFile(c: Check, ctx: Context, item: any, d: any): Row[] {
       const tolerance = Math.min(0.3, 0.05 * (progs.length + 1) + 0.01);
       for (let k = 0; k < 9; k++) {
         const s = sum(
-            progs.map((r: any) =>
+            pyMap(progs, (r: any) =>
               Object.hasOwn(r.values, ys) ? n(r.values[ys], k) : { value: 0, kind: 'float' },
             ),
           ),
@@ -656,7 +683,7 @@ function checkFile(c: Check, ctx: Context, item: any, d: any): Row[] {
     const sameLaw = Math.abs(ck.prbTotal2026 - ck.zdbExp) <= 0.05;
     c.ok(
       ck.matchesLaw === sameLaw && sameLaw === (d.tier === 'validated'),
-      `${w}: matchesLaw ${pyRepr(ck.matchesLaw)} tier ${d.tier}`,
+      `${w}: matchesLaw ${disp(ck, 'matchesLaw')} tier ${d.tier}`,
     );
     c.ok(
       'diffKhil' in ck === !sameLaw,

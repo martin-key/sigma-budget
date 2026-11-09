@@ -4594,5 +4594,1137 @@
         "value": true
       }
     ]
+  },
+  {
+    "name": "acceptance2-matches-bill-int-0",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          2,
+          "programBudgetVsLaw",
+          "matchesBill"
+        ],
+        "op": "set",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-matches-bill-float-0",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          2,
+          "programBudgetVsLaw",
+          "matchesBill"
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-matches-bill-int-1",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          5,
+          "programBudgetVsLaw",
+          "matchesBill"
+        ],
+        "op": "set",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-matches-bill-float-1",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          5,
+          "programBudgetVsLaw",
+          "matchesBill"
+        ],
+        "op": "rawSet",
+        "token": "1.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-revenue-first-error-null",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          0,
+          "mln",
+          0
+        ],
+        "op": "set",
+        "value": null
+      },
+      {
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          1,
+          "mln"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-revenue-first-error-string",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          0,
+          "mln",
+          0
+        ],
+        "op": "set",
+        "value": "1"
+      },
+      {
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          1,
+          "mln"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-budget-later-operand-null",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policies",
+          1,
+          "khil"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-budget-later-operand-string",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policies",
+          1,
+          "khil"
+        ],
+        "op": "set",
+        "value": "1"
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-budget-later-operand-list",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policies",
+          1,
+          "khil"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-budget-later-operand-map",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policies",
+          1,
+          "khil"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-budget-first-error-null",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policies",
+          0,
+          "khil"
+        ],
+        "op": "set",
+        "value": null
+      },
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policies",
+          1,
+          "khil"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-budget-first-error-string",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policies",
+          0,
+          "khil"
+        ],
+        "op": "set",
+        "value": "1"
+      },
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policies",
+          1,
+          "khil"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-revenue-short-circuit-null",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "mln"
+        ],
+        "op": "set",
+        "value": []
+      },
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "y0"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-revenue-short-circuit-string",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "mln"
+        ],
+        "op": "set",
+        "value": []
+      },
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "y0"
+        ],
+        "op": "set",
+        "value": "1"
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-revenue-short-circuit-list",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "mln"
+        ],
+        "op": "set",
+        "value": []
+      },
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "y0"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-revenue-short-circuit-map",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "mln"
+        ],
+        "op": "set",
+        "value": []
+      },
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "y0"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-revenue-short-circuit-true",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "mln"
+        ],
+        "op": "set",
+        "value": []
+      },
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "y0"
+        ],
+        "op": "set",
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-revenue-short-circuit-false",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "mln"
+        ],
+        "op": "set",
+        "value": []
+      },
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "y0"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-revenue-short-circuit-negative",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "mln"
+        ],
+        "op": "set",
+        "value": []
+      },
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "y0"
+        ],
+        "op": "set",
+        "value": -1
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-revenue-short-circuit-float",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "mln"
+        ],
+        "op": "set",
+        "value": []
+      },
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "y0"
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-expenditure-short-circuit-null",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "mln"
+        ],
+        "op": "set",
+        "value": []
+      },
+      {
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "y0"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-expenditure-short-circuit-string",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "mln"
+        ],
+        "op": "set",
+        "value": []
+      },
+      {
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "y0"
+        ],
+        "op": "set",
+        "value": "1"
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-expenditure-short-circuit-list",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "mln"
+        ],
+        "op": "set",
+        "value": []
+      },
+      {
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "y0"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-expenditure-short-circuit-map",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "mln"
+        ],
+        "op": "set",
+        "value": []
+      },
+      {
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "y0"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-expenditure-short-circuit-true",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "mln"
+        ],
+        "op": "set",
+        "value": []
+      },
+      {
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "y0"
+        ],
+        "op": "set",
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-expenditure-short-circuit-false",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "mln"
+        ],
+        "op": "set",
+        "value": []
+      },
+      {
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "y0"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-expenditure-short-circuit-negative",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "mln"
+        ],
+        "op": "set",
+        "value": []
+      },
+      {
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "y0"
+        ],
+        "op": "set",
+        "value": -1
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-expenditure-short-circuit-float",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "mln"
+        ],
+        "op": "set",
+        "value": []
+      },
+      {
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "y0"
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-budget-sum-display-0",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policies",
+          0,
+          "khil"
+        ],
+        "op": "rawSet",
+        "token": "0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-budget-sum-display-0.0",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policies",
+          0,
+          "khil"
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-budget-sum-display-1.0",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policies",
+          0,
+          "khil"
+        ],
+        "op": "rawSet",
+        "token": "1.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-budget-sum-display-1e0",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policies",
+          0,
+          "khil"
+        ],
+        "op": "rawSet",
+        "token": "1e0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-program-identity-display-0",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "file": "ministries/0200.json",
+        "path": [
+          "check",
+          "matchesLaw"
+        ],
+        "op": "rawSet",
+        "token": "0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-program-identity-display-0.0",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "file": "ministries/0200.json",
+        "path": [
+          "check",
+          "matchesLaw"
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-program-identity-display-1",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "file": "ministries/0200.json",
+        "path": [
+          "check",
+          "matchesLaw"
+        ],
+        "op": "rawSet",
+        "token": "1"
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-program-identity-display-1.0",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "file": "ministries/0200.json",
+        "path": [
+          "check",
+          "matchesLaw"
+        ],
+        "op": "rawSet",
+        "token": "1.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-program-identity-display-1e0",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "file": "ministries/0200.json",
+        "path": [
+          "check",
+          "matchesLaw"
+        ],
+        "op": "rawSet",
+        "token": "1e0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-program-identity-display-2.0",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "file": "ministries/0200.json",
+        "path": [
+          "check",
+          "matchesLaw"
+        ],
+        "op": "rawSet",
+        "token": "2.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-budget-typed-sum-int",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policies",
+          0,
+          "khil"
+        ],
+        "op": "rawSet",
+        "token": "1"
+      },
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policies",
+          1,
+          "khil"
+        ],
+        "op": "rawSet",
+        "token": "1"
+      },
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policies",
+          2,
+          "khil"
+        ],
+        "op": "rawSet",
+        "token": "1"
+      },
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policies",
+          3,
+          "khil"
+        ],
+        "op": "rawSet",
+        "token": "1"
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-budget-typed-sum-float",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policies",
+          0,
+          "khil"
+        ],
+        "op": "rawSet",
+        "token": "1.0"
+      },
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policies",
+          1,
+          "khil"
+        ],
+        "op": "rawSet",
+        "token": "1.0"
+      },
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policies",
+          2,
+          "khil"
+        ],
+        "op": "rawSet",
+        "token": "1.0"
+      },
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policies",
+          3,
+          "khil"
+        ],
+        "op": "rawSet",
+        "token": "1.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-budget-typed-sum-mixed",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policies",
+          0,
+          "khil"
+        ],
+        "op": "rawSet",
+        "token": "1.0"
+      },
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policies",
+          1,
+          "khil"
+        ],
+        "op": "rawSet",
+        "token": "1"
+      },
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policies",
+          2,
+          "khil"
+        ],
+        "op": "rawSet",
+        "token": "1"
+      },
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policies",
+          3,
+          "khil"
+        ],
+        "op": "rawSet",
+        "token": "1"
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-budget-parts-display",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          2,
+          "policies",
+          6,
+          "parts",
+          0,
+          "khil"
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance2-budget-bodies-display",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          5,
+          "bodies",
+          0,
+          "khil"
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
   }
 ]

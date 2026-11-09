@@ -10,6 +10,8 @@ import {
   pyEqual,
   pyIntAt,
   pySum,
+  pyMap,
+  pyDecimalInteger,
   pySubtract,
   pythonType,
 } from './python-error.js';
@@ -229,11 +231,13 @@ function tree(c: Check, rows: any[], what: string, gdp: number[], tolCap = 0.3):
         (kids[p] ??= []).push(q);
       }
     } else c.ok(pyEqual(q.level, 0), `${what} ${q.id}: a row without parent must be level 0`);
-    const y0 = rowOffset(q);
+    const fits = q.mln.length === q.pctGdp.length && rowOffset(q) + q.mln.length <= 5;
+    const rawOffset = Object.hasOwn(q, 'y0') ? q.y0 : 0;
     c.ok(
-      q.mln.length === q.pctGdp.length && y0 + q.mln.length <= 5,
-      `${what} ${q.id}: mln/pctGdp lengths ${q.mln.length}/${q.pctGdp.length} (y0 ${y0})`,
+      fits,
+      `${what} ${q.id}: mln/pctGdp lengths ${q.mln.length}/${q.pctGdp.length} (y0 ${pyDecimalInteger(rawOffset)})`,
     );
+    const y0 = rowOffset(q);
     const tol = ptol(q.pctGdp);
     for (let j = 0; j < Math.min(q.mln.length, q.pctGdp.length); j++) {
       const m = q.mln[j],
@@ -259,7 +263,7 @@ function tree(c: Check, rows: any[], what: string, gdp: number[], tolCap = 0.3):
     for (let i = 0; i < 5; i++) {
       const parent = at(by[pid], i);
       if (parent === null) continue;
-      const values = real.map((k) => {
+      const values = pyMap(real, (k) => {
         const n = at(k, i);
         return n && n.value ? n : floatZero;
       });
@@ -341,7 +345,7 @@ export function revenue(ctx: Context): Check {
   );
   const gsum = [];
   for (let i = 0; i < 5; i++) {
-    const s = pySum(groups.map((gr: any) => numeric(gr.mln, i)));
+    const s = pySum(pyMap(groups, (gr: any) => numeric(gr.mln, i)));
     gsum.push(roundedOne(s));
     c.near(s, t.mln[i], 0.15, `groups sum vs total, year ${2024 + i}`);
     c.near(r.groupSums[i], roundedOne(s), 0.0501, `groupSums[${i}]`);
@@ -357,7 +361,7 @@ export function revenue(ctx: Context): Check {
     );
     for (let i = 0; i < 5; i++) {
       const s = pySum(
-        gr.rowIds.map((x: string) => {
+        pyMap(gr.rowIds, (x: string) => {
           const n = at(by[x], i);
           return n && n.value ? n : floatZero;
         }),
@@ -391,7 +395,7 @@ export function revenue(ctx: Context): Check {
       `group ${gr.id} yoy2026Pct`,
     );
   }
-  const shares = pySum(groups.map((gr: any) => numeric(gr, 'share2026')));
+  const shares = pySum(pyMap(groups, (gr: any) => numeric(gr, 'share2026')));
   nearWithText(c, shares, 100, 0.05, 'shares add up to 100', pyFloat(shares), '100.0');
   const ex = ctx.get('execution.json');
   c.ok(
@@ -538,7 +542,7 @@ export function measures(ctx: Context): Check {
       `group ${gr.id}: items must be short-term ${gr.kind} measures`,
     );
     if ('totalMln' in gr) {
-      const s = pySum(gr.items.map((x: string) => numeric(by[x].effectMln, '2026')));
+      const s = pySum(pyMap(gr.items, (x: string) => numeric(by[x].effectMln, '2026')));
       nearWithText(
         c,
         s,
@@ -570,7 +574,7 @@ export function measures(ctx: Context): Check {
     .map((x: string) => by[x])
     .filter((x: any) => x.estimateKind === 'stated');
   c.near(
-    pySum(kk.map((x: any) => numeric(x.effectMln, '2026'))),
+    pySum(pyMap(kk, (x: any) => numeric(x.effectMln, '2026'))),
     t.expenditureMlnWithoutIndicative,
     0.05 * (kk.length + 1),
     'stated expenditure measures vs totals.expenditureMlnWithoutIndicative',
@@ -588,7 +592,9 @@ export function measures(ctx: Context): Check {
     const sums = [];
     for (const y of ['2026', '2027', '2028']) {
       const s = pySum(
-        its.map((i: any) => (Object.hasOwn(i.effectMln, y) ? numeric(i.effectMln, y) : floatZero)),
+        pyMap(its, (i: any) =>
+          Object.hasOwn(i.effectMln, y) ? numeric(i.effectMln, y) : floatZero,
+        ),
       );
       sums.push(roundedOne(s));
       nearWithText(
@@ -607,7 +613,7 @@ export function measures(ctx: Context): Check {
     );
     c.near(
       t.discretionaryPeriod[tab],
-      pySum(Object.keys(t.discretionary[tab]).map((y) => numeric(t.discretionary[tab], y))),
+      pySum(pyMap(Object.keys(t.discretionary[tab]), (y) => numeric(t.discretionary[tab], y))),
       0.15,
       `${tab}: period total`,
     );
@@ -665,7 +671,7 @@ export function expenditure(ctx: Context): Check {
     'functions: 9 unique items',
   );
   for (let k = 0; k < 4; k++) {
-    const s = pySum(items.map((i: any) => numeric(i.mln, k)));
+    const s = pySum(pyMap(items, (i: any) => numeric(i.mln, k)));
     nearWithText(
       c,
       s,
@@ -713,7 +719,7 @@ export function expenditure(ctx: Context): Check {
     if (pyTruth(it.parts))
       for (let k = 0; k < 4; k++)
         c.near(
-          pySum(it.parts.map((p: any) => numeric(p.mln, k))),
+          pySum(pyMap(it.parts, (p: any) => numeric(p.mln, k))),
           it.mln[k],
           0.15,
           `functions ${it.id}: parts vs item, ${2025 + k}`,
@@ -838,7 +844,7 @@ export function expenditure(ctx: Context): Check {
   );
   for (let k = 0; k < 10; k++)
     c.ok(
-      Math.abs(pySum(top.map((x: any) => numeric(x.mln, k))) - cf.total.mln[k]) <= 0.3,
+      Math.abs(pySum(pyMap(top, (x: any) => numeric(x.mln, k))) - cf.total.mln[k]) <= 0.3,
       `cofog ${cf.years[k]}: functions differ from the total`,
     );
   for (const m of cit.filter((x: any) => pyTruth(x.memoOf))) {

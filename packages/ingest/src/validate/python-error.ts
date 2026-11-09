@@ -83,6 +83,41 @@ export function pythonType(value: unknown): string {
   return Array.isArray(value) ? 'list' : 'dict';
 }
 
+/** Python generator comprehensions must stop at the first invalid operand. */
+export function* pyMap<T, U>(
+  values: Iterable<T>,
+  project: (value: T, index: number) => U,
+): Generator<U> {
+  let index = 0;
+  for (const value of values) yield project(value, index++);
+}
+
+/** The %d conversion is evaluated after a check's short-circuited condition. */
+export function pyDecimalInteger(value: unknown): string {
+  if (typeof value !== 'number' && typeof value !== 'boolean')
+    throw new PythonError(
+      'TypeError',
+      '%d format: a real number is required, not ' + pythonType(value),
+    );
+  const number = Number(value);
+  if (Number.isNaN(number))
+    throw new PythonError('ValueError', 'cannot convert float NaN to integer');
+  if (!Number.isFinite(number))
+    throw new PythonError('OverflowError', 'cannot convert float infinity to integer');
+  return BigInt(Math.trunc(number)).toString();
+}
+
+export function pyTypedSum(values: Iterable<PythonNumber>): PythonNumber {
+  let kind: PythonNumber['kind'] = 'int';
+  const value = pySum(
+    pyMap(values, (operand) => {
+      if (operand.kind === 'float') kind = 'float';
+      return operand;
+    }),
+  );
+  return { value, kind };
+}
+
 export function pySubtract(a: PythonNumber, b: PythonNumber): number {
   if (typeof a.value !== 'number' || typeof b.value !== 'number') {
     const left = typeof a.value === 'number' ? a.kind : pythonType(a.value),

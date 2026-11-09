@@ -2,7 +2,16 @@
 import { pythonNumberAt, type PythonNumber } from '../common/numbers.js';
 import { Check, fmt, isnum, numbersIn, pyRepr, pyTruth } from './checks.js';
 import { Context } from './context.js';
-import { required, floatRepr, pyStrip, pyEqual, pyIntAt, pySum } from './python-error.js';
+import {
+  PythonError,
+  required,
+  floatRepr,
+  pyStrip,
+  pyEqual,
+  pyIntAt,
+  pySum,
+  pyMap,
+} from './python-error.js';
 
 const TOL = 0.06,
   TOL_SUM = 0.15;
@@ -32,11 +41,18 @@ const iso = (x: any) =>
   /^\p{Decimal_Number}{4}-\p{Decimal_Number}{2}-\p{Decimal_Number}{2}$/u.test(x);
 const nz = (x: any): number => (isnum(x) ? x : 0);
 const sorted = (x: any[]) => [...x].sort();
-const n = (o: any, k: string | number): PythonNumber =>
-  typeof o[k] === 'boolean'
-    ? { value: Number(o[k]), kind: 'int' }
-    : pythonNumberAt(o, String(k), o[k]);
-const sum = (xs: PythonNumber[]) => pySum(xs);
+const n = (o: any, k: string | number): PythonNumber => {
+  const value = o[k];
+  if (value === undefined)
+    throw new PythonError(
+      Array.isArray(o) ? 'IndexError' : 'KeyError',
+      Array.isArray(o) ? 'list index out of range' : pyRepr(String(k)),
+    );
+  return typeof value === 'boolean'
+    ? { value: Number(value), kind: 'int' }
+    : pythonNumberAt(o, String(k), value);
+};
+const sum = (xs: Iterable<PythonNumber>) => pySum(xs);
 const pyfloat = floatRepr;
 const display = (o: any, k: string | number) =>
   isnum(o[k]) && n(o, k).kind === 'float' ? pyfloat(o[k]) : repr(o[k]);
@@ -145,7 +161,7 @@ function art1(c: Check, law: any): Map<string, any> {
   };
   const sumRows = (sec: string, nos: string[], s: string) =>
     sum(
-      nos.map((no) =>
+      pyMap(nos, (no) =>
         n(
           rows.get(key(sec, no)) ??
             (() => {
@@ -404,7 +420,7 @@ function changes(c: Check, law: any, artRows: Map<string, any>) {
         for (const s of ['bill', 'law'])
           near(
             c,
-            sum(x.areas.map((a: any) => n(a, s))),
+            sum(pyMap(x.areas, (a: any) => n(a, s))),
             b[s].exp,
             TOL_SUM,
             `${w} areas ${s} sum to the expenditure`,
@@ -471,7 +487,9 @@ function reconciliation(c: Check, law: any) {
         display(rows[i].source, k),
       );
   const values = (k: string) =>
-    sum(rows.map((r: any) => (isnum(r.source[k]) ? n(r.source, k) : { value: 0, kind: 'float' })));
+    sum(
+      pyMap(rows, (r: any) => (isnum(r.source[k]) ? n(r.source, k) : { value: 0, kind: 'float' })),
+    );
   const s: any = { rev: values('rev'), exp: values('exp') };
   s.balance = s.rev - s.exp;
   for (const k of ['rev', 'exp', 'balance']) {
@@ -575,7 +593,7 @@ function bills(c: Check, law: any, src: any, buildDate: string) {
     ['opinions', 'opinionDates'],
     ['proposals', 'proposalDates'],
   ] as const) {
-    const value = sum(Object.keys(cn[d]).map((x) => n(cn[d], x)));
+    const value = sum(pyMap(Object.keys(cn[d]), (x) => n(cn[d], x)));
     c.ok(value === cn[k], `counts.${d} sums to ${value}, not ${cn[k]}`);
     c.ok(
       Object.keys(cn[d]).every((x) => iso(x) && x <= buildDate),
@@ -656,7 +674,7 @@ function proposals(c: Check, law: any) {
     same(sorted(Object.keys(p)), ['byDate', 'count', 'items', 'note', 'urlPattern']),
     `proposals keys ${repr(sorted(Object.keys(p)))}`,
   );
-  const count = sum(Object.keys(p.byDate).map((k) => n(p.byDate, k)));
+  const count = sum(pyMap(Object.keys(p.byDate), (k) => n(p.byDate, k)));
   c.ok(
     p.count === items.length && items.length === 69 && count === 69,
     `proposals: count ${p.count}, items ${items.length}, byDate ${count}`,
