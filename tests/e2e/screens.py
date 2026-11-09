@@ -28,6 +28,7 @@ import threading
 import time
 import urllib.error
 import urllib.request
+from urllib.parse import urlsplit, urlunsplit
 from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -870,7 +871,7 @@ VALUE_CHECKS = {
     'S01': dict(all=['Държавният бюджет на достъпен език', 'Разгледай бюджета за 5 минути', 'Изпълнение на плана за 2026 г.',
                      'Приходи', 'Разходи с вноската в ЕС', 'Капиталови разходи', *_PLAN['cur'], *_PLAN['prev'],
                      *[s + ' млрд. €' for s in _PLAN['sums']],
-                     'Платформата показва държавния бюджет за 2026 г. с прости думи: откъде идват парите, за какво се харчат и как се изпълнява планът.',
+                     'Виж приходите и разходите по проекта за 2027 г. и прогнозата за 2027–2029 г., както и изпълнението за 2026 г.',
                      'Откъде идват парите?', 'За какво се харчат?', 'Изпълнява ли се планът?', 'Колко плащам аз?',
                      'Кой харчи парите?', 'Колко е държавният дълг?', 'Какво се променя?', 'Накъде върви бюджетът?']),
     'S15': dict(all=[*_CMP['prev'], *_CMP['cur'], *_CMP['diff'], 'дефицит']),
@@ -1982,7 +1983,7 @@ SHARE_LIST_JS = r"""async () => {
     try { text = sh.textFor(s); link = sh.linkFor(s); embed = sh.embedFor(s); embedHash = sh.embedHash(s); } catch (e) { textErr = String(e); }
     const rel = (await import('./js/data.js')).data.get('releases/current');
     out.push({ id, route: s.route || '', title: s.title || '', source: [].concat(s.source || []).filter(Boolean), status: s.status || '', mock: sh.isMock(s), release: rel ? rel.release_id || '' : null,
-      el: !!el, btn: !!btn, btnVisible: !!btn && btn.getClientRects().length > 0, hasChart, hasStat, report: s.report || '', csv: csv.slice(0, 80000), csvErr, text, link, embed, embedHash, textErr });
+      el: !!el, btn: !!btn, btnVisible: !!btn && btn.getClientRects().length > 0, hasChart, hasStat, report: s.report || '', csv, csvErr, text, link, embed, embedHash, textErr });
   }
   return { specs: out, orphans: [...new Set([...document.querySelectorAll('[data-share]')].map(b => b.dataset.share).filter(id => !sh.get(id)))],
            labels: Object.values(st.STATUS).map(x => x.label) };
@@ -2246,7 +2247,7 @@ def share_ui_csv(page, s, F, W):
     except UnicodeDecodeError:
         F('share-csv', f'{sid}: the downloaded CSV is not valid UTF-8')
         return
-    if len(s['csv']) < 80000 and txt != s['csv']:
+    if txt != s['csv']:
         F('share-csv', f'{sid}: the downloaded CSV differs from csvFor(spec) ({len(txt)} against {len(s["csv"])} characters)')
 
 
@@ -4354,14 +4355,21 @@ def run_summary(findings, args, d, stats, t0):
 
 
 # ========================================================================================================= orchestrator
+def site_base(address):
+    """Normalize only the URL path; dots in a hostname never denote a file."""
+    parts = urlsplit(address)
+    path = parts.path or '/'
+    if not path.endswith('/'):
+        path = path[:path.rfind('/') + 1] if '.' in path.rsplit('/', 1)[-1] else path + '/'
+    return urlunsplit((parts.scheme, parts.netloc, path, '', ''))
+
+
 def main(argv=None):
     args = parse_args(argv)
     t0 = time.time()
     server = None
     if args.url:
-        base = args.url.split('#')[0].split('?')[0]
-        if not base.endswith('/'):
-            base = base[:base.rfind('/') + 1] if '.' in base.rsplit('/', 1)[-1] else base + '/'
+        base = site_base(args.url)
     else:
         if not (SITE / 'index.html').is_file():
             print(f'screens: {SITE / "index.html"} does not exist', file=sys.stderr)

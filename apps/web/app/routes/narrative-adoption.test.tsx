@@ -161,7 +161,7 @@ it('law remains usable without the optional ministry comparison and rejects unsu
     renderToString(<MigratedScreen model={m} navigation={{ go() {}, announce() {} }} />),
   ).toContain('Пътят на бюджета');
   expect((await model('S14', { per: '2024.report' })).unsupported).toBe(true);
-  expect((await model('S14', { per: 'invalid' })).period.key).toBe('2026.law');
+  expect((await model('S14', { per: 'invalid' })).period.key).toBe('2027.draft');
 });
 for (const per of ['2026.draft', '2026.law'])
   it(`feed preserves the adopted-law percentage and citation under ${per}`, async () => {

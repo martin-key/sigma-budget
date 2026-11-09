@@ -138,7 +138,7 @@
       "query": {},
       "status": 200,
       "file": "S14.html",
-      "sha256": "3dca023c1c7c0d69cc10e5516f93690c0f5b9ec2d1334db93da7b9bcd733ebde"
+      "sha256": "e52470f8cdd35efb78b878b56205c5365b26736eb8a59fce23a40c21b94473f0"
     },
     {
       "screen": "S14",
@@ -188,7 +188,7 @@
       },
       "status": 200,
       "file": "S14-draft.html",
-      "sha256": "7ebe232ef5a27efdbb83c6ea4d58e61653d4be212e07bbe6cd396d362c2df3cb"
+      "sha256": "81dcf0b8437c95ddf3ce18d7fc70518b9c43790d96c013ed436589f9b680f354"
     },
     {
       "screen": "S14",
@@ -218,23 +218,29 @@
       "file": "S14-budgets.csv",
       "address": "/zakon",
       "block": "s14-bjudzheti",
-      "sha256": "a181bda62eb9f2a2d2b83074b197a124eb15f7b6b582905f17e045c0ae284875"
+      "sha256": "c03de11ff589d0f88c9ccde90cd37949020b78f65a02d2c425455ef6c36b719c"
     }
   ],
   "periodContractOverrides": {
-    "integrationBaseCommit": "bd973a0a3dfbc8d8bd03ac85e6aa1f0784669bf2",
+    "integrationBaseCommit": "05d6f6eeca9991468f3c94c3c9c26e87d5b0fae0",
     "generator": "refresh-period-fixtures.mjs",
-    "renderer": "Legacy build()/frameHtml()/head() with frozen narrative inputs",
+    "renderer": "Legacy build()/frameHtml()/head()/csvFor() with frozen narrative inputs and manifest edition metadata",
     "sourceSha256": {
-      "../../../client/render.js": "5c9203cfb9f1e16aa2fef0192690a19835d1d8d0895f09952182517f2eab842a",
-      "../../../client/periods.js": "50d7a6846461e4dbf77399439ef481a65ccc5b06d05a24909ec6b93a454b696d",
-      "../../../client/seo.js": "b586aee19d01a48b752525445c73442b2a74591c7c521c74e7e1c84106910878",
+      "../../../client/render.js": "cf908966b9436aaa01a8d7f004ac7515dd0992884146560856f380923be45bd0",
+      "../../../client/periods.js": "2b658e09e3c934aee774a565e0899ad4b1f2710cbba00e0fd96a71b14bdff753",
+      "../../../client/routes.js": "75156e25fb5e401d65eb182956be450f81a01c2a14e5bed649d0f0ff30f96095",
+      "../../../client/seo.js": "9c27cb073712dc8a047e8870c000dae798ea20efbacbb7bfa19eaaaacc88f0b1",
       "../../../client/pages/s14-zakon.js": "3d4518321ddd2a41c8cb039c8023de3094ebba3ead7b78e332ed51286b0f0726",
-      "../../lib/routes.json": "07c6aaeae1a8d9da5e853f886be1ee3949e78c3eadb871a0da0a8a460fa5b765"
+      "../../../client/share.js": "e4101fe4fa1e7fdac16f93da35a0b01932570216fda29819fc93ba0a2dfeecfe",
+      "../../../client/ui/table.js": "4d6ff58559bb8756a3c4e708a13c8c32547e25378d78e280ed9f00cf0d9e1a20",
+      "../../../client/publication-query.js": "834f8049cab2c6ca133bb450a96ac5b421436d7f038994635f0caa40a9567ea8",
+      "../../lib/routes.json": "d41a55e3a68f3d92192df348518c4e98e0289ea604f67b045b9fbc4c3c003f7f"
     },
     "files": [
+      "S14.html",
       "S14-draft.html",
-      "S14-unsupported.html"
+      "S14-unsupported.html",
+      "S14-budgets.csv"
     ]
   }
 }

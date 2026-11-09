@@ -265,7 +265,9 @@ jobs:
       - name: Law builder and frozen Python parity
         env:
           LAW_PARITY_REPORT: ${{ github.workspace }}/tmp/ts-migration/candidates/04/diff.json
+          PYTHONPATH: pipeline
         run: |
+          python packages/ingest/test/fixtures/law/generate_oracle.py --check
           pnpm --filter @sigma-budget/ingest exec vitest run src/build/law-evidence.test.ts src/build/law-articles.test.ts src/build/law-changes.test.ts src/build/law.test.ts
       - name: Editorial builder and frozen Python parity
         env:

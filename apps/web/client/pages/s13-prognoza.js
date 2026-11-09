@@ -1,3 +1,4 @@
+import { stateDebt } from '../budget-2027.js';
 import { periodIndex, previousPeriodIndex } from '../annual.js';
 import { selectPeriod } from '../periods.js';
 import { annualGap } from '../ui/annual.js';
@@ -19,7 +20,7 @@ import { pendingState } from '../ui/states.js';
 import { yIndex, change, chartUnit } from '../view.js';
 import { num, pct, money, date, DASH, NBSP } from '../format.js';
 
-export const needs = ['core', 'outlook', 'debt?'];
+export const needs = ['core', 'outlook', 'budget2027?'];
 export const styles = ['s13-prognoza'];
 
 /* ---------------------------------------------------------------- words and small helpers */
@@ -52,7 +53,11 @@ function frame(ctx) {
 }
 
 /** government debt aligned to the years of the outlook; null while debt.json is missing or has no usable series */
-function debtOf() { return null; }
+function debtOf(ctx, f) {
+  const records = f.o.periodKeys.map(key => stateDebt(ctx.data.budget2027, key));
+  if (!records.some(Boolean)) return null;
+  return { mln: records.map(r => r?.total?.value ?? null), pg: records.map(r => r?.pctGdp?.value ?? null), origins: records.map(r => r?.total?.provenance || '') };
+}
 
 /** the year on the axis, then what kind of numbers it is */
 const cats = f => f.years.map((y, i) => `${y}\n${WORD[f.kinds[i]]}`);
@@ -103,10 +108,10 @@ const PLURAL = ['растат', 'намаляват'], SINGULAR = ['расте',
 /** the table twin of a chart: the published numbers, always in млн. € and % от БВП, whatever the chart shows */
 function twin(f, items) {
   const columns = [{ key: 'y', label: 'Година' }, { key: 'v', label: 'Вид данни' }];
-  items.forEach((it, k) => columns.push({ key: `m${k}`, label: it.name, unit: 'млн. €', d: 1, num: true }, { key: `p${k}`, label: it.name, unit: '% от БВП', d: 1, num: true }));
+  items.forEach((it, k) => columns.push({ key: `m${k}`, label: it.name, unit: 'млн. €', d: 1, num: true }, { key: `p${k}`, label: it.name, unit: '% от БВП', d: 1, num: true }, {key:`src${k}`, label: `${it.name}: произход`}));
   const rows = f.years.map((y, i) => {
     const r = { y: String(y), v: LONG[f.kinds[i]], _status: f.kinds[i] === 'forecast' ? 'forecast' : 'real' };
-    items.forEach((it, k) => { r[`m${k}`] = it.s.mln[i]; r[`p${k}`] = it.s.pg[i]; });
+    items.forEach((it, k) => { r[`m${k}`] = it.s.mln[i]; r[`p${k}`] = it.s.pg[i]; r[`src${k}`] = it.s.origins?.[i] || f.o.records?.[i]?.series?.[{ 'Приходи':'revenue', 'Разходи':'expenditure', 'Дефицит':'balance', 'Салдо':'balance', 'Лихви по дълга':'interest' }[it.name]]?.provenance || ''; });
     return r;
   });
   return { columns, rows };
@@ -244,10 +249,10 @@ function summaryBlock(ctx, f, d) {
   const py = f.plan >= 0 ? f.years[f.plan] : null;
   const note = callout({
     kind: 'info', title: 'Чии са тези числа?',
-    body: html`<p>Числата са от мотивите към проекта на бюджета${py ? ` за ${yr(py)}` : ''}, към ${date(f.asOf, true)}. Приетият закон може да се различава от проекта. Какво е променено, виж в „<a href="${ctx.href('S14', {}, { per: '2026.law' })}">Пътят на бюджета</a>“.</p>`
+    body: html`<p>Числата са от мотивите към проекта на бюджета${py ? ` за ${yr(py)}` : ''}, към ${date(f.asOf, true)}. ${ctx.period.year >= 2027 ? 'Проектът за 2027 не е приет закон; 2028–2029 са прогнози. Историческото сравнение на проекта и закона за 2026 е в „' : 'Приетият закон може да се различава от проекта. Какво е променено, виж в „'}<a href="${ctx.href('S14', {}, { per: '2026.law' })}">Пътят на бюджета</a>“.</p>`
   });
   return block({
-    id: 's13-sum', title: 'Накратко', scope: 'kfp', status: 'forecast', statusLabel: 'План и прогноза', source: f.sources, asOf: f.asOf,
+    id: 's13-sum', title: 'Накратко', scope: 'kfp', status: 'forecast', statusLabel: f.years[0] === 2027 ? 'Проект и прогноза' : 'Закон, оценка и прогноза', source: f.sources, asOf: f.asOf,
     share: { text: pts.join(' ') },
     body: html`<div class="s13-sum stack">
       ${pts.length ? html`<ul class="s13-points" data-gl-scan>${pts.map(t => html`<li>${t}</li>`)}</ul>` : pendingState({ title: 'Накратко', text: 'Числата за приходите и разходите още не са налични.' })}
@@ -298,7 +303,7 @@ function kpiBlock(ctx, f, debt) {
 
   // A matching year alone cannot establish the publication or status of debt.
   let dm = null, dg = null, dpm = null, dpg = null, dsub = 'Няма съпоставими данни за дълга за избрания период.';
-  if (debt) { dm = debt.mln[i]; dg = debt.pg[i]; dpm = p >= 0 ? debt.mln[p] : null; dpg = p >= 0 ? debt.pg[p] : null; dsub = null; }
+  if (debt) { dm = debt.mln[i]; dg = debt.pg[i]; dpm = p >= 0 ? debt.mln[p] : null; dpg = p >= 0 ? debt.pg[p] : null; dsub = ok(dm) ? null : 'Няма съпоставими данни за дълга за избрания период.'; }
   const dShow = inPct && ok(dg);
   const debtTile = kpi({
     label: 'Държавен дълг', gl: 'darzhaven-dalg', scope: 'zdd', mln: dm, pctGdp: dg,
@@ -327,14 +332,14 @@ function kpiBlock(ctx, f, debt) {
 /* ---------------------------------------------------------------- chart blocks */
 function chartBlock(f, spec, o) {
   return block({
-    id: o.id, title: o.title, sub: o.sub, scope: o.scope || 'kfp', status: 'forecast', statusLabel: 'Отчет, план и прогноза',
+    id: o.id, title: o.title, sub: o.sub, scope: o.scope || 'kfp', status: 'forecast', statusLabel: f.years[0] === 2027 ? 'Проект 2027 и прогноза 2028–2029' : 'Отчет, закон, оценка и прогноза',
     source: f.sources, asOf: f.asOf, share: { text: spec.desc || o.sub, embed: spec.id },
     body: chart(spec)
   });
 }
 function debtBlock(ctx, f, d) {
   const spec = debtChart(ctx, f, d);
-  if (spec) return chartBlock(f, spec, { id: 's13-b-debt', title: 'Държавен дълг', scope: 'zdd', sub: 'Колко е държавният дълг по години и как се променя спрямо БВП.' });
+  if (spec) return chartBlock(f, spec, { id: 's13-b-debt', title: 'Държавен дълг', scope: 'zdd', sub: 'Таблица VI-1 на АСБП 2027–2029: прогноза за държавния дълг по ЗДД. Не е дългът на целия сектор „Държавно управление“.' });
   return block({
     id: 's13-b-debt', title: 'Държавен дълг', scope: 'zdd', status: 'pending', source: f.sources,
     sub: 'Колко е държавният дълг по години.',
@@ -434,6 +439,7 @@ export function render(ctx) {
   const f = frame(ctx), d = debtOf(ctx, f);
   const rev = revExpChart(ctx, f), def = deficitChart(ctx, f), int = interestChart(ctx, f);
   return {
+    title: f.years[0] === 2027 ? 'Накъде вървим? 2027–2029' : 'Накъде вървим? 2026–2029',
     context: `${ctx.period.label}. Публикация на МФ от ${date(f.asOf)}${NBSP}г.`,
     body: html`
       ${summaryBlock(ctx, f, d)}

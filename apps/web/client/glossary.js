@@ -16,6 +16,7 @@ import { data } from './data.js';
 import { HREF, index, link } from './glossary-scan.js';
 import { popover } from './ui/sheet.js';
 import { go } from './router.js';
+import { glossaryLinks } from './budget-documents.js';
 
 export const titleOf = t => (t.abbr ? `${t.name} – ${t.abbr}` : t.title || t.name || t.slug);
 
@@ -30,7 +31,7 @@ let cur = null;       // the open popover: {pop, opener, slug, trail:[slugs we c
 function bodyOf(term, g, trail) {
   const rel = (term.related || []).map(r => ({ t: g.by.get(r.slug), note: r.note })).filter(r => r.t);
   const notes = [...new Set(rel.map(r => r.note).filter(Boolean))];
-  const see = (term.see || []).filter(s => s && s.label && /^#\//.test(s.href || ''));
+  const see = glossaryLinks(term).filter(s => s && s.label && /^#\//.test(s.href || ''));
   const prev = trail.length ? g.by.get(trail[trail.length - 1]) : null;
   return html`<div class="gl-pop" tabindex="-1">
     ${prev ? html`<p class="gl-trail"><button type="button" class="link-btn" data-gl-back>← ${titleOf(prev)}</button></p>` : ''}

@@ -583,7 +583,7 @@ function budgetsBlock(G: LawModel) {
     law: b.law?.exp ?? null,
     diff: b.diff?.exp ?? null,
     changed: !!b.changed,
-    _href: ctx.href('vedomstvo', { code: b.id }),
+    _href: ctx.href('vedomstvo', { code: b.id }, { per: '2026.law' }),
   }));
   const changed = arr(L.budgets).filter((b) => b.changed);
   const pbl = arr(M?.items).filter(

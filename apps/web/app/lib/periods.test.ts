@@ -31,12 +31,12 @@ const expectedKeys = [
   '2028.forecast',
   '2029.forecast',
 ];
-it('orders statuses explicitly and keeps the law as default', () => {
+it('orders statuses explicitly and uses the 2027 draft as default', () => {
   expect(PERIODS.map((p) => p.key)).toEqual(expectedKeys);
-  expect(DEFAULT_PERIOD).toBe('2026.law');
+  expect(DEFAULT_PERIOD).toBe('2027.draft');
 });
 for (const [requested, canonical, hasNotice] of [
-  [undefined, '2026.law', false],
+  [undefined, '2027.draft', false],
   ['2026.law', '2026.law', false],
   ['2026.expected', '2026.expected', false],
   ['2026.draft', '2026.law', true],
@@ -44,8 +44,8 @@ for (const [requested, canonical, hasNotice] of [
   ['2028.forecast', '2028.forecast', true],
   ['2027.draft', '2027.draft', false],
   ['2029.forecast', '2029.forecast', false],
-  ['no-such-period', '2026.law', true],
-  ['constructor', '2026.law', true],
+  ['no-such-period', '2027.draft', true],
+  ['constructor', '2027.draft', true],
 ] as const) {
   it(`URL/state/SSR/cache matrix: ${requested ?? 'default'}`, () => {
     const address = '/pari' + (requested ? '?per=' + requested : '');
@@ -187,20 +187,22 @@ it('projects keyed series without conflating the two 2026 columns or changing ra
     expect(projected.kfp.expenditure.mln[i]).toBe(out.byPeriod[p.key].series.expenditure.value);
     const R = annualView(rev, 'revenue', out, p.key),
       X = annualView(exp, 'expenditure', out, p.key);
-    expect(R.rows[0].mln[i]).toBe(out.byPeriod[p.key].series.revenue.value);
-    expect(X.economic.rows[0].mln[i]).toBe(out.byPeriod[p.key].series.expenditure.value);
+    const ri = R.periodKeys.indexOf(p.key),
+      xi = X.periodKeys.indexOf(p.key);
+    expect(R.rows[0].mln[ri]).toBe(out.byPeriod[p.key].series.revenue.value);
+    expect(X.economic.rows[0].mln[xi]).toBe(out.byPeriod[p.key].series.expenditure.value);
     if (p.status === 'law') {
       expect(projected.gdp.mln[i]).toBeNull();
-      expect(R.groups.every((g: { mln: Array<number | null> }) => g.mln[i] === null)).toBe(true);
-      expect(X.functions.items.every((g: { mln: Array<number | null> }) => g.mln[i] === null)).toBe(
-        true,
-      );
+      expect(R.groups.every((g: { mln: Array<number | null> }) => g.mln[ri] === null)).toBe(true);
+      expect(
+        X.functions.items.every((g: { mln: Array<number | null> }) => g.mln[ri] === null),
+      ).toBe(true);
     } else {
-      expect(R.groups.every((g: { mln: Array<number | null> }) => Number.isFinite(g.mln[i]))).toBe(
+      expect(R.groups.every((g: { mln: Array<number | null> }) => Number.isFinite(g.mln[ri]))).toBe(
         true,
       );
       expect(
-        X.functions.items.every((g: { mln: Array<number | null> }) => Number.isFinite(g.mln[i])),
+        X.functions.items.every((g: { mln: Array<number | null> }) => Number.isFinite(g.mln[ri])),
       ).toBe(true);
       expect(
         projected.macroRows.every((g: { values: Array<number | null> }) =>

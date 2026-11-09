@@ -128,6 +128,17 @@ class _Rows:
 
     def add(self, group, title, sub="", value="", period="", status="real", href="", kw=""):
         title, href = _clean(title), _clean(href)
+        # The older ASBP draft/forecast has no canonical destination in the current publication.
+        # Annual readers supply current-period search entries in the client. Keep only
+        # historical report years that can be opened with the same publication/status.
+        if group == "indicators" and value and "per=" not in href and re.match(r"^#/(?:pari|prihodi|razhodi|prognoza|bvp)(?:[/?]|$)", href):
+            if str(period) not in ("2024", "2025"):
+                return
+            href += ("&" if "?" in href else "?") + "per=" + str(period) + ".report"
+        # Historical rows must retain their actual publication after the primary context changes.
+        if "per=" not in href and re.search(r"#/(vedomstv|obshtin|dalg|merki|danaci)", href):
+            historical = "2025.report" if str(period) == "2025" and href.startswith("#/dalg") else "2026.law"
+            href += ("&" if "?" in href else "?") + "per=" + historical
         if not title:
             raise ValueError("search-index: a %s row has no title (href %s)" % (group, href))
         if not href.startswith("#/"):
@@ -252,17 +263,6 @@ def _institutions(ctx, rows):
     names = {}
     for b in mi["items"]:
         names[b["id"]] = b
-        pol = b.get("policies") or []
-        bodies = b.get("bodies") or []
-        pol_names = [p["name"] for p in pol] if pol else [p["name"] for p in bodies]
-        short = b["short"] if b["short"] != b["name"] else ""
-        sub = " · ".join(x for x in (short, KIND_LABELS.get(b["kind"], ""), "чл. %s от ЗДБ" % b["art"] if b.get("art") else "") if x)
-        # an abbreviation goes into the title ("Министерство на вътрешните работи – МВР", as the terms do): the engine ranks a word of the
-        # title above one of the description, so „МВР“ then finds the ministry before the „Военна полиция“ programme of another one
-        abbr = short if re.fullmatch(r"[A-Za-zА-Яа-я]{2,8}", short or "") and short[0].isupper() else ""
-        rows.add("institutions", "%s – %s" % (b["name"], abbr) if abbr else b["name"], sub, _money_khil(b.get("expKhil")), "ЗДБ %d" % PLAN_YEAR,
-                 href="#/vedomstvo/%s" % b["id"],
-                 kw=_words(short, b.get("lawName", ""), b["id"], *pol_names))
     f = {n: i for i, n in enumerate(prog["fields"])}
     for r in prog["items"]:
         code, name, level, y26 = r[f["code"]], r[f["name"]], r[f["level"]], r[f["y2026"]]
@@ -272,10 +272,10 @@ def _institutions(ctx, rows):
         who = (b["short"] if b else r[f["ministry"]])
         val = "" if y26 == prog["sentinels"]["noData"] else _money_khil(y26)
         if level == "policy":
-            rows.add("institutions", name, "%s · политика %s" % (who, code), val, str(PLAN_YEAR), href="#/vedomstvo/%s" % r[f["ministry"]], kw=code)
+            rows.add("institutions", name, "%s · политика %s" % (who, code), val, "Проект %s" % PLAN_YEAR, href="#/vedomstvo/%s" % r[f["ministry"]])
         else:
-            rows.add("institutions", name, "%s · програма %s" % (who, code), val, str(PLAN_YEAR),
-                     href="#/vedomstvo/%s/%s" % (r[f["ministry"]], code), kw=code)
+            rows.add("institutions", name, "%s · програма %s" % (who, code), val, "Проект %s" % PLAN_YEAR,
+                     href="#/vedomstvo/%s/%s" % (r[f["ministry"]], code))
 
 
 # ----------------------------------------------------------------------------------------------- municipalities
@@ -287,6 +287,57 @@ def _municipalities(ctx, rows):
             sub += " · %s жители" % fmt_num(m["population"])
         rows.add("municipalities", m["name"], sub, _money_khil(m["transfers"]["all"]), str(mu["year"]), href="#/obshtina/%s" % m["id"],
                  kw=_words("община", m["id"]))
+
+
+def _publication_2027(ctx, rows):
+    from .municipalities import _norm
+    doc = _obj(ctx, "budget2027.json")
+    historical = _obj(ctx, "ministries.json")
+    article_codes = {b["art"] + (1 if b["art"] >= 32 else 0): b["id"] for b in historical["items"]}
+    for article, budget in doc["budgets"]["bill"].items():
+        if int(article) < 2:
+            continue
+        expense = next((r["cell"]["value"] for r in budget["rows"] if r["no"] == "II."), None)
+        code = article_codes.get(int(article), "art" + article)
+        identity = next((b for b in historical["items"] if b["id"] == code), {})
+        short = identity.get("short", "")
+        abbr = short if re.fullmatch(r"[A-Za-zА-Яа-я]{2,8}", short) and short[0].isupper() else ""
+        title = budget["name"] + (" – " + abbr if abbr else "")
+        rows.add("institutions", title, "чл. %s от проекта за 2027 г., основен вариант" % article,
+                 _money_khil(expense), "Проект 2027", href="#/vedomstvo/%s?per=2027.draft" % code, kw=_words(code, short))
+    aliases = {"добричка": "добрич селска", "столична община": "столична", "бобовдол": "бобов дол"}
+    homoglyphs = str.maketrans("ABCEHKMOPTXYabcehkmoptxy", "АВСЕНКМОРТХУавсенкмортху")
+    def name_key(name):
+        name = _norm(name.translate(homoglyphs))
+        return re.sub(r"[^а-я0-9]", "", aliases.get(name, name))
+    identities = _obj(ctx, "municipalities.json")["items"]
+    for row in doc["municipal"]["art52"]:
+        matches = [m for m in identities if name_key(row["name"]) in [name_key(m["name"]), name_key(m.get("lawName", ""))]]
+        if len(matches) > 1:
+            matches = [m for m in matches if name_key(m["region"]) == name_key(re.sub(r"^ОБЛАСТ\s+", "", row["region"]))]
+        if len(matches) != 1:
+            raise ValueError("2027 municipality identity is ambiguous: " + row["name"])
+        municipality = matches[0]
+        rows.add("municipalities", municipality["name"], "Основни бюджетни взаимоотношения, чл. 52, проект 2027",
+                 _money_khil(row["cells"][0]["value"]), "Проект 2027", href="#/obshtina/%s?per=2027.draft" % municipality["id"], kw=_words("община", municipality["id"]))
+    for key, column in (("2027.draft", "2"), ("2028.forecast", "3"), ("2029.forecast", "4")):
+        cell = doc["forecast"]["VI_1"][0]["cells"][column]
+        rows.add("indicators", "Държавен дълг по ЗДД " + key[:4], "Таблица VI-1, АСБП 2027–2029, прогноза на МФ",
+                 fmt_money(cell["value"]), "Прогноза " + key[:4], href="#/dalg?per=" + key)
+    for article, cell in doc["debtLimits"].items():
+        label = {"66": "Минимален фискален резерв", "67": "Максимален държавен дълг", "68": "Максимален нов държавен дълг"}[article]
+        rows.add("indicators", label + " 2027", "Предложена граница, чл. " + article + ", не прогноза и не приет закон",
+                 fmt_money(cell["value"] * 1000), "Проект 2027", href="#/dalg?per=2027.draft")
+    for table, kind in (("II_7", "Приходна мярка"), ("II_8", "Разходна мярка")):
+        for row_index, row in enumerate(doc["forecast"][table]):
+            label_kind = "Общ ред" if row["label"].strip().lower().startswith("общо:") else kind
+            for column, period in enumerate(("2027.draft", "2028.forecast", "2029.forecast")):
+                cell = row["cells"].get(str(column))
+                publication = ("Проект " if column == 0 else "Прогноза ") + period[:4]
+                gap = row["gaps"].get(str(column), "")
+                rows.add("measures", row["label"], "%s · Таблица %s%s" % (label_kind, table.replace("_", "-"), " · " + gap if gap else ""),
+                         fmt_money(cell["value"]) if cell else "", publication,
+                         href="#/merki?per=%s&to=s12-%s-%d-%d" % (period, table, row_index, column))
 
 
 # ----------------------------------------------------------------------------------------------- measures
@@ -373,7 +424,7 @@ def search(ctx):
     rows = _Rows()
     _indicators(ctx, rows)
     _institutions(ctx, rows)
-    _municipalities(ctx, rows)
+    _publication_2027(ctx, rows)
     _measures(ctx, rows)
     _terms(ctx, rows)
     _datasets(ctx, rows)
@@ -382,7 +433,7 @@ def search(ctx):
     if used != GROUPS:
         ctx.notes.append("search-index: groups without rows: %s" % ", ".join(g for g in GROUPS if g not in used))
     srcs = set()
-    for rel in ("core.json", "outlook.json", "ministries.json", "programs.json", "municipalities.json", "measures.json", "debt.json", "rates.json"):
+    for rel in ("core.json", "outlook.json", "ministries.json", "programs.json", "municipalities.json", "measures.json", "debt.json", "rates.json", "budget2027.json"):
         srcs.update(_obj(ctx, rel)["meta"].get("source") or [])
     srcs.update(["wg"])
     sources = [s for s in definitions.SOURCES if s in srcs]

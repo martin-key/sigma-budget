@@ -1,5 +1,5 @@
 // S03 · Речник · #/rechnik/:term? · next S02, S01 · periods none
-// Every definition, example, alias, note and link comes verbatim from data/glossary.json (D22, 64 terms): nothing here retypes a term.
+// Definitions, examples, aliases and notes come verbatim from data/glossary.json; document links preserve their original publication.
 // Only the interface words are ours (labels, hints, the empty state, the form).
 //   #/rechnik               search ("Коя дума не разбираш?") + 5 themes + А–Я index + the 64 terms as disclosures
 //   #/rechnik?q=дълг&cat=…&l=Д   the same, with a search / theme / letter applied (kept in the address while typing, without re-rendering)
@@ -17,6 +17,7 @@ import { ext } from '../ui/cards.js';
 import { srcTag } from '../ui/source.js';
 import * as feedback from '../feedback.js';
 import { siteUrl } from '../seo.js';
+import { glossaryLinks } from '../budget-documents.js';
 
 export const needs = ['glossary'];
 export const styles = ['s03-rechnik'];
@@ -240,6 +241,7 @@ function confusables(I, t) {
 /** the screen a „Виж в бюджета“ link opens, by its address: for the sentence under the button */
 function screenTitle(href) {
   try {
+    if (new URLSearchParams(String(href).split('?')[1] || '').get('dokument') === 'plan') return 'Проект на бюджетен план до ЕК за 2027';
     const segs = String(href).replace(/^#\/?/, '').split('?')[0].split('/').filter(Boolean).map(decodeURIComponent);
     return match(segs)?.route?.title || '';
   } catch { return ''; }
@@ -253,7 +255,7 @@ function termCard(ctx, I, e, o = {}) {
     <p class="s03-ex"><span class="s03-ex-label">Пример</span> ${t.example}</p>
     ${groups.map(gr => html`<p class="s03-confuse"><strong>Не бъркай с:</strong> ${gr.items.map((x, i) => html`${i ? ', ' : ''}<a href="${termHref(ctx, x.slug)}">${x.name}</a>`)}. <span class="s03-confuse-note">${gr.note}</span></p>`)}
     <p class="s03-acts">
-      ${(t.see || []).map(s => html`<a class="btn btn-sm btn-primary" href="${s.href}">${s.label}<span class="sr-only"> за „${t.name}“</span>${icon('arrowRight', { size: 14 })}</a>`)}
+      ${glossaryLinks(t).map(s => html`<a class="btn btn-sm btn-primary" href="${s.href}">${s.label}<span class="sr-only"> за „${t.name}“</span>${icon('arrowRight', { size: 14 })}</a>`)}
       <a class="btn btn-sm" href="${termHref(ctx, t.slug)}">Страница на термина<span class="sr-only"> „${t.name}“</span></a>
     </p>`;
   return html`<li class="s03-item">${disclosure({
@@ -437,9 +439,9 @@ function termPage(ctx, I, e) {
         <h2 id="s03-conf-h">${g.relationsTitle}</h2>
         ${groups.map(gr => html`<p class="s03-conf-note"><strong>Не бъркай с…</strong> ${gr.note}</p>${chips({ label: 'Не бъркай с', items: gr.items.map(x => ({ label: x.name, href: termHref(ctx, x.slug) })) })}`)}
       </section>` : ''}
-      ${(t.see || []).length ? html`<section class="s03-block" aria-labelledby="s03-see-h">
+      ${glossaryLinks(t).length ? html`<section class="s03-block" aria-labelledby="s03-see-h">
         <h2 id="s03-see-h">Къде е това в бюджета?</h2>
-        ${t.see.map(s => html`<p class="s03-see"><a class="btn btn-primary" href="${s.href}">${s.label}${icon('arrowRight', { size: 16 })}</a>${screenTitle(s.href) ? html` <span class="muted">Отваря екрана „${screenTitle(s.href)}“.</span>` : ''}</p>`)}
+        ${glossaryLinks(t).map(s => html`<p class="s03-see"><a class="btn btn-primary" href="${s.href}">${s.label}${icon('arrowRight', { size: 16 })}</a>${screenTitle(s.href) ? html` <span class="muted">Отваря екрана „${screenTitle(s.href)}“.</span>` : ''}</p>`)}
       </section>` : ''}
       <section class="s03-block" aria-labelledby="s03-ask-h">
         <h2 id="s03-ask-h">Още не разбирам</h2>

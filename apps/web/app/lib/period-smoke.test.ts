@@ -46,7 +46,7 @@ it('does not attach July function notes to the newer annual series', async () =>
   }
 });
 
-for (const per of ['2026.law', '2026.expected']) {
+for (const per of ['2026.law']) {
   it(`does not relabel the old core debt figure as ${per}`, async () => {
     const document = await annualDocument('/prognoza?per=' + per);
     const debt = [...document.querySelectorAll('#s13-kpis .kpi')].find((tile) =>
@@ -165,10 +165,16 @@ for (const per of ['2026.draft', '2027.forecast', '2028.forecast', 'unknown']) {
 }
 
 it('law overview explains incomplete spending coverage instead of ranking the few known rows', async () => {
-  const url = new URL('https://budget.test/pari');
-  provideScope(() => ({ url, origin: url.origin, state: requestState(), data: new Map(), load }));
+  const url = new URL('https://budget.test/pari?per=2026.law');
+  provideScope(() => ({
+    url,
+    origin: url.origin,
+    state: requestState('2026.law'),
+    data: new Map(),
+    load,
+  }));
   try {
-    const r = resolve('/pari');
+    const r = resolve('/pari?per=2026.law');
     const vm = await build(r.route, r.params, r.query);
     const html = String(frameHtml(vm));
     expect(html).toContain('Няма законова функционална разбивка.');
@@ -217,10 +223,16 @@ it('annual CSV preserves published decimal precision and the law/expected distin
 
 it('unavailable annual blocks carry reasons without invented pending IDs or statistic share actions', async () => {
   for (const path of ['/prognoza', '/bvp']) {
-    const url = new URL(path, 'https://budget.test');
-    provideScope(() => ({ url, origin: url.origin, state: requestState(), data: new Map(), load }));
+    const url = new URL(path + '?per=2026.law', 'https://budget.test');
+    provideScope(() => ({
+      url,
+      origin: url.origin,
+      state: requestState('2026.law'),
+      data: new Map(),
+      load,
+    }));
     try {
-      const r = resolve(path);
+      const r = resolve(url.pathname + url.search);
       const vm = await build(r.route, r.params, r.query);
       const html = String(frameHtml(vm));
       expect(html).not.toContain('data-pending-id="s13-debt-pending"');

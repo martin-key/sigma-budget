@@ -167,16 +167,16 @@ def _eurostat_events(ctx):
          "title": "Евростат: дългът на държавното управление за %d г." % mst["year"],
          "text": "Дългът по Маастрихт е %s (%s от БВП). Това е друг обхват от държавния дълг в закона."
                  % (fmt_money(mst["mln"]), fmt_pct(mst["pctGdp"])),
-         "href": "#/dalg?obhvat=maastricht", "status": "real", "source": ["eurostat"]},
+         "href": "#/dalg?obhvat=maastricht&per=%d.report&to=s17-b-maastricht" % mst["year"], "status": "real", "source": ["eurostat"]},
         {"id": "eurostat-gov_10q_ggdebt-" + d_quarter, "date": d_quarter, "dateKind": "published", "kind": "eurostat",
          "title": "Евростат: дългът в края на %s" % _quarter_text(q["id"]),
          "text": "Дългът по Маастрихт е %s (%s от БВП); данните са предварителни." % (fmt_money(q["mln"]), fmt_pct(q["pctGdp"])),
-         "href": "#/dalg?obhvat=maastricht", "status": "real", "source": ["eurostat"]},
+         "href": "#/dalg?obhvat=maastricht&per=%d.report&to=s17-b-quarterly" % mst["year"], "status": "real", "source": ["eurostat"]},
         {"id": "eurostat-gov_10a_exp-" + d_cofog, "date": d_cofog, "dateKind": "published", "kind": "eurostat",
          "title": "Евростат: разходите по функции (COFOG) са допълнени до %d г." % cy,
          "text": "Разходите на сектор „Държавно управление“ за %d г. са %s (%s от БВП). Разрезът по функции на Евростат не съвпада "
                  "с функциите на КФП." % (cy, fmt_money(exp["cofog"]["total"]["mln"][-1]), fmt_pct(exp["cofog"]["total"]["pctGdp"][-1])),
-         "href": "#/razhodi", "status": "real", "source": ["eurostat"]},
+         "href": "#/razhodi?per=%d.report" % cy, "status": "real", "source": ["eurostat"]},
         {"id": "eurostat-tps00001-" + pop_raw, "date": pop_raw, "dateKind": "published", "kind": "eurostat",
          "title": "Евростат: населението на 1 януари %d г." % pop["year"],
          "text": "Населението на България е %s души. Ползваме го за показателите „на човек“." % fmt_num(pop["persons"]),
@@ -198,6 +198,14 @@ def _data_events(ctx):
              "text": "Страницата на МИДТ показва %d дневни файла (%s): общо %d плащания на стойност %s. Файловете не "
                      "съдържат получателите и не са сума за месеца." % (len(files), days, ov["count"], fmt_eur(ov["eur"], 2)),
              "href": "#/plashtania", "status": "real", "source": ["sebra"]}]
+
+
+def budget_publication_events(ctx):
+    publication = _need(ctx, "budget2027.json")
+    return [{"id": "mf-budget-2027", "date": publication["publication"], "dateKind": "published", "kind": "data",
+             "title": "Проектът за бюджет 2027 и АСБП 2027–2029 са публикувани от МФ",
+             "text": "Налични са проектът за държавния бюджет за 2027 г. и средносрочната рамка за 2027–2029 г.: ведомствени бюджети, общини и предложени граници на дълга. Проектът не е приет закон.",
+             "href": "#/byudzhet-2027", "status": "real", "source": ["budget2027"]}]
 
 
 # ------------------------------------------------------------------------------------------------ highlights
@@ -270,7 +278,7 @@ def rss(feed, base):
 # ------------------------------------------------------------------------------------------------ build
 def build_feed(ctx):
     events = []
-    for fam in (_report_events(ctx), _law_events(ctx), _rates_events(ctx), _eurostat_events(ctx), _data_events(ctx)):
+    for fam in (_report_events(ctx), _law_events(ctx), _rates_events(ctx), _eurostat_events(ctx), _data_events(ctx), budget_publication_events(ctx)):
         events.extend(fam)
     ids = [e["id"] for e in events]
     if len(set(ids)) != len(ids):

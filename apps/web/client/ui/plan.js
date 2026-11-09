@@ -36,6 +36,7 @@ export function planModel(C) {
   return { month: L.month, asOf: L.asOf, rows, basis: planBasis(C.ex) };
 }
 export const planCsv = P => ({
+  decimalColumns: [1, 2],
   columns: ['Показател', `Отчет към ${P.asOf}, ${P.basis.adopted ? 'млн.' : 'млрд.'} €`, P.basis.csvPlan, 'Дял от плана, %'],
   rows: P.rows.map(r => [r.name, ...(P.basis.adopted
     ? [r.canonical.cum, r.canonical.plan ?? null]

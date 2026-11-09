@@ -1,5 +1,5 @@
 // One vocabulary and resolver for the URL, request state, selector and historical bookmarks.
-export const DEFAULT_PERIOD = '2026.law';
+export const DEFAULT_PERIOD = '2027.draft';
 export const PERIODS = [
   { key: '2024.report', year: 2024, status: 'report', vintage: 'actual', label: '2024 · Отчет', desc: 'Отчетени данни' },
   { key: '2025.report', year: 2025, status: 'report', vintage: 'actual', label: '2025 · Отчет', desc: 'Всяка серия пази статуса на отчета при издателя' },
@@ -19,7 +19,7 @@ export function resolvePeriod(requested) {
   const key = Object.hasOwn(aliases, requested) ? aliases[requested] : requested;
   const known = PERIODS.some(p => p.key === key);
   return { requested: requested ?? null, resolved: known ? key : DEFAULT_PERIOD,
-    notice: (Object.hasOwn(notices, requested) ? notices[requested] : '') || (requested != null && !known ? `Непознат период „${requested}“. Показан е приетият закон за 2026.` : '') };
+    notice: (Object.hasOwn(notices, requested) ? notices[requested] : '') || (requested != null && !known ? `Непознат период „${requested}“. Показан е проектът за 2027.` : '') };
 }
 export const periodByKey = key => PERIODS.find(p => p.key === resolvePeriod(key).resolved);
 

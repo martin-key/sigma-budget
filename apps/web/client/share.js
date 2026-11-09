@@ -1,4 +1,5 @@
 import { resolvePeriod } from './periods.js';
+import { publicationQuery } from './publication-query.js';
 // Sharing: registry of shareable blocks + the ONE block menu „Сподели“ (V5: „Изтегли изображение“ and „Копирай връзка“; the table file for experts; „Намерих грешка“).
 // A block registers a spec while its screen renders (ui/block.js does this for you); the router clears the registry on every navigation.
 //   share.register(id, {title, sub, text, source:['kfp'], asOf, status, mock, chart:'chartDomId', table:{columns,rows,statuses?} | ()=>…, embed:true|'routeKey.chartId', embedParams:{code:'1000'}, report:'#/vrazka?…',
@@ -88,7 +89,7 @@ const PERSONAL = new Set(['demo', 'brutno', 'bruto', 'zaplata', 'dohod', 'neto',
 /** link to this block on the current screen: keeps the state of the address (?per=, ?g1=…), adds the block's own `link` parameters (the same result on every opening) and ?to=<block> */
 export function linkFor(spec, { to = true } = {}) {
   const { path, query: qs } = addrParts(here());
-  const q = new URLSearchParams(qs);
+  const q = new URLSearchParams(publicationQuery(currentRoute()?.id, {}, Object.fromEntries(new URLSearchParams(qs))));
   PERSONAL.forEach(k => q.delete(k));
   const own = val(spec?.link);
   if (own && typeof own === 'object') for (const [k, v] of Object.entries(own)) { if (v == null || v === '') q.delete(k); else if (!PERSONAL.has(k)) q.set(k, String(v)); }
@@ -122,6 +123,9 @@ export function textFor(spec) {
 export const FORMULA_START = /^[=+\-@\t\r\uFF1D\uFF0B\uFF0D\uFF20]/;
 const guard = s => (FORMULA_START.test(s) ? "'" + s : s);
 const csvVal = v => (v == null ? '' : typeof v === 'number' ? (Number.isFinite(v) ? String(v).replace('.', ',') : '') : guard(String(v).replace(/\s*[\r\n]+\s*/g, ' ')));   // a cell is one line: a break inside a cell breaks row-by-row tools
+// Only declared decimal columns carry canonical money strings. Never coerce
+// identifiers or arbitrary text, and never round through binary Number.
+const csvDecimal = v => typeof v === 'string' && /^-?(?:0|[1-9]\d*)(?:\.\d+)?$/.test(v) ? v.replace('.', ',') : csvVal(v);
 /** what every row of a CSV says about itself (section 9.2): the period, the unit, the budget scope and the release of the data. The period
  *  line of a block is „януари—септември 2026 г. · млрд. €“: the part after „ · “ is the unit, unless the block names one */
 export function csvMeta(spec) {
@@ -130,7 +134,7 @@ export function csvMeta(spec) {
   return {
     period: per || (spec.asOf ? `към ${date(spec.asOf)}` : ''),
     unit: spec.unit || rest.join(' · '),
-    scope: scope ? SCOPES[scope]?.long || SCOPES[scope]?.label || scope : '',
+    scope: scope ? spec.scope?.long || SCOPES[scope]?.long || spec.scope?.label || SCOPES[scope]?.label || scope : '',
     release: data.get('releases/current')?.release_id || '',
   };
 }
@@ -142,7 +146,7 @@ export function csvFor(spec) {
   const st = i => statusLabel(t.statuses?.[i] || spec.status || (isMock(spec) ? 'mock' : 'real'));
   const m = csvMeta(spec);
   const lines = [[...t.columns, 'период', 'единица', 'обхват', 'издание', 'статус', 'източник'].map(c => csvCell(csvVal(c))).join(';')];
-  t.rows.forEach((r, i) => lines.push([...r.map(csvVal), ...[m.period, m.unit, m.scope, m.release].map(csvVal), st(i), src].map(csvCell).join(';')));
+  t.rows.forEach((r, i) => lines.push([...r.map((v, column) => t.decimalColumns?.includes(column) ? csvDecimal(v) : csvVal(v)), ...[m.period, t.units?.[i] ?? m.unit, m.scope, m.release].map(csvVal), st(i), src].map(csvCell).join(';')));
   return '\uFEFF' + lines.join('\r\n') + '\r\n';
 }
 /** address of the embed view (S29): /embed/<routeKey>.<chartId>[?per=…&<spec.embedParams>] (internal form, js/loc.js)

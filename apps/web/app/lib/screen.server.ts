@@ -1,3 +1,4 @@
+import { store } from '../../client/store.js';
 // The first response of a screen (docs/adr/0002-react-router-ssr.md): the screen that apps/web/client/router.js paints in the browser, drawn
 // here from the release of the request. The browser then takes the same document over (apps/web/client/main.js), as it took over the
 // prerendered files before. The request scope (apps/web/client/env.js) is set by apps/web/workers/app.ts around this call.
@@ -85,6 +86,7 @@ export async function renderScreen(url: URL, release: Rel): Promise<ScreenResult
   const r = resolve(address);
   if (r.found && !sameAddress(r.want, address)) return { redirect: r.want }; // /Prihodi, an old address, a default ?per= → the canonical one
   const { route, params } = r;
+  store.set('period', r.periodResolution.resolved);
   const query = screenQuery(route, r.query); // the keys of the screen only: what the edge cache keys it on (apps/web/workers/app.ts)
 
   resetShare(route);

@@ -1,3 +1,4 @@
+import { cellValue, stateDebt } from '../budget-2027.js';
 // S04 · Бюджетът за 5 минути · #/5-minuti · next S06, S03 · periods none
 // V5: the former «Пътеводител» (S02) is merged in. Six short scenes with real numbers: (1) revenue against expenditure, (2) where the money comes
 // from (100 € as a waffle), (3) where it goes (the functions), (4) deficit -> new debt -> debt, (5) the measures, (6) the execution to the latest
@@ -10,11 +11,11 @@
 // Numbers: only from core (kpis, functions, revenueGroups), execution (the 2025 pace), debt (limits, ZDD) and measures; all through the
 // format helpers and view.amount, so „% от БВП“, „на човек“ and „и в лева“ apply. A failed optional file turns only its own scene into a note.
 // Motion: bars and cells grow once when their scene scrolls into view; nothing moves under prefers-reduced-motion, and nothing is hidden first.
-import { selectPeriod } from '../periods.js';
+import { selectPeriod, DEFAULT_PERIOD } from '../periods.js';
 import { planBasis } from '../exec.js';
 import { html, raw } from '../html.js';
 import { num, pct, money, date, monthName, NBSP } from '../format.js';
-import { byKey, href } from '../routes.js';
+import { byKey, byId, href as routeHref } from '../routes.js';
 import { amount } from '../view.js';
 import * as share from '../share.js';
 import { block } from '../ui/block.js';
@@ -24,15 +25,20 @@ import { scopeChip } from '../ui/scope.js';
 import { errorState } from '../ui/states.js';
 import { gl } from '../ui/gl.js';
 
-export const needs = ['core', 'outlook', 'revenue?', 'expenditure?', 'execution?', 'measures?', 'debt?', 'guide?'];
+export const needs = ['core', 'outlook', 'revenue?', 'expenditure?', 'execution?', 'measures?', 'debt?', 'budget2027?', 'guide?'];
 export const styles = ['s04-5-minuti'];
+const href = (id, params = {}, query = {}) => {
+  const target = byId[id] || byKey[id];
+  const primary = target?.periods === 'all' || target?.periods?.includes?.(DEFAULT_PERIOD);
+  return routeHref(id, params, { ...(primary ? { per: DEFAULT_PERIOD } : {}), ...query });
+};
 
 const SCENES = [
   { id: 's04-scene1', nav: 'Приходи и разходи', title: 'Повече разходи, отколкото приходи' },
   { id: 's04-scene2', nav: 'Откъде идват парите', title: 'Откъде идват парите' },
   { id: 's04-scene3', nav: 'За какво отиват', title: 'За какво отиват парите' },
   { id: 's04-scene4', nav: 'Дефицит и дълг', title: 'От дефицит до дълг' },
-  { id: 's04-scene5', nav: 'Мерките', title: 'Мерките в бюджета' },
+  { id: 's04-scene5', nav: 'Мерките', title: 'Мерките в проекта за 2027 г.' },
   { id: 's04-scene6', nav: 'Изпълнението', title: 'Как върви изпълнението' }
 ];
 const TOTAL = SCENES.length;
@@ -70,7 +76,7 @@ function cells100(shares) {
 }
 
 /** the table behind a picture: registered for the block's „Сподели“ (CSV) and named by data-attach on the figure */
-const twin = (id, columns, rows) => { share.attach(id, { table: () => ({ columns, rows }) }); return id; };
+const twin = (id, columns, rows, decimalColumns = []) => { share.attach(id, { table: () => ({ columns, rows, decimalColumns }) }); return id; };
 
 /* ------------------------------------------------------------------ pieces */
 
@@ -109,7 +115,7 @@ function scene(n, o) {
     ${nx ? html`<p class="s04-go"><a href="${to(nx.id)}">Следваща сцена: ${nx.nav}<span aria-hidden="true"> →</span></a></p>` : ''}`;
   return block({
     id: s.id, title: o.title || s.title, level: 2, sub: `Сцена ${n} от ${TOTAL}`, scope: o.scope, status: o.status,
-    source: o.source, asOf: o.asOf, share: o.share ? { text: o.share } : undefined, body, cls: 's04-block'
+    source: o.source, asOf: o.asOf, share: o.share ? { text: o.share, period: o.period || '2027.draft', unit: o.unit || 'млн. €' } : undefined, body, cls: 's04-block'
   });
 }
 
@@ -131,7 +137,7 @@ function scene1(ctx, core) {
   const g = mln => (mln / k.gdp?.mlnPrecise) * 100;
   const top = Math.max(rev, exp);
   const text = html`
-    <p>През 2026 г. държавата планира да събере <strong>${amt(ctx, rev, g(rev))}</strong> приходи и да похарчи <strong>${amt(ctx, exp, g(exp))}</strong>.</p>
+    <p>През ${ctx.period.year} г. държавата планира да събере <strong>${amt(ctx, rev, g(rev))}</strong> приходи и да похарчи <strong>${amt(ctx, exp, g(exp))}</strong>.</p>
     <p>Разликата е <strong>${amt(ctx, gap, g(gap))}</strong>${or(alt(ctx, gap, g(gap), 1, true))}. Така се нарича ${gl('byudzheten-defitsit', 'дефицит')}: държавата харчи повече, отколкото получава.</p>`;
   const id = twin('s04-fig1', ['Показател', 'Стойност, млн. €'], [['Приходи', rev], ['Разходи', exp], ['Дефицит', gap]]);
   const visual = html`<figure class="s04-fig" data-attach="${id}">
@@ -139,15 +145,15 @@ function scene1(ctx, core) {
       ${bar({ label: html`<a href="${href('prihodi')}">Приходи</a>`, value: amt(ctx, rev, g(rev)), kind: 'rev', fill: (rev / top) * 100, gap: (gap / top) * 100 })}
       ${bar({ label: html`<a href="${href('razhodi')}">Разходи</a>`, value: amt(ctx, exp, g(exp)), kind: 'exp', fill: (exp / top) * 100 })}
     </div>
-    <figcaption class="s04-cap">Планирани приходи и разходи на КФП за 2026 г. Пунктираната част е дефицитът: разходи, за които няма приходи.</figcaption>
+    <figcaption class="s04-cap">Планирани приходи и разходи на КФП за ${ctx.period.year} г. Пунктираната част е дефицитът: разходи, за които няма приходи.</figcaption>
   </figure>`;
   const deep = deeper(ctx, 1, 1, [
     { href: href('izpalnenie'), title: byKey.izpalnenie.title, text: 'Колко е събрано и похарчено досега, и как се сравнява с миналата година.' },
     { href: href('izpalnenie', {}, { pokazatel: 'balance' }), title: 'Салдото месец по месец', text: 'Кога дефицитът расте и кога намалява.' }
   ]);
   return scene(1, {
-    text, visual, deep, scope: 'kfp', source: ['budget2027'], asOf: ctx.data.execution?.plan2026?.asOf,
-    share: `През 2026 г. държавата планира приходи от ${money(rev, { d: 1 })} и разходи от ${money(exp, { d: 1 })}; разликата е дефицит от ${money(gap, { d: 1 })}.`
+    text, visual, deep, scope: 'kfp', source: ['budget2027'], asOf: selectPeriod(ctx.annualRaw?.outlook, ctx.period.key).publication,
+    share: `През ${ctx.period.year} г. държавата планира приходи от ${money(rev, { d: 1 })} и разходи от ${money(exp, { d: 1 })}; разликата е дефицит от ${money(gap, { d: 1 })}.`
   });
 }
 
@@ -155,7 +161,7 @@ function scene1(ctx, core) {
 
 function scene2(ctx, core) {
   const groups = core.revenueGroups;
-  if (!Array.isArray(groups) || !groups.length) return block({ id: 's04-scene2', title: SCENES[1].title, status: 'pending', body: html`<p>${selectPeriod(ctx.annualRaw?.revenue, '2026.law').gaps?.groups || 'Няма данни за приходите.'}</p>` });
+  if (!Array.isArray(groups) || !groups.length) return block({ id: 's04-scene2', title: SCENES[1].title, status: 'pending', body: html`<p>${selectPeriod(ctx.annualRaw?.revenue, ctx.period.key).gaps?.groups || 'Няма данни за приходите.'}</p>` });
   const gdp = core.kpis.gdp?.mlnPrecise;
   const cells = cells100(groups.map(g => g.share ?? g.mln));
   let c = 0;
@@ -176,15 +182,15 @@ function scene2(ctx, core) {
   const visual = html`<figure class="s04-fig s04-fig-waffle" data-attach="${id}">
     <div class="s04-waffle" aria-hidden="true">${squares}</div>
     <ul class="s04-legend">${groups.map((g, i) => html`<li><span class="s04-sw" data-g="${col[i]}" aria-hidden="true"></span><span class="s04-lg-n"><a href="${href('prihodi', { source: g.id })}">${g.name}</a></span><span class="s04-lg-v"><strong>${cells[i]}${NBSP}€</strong><span class="s04-lg-a">${amt(ctx, g.mln, ok(gdp) ? (g.mln / gdp) * 100 : undefined)}</span></span></li>`)}</ul>
-    <figcaption class="s04-cap">Приходи на КФП за 2026 г. по видове. Дяловете са закръглени до цели евро така, че да се събират точно до 100${NBSP}€.</figcaption>
+    <figcaption class="s04-cap">Приходи на КФП за ${ctx.period.year} г. по видове. Дяловете са закръглени до цели евро така, че да се събират точно до 100${NBSP}€.</figcaption>
   </figure>`;
   const deep = deeper(ctx, 2, 2, [
     { href: href('prihodi'), title: byKey.prihodi.title, text: 'Всичките осем източника, по години и в таблица.' },
     { href: href('prihodi', { source: a.id }), title: a.name, text: 'Най-големият източник: кой го плаща и какво значи за теб.' }
   ]);
   return scene(2, {
-    text, visual, deep, scope: 'kfp', source: ['budget2027'], asOf: ctx.data.execution?.plan2026?.asOf,
-    share: `От всеки 100 € приходи на КФП през 2026 г.: ${groups.map((g, i) => `${cells[i]} € — ${g.name}`).join('; ')}.`
+    text, visual, deep, scope: 'kfp', source: ['budget2027'], asOf: selectPeriod(ctx.annualRaw?.outlook, ctx.period.key).publication,
+    share: `От всеки 100 € приходи на КФП през ${ctx.period.year} г.: ${groups.map((g, i) => `${cells[i]} € — ${g.name}`).join('; ')}.`
   });
 }
 
@@ -192,11 +198,11 @@ function scene2(ctx, core) {
 
 function scene3(ctx, core) {
   const fns = [...(core.functions || [])].filter(f => ok(f.mln)).sort((x, y) => y.mln - x.mln);
-  if (!fns.length) return block({ id: 's04-scene3', title: SCENES[2].title, status: 'pending', body: html`<p>${selectPeriod(ctx.annualRaw?.expenditure, '2026.law').gaps?.functions || 'Няма данни за разходите по функции.'}</p>` });
+  if (!fns.length) return block({ id: 's04-scene3', title: SCENES[2].title, status: 'pending', body: html`<p>${selectPeriod(ctx.annualRaw?.expenditure, ctx.period.key).gaps?.functions || 'Няма данни за разходите по функции.'}</p>` });
   const k = core.kpis, gdp = k.gdp?.mlnPrecise;
   const top = fns[0];
   const sum = fns.reduce((s, f) => s + f.mln, 0);
-  const eu = ctx.data.execution?.plan2026?.kfp?.eucontrib;
+  const eu = ctx.data.expenditure?.economic?.rows?.find(r => r.id === 'x.eucontrib')?.mln?.[ctx.data.expenditure?.periodKeys?.indexOf(ctx.period.key)];
   // the EU contribution is the one line of the expenditure that is not a function: it is said only when the parts really add up to the total
   const euLine = ok(eu) && Math.abs(sum + eu - k.expenditure.planMln) < 0.2
     ? html`<p>Към тях се добавя вноската на България в бюджета на ЕС — <strong>${amt(ctx, eu, ok(gdp) ? (eu / gdp) * 100 : undefined)}</strong>. Така общите разходи са ${amt(ctx, k.expenditure.planMln, ok(gdp) ? (k.expenditure.planMln / gdp) * 100 : undefined)}.</p>`
@@ -207,7 +213,7 @@ function scene3(ctx, core) {
     ${euLine}
     <p>Кои министерства и ведомства харчат тези пари — виж <a href="${href('vedomstva')}">„${byKey.vedomstva.title}“</a>.</p>`;
   const visual = ranklist({
-    id: 's04-fn', caption: 'Разходи на КФП по функции за 2026 г.', unit: 'mln', d: ctx.store.get('perPerson') ? 0 : 1, categoryLabel: 'Функция',
+    id: 's04-fn', caption: `Разходи на КФП по функции за ${ctx.period.year} г.`, unit: 'mln', d: ctx.store.get('perPerson') ? 0 : 1, categoryLabel: 'Функция',
     items: fns.map(f => ({ label: f.short || f.name, value: f.mln, share: f.share, pctGdp: f.pctGdp, href: href('funkciya', { fn: f.id }) }))
   });
   const deep = deeper(ctx, 3, 3, [
@@ -216,14 +222,19 @@ function scene3(ctx, core) {
     { href: href('vedomstva'), title: byKey.vedomstva.title, text: 'Министерствата и другите бюджети, и програмите им.' }
   ]);
   return scene(3, {
-    text, visual, deep, scope: 'kfp', source: ['budget2027'], asOf: ctx.data.execution?.plan2026?.asOf,
-    share: `Най-голямата функция на разходите за 2026 г. е „${top.short || top.name}“: ${money(top.mln, { d: 1 })} (${pct(top.share, 1)} от разходите по функции).`
+    text, visual, deep, scope: 'kfp', source: ['budget2027'], asOf: selectPeriod(ctx.annualRaw?.outlook, ctx.period.key).publication,
+    share: `Най-голямата функция на разходите за ${ctx.period.year} г. е „${top.short || top.name}“: ${money(top.mln, { d: 1 })} (${pct(top.share, 1)} от разходите по функции).`
   });
 }
 
 /* ------------------------------------------------------------------ 4 · deficit -> new debt -> debt */
 
 function scene4(ctx, core) {
+  if (ctx.period.key === '2027.draft') {
+    const doc = ctx.data.budget2027, d = stateDebt(doc, ctx.period.key), lim = doc?.debtLimits?.['68'];
+    return block({ id:'s04-scene4', title:'От дефицит до дълг', source:['budget2027'], asOf:doc?.publication, status:'forecast', statusLabel:'Проект и прогноза', share:{period:'2027.draft'},
+      body:html`<p>Прогнозният държавен дълг по ЗДД към края на 2027 г. е ${money(cellValue(d?.total))}. Проектът допуска ново заемане до ${num(cellValue(lim),1)} млрд. евро по чл. 68. Това е предложена горна граница, не прогноза и не приет закон.</p><p><a href="${href('dalg',{}, {per:'2027.draft'})}">Дългът и предложените граници за 2027 г.</a></p>` });
+  }
   const debt = ctx.data.debt;
   if (!debt) return failed(4, 'Данните за дълга не се заредиха.');
   const k = core.kpis, gdp = k.gdp?.mlnPrecise;
@@ -280,6 +291,11 @@ function scene4(ctx, core) {
 /* ------------------------------------------------------------------ 5 · the measures */
 
 function scene5(ctx) {
+  if (ctx.period.key === '2027.draft') {
+    const doc = ctx.data.budget2027, rev = doc?.forecast?.II_7?.at(-1)?.cells?.[0], exp = doc?.forecast?.II_8?.at(-1)?.cells?.[0];
+    const id = twin('s04-fig5-2027', ['Показател', 'Ефект 2027, млн. €', 'Произход'], [['Приходни мерки: общ ред II-7', cellValue(rev), rev?.provenance], ['Разходни мерки: общ ред II-8', cellValue(exp), exp?.provenance]]);
+    return block({id:'s04-scene5',title:'Мерките в проекта за 2027 г.',scope:{key:'fiscal-measures',label:'Фискални мерки',long:'Приходни и разходни мерки по АСБП 2027–2029'},source:['budget2027'],asOf:doc?.publication,status:'real',statusLabel:'Проект 2027',share:{period:'2027.draft',unit:'млн. €'},body:html`<div data-attach="${id}"><p>Отпечатаният общ ефект за 2027 г. е ${money(cellValue(rev))} за приходните мерки (таблица II-7) и ${money(cellValue(exp))} за разходните мерки (таблица II-8). Това са предложени мерки в АСБП 2027–2029.</p><p><a href="${href('S12',{}, {per:'2027.draft'})}">Всички мерки и годишните им ефекти за 2027–2029</a></p></div>`});
+  }
   const m = ctx.data.measures;
   if (!m) return failed(5, 'Данните за мерките не се заредиха.');
   const t = m.totals, c = m.counts?.short;
@@ -335,10 +351,10 @@ function scene5(ctx) {
 
 function scene6(ctx, core) {
   const basis = planBasis(ctx.data.execution || {});
-  const k = core.kpis, r = k.revenue, e = k.expenditure, b = k.balance;
+  const k = core.kpis, executionYear = Number(String(k.asOf).slice(0,4)), r = k.revenue, e = k.expenditure, b = k.balance;
   if (![r.execMln, e.execMln].every(ok)) return failed(6, 'Няма данни за изпълнението.');
   if (![r.execPct, e.execPct].every(ok)) return failed(6, 'Няма наличен положителен знаменател за процента на изпълнение.');
-  const gdp = k.gdp?.mlnPrecise;
+  const gdp = selectPeriod(ctx.annualRaw?.outlook, `${executionYear}.expected`).series?.gdp?.value ?? null;
   const g = mln => (ok(gdp) ? (mln / gdp) * 100 : undefined);
   const mi = ok(k.month) ? k.month - 1 : -1;
   const pace = ctx.data.execution?.pace?.['2025'];
@@ -348,6 +364,7 @@ function scene6(ctx, core) {
   const balShare = null;
   const yoy = ok(r.yoyPct) && ok(e.yoyPct);
   const text = html`
+    ${ctx.store.get('unit') === 'pct' ? html`<p>Дяловете от БВП са спрямо прогнозния БВП за ${executionYear} г. от публикацията на МФ от 06.11.2026, не спрямо БВП за 2027 г.</p>` : ''}
     <p>${mon ? html`До края на ${mon}` : 'Към последния отчет'} са събрани <strong>${amt(ctx, r.execMln, g(r.execMln))}</strong> приходи, или ${pct(r.execPct, 1)}${NBSP}от${NBSP}плана за годината. Похарчени са <strong>${amt(ctx, e.execMln, g(e.execMln))}</strong>, или ${pct(e.execPct, 1)}${NBSP}от${NBSP}плана.</p>
     <p>${yoy ? html`Спрямо същите месеци на 2025 г. приходите са с ${pct(r.yoyPct, 1)} повече, а разходите — с ${pct(e.yoyPct, 1)} повече. ` : ''}${ok(b?.execMln) ? html`Дефицитът дотук е <strong>${amt(ctx, -b.execMln, g(-b.execMln))}</strong>${balShare !== null ? html` — ${pct(balShare, 1)}${NBSP}от${NBSP}планирания за цялата година` : ''}.` : ''}</p>
     <p>${ok(paceRev) && ok(paceExp) ? html`Приходите и разходите не постъпват равно през годината (${gl('sezonnost', 'сезонност')}). Чертата е ориентир: делът от цялата 2025 г. до същия месец — ${pct(paceRev, 1)} от приходите и ${pct(paceExp, 1)} от разходите. ` : ''}Повече — в <a href="${href('izpalnenie')}">„${byKey.izpalnenie.title}“</a>.</p>`;
@@ -355,7 +372,7 @@ function scene6(ctx, core) {
   const exportValue = (id, key, fallback) => canonical?.[id]?.[key] ?? fallback;
   const id = twin('s04-fig6', ['Показател', `Към ${date(asOf)}, млн. €`, 'Годишен план, млн. €', 'Изпълнение, % от плана', 'Дял от 2025 г. до същия месец, %'], [
     ['Приходи', exportValue('rev', 'cum', r.execMln), exportValue('rev', 'plan', r.planMln), r.execPct, paceRev ?? null], ['Разходи', exportValue('exp.total', 'cum', e.execMln), exportValue('exp.total', 'plan', e.planMln), e.execPct, paceExp ?? null]
-  ]);
+  ], [1, 2]);
   const row = (label, kind, x, tick, item) => bar({
     label: html`<a href="${href('izpalnenie', {}, { pokazatel: item })}">${label}</a>`, kind, fill: x.execPct, tick,
     value: html`<strong>${amt(ctx, x.execMln, g(x.execMln))}</strong> <span class="s04-bar-p">${pct(x.execPct, 1)}${NBSP}от${NBSP}плана</span>`
@@ -369,7 +386,7 @@ function scene6(ctx, core) {
     { href: href('izpalnenie', {}, { to: 's15-b-plan' }), title: 'Изпълнява ли се планът', text: 'Приходи, разходи и капиталови разходи: план срещу изпълнение.' }
   ]);
   return scene(6, {
-    text, visual, deep, scope: 'kfp', source: basis.source, asOf,
+    text, visual, deep, title: `Изпълнението през ${executionYear} г.`, period: ctx.data.execution?.plan2026?.periodKey || `${executionYear}.draft`, scope: 'kfp', source: basis.source, asOf,
     share: `${basis.citation}. Към ${date(asOf, true)} са изпълнени ${pct(r.execPct, 1)} от плана за приходите и ${pct(e.execPct, 1)} от плана за разходите.`
   });
 }
@@ -399,8 +416,8 @@ export function render(ctx) {
   const nav = html`<nav class="s04-nav" aria-label="Сцени на екрана"><ol>${SCENES.map((s, i) => html`<li><a href="${to(s.id)}"><span class="s04-nav-n" aria-hidden="true">${i + 1}</span>${s.nav}</a></li>`)}</ol></nav>`;
   return html`<div class="s04">
     <div class="s04-top" data-gl-scan>
-      <p class="s04-lead">Държавният бюджет на България за 2026 г. — от общата сметка до изпълнението. Чете се за около пет минути.</p>
-      <p class="s04-basis">Числата са в евро. Годишните агрегати са по приетия закон; липсващите законови разбивки са обозначени. Какво промени приетият закон — на екрана <a href="${href('zakon')}">„${byKey.zakon.title}“</a>.</p>
+      <p class="s04-lead">Проектът за бюджет 2027 и прогнозата за 2027–2029 г. Месечните отчети показват изпълнението за 2026 г. Чете се за около пет минути.</p>
+      <p class="s04-basis">Числата са в евро. Годишните числа са от проекта на МФ за 2027 г., публикуван на 06.11.2026. Историческите мерки и месечните отчети са обозначени със своята година. Какво промени приетият закон — на екрана <a href="${href('zakon')}">„${byKey.zakon.title}“</a>.</p>
     </div>
     ${nav}
     ${guard(1, () => scene1(ctx, core))}
@@ -408,7 +425,7 @@ export function render(ctx) {
     ${guard(3, () => scene3(ctx, core))}
     ${guard(4, () => scene4(ctx, core))}
     ${guard(5, () => scene5(ctx))}
-    ${guard(6, () => scene6(ctx, core))}
+    ${guard(6, () => scene6(ctx, ctx.annualRaw?.core || core))}
     ${checks(ctx)}
   </div>`;
 }
