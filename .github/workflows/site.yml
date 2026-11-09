@@ -301,6 +301,23 @@ jobs:
           name: components-rates-parity
           path: tmp/ts-migration/candidates/06/diff.json
           if-no-files-found: error
+      - name: Debt and local finance frozen Python oracle and parity
+        run: |
+          python packages/ingest/test/fixtures/debt-local/generate_oracle.py --check
+          python packages/ingest/test/fixtures/debt-local/test_readers.py
+          pnpm --filter @sigma-budget/etl... build
+          pnpm --filter @sigma-budget/ingest exec vitest run src/build/debt.test.ts src/build/municipalities.test.ts src/build/sebra.test.ts
+          pnpm --filter @sigma-budget/etl exec vitest run src/debt-local-build.test.ts
+          pnpm exec budget-ts build --inputs packages/ingest/test/fixtures/debt-local --out tmp/ts-migration/candidates/07 --scope debt,municipalities,geo-obshtini,sebra --build-date 2026-11-08
+          for stage in donor projected published; do
+            pnpm exec budget-ts parity --registry packages/ingest/test/fixtures/debt-local/registry.yaml --oracle packages/ingest/test/fixtures/debt-local/$stage --candidate tmp/ts-migration/candidates/07/data --scope debt,municipalities,geo-obshtini,sebra --policy packages/ingest/test/fixtures/debt-local/policy.json --report tmp/ts-migration/candidates/07/$stage-diff.json
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: debt-local-parity
+          path: tmp/ts-migration/candidates/07/*-diff.json
+          if-no-files-found: error
       - name: Budgets and programmes frozen Python parity
         env:
           PROGRAMMES_PARITY_REPORT: ${{ github.workspace }}/tmp/ts-migration/candidates/05/diff.json

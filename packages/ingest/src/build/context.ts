@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { json, type Json } from '@sigma-budget/dataset-schema';
 import { loadAnnex, type AnnexTables } from './annex.js';
+import { pythonNumericText } from '../common/numbers.js';
 
 export interface BuildRoots {
   inputs: string;
@@ -30,16 +31,7 @@ export function pythonFloat(v: unknown): number | null {
   if (typeof v === 'boolean') return v ? 1 : 0;
   if (typeof v === 'number') return v;
   if (typeof v !== 'string') throw new Error('Invalid execution money');
-  const whitespace =
-    /^[\u0009-\u000d\u001c-\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]+|[\u0009-\u000d\u001c-\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]+$/g;
-  const digit = /\p{Decimal_Number}/u;
-  const normalized = Array.from(v.replace(whitespace, ''), (ch) => {
-    if (!digit.test(ch)) return ch;
-    const code = ch.codePointAt(0)!;
-    let first = code;
-    while (first > 0 && digit.test(String.fromCodePoint(first - 1))) first--;
-    return String((code - first) % 10);
-  }).join('');
+  const normalized = pythonNumericText(v);
   if (/^[+-]?(?:inf(?:inity)?|nan)$/i.test(normalized)) {
     return /nan/i.test(normalized) ? NaN : normalized.startsWith('-') ? -Infinity : Infinity;
   }

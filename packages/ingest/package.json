@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@sigma-budget/dataset-schema": "workspace:*",
+    "jsts": "2.12.1",
     "pako": "2.1.0",
     "yaml": "2.9.1"
   },
