@@ -23138,5 +23138,2001 @@
         "value": "a'𐵃"
       }
     ]
+  },
+  {
+    "name": "optional-dictionary-000-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          0,
+          "kfpFunctions"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-001-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          0,
+          "kfpFunctions"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-002-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          0,
+          "kfpFunctions"
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-003-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "ministries"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-004-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "ministries"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-005-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "ministries"
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-006-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "related"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-007-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "related"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-008-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "related"
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-009-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "versions",
+          0,
+          "diff",
+          0
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-010-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "versions",
+          0,
+          "diff",
+          0
+        ],
+        "value": "4.3"
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-011-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "versions",
+          0,
+          "diff",
+          0
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-012-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "versions",
+          0,
+          "diff",
+          0
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-013-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "parent"
+        ],
+        "value": [
+          "r.total"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-014-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "parent"
+        ],
+        "value": {
+          "x": 1
+        }
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-015-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "parent"
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-016-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "parent"
+        ],
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-017-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          0,
+          "code"
+        ],
+        "value": [
+          "01"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-018-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          0,
+          "code"
+        ],
+        "value": {
+          "x": 1
+        }
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-020-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "hasEstimate"
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-021-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "hasEstimate"
+        ],
+        "value": 1.0
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-022-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "hasEstimate"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-030-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "bodies"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-031-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "bodies"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-032-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "commitments"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-033-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "commitments"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-034-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "areas"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-035-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "areas"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-036-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          0,
+          "kfpFunctions"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-037-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "ministries"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-038-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "related"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-039-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          0,
+          "kfpFunctions"
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-040-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          0,
+          "kfpFunctions"
+        ],
+        "value": 0.0
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-041-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          0,
+          "kfpFunctions"
+        ],
+        "value": ""
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-042-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          0,
+          "kfpFunctions"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-043-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          0,
+          "kfpFunctions"
+        ],
+        "value": [
+          null
+        ]
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-044-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          0,
+          "kfpFunctions"
+        ],
+        "value": [
+          []
+        ]
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-045-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          0,
+          "kfpFunctions"
+        ],
+        "value": [
+          {}
+        ]
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-046-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "ministries"
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-047-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "ministries"
+        ],
+        "value": 0.0
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-048-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "ministries"
+        ],
+        "value": ""
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-049-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "ministries"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-050-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "ministries"
+        ],
+        "value": [
+          null
+        ]
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-051-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "ministries"
+        ],
+        "value": [
+          []
+        ]
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-052-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "ministries"
+        ],
+        "value": [
+          {}
+        ]
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-053-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "related"
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-054-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "related"
+        ],
+        "value": 0.0
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-055-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "related"
+        ],
+        "value": ""
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-056-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "related"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-057-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "related"
+        ],
+        "value": [
+          null
+        ]
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-058-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "related"
+        ],
+        "value": [
+          []
+        ]
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-059-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "related"
+        ],
+        "value": [
+          {}
+        ]
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-060-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "bodies"
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-061-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "bodies"
+        ],
+        "value": 0.0
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-062-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "bodies"
+        ],
+        "value": ""
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-063-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "bodies"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-064-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "bodies"
+        ],
+        "value": [
+          null
+        ]
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-065-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "bodies"
+        ],
+        "value": [
+          []
+        ]
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-066-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "bodies"
+        ],
+        "value": [
+          {}
+        ]
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-067-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "commitments"
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-068-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "commitments"
+        ],
+        "value": 0.0
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-069-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "commitments"
+        ],
+        "value": ""
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-070-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "commitments"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-071-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "commitments"
+        ],
+        "value": [
+          null
+        ]
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-072-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "commitments"
+        ],
+        "value": [
+          []
+        ]
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-073-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "commitments"
+        ],
+        "value": [
+          {}
+        ]
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-074-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "areas"
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-075-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "areas"
+        ],
+        "value": 0.0
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-076-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "areas"
+        ],
+        "value": ""
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-077-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "areas"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-078-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "areas"
+        ],
+        "value": [
+          null
+        ]
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-079-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "areas"
+        ],
+        "value": [
+          []
+        ]
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-080-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "areas"
+        ],
+        "value": [
+          {}
+        ]
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-081-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "timeline",
+          0,
+          "title"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-082-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "timeline",
+          0,
+          "title"
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-083-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "timeline",
+          0,
+          "title"
+        ],
+        "value": 0.0
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-084-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "timeline",
+          0,
+          "title"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-085-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "timeline",
+          0,
+          "title"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-086-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "timeline",
+          0,
+          "title"
+        ],
+        "value": "title😀title😀title😀title😀title😀title😀title😀title😀"
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-088-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "programs",
+          "tier"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-089-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "programs",
+          "tier"
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-090-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "programs",
+          "tier"
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-091-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "programs",
+          "tier"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-092-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "programs",
+          "tier"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-093-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "parent"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-094-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "parent"
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-096-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "parent"
+        ],
+        "value": 1.0
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-097-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "parent"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-099-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "parent"
+        ],
+        "value": "r.total"
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-100-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          0,
+          "code"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-101-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          0,
+          "code"
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-102-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          0,
+          "code"
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-103-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          0,
+          "code"
+        ],
+        "value": 1.0
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-104-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "versions",
+          0,
+          "diff",
+          0
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-105-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "versions",
+          0,
+          "diff",
+          0
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-106-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "versions",
+          0,
+          "diff",
+          0
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-107-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "versions",
+          0,
+          "diff",
+          0
+        ],
+        "value": 0.0
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-108-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          0,
+          "id"
+        ],
+        "value": "1"
+      },
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "parent"
+        ],
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-109-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          0,
+          "id"
+        ],
+        "value": 1
+      },
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "parent"
+        ],
+        "value": "1"
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-110-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          0,
+          "id"
+        ],
+        "value": 1
+      },
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "parent"
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-111-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          0,
+          "id"
+        ],
+        "value": true
+      },
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "parent"
+        ],
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-112-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          0,
+          "id"
+        ],
+        "value": "True"
+      },
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "parent"
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "optional-dictionary-113-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          0,
+          "id"
+        ],
+        "value": "None"
+      },
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "parent"
+        ],
+        "value": null
+      }
+    ]
   }
 ]

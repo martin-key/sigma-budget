@@ -4,6 +4,9 @@ import { Check, isnum, numbersIn, pyTruth } from './checks.js';
 import { Context } from './context.js';
 import {
   PythonError,
+  pyDict,
+  pyGet,
+  pyHas,
   pythonFormat as fmt,
   pythonRepr as pyRepr,
   pyReprAt,
@@ -103,11 +106,7 @@ const disp = (o: any, k: string | number) =>
 const iso = (x: any) =>
   typeof x === 'string' &&
   /^\p{Decimal_Number}{4}-\p{Decimal_Number}{2}-\p{Decimal_Number}{2}$/u.test(x);
-const byid = (rows: any[]) =>
-  Object.assign(
-    Object.create(null),
-    Object.fromEntries(rows.map((x) => [required<any>(x, 'id'), x])),
-  );
+const byid = (rows: any[]) => pyDict<any, any>(rows.map((x) => [required<any>(x, 'id'), x]));
 function near(c: Check, a: any, b: any, tol: number, msg: string, ar?: string, br?: string) {
   return c.ok(
     isnum(a) && isnum(b) && Math.abs(a - b) <= tol + 1e-9,
@@ -193,9 +192,7 @@ export function budgets(ctx: Context): Check {
   c.ok(
     iso(required<any>(mm, 'asOf')) &&
       required<any>(mm, 'asOf') <= ctx.buildDate &&
-      required<any>(mm, 'source').every((s: string) =>
-        Object.hasOwn(required<any>(core, 'sources'), s),
-      ),
+      required<any>(mm, 'source').every((s: string) => pyHas(required<any>(core, 'sources'), s)),
     'meta asOf/source',
   );
   c.ok(
@@ -231,20 +228,20 @@ export function budgets(ctx: Context): Check {
     'items are unique and sorted by id',
   );
   const lb = byid(required<any>(law, 'budgets'));
-  const diff = [...pySet([...ids, ...Object.keys(lb)])]
-    .filter((x) => ids.includes(x) !== Object.hasOwn(lb, x))
+  const diff = [...pySet([...ids, ...[...lb.keys()]])]
+    .filter((x) => ids.includes(x) !== pyHas(lb, x))
     .sort();
   c.ok(!diff.length, `ministries.json and law.json list different budgets: ${pyRepr(diff)}`);
   let rev = 0,
     exp = 0,
     polTotal = 0,
     progTotal = 0;
-  const tiers: Record<string, number> = Object.create(null),
+  const tiers = pyDict<any, number>(),
     kinds: Record<string, number> = Object.create(null);
   for (const x of items) {
     const i = required<any>(x, 'id'),
       w = `budget ${i}`,
-      b = lb[i];
+      b = lb.get(i);
     if (!c.ok(b !== undefined, `${w}: not in law.json`)) continue;
     c.ok(
       pyEqual(required(x, 'art'), required(b, 'art')) &&
@@ -254,7 +251,7 @@ export function budgets(ctx: Context): Check {
       `${w}: art/name/short/kind differ from law.json`,
     );
     c.ok(
-      Object.hasOwn(required<any>(m, 'kinds'), required<any>(x, 'kind')),
+      pyHas(required<any>(m, 'kinds'), required<any>(x, 'kind')),
       `${w}: kind ${required<any>(x, 'kind')}`,
     );
     kinds[required<any>(x, 'kind')] = (kinds[required<any>(x, 'kind')] ?? 0) + 1;
@@ -389,11 +386,8 @@ export function budgets(ctx: Context): Check {
               ? required<any>(required<any>(b, 'diff'), k)
               : 0,
           ) > 0.05;
-        c.ok(
-          Object.hasOwn(bl, key) === moved,
-          `${w} billVsLaw.${key} present only when the amount moved`,
-        );
-        if (Object.hasOwn(bl, key))
+        c.ok(pyHas(bl, key) === moved, `${w} billVsLaw.${key} present only when the amount moved`);
+        if (pyHas(bl, key))
           for (const s of ['bill', 'law', 'diff'])
             near(
               c,
@@ -408,7 +402,12 @@ export function budgets(ctx: Context): Check {
       c.ok(same(required(bl, 'lines'), required<any>(b, 'lines')), `${w}: billVsLaw.lines`);
     }
     const p = required<any>(x, 'programs');
-    tiers[p.tier ?? 'pending'] = (tiers[p.tier ?? 'pending'] ?? 0) + 1;
+    const tierKey = pyGet(p, 'tier', 'pending');
+    tiers.set(
+      tierKey,
+      (tiers.get(tierKey) ?? 0) + 1,
+      pyHas(p, 'tier') ? pyReprAt(p, 'tier') : pyRepr('pending'),
+    );
     if (required<any>(p, 'status') === 'real') {
       const tier = required<string>(p, 'tier');
       c.ok(
@@ -521,9 +520,9 @@ export function budgets(ctx: Context): Check {
     disp(required<any>(required<any>(law, 'totals'), 'law'), 'exp'),
   );
   const pt = required<any>(m, 'programTotals'),
-    validated = tiers.validated ?? 0,
-    differ = tiers['program-budget-differs'] ?? 0,
-    pending = tiers.pending ?? 0;
+    validated = tiers.get('validated') ?? 0,
+    differ = tiers.get('program-budget-differs') ?? 0,
+    pending = tiers.get('pending') ?? 0;
   c.ok(
     required<any>(pt, 'budgets') === validated + differ &&
       required<any>(pt, 'budgets') === 42 &&
@@ -679,7 +678,7 @@ function checkFile(c: Check, ctx: Context, item: any, d: any): Row[] {
       total = required<any>(d, 'total')[ys];
     if (
       !c.ok(
-        Object.hasOwn(required<any>(d, 'total'), ys) && total.length === 9 && total.every(isnum),
+        pyHas(required<any>(d, 'total'), ys) && total.length === 9 && total.every(isnum),
         `${w}: total ${y}`,
       )
     )
@@ -689,7 +688,7 @@ function checkFile(c: Check, ctx: Context, item: any, d: any): Row[] {
     for (let k = 0; k < 9; k++) {
       const s = sum(
         pyMap(pols, (p: any) =>
-          Object.hasOwn(required<any>(p, 'values'), ys)
+          pyHas(required<any>(p, 'values'), ys)
             ? n(required<any>(p, 'values')[ys], k)
             : { value: 0, kind: 'float' },
         ),
@@ -706,14 +705,12 @@ function checkFile(c: Check, ctx: Context, item: any, d: any): Row[] {
       for (let k = 0; k < 9; k++) {
         const s = sum(
             pyMap(progs, (r: any) =>
-              Object.hasOwn(required<any>(r, 'values'), ys)
+              pyHas(required<any>(r, 'values'), ys)
                 ? n(required<any>(r, 'values')[ys], k)
                 : { value: 0, kind: 'float' },
             ),
           ),
-          pv = Object.hasOwn(required<any>(pol, 'values'), ys)
-            ? required<any>(pol, 'values')[ys][k]
-            : 0;
+          pv = pyHas(required<any>(pol, 'values'), ys) ? required<any>(pol, 'values')[ys][k] : 0;
         if (Math.abs(s - pv) > tolerance + 1e-9) {
           progOk = false;
           c.fail(
@@ -839,7 +836,7 @@ export function programs(ctx: Context): Check {
     `ministries/ holds ${files.length} files, ministries.json announces ${real.length}: ${pyRepr(diff)}`,
   );
   const by = byid(required<any>(m, 'items')),
-    expect: Record<string, [string, string, string, any]> = Object.create(null);
+    expect = pyDict<any, [string, string, string, any]>();
   for (const i of real) {
     const rel = `ministries/${i}.json`;
     if (!ctx.exists(rel))
@@ -847,8 +844,8 @@ export function programs(ctx: Context): Check {
         'FileNotFoundError',
         `[Errno 2] No such file or directory: '${ctx.root}/${ctx.dataDir}/${rel}'`,
       );
-    for (const [lvl, parent, r] of checkFile(c, ctx, by[i], ctx.get(rel)))
-      expect[required<any>(r, 'code')] = [i, lvl, parent, r];
+    for (const [lvl, parent, r] of checkFile(c, ctx, pyItem(by, i), ctx.get(rel)))
+      expect.set(required<any>(r, 'code'), [i, lvl, parent, r], pyReprAt(r, 'code'));
   }
   const pm = required<any>(pj, 'meta');
   c.ok(
@@ -869,8 +866,8 @@ export function programs(ctx: Context): Check {
   );
   const rows = required<any[]>(pj, 'items');
   c.ok(
-    rows.length === Object.keys(expect).length && rows.length === 272,
-    `programs.json has ${rows.length} rows, the files ${Object.keys(expect).length} (272 expected)`,
+    rows.length === expect.size && rows.length === 272,
+    `programs.json has ${rows.length} rows, the files ${expect.size} (272 expected)`,
   );
   const seen = pySet<string>(),
     levels: Record<string, number> = Object.create(null);
@@ -881,8 +878,8 @@ export function programs(ctx: Context): Check {
       w = `programs.json ${code}`;
     c.ok(!seen.has(code), `${w}: duplicate row`);
     seen.add(code);
-    if (!c.ok(Object.hasOwn(expect, code), `${w}: no such row in ministries/<code>.json`)) continue;
-    const [i, lvl, parent, src] = expect[code]!;
+    if (!c.ok(pyHas(expect, code), `${w}: no such row in ministries/<code>.json`)) continue;
+    const [i, lvl, parent, src] = pyItem(expect, code);
     levels[required<any>(r, 'level')] = (levels[required<any>(r, 'level')] ?? 0) + 1;
     c.ok(
       required<any>(r, 'ministry') === i &&
@@ -909,7 +906,7 @@ export function programs(ctx: Context): Check {
         TOL,
         `${w} ${field}`,
         disp(row, FIELDS.indexOf(field)),
-        Object.hasOwn(v, year) ? disp(v[year], index) : '-1',
+        pyHas(v, year) ? disp(v[year], index) : '-1',
       );
     if (y25 > 0 && y26 >= 0)
       near(
@@ -931,11 +928,9 @@ export function programs(ctx: Context): Check {
       `${w}: isNew ${disp(row, 8)}`,
     );
   }
-  const missing = Object.keys(expect)
-    .filter((x) => !seen.has(x))
-    .sort();
+  const missing = [...expect.keys()].filter((x) => !seen.has(x)).sort();
   c.ok(
-    same(sorted(Object.keys(expect)), sorted([...seen])),
+    same(sorted([...expect.keys()]), sorted([...seen])),
     `rows missing from programs.json: ${pyRepr(missing.slice(0, 5))}`,
   );
   c.ok(

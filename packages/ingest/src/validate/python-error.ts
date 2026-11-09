@@ -19,6 +19,10 @@ export function pyItem(
   key: string | number | boolean,
   sourceType = pythonType(value),
 ): any {
+  if (value instanceof Map) {
+    if (value.has(key)) return value.get(key);
+    throw new PythonError('KeyError', pythonRepr(key));
+  }
   if (Array.isArray(value) || typeof value === 'string') {
     if ((typeof key !== 'number' || !Number.isInteger(key)) && typeof key !== 'boolean')
       throw new PythonError(
@@ -75,7 +79,86 @@ export function pyItemAt(holder: any, key: string | number, index: string | numb
 export function pyHas(mapping: any, key: any): boolean {
   if (key && typeof key === 'object')
     throw new PythonError('TypeError', `unhashable type: '${pythonType(key)}'`);
+  if (mapping instanceof Map) return mapping.has(key);
   return typeof key === 'string' && Object.hasOwn(mapping, key);
+}
+
+/** Dict.get supplies its default only for an absent key, preserving explicit None. */
+export function pyGet(mapping: any, key: any, fallback: any = undefined): any {
+  if (mapping === null || typeof mapping !== 'object' || Array.isArray(mapping))
+    throw new PythonError(
+      'AttributeError',
+      `'${pythonType(mapping)}' object has no attribute 'get'`,
+    );
+  return pyHas(mapping, key)
+    ? mapping instanceof Map
+      ? mapping.get(key)
+      : mapping[key]
+    : fallback;
+}
+
+export function pyIterGet(mapping: any, key: string): unknown[] {
+  const value = pyGet(mapping, key, []);
+  return pyIter(
+    value,
+    typeof value === 'number' ? pythonNumberAt(mapping, key, value).kind : pythonType(value),
+  );
+}
+
+class PythonDict<K, V> extends Map<K, V> {
+  private readonly representations = new Map<K, string>();
+  private storedKey(key: K): K {
+    if (key !== null && typeof key === 'object')
+      throw new PythonError('TypeError', `unhashable type: '${pythonType(key)}'`);
+    if (super.has(key)) return key;
+    const equal = (typeof key === 'boolean' ? Number(key) : Boolean(key)) as K;
+    return (typeof key === 'boolean' || key === 0 || key === 1) && super.has(equal) ? equal : key;
+  }
+  override has(key: K): boolean {
+    return super.has(this.storedKey(key));
+  }
+  override get(key: K): V | undefined {
+    return super.get(this.storedKey(key));
+  }
+  override set(key: K, value: V, representation = pythonRepr(key)): this {
+    const stored = this.storedKey(key);
+    if (!super.has(stored)) this.representations.set(stored, representation);
+    return super.set(stored, value);
+  }
+  keyRepr(key: K): string {
+    return this.representations.get(this.storedKey(key))!;
+  }
+}
+
+export function pyDict<K, V>(entries: Iterable<readonly [K, V]> = []): PythonDict<K, V> {
+  const result = new PythonDict<K, V>();
+  for (const [key, value] of entries) result.set(key, value);
+  return result;
+}
+
+/** Scoped by_id keeps Python dictionary keys instead of JavaScript property coercion. */
+export function pyById(rows: unknown, key = 'id'): any {
+  const result = pyDict<unknown, unknown>();
+  for (const row of pyIter(rows))
+    if (row && typeof row === 'object' && !Array.isArray(row) && Object.hasOwn(row, key))
+      result.set((row as Record<string, unknown>)[key], row, pyReprAt(row, key));
+  return result;
+}
+
+/** Python string formatting after a prefix slice, including list repr and source float kinds. */
+export function pyPrefixStringAt(holder: any, key: string, end: number): string {
+  const value = pyGet(holder, key, '');
+  if (typeof value === 'string') return Array.from(value).slice(0, end).join('');
+  if (Array.isArray(value))
+    return `[${value
+      .slice(0, end)
+      .map((_, i) => pyReprAt(value, i))
+      .join(', ')}]`;
+  if (value && typeof value === 'object')
+    throw new PythonError('KeyError', `slice(None, ${end}, None)`);
+  const type =
+    typeof value === 'number' ? pythonNumberAt(holder, key, value).kind : pythonType(value);
+  throw new PythonError('TypeError', `'${type}' object is not subscriptable`);
 }
 export function pyLessEqual(
   a: any,
@@ -204,6 +287,8 @@ export function floatRepr(value: number): string {
 
 /** Scoped donor repr: nested dictionaries retain input order and numeric token kinds. */
 export function pythonRepr(value: unknown): string {
+  if (value instanceof Map)
+    return `{${[...value].map(([key, item]) => `${value instanceof PythonDict ? value.keyRepr(key) : pythonRepr(key)}: ${pythonRepr(item)}`).join(', ')}}`;
   if (Array.isArray(value)) return `[${value.map((_, i) => pyReprAt(value, i)).join(', ')}]`;
   if (value && typeof value === 'object')
     return `{${pythonKeys(value)

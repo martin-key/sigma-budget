@@ -50,7 +50,7 @@ continues to use Python, and BUDGET2027 and the other listed unported groups
 remain outside the TypeScript scope.
 
 The corpus preserves the original 206 definitions and 212 observations, and
-every subsequent prefix. It now contains 1,263 definitions producing 1,269
+every subsequent prefix. It now contains 1,366 definitions producing 1,372
 independent donor observations. The scenarios cover actual required reads,
 nullable and sparse values, raw integer/float distinctions, boolean-number
 identity, hashability, numeric and sequence operations, lazy evaluation,
@@ -75,3 +75,11 @@ verified by the same check; its values are independent of TypeScript output.
 ```sh
 python packages/ingest/test/fixtures/validate15/generate_unicode.py --check
 ```
+
+Optional-list and dictionary-boundary cases distinguish an absent key from
+explicit null, false, zero, strings, arrays and mappings. The scoped dictionary
+keeps numeric, boolean and string keys distinct according to Python equality,
+rejects unhashable keys when they are actually used, and retains insertion
+order and key representations. Counter defaults preserve explicit null keys.
+ANNEX3 absolute-value checks and prefix formatting are exercised through the
+real groups, including raw floating zeros and boolean diagnostics.

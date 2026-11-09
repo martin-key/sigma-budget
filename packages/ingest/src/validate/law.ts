@@ -4,6 +4,11 @@ import { Check, isnum, numbersIn, pyTruth } from './checks.js';
 import { Context } from './context.js';
 import {
   PythonError,
+  pyGet,
+  pyPrefixStringAt,
+  pyHas,
+  pyDict,
+  pyIterGet,
   pythonFormat as fmt,
   pythonRepr as pyRepr,
   pyReprAt,
@@ -86,12 +91,10 @@ function art1(c: Check, law: any): Map<string, any> {
   c.ok(same(Object.keys(h), HEAD), `art1.headline keys ${repr(Object.keys(h))}`);
   for (const k of HEAD) {
     for (const s of ['bill', 'law', 'diff'])
-      c.ok(Object.hasOwn(h, k) && isnum(h[k][s]), `art1.headline.${k}.${s} is not a number`);
-    if (Object.hasOwn(h, k)) dd(c, h[k], `art1.headline.${k}`);
+      c.ok(pyHas(h, k) && isnum(h[k][s]), `art1.headline.${k}.${s} is not a number`);
+    if (pyHas(h, k)) dd(c, h[k], `art1.headline.${k}`);
   }
-  if (
-    HEAD.every((k) => Object.hasOwn(h, k) && ['bill', 'law', 'diff'].every((s) => isnum(h[k][s])))
-  )
+  if (HEAD.every((k) => pyHas(h, k) && ['bill', 'law', 'diff'].every((s) => isnum(h[k][s]))))
     for (const s of ['bill', 'law', 'diff']) {
       const v: any = Object.fromEntries(HEAD.map((k) => [k, h[k][s]]));
       near(
@@ -130,7 +133,7 @@ function art1(c: Check, law: any): Map<string, any> {
     ),
     'art1 line ids are a1.01.. consecutive',
   );
-  const rows = new Map<string, any>();
+  const rows = pyDict<string, any>();
   const key = (sec: string, no: string) => JSON.stringify([sec, no]);
   for (const r of lines) {
     const w = `art1 line ${required<any>(r, 'id')}`;
@@ -144,7 +147,7 @@ function art1(c: Check, law: any): Map<string, any> {
     );
     if (pyTruth(r.header)) {
       c.ok(
-        !['bill', 'law', 'diff', 'changed'].some((k) => Object.hasOwn(r, k)),
+        !['bill', 'law', 'diff', 'changed'].some((k) => pyHas(r, k)),
         `${w}: a header row must not carry numbers`,
       );
       continue;
@@ -263,7 +266,7 @@ function art1(c: Check, law: any): Map<string, any> {
     else if (Array.isArray(e))
       c.fail(`art1: row (${pyReprAt(e, 0)}, ${pyReprAt(e, 1)}) is missing`);
     else throw e;
-    return new Map();
+    return pyDict();
   }
   return rows;
 }
@@ -400,7 +403,7 @@ function lawBudgets(c: Check, law: any) {
   );
 }
 function changes(c: Check, law: any, artRows: Map<string, any>) {
-  const bs = new Map<number, any>(
+  const bs = pyDict<number, any>(
       required<any>(law, 'budgets').map((b: any) => [required<any>(b, 'art'), b]),
     ),
     ch = required<any>(law, 'changes');
@@ -432,15 +435,18 @@ function changes(c: Check, law: any, artRows: Map<string, any>) {
     for (const [k, node] of Object.entries(required<Record<string, any>>(x, 'headline')))
       dd(c, node, `${w} headline ${k}`);
     for (const key of ['areas', 'bodies', 'commitments'])
-      for (const [i, node] of (x[key] ?? []).entries()) {
-        c.ok(isnum(node.bill) && isnum(node.law), `${w} ${key}[${i}]: both sides must be numbers`);
+      for (const [i, node] of pyIterGet(x, key).entries()) {
+        c.ok(
+          isnum(pyGet(node, 'bill')) && isnum(pyGet(node, 'law')),
+          `${w} ${key}[${i}]: both sides must be numbers`,
+        );
         dd(c, node, `${w} ${key}[${i}]`);
       }
     const ops: Record<string, number> = { chg: 0, add: 0, del: 0 };
     for (const [i, r] of required<any>(x, 'lines').entries()) {
       const ww = `${w} line ${i} (${r.sec ?? 'None'} ${r.no ?? 'None'})`;
       c.ok(
-        Object.hasOwn(ops, required<any>(r, 'op')) &&
+        pyHas(ops, required<any>(r, 'op')) &&
           typeof required<any>(r, 'text') === 'string' &&
           !!pyStrip(required<any>(r, 'text')),
         `${ww}: op/text`,
@@ -449,7 +455,7 @@ function changes(c: Check, law: any, artRows: Map<string, any>) {
         [...(required<any>(r, 'no') as string)].every((ch) => ch.codePointAt(0)! < 128),
         `${ww}: 'no' must be plain ASCII`,
       );
-      if (Object.hasOwn(ops, required<any>(r, 'op'))) ops[required<any>(r, 'op')]!++;
+      if (pyHas(ops, required<any>(r, 'op'))) ops[required<any>(r, 'op')]!++;
       c.ok(
         (required<any>(r, 'op') !== 'add' || required<any>(r, 'bill') === null) &&
           (required<any>(r, 'op') !== 'del' || required<any>(r, 'law') === null) &&
@@ -465,7 +471,7 @@ function changes(c: Check, law: any, artRows: Map<string, any>) {
         `${w}: op counts ${repr(ops)} vs the budget's lines ${pyReprAt(b, 'lines')}`,
       );
       for (const k of ['rev', 'exp', 'transfers'])
-        if (Object.hasOwn(required<any>(x, 'headline'), k))
+        if (pyHas(required<any>(x, 'headline'), k))
           for (const s of ['bill', 'law'])
             near(
               c,
@@ -486,13 +492,13 @@ function changes(c: Check, law: any, artRows: Map<string, any>) {
             `${w} areas ${s} sum to the expenditure`,
           );
     } else {
-      const marked = new Map<string, any>(
+      const marked = pyDict<string, any>(
         required<any>(x, 'lines').map((r: any) => [
           JSON.stringify([required<any>(r, 'sec'), required<any>(r, 'no')]),
           r,
         ]),
       );
-      const changed = new Map([...artRows].filter(([, r]) => pyTruth(r.changed)));
+      const changed = pyDict([...artRows].filter(([, r]) => pyTruth(r.changed)));
       const diff = [...pySet([...marked.keys(), ...changed.keys()])]
         .filter((k) => marked.has(k) !== changed.has(k))
         .sort()
@@ -699,7 +705,7 @@ function bills(c: Check, law: any, src: any, buildDate: string) {
       `${w}: urls`,
     );
     c.ok(
-      required<any[]>(b, 'source').every((k: string) => Object.hasOwn(src, k)),
+      required<any[]>(b, 'source').every((k: string) => pyHas(src, k)),
       `${w}: source keys`,
     );
   }
@@ -776,9 +782,9 @@ function timeline(c: Check, law: any, ctx: Context) {
   c.ok(tl.length === 21, `timeline has ${tl.length} entries (21 expected)`);
   const days: string[] = [];
   for (const [i, t] of tl.entries()) {
-    const w = `timeline[${i}] ${(t.title ?? '').slice(0, 30)}`;
+    const w = `timeline[${i}] ${pyPrefixStringAt(t, 'title', 30)}`;
     c.ok(
-      Object.hasOwn(required<any>(law, 'kinds'), required<any>(t, 'kind')) &&
+      pyHas(required<any>(law, 'kinds'), required<any>(t, 'kind')) &&
         ['prehistory', 'parliament', 'execution'].includes(required<any>(t, 'phase')),
       `${w}: kind/phase`,
     );
@@ -815,7 +821,7 @@ function timeline(c: Check, law: any, ctx: Context) {
     'one execution entry, last',
   );
   const used = pySet<string>(tl.map((t: any) => required<any>(t, 'kind'))),
-    missing = [...used].filter((x) => !Object.hasOwn(required<any>(law, 'kinds'), x)).sort();
+    missing = [...used].filter((x) => !pyHas(required<any>(law, 'kinds'), x)).sort();
   c.ok(!missing.length, `timeline kinds ${repr(missing)}`);
 }
 function proposals(c: Check, law: any) {
@@ -848,8 +854,7 @@ function proposals(c: Check, law: any) {
       `${w}: no/file ${stringField(r, 'no')} ${stringField(r, 'file')}`,
     );
     c.ok(
-      iso(required<any>(r, 'date')) &&
-        Object.hasOwn(required<any>(p, 'byDate'), required<any>(r, 'date')),
+      iso(required<any>(r, 'date')) && pyHas(required<any>(p, 'byDate'), required<any>(r, 'date')),
       `${w}: date ${required<any>(r, 'date')}`,
     );
     c.ok(!nos.has(required<any>(r, 'no')), `${w}: duplicate number`);

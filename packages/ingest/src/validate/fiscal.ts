@@ -1,8 +1,12 @@
 /** Fiscal validation against the legacy 2024–28 Annex 3 contract. */
-import { Check, byId, isnum } from './checks.js';
+import { Check, isnum } from './checks.js';
 import { Context } from './context.js';
 import {
   PythonError,
+  pyById as byId,
+  pyDict,
+  pyGet,
+  pyIterGet,
   pythonFormat as fmt,
   pythonRepr as pyRepr,
   pyReprAt,
@@ -174,11 +178,10 @@ export function annex3(ctx: Context): Check {
   );
   const vs = required<any[]>(o, 'versions');
   c.ok(vs.length === 9, `versions: ${vs.length} rows, expected 9`);
-  const other: Record<string, any> = Object.assign(
-    Object.create(null),
-    byId(required(ctx.get('revenue.json'), 'rows')),
-    byId(required(required<any>(ctx.get('expenditure.json'), 'economic'), 'rows')),
-  );
+  const other = pyDict<any, any>([
+    ...byId(required(ctx.get('revenue.json'), 'rows')),
+    ...byId(required(required<any>(ctx.get('expenditure.json'), 'economic'), 'rows')),
+  ]);
   let mx = 0;
   for (const v of vs) {
     c.ok(
@@ -191,15 +194,22 @@ export function annex3(ctx: Context): Check {
       `versions ${required<string>(v, 'id')}: 2024-2025 must be equal`,
     );
     for (let i = 0; i < 5; i++) {
-      c.near(
-        pyItemAt(v, 'diff', i),
-        pySubtract(numeric(required(v, 'docx'), i), numeric(required(v, 'pdf'), i)),
+      const actual = pyItemAt(v, 'diff', i),
+        left = numeric(required(v, 'docx'), i),
+        right = numeric(required(v, 'pdf'), i),
+        expected = pySubtract(left, right);
+      nearWithText(
+        c,
+        actual,
+        expected,
         0.0501,
         `versions ${required<string>(v, 'id')} diff ${i}`,
+        displayAt(required(v, 'diff'), i),
+        left.kind === 'float' || right.kind === 'float' ? pyFloat(expected) : String(expected),
       );
-      mx = Math.max(mx, Math.abs(required<any>(v, 'diff')[i]));
+      mx = Math.max(mx, pyAbs(numeric(required<any>(v, 'diff'), i)));
     }
-    const row = other[required<string>(v, 'id')];
+    const row = other.get(required<string>(v, 'id'));
     if (
       c.ok(
         row !== undefined,
@@ -237,7 +247,7 @@ const numeric = (holder: any, key: string | number): PythonNumber => {
 const floatZero: PythonNumber = { value: 0, kind: 'float' };
 const roundedOne = (x: number): number => Number(fmt(x, 1).replaceAll(' ', '').replace(',', '.'));
 function rowOffset(row: any, operation: '+' | '-' = '+'): number {
-  if (!Object.hasOwn(row, 'y0')) return 0;
+  if (!pyHas(row, 'y0')) return 0;
   const value = row.y0;
   if (typeof value === 'number' || typeof value === 'boolean') return Number(value);
   const type = pythonType(value);
@@ -253,7 +263,7 @@ function rowOffset(row: any, operation: '+' | '-' = '+'): number {
   throw new PythonError('TypeError', message);
 }
 function requireOffsetIndex(row: any, slice = false): void {
-  if (Object.hasOwn(row, 'y0') && !pyIntAt(row, 'y0'))
+  if (pyHas(row, 'y0') && !pyIntAt(row, 'y0'))
     throw new PythonError(
       'TypeError',
       slice
@@ -280,25 +290,26 @@ function at(row: any, i: number): RowValue | null {
 }
 function tree(c: Check, rows: any[], what: string, gdp: number[], tolCap = 0.3): number {
   const by = byId(rows) as Record<string, any>,
-    kids: Record<string, any[]> = {};
+    kids = pyDict<any, any[]>();
   for (const q of rows) {
     c.ok(isnum(required<any>(q, 'level')), `${what} ${required<any>(q, 'id')}: level`);
     const p = q.parent;
     if (pyTruth(p)) {
       if (
         c.ok(
-          Object.hasOwn(by, p),
-          `${what} ${required<any>(q, 'id')}: parent ${p} not in the table`,
+          pyHas(by, p),
+          `${what} ${required<any>(q, 'id')}: parent ${typeof p === 'string' ? p : pyReprAt(q, 'parent')} not in the table`,
         )
       ) {
         c.ok(
           pyEqual(
-            required(by[p], 'level'),
+            required(pyItem(by, p), 'level'),
             pySubtract(numeric(q, 'level'), { value: 1, kind: 'int' }),
           ),
-          `${what} ${required<any>(q, 'id')}: level ${pyReprAt(q, 'level')} under parent level ${pyReprAt(by[p], 'level')}`,
+          `${what} ${required<any>(q, 'id')}: level ${pyReprAt(q, 'level')} under parent level ${pyReprAt(pyItem(by, p), 'level')}`,
         );
-        (kids[p] ??= []).push(q);
+        if (!kids.has(p)) kids.set(p, []);
+        kids.get(p)!.push(q);
       }
     } else
       c.ok(
@@ -308,7 +319,7 @@ function tree(c: Check, rows: any[], what: string, gdp: number[], tolCap = 0.3):
     const mlnLength = pyLenAt(q, 'mln');
     const pct = required<any>(q, 'pctGdp');
     const fits = mlnLength === pyLenAt(q, 'pctGdp') && rowOffset(q) + mlnLength <= 5;
-    const rawOffset = Object.hasOwn(q, 'y0') ? q.y0 : 0;
+    const rawOffset = pyHas(q, 'y0') ? q.y0 : 0;
     c.ok(
       fits,
       `${what} ${required<any>(q, 'id')}: mln/pctGdp lengths ${mlnLength}/${pyLenAt(q, 'pctGdp')} (y0 ${pyDecimalInteger(rawOffset)})`,
@@ -340,11 +351,11 @@ function tree(c: Check, rows: any[], what: string, gdp: number[], tolCap = 0.3):
     }
   }
   let worst = 0;
-  for (const [pid, ks] of Object.entries(kids)) {
+  for (const [pid, ks] of kids) {
     const real = ks.filter((k) => !pyTruth(k.memo)),
       tol = Math.min(tolCap, 0.05 * (real.length + 1) + 0.01);
     for (let i = 0; i < 5; i++) {
-      const parent = at(by[pid], i);
+      const parent = at(pyItem(by, pid), i);
       if (parent === null) continue;
       const values = pyMap(real, (k) => {
         const n = at(k, i);
@@ -421,8 +432,8 @@ export function revenue(ctx: Context): Check {
   const rows = required<any[]>(r, 'rows'),
     by = byId(rows) as Record<string, any>;
   c.ok(
-    rows.length === 31 && Object.keys(by).length === 31,
-    `rows: ${rows.length} (unique ${Object.keys(by).length}), expected 31`,
+    rows.length === 31 && by.size === 31,
+    `rows: ${rows.length} (unique ${by.size}), expected 31`,
   );
   c.ok(
     same(required(required<any>(by, 'r.total'), 'mln'), required(t, 'mln')),
@@ -436,7 +447,7 @@ export function revenue(ctx: Context): Check {
   );
   const used = groups.flatMap((gr: any) => pyIterAt(gr, 'rowIds'));
   c.ok(
-    used.length === pySet(used).size && used.every((id: any) => Object.hasOwn(by, id)),
+    used.length === pySet(used).size && used.every((id: any) => pyHas(by, id)),
     'groups: rowIds unique and existing',
   );
   const gsum = [];
@@ -447,11 +458,11 @@ export function revenue(ctx: Context): Check {
     c.near(pyItemAt(r, 'groupSums', i), roundedOne(s), 0.0501, `groupSums[${i}]`);
   }
   for (const gr of groups) {
-    if (!required<any>(gr, 'rowIds').every((x: string) => Object.hasOwn(by, x))) continue;
+    if (!required<any>(gr, 'rowIds').every((x: string) => pyHas(by, x))) continue;
     c.ok(
       same(
         required(gr, 'annex3Rows'),
-        required<any>(gr, 'rowIds').map((i: string) => required(by[i], 'label')),
+        required<any>(gr, 'rowIds').map((i: string) => required(pyItem(by, i), 'label')),
       ),
       `group ${required<any>(gr, 'id')}: annex3Rows differ from the row labels`,
     );
@@ -459,7 +470,7 @@ export function revenue(ctx: Context): Check {
       const actual = pyItemAt(gr, 'mln', i);
       const s = pyTypedSum(
         pyMap(required<any>(gr, 'rowIds'), (x: string) => {
-          const n = at(by[x], i);
+          const n = at(pyItem(by, x), i);
           return n && pyTruth(n.raw) ? n : floatZero;
         }),
       );
@@ -656,7 +667,7 @@ export function measures(ctx: Context): Check {
       );
       if (required<any>(i, 'tab') === 'short')
         c.ok(
-          Object.hasOwn(required<any>(m, 'estimateKinds'), i.estimateKind),
+          pyHas(required<any>(m, 'estimateKinds'), i.estimateKind),
           `${required(i, 'id')}: estimateKind`,
         );
     } else
@@ -686,8 +697,11 @@ export function measures(ctx: Context): Check {
         `${required(i, 'id')}: balanceEffectMln must be +effect (revenue) or -effect (expenditure)`,
       );
     }
-    for (const rid of i.related ?? [])
-      c.ok(Object.hasOwn(by, rid), `${required(i, 'id')}: related ${rid} does not exist`);
+    for (const rid of pyIterGet(i, 'related'))
+      c.ok(
+        pyHas(by, rid),
+        `${required(i, 'id')}: related ${typeof rid === 'string' ? rid : pyRepr(rid)} does not exist`,
+      );
     if ('from' in i)
       c.ok(
         typeof required<any>(i, 'from') === 'string' &&
@@ -704,16 +718,16 @@ export function measures(ctx: Context): Check {
     c.ok(
       required<any>(gr, 'items').every(
         (x: string) =>
-          Object.hasOwn(by, x) &&
-          required<any>(by[x], 'tab') === 'short' &&
-          required<any>(by[x], 'kind') === required<any>(gr, 'kind'),
+          pyHas(by, x) &&
+          required<any>(pyItem(by, x), 'tab') === 'short' &&
+          required<any>(pyItem(by, x), 'kind') === required<any>(gr, 'kind'),
       ),
       `group ${required<any>(gr, 'id')}: items must be short-term ${required<any>(gr, 'kind')} measures`,
     );
     if ('totalMln' in gr) {
       const s = pySum(
         pyMap(required<any>(gr, 'items'), (x: string) =>
-          numeric(required<any>(by[x], 'effectMln'), '2026'),
+          numeric(required<any>(pyItem(by, x), 'effectMln'), '2026'),
         ),
       );
       nearWithText(
@@ -733,24 +747,24 @@ export function measures(ctx: Context): Check {
   );
   nearWithText(
     c,
-    required<any>(grp['short-revenue'], 'totalMln'),
+    required<any>(pyItem(grp, 'short-revenue'), 'totalMln'),
     required<any>(t, 'revenueMln'),
     0.0001,
     'group short-revenue vs totals.revenueMln',
-    displayAt(grp['short-revenue'], 'totalMln'),
+    displayAt(pyItem(grp, 'short-revenue'), 'totalMln'),
     displayAt(t, 'revenueMln'),
   );
   nearWithText(
     c,
-    required<any>(grp['short-expenditure'], 'totalMln'),
+    required<any>(pyItem(grp, 'short-expenditure'), 'totalMln'),
     required<any>(t, 'expenditureMln'),
     0.0001,
     'group short-expenditure vs totals.expenditureMln',
-    displayAt(grp['short-expenditure'], 'totalMln'),
+    displayAt(pyItem(grp, 'short-expenditure'), 'totalMln'),
     displayAt(t, 'expenditureMln'),
   );
-  const kk = required<any>(grp['short-expenditure'], 'items')
-    .map((x: string) => by[x])
+  const kk = required<any>(pyItem(grp, 'short-expenditure'), 'items')
+    .map((x: string) => pyItem(by, x))
     .filter((x: any) => required<any>(x, 'estimateKind') === 'stated');
   const stated = pyTypedSum(pyMap(kk, (x: any) => numeric(required<any>(x, 'effectMln'), '2026')));
   nearWithText(
@@ -777,7 +791,7 @@ export function measures(ctx: Context): Check {
     for (const y of ['2026', '2027', '2028']) {
       const s = pySum(
         pyMap(its, (i: any) =>
-          Object.hasOwn(required<any>(i, 'effectMln'), y)
+          pyHas(required<any>(i, 'effectMln'), y)
             ? numeric(required<any>(i, 'effectMln'), y)
             : floatZero,
         ),
@@ -974,7 +988,7 @@ export function expenditure(ctx: Context): Check {
     );
   const ec = byId(required<any>(required<any>(e, 'economic'), 'rows')) as Record<string, any>;
   for (let k = 0; k < 4; k++) {
-    const value = at(ec['x.exp'], k + 1);
+    const value = at(pyItem(ec, 'x.exp'), k + 1);
     nearWithText(
       c,
       required<any>(rc, 'annex3ExpenditureMln')[k],
@@ -1015,7 +1029,7 @@ export function expenditure(ctx: Context): Check {
     pdfTotal = [...tot];
   c.ok(vers.length === 7, `functions.versions: ${vers.length} rows, expected 7`);
   for (const v of vers) {
-    const it = by[required<string>(v, 'id')],
+    const it = pyItem(by, required<string>(v, 'id')),
       pub =
         'part' in v
           ? required<any>(
@@ -1061,7 +1075,7 @@ export function expenditure(ctx: Context): Check {
   );
   for (const it of items)
     c.ok(
-      (it.ministries ?? []).every((m: string) => mins.has(m)),
+      pyIterGet(it, 'ministries').every((m) => mins.has(m)),
       `functions ${required<any>(it, 'id')}: unknown ministry code in ${pyReprAt(it, 'ministries')}`,
     );
   const z = required<any>(e, 'economic'),
@@ -1071,55 +1085,56 @@ export function expenditure(ctx: Context): Check {
       same(required(z, 'vintage'), required(o, 'vintage')),
     'economic: years/vintage must equal outlook',
   );
-  c.ok(
-    rows.length === 30 && Object.keys(ec).length === 30,
-    `economic: ${rows.length} rows, expected 30`,
-  );
+  c.ok(rows.length === 30 && ec.size === 30, `economic: ${rows.length} rows, expected 30`);
   const worst = tree(c, rows, 'economic', gdp);
   c.ok(
     same(
-      required<any>(ec['x.total'], 'mln'),
+      required<any>(pyItem(ec, 'x.total'), 'mln'),
       required<any>(required<any>(required<any>(o, 'kfp'), 'expenditure'), 'mln'),
     ),
     'economic x.total must equal outlook expenditure',
   );
   c.ok(
     same(
-      required<any>(ec['x.interest'], 'mln'),
+      required<any>(pyItem(ec, 'x.interest'), 'mln'),
       required<any>(required<any>(required<any>(o, 'kfp'), 'interest'), 'mln'),
     ),
     'economic x.interest must equal outlook interest',
   );
   for (let i = 0; i < 5; i++)
     c.near(
-      required<any>(ec['x.nonint'], 'mln')[i],
+      required<any>(pyItem(ec, 'x.nonint'), 'mln')[i],
       pySubtract(
-        numeric(required<any>(ec['x.exp'], 'mln'), i),
-        numeric(required<any>(ec['x.interest'], 'mln'), i),
+        numeric(required<any>(pyItem(ec, 'x.exp'), 'mln'), i),
+        numeric(required<any>(pyItem(ec, 'x.interest'), 'mln'), i),
       ),
       0.15,
       `economic: memo x.nonint ${2024 + i}`,
     );
-  c.ok(ec['x.nonint'].memo === true, 'economic: x.nonint must be a memo row');
+  c.ok(pyItem(ec, 'x.nonint').memo === true, 'economic: x.nonint must be a memo row');
   nearWithText(
     c,
-    required<any>(ec['x.exp'], 'mln')[2],
+    required<any>(pyItem(ec, 'x.exp'), 'mln')[2],
     tot[1],
     0.0011,
     'economic x.exp 2026 vs functions total',
-    displayAt(required<any>(ec['x.exp'], 'mln'), 2),
+    displayAt(required<any>(pyItem(ec, 'x.exp'), 'mln'), 2),
     displayAt(tot, 1),
   );
   c.ok(
     same(
-      [required<any>(ec['x.total'], 'mln')[2], required<any>(ec['x.eucontrib'], 'mln')[2]],
+      [
+        required<any>(pyItem(ec, 'x.total'), 'mln')[2],
+        required<any>(pyItem(ec, 'x.eucontrib'), 'mln')[2],
+      ],
       [56807.2, 1282.2],
     ),
     'economic 2026: x.total/x.eucontrib',
   );
   c.near(
-    required<any>(ec['x.exp'], 'mln')[2] + required<any>(ec['x.eucontrib'], 'mln')[2],
-    required<any>(ec['x.total'], 'mln')[2],
+    required<any>(pyItem(ec, 'x.exp'), 'mln')[2] +
+      required<any>(pyItem(ec, 'x.eucontrib'), 'mln')[2],
+    required<any>(pyItem(ec, 'x.total'), 'mln')[2],
     0.15,
     '55 525,0 + 1 282,2 vs 56 807,2',
   );
@@ -1158,7 +1173,7 @@ export function expenditure(ctx: Context): Check {
     );
   }
   c.ok(
-    cit.every((x: any) => (x.kfpFunctions ?? []).every((id: string) => Object.hasOwn(by, id))),
+    cit.every((x: any) => pyIterGet(x, 'kfpFunctions').every((id) => pyHas(by, id))),
     'cofog: kfpFunctions must be function ids',
   );
   const implied = percentage(
@@ -1184,7 +1199,7 @@ export function expenditure(ctx: Context): Check {
     'perCapita: population must equal core.population',
   );
   c.fact(
-    `functions 2026 ${fmt(tot[1])} млн. € (+ EU contribution ${fmt(required<any>(ec['x.eucontrib'], 'mln')[2])} = ${fmt(required<any>(ec['x.total'], 'mln')[2])}); economic tree within ${fixed(worst, 1)}; Annex 3 2025 column differs from the printed 'Програма' by ${fmt(required<any>(rc, 'diffMln')[0])} млн. €`,
+    `functions 2026 ${fmt(tot[1])} млн. € (+ EU contribution ${fmt(required<any>(pyItem(ec, 'x.eucontrib'), 'mln')[2])} = ${fmt(required<any>(pyItem(ec, 'x.total'), 'mln')[2])}); economic tree within ${fixed(worst, 1)}; Annex 3 2025 column differs from the printed 'Програма' by ${fmt(required<any>(rc, 'diffMln')[0])} млн. €`,
   );
   return c;
 }
