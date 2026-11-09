@@ -1,4 +1,6 @@
 import { pythonNumberAt, pythonSum, type PythonNumber } from '../common/numbers.js';
+import { pyRepr } from './checks.js';
+import { pythonKeys } from './ordered-json.js';
 
 /** Donor-visible Python exception names for cases that terminate a validation group. */
 export class PythonError extends Error {
@@ -8,8 +10,70 @@ export class PythonError extends Error {
   }
 }
 export function required<T>(object: Record<string, T>, key: string): T {
-  if (!Object.hasOwn(object, key)) throw new PythonError('KeyError', `'${key}'`);
-  return object[key]!;
+  return pyItem(object, key) as T;
+}
+
+/** Subscription, length and iteration retain Python's first failing operation. */
+export function pyItem(value: any, key: string | number | boolean): any {
+  if (Array.isArray(value) || typeof value === 'string') {
+    if ((typeof key !== 'number' || !Number.isInteger(key)) && typeof key !== 'boolean')
+      throw new PythonError(
+        'TypeError',
+        Array.isArray(value)
+          ? `list indices must be integers or slices, not ${pythonType(key)}`
+          : `string indices must be integers, not '${pythonType(key)}'`,
+      );
+    const sequence = typeof value === 'string' ? Array.from(value) : value;
+    const at = Number(key) < 0 ? sequence.length + Number(key) : Number(key);
+    if (at < 0 || at >= sequence.length)
+      throw new PythonError(
+        'IndexError',
+        Array.isArray(value) ? 'list index out of range' : 'string index out of range',
+      );
+    return sequence[at];
+  }
+  if (value && typeof value === 'object') {
+    if (typeof key === 'string' && Object.hasOwn(value, key)) return value[key];
+    throw new PythonError('KeyError', pyRepr(key));
+  }
+  throw new PythonError('TypeError', `'${pythonType(value)}' object is not subscriptable`);
+}
+export function pyLen(value: unknown): number {
+  if (typeof value === 'string') return Array.from(value).length;
+  if (Array.isArray(value)) return value.length;
+  if (value && typeof value === 'object') return Object.keys(value).length;
+  throw new PythonError('TypeError', `object of type '${pythonType(value)}' has no len()`);
+}
+export function pyIter(value: unknown): unknown[] {
+  if (typeof value === 'string') return Array.from(value);
+  if (Array.isArray(value)) return value;
+  if (value && typeof value === 'object') return pythonKeys(value);
+  throw new PythonError('TypeError', `'${pythonType(value)}' object is not iterable`);
+}
+export function pyHas(mapping: any, key: any): boolean {
+  if (key && typeof key === 'object')
+    throw new PythonError('TypeError', `unhashable type: '${pythonType(key)}'`);
+  return typeof key === 'string' && Object.hasOwn(mapping, key);
+}
+export function pyLessEqual(a: any, b: any): boolean {
+  if (
+    (typeof a === 'number' || typeof a === 'boolean') &&
+    (typeof b === 'number' || typeof b === 'boolean')
+  )
+    return Number(a) <= Number(b);
+  if (typeof a === 'string' && typeof b === 'string') return a <= b;
+  throw new PythonError(
+    'TypeError',
+    `'<=' not supported between instances of '${pythonType(a)}' and '${pythonType(b)}'`,
+  );
+}
+export function pyAddAssign(a: PythonNumber, b: PythonNumber): number {
+  if (typeof a.value !== 'number' || typeof b.value !== 'number')
+    throw new PythonError(
+      'TypeError',
+      `unsupported operand type(s) for +=: '${typeof a.value === 'number' ? a.kind : pythonType(a.value)}' and '${typeof b.value === 'number' ? b.kind : pythonType(b.value)}'`,
+    );
+  return a.value + b.value;
 }
 export function divide(a: number, b: number): number {
   if (b === 0) throw new PythonError('ZeroDivisionError', 'float division by zero');

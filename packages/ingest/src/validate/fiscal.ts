@@ -14,6 +14,10 @@ import {
   pyDecimalInteger,
   pySubtract,
   pythonType,
+  pyItem,
+  pyLen,
+  pyIter,
+  pyHas,
 } from './python-error.js';
 
 const KFP_KEYS = ['revenue', 'expenditure', 'balance', 'interest', 'primaryBalance', 'financing'];
@@ -23,14 +27,18 @@ const fixed = (n: number, places: number) => fmt(n, places).replaceAll(' ', ''
 const tuple = (values: number[]): string => `(${values.map(pyFloat).join(', ')})`;
 // CPython round(x) uses ties-to-even, unlike Math.round.
 function roundInteger(x: number): number {
-  if (x === null)
-    throw new PythonError('TypeError', "type NoneType doesn't define __round__ method");
+  if (typeof x !== 'number' && typeof x !== 'boolean')
+    throw new PythonError('TypeError', `type ${pythonType(x)} doesn't define __round__ method`);
+  if (Number.isNaN(x)) throw new PythonError('ValueError', 'cannot convert float NaN to integer');
+  if (!Number.isFinite(Number(x)))
+    throw new PythonError('OverflowError', 'cannot convert float infinity to integer');
+  x = Number(x);
   const lo = Math.floor(x),
     fraction = x - lo;
   return fraction === 0.5 ? (lo % 2 === 0 ? lo : lo + 1) : Math.round(x);
 }
-function ptol(series: any[]): number {
-  const decimals = series.map((v) => {
+function ptol(series: any): number {
+  const decimals = pyIter(series).map((v) => {
     if (v === null)
       throw new PythonError(
         'TypeError',
@@ -50,7 +58,12 @@ function ptol(series: any[]): number {
           ? -Infinity
           : Infinity
         : Number(normalized.replaceAll('_', ''));
-    } else x = Number(v);
+    } else if (typeof v === 'number' || typeof v === 'boolean') x = Number(v);
+    else
+      throw new PythonError(
+        'TypeError',
+        `float() argument must be a string or a real number, not '${pythonType(v)}'`,
+      );
     const repr = pyFloat(x);
     return repr.includes('.') ? repr.split('.')[1]!.length : 0;
   });
@@ -62,16 +75,16 @@ export function annex3(ctx: Context): Check {
     o = ctx.get('outlook.json');
   c.ok(same(required(o, 'years'), [2024, 2025, 2026, 2027, 2028]), `years ${pyRepr(o.years)}`);
   c.ok(
-    same(o.vintage, ['actual', 'prelim', 'plan', 'forecast', 'forecast']),
+    same(required(o, 'vintage'), ['actual', 'prelim', 'plan', 'forecast', 'forecast']),
     `vintage ${pyRepr(o.vintage)}`,
   );
-  const g = o.gdp;
-  required(g, 'mln');
-  c.ok(g.mln.length === 5 && g.mlnPrecise.length === 5, 'gdp lengths');
+  const g = required<any>(o, 'gdp');
+  c.ok(pyLen(required(g, 'mln')) === 5 && pyLen(required(g, 'mlnPrecise')) === 5, 'gdp lengths');
   for (let i = 0; i < 5; i++) {
-    const rounded = roundInteger(g.mlnPrecise[i]);
+    const cell = pyItem(required(g, 'mln'), i);
+    const rounded = roundInteger(pyItem(required(g, 'mlnPrecise'), i));
     c.ok(
-      isnum(g.mln[i]) && Math.abs(g.mln[i] - rounded) <= 1e-9,
+      isnum(cell) && Math.abs(cell - rounded) <= 1e-9,
       `gdp.mln[${i}] is the rounded precise value: ${displayAt(g.mln, i)} vs ${rounded} (tolerance 0.0)`,
     );
   }
@@ -85,12 +98,19 @@ export function annex3(ctx: Context): Check {
     const b = k[name];
     required(b, 'mln');
     c.ok(
-      b.mln.length === 5 && b.pctGdp.length === 5 && [...b.mln, ...b.pctGdp].every(isnum),
+      pyLen(required(b, 'mln')) === 5 &&
+        pyLen(required(b, 'pctGdp')) === 5 &&
+        [...b.mln, ...b.pctGdp].every(isnum),
       `${name}: five numbers each`,
     );
     const tol = ptol(b.pctGdp);
     for (let i = 0; i < 5; i++)
-      c.near(b.pctGdp[i], divide(100 * b.mln[i], gdp[i]), tol, `${name} pctGdp ${2024 + i}`);
+      c.near(
+        pyItem(b.pctGdp, i),
+        divide(100 * pyItem(b.mln, i), pyItem(gdp, i)),
+        tol,
+        `${name} pctGdp ${2024 + i}`,
+      );
   }
   const [rev, exp, bal, itr, pb, fin] = KFP_KEYS.map((name) => k[name].mln);
   for (let i = 0; i < 5; i++) {
@@ -208,17 +228,18 @@ function listValue<T>(values: T[], index: number): T {
 }
 function at(row: any, i: number): PythonNumber | null {
   const j = i - rowOffset(row, '-');
-  if (j < 0 || j >= row.mln.length) return null;
+  if (!(j >= 0)) return null;
+  const values = required<any>(row, 'mln');
+  if (j >= pyLen(values)) return null;
   requireOffsetIndex(row);
-  if (row.mln[j] === null) return null;
-  return numeric(row.mln, j);
+  if (pyItem(values, j) === null) return null;
+  return numeric(values, j);
 }
 function tree(c: Check, rows: any[], what: string, gdp: number[], tolCap = 0.3): number {
   const by = byId(rows) as Record<string, any>,
     kids: Record<string, any[]> = {};
   for (const q of rows) {
     required(q, 'id');
-    required(q, 'mln');
     required(q, 'level');
     c.ok(isnum(q.level), `${what} ${q.id}: level`);
     const p = q.parent;
@@ -231,17 +252,21 @@ function tree(c: Check, rows: any[], what: string, gdp: number[], tolCap = 0.3):
         (kids[p] ??= []).push(q);
       }
     } else c.ok(pyEqual(q.level, 0), `${what} ${q.id}: a row without parent must be level 0`);
-    const fits = q.mln.length === q.pctGdp.length && rowOffset(q) + q.mln.length <= 5;
+    const mlnLength = pyLen(required(q, 'mln'));
+    const pct = required<any>(q, 'pctGdp');
+    const fits = mlnLength === pyLen(pct) && rowOffset(q) + mlnLength <= 5;
     const rawOffset = Object.hasOwn(q, 'y0') ? q.y0 : 0;
     c.ok(
       fits,
-      `${what} ${q.id}: mln/pctGdp lengths ${q.mln.length}/${q.pctGdp.length} (y0 ${pyDecimalInteger(rawOffset)})`,
+      `${what} ${q.id}: mln/pctGdp lengths ${mlnLength}/${pyLen(pct)} (y0 ${pyDecimalInteger(rawOffset)})`,
     );
     const y0 = rowOffset(q);
     const tol = ptol(q.pctGdp);
-    for (let j = 0; j < Math.min(q.mln.length, q.pctGdp.length); j++) {
-      const m = q.mln[j],
-        p = q.pctGdp[j];
+    const ms = pyIter(q.mln),
+      ps = pyIter(pct);
+    for (let j = 0; j < Math.min(ms.length, ps.length); j++) {
+      const m = ms[j],
+        p = ps[j];
       c.ok(isnum(m) && isnum(p), `${what} ${q.id}: non-number at ${j}`);
       if (isnum(m) && isnum(p)) {
         requireOffsetIndex(q);
@@ -249,7 +274,7 @@ function tree(c: Check, rows: any[], what: string, gdp: number[], tolCap = 0.3):
           c,
           q.pctGdp,
           j,
-          divide(100 * m, listValue(gdp, j + y0)),
+          () => divide(100 * m, listValue(gdp, j + y0)),
           tol,
           `${what} ${q.id} pctGdp ${j + y0}`,
         );
@@ -303,15 +328,16 @@ function nearComputed(
   c: Check,
   holder: any,
   key: string | number,
-  b: number,
+  b: () => number,
   tolerance: number,
   message: string,
 ): void {
-  const a = holder[key];
+  const a = pyItem(holder, key);
+  const computed = b();
   const rendered = displayAt(holder, key);
   c.ok(
-    isnum(a) && Number.isFinite(b) && Math.abs(a - b) <= tolerance + 1e-9,
-    `${message}: ${rendered} vs ${pyFloat(b)} (tolerance ${tolerance})`,
+    isnum(a) && Number.isFinite(computed) && Math.abs(a - computed) <= tolerance + 1e-9,
+    `${message}: ${rendered} vs ${pyFloat(computed)} (tolerance ${tolerance})`,
   );
 }
 export function revenue(ctx: Context): Check {
@@ -319,7 +345,11 @@ export function revenue(ctx: Context): Check {
     r = ctx.get('revenue.json'),
     o = ctx.get('outlook.json'),
     gdp = o.gdp.mlnPrecise;
-  c.ok(same(r.years, o.years) && same(r.vintage, o.vintage), 'years/vintage must equal outlook');
+  c.ok(
+    same(required(r, 'years'), required(o, 'years')) &&
+      same(required(r, 'vintage'), required(o, 'vintage')),
+    'years/vintage must equal outlook',
+  );
   const t = r.total;
   c.ok(
     same(t.mln, o.kfp.revenue.mln) && same(t.pctGdp, o.kfp.revenue.pctGdp),
@@ -374,7 +404,7 @@ export function revenue(ctx: Context): Check {
         c,
         gr.pctGdp,
         i,
-        divide(100 * gr.mln[i], gdp[i]),
+        () => divide(100 * gr.mln[i], gdp[i]),
         tol,
         `group ${gr.id} pctGdp ${2024 + i}`,
       );
@@ -382,7 +412,7 @@ export function revenue(ctx: Context): Check {
       c,
       gr,
       'share2026',
-      divide(100 * gr.mln[2], t.mln[2]),
+      () => divide(100 * gr.mln[2], t.mln[2]),
       0.0051,
       `group ${gr.id} share2026`,
     );
@@ -390,7 +420,7 @@ export function revenue(ctx: Context): Check {
       c,
       gr,
       'yoy2026Pct',
-      100 * (divide(gr.mln[2], gr.mln[1]) - 1),
+      () => 100 * (divide(gr.mln[2], gr.mln[1]) - 1),
       0.0501,
       `group ${gr.id} yoy2026Pct`,
     );
@@ -442,9 +472,9 @@ export function measures(ctx: Context): Check {
     items.length === 52 && new Set(ids).size === 52,
     `items: ${items.length} (unique ${new Set(ids).size}), expected 52`,
   );
-  const short = items.filter((i: any) => i.tab === 'short'),
-    disc = items.filter((i: any) => i.tab === 'discretionary'),
-    laws = items.filter((i: any) => i.tab === 'laws');
+  const short = items.filter((i: any) => required(i, 'tab') === 'short'),
+    disc = items.filter((i: any) => required(i, 'tab') === 'discretionary'),
+    laws = items.filter((i: any) => required(i, 'tab') === 'laws');
   c.ok(
     same(
       [short.length, disc.length, laws.length],
@@ -480,10 +510,10 @@ export function measures(ctx: Context): Check {
     'counts: discretionary expenditure',
   );
   for (const i of items) {
-    required(i, 'page');
     c.ok(
-      (Array.isArray(m.tabs) ? m.tabs.includes(i.tab) : Object.hasOwn(m.tabs, i.tab)) &&
-        Object.hasOwn(m.stageLabels, i.stage),
+      (Array.isArray(m.tabs)
+        ? m.tabs.includes(required(i, 'tab'))
+        : pyHas(m.tabs, required(i, 'tab'))) && pyHas(m.stageLabels, required(i, 'stage')),
       `${i.id}: tab/stage`,
     );
     c.ok(
@@ -491,7 +521,7 @@ export function measures(ctx: Context): Check {
       `${i.id}: name/text/quote must be text`,
     );
     c.ok(
-      i.page !== null &&
+      required(i, 'page') !== null &&
         typeof i.page === 'object' &&
         !Array.isArray(i.page) &&
         pyIntAt(i.page, 'docx'),
@@ -622,7 +652,7 @@ export function measures(ctx: Context): Check {
     c,
     t.gdpShare2026,
     'revenue',
-    divide(100 * tt['II-8'], gdp),
+    () => divide(100 * tt['II-8'], gdp),
     0.0051,
     'gdpShare2026 revenue',
   );
@@ -630,7 +660,7 @@ export function measures(ctx: Context): Check {
     c,
     t.gdpShare2026,
     'expenditure',
-    divide(100 * tt['II-9'], gdp),
+    () => divide(100 * tt['II-9'], gdp),
     0.0051,
     'gdpShare2026 expenditure',
   );
@@ -685,7 +715,7 @@ export function expenditure(ctx: Context): Check {
       c,
       f.totalPctGdp,
       k,
-      divide(100 * tot[k], gdp[k + 1]),
+      () => divide(100 * tot[k], gdp[k + 1]),
       0.0051,
       `functions: totalPctGdp ${2025 + k}`,
     );
@@ -694,7 +724,8 @@ export function expenditure(ctx: Context): Check {
   const gaps = [0, 0, 0, 0];
   for (const it of items) {
     c.ok(
-      ['mln', 'pctGdp', 'share'].every((x) => it[x].length === 4 && it[x].every(isnum)),
+      ['mln', 'pctGdp', 'share'].every((x) => pyLen(required(it, x)) === 4) &&
+        ['mln', 'pctGdp', 'share'].every((x) => pyIter(required(it, x)).every(isnum)),
       `functions ${it.id}: four numbers each`,
     );
     for (let k = 0; k < 4; k++) {
@@ -703,7 +734,7 @@ export function expenditure(ctx: Context): Check {
         c,
         it.share,
         k,
-        divide(100 * it.mln[k], tot[k]),
+        () => divide(100 * it.mln[k], tot[k]),
         0.0061,
         `functions ${it.id} share ${2025 + k}`,
       );
@@ -712,7 +743,7 @@ export function expenditure(ctx: Context): Check {
       c,
       it,
       'yoy2026Pct',
-      100 * (divide(it.mln[1], it.mln[0]) - 1),
+      () => 100 * (divide(it.mln[1], it.mln[0]) - 1),
       0.0501,
       `functions ${it.id} yoy2026Pct`,
     );
@@ -753,7 +784,7 @@ export function expenditure(ctx: Context): Check {
       c,
       rc.diffMln,
       k,
-      roundedOne(tot[k] - rc.annex3ExpenditureMln[k]),
+      () => roundedOne(tot[k] - rc.annex3ExpenditureMln[k]),
       0.0501,
       `reconcile: diffMln ${2025 + k}`,
     );
@@ -863,9 +894,10 @@ export function expenditure(ctx: Context): Check {
     Math.abs(divide(implied, gdp[0]) - 1) < 0.003,
     `cofog: the GDP implied by the 2024 percentages (${fmt(implied, 0)}) differs from Annex 3's 2024 GDP`,
   );
-  const pc = e.perCapita;
+  const pc = required<any>(e, 'perCapita');
   c.ok(
-    pc.population === core.population.persons && pc.year === core.population.year,
+    required(pc, 'population') === core.population.persons &&
+      required(pc, 'year') === core.population.year,
     'perCapita: population must equal core.population',
   );
   c.fact(

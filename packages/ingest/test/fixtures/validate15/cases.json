@@ -6212,5 +6212,2258 @@
         "token": "0.0"
       }
     ]
+  },
+  {
+    "name": "acceptance4-000-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "file": "outlook.json",
+        "path": [
+          "vintage"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-001-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "file": "outlook.json",
+        "path": [
+          "vintage"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-002-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "file": "outlook.json",
+        "path": [
+          "vintage"
+        ],
+        "op": "set",
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-003-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "file": "outlook.json",
+        "path": [
+          "vintage"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-004-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "file": "outlook.json",
+        "path": [
+          "vintage"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-005-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mlnPrecise"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-006-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mlnPrecise"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-007-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mlnPrecise"
+        ],
+        "op": "set",
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-008-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mlnPrecise"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-009-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mlnPrecise"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-010-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "revenue",
+          "mln"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-011-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "revenue",
+          "mln"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-012-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "revenue",
+          "mln"
+        ],
+        "op": "set",
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-013-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "revenue",
+          "mln"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-014-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "revenue",
+          "mln"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-015-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "years"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-016-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "years"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-017-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "years"
+        ],
+        "op": "set",
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-018-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "years"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-019-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "years"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-020-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "pctGdp"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-021-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "pctGdp"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-022-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "pctGdp"
+        ],
+        "op": "set",
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-023-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "pctGdp"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-024-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "pctGdp"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-025-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          0,
+          "share2026"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-026-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          0,
+          "share2026"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-027-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          0,
+          "share2026"
+        ],
+        "op": "set",
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-028-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          0,
+          "share2026"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-029-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          0,
+          "share2026"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-030-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "perCapita",
+          "year"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-031-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "perCapita",
+          "year"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-032-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "perCapita",
+          "year"
+        ],
+        "op": "set",
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-033-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "perCapita",
+          "year"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-034-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "perCapita",
+          "year"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-035-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "share"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-036-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "share"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-037-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "share"
+        ],
+        "op": "set",
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-038-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "share"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-039-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "share"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-040-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "tab"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-041-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "tab"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-042-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "tab"
+        ],
+        "op": "set",
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-043-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "tab"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-044-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "tab"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-045-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "stage"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-046-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "stage"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-047-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "stage"
+        ],
+        "op": "set",
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-048-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "stage"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-049-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "stage"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-050-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "bill",
+          "rev"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-051-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "bill",
+          "rev"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-052-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "bill",
+          "rev"
+        ],
+        "op": "set",
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-053-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "bill",
+          "rev"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-054-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "bill",
+          "rev"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-055-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "counts",
+          "opinions"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-056-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "counts",
+          "opinions"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-057-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "counts",
+          "opinions"
+        ],
+        "op": "set",
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-058-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "counts",
+          "opinions"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-059-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "counts",
+          "opinions"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-060-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "proposals",
+          "items",
+          0,
+          "file"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-061-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "proposals",
+          "items",
+          0,
+          "file"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-062-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "proposals",
+          "items",
+          0,
+          "file"
+        ],
+        "op": "set",
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-063-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "proposals",
+          "items",
+          0,
+          "file"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-064-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "proposals",
+          "items",
+          0,
+          "file"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-065-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "expKhil"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-066-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "expKhil"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-067-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "expKhil"
+        ],
+        "op": "set",
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-068-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "expKhil"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-069-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "expKhil"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-070-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "lawName"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-071-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "lawName"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-072-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "lawName"
+        ],
+        "op": "set",
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-073-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "lawName"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-074-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "lawName"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-075-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "file": "ministries/0200.json",
+        "path": [
+          "check",
+          "policiesSumToTotal"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-076-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "file": "ministries/0200.json",
+        "path": [
+          "check",
+          "policiesSumToTotal"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-077-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "file": "ministries/0200.json",
+        "path": [
+          "check",
+          "policiesSumToTotal"
+        ],
+        "op": "set",
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-078-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "file": "ministries/0200.json",
+        "path": [
+          "check",
+          "policiesSumToTotal"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-079-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "file": "ministries/0200.json",
+        "path": [
+          "check",
+          "policiesSumToTotal"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-080-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "file": "ministries/0200.json",
+        "path": [
+          "policies",
+          0,
+          "name"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-081-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "file": "ministries/0200.json",
+        "path": [
+          "policies",
+          0,
+          "name"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-082-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "file": "ministries/0200.json",
+        "path": [
+          "policies",
+          0,
+          "name"
+        ],
+        "op": "set",
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-083-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "file": "ministries/0200.json",
+        "path": [
+          "policies",
+          0,
+          "name"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-084-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "file": "ministries/0200.json",
+        "path": [
+          "policies",
+          0,
+          "name"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-085-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "art1",
+          "headline"
+        ],
+        "op": "set",
+        "value": {
+          "financing": {
+            "bill": 7350531.5,
+            "law": 7319804.0,
+            "diff": -30727.5
+          },
+          "balance": {
+            "bill": -7350531.5,
+            "law": -7319804.0,
+            "diff": 30727.5
+          },
+          "eucontrib": {
+            "bill": 1282158.2,
+            "law": 1282158.2,
+            "diff": 0.0
+          },
+          "transfers": {
+            "bill": 16897918.8,
+            "law": 16897918.8,
+            "diff": 0.0
+          },
+          "exp": {
+            "bill": 17626188.6,
+            "law": 17600574.1,
+            "diff": -25614.5
+          },
+          "rev": {
+            "bill": 28455734.1,
+            "law": 28460847.1,
+            "diff": 5113.0
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-086-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "counts",
+          "reportDates"
+        ],
+        "op": "set",
+        "value": {
+          "2026-07-10": 4,
+          "2026-07-09": 12,
+          "2026-07-08": 3,
+          "2026-07-07": 3
+        }
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-087-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "lines"
+        ],
+        "op": "set",
+        "value": {
+          "del": 0,
+          "add": 3,
+          "chg": 12
+        }
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-088-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "changed"
+        ],
+        "op": "rawSet",
+        "token": "\"text\""
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-089-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "changed"
+        ],
+        "op": "rawSet",
+        "token": "[1.0,{\"2\":0.0,\"1\":1e0}]"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-090-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "changed"
+        ],
+        "op": "rawSet",
+        "token": "{\"2\":0.0,\"1\":1e0}"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-091-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "changed"
+        ],
+        "op": "rawSet",
+        "token": "1e-5"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-092-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "changed"
+        ],
+        "op": "rawSet",
+        "token": "-0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-093-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "changed"
+        ],
+        "op": "rawSet",
+        "token": "\"text\""
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-094-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "changed"
+        ],
+        "op": "rawSet",
+        "token": "[1.0,{\"2\":0.0,\"1\":1e0}]"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-095-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "changed"
+        ],
+        "op": "rawSet",
+        "token": "{\"2\":0.0,\"1\":1e0}"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-096-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "changed"
+        ],
+        "op": "rawSet",
+        "token": "1e-5"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-097-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "changed"
+        ],
+        "op": "rawSet",
+        "token": "-0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-098-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "counts",
+          "committeeReports"
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-099-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "counts",
+          "committeeReports"
+        ],
+        "op": "rawSet",
+        "token": "0e0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-100-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "counts",
+          "committeeReports"
+        ],
+        "op": "rawSet",
+        "token": "true"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-101-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "counts",
+          "committeeReports"
+        ],
+        "op": "rawSet",
+        "token": "null"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-102-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "counts",
+          "committees",
+          "total"
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-103-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "counts",
+          "committees",
+          "total"
+        ],
+        "op": "rawSet",
+        "token": "0e0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-104-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "counts",
+          "committees",
+          "total"
+        ],
+        "op": "rawSet",
+        "token": "true"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-105-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "counts",
+          "committees",
+          "total"
+        ],
+        "op": "rawSet",
+        "token": "null"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-106-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "proposals",
+          "count"
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-107-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "proposals",
+          "count"
+        ],
+        "op": "rawSet",
+        "token": "0e0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-108-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "proposals",
+          "count"
+        ],
+        "op": "rawSet",
+        "token": "true"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-109-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "proposals",
+          "count"
+        ],
+        "op": "rawSet",
+        "token": "null"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-annex-empty-first-array",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mln"
+        ],
+        "op": "set",
+        "value": []
+      },
+      {
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mlnPrecise"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-annex-null-first-array",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mln"
+        ],
+        "op": "set",
+        "value": null
+      },
+      {
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mlnPrecise"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-revenue-missing-level-before-amount",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "level"
+        ],
+        "op": "delete"
+      },
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "mln"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-expenditure-missing-level-before-amount",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "level"
+        ],
+        "op": "delete"
+      },
+      {
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "mln"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-share-before-zero-denominator",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "share"
+        ],
+        "op": "set",
+        "value": []
+      },
+      {
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "totalMln",
+          0
+        ],
+        "op": "set",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-program-flags-short-circuit",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "file": "ministries/0200.json",
+        "path": [
+          "check",
+          "policiesSumToTotal"
+        ],
+        "op": "set",
+        "value": false
+      },
+      {
+        "file": "ministries/0200.json",
+        "path": [
+          "check",
+          "programsSumToPolicies"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-bill-counts-short-circuit",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "counts",
+          "committeeReports"
+        ],
+        "op": "set",
+        "value": null
+      },
+      {
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "counts",
+          "opinions"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-committees-short-circuit",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "counts",
+          "committees",
+          "reported"
+        ],
+        "op": "set",
+        "value": null
+      },
+      {
+        "file": "law.json",
+        "path": [
+          "counts",
+          "committees",
+          "total"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-row-length-before-offset",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "pctGdp"
+        ],
+        "op": "set",
+        "value": {}
+      },
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "y0"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-stage-before-missing-page",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "stage"
+        ],
+        "op": "set",
+        "value": []
+      },
+      {
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "page"
+        ],
+        "op": "delete"
+      }
+    ]
   }
 ]

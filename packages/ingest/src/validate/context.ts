@@ -1,7 +1,7 @@
 import { existsSync, lstatSync, readFileSync, readdirSync, realpathSync } from 'node:fs';
 import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { numbers } from './execution-contract.js';
-import { parsePythonJson } from '../common/numbers.js';
+import { parseOrderedPythonJson } from './ordered-json.js';
 
 let inputObserver: ((root: string, path: string) => void) | undefined;
 /** Record files and trees consulted by synchronous validators, including registry-defined paths. */
@@ -91,7 +91,7 @@ export function strictJson(text: string): unknown {
       throw error;
     }
   }
-  return parsePythonJson(text);
+  return parseOrderedPythonJson(text);
 }
 
 export class Context {

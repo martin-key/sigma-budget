@@ -12,6 +12,7 @@ import {
   pySum,
   pyMap,
   pyTypedSum,
+  pyAddAssign,
 } from './python-error.js';
 const TOL = 0.06,
   TOL_SUM = 0.15,
@@ -234,7 +235,7 @@ export function budgets(ctx: Context): Check {
     c.ok(Object.hasOwn(m.kinds, x.kind), `${w}: kind ${x.kind}`);
     kinds[x.kind] = (kinds[x.kind] ?? 0) + 1;
     c.ok(
-      typeof x.lawName === 'string' && cleanName(x.lawName),
+      typeof required(x, 'lawName') === 'string' && cleanName(x.lawName),
       `${w}: lawName ${pyRepr(x.lawName)}`,
     );
     for (const [key, k] of [
@@ -243,8 +244,11 @@ export function budgets(ctx: Context): Check {
       ['transfersKhil', 'transfers'],
     ] as const)
       optional(c, x[key], b.law[k], `${w} ${key} = law.json`, disp(x, key), disp(b.law, k));
-    rev += pyTruth(x.revKhil) ? x.revKhil : 0;
-    exp += x.expKhil;
+    rev = pyAddAssign(
+      { value: rev, kind: 'float' },
+      pyTruth(x.revKhil) ? n(x, 'revKhil') : { value: 0, kind: 'float' },
+    );
+    exp = pyAddAssign({ value: exp, kind: 'float' }, n(x, 'expKhil'));
     const pols = required<any[]>(x, 'policies');
     c.ok(
       ['policies', 'areas'].includes(x.policiesKind) && pyTruth(pols),
@@ -568,7 +572,7 @@ function checkFile(c: Check, ctx: Context, item: any, d: any): Row[] {
   c.ok(new Set(codes).size === codes.length, `${w}: duplicate codes`);
   for (const [lvl, parent, r] of rows) {
     const ww = `${w} ${r.code}`;
-    c.ok(cleanName(r.name), `${ww}: name ${pyRepr(r.name)}`);
+    c.ok(cleanName(required(r, 'name')), `${ww}: name ${pyRepr(r.name)}`);
     if (lvl === 'policy' || (lvl === 'program' && !parent))
       c.ok(
         new RegExp(`^${i}\\.\\p{Decimal_Number}{2}\\.00$`, 'u').test(r.code) &&
@@ -657,7 +661,10 @@ function checkFile(c: Check, ctx: Context, item: any, d: any): Row[] {
   }
   const ck = d.check;
   c.ok(
-    ck.policiesSumToTotal === polOk && ck.programsSumToPolicies === progOk && polOk && progOk,
+    required(ck, 'policiesSumToTotal') === polOk &&
+      required(ck, 'programsSumToPolicies') === progOk &&
+      polOk &&
+      progOk,
     `${w}: check flags vs recomputed sums`,
   );
   const t26 = d.total['2026'];

@@ -12,7 +12,10 @@ import {
   pySum,
   pyMap,
   pyTypedSum,
+  pyDecimalInteger,
+  pyLessEqual,
 } from './python-error.js';
+import { pythonKeys } from './ordered-json.js';
 
 const TOL = 0.06,
   TOL_SUM = 0.15;
@@ -60,13 +63,17 @@ const display = (o: any, k: string | number): string => {
   if (isnum(value) && n(o, k).kind === 'float') return pyfloat(value);
   if (Array.isArray(value)) return `[${value.map((_, i) => display(value, i)).join(', ')}]`;
   if (value && typeof value === 'object')
-    return `{${Object.keys(value)
+    return `{${pythonKeys(value)
       .map((key) => `${repr(key)}: ${display(value, key)}`)
       .join(', ')}}`;
   return repr(value);
 };
 const displaySum = (value: PythonNumber) =>
   value.kind === 'float' ? pyfloat(value.value) : String(value.value);
+const stringField = (holder: any, key: string) => {
+  const value = required(holder, key);
+  return typeof value === 'string' ? value : display(holder, key);
+};
 function near(c: Check, a: any, b: any, tol: number, message: string, ar?: string, br?: string) {
   return c.ok(
     isnum(a) && isnum(b) && Math.abs(a - b) <= tol + 1e-9,
@@ -280,7 +287,7 @@ function lawBudgets(c: Check, law: any) {
     for (const k of ['name', 'short', 'kind'])
       c.ok(typeof b[k] === 'string' && !!pyStrip(b[k]), `${w}: ${k}`);
     for (const k of ['rev', 'exp', 'transfers']) {
-      const sides = ['bill', 'law', 'diff'].map((s) => b[s][k]);
+      const sides = ['bill', 'law', 'diff'].map((s) => required(required<any>(b, s), k));
       c.ok(
         sides.every((x) => x === null) || sides.every(isnum),
         `${w}.${k}: the three sides must be all numbers or all null: [${['bill', 'law', 'diff'].map((s) => display(b[s], k)).join(', ')}]`,
@@ -580,9 +587,10 @@ function bills(c: Check, law: any, src: any, buildDate: string) {
       );
     }
     c.ok(
-      ['committeeReports', 'opinions', 'proposals'].every(
-        (k) => pyIntAt(b.counts, k) && Number(b.counts[k]) >= 0,
-      ),
+      ['committeeReports', 'opinions', 'proposals'].every((k) => {
+        required(b.counts, k);
+        return pyIntAt(b.counts, k) && Number(b.counts[k]) >= 0;
+      }),
       `${w}: counts`,
     );
     c.ok(
@@ -598,7 +606,10 @@ function bills(c: Check, law: any, src: any, buildDate: string) {
   const z = bs[0].counts,
     cn = law.counts;
   for (const k of ['committeeReports', 'opinions', 'proposals'])
-    c.ok(cn[k] === z[k], `counts.${k} ${display(cn, k)} vs the bill ${display(z, k)}`);
+    c.ok(
+      pyEqual(required(cn, k), required(z, k)),
+      `counts.${k} ${display(cn, k)} vs the bill ${display(z, k)}`,
+    );
   for (const [k, d] of [
     ['committeeReports', 'reportDates'],
     ['opinions', 'opinionDates'],
@@ -612,10 +623,13 @@ function bills(c: Check, law: any, src: any, buildDate: string) {
     );
   }
   c.ok(
-    cn.committees.reported === cn.committeeReports &&
-      cn.committeeReports <= cn.committees.total &&
-      cn.committees.total === 24,
-    `counts.committees ${repr(cn.committees)}`,
+    pyEqual(
+      required(required<any>(cn, 'committees'), 'reported'),
+      required(cn, 'committeeReports'),
+    ) &&
+      pyLessEqual(cn.committeeReports, required(cn.committees, 'total')) &&
+      pyEqual(cn.committees.total, 24),
+    `counts.committees ${display(cn, 'committees')}`,
   );
   c.ok(same(cn.proposalDates, law.proposals.byDate), 'counts.proposalDates = proposals.byDate');
   const g = law.gazette,
@@ -701,8 +715,8 @@ function proposals(c: Check, law: any) {
     required(r, 'no');
     c.ok(
       /^52-\p{Decimal_Number}{3}-\p{Decimal_Number}{2}-\p{Decimal_Number}+$/u.test(r.no) &&
-        r.file === r.no + '.pdf',
-      `${w}: no/file ${r.no} ${r.file}`,
+        required(r, 'file') === r.no + '.pdf',
+      `${w}: no/file ${stringField(r, 'no')} ${stringField(r, 'file')}`,
     );
     c.ok(iso(r.date) && Object.hasOwn(p.byDate, r.date), `${w}: date ${r.date}`);
     c.ok(!nos.has(r.no), `${w}: duplicate number`);
@@ -772,7 +786,7 @@ export function law(ctx: Context): Check {
   proposals(c, data);
   const t = data.totals;
   c.fact(
-    `46 budgets: revenue ${fmt(t.bill.rev)} -> ${fmt(t.law.rev)}, expenditure ${fmt(t.bill.exp)} -> ${fmt(t.law.exp)} хил. €; 4 differ (arts 2, 3, 16, 17); arts 2 + 3 + 17 = art. 1: revenue ${fmt(s.rev)}, expenditure ${fmt(s.exp)}, balance ${fmt(s.balance)}; ${data.timeline.length} timeline entries, ${data.counts.committeeReports} committee reports, ${data.counts.opinions} opinions, ${data.counts.proposals} proposals`,
+    `46 budgets: revenue ${fmt(t.bill.rev)} -> ${fmt(t.law.rev)}, expenditure ${fmt(t.bill.exp)} -> ${fmt(t.law.exp)} хил. €; 4 differ (arts 2, 3, 16, 17); arts 2 + 3 + 17 = art. 1: revenue ${fmt(s.rev)}, expenditure ${fmt(s.exp)}, balance ${fmt(s.balance)}; ${data.timeline.length} timeline entries, ${pyDecimalInteger(required(data.counts, 'committeeReports'))} committee reports, ${pyDecimalInteger(required(data.counts, 'opinions'))} opinions, ${pyDecimalInteger(required(data.counts, 'proposals'))} proposals`,
   );
   return c;
 }
