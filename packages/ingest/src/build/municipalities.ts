@@ -3,7 +3,13 @@ import { jsonstatSeries, type JsonStat } from '../io/data.js';
 import { formatNumber, pythonRound as rnd } from '../common/format.js';
 import { metadata } from '../common/metadata.js';
 import { pythonFloatSum as sum } from '../common/numbers.js';
+import { pythonTextSpace } from '../common/text.js';
 import { REGIONS, COLS, KINDS } from './municipality-definitions.js';
+import {
+  validateMunicipalityGeometry,
+  type MunicipalityGeometryOptions,
+} from './municipality-geometry.js';
+export type { MunicipalityGeometryOptions } from './municipality-geometry.js';
 
 type Point = [number, number];
 type Ring = Point[];
@@ -38,15 +44,16 @@ export interface MunicipalityInput {
   population: { years: string[]; persons: number[] };
 }
 const norm = (s: string) =>
-  s
-    .replace(/[„“”"«»]/gu, '')
-    .toLowerCase()
-    .replaceAll('ё', 'е')
-    .replace(/[\s\-–—]+/gu, ' ')
-    .trim();
+  pythonTextSpace(
+    s
+      .replace(/[„“”"«»]/gu, '')
+      .toLowerCase()
+      .replaceAll('ё', 'е')
+      .replace(/[\-–—]+/gu, ' '),
+  );
 const nullable = (n: number | null) => {
   if (n === null) return 0;
-  if (!Number.isFinite(n)) throw new Error('Invalid municipal value');
+  if (!Number.isFinite(n) || n < 0) throw new Error('Invalid municipal value');
   return n;
 };
 function dp(points: Ring, eps: number): Ring {
@@ -107,24 +114,29 @@ function area(rings: Polygon): number {
     0.5 * sum(r.slice(0, -1).map((p, i) => p[0] * r[i + 1]![1] - r[i + 1]![0] * p[1]));
   return Math.abs(one(rings[0]!)) - sum(rings.slice(1).map((r) => Math.abs(one(r))));
 }
-export function municipalityGeometry(items: MunicipalityGeo[]) {
+export function municipalityGeometry(
+  items: MunicipalityGeo[],
+  options: MunicipalityGeometryOptions = {},
+) {
   let worst = 0,
     npts = 0;
   const features = items.map((it) => {
+    validateMunicipalityGeometry(it.rings, it.id, options);
     const polys: Polygon[] = [];
     let before = 0,
       after = 0;
     for (const poly of it.rings) {
       before += area(poly);
       const rs = poly.map(ring);
-      if (!rs[0]?.length) continue;
-      const kept = rs.filter((r) => r.length > 0);
+      if (rs.some((r) => !r.length)) throw new Error(`Collapsed geometry ring: ${it.id}`);
+      const kept = rs;
       polys.push(kept);
       after += area(kept);
       npts += sum(kept.map((r) => r.length));
     }
     if (!polys.length || !Number.isFinite(before) || before <= 0)
       throw new Error(`Collapsed geometry ${it.id}`);
+    validateMunicipalityGeometry(polys, it.id, options);
     const dev = Math.abs(after - before) / before;
     worst = Math.max(worst, dev);
     if (dev > 0.02) throw new Error(`Geometry area changed: ${it.id}`);
@@ -150,6 +162,7 @@ const pk = [
 export function buildMunicipalities(
   input: MunicipalityInput,
   buildDate: string,
+  options: MunicipalityGeometryOptions = {},
 ): { municipalities: Record<string, Json>; geo: Record<string, Json> } {
   const { art, proto, oblast, population } = input,
     gis = structuredClone(input.gis.items).sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
@@ -159,6 +172,8 @@ export function buildMunicipalities(
   if (law.length !== 265 || gis.length !== 265 || proto.municipalities.length !== 265)
     throw new Error('Expected 265 municipalities');
   if (new Set(gis.map((x) => x.id)).size !== 265) throw new Error('Duplicate municipality ids');
+  if (gis.some((item) => !Number.isSafeInteger(item.pop) || item.pop <= 0))
+    throw new Error('Invalid municipality population');
   const byId = new Map(gis.map((i) => [i.id, i])),
     rural = byId.get('DOB15'),
     city = byId.get('DOB28');
@@ -231,7 +246,7 @@ export function buildMunicipalities(
     const series = jsonstatSeries(oblast.jsonstat, 'time', { geo: nuts });
     if (sum(gis.filter((i) => i.id.startsWith(code)).map((i) => i.pop)) !== series['2024']?.[0])
       throw new Error(`Oblast population differs: ${code}`);
-    if (!series['2025'] || !Number.isSafeInteger(series['2025'][0]))
+    if (!series['2025'] || !Number.isSafeInteger(series['2025'][0]) || series['2025'][0] <= 0)
       throw new Error('Invalid oblast population');
     pop25[code] = series['2025'][0];
   }
@@ -355,14 +370,18 @@ export function buildMunicipalities(
       populationFixApplied: !!popFix,
     },
   };
-  const geo = buildMunicipalGeo(gis, buildDate);
+  const geo = buildMunicipalGeo(gis, buildDate, options);
   return { municipalities: municipalities as unknown as Record<string, Json>, geo };
 }
-export function buildMunicipalGeo(gis: MunicipalityGeo[], buildDate: string): Record<string, Json> {
+export function buildMunicipalGeo(
+  gis: MunicipalityGeo[],
+  buildDate: string,
+  options: MunicipalityGeometryOptions = {},
+): Record<string, Json> {
   if (gis.length !== 265 || new Set(gis.map((item) => item.id)).size !== 265)
     throw new Error('Expected 265 unique municipality geometries');
   const ordered = [...gis].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
-  const geometry = municipalityGeometry(ordered);
+  const geometry = municipalityGeometry(ordered, options);
   return {
     type: 'FeatureCollection',
     meta: metadata('D20', 'Граници на общините (GeoJSON, WGS84)', buildDate, {

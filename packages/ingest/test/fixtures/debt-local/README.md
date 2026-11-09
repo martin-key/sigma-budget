@@ -14,3 +14,9 @@ pnpm --filter @sigma-budget/etl exec vitest run src/debt-local-build.test.ts
 ```
 
 `pnpm debt-local:compare-live` is a separate local diagnostic against the current release and is not a CI fixture. The test-only CLI writes only to this project's `tmp/ts-migration/candidates/07/data`, rejects unsafe paths, and dispatches only the exact four-dataset scope. No network acquisition is performed.
+
+## Historical topology limitation
+
+Independent topology validation found an existing self-intersection in the Chirpan (`SZR36`) boundary, both in the captured GISCO evidence and the published snapshot. The original historical GISCO response is unavailable, so the correct physical boundary cannot be established from this corpus. Output parity does **not** certify that historical geometry as valid.
+
+Normal `buildMunicipalities`, `buildMunicipalGeo` and `municipalityGeometry` calls validate WGS84 coordinates and complete polygon/multipolygon topology before and after simplification, and reject this defect. The fixture loader explicitly requests `preserveHistoricalChirpan` solely to reproduce the archive. This opt-in accepts only the exact source-coordinate SHA-256 `a775c7cac73123abd78d88d30013e15b024bd2deb70ddb710991bcba1e80b5a0` and published-coordinate SHA-256 `b3c8416bcea638d92a6a83ea7bf2b7514c5ef459c5a9685f511717aee5d7a6d1` for `SZR36`; any altered invalid geometry is rejected. The CLI prints the limitation explicitly. It does not repair, approve or silently refresh the historical boundary. All other source and simplified geometries pass the same topology checks, including shell/hole intersections, nested holes and overlapping polygon components.

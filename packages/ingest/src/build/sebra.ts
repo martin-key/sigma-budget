@@ -3,6 +3,8 @@ import { metadata } from '../common/metadata.js';
 import { pythonRound } from '../common/format.js';
 import { pythonFloatSum as sum, pythonNumericText } from '../common/numbers.js';
 import { pythonFloat } from './context.js';
+import { isIsoDay } from '../common/dates.js';
+import { pythonTextSpace } from '../common/text.js';
 
 /** XLSX rows and page listing are captured by the unchanged Python readers. */
 export interface SebraCode {
@@ -56,10 +58,8 @@ const cyrMap: Record<string, string> = Object.fromEntries(
   'eaopcxykBHMTAEOPCXK'.split('').map((c, i) => [c, 'еаорсхукВНМТАЕОРСХК'[i]!]),
 );
 function cyr(value: string): string {
-  return value
-    .replaceAll('\u00a0', ' ')
-    .trim()
-    .split(/\s+/u)
+  return pythonTextSpace(value)
+    .split(' ')
     .map((word) => (/[А-Яа-я]/u.test(word) ? [...word].map((c) => cyrMap[c] ?? c).join('') : word))
     .join(' ');
 }
@@ -78,7 +78,7 @@ function count(value: string | undefined): number {
   const token = pythonNumericText(value);
   if (!/^[+-]?\d(?:_?\d)*$/.test(token)) throw new Error('Invalid SEBRA count');
   const n = Number(token.replaceAll('_', ''));
-  if (!Number.isSafeInteger(n)) throw new Error('Invalid SEBRA count');
+  if (!Number.isSafeInteger(n) || n < 0) throw new Error('Invalid SEBRA count');
   return n === 0 ? 0 : n;
 }
 const sortedCodes = (codes: SebraCode[]) =>
@@ -99,12 +99,15 @@ export function parseSebraDay(rows: Record<string, string>[]): Day {
       const m = /^Период: (\d\d)\.(\d\d)\.(\d{4}) - (\d\d)\.(\d\d)\.(\d{4})$/.exec(c);
       if (!m || m[1] !== m[4] || m[2] !== m[5] || m[3] !== m[6])
         throw new Error('Unexpected SEBRA period');
-      current = { title: cyr(a), day: `${m[3]}-${m[2]}-${m[1]}`, codes: [], total: null };
+      const day = `${m[3]}-${m[2]}-${m[1]}`;
+      if (!isIsoDay(day)) throw new Error('Invalid SEBRA calendar day');
+      current = { title: cyr(a), day, codes: [], total: null };
       sections.push(current);
     } else if (current && a.startsWith('Общо:')) {
       current.total = { count: count(row.C), eur: pythonRound(num(row.D), 2) };
       current = undefined;
     } else if (current && a !== 'Код' && row.D !== undefined && row.B !== undefined) {
+      if (!/^\d{2} xxxx$/.test(a)) throw new Error('Invalid SEBRA category code');
       current.codes.push({
         code: a,
         name: cyr(row.B),
@@ -161,8 +164,14 @@ export function parseSebraDay(rows: Record<string, string>[]): Day {
 }
 export function buildSebra(input: SebraEvidence, buildDate: string): Record<string, Json> {
   const listing = structuredClone(input.listing);
-  if (listing.files.length !== 3 || new Set(listing.files.map((f) => f.day)).size !== 3)
+  if (
+    listing.files.length !== 3 ||
+    new Set(listing.files.map((f) => f.day)).size !== 3 ||
+    listing.files.some((f, i) => !isIsoDay(f.day) || (i > 0 && f.day <= listing.files[i - 1]!.day))
+  )
     throw new Error('SEBRA listing changed');
+  if (input.latest !== listing.files.at(-1)!.day)
+    throw new Error('Latest SEBRA day differs from publication listing');
   const days: Day[] = [],
     sizes: Record<string, number> = {};
   for (const f of listing.files) {
@@ -173,7 +182,11 @@ export function buildSebra(input: SebraEvidence, buildDate: string): Record<stri
     }
     if (!file || typeof file !== 'object' || Array.isArray(file) || !Array.isArray(file.rows))
       throw new Error('Invalid SEBRA file evidence');
-    if (!Number.isSafeInteger(file.bytes) || pythonRound(file.bytes / 1024, 2) !== f.sizeKb)
+    if (
+      !Number.isSafeInteger(file.bytes) ||
+      file.bytes <= 0 ||
+      pythonRound(file.bytes / 1024, 2) !== f.sizeKb
+    )
       throw new Error('SEBRA file size mismatch');
     const day = parseSebraDay(file.rows);
     if (day.day !== f.day) throw new Error('SEBRA file date mismatch');
@@ -187,7 +200,10 @@ export function buildSebra(input: SebraEvidence, buildDate: string): Record<stri
     latest.eur !== input.latestExpected.eur
   )
     throw new Error('Latest SEBRA summary changed');
-  if (new Set(days.map((d) => d.ministry)).size !== 1)
+  if (
+    new Set(days.map((d) => d.ministry)).size !== 1 ||
+    new Set(days.map((d) => d.ministryCode)).size !== 1
+  )
     throw new Error('SEBRA ministry differs between days');
   const codes = new Map<string, SebraCode>();
   for (const day of days)

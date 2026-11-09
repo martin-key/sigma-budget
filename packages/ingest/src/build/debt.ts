@@ -2,6 +2,7 @@ import type { Json } from '@sigma-budget/dataset-schema';
 import { jsonstatSeries, type JsonStat } from '../io/data.js';
 import { metadata } from '../common/metadata.js';
 import { pythonFloatSum as sum } from '../common/numbers.js';
+import { isIsoDay } from '../common/dates.js';
 import { pythonRound as rnd } from '../common/format.js';
 import { stateDebtTable, percentage, type CleanPage, type StateDebtTableInput } from './fiscal.js';
 import {
@@ -76,7 +77,7 @@ function series(js: DebtStat, geo: string, unit: string) {
 function validateBnb(b: Bnb, indicator: string) {
   if (
     b.indicator !== indicator ||
-    !/^\d{4}-\d\d-\d\d$/.test(b.asOf) ||
+    !isIsoDay(b.asOf) ||
     b.quarters.length !== b.mln.length ||
     new Set(b.quarters).size !== b.quarters.length ||
     b.quarters.some(

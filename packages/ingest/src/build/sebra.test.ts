@@ -6,6 +6,56 @@ const root = fileURLToPath(new URL('../../test/fixtures/debt-local/', import.met
 const read = (name: string) => JSON.parse(readFileSync(root + name, 'utf8'));
 const evidence = () => read('inputs/reader-captures.json') as SebraEvidence;
 describe('SEBRA frozen source', () => {
+  it.each([-1, 0, 0.5, NaN])('rejects an invalid present file size: %s', (bytes) => {
+    const e = evidence();
+    e.files['2026-08-27']!.bytes = bytes;
+    e.listing.files[0]!.sizeKb = 0;
+    expect(() => buildSebra(e, '2026-11-08')).toThrow(/size/);
+  });
+  it('requires the actually latest listed file, independently of the supplied summary', () => {
+    const e = evidence();
+    e.latest = '2026-08-27';
+    const day = parseSebraDay(e.files[e.latest]!.rows);
+    e.latestExpected = { count: day.count, eur: day.eur };
+    delete e.files['2026-08-31'];
+    expect(() => buildSebra(e, '2026-11-08')).toThrow(/Latest/);
+  });
+  it('accepts Python text whitespace in ministry and organisation titles', () => {
+    const rows = evidence().files['2026-08-27']!.rows;
+    const expected = parseSebraDay(structuredClone(rows));
+    for (const row of rows)
+      if (row.C?.startsWith('Период:')) row.A = row.A!.replaceAll(' ', '\u0085');
+    expect(parseSebraDay(rows)).toEqual(expected);
+  });
+  it('rejects balanced negative counts', () => {
+    const rows = evidence().files['2026-08-27']!.rows;
+    for (const row of rows)
+      if (/^\d+$/.test(row.C || '') && row.D !== undefined) row.C = '-' + row.C;
+    expect(() => parseSebraDay(rows)).toThrow(/count/);
+  });
+  it('rejects different ministry codes even when ministry names are equal', () => {
+    const e = evidence();
+    const title = e.files['2026-08-27']!.rows.find((r) => r.A?.includes('075*******'))!;
+    title.A = title.A!.replace('075*******', '999*******');
+    expect(() => buildSebra(e, '2026-11-08')).toThrow(/ministry/);
+  });
+  it.each(['', '1 xxxx', '10 xxx', '10 xxxx extra'])(
+    'rejects an invalid category code: %j',
+    (code) => {
+      const rows = evidence().files['2026-08-27']!.rows;
+      for (const row of rows) if (row.A === '10 xxxx') row.A = code;
+      expect(() => parseSebraDay(rows)).toThrow(/category code/);
+    },
+  );
+  it('rejects an impossible calendar day in both rows and listing', () => {
+    const rows = evidence().files['2026-08-27']!.rows;
+    for (const row of rows)
+      if (row.C?.startsWith('Период:')) row.C = 'Период: 31.02.2026 - 31.02.2026';
+    expect(() => parseSebraDay(rows)).toThrow(/calendar/);
+    const e = evidence();
+    e.listing.files[0]!.day = '2026-02-31';
+    expect(() => buildSebra(e, '2026-11-08')).toThrow(/listing/);
+  });
   it('matches the independent Python output completely', () => {
     expect(buildSebra(evidence(), '2026-11-08')).toEqual(read('donor/sebra.json'));
   });

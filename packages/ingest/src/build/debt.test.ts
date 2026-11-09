@@ -32,6 +32,14 @@ const input = (): DebtInput => {
   };
 };
 describe('Debt frozen sources', () => {
+  it.each(['2026-99-99', '2026-02-29', '2026-04-31'])(
+    'rejects invalid BNB calendar day %s',
+    (day) => {
+      const e = input();
+      e.bnbCg.asOf = day;
+      expect(() => buildDebt(e, '2026-11-08')).toThrow(/BNB/);
+    },
+  );
   it('matches the complete independent Python output', () =>
     expect(buildDebt(input(), '2026-11-08')).toEqual(read('donor/debt.json')));
   it('rejects discrepancies in copies, unlisted revisions, quarter coverage and law evidence', () => {

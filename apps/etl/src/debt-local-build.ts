@@ -2,7 +2,7 @@ import { constants } from 'node:fs';
 import { lstat, mkdir, open, realpath, rename, unlink } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { jsonStringify, loadDebtLocalFixture } from '@sigma-budget/ingest';
+import { jsonStringify, loadDebtLocalFixture, isIsoDay } from '@sigma-budget/ingest';
 const scope = 'debt,municipalities,geo-obshtini,sebra';
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 export async function debtLocalBuildCli(args: string[]): Promise<number> {
@@ -24,7 +24,7 @@ export async function debtLocalBuildCli(args: string[]): Promise<number> {
     !flags['--inputs'] ||
     !flags['--out'] ||
     flags['--scope'] !== scope ||
-    !/^\d{4}-\d\d-\d\d$/.test(flags['--build-date'] ?? '')
+    !isIsoDay(flags['--build-date'])
   )
     throw new Error(`Build requires --inputs, --out, --scope ${scope} and --build-date`);
   if (flags['--out'].split(/[\\/]/).includes('..')) throw new Error('Traversal in output path');
@@ -33,6 +33,9 @@ export async function debtLocalBuildCli(args: string[]): Promise<number> {
   if (resolve(flags['--out']) !== allowed)
     throw new Error('Output must be tmp/ts-migration/candidates/07 in this project');
   const output = await loadDebtLocalFixture(flags['--inputs'], flags['--build-date']!);
+  process.stderr.write(
+    'Archival geometry reproduction: SZR36 (Chirpan) retains a pinned historical self-intersection; archived topology remains invalid.\n',
+  );
   let dir = projectRoot;
   for (const part of ['tmp', 'ts-migration', 'candidates', '07', 'data', 'geo']) {
     dir = join(dir, part);

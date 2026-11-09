@@ -106,7 +106,7 @@ export async function loadDebtLocalFixture(path: string, buildDate: string) {
     population,
   };
   const sebra = capture as SebraEvidence;
-  const local = buildMunicipalities(municipal, buildDate);
+  const local = buildMunicipalities(municipal, buildDate, { preserveHistoricalChirpan: true });
   return {
     'debt.json': buildDebt(debt, buildDate),
     'municipalities.json': local.municipalities,

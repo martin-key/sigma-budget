@@ -37,6 +37,7 @@ it('dispatches the exact scope from another working directory and compares all f
       encoding: 'utf8',
     });
     expect(result.status, result.stderr).toBe(0);
+    expect(result.stderr).toMatch(/SZR36.*archived topology remains invalid/);
     for (const name of ['debt.json', 'municipalities.json', 'geo/obshtini.json', 'sebra.json'])
       expect(JSON.parse(readFileSync(join(candidate, 'data', name), 'utf8'))).toEqual(
         JSON.parse(readFileSync(join(fixture, 'projected', name), 'utf8')),
@@ -59,6 +60,9 @@ it('rejects traversal, outside paths, symlinks, hardlinks and changed fixture by
   mkdirSync(join(root, 'tmp'), { recursive: true });
   const outside = mkdtempSync(join(root, 'tmp/ts07-guard-'));
   try {
+    await expect(
+      debtLocalBuildCli(args().map((value) => (value === '2026-11-08' ? '2026-02-31' : value))),
+    ).rejects.toThrow(/build-date/);
     await expect(debtLocalBuildCli(args(join(candidate, '..', '07') + '/../07'))).rejects.toThrow(
       /Traversal/,
     );
