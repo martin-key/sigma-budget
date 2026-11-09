@@ -1,0 +1,17 @@
+{
+  "base": {
+    "exit": 0,
+    "stdout": "base: data/release, 9 files, build date 2026-11-08\nOK    SEARCH      11309 checks · 871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock\nRESULT OK: 11309 checks, 0 problems, 0 warnings, <elapsed> s\n",
+    "stderr": ""
+  },
+  "default": {
+    "exit": 0,
+    "stdout": "base: data/release, 9 files, build date 2026-11-08\nOK    SEARCH      11309 checks · 871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock\nRESULT OK: 11309 checks, 0 problems, 0 warnings, <elapsed> s\n",
+    "stderr": ""
+  },
+  "no-accepted": {
+    "exit": 0,
+    "stdout": "base: data/release, 9 files, build date 2026-11-08\nOK    SEARCH      11309 checks · 871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock\nRESULT OK: 11309 checks, 0 problems, 0 warnings, <elapsed> s\n",
+    "stderr": ""
+  }
+}
