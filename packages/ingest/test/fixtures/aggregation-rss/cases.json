@@ -1,0 +1,320 @@
+{
+  "escaping": {
+    "base": "https://budget-na-svetlo.example/",
+    "feed": {
+      "kinds": [
+        {
+          "id": "data",
+          "label": "Данни & събития"
+        }
+      ],
+      "events": [
+        {
+          "id": "събитие<&>",
+          "date": "2024-02-29",
+          "kind": "data",
+          "title": "Бюджет <2027> & \"проект\"",
+          "href": "#/данни?per=2027.draft&to=мярка",
+          "text": "Текст & <HTML> — кирилица"
+        }
+      ]
+    }
+  },
+  "limit-and-override": {
+    "base": "https://example.test/site?x=1&y=2",
+    "feed": {
+      "kinds": [
+        {
+          "id": "data",
+          "label": "Нови данни"
+        }
+      ],
+      "events": [
+        {
+          "id": "id-00",
+          "date": "2026-11-06",
+          "kind": "data",
+          "title": "Бюджет 0",
+          "href": "#/данни?x=0&per=2027.draft",
+          "text": "Стойност 0"
+        },
+        {
+          "id": "id-01",
+          "date": "2026-11-06",
+          "kind": "data",
+          "title": "Бюджет 1",
+          "href": "#/данни?x=1&per=2027.draft",
+          "text": "Стойност 1"
+        },
+        {
+          "id": "id-02",
+          "date": "2026-11-06",
+          "kind": "data",
+          "title": "Бюджет 2",
+          "href": "#/данни?x=2&per=2027.draft",
+          "text": "Стойност 2"
+        },
+        {
+          "id": "id-03",
+          "date": "2026-11-06",
+          "kind": "data",
+          "title": "Бюджет 3",
+          "href": "#/данни?x=3&per=2027.draft",
+          "text": "Стойност 3"
+        },
+        {
+          "id": "id-04",
+          "date": "2026-11-06",
+          "kind": "data",
+          "title": "Бюджет 4",
+          "href": "#/данни?x=4&per=2027.draft",
+          "text": "Стойност 4"
+        },
+        {
+          "id": "id-05",
+          "date": "2026-11-06",
+          "kind": "data",
+          "title": "Бюджет 5",
+          "href": "#/данни?x=5&per=2027.draft",
+          "text": "Стойност 5"
+        },
+        {
+          "id": "id-06",
+          "date": "2026-11-06",
+          "kind": "data",
+          "title": "Бюджет 6",
+          "href": "#/данни?x=6&per=2027.draft",
+          "text": "Стойност 6"
+        },
+        {
+          "id": "id-07",
+          "date": "2026-11-06",
+          "kind": "data",
+          "title": "Бюджет 7",
+          "href": "#/данни?x=7&per=2027.draft",
+          "text": "Стойност 7"
+        },
+        {
+          "id": "id-08",
+          "date": "2026-11-06",
+          "kind": "data",
+          "title": "Бюджет 8",
+          "href": "#/данни?x=8&per=2027.draft",
+          "text": "Стойност 8"
+        },
+        {
+          "id": "id-09",
+          "date": "2026-11-06",
+          "kind": "data",
+          "title": "Бюджет 9",
+          "href": "#/данни?x=9&per=2027.draft",
+          "text": "Стойност 9"
+        },
+        {
+          "id": "id-10",
+          "date": "2026-11-06",
+          "kind": "data",
+          "title": "Бюджет 10",
+          "href": "#/данни?x=10&per=2027.draft",
+          "text": "Стойност 10"
+        },
+        {
+          "id": "id-11",
+          "date": "2026-11-06",
+          "kind": "data",
+          "title": "Бюджет 11",
+          "href": "#/данни?x=11&per=2027.draft",
+          "text": "Стойност 11"
+        },
+        {
+          "id": "id-12",
+          "date": "2026-11-06",
+          "kind": "data",
+          "title": "Бюджет 12",
+          "href": "#/данни?x=12&per=2027.draft",
+          "text": "Стойност 12"
+        },
+        {
+          "id": "id-13",
+          "date": "2026-11-06",
+          "kind": "data",
+          "title": "Бюджет 13",
+          "href": "#/данни?x=13&per=2027.draft",
+          "text": "Стойност 13"
+        },
+        {
+          "id": "id-14",
+          "date": "2026-11-06",
+          "kind": "data",
+          "title": "Бюджет 14",
+          "href": "#/данни?x=14&per=2027.draft",
+          "text": "Стойност 14"
+        },
+        {
+          "id": "id-15",
+          "date": "2026-11-06",
+          "kind": "data",
+          "title": "Бюджет 15",
+          "href": "#/данни?x=15&per=2027.draft",
+          "text": "Стойност 15"
+        },
+        {
+          "id": "id-16",
+          "date": "2026-11-06",
+          "kind": "data",
+          "title": "Бюджет 16",
+          "href": "#/данни?x=16&per=2027.draft",
+          "text": "Стойност 16"
+        },
+        {
+          "id": "id-17",
+          "date": "2026-11-06",
+          "kind": "data",
+          "title": "Бюджет 17",
+          "href": "#/данни?x=17&per=2027.draft",
+          "text": "Стойност 17"
+        },
+        {
+          "id": "id-18",
+          "date": "2026-11-06",
+          "kind": "data",
+          "title": "Бюджет 18",
+          "href": "#/данни?x=18&per=2027.draft",
+          "text": "Стойност 18"
+        },
+        {
+          "id": "id-19",
+          "date": "2026-11-06",
+          "kind": "data",
+          "title": "Бюджет 19",
+          "href": "#/данни?x=19&per=2027.draft",
+          "text": "Стойност 19"
+        },
+        {
+          "id": "id-20",
+          "date": "2026-11-06",
+          "kind": "data",
+          "title": "Бюджет 20",
+          "href": "#/данни?x=20&per=2027.draft",
+          "text": "Стойност 20"
+        },
+        {
+          "id": "id-21",
+          "date": "2026-11-06",
+          "kind": "data",
+          "title": "Бюджет 21",
+          "href": "#/данни?x=21&per=2027.draft",
+          "text": "Стойност 21"
+        },
+        {
+          "id": "id-22",
+          "date": "2026-11-06",
+          "kind": "data",
+          "title": "Бюджет 22",
+          "href": "#/данни?x=22&per=2027.draft",
+          "text": "Стойност 22"
+        },
+        {
+          "id": "id-23",
+          "date": "2026-11-06",
+          "kind": "data",
+          "title": "Бюджет 23",
+          "href": "#/данни?x=23&per=2027.draft",
+          "text": "Стойност 23"
+        },
+        {
+          "id": "id-24",
+          "date": "2026-11-06",
+          "kind": "data",
+          "title": "Бюджет 24",
+          "href": "#/данни?x=24&per=2027.draft",
+          "text": "Стойност 24"
+        },
+        {
+          "id": "id-25",
+          "date": "2026-11-06",
+          "kind": "data",
+          "title": "Бюджет 25",
+          "href": "#/данни?x=25&per=2027.draft",
+          "text": "Стойност 25"
+        },
+        {
+          "id": "id-26",
+          "date": "2026-11-06",
+          "kind": "data",
+          "title": "Бюджет 26",
+          "href": "#/данни?x=26&per=2027.draft",
+          "text": "Стойност 26"
+        },
+        {
+          "id": "id-27",
+          "date": "2026-11-06",
+          "kind": "data",
+          "title": "Бюджет 27",
+          "href": "#/данни?x=27&per=2027.draft",
+          "text": "Стойност 27"
+        },
+        {
+          "id": "id-28",
+          "date": "2026-11-06",
+          "kind": "data",
+          "title": "Бюджет 28",
+          "href": "#/данни?x=28&per=2027.draft",
+          "text": "Стойност 28"
+        },
+        {
+          "id": "id-29",
+          "date": "2026-11-06",
+          "kind": "data",
+          "title": "Бюджет 29",
+          "href": "#/данни?x=29&per=2027.draft",
+          "text": "Стойност 29"
+        },
+        {
+          "id": "id-30",
+          "date": "2026-11-06",
+          "kind": "data",
+          "title": "Бюджет 30",
+          "href": "#/данни?x=30&per=2027.draft",
+          "text": "Стойност 30"
+        },
+        {
+          "id": "id-31",
+          "date": "2026-11-06",
+          "kind": "data",
+          "title": "Бюджет 31",
+          "href": "#/данни?x=31&per=2027.draft",
+          "text": "Стойност 31"
+        }
+      ]
+    }
+  },
+  "empty": {
+    "base": "https://example.test/",
+    "feed": {
+      "kinds": [],
+      "events": []
+    }
+  },
+  "numeric-date": {
+    "base": "https://example.test/",
+    "feed": {
+      "kinds": [
+        {
+          "id": "data",
+          "label": "Данни"
+        }
+      ],
+      "events": [
+        {
+          "id": "дата",
+          "date": " 2_024 -٠٢-+29 ",
+          "kind": "data",
+          "title": "Дата",
+          "href": "#/test",
+          "text": "Проверка"
+        }
+      ]
+    }
+  }
+}

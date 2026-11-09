@@ -380,3 +380,42 @@ jobs:
       - name: Release remains unchanged
         if: always()
         run: git diff --exit-code -- data/release
+
+  aggregation-parity:
+    # Offline Wave 11: frozen owner snapshots, Python donors, and exact scoped parity.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm --filter @sigma-budget/etl... build
+      - name: Frozen aggregation donor and XML evidence
+        run: |
+          python packages/ingest/test/fixtures/aggregation/generate_oracle.py --check
+          python packages/ingest/test/fixtures/aggregation-rss/generate_oracle.py --check
+      - name: Scoped aggregation tests and parity
+        env:
+          PYTHON312: python
+        run: |
+          pnpm --filter @sigma-budget/ingest exec vitest run src/build/aggregation-core.test.ts src/build/aggregation-feed.test.ts src/build/aggregation-rss.test.ts src/build/aggregation-search.test.ts src/build/aggregation-layers.test.ts src/build/aggregation-fixture.test.ts src/parity/cli.test.ts
+          pnpm --filter @sigma-budget/etl exec vitest run src/aggregation-build.test.ts
+          pnpm exec budget-ts build --inputs packages/ingest/test/fixtures/aggregation --out tmp/ts-migration/candidates/11 --scope core,feed,feed-rss,search-index --build-date 2026-11-08
+          for stage in final published; do
+            pnpm exec budget-ts parity --registry packages/ingest/test/fixtures/aggregation/metadata/data/datasets.yaml --oracle packages/ingest/test/fixtures/aggregation/$stage --candidate tmp/ts-migration/candidates/11/data --scope core,feed,feed-rss,search-index --policy packages/ingest/test/fixtures/aggregation/policy.json --report tmp/ts-migration/candidates/11/$stage-parity.json
+          done
+          test -z "$(git status --porcelain -- data/release)"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aggregation-parity
+          path: tmp/ts-migration/candidates/11/*-parity.json
+          if-no-files-found: error
