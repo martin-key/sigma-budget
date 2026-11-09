@@ -18,6 +18,7 @@
     "validate:wave14": "pnpm --filter @sigma-budget/ingest... build && node packages/ingest/dist/validate/cli.js",
     "validate:wave14-live": "pnpm --filter @sigma-budget/ingest... build && node packages/ingest/dist/validate/cli.js --live --report tmp/ts-migration/candidates/14/live.json",
     "validate:wave17a": "pnpm --filter @sigma-budget/ingest... build && node packages/ingest/dist/validate/cli17a.js",
+    "validate:wave15b": "pnpm --filter @sigma-budget/ingest... build && node packages/ingest/dist/validate/budget-2027-cli.js",
     "validate:wave18": "pnpm --filter @sigma-budget/ingest... build && node packages/ingest/dist/validate/kfp-cli.js --root packages/ingest/test/fixtures/wave18 --captures captures.json --manifest manifest.json --only KFP --report tmp/ts-migration/candidates/18/report.json",
     "validate:wave18-live": "pnpm --filter @sigma-budget/ingest... build && node packages/ingest/dist/validate/kfp-cli.js --root . --captures packages/ingest/test/fixtures/wave18/captures.json --manifest packages/ingest/test/fixtures/wave18/manifest.json --only KFP --report tmp/ts-migration/candidates/18/report.json"
   },
