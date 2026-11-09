@@ -34,3 +34,10 @@ frozen decimal repertoire in dataVersion, its final-newline rule, raw floating
 container diagnostics and unhashable screen IDs. Decimal normalization does
 not trim whitespace. Screen membership rejects containers before continuing
 validation. Earlier integer, reader and group observations remain unchanged.
+
+`containers/generate_oracle.py --check` adds 63 full outcomes for raw floating
+container reads, lengths and iteration across CORE and CATALOG, counts
+diagnostics and the later screen-list join. Owner/key metadata follows actual
+reads, including aliases and lazy owner getters. The file-count check performs
+length before iteration; string join preserves its own error after membership
+short-circuits. Earlier observations and tolerances remain immutable.
