@@ -212,13 +212,13 @@ def _feed_events(c, f, ctx):
     pop = core["population"]
     ordinal = {1: "първото", 2: "второто", 3: "третото", 4: "четвъртото"}[int(qn)]
     _event(c, evs, "eurostat-gov_10dd_edpt1-" + ms["asOf"],
-           {"date": ms["asOf"], "dateKind": "published", "kind": "eurostat", "href": "#/dalg?obhvat=maastricht", "status": "real", "source": ["eurostat"],
+           {"date": ms["asOf"], "dateKind": "published", "kind": "eurostat", "href": "#/dalg?obhvat=maastricht&per=%d.report&to=s17-b-maastricht" % ms["year"], "status": "real", "source": ["eurostat"],
             "title": "Евростат: дългът на държавното управление за %d г." % ms["year"]}, money=[ms["mln"]], pct=[ms["pctGdp"]])
     _event(c, evs, "eurostat-gov_10q_ggdebt-" + q["asOf"],
-           {"date": q["asOf"], "dateKind": "published", "kind": "eurostat", "href": "#/dalg?obhvat=maastricht", "status": "real", "source": ["eurostat"],
+           {"date": q["asOf"], "dateKind": "published", "kind": "eurostat", "href": "#/dalg?obhvat=maastricht&per=%d.report&to=s17-b-quarterly" % ms["year"], "status": "real", "source": ["eurostat"],
             "title": "Евростат: дългът в края на %s тримесечие на %s г." % (ordinal, qy)}, money=[q["mln"]], pct=[q["pctGdp"]])
     _event(c, evs, "eurostat-gov_10a_exp-" + exp["cofog"]["asOf"],
-           {"date": exp["cofog"]["asOf"], "dateKind": "published", "kind": "eurostat", "href": "#/razhodi", "status": "real", "source": ["eurostat"],
+           {"date": exp["cofog"]["asOf"], "dateKind": "published", "kind": "eurostat", "href": "#/razhodi?per=%d.report" % cy, "status": "real", "source": ["eurostat"],
             "title": "Евростат: разходите по функции (COFOG) са допълнени до %d г." % cy},
            money=[exp["cofog"]["total"]["mln"][-1]], pct=[exp["cofog"]["total"]["pctGdp"][-1]], has=["%d г\\." % cy])
     persons = "{:,}".format(pop["persons"]).replace(",", NNBSP)

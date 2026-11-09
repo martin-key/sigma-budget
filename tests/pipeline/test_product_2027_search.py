@@ -129,3 +129,25 @@ class ProductSearchTest(unittest.TestCase):
         self.assertIn('още не е извлечена', current['note'])
         self.assertEqual(current['status'],'pending')
         self.assertIn('ще бъде добавен', next_budget()['note'])
+
+    def test_eurostat_news_links_keep_the_reported_series_and_period(self):
+        from urllib.parse import parse_qs, urlsplit
+        from budget_pipeline.build.context import Ctx
+        from budget_pipeline.build.feed import _eurostat_events
+        ctx = Ctx()
+        for name in ('debt.json', 'expenditure.json'):
+            ctx.put(name, json.loads((ROOT / 'data/release' / name).read_text()))
+        events = _eurostat_events(ctx)
+        annual = next(e for e in events if e['id'].startswith('eurostat-gov_10dd_edpt1-'))
+        quarter = next(e for e in events if e['id'].startswith('eurostat-gov_10q_ggdebt-'))
+        cofog = next(e for e in events if e['id'].startswith('eurostat-gov_10a_exp-'))
+        annual_year = ctx.get('debt.json')['latest']['maastricht']['year']
+        # Quarterly observations share the historical debt screen with its
+        # latest annual report, and must land on their own dated section.
+        for event, anchor in ((annual, 's17-b-maastricht'), (quarter, 's17-b-quarterly')):
+            query = parse_qs(urlsplit(event['href'][1:]).query)
+            self.assertEqual(query.get('obhvat'), ['maastricht'])
+            self.assertEqual(query.get('per'), [f'{annual_year}.report'])
+            self.assertEqual(query.get('to'), [anchor])
+        cofog_query = parse_qs(urlsplit(cofog['href'][1:]).query)
+        self.assertEqual(cofog_query.get('per'), [f"{ctx.get('expenditure.json')['cofog']['years'][-1]}.report"])

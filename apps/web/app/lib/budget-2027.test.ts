@@ -40,6 +40,23 @@ it.each([
 ])('labels %s from publication metadata: %s', (group, period, key, expected) => {
   expect(stageOf(group, { period, href: `#/dalg?per=${key}` })).toBe(expected);
 });
+it.each([
+  [
+    'Данък върху доходите на физическите лица',
+    'Основна ставка по Приложение 2 към законопроекта',
+    'По законопроекта 2026',
+  ],
+  ['БВП', 'Макроикономическа прогноза', 'Прогноза 2026'],
+  ['Изпълнение на КФП', 'Месечен отчет', 'Отчет 2026'],
+  ['Приходи', 'КФП · отчет', 'Отчет 2026'],
+])(
+  'keeps the publication status of %s independently of its law-period destination',
+  (title, sub, expected) => {
+    expect(
+      stageOf('indicators', { title, sub, period: '2026', href: '#/danaci?per=2026.law' }),
+    ).toBe(expected);
+  },
+);
 it('does not offer an old draft figure when annual search data is unavailable', async () => {
   const scope = {
     url: new URL('https://budget.test/tarsene'),
@@ -76,6 +93,11 @@ it('does not offer an old draft figure when annual search data is unavailable', 
   );
   expect(historicalMeasures).toHaveLength(52);
   for (const entry of historicalMeasures) expect(entry.stage).toBe('По законопроекта 2026');
+  const billRate = index.entries.find((e: any) =>
+    e.sub.includes('Основна ставка по Приложение 2 към законопроекта'),
+  );
+  expect(billRate?.stage).toBe('По законопроекта 2026');
+  expect(metaOf(billRate)).not.toContain('Закон 2026');
 });
 it('localizes declared canonical decimals without losing precision or weakening formula protection', () => {
   const canonical = '-12345678901234567890.123456789';

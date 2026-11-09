@@ -219,19 +219,17 @@ export function stageOf(group, o) {
   const txt = `${o.title || ''} ${o.sub || ''}`;
   if (['indicators', 'institutions', 'municipalities', 'measures'].includes(group)) {
     if (publication) return `${{проект:'По законопроекта', прогноза:'Прогноза', закон:'Закон', отчет:'Отчет'}[publication[1].toLowerCase()]} ${yr}`;
-    // Historical measure pages remain reachable under the law period, but their
-    // source is the unverified bill. A destination is not a publication status.
+    // Publication wording describes the figure; the destination only selects
+    // its screen. Historical bill figures can be reached under a law period.
     if (group === 'measures') return `По законопроекта ${yr}`.trim();
+    if (group === 'indicators' && /Макроикономическа прогноза/i.test(txt)) return `Прогноза ${yr}`.trim();
+    if (/законопроект/i.test(txt)) return `По законопроекта ${yr}`.trim();
+    if (group === 'indicators' && /^Изпълнение |^Салдо на КФП, януари|· отчет(?:\s|$)/i.test(txt)) return `Отчет ${yr}`.trim();
     if (canonical) return `${{draft:'По законопроекта', forecast:'Прогноза', law:'Закон', report:'Отчет', expected:'Очаквано изпълнение'}[canonical[2]]} ${yr}`;
   }
   let w = '';
-  if (group === 'measures') w = 'По законопроекта';
-  else if (group === 'indicators') {
-    if (/Макроикономическа прогноза/.test(txt)) w = 'Прогноза';
-    else if (/законопроект/i.test(txt)) w = 'По законопроекта';
-    else if ((yr && yr < '2026') || /^Изпълнение |^Салдо на КФП, януари|· отчет\b/.test(txt)) w = 'Отчет';
-    else w = 'Закон';
-  } else if (group === 'institutions' || group === 'municipalities') w = 'Закон';
+  if (group === 'indicators') w = yr && yr < '2026' ? 'Отчет' : 'Закон';
+  else if (group === 'institutions' || group === 'municipalities') w = 'Закон';
   return w ? `${w} ${yr}`.trim() : '';
 }
 /** the line under a result: its description, then stage + year (the plain year when the group has no stage) */
