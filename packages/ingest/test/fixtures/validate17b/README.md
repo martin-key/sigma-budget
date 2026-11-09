@@ -15,3 +15,9 @@ pnpm validate:wave17b
 ```
 
 The runner is FEED-only, reports `completeValidation: false`, and lists SEARCH and other groups outside its scope. It is not the production validator. The compiled CLI confines reports to candidate17b and preflights declared inputs before writing, including after a logical validation failure.
+
+`population/generate.py --check` adds 16 separate full donor outcomes and exact
+source preimages for population formatting. Invalid strings and containers retain
+Python format errors; integer, boolean, float, exponent and large-integer controls
+retain their printed form. Direct and compiled tests cover accepted and raw
+modes. The original donor, scenarios and supplemental observations are unchanged.

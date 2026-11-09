@@ -34,6 +34,33 @@ const MONTHS = [
 const same = equal;
 const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const idMonth = monthId;
+function populationText(value: unknown, token: string | undefined): string {
+  if (typeof value === 'string') pyError('ValueError', "Cannot specify ',' with 's'.");
+  if (typeof value !== 'number' && typeof value !== 'boolean')
+    pyError('TypeError', `unsupported format string passed to ${typeName(value)}.__format__`);
+  const number = Number(value);
+  let text: string;
+  if (typeof value === 'boolean') text = String(number);
+  else if (token && !/[.eE]/.test(token)) text = BigInt(token).toString();
+  else if (!Number.isFinite(number))
+    text = Number.isNaN(number) ? 'nan' : number < 0 ? '-inf' : 'inf';
+  else if (Object.is(number, -0)) text = '-0.0';
+  else {
+    text =
+      number !== 0 && (Math.abs(number) < 1e-4 || Math.abs(number) >= 1e16)
+        ? number.toExponential()
+        : String(number);
+    if (text.includes('e'))
+      text = text.replace(
+        /e([+-]?)(\d+)$/,
+        (_, sign: string, digits: string) => 'e' + (sign || '+') + digits.padStart(2, '0'),
+      );
+    else if (!text.includes('.')) text += '.0';
+  }
+  return text.includes('e')
+    ? text
+    : text.replace(/^[+-]?\d+/, (part) => part.replace(/\B(?=(\d{3})+(?!\d))/g, ' '));
+}
 export function denominator(ex: any): any {
   return {
     periodKey: required(required(ex, 'plan2026'), 'periodKey'),
@@ -447,7 +474,10 @@ export function feedEvents(c: Check, f: any, ctx: Context): void {
     [required(required(exp.cofog, 'total'), 'pctGdp').at(-1)],
     [`${cy} г\\.`],
   );
-  const persons = String(required(pop, 'persons')).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  const persons = populationText(
+    required(pop, 'persons'),
+    sourceToken(ctx.text('core.json'), ['population', 'persons']),
+  );
   event(
     c,
     evs,
