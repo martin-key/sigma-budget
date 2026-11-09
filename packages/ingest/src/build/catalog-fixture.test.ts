@@ -5,8 +5,13 @@ import { loadCatalogFixture } from './catalog-fixture.js';
 import { buildCatalog } from './catalog-build.js';
 import { parsePythonJson } from '../common/numbers.js';
 const dir = fileURLToPath(new URL('../../test/fixtures/catalog/', import.meta.url));
+// Reuse the pinned baseline; mutation cases copy the maps or objects they alter.
+let fixtureBase: Awaited<ReturnType<typeof loadCatalogFixture>>;
+beforeAll(async () => {
+  fixtureBase = await loadCatalogFixture(dir, '2026-11-08');
+});
 it('matches independent raw, refreshed and published Python catalogs', async () => {
-  const actual = await loadCatalogFixture(dir, '2026-11-08');
+  const actual = fixtureBase;
   const oracle = async (name: string) =>
     JSON.parse(await readFile(`${dir}/oracle/${name}.json`, 'utf8'));
   expect(actual.raw).toEqual(await oracle('raw'));
@@ -18,15 +23,16 @@ it('matches independent raw, refreshed and published Python catalogs', async () 
   expect(actual.projected).toEqual(await oracle('published'));
 });
 
-it('matches donor mutations and rejects missing or unexpected ministry owners', async () => {
-  const fixture = await loadCatalogFixture(dir, '2026-11-08');
-  for (const name of ['revenue', 'law']) {
-    const bytes = await readFile(`${dir}/cases/inputs/${name}.json`);
-    const out = new Map(fixture.buildInput.out);
-    out.set(`${name}.json`, { bytes, object: parsePythonJson(bytes.toString('utf8')) });
-    const actual = buildCatalog({ ...fixture.buildInput, out }).catalog;
-    expect(actual).toEqual(JSON.parse(await readFile(`${dir}/cases/oracle/${name}.json`, 'utf8')));
-  }
+it.each(['revenue', 'law'])('matches the %s donor mutation', async (name) => {
+  const fixture = fixtureBase;
+  const bytes = await readFile(`${dir}/cases/inputs/${name}.json`);
+  const out = new Map(fixture.buildInput.out);
+  out.set(`${name}.json`, { bytes, object: parsePythonJson(bytes.toString('utf8')) });
+  const actual = buildCatalog({ ...fixture.buildInput, out }).catalog;
+  expect(actual).toEqual(JSON.parse(await readFile(`${dir}/cases/oracle/${name}.json`, 'utf8')));
+});
+it('rejects missing or unexpected ministry owners', () => {
+  const fixture = fixtureBase;
   const missing = new Map(fixture.buildInput.out);
   missing.delete(fixture.buildInput.expectedMinistryFiles[0]!);
   expect(() => buildCatalog({ ...fixture.buildInput, out: missing })).toThrow(/ministry file set/);
@@ -36,7 +42,7 @@ it('matches donor mutations and rejects missing or unexpected ministry owners', 
 });
 it('refreshes stale derived metadata from the candidate streams and registry', async () => {
   const { refreshCatalog } = await import('./catalog-refresh.js');
-  const state = await loadCatalogFixture(dir, '2026-11-08'),
+  const state = fixtureBase,
     cat = structuredClone(state.projected);
   const d = cat.datasets.find((x) => x.slug === 'revenue')!;
   d.bytes = 1;
@@ -83,27 +89,23 @@ it('shares the aggregation authored catalog definitions', async () => {
   expect(catalog.catalogGroups).toEqual(aggregation.catalogGroups);
 });
 
-let numericFixture: Awaited<ReturnType<typeof loadCatalogFixture>>;
-beforeAll(async () => {
-  numericFixture = await loadCatalogFixture(dir, '2026-11-08');
-});
 it.each(['int', 'float', 'exp', 'negative0', 'bool', 'yearfloat', 'yearexp'])(
   'preserves donor numeric display for %s',
   async (name) => {
     const source = await readFile(`${dir}/cases/inputs/${name}.json`),
       bytes = await readFile(`${dir}/cases/serialized/${name}.json`);
-    const out = new Map(numericFixture.buildInput.out);
+    const out = new Map(fixtureBase.buildInput.out);
     out.set(name.startsWith('year') ? 'revenue.json' : 'law.json', {
       bytes,
       object: parsePythonJson(source.toString('utf8')),
     });
-    expect(buildCatalog({ ...numericFixture.buildInput, out }).catalog).toEqual(
+    expect(buildCatalog({ ...fixtureBase.buildInput, out }).catalog).toEqual(
       JSON.parse(await readFile(`${dir}/cases/oracle/${name}.json`, 'utf8')),
     );
   },
 );
 it('rejects malformed metadata and preserves Python truth for empty collections', async () => {
-  const state = await loadCatalogFixture(dir, '2026-11-08');
+  const state = fixtureBase;
   const replace = (name: string, object: Record<string, any>) => {
     const out = new Map(state.buildInput.out);
     out.set(name, { object, bytes: Buffer.from(JSON.stringify(object) + '\n') });
@@ -133,7 +135,7 @@ it('rejects malformed metadata and preserves Python truth for empty collections'
 });
 it('metadata audit independently detects stale lengths, gzip, schema, sources, screens and counts', async () => {
   const { auditCatalogMetadata } = await import('./catalog-metadata.js');
-  const cat = structuredClone(numericFixture.projected),
+  const cat = structuredClone(fixtureBase.projected),
     row = cat.datasets.find((d) => d.slug === 'revenue')!,
     multi = cat.datasets.find((d) => d.slug === 'ministries-programs')!;
   const reordered = cat.datasets.find((d) => d.slug === 'expenditure')!;
@@ -148,9 +150,9 @@ it('metadata audit independently detects stale lengths, gzip, schema, sources, s
   cat.counts.files = 0;
   const audit = auditCatalogMetadata({
     catalogBytes: Buffer.from(JSON.stringify(cat)),
-    ownerBytes: numericFixture.ownerBytes,
-    registry: numericFixture.registry,
-    activeRoutes: numericFixture.activeRoutes,
+    ownerBytes: fixtureBase.ownerBytes,
+    registry: fixtureBase.registry,
+    activeRoutes: fixtureBase.activeRoutes,
   });
   const r = audit.reported.datasets.find((d) => d.slug === 'revenue')!,
     c = audit.computed.datasets.find((d) => d.slug === 'revenue')!;
@@ -169,7 +171,7 @@ it('metadata audit independently detects stale lengths, gzip, schema, sources, s
   expect(m.schema).not.toEqual(n.schema);
 });
 it('uses owner and text precedence, inherits RSS metadata, and notes missing disk fallbacks', () => {
-  const state = numericFixture,
+  const state = fixtureBase,
     disk = new Map(state.buildInput.disk),
     texts = new Map(state.buildInput.texts);
   disk.set('outlook.json', Buffer.from('invalid disk fallback'));
