@@ -7,10 +7,11 @@ import { programmesBuildCli } from './programmes-build.js';
 import { componentsRatesBuildCli } from './components-rates-build.js';
 import { freshnessCli } from './freshness.js';
 import { fiscalBuildCli } from './fiscal-build.js';
+import { debtLocalBuildCli } from './debt-local-build.js';
 
 const USAGE = [
   'Usage: budget-ts parity --oracle <dir> --candidate <dir> --scope <ids> --policy <file> --report <file>',
-  '       budget-ts build --inputs <fixture-root> --out <candidate-dir> --scope law|glossary,guide|ministries,ministries-programs,programs|outlook,revenue,expenditure,measures|components,rates|dbp2027,gva-sectors --build-date YYYY-MM-DD',
+  '       budget-ts build --inputs <fixture-root> --out <candidate-dir> --scope law|glossary,guide|ministries,ministries-programs,programs|outlook,revenue,expenditure,measures|components,rates|debt,municipalities,geo-obshtini,sebra|dbp2027,gva-sectors --build-date YYYY-MM-DD',
   '       budget-ts freshness [--release <dir>] [--today YYYY-MM-DD]',
 ].join('\n');
 
@@ -20,17 +21,19 @@ try {
   const scope = scopeIndex < 0 ? undefined : args[scopeIndex + 1];
   if (command === 'build')
     process.exitCode =
-      scope === 'dbp2027,gva-sectors'
-        ? await dbpGvaBuildCli(args)
-        : scope === 'outlook,revenue,expenditure,measures'
-          ? await fiscalBuildCli(args)
-          : scope === 'glossary,guide'
-            ? await editorialBuildCli(args)
-            : scope === 'components,rates'
-              ? await componentsRatesBuildCli(args)
-              : scope === 'ministries,ministries-programs,programs'
-                ? await programmesBuildCli(args)
-                : await lawBuildCli(args);
+      scope === 'debt,municipalities,geo-obshtini,sebra'
+        ? await debtLocalBuildCli(args)
+        : scope === 'dbp2027,gva-sectors'
+          ? await dbpGvaBuildCli(args)
+          : scope === 'outlook,revenue,expenditure,measures'
+            ? await fiscalBuildCli(args)
+            : scope === 'glossary,guide'
+              ? await editorialBuildCli(args)
+              : scope === 'components,rates'
+                ? await componentsRatesBuildCli(args)
+                : scope === 'ministries,ministries-programs,programs'
+                  ? await programmesBuildCli(args)
+                  : await lawBuildCli(args);
   else if (command === 'parity') process.exitCode = await parityCli(args);
   else if (command === 'freshness') process.exitCode = await freshnessCli(args);
   else throw new Error(USAGE);

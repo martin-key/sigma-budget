@@ -24,6 +24,9 @@
     "test": {
       "dependsOn": ["^build"]
     },
+    "@sigma-budget/etl#test": {
+      "dependsOn": ["build"]
+    },
     "dev": {
       "cache": false,
       "persistent": true
