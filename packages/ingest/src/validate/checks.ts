@@ -26,8 +26,11 @@ export function pyRepr(value: unknown): string {
       else if (ch === '\n') result += '\\n';
       else if (ch === '\r') result += '\\r';
       else if (ch === '\t') result += '\\t';
-      else if (code < 32 || code === 127) result += `\\x${code.toString(16).padStart(2, '0')}`;
-      else result += ch;
+      else if (ch !== ' ' && /[\p{C}\p{Z}]/u.test(ch)) {
+        if (code <= 0xff) result += `\\x${code.toString(16).padStart(2, '0')}`;
+        else if (code <= 0xffff) result += `\\u${code.toString(16).padStart(4, '0')}`;
+        else result += `\\U${code.toString(16).padStart(8, '0')}`;
+      } else result += ch;
     }
     return result + quote;
   }

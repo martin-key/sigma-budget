@@ -1,6 +1,7 @@
 import { existsSync, lstatSync, readFileSync, readdirSync, realpathSync } from 'node:fs';
 import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { numbers } from './execution-contract.js';
+import { parsePythonJson } from '../common/numbers.js';
 
 let inputObserver: ((root: string, path: string) => void) | undefined;
 /** Record files and trees consulted by synchronous validators, including registry-defined paths. */
@@ -90,7 +91,7 @@ export function strictJson(text: string): unknown {
       throw error;
     }
   }
-  return JSON.parse(text);
+  return parsePythonJson(text);
 }
 
 export class Context {
@@ -104,6 +105,15 @@ export class Context {
   ) {
     realpathSync(root);
     safePath(root, dataDir);
+  }
+  sourceExists(rel: string): boolean {
+    return existsSync(safePath(this.root, `data/originals/${rel}`));
+  }
+  sourceBytes(rel: string): Buffer {
+    return readFileSync(safePath(this.root, `data/originals/${rel}`));
+  }
+  dataDirectory(rel: string): string[] {
+    return readdirSync(safePath(this.root, `${this.dataDir}/${rel}`)).sort();
   }
   dataFiles(): string[] {
     return files(this.root, this.dataDir, true);

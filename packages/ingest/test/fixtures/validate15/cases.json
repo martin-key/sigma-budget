@@ -1,0 +1,3751 @@
+[
+  {
+    "name": "baseline-missing-original",
+    "groups": [
+      "ANNEX3",
+      "REVENUE",
+      "EXPENDITURE",
+      "MEASURES",
+      "LAW",
+      "BUDGETS",
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "deleteOriginal",
+        "file": "parliament/52-602-01-19.docx"
+      }
+    ]
+  },
+  {
+    "name": "baseline-present-original",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": []
+  },
+  {
+    "name": "annex-gdp",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mlnPrecise",
+          2
+        ],
+        "value": 125000.0
+      }
+    ]
+  },
+  {
+    "name": "annex-missing-note",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "primaryBalance",
+          "note"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "annex-duplicate-macro",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "macroRows",
+          1,
+          "id"
+        ],
+        "value": "gdp"
+      }
+    ]
+  },
+  {
+    "name": "revenue-parent",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "parent"
+        ],
+        "value": "not-found"
+      }
+    ]
+  },
+  {
+    "name": "revenue-total",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          0,
+          "mln",
+          2
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "revenue-null",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          0,
+          "pctGdp",
+          0
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "expenditure-total",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "totalMln",
+          1
+        ],
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "expenditure-memo",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          0,
+          "memo"
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "measures-sign",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "balanceEffectMln",
+          "2026"
+        ],
+        "value": -90.8
+      }
+    ]
+  },
+  {
+    "name": "measures-page",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "page",
+          "docx"
+        ],
+        "value": "215"
+      }
+    ]
+  },
+  {
+    "name": "measures-empty",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "name"
+        ],
+        "value": "   "
+      }
+    ]
+  },
+  {
+    "name": "measures-count",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "counts",
+          "all"
+        ],
+        "value": 51
+      }
+    ]
+  },
+  {
+    "name": "law-article",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "headline",
+          "rev",
+          "diff"
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "law-timeline",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "timeline",
+          0,
+          "date"
+        ],
+        "value": "2026-11-01"
+      }
+    ]
+  },
+  {
+    "name": "law-status",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "next",
+          "status"
+        ],
+        "value": "real"
+      }
+    ]
+  },
+  {
+    "name": "law-proposal",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "proposals",
+          "items",
+          0,
+          "no"
+        ],
+        "value": "invalid"
+      }
+    ]
+  },
+  {
+    "name": "budgets-total",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "totals",
+          "expKhil"
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "budgets-tier",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "programs",
+          "status"
+        ],
+        "value": "real"
+      }
+    ]
+  },
+  {
+    "name": "programs-sentinel",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "programs.json",
+        "path": [
+          "sentinels",
+          "noData"
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "programs-row",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "programs.json",
+        "path": [
+          "items",
+          0,
+          1
+        ],
+        "value": "unknown"
+      }
+    ]
+  },
+  {
+    "name": "programs-missing-file",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "deleteFile",
+        "file": "ministries/0200.json",
+        "path": []
+      }
+    ]
+  },
+  {
+    "name": "measures-original-mismatch",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "document",
+          "sha256"
+        ],
+        "value": "0000000000000000000000000000000000000000000000000000000000000000"
+      }
+    ]
+  },
+  {
+    "name": "annex-year",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "years",
+          0
+        ],
+        "value": 2023
+      }
+    ]
+  },
+  {
+    "name": "annex-macro-bool",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "macro",
+          "hicpPct",
+          0
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "annex-version",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "versions",
+          0,
+          "diff",
+          2
+        ],
+        "value": 99
+      }
+    ]
+  },
+  {
+    "name": "annex-vintage-empty",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "vintage"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "annex-precision",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mlnPrecise",
+          2
+        ],
+        "value": 125246.75
+      }
+    ]
+  },
+  {
+    "name": "revenue-level",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "level"
+        ],
+        "value": 9
+      }
+    ]
+  },
+  {
+    "name": "revenue-memo",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "memo"
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "revenue-percent",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          0,
+          "pctGdp",
+          2
+        ],
+        "value": 999
+      }
+    ]
+  },
+  {
+    "name": "revenue-zero",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          0,
+          "share2026"
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "revenue-group-label",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          0,
+          "annex3Rows",
+          0
+        ],
+        "value": "друго"
+      }
+    ]
+  },
+  {
+    "name": "revenue-rowid",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          0,
+          "rowIds",
+          0
+        ],
+        "value": "missing"
+      }
+    ]
+  },
+  {
+    "name": "expenditure-memo-removed",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          2,
+          "memo"
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "expenditure-pct",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "share",
+          1
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "expenditure-pop",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "perCapita",
+          "population"
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "expenditure-cofog",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "source"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "expenditure-functions",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "yearLabels"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "expenditure-2025",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "reconcile",
+          "diffMln",
+          0
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "measures-effect-year",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "effectMln",
+          "2026"
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "measures-tab",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "tab"
+        ],
+        "value": "bad"
+      }
+    ]
+  },
+  {
+    "name": "measures-stage",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "stage"
+        ],
+        "value": "bad"
+      }
+    ]
+  },
+  {
+    "name": "measures-from",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "from"
+        ],
+        "value": "invalid"
+      }
+    ]
+  },
+  {
+    "name": "measures-related",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "related",
+          0
+        ],
+        "value": "bad"
+      }
+    ]
+  },
+  {
+    "name": "measures-hash",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "document",
+          "sha256"
+        ],
+        "value": "invalid"
+      }
+    ]
+  },
+  {
+    "name": "measures-boolean",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "page",
+          "docx"
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "measures-groups",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "groups",
+          0,
+          "items",
+          0
+        ],
+        "value": "kr2"
+      }
+    ]
+  },
+  {
+    "name": "law-budget-balance",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          14,
+          "law",
+          "transfers"
+        ],
+        "value": 755000
+      }
+    ]
+  },
+  {
+    "name": "law-budget-diff",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "diff",
+          "rev"
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "law-reconcile",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "reconciliation",
+          "ok"
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "law-source",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "source"
+        ],
+        "value": [
+          "bad"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "law-page",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "page"
+        ],
+        "value": "http://bad"
+      }
+    ]
+  },
+  {
+    "name": "law-date",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "adopted"
+        ],
+        "value": "2025-01-01"
+      }
+    ]
+  },
+  {
+    "name": "law-timeline-source",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "timeline",
+          0,
+          "source"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "law-timeline-href",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "timeline",
+          0,
+          "href"
+        ],
+        "value": "#/missing"
+      }
+    ]
+  },
+  {
+    "name": "law-timeline-ongoing",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "timeline",
+          0,
+          "ongoing"
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "law-proposal-file",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "proposals",
+          "items",
+          0,
+          "file"
+        ],
+        "value": "invalid"
+      }
+    ]
+  },
+  {
+    "name": "law-changes",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "lines",
+          0,
+          "op"
+        ],
+        "value": "add"
+      }
+    ]
+  },
+  {
+    "name": "law-pending-numbers",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "next",
+          "extra"
+        ],
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "budgets-name",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "lawName"
+        ],
+        "value": "Код"
+      }
+    ]
+  },
+  {
+    "name": "budgets-tier2",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "programs",
+          "tier"
+        ],
+        "value": "pending"
+      }
+    ]
+  },
+  {
+    "name": "budgets-policies",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "policies",
+          0,
+          "khil"
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "budgets-pending",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "programs",
+          "reason"
+        ],
+        "value": " "
+      }
+    ]
+  },
+  {
+    "name": "budgets-bill-diff",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "billVsLaw"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "budgets-count",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "programTotals",
+          "programs"
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "programs-duplicate",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "programs.json",
+        "path": [
+          "items",
+          1,
+          1
+        ],
+        "value": "0200.01.00"
+      }
+    ]
+  },
+  {
+    "name": "programs-index-name",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "programs.json",
+        "path": [
+          "items",
+          0,
+          2
+        ],
+        "value": "wrong"
+      }
+    ]
+  },
+  {
+    "name": "programs-growth",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "programs.json",
+        "path": [
+          "items",
+          0,
+          7
+        ],
+        "value": -101
+      }
+    ]
+  },
+  {
+    "name": "programs-new",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "programs.json",
+        "path": [
+          "items",
+          0,
+          8
+        ],
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "programs-fields",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "programs.json",
+        "path": [
+          "fields",
+          0
+        ],
+        "value": "bad"
+      }
+    ]
+  },
+  {
+    "name": "program-file-tier",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries/0200.json",
+        "path": [
+          "tier"
+        ],
+        "value": "pending"
+      }
+    ]
+  },
+  {
+    "name": "program-file-name",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries/0200.json",
+        "path": [
+          "policies",
+          0,
+          "name"
+        ],
+        "value": "Код"
+      }
+    ]
+  },
+  {
+    "name": "program-file-code",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries/0200.json",
+        "path": [
+          "policies",
+          0,
+          "programs",
+          0,
+          "code"
+        ],
+        "value": "0200.01.00"
+      }
+    ]
+  },
+  {
+    "name": "program-file-row-total",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries/0200.json",
+        "path": [
+          "policies",
+          0,
+          "values",
+          "2026",
+          0
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "program-file-cell-bool",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries/0200.json",
+        "path": [
+          "policies",
+          0,
+          "values",
+          "2026",
+          1
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "program-file-pages",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries/0200.json",
+        "path": [
+          "doc",
+          "pagesByYear",
+          "2026"
+        ],
+        "value": [
+          999
+        ]
+      }
+    ]
+  },
+  {
+    "name": "program-file-source",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries/0200.json",
+        "path": [
+          "doc",
+          "archiveUrl"
+        ],
+        "value": "https://invalid"
+      }
+    ]
+  },
+  {
+    "name": "program-file-blank",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries/0200.json",
+        "path": [
+          "policies",
+          0,
+          "values",
+          "2026"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "program-file-check",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries/0200.json",
+        "path": [
+          "check",
+          "matchesLaw"
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "programme-evidence-changed-page",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries/0200.json",
+        "path": [
+          "doc",
+          "pagesByYear",
+          "2026"
+        ],
+        "value": [
+          999
+        ]
+      }
+    ]
+  },
+  {
+    "name": "programme-evidence-repaired-page",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries/0200.json",
+        "path": [
+          "doc",
+          "pagesByYear",
+          "2026"
+        ],
+        "value": [
+          999
+        ]
+      },
+      {
+        "op": "evidencePage",
+        "file": "ministries/0200.json",
+        "path": [
+          "doc",
+          "pagesByYear",
+          "2026"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "law-evidence-repaired-date",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "adopted"
+        ],
+        "value": "2025-01-01"
+      },
+      {
+        "op": "evidenceAdopted",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "adopted"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "annex3-missing-required",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "years"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "annex3-nonfinite",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "writeRaw",
+        "file": "outlook.json",
+        "text": "{\"x\":NaN}"
+      }
+    ]
+  },
+  {
+    "name": "revenue-missing-required",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "revenue.json",
+        "path": [
+          "rows"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "revenue-nonfinite",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "writeRaw",
+        "file": "revenue.json",
+        "text": "{\"x\":NaN}"
+      }
+    ]
+  },
+  {
+    "name": "expenditure-missing-required",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "functions"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "expenditure-nonfinite",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "writeRaw",
+        "file": "expenditure.json",
+        "text": "{\"x\":NaN}"
+      }
+    ]
+  },
+  {
+    "name": "measures-missing-required",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "counts"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "measures-nonfinite",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "writeRaw",
+        "file": "measures.json",
+        "text": "{\"x\":NaN}"
+      }
+    ]
+  },
+  {
+    "name": "law-missing-required",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "law-nonfinite",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "writeRaw",
+        "file": "law.json",
+        "text": "{\"x\":NaN}"
+      }
+    ]
+  },
+  {
+    "name": "budgets-missing-required",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "budgets-nonfinite",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "writeRaw",
+        "file": "ministries.json",
+        "text": "{\"x\":NaN}"
+      }
+    ]
+  },
+  {
+    "name": "programs-missing-required",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "programs.json",
+        "path": [
+          "items"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "programs-nonfinite",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "writeRaw",
+        "file": "programs.json",
+        "text": "{\"x\":NaN}"
+      }
+    ]
+  },
+  {
+    "name": "programs-extra-file",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "copyFile",
+        "file": "ministries/0200.json",
+        "name": "9999.json"
+      }
+    ]
+  },
+  {
+    "name": "annex-empty-macro",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "macro",
+          "hicpPct"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "annex-bool",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "revenue",
+          "mln",
+          0
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "annex-version-boundary",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "versions",
+          0,
+          "diff",
+          2
+        ],
+        "value": 0.0501
+      }
+    ]
+  },
+  {
+    "name": "annex-extra-kfp",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "extra"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "annex-null-gdp",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mlnPrecise",
+          1
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "revenue-level-bool",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          0,
+          "level"
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "revenue-parent-empty",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "parent"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "revenue-group-duplicate",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          1,
+          "id"
+        ],
+        "value": "dds"
+      }
+    ]
+  },
+  {
+    "name": "revenue-tree-boundary",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          0,
+          "mln",
+          0
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "revenue-string",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          0,
+          "pctGdp",
+          0
+        ],
+        "value": "hello"
+      }
+    ]
+  },
+  {
+    "name": "expenditure-pct-boundary",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "share",
+          1
+        ],
+        "value": 5.4161
+      }
+    ]
+  },
+  {
+    "name": "expenditure-cofog-memo",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          0,
+          "memoOf"
+        ],
+        "value": "bad"
+      }
+    ]
+  },
+  {
+    "name": "expenditure-year",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "years",
+          0
+        ],
+        "value": 2023
+      }
+    ]
+  },
+  {
+    "name": "expenditure-extra",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "versions",
+          0,
+          "docx",
+          0
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "measures-effect-extra",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "effectMln",
+          "2030"
+        ],
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "measures-no-estimate",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "hasEstimate"
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "measures-empty-effects",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "effectMln"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "measures-sign-null",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "balanceEffectMln"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "measures-type",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "page"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "measures-count-boolean",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "counts",
+          "all"
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "measures-url",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "document",
+          "url"
+        ],
+        "value": "http://invalid"
+      }
+    ]
+  },
+  {
+    "name": "law-line-header",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          1,
+          "header"
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "law-line-level-bool",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "level"
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "law-budget-rev-null",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "law",
+          "rev"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "law-bal-own",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "law",
+          "transfers"
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "law-change-lines",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          1,
+          "lines",
+          0,
+          "op"
+        ],
+        "value": "del"
+      }
+    ]
+  },
+  {
+    "name": "law-timeline-whitespace",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "timeline",
+          0,
+          "title"
+        ],
+        "value": " "
+      }
+    ]
+  },
+  {
+    "name": "law-timeline-phase",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "timeline",
+          0,
+          "phase"
+        ],
+        "value": "execution"
+      }
+    ]
+  },
+  {
+    "name": "law-proposal-duplicate",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "proposals",
+          "items",
+          1,
+          "no"
+        ],
+        "value": "52-653-04-1"
+      }
+    ]
+  },
+  {
+    "name": "law-next-empty",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "next",
+          "note"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "law-inforce-null",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "inForce",
+          "exceptions",
+          0,
+          "from"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "budgets-extra",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "extra"
+        ],
+        "value": 3
+      }
+    ]
+  },
+  {
+    "name": "budgets-null",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "revKhil"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "budgets-policies-empty",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "policies"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "budgets-pending-extra",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "programs",
+          "value"
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "budgets-name-quote",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "lawName"
+        ],
+        "value": "\"invalid\""
+      }
+    ]
+  },
+  {
+    "name": "budgets-count-bool",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "programTotals",
+          "programs"
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "program-code-foreign",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "programs.json",
+        "path": [
+          "items",
+          0,
+          0
+        ],
+        "value": "9999"
+      }
+    ]
+  },
+  {
+    "name": "program-index-sentinel",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "programs.json",
+        "path": [
+          "items",
+          0,
+          5
+        ],
+        "value": -1
+      }
+    ]
+  },
+  {
+    "name": "program-level",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "programs.json",
+        "path": [
+          "items",
+          0,
+          3
+        ],
+        "value": "other"
+      }
+    ]
+  },
+  {
+    "name": "program-short-row",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "programs.json",
+        "path": [
+          "items",
+          0
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "program-extra-field",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "programs.json",
+        "path": [
+          "fields"
+        ],
+        "value": [
+          "bad"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "program-sparse-year",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries/0200.json",
+        "path": [
+          "policies",
+          0,
+          "values",
+          "2026"
+        ],
+        "value": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ]
+  },
+  {
+    "name": "program-null",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries/0200.json",
+        "path": [
+          "policies",
+          0,
+          "values",
+          "2026",
+          0
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "program-whitespace",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries/0200.json",
+        "path": [
+          "policies",
+          0,
+          "name"
+        ],
+        "value": "  България"
+      }
+    ]
+  },
+  {
+    "name": "program-quotes",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries/0200.json",
+        "path": [
+          "policies",
+          0,
+          "name"
+        ],
+        "value": "\"България\""
+      }
+    ]
+  },
+  {
+    "name": "program-keys",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries/0200.json",
+        "path": [
+          "doc",
+          "pages"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "program-sum-precision",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries/0200.json",
+        "path": [
+          "policies",
+          0,
+          "values",
+          "2026",
+          1
+        ],
+        "value": 6595.22
+      }
+    ]
+  },
+  {
+    "name": "program-year-extra",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries/0200.json",
+        "path": [
+          "yearsComplete"
+        ],
+        "value": [
+          2026,
+          2029
+        ]
+      }
+    ]
+  },
+  {
+    "name": "annex-zero-gdp",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mlnPrecise",
+          0
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "revenue-zero-gdp",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mlnPrecise",
+          0
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "expenditure-zero-gdp",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mlnPrecise",
+          1
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "measures-zero-gdp",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mlnPrecise",
+          2
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "revenue-zero-prior",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          0,
+          "mln",
+          1
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "revenue-mixed-float-int-sum",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "rawSet",
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          0,
+          "share2026"
+        ],
+        "token": "1e16"
+      },
+      {
+        "op": "rawSet",
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          1,
+          "share2026"
+        ],
+        "token": "1"
+      },
+      {
+        "op": "rawSet",
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          2,
+          "share2026"
+        ],
+        "token": "-1e16"
+      }
+    ]
+  },
+  {
+    "name": "revenue-mixed-float-exponent-sum",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "rawSet",
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          0,
+          "share2026"
+        ],
+        "token": "1e16"
+      },
+      {
+        "op": "rawSet",
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          2,
+          "share2026"
+        ],
+        "token": "-1e16"
+      },
+      {
+        "op": "rawSet",
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          1,
+          "share2026"
+        ],
+        "token": "1e0"
+      }
+    ]
+  },
+  {
+    "name": "measures-source-page-altered",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "page",
+          "docx"
+        ],
+        "value": 216
+      }
+    ]
+  },
+  {
+    "name": "measures-source-page-repaired",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "page",
+          "docx"
+        ],
+        "value": 216
+      },
+      {
+        "op": "evidenceDocxPage",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "page",
+          "docx"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "measures-whitespace-nel",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "name"
+        ],
+        "value": ""
+      }
+    ]
+  },
+  {
+    "name": "measures-whitespace-bom",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "name"
+        ],
+        "value": "﻿"
+      }
+    ]
+  },
+  {
+    "name": "law-whitespace-nel",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "timeline",
+          0,
+          "title"
+        ],
+        "value": ""
+      }
+    ]
+  },
+  {
+    "name": "law-whitespace-bom",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "timeline",
+          0,
+          "title"
+        ],
+        "value": "﻿"
+      }
+    ]
+  },
+  {
+    "name": "program-whitespace-nel",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries/0200.json",
+        "path": [
+          "policies",
+          0,
+          "name"
+        ],
+        "value": "България"
+      }
+    ]
+  },
+  {
+    "name": "program-whitespace-bom",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries/0200.json",
+        "path": [
+          "policies",
+          0,
+          "name"
+        ],
+        "value": "﻿България"
+      }
+    ]
+  },
+  {
+    "name": "revenue-arabic-float",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          0,
+          "pctGdp",
+          0
+        ],
+        "value": "٣.٠"
+      }
+    ]
+  },
+  {
+    "name": "revenue-nel-float",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          0,
+          "pctGdp",
+          0
+        ],
+        "value": " 3.0 "
+      }
+    ]
+  },
+  {
+    "name": "revenue-bom-float",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          0,
+          "pctGdp",
+          0
+        ],
+        "value": "﻿3.0"
+      }
+    ]
+  },
+  {
+    "name": "annex-missing-mln",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "revenue",
+          "mln"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "annex-missing-gdp",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mln"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "revenue-missing-parent-id",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "revenue-missing-values",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "mln"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "expenditure-missing-economic",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "economic"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "measures-missing-effect",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "effectMln"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "measures-missing-page",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "page"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "measures-missing-document",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "document",
+          "sha256"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "law-missing-line",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "law-missing-headline",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "headline",
+          "rev"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "law-missing-proposal",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "proposals",
+          "items",
+          0,
+          "no"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "law-missing-source",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "source"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "budgets-missing-name",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "name"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "budgets-missing-policy",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "policies"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "budgets-missing-programs",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "programs"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "program-missing-values",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "policies",
+          0,
+          "values"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "program-missing-code",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "policies",
+          0,
+          "code"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "program-missing-doc-pages",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "doc",
+          "pages"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "program-missing-index-field",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "programs.json",
+        "path": [
+          "fields"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "program-tolerance-on",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries/0200.json",
+        "path": [
+          "policies",
+          0,
+          "values",
+          "2026",
+          2
+        ],
+        "value": 0.12
+      }
+    ]
+  },
+  {
+    "name": "program-tolerance-over",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries/0200.json",
+        "path": [
+          "policies",
+          0,
+          "values",
+          "2026",
+          2
+        ],
+        "value": 0.12001
+      }
+    ]
+  },
+  {
+    "name": "measures-positive-boundary",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "balanceEffectMln",
+          "2026"
+        ],
+        "value": 90.8000000005
+      }
+    ]
+  },
+  {
+    "name": "measures-negative-boundary",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "balanceEffectMln",
+          "2026"
+        ],
+        "value": 90.800000002
+      }
+    ]
+  },
+  {
+    "name": "measures-float-page",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "rawSet",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "page",
+          "docx"
+        ],
+        "token": "215.0"
+      }
+    ]
+  },
+  {
+    "name": "law-float-level",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "rawSet",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "level"
+        ],
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "budgets-float-count",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "rawSet",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "programs",
+          "count"
+        ],
+        "token": "1e0"
+      }
+    ]
+  },
+  {
+    "name": "program-float-page",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "rawSet",
+        "file": "ministries/0200.json",
+        "path": [
+          "doc",
+          "pages",
+          0
+        ],
+        "token": "3.0"
+      }
+    ]
+  },
+  {
+    "name": "program-bool-isnew",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "programs.json",
+        "path": [
+          "items",
+          56,
+          8
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "program-prototype-code",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "programs.json",
+        "path": [
+          "items",
+          0,
+          1
+        ],
+        "value": "toString"
+      }
+    ]
+  },
+  {
+    "name": "measures-prototype-related",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "related",
+          0
+        ],
+        "value": "toString"
+      }
+    ]
+  },
+  {
+    "name": "revenue-prototype-parent",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "parent"
+        ],
+        "value": "toString"
+      }
+    ]
+  },
+  {
+    "name": "law-prototype-op",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "lines",
+          0,
+          "op"
+        ],
+        "value": "toString"
+      }
+    ]
+  },
+  {
+    "name": "law-prototype-source",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "source",
+          0
+        ],
+        "value": "toString"
+      }
+    ]
+  },
+  {
+    "name": "budgets-prototype-kind",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "kind"
+        ],
+        "value": "toString"
+      }
+    ]
+  },
+  {
+    "name": "measures-boolean-effect",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          24,
+          "effectMln",
+          "2026"
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "law-boolean-area",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          1,
+          "areas",
+          0,
+          "bill"
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "law-boolean-report-date",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "counts",
+          "reportDates",
+          "2026-07-07"
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "annex-version-prototype-id",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "versions",
+          0,
+          "id"
+        ],
+        "value": "toString"
+      }
+    ]
+  },
+  {
+    "name": "budget-prototype-id",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "id"
+        ],
+        "value": "toString"
+      }
+    ]
+  },
+  {
+    "name": "annex-missing-gdp-row",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "macroRows",
+          0,
+          "id"
+        ],
+        "value": "not-gdp"
+      }
+    ]
+  }
+]
