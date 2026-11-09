@@ -16,6 +16,22 @@ it('builds the law dataset against the Python oracle', () => {
   }
   expect(differences).toEqual([]);
 });
+it('changes only next for the optional current publication, matching the frozen donor', () => {
+  const cases = JSON.parse(
+    readFileSync(
+      resolve(import.meta.dirname, '../../test/fixtures/wave13a/law-next-oracle.json'),
+      'utf8',
+    ),
+  ) as { input: { publication: string } | null; next: unknown }[];
+  const evidence = fixture('evidence.json');
+  const original = buildLaw(evidence, '2026-11-08');
+  for (const { input, next } of cases) {
+    const actual = buildLaw(evidence, '2026-11-08', input);
+    expect(actual.next).toEqual(next);
+    expect({ ...actual, next: original.next }).toEqual(original);
+  }
+  expect(() => buildLaw(evidence, '2026-11-08', { other: 1 } as never)).toThrow();
+});
 it('rejects wrong dates', () => {
   const e = fixture('evidence.json');
   e.parliament.zdb.L_Act_date = '2026-07-02';

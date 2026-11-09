@@ -6,6 +6,8 @@ import { sources } from '../common/sources.js';
 import { articleOne, budgetRows, budgetTotals } from './law-articles.js';
 import { lawChanges } from './law-changes.js';
 import { gazetteFacts, next2027, parliamentFacts } from './law-evidence.js';
+import type { CurrentPublication } from './law-evidence.js';
+export type { CurrentPublication } from './law-evidence.js';
 import { kinds } from './law-kinds.js';
 
 type Data = Record<string, any>;
@@ -53,7 +55,11 @@ function event(kind: string, title: string, date?: string, options: Data = {}): 
     source: source || ['parliament'],
   };
 }
-export function buildLaw(evidence: LawEvidence, buildDate: string): LawDataset {
+export function buildLaw(
+  evidence: LawEvidence,
+  buildDate: string,
+  publication?: CurrentPublication | null,
+): LawDataset {
   const L = evidence.law,
     P: Data = {},
     DV: Data = {};
@@ -404,7 +410,7 @@ export function buildLaw(evidence: LawEvidence, buildDate: string): LawDataset {
     gazette,
     documents,
     proposals,
-    next: next2027(),
+    next: next2027(publication),
     pending: ['P07'],
   } as unknown as LawDataset;
 }

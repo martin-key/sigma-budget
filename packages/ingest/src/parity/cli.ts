@@ -180,7 +180,15 @@ export async function parityCli(
       value = args[i + 1];
     if (
       !key ||
-      !['--oracle', '--candidate', '--scope', '--policy', '--report', '--registry'].includes(key) ||
+      ![
+        '--oracle',
+        '--candidate',
+        '--scope',
+        '--policy',
+        '--report',
+        '--registry',
+        '--protect',
+      ].includes(key) ||
       !value ||
       value.startsWith('--') ||
       flags[key]
@@ -190,6 +198,16 @@ export async function parityCli(
   }
   for (const k of ['--oracle', '--candidate', '--scope', '--policy', '--report'])
     if (!flags[k]) throw new Error(`Required: ${k}`);
+  const requestedIds = flags['--scope']!.split(',');
+  const candidatePath = resolve(flags['--candidate']!);
+  const candidateReal = await realpath(candidatePath).catch(() => candidatePath);
+  const wave13a =
+    requestedIds.includes('budget2027') ||
+    requestedIds.includes('budget2027-provenance') ||
+    candidateReal ===
+      fileURLToPath(new URL('../../../../tmp/ts-migration/candidates/13a/data', import.meta.url));
+  if (wave13a && !flags['--protect'])
+    throw new Error('Wave13a parity requires --protect for the consulted fixture root');
   const requestedReport = resolve(flags['--report']!);
   // Check the requested path, rather than following its links to a canonical target.
   async function checkReportPath(createParents = false): Promise<void> {
@@ -232,6 +250,14 @@ export async function parityCli(
     fileURLToPath(new URL('../../../../data/release', import.meta.url)),
     effectiveRegistryPath,
     flags['--policy']!,
+    ...(flags['--protect'] ? [flags['--protect']] : []),
+    ...(wave13a
+      ? [
+          'data/datasets.yaml',
+          'data/sources.yaml',
+          fileURLToPath(new URL('../../test/fixtures', import.meta.url)),
+        ]
+      : []),
   ]) {
     const rel = relative(await canonical(resolve(input)), reportPath);
     if (rel === '' || (rel !== '..' && !rel.startsWith(`..${sep}`) && !isAbsolute(rel)))
