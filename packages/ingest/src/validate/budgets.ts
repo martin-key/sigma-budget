@@ -193,7 +193,7 @@ export function budgets(ctx: Context): Check {
   c.ok(
     pyRegexAt(mm, 'asOf', /^\p{Decimal_Number}{4}-\p{Decimal_Number}{2}-\p{Decimal_Number}{2}$/u) &&
       required<any>(mm, 'asOf') <= ctx.buildDate &&
-      required<any>(mm, 'source').every((s: string) => pyHas(required<any>(core, 'sources'), s)),
+      pyIterAt(mm, 'source').every((s: any) => pyHas(required<any>(core, 'sources'), s)),
     'meta asOf/source',
   );
   c.ok(
@@ -623,8 +623,8 @@ function checkFile(c: Check, ctx: Context, item: any, d: any): Row[] {
     `${w}: yearsComplete ${pyRepr(yc)}`,
   );
   c.ok(
-    required<any>(d, 'skipped').length === required<any>(d, 'skippedTotal') &&
-      required<any>(d, 'skipped').every((s: any) => typeof s === 'string' && !!pyStrip(s)),
+    pyEqual(pyLenAt(d, 'skipped'), required<any>(d, 'skippedTotal')) &&
+      pyIterAt(d, 'skipped').every((s: any) => typeof s === 'string' && !!pyStrip(s)),
     `${w}: skipped list vs skippedTotal`,
   );
   const rows = progRows(d),

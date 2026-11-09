@@ -83,3 +83,12 @@ rejects unhashable keys when they are actually used, and retains insertion
 order and key representations. Counter defaults preserve explicit null keys.
 ANNEX3 absolute-value checks and prefix formatting are exercised through the
 real groups, including raw floating zeros and boolean diagnostics.
+
+The separate `iterable/` corpus adds 29 complete seven-group observations for
+the actual Python length and iteration operations, empty mappings and strings,
+floating receiver tokens and `%s` diagnostics. It preserves raw source preimages
+and observes eight independent hash seeds. Direct and compiled CLI comparisons
+retain complete normal FAIL results, counts and facts, as well as first crashes.
+The copied PDF reconciliation totals retain their initial int/float kinds and
+the kind of each subsequent addition. All earlier donor observations, inputs
+and tolerances remain unchanged.

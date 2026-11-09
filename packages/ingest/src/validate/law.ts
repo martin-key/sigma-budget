@@ -472,7 +472,7 @@ function changes(c: Check, law: any, artRows: Map<PythonTuple, any>) {
       }
     }
     const ops: Record<string, number> = { chg: 0, add: 0, del: 0 };
-    for (const [i, r] of required<any>(x, 'lines').entries()) {
+    for (const [i, r] of (pyIterAt(x, 'lines') as any[]).entries()) {
       const ww = `${w} line ${i} (${r.sec ?? 'None'} ${r.no ?? 'None'})`;
       c.ok(
         pyHas(ops, required<any>(r, 'op')) &&
@@ -519,7 +519,7 @@ function changes(c: Check, law: any, artRows: Map<PythonTuple, any>) {
           );
     } else {
       const marked = pyDict<PythonTuple, any>(
-        required<any>(x, 'lines').map((r: any) => [pyTupleAt(r, ['sec', 'no']), r]),
+        (pyIterAt(x, 'lines') as any[]).map((r: any) => [pyTupleAt(r, ['sec', 'no']), r]),
       );
       const changed = pyDict([...artRows].filter(([, r]) => pyTruth(r.changed)));
       const diff = pySortedTuples(
@@ -695,7 +695,7 @@ function bills(c: Check, law: any, src: any, buildDate: string) {
       `${w}: decree / issue numbers`,
     );
     c.ok(isoAt(required<any>(b, 'inForce'), 'from'), `${w}: inForce.from`);
-    for (const e of pyPath(b, 'inForce', 'exceptions')) {
+    for (const e of pyIterAt(required<any>(b, 'inForce'), 'exceptions') as any[]) {
       c.ok(
         (required<any>(e, 'from') === null ||
           (typeof required<any>(e, 'from') === 'string' && iso(required<any>(e, 'from')))) &&
@@ -722,7 +722,7 @@ function bills(c: Check, law: any, src: any, buildDate: string) {
       `${w}: urls`,
     );
     c.ok(
-      required<any[]>(b, 'source').every((k: string) => pyHas(src, k)),
+      pyIterAt(b, 'source').every((k: any) => pyHas(src, k)),
       `${w}: source keys`,
     );
   }

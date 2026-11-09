@@ -462,6 +462,12 @@ export function pyReprAt(holder: any, key: string | number): string {
     ? floatRepr(value)
     : pythonRepr(value);
 }
+
+/** Python %s leaves a string unquoted and renders other values with their source kind. */
+export function pyStrAt(holder: any, key: string | number): string {
+  const value = pyItem(holder, key);
+  return typeof value === 'string' ? value : pyReprAt(holder, key);
+}
 /** Python str.strip() whitespace differs from JavaScript trim (notably NEL and BOM). */
 export function pyStrip(value: string): string {
   return value.replace(

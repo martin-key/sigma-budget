@@ -10,6 +10,7 @@ import {
   pythonFormat as fmt,
   pythonRepr as pyRepr,
   pyReprAt,
+  pyStrAt,
   required,
   floatRepr,
   pyStrip,
@@ -100,10 +101,10 @@ function ptol(series: any): number {
 export function annex3(ctx: Context): Check {
   const c = new Check('ANNEX3'),
     o = ctx.get('outlook.json');
-  c.ok(same(required(o, 'years'), [2024, 2025, 2026, 2027, 2028]), `years ${pyReprAt(o, 'years')}`);
+  c.ok(same(required(o, 'years'), [2024, 2025, 2026, 2027, 2028]), `years ${pyStrAt(o, 'years')}`);
   c.ok(
     same(required(o, 'vintage'), ['actual', 'prelim', 'plan', 'forecast', 'forecast']),
-    `vintage ${pyReprAt(o, 'vintage')}`,
+    `vintage ${pyStrAt(o, 'vintage')}`,
   );
   const g = required<any>(o, 'gdp');
   pyItemAt(o, 'gdp', 'mln');
@@ -168,12 +169,14 @@ export function annex3(ctx: Context): Check {
   }
   c.ok(pyLenAt(o, 'macroVintage') === 5, 'macroVintage length');
   const rows = pyIterAt(o, 'macroRows') as any[],
-    ids = rows.map((r: any) => required(r, 'id'));
+    ids = rows.map((_r: any, index) => pyItemAt(rows, index, 'id'));
   c.ok(
     ids.length === pySet(ids).size && rows.length === 16,
     `macroRows: 16 unique ids, got ${rows.length}`,
   );
-  const inGroups = (pyIterAt(o, 'macroGroups') as any[]).flatMap((gr: any) => pyIterAt(gr, 'rows'));
+  const inGroups = (pyIterAt(o, 'macroGroups') as any[]).flatMap((_gr: any, index, groups) =>
+    pyIter(pyItemAt(groups, index, 'rows')),
+  );
   c.ok(same(inGroups.sort(), [...ids].sort()), 'macroGroups must list every macroRow exactly once');
   for (const r of rows)
     c.ok(
@@ -190,7 +193,8 @@ export function annex3(ctx: Context): Check {
     ...byId(pyPath(ctx.get('expenditure.json'), 'economic', 'rows')),
   ]);
   let mx = 0;
-  for (const v of vs) {
+  for (const [index, v] of vs.entries()) {
+    pyItemAt(vs, index, 'pdf');
     c.ok(
       pyLenAt(v, 'pdf') === 5 && pyLenAt(v, 'docx') === 5 && pyLenAt(v, 'diff') === 5,
       `versions ${required<string>(v, 'id')}: five values`,
@@ -444,7 +448,8 @@ export function revenue(ctx: Context): Check {
     groupsLength = pyLenAt(r, 'groups');
   c.ok(
     groupsLength === 8 &&
-      pySet(pyIterAt(r, 'groups').map((gr: any) => required(gr, 'id'))).size === 8,
+      pySet(pyIterAt(r, 'groups').map((_gr: any, index, groups) => pyItemAt(groups, index, 'id')))
+        .size === 8,
     'groups: 8 unique ids',
   );
   const groups = pyIterAt(r, 'groups') as any[];
@@ -480,18 +485,18 @@ export function revenue(ctx: Context): Check {
     );
   }
   for (const gr of groups) {
-    if (!required<any>(gr, 'rowIds').every((x: string) => pyHas(by, x))) continue;
+    if (!pyIterAt(gr, 'rowIds').every((x: any) => pyHas(by, x))) continue;
     c.ok(
       same(
         required(gr, 'annex3Rows'),
-        required<any>(gr, 'rowIds').map((i: string) => required(pyItem(by, i), 'label')),
+        pyIterAt(gr, 'rowIds').map((i: any) => required(pyItem(by, i), 'label')),
       ),
       `group ${required<any>(gr, 'id')}: annex3Rows differ from the row labels`,
     );
     for (let i = 0; i < 5; i++) {
       const actual = pyItemAt(gr, 'mln', i);
       const s = pyTypedSum(
-        pyMap(required<any>(gr, 'rowIds'), (x: string) => {
+        pyMap(pyIterAt(gr, 'rowIds'), (x: any) => {
           const n = at(pyItem(by, x), i);
           return n && pyTruth(n.raw) ? n : floatZero;
         }),
@@ -1048,11 +1053,15 @@ export function expenditure(ctx: Context): Check {
         ),
     "reconcile: only the 2025 'Програма' column may differ from Annex 3",
   );
-  const vers = required<any>(f, 'versions'),
-    by = byId(items) as Record<string, any>,
-    pdfTotal = [...tot];
-  c.ok(vers.length === 7, `functions.versions: ${vers.length} rows, expected 7`);
-  for (const v of vers) {
+  const vers = required<any>(f, 'versions');
+  c.ok(
+    pyLenAt(f, 'versions') === 7,
+    `functions.versions: ${pyLenAt(f, 'versions')} rows, expected 7`,
+  );
+  const by = byId(items) as Record<string, any>,
+    pdfTotal = [...tot],
+    pdfKinds = pdfTotal.map((_value, k) => numeric(tot, k).kind);
+  for (const v of pyIter(vers, sourceTypeAt(f, 'versions')) as any[]) {
     const it = pyItem(by, required<string>(v, 'id')),
       pub =
         'part' in v
@@ -1072,18 +1081,24 @@ export function expenditure(ctx: Context): Check {
       `functions.versions ${required<string>(v, 'id')}: 2025 must be equal`,
     );
     if (!('part' in v))
-      for (let k = 0; k < 4; k++)
-        pdfTotal[k] = pyAddAssign(numeric(pdfTotal, k), {
-          value: pySubtract(numeric(required(v, 'pdf'), k), numeric(required(v, 'docx'), k)),
-          kind: 'float',
-        });
+      for (let k = 0; k < 4; k++) {
+        const accumulated = { ...numeric(pdfTotal, k), kind: pdfKinds[k]! },
+          left = numeric(required(v, 'pdf'), k),
+          right = numeric(required(v, 'docx'), k),
+          kind = left.kind === 'float' || right.kind === 'float' ? 'float' : 'int';
+        pdfTotal[k] = pyAddAssign(accumulated, { value: pySubtract(left, right), kind });
+        pdfKinds[k] = accumulated.kind === 'float' || kind === 'float' ? 'float' : 'int';
+      }
   }
   for (let k = 0; k < 4; k++)
-    c.near(
+    nearWithText(
+      c,
       required<any>(rc, 'pdfTotalMln')[k],
       pdfTotal[k],
       0.0501,
       `reconcile: pdfTotalMln ${2025 + k}`,
+      displayAt(required(rc, 'pdfTotalMln'), k),
+      pdfKinds[k] === 'float' && isnum(pdfTotal[k]) ? pyFloat(pdfTotal[k]) : displayAt(pdfTotal, k),
     );
   const note = required<any>(required<any>(f, 'notes')[0], 'text')
     .replaceAll('\u202f', ' ')
