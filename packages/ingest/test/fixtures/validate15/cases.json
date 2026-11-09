@@ -5726,5 +5726,491 @@
         "token": "0.0"
       }
     ]
+  },
+  {
+    "name": "acceptance3-reportDates-zero",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "counts",
+          "reportDates",
+          "2026-07-07"
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance3-reportDates-one",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "counts",
+          "reportDates",
+          "2026-07-07"
+        ],
+        "op": "rawSet",
+        "token": "1.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance3-reportDates-exponent",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "counts",
+          "reportDates",
+          "2026-07-07"
+        ],
+        "op": "rawSet",
+        "token": "0e0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance3-reportDates-negative-zero",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "counts",
+          "reportDates",
+          "2026-07-07"
+        ],
+        "op": "rawSet",
+        "token": "-0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance3-opinionDates-zero",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "counts",
+          "opinionDates",
+          "2026-07-01"
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance3-opinionDates-one",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "counts",
+          "opinionDates",
+          "2026-07-01"
+        ],
+        "op": "rawSet",
+        "token": "1.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance3-opinionDates-exponent",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "counts",
+          "opinionDates",
+          "2026-07-01"
+        ],
+        "op": "rawSet",
+        "token": "0e0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance3-opinionDates-negative-zero",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "counts",
+          "opinionDates",
+          "2026-07-01"
+        ],
+        "op": "rawSet",
+        "token": "-0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance3-proposalDates-zero",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "counts",
+          "proposalDates",
+          "2026-07-16"
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance3-proposalDates-one",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "counts",
+          "proposalDates",
+          "2026-07-16"
+        ],
+        "op": "rawSet",
+        "token": "1.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance3-proposalDates-exponent",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "counts",
+          "proposalDates",
+          "2026-07-16"
+        ],
+        "op": "rawSet",
+        "token": "0e0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance3-proposalDates-negative-zero",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "counts",
+          "proposalDates",
+          "2026-07-16"
+        ],
+        "op": "rawSet",
+        "token": "-0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance3-budget-changed-zero",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "changed"
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance3-budget-changed-negative-zero",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "changed"
+        ],
+        "op": "rawSet",
+        "token": "-0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance3-budget-changed-list",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "changed"
+        ],
+        "op": "rawSet",
+        "token": "[0.0]"
+      }
+    ]
+  },
+  {
+    "name": "acceptance3-budget-changed-mapping",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "changed"
+        ],
+        "op": "rawSet",
+        "token": "{\"value\":0.0}"
+      }
+    ]
+  },
+  {
+    "name": "acceptance3-article-changed-zero",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "changed"
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance3-article-changed-negative-zero",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "changed"
+        ],
+        "op": "rawSet",
+        "token": "-0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance3-article-changed-list",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "changed"
+        ],
+        "op": "rawSet",
+        "token": "[0.0]"
+      }
+    ]
+  },
+  {
+    "name": "acceptance3-article-changed-mapping",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "changed"
+        ],
+        "op": "rawSet",
+        "token": "{\"value\":0.0}"
+      }
+    ]
+  },
+  {
+    "name": "acceptance3-count-committeeReports",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "counts",
+          "committeeReports"
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance3-count-opinions",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "counts",
+          "opinions"
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance3-count-proposals",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "counts",
+          "proposals"
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance3-proposals-byDate-zero",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "proposals",
+          "byDate",
+          "2026-07-16"
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance3-proposals-byDate-one",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "proposals",
+          "byDate",
+          "2026-07-16"
+        ],
+        "op": "rawSet",
+        "token": "1.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance3-proposals-byDate-negative-zero",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "proposals",
+          "byDate",
+          "2026-07-16"
+        ],
+        "op": "rawSet",
+        "token": "-0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance3-proposals-count",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "proposals",
+          "count"
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
   }
 ]

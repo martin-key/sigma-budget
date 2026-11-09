@@ -11,6 +11,7 @@ import {
   pyIntAt,
   pySum,
   pyMap,
+  pyTypedSum,
 } from './python-error.js';
 
 const TOL = 0.06,
@@ -54,8 +55,18 @@ const n = (o: any, k: string | number): PythonNumber => {
 };
 const sum = (xs: Iterable<PythonNumber>) => pySum(xs);
 const pyfloat = floatRepr;
-const display = (o: any, k: string | number) =>
-  isnum(o[k]) && n(o, k).kind === 'float' ? pyfloat(o[k]) : repr(o[k]);
+const display = (o: any, k: string | number): string => {
+  const value = o[k];
+  if (isnum(value) && n(o, k).kind === 'float') return pyfloat(value);
+  if (Array.isArray(value)) return `[${value.map((_, i) => display(value, i)).join(', ')}]`;
+  if (value && typeof value === 'object')
+    return `{${Object.keys(value)
+      .map((key) => `${repr(key)}: ${display(value, key)}`)
+      .join(', ')}}`;
+  return repr(value);
+};
+const displaySum = (value: PythonNumber) =>
+  value.kind === 'float' ? pyfloat(value.value) : String(value.value);
 function near(c: Check, a: any, b: any, tol: number, message: string, ar?: string, br?: string) {
   return c.ok(
     isnum(a) && isnum(b) && Math.abs(a - b) <= tol + 1e-9,
@@ -148,7 +159,7 @@ function art1(c: Check, law: any): Map<string, any> {
     dd(c, r, w);
     c.ok(
       pyEqual(r.changed, Math.abs(r.diff) > 0.05),
-      `${w}: changed flag ${repr(r.changed ?? null)} vs diff ${display(r, 'diff')}`,
+      `${w}: changed flag ${display(r, 'changed')} vs diff ${display(r, 'diff')}`,
     );
     const rk = key(r.sec, r.no);
     c.ok(!rows.has(rk), `${w}: duplicate row (${repr(r.sec)}, ${repr(r.no)})`);
@@ -315,7 +326,7 @@ function lawBudgets(c: Check, law: any) {
       Object.values(ln).some(pyTruth);
     c.ok(
       pyEqual(required(b, 'changed'), moved),
-      `${w}: changed flag ${repr(b.changed)} vs differences`,
+      `${w}: changed flag ${display(b, 'changed')} vs differences`,
     );
     if (moved) changed.push(b.art);
   }
@@ -587,14 +598,14 @@ function bills(c: Check, law: any, src: any, buildDate: string) {
   const z = bs[0].counts,
     cn = law.counts;
   for (const k of ['committeeReports', 'opinions', 'proposals'])
-    c.ok(cn[k] === z[k], `counts.${k} ${cn[k]} vs the bill ${z[k]}`);
+    c.ok(cn[k] === z[k], `counts.${k} ${display(cn, k)} vs the bill ${display(z, k)}`);
   for (const [k, d] of [
     ['committeeReports', 'reportDates'],
     ['opinions', 'opinionDates'],
     ['proposals', 'proposalDates'],
   ] as const) {
-    const value = sum(pyMap(Object.keys(cn[d]), (x) => n(cn[d], x)));
-    c.ok(value === cn[k], `counts.${d} sums to ${value}, not ${cn[k]}`);
+    const value = pyTypedSum(pyMap(Object.keys(cn[d]), (x) => n(cn[d], x)));
+    c.ok(value.value === cn[k], `counts.${d} sums to ${displaySum(value)}, not ${display(cn, k)}`);
     c.ok(
       Object.keys(cn[d]).every((x) => iso(x) && x <= buildDate),
       `counts.${d} dates`,
@@ -674,10 +685,10 @@ function proposals(c: Check, law: any) {
     same(sorted(Object.keys(p)), ['byDate', 'count', 'items', 'note', 'urlPattern']),
     `proposals keys ${repr(sorted(Object.keys(p)))}`,
   );
-  const count = sum(pyMap(Object.keys(p.byDate), (k) => n(p.byDate, k)));
+  const count = pyTypedSum(pyMap(Object.keys(p.byDate), (k) => n(p.byDate, k)));
   c.ok(
-    p.count === items.length && items.length === 69 && count === 69,
-    `proposals: count ${p.count}, items ${items.length}, byDate ${count}`,
+    p.count === items.length && items.length === 69 && count.value === 69,
+    `proposals: count ${display(p, 'count')}, items ${items.length}, byDate ${displaySum(count)}`,
   );
   const seen: Record<string, number> = {},
     nos = new Set<string>();
@@ -698,7 +709,7 @@ function proposals(c: Check, law: any) {
     nos.add(r.no);
     seen[r.date] = (seen[r.date] ?? 0) + 1;
   }
-  c.ok(same(seen, p.byDate), `proposals.byDate ${repr(p.byDate)} vs items ${repr(seen)}`);
+  c.ok(same(seen, p.byDate), `proposals.byDate ${display(p, 'byDate')} vs items ${repr(seen)}`);
   c.ok(p.urlPattern === 'https://www.parliament.bg/bills/52/{file}', 'proposals.urlPattern');
   const nx = law.next;
   c.ok(
