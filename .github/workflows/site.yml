@@ -504,3 +504,42 @@ jobs:
           name: wave13a-parity
           path: tmp/ts-migration/candidates/13a/*-parity.json
           if-no-files-found: error
+
+  wave13b-parity:
+    # Frozen raw-reader evidence and the independent Python graph; no live release comparison.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: pipeline/requirements.lock
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: |
+          python -m pip install --require-hashes -r pipeline/requirements.lock
+          pnpm install --frozen-lockfile
+          pnpm --filter @sigma-budget/etl... build
+      - name: Regenerate frozen Python references
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          python packages/ingest/test/fixtures/indirect-taxes/regenerate.py
+          python packages/ingest/test/fixtures/wave13b/generate_oracle.py --check
+      - name: Integrated graph, reader and path tests
+        run: |
+          pnpm --filter @sigma-budget/ingest exec vitest run src/build/fiscal-graph.test.ts src/build/indirect-taxes.test.ts src/build/wave13b.test.ts
+          pnpm --filter @sigma-budget/etl exec vitest run src/wave13b-build.test.ts
+      - name: Build and compare the frozen candidate
+        run: pnpm exec budget-ts build --inputs packages/ingest/test/fixtures --out tmp/ts-migration/candidates/candidate13b --scope wave13b --build-date 2026-11-08
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wave13b-parity
+          path: tmp/ts-migration/candidates/candidate13b/report.json
+          if-no-files-found: error
