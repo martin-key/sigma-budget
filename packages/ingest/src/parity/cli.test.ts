@@ -246,3 +246,38 @@ it("compares exact scoped file sets, pending and absent inputs, and CLI exit cod
     await rm(root, { recursive: true, force: true });
   }
 });
+
+it('verifies feed-rss bytes and keeps unrelated XML unverified', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'budget-rss-parity-'));
+  try {
+    const oracle = join(root, 'oracle'),
+      candidate = join(root, 'candidate');
+    await mkdir(oracle);
+    await mkdir(candidate);
+    await writeFile(join(oracle, 'feed.xml'), '<rss>кирилица &amp;</rss>\n');
+    await writeFile(join(candidate, 'feed.xml'), '<rss>кирилица &amp;</rss>\n');
+    const opts = {
+      oracle,
+      candidate,
+      scope: ['feed-rss'],
+      registry: [{ id: 'feed-rss', files: ['data/release/feed.xml'] }],
+      policy: exactPolicy,
+    };
+    expect((await compareScope(opts)).outcome).toBe('pass');
+    await writeFile(join(candidate, 'feed.xml'), '<rss>кирилица &amp;</rss>');
+    const changed = await compareScope(opts);
+    expect(changed.outcome).toBe('fail');
+    expect(changed.differences[0]?.kind).toBe('bytes');
+    expect(
+      (
+        await compareScope({
+          ...opts,
+          scope: ['other'],
+          registry: [{ id: 'other', files: ['data/release/feed.xml'] }],
+        })
+      ).outcome,
+    ).toBe('unverified');
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});

@@ -134,17 +134,25 @@ export async function compareScope(options: {
         }
         try {
           const [x, y] = await Promise.all([
-            readFile(resolve(options.oracle, file), "utf8"),
-            readFile(resolve(options.candidate, file), "utf8"),
+            readFile(resolve(options.oracle, file)),
+            readFile(resolve(options.candidate, file)),
           ]);
+          if (entry.id === "feed-rss" && file === "feed.xml") {
+            if (!x.equals(y)) report.differences.push({
+              dataset: entry.id, file, pointer: "", kind: "bytes",
+              expected: `${x.length} bytes`, actual: `${y.length} bytes`,
+              tolerance: 0, outcome: "different",
+            });
+            continue;
+          }
           if (!file.endsWith(".json")) {
             report.unverified.push(`${file}: non-JSON adapter not implemented`);
             continue;
           }
           report.differences.push(
             ...compare(
-              JSON.parse(x),
-              JSON.parse(y),
+              JSON.parse(x.toString("utf8")),
+              JSON.parse(y.toString("utf8")),
               { dataset: entry.id, file },
               options.policy,
             ),
