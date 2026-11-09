@@ -75,7 +75,43 @@ export function pyIntAt(holder: any, key: string | number): boolean {
   );
 }
 
+export function pythonType(value: unknown): string {
+  if (value === null || value === undefined) return 'NoneType';
+  if (typeof value === 'boolean') return 'bool';
+  if (typeof value === 'number') return Number.isInteger(value) ? 'int' : 'float';
+  if (typeof value === 'string') return 'str';
+  return Array.isArray(value) ? 'list' : 'dict';
+}
+
+export function pySubtract(a: PythonNumber, b: PythonNumber): number {
+  if (typeof a.value !== 'number' || typeof b.value !== 'number') {
+    const left = typeof a.value === 'number' ? a.kind : pythonType(a.value),
+      right = typeof b.value === 'number' ? b.kind : pythonType(b.value);
+    throw new PythonError(
+      'TypeError',
+      "unsupported operand type(s) for -: '" + left + "' and '" + right + "'",
+    );
+  }
+  return a.value - b.value;
+}
+
 /** Python booleans participate in the integer fast path of sum. */
 export function pySum(values: Iterable<PythonNumber>): number {
-  return pythonSum(values);
+  function* checked() {
+    let left = 'int';
+    for (const operand of values) {
+      if (typeof operand.value !== 'number')
+        throw new PythonError(
+          'TypeError',
+          "unsupported operand type(s) for +: '" +
+            left +
+            "' and '" +
+            pythonType(operand.value) +
+            "'",
+        );
+      if (operand.kind === 'float') left = 'float';
+      yield operand;
+    }
+  }
+  return pythonSum(checked());
 }

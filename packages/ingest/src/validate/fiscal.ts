@@ -10,6 +10,8 @@ import {
   pyEqual,
   pyIntAt,
   pySum,
+  pySubtract,
+  pythonType,
 } from './python-error.js';
 
 const KFP_KEYS = ['revenue', 'expenditure', 'balance', 'interest', 'primaryBalance', 'financing'];
@@ -68,7 +70,7 @@ export function annex3(ctx: Context): Check {
     const rounded = roundInteger(g.mlnPrecise[i]);
     c.ok(
       isnum(g.mln[i]) && Math.abs(g.mln[i] - rounded) <= 1e-9,
-      `gdp.mln[${i}] is the rounded precise value: ${g.mln[i]} vs ${rounded} (tolerance 0.0)`,
+      `gdp.mln[${i}] is the rounded precise value: ${displayAt(g.mln, i)} vs ${rounded} (tolerance 0.0)`,
     );
   }
   const gdp = g.mlnPrecise,
@@ -138,11 +140,14 @@ export function annex3(ctx: Context): Check {
       mx = Math.max(mx, Math.abs(v.diff[i]));
     }
     const row = other[v.id];
-    if (c.ok(row !== undefined, `versions ${v.id}: no such row in revenue/economic`))
+    if (c.ok(row !== undefined, `versions ${v.id}: no such row in revenue/economic`)) {
+      const start = rowOffset(row);
+      requireOffsetIndex(row, true);
       c.ok(
-        same(row.mln, v.pdf.slice(row.y0 ?? 0, (row.y0 ?? 0) + row.mln.length)),
+        same(row.mln, v.pdf.slice(start, start + row.mln.length)),
         `versions ${v.id}: the published row must be the PDF version`,
       );
+    }
   }
   c.ok(Math.abs(mx - 4.3) < 0.001, `versions: largest difference ${fixed(mx, 1)}, documented 4.3`);
   c.ok(
@@ -158,15 +163,53 @@ export function annex3(ctx: Context): Check {
 import { pythonNumberAt, pythonNumericText, type PythonNumber } from '../common/numbers.js';
 const numeric = (holder: any, key: string | number): PythonNumber => {
   const v = holder[key];
-  if (v === undefined) throw new PythonError('KeyError', pyRepr(String(key)));
+  if (v === undefined)
+    throw new PythonError(
+      Array.isArray(holder) ? 'IndexError' : 'KeyError',
+      Array.isArray(holder) ? 'list index out of range' : pyRepr(String(key)),
+    );
   if (typeof v === 'boolean') return { value: Number(v), kind: 'int' };
   return pythonNumberAt(holder, String(key), v);
 };
 const floatZero: PythonNumber = { value: 0, kind: 'float' };
 const roundedOne = (x: number): number => Number(fmt(x, 1).replaceAll(' ', '').replace(',', '.'));
+function rowOffset(row: any, operation: '+' | '-' = '+'): number {
+  if (!Object.hasOwn(row, 'y0')) return 0;
+  const value = row.y0;
+  if (typeof value === 'number' || typeof value === 'boolean') return Number(value);
+  const type = pythonType(value);
+  if (operation === '-')
+    throw new PythonError(
+      'TypeError',
+      "unsupported operand type(s) for -: 'int' and '" + type + "'",
+    );
+  const message =
+    type === 'str' || type === 'list'
+      ? 'can only concatenate ' + type + ' (not "int") to ' + type
+      : "unsupported operand type(s) for +: '" + type + "' and 'int'";
+  throw new PythonError('TypeError', message);
+}
+function requireOffsetIndex(row: any, slice = false): void {
+  if (Object.hasOwn(row, 'y0') && !pyIntAt(row, 'y0'))
+    throw new PythonError(
+      'TypeError',
+      slice
+        ? 'slice indices must be integers or None or have an __index__ method'
+        : 'list indices must be integers or slices, not float',
+    );
+}
+function listValue<T>(values: T[], index: number): T {
+  const position = index < 0 ? values.length + index : index;
+  if (position < 0 || position >= values.length)
+    throw new PythonError('IndexError', 'list index out of range');
+  return values[position]!;
+}
 function at(row: any, i: number): PythonNumber | null {
-  const j = i - (row.y0 ?? 0);
-  return j >= 0 && j < row.mln.length ? numeric(row.mln, j) : null;
+  const j = i - rowOffset(row, '-');
+  if (j < 0 || j >= row.mln.length) return null;
+  requireOffsetIndex(row);
+  if (row.mln[j] === null) return null;
+  return numeric(row.mln, j);
 }
 function tree(c: Check, rows: any[], what: string, gdp: number[], tolCap = 0.3): number {
   const by = byId(rows) as Record<string, any>,
@@ -174,18 +217,19 @@ function tree(c: Check, rows: any[], what: string, gdp: number[], tolCap = 0.3):
   for (const q of rows) {
     required(q, 'id');
     required(q, 'mln');
+    required(q, 'level');
     c.ok(isnum(q.level), `${what} ${q.id}: level`);
     const p = q.parent;
     if (pyTruth(p)) {
       if (c.ok(Object.hasOwn(by, p), `${what} ${q.id}: parent ${p} not in the table`)) {
         c.ok(
-          by[p].level === q.level - 1,
+          pyEqual(by[p].level, q.level - 1),
           `${what} ${q.id}: level ${pyRepr(q.level)} under parent level ${pyRepr(by[p].level)}`,
         );
         (kids[p] ??= []).push(q);
       }
-    } else c.ok(q.level === 0, `${what} ${q.id}: a row without parent must be level 0`);
-    const y0 = q.y0 ?? 0;
+    } else c.ok(pyEqual(q.level, 0), `${what} ${q.id}: a row without parent must be level 0`);
+    const y0 = rowOffset(q);
     c.ok(
       q.mln.length === q.pctGdp.length && y0 + q.mln.length <= 5,
       `${what} ${q.id}: mln/pctGdp lengths ${q.mln.length}/${q.pctGdp.length} (y0 ${y0})`,
@@ -195,20 +239,22 @@ function tree(c: Check, rows: any[], what: string, gdp: number[], tolCap = 0.3):
       const m = q.mln[j],
         p = q.pctGdp[j];
       c.ok(isnum(m) && isnum(p), `${what} ${q.id}: non-number at ${j}`);
-      if (isnum(m) && isnum(p))
+      if (isnum(m) && isnum(p)) {
+        requireOffsetIndex(q);
         nearComputed(
           c,
           q.pctGdp,
           j,
-          divide(100 * m, gdp[j + y0]!),
+          divide(100 * m, listValue(gdp, j + y0)),
           tol,
           `${what} ${q.id} pctGdp ${j + y0}`,
         );
+      }
     }
   }
   let worst = 0;
   for (const [pid, ks] of Object.entries(kids)) {
-    const real = ks.filter((k) => !k.memo),
+    const real = ks.filter((k) => !pyTruth(k.memo)),
       tol = Math.min(tolCap, 0.05 * (real.length + 1) + 0.01);
     for (let i = 0; i < 5; i++) {
       const parent = at(by[pid], i);
@@ -229,12 +275,16 @@ function tree(c: Check, rows: any[], what: string, gdp: number[], tolCap = 0.3):
 }
 function displayAt(holder: any, key: string | number): string {
   const v = holder[key];
-  return isnum(v) && numeric(holder, key).kind === 'float' ? pyFloat(v) : String(v);
+  return isnum(v) && numeric(holder, key).kind === 'float'
+    ? pyFloat(v)
+    : typeof v === 'string'
+      ? v
+      : pyRepr(v);
 }
 function nearWithText(
   c: Check,
-  a: number,
-  b: number,
+  a: unknown,
+  b: unknown,
   tolerance: number,
   message: string,
   ar: string,
@@ -254,7 +304,7 @@ function nearComputed(
   message: string,
 ): void {
   const a = holder[key];
-  const rendered = isnum(a) && numeric(holder, key).kind === 'float' ? pyFloat(a) : String(a);
+  const rendered = displayAt(holder, key);
   c.ok(
     isnum(a) && Number.isFinite(b) && Math.abs(a - b) <= tolerance + 1e-9,
     `${message}: ${rendered} vs ${pyFloat(b)} (tolerance ${tolerance})`,
@@ -401,17 +451,17 @@ export function measures(ctx: Context): Check {
   c.ok(cnt.all === items.length && items.length === 52, 'counts.all');
   const count = (xs: any[], f: (x: any) => boolean) => xs.filter(f).length;
   c.ok(
-    count(short, (i) => i.kind === 'revenue' && pyTruth(i.hasEstimate)) === cnt.short.revenue &&
-      cnt.short.revenue === 8,
+    count(short, (i) => i.kind === 'revenue' && pyTruth(required(i, 'hasEstimate'))) ===
+      cnt.short.revenue && cnt.short.revenue === 8,
     'counts: short revenue with estimate',
   );
   c.ok(
-    count(short, (i) => i.kind === 'expenditure' && pyTruth(i.hasEstimate)) ===
+    count(short, (i) => i.kind === 'expenditure' && pyTruth(required(i, 'hasEstimate'))) ===
       cnt.short.expenditure && cnt.short.expenditure === 9,
     'counts: short expenditure with estimate',
   );
   c.ok(
-    count(short, (i) => !pyTruth(i.hasEstimate)) === cnt.short.noEstimate &&
+    count(short, (i) => !pyTruth(required(i, 'hasEstimate'))) === cnt.short.noEstimate &&
       cnt.short.noEstimate === 7,
     'counts: short without estimate',
   );
@@ -443,7 +493,7 @@ export function measures(ctx: Context): Check {
         pyIntAt(i.page, 'docx'),
       `${i.id}: page.docx`,
     );
-    if (pyTruth(i.hasEstimate)) {
+    if (pyTruth(required(i, 'hasEstimate'))) {
       required(i, 'effectMln');
       c.ok(
         Object.keys(i.effectMln).every((y) => ['2026', '2027', '2028'].includes(y)) &&
@@ -677,11 +727,21 @@ export function expenditure(ctx: Context): Check {
     );
   const ec = byId(required<any>(e, 'economic').rows) as Record<string, any>;
   for (let k = 0; k < 4; k++) {
-    c.near(
+    const value = at(ec['x.exp'], k + 1);
+    nearWithText(
+      c,
       rc.annex3ExpenditureMln[k],
-      at(ec['x.exp'], k + 1)?.value,
+      value?.value,
       0.0001,
       `reconcile: annex3ExpenditureMln ${2025 + k} vs economic x.exp`,
+      displayAt(rc.annex3ExpenditureMln, k),
+      value === null
+        ? 'None'
+        : typeof value.value === 'number' && value.kind === 'float'
+          ? pyFloat(value.value)
+          : typeof value.value === 'string'
+            ? value.value
+            : pyRepr(value.value),
     );
     nearComputed(
       c,
@@ -745,7 +805,7 @@ export function expenditure(ctx: Context): Check {
   for (let i = 0; i < 5; i++)
     c.near(
       ec['x.nonint'].mln[i],
-      ec['x.exp'].mln[i] - ec['x.interest'].mln[i],
+      pySubtract(numeric(ec['x.exp'].mln, i), numeric(ec['x.interest'].mln, i)),
       0.15,
       `economic: memo x.nonint ${2024 + i}`,
     );

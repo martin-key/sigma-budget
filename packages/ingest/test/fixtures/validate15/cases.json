@@ -3747,5 +3747,852 @@
         "value": "not-gdp"
       }
     ]
+  },
+  {
+    "name": "acceptance-revenue-offset-null",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "y0"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance-revenue-offset-true",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "y0"
+        ],
+        "op": "set",
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "acceptance-revenue-offset-false",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "y0"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "acceptance-revenue-offset-negative",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "y0"
+        ],
+        "op": "set",
+        "value": -1
+      }
+    ]
+  },
+  {
+    "name": "acceptance-revenue-offset-string",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "y0"
+        ],
+        "op": "set",
+        "value": "0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance-revenue-offset-empty-list",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "y0"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "acceptance-revenue-offset-empty-map",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "y0"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "acceptance-revenue-offset-float-zero",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "y0"
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance-revenue-memo-empty-map",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "memo"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "acceptance-revenue-memo-empty-list",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "memo"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "acceptance-revenue-missing-level",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "level"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "acceptance-expenditure-offset-null",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "y0"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance-expenditure-offset-true",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "y0"
+        ],
+        "op": "set",
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "acceptance-expenditure-offset-false",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "y0"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "acceptance-expenditure-offset-negative",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "y0"
+        ],
+        "op": "set",
+        "value": -1
+      }
+    ]
+  },
+  {
+    "name": "acceptance-expenditure-offset-string",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "y0"
+        ],
+        "op": "set",
+        "value": "0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance-expenditure-offset-empty-list",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "y0"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "acceptance-expenditure-offset-empty-map",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "y0"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "acceptance-expenditure-offset-float-zero",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "y0"
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance-expenditure-memo-empty-map",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "memo"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "acceptance-expenditure-memo-empty-list",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "memo"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "acceptance-expenditure-missing-level",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "level"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "acceptance-revenue-sum-0-null",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          0,
+          "mln",
+          0
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance-revenue-sum-0-string",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          0,
+          "mln",
+          0
+        ],
+        "op": "set",
+        "value": "1"
+      }
+    ]
+  },
+  {
+    "name": "acceptance-revenue-sum-1-null",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          1,
+          "mln",
+          0
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance-revenue-sum-1-string",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          1,
+          "mln",
+          0
+        ],
+        "op": "set",
+        "value": "1"
+      }
+    ]
+  },
+  {
+    "name": "acceptance-law-budget-changed-1",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "changed"
+        ],
+        "op": "set",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "acceptance-law-budget-changed-float-1",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "changed"
+        ],
+        "op": "rawSet",
+        "token": "1.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance-law-line-changed-1",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "changed"
+        ],
+        "op": "set",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "acceptance-law-budget-changed-0",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "budgets",
+          2,
+          "changed"
+        ],
+        "op": "set",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "acceptance-law-budget-changed-float-0",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "budgets",
+          2,
+          "changed"
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance-law-line-changed-0",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          1,
+          "changed"
+        ],
+        "op": "set",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "acceptance-law-missing-changed",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "changed"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "acceptance-measures-missing-estimate-flag",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "hasEstimate"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "acceptance-programs-missing-page-map",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "file": "ministries/0200.json",
+        "path": [
+          "doc",
+          "pagesByYear"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "acceptance-annex-null-gdp-display",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mln",
+          0
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance-annex-slice-float-offset",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          23,
+          "y0"
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance-annex-slice-null-offset",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          23,
+          "y0"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance-revenue-blank-row-0",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          0,
+          "mln",
+          0
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance-revenue-blank-row-1",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "mln",
+          0
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance-expenditure-blank-row-0",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          0,
+          "mln",
+          0
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance-expenditure-blank-row-1",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "mln",
+          0
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance-revenue-bool-level-0",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          0,
+          "level"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "acceptance-revenue-bool-level-1",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "level"
+        ],
+        "op": "set",
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "acceptance-expenditure-bool-level-0",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          0,
+          "level"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "acceptance-expenditure-bool-level-1",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "level"
+        ],
+        "op": "set",
+        "value": true
+      }
+    ]
   }
 ]

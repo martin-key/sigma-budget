@@ -131,7 +131,7 @@ function art1(c: Check, law: any): Map<string, any> {
       continue;
     dd(c, r, w);
     c.ok(
-      r.changed === Math.abs(r.diff) > 0.05,
+      pyEqual(r.changed, Math.abs(r.diff) > 0.05),
       `${w}: changed flag ${repr(r.changed ?? null)} vs diff ${display(r, 'diff')}`,
     );
     const rk = key(r.sec, r.no);
@@ -297,7 +297,10 @@ function lawBudgets(c: Check, law: any) {
     const moved =
       ['rev', 'exp', 'transfers'].some((k) => Math.abs(nz(b.diff[k])) > 0.05) ||
       Object.values(ln).some(pyTruth);
-    c.ok(b.changed === moved, `${w}: changed flag ${repr(b.changed)} vs differences`);
+    c.ok(
+      pyEqual(required(b, 'changed'), moved),
+      `${w}: changed flag ${repr(b.changed)} vs differences`,
+    );
     if (moved) changed.push(b.art);
   }
   const t = law.totals;

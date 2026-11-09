@@ -699,7 +699,7 @@ function checkFile(c: Check, ctx: Context, item: any, d: any): Row[] {
     `${w}: doc.pages`,
   );
   c.ok(
-    Object.keys(doc.pagesByYear).every((y) => YEARS.map(String).includes(y)) &&
+    Object.keys(required(doc, 'pagesByYear')).every((y) => YEARS.map(String).includes(y)) &&
       Object.values(doc.pagesByYear).every((v: any) => v.every((x: any) => doc.pages.includes(x))),
     `${w}: doc.pagesByYear`,
   );

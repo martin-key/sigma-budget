@@ -48,3 +48,5 @@ provenance changes together. The scoped CLI requires explicit `--root` or
 `--live`; `--live` is a local diagnostic, separate from this proof. Production
 continues to use Python, and BUDGET2027 and the other listed unported groups
 remain outside the TypeScript scope.
+
+The acceptance additions preserve the original 206 scenario definitions and all 212 observations byte-semantically. Forty-six appended cases cover absent/null/integer/float/bool offsets and Python list/slice errors, empty memo containers, boolean-number equality, missing required fields, null/string arithmetic, blank cells and diagnostic representations. There are now 252 definitions yielding 258 donor observations. All 64 original input pins and the frozen donor files remain unchanged; only the scenario and oracle digests change.
