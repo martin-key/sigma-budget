@@ -18,6 +18,7 @@ import { Context, safePath } from './context.js';
 import { envelope, glossary, inputs, numeric, privacy, sizes } from './foundations.js';
 import { validateRegistry } from './registry.js';
 import { applyExceptions, UNPORTED_GROUPS } from './runner.js';
+import { writeValidationReport } from './report.js';
 
 const home = new URL('../../test/fixtures/validate14/', import.meta.url);
 const load = (p: string): any => JSON.parse(readFileSync(new URL(p, home), 'utf8'));
@@ -96,13 +97,10 @@ const evidence: { scenario: string; status: 'PASS' | 'FAIL'; groups: Record<stri
 afterAll(() => {
   const report = process.env.WAVE14_PARITY_REPORT;
   if (!report) return;
-  if (!report.startsWith('tmp/ts-migration/') || !report.endsWith('.json'))
-    throw new Error('Unsafe parity report path');
   const repo = new URL('../../../../', import.meta.url).pathname;
-  const file = safePath(repo, report);
-  mkdirSync(dirname(file), { recursive: true });
-  writeFileSync(
-    file,
+  writeValidationReport(
+    repo,
+    report,
     JSON.stringify(
       {
         scope: 'wave14',

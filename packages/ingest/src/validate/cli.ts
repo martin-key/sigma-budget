@@ -1,8 +1,8 @@
 /** Test/diagnostic-only entry point. Production continues to use Python validation. */
-import { mkdirSync, writeFileSync } from 'node:fs';
-import { dirname, isAbsolute, relative, resolve, sep } from 'node:path';
+import { isAbsolute, relative, resolve, sep } from 'node:path';
 import { Context, safePath } from './context.js';
 import { PORTED_GROUPS, UNPORTED_GROUPS, runWave14 } from './runner.js';
+import { writeValidationReport } from './report.js';
 
 export function main(argv: string[]): number {
   try {
@@ -62,8 +62,7 @@ export function main(argv: string[]): number {
         path.split(sep).some((part, i, parts) => part === 'data' && parts[i + 1] === 'release')
       )
         throw new Error('report cannot be written inside a release tree');
-      mkdirSync(dirname(path), { recursive: true });
-      writeFileSync(path, text);
+      writeValidationReport(process.cwd(), report, text);
     }
     process.stdout.write(text);
     return result.status === 'PASS' ? 0 : 1;

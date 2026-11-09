@@ -1,7 +1,15 @@
 import { createHash } from 'node:crypto';
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import {
+  mkdtempSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+  linkSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { dirname, join, relative, resolve } from 'node:path';
 import { expect, it, vi } from 'vitest';
 import { main } from './cli.js';
 import { Context, safePath, strictJson } from './context.js';
@@ -109,6 +117,58 @@ it('treats nonfinite JSON constants as errors while leaving strings alone', () =
   expect(strictJson('{"x":"NaN"}')).toEqual({ x: 'NaN' });
   for (const v of ['NaN', 'Infinity', '-Infinity'])
     expect(() => strictJson(`{"x":${v}}`)).toThrow(`non-finite number ${v} in JSON`);
+});
+it('refuses linked reports without changing their external targets', () => {
+  mkdirSync(resolve('tmp/ts-migration'), { recursive: true });
+  const root = mkdtempSync(join(tmpdir(), 'sigma-report-input-'));
+  const reports = mkdtempSync(resolve('tmp/ts-migration/wave14-report-'));
+  const external = mkdtempSync(resolve('tmp/wave14-external-'));
+  const out = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+  const err = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
+  try {
+    fixture(root);
+    const sentinel = join(external, 'sentinel.json');
+    writeFileSync(sentinel, 'external sentinel\n');
+    for (const [name, makeLink] of [
+      ['hard.json', linkSync],
+      ['symbolic.json', symlinkSync],
+    ] as const) {
+      const target = join(reports, name);
+      makeLink(sentinel, target);
+      expect(
+        main(['--root', root, '--only', 'INPUTS', '--report', relative(process.cwd(), target)]),
+      ).toBe(2);
+      expect(readFileSync(sentinel, 'utf8')).toBe('external sentinel\n');
+    }
+  } finally {
+    out.mockRestore();
+    err.mockRestore();
+    rmSync(reports, { recursive: true, force: true });
+    rmSync(external, { recursive: true, force: true });
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+it('writes new and existing regular reports without changing unrelated files', () => {
+  mkdirSync(resolve('tmp/ts-migration'), { recursive: true });
+  const root = mkdtempSync(join(tmpdir(), 'sigma-report-regular-'));
+  const reports = mkdtempSync(resolve('tmp/ts-migration/wave14-regular-'));
+  const out = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+  const err = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
+  try {
+    fixture(root);
+    const target = join(reports, 'nested/report.json');
+    const args = ['--root', root, '--only', 'INPUTS', '--report', relative(process.cwd(), target)];
+    expect(main(args)).toBe(0);
+    expect(JSON.parse(readFileSync(target, 'utf8')).status).toBe('PASS');
+    writeFileSync(target, 'old report');
+    expect(main(args)).toBe(0);
+    expect(JSON.parse(readFileSync(target, 'utf8')).status).toBe('PASS');
+  } finally {
+    out.mockRestore();
+    err.mockRestore();
+    rmSync(reports, { recursive: true, force: true });
+    rmSync(root, { recursive: true, force: true });
+  }
 });
 it('reports explicit scope, unknown groups and safe CLI output paths', () => {
   const root = mkdtempSync(join(tmpdir(), 'sigma-runner-'));

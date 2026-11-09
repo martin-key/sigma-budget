@@ -16,3 +16,5 @@ WAVE14_PARITY_REPORT=tmp/ts-migration/candidates/14/report.json pnpm --filter @s
 ```
 
 For an explicit local diagnostic on a checkout, run `pnpm validate:wave14-live`. It validates that checkout and writes a report under `tmp/ts-migration/`; it does not compare live data with frozen expectations. For another local tree use `pnpm validate:wave14 --root <directory> --only INPUTS,ENVELOPE` (omit `--only` for the scoped wave14 groups). `--no-accepted` retains the donor's underlying findings. The report lists unsupported groups; an unsupported selection is an error. This is not the production validation command.
+
+Both CLI and CI reports use the same confined writer. Symbolic links (including parents), hard-linked files and non-regular targets are rejected; regular reports are replaced atomically. This protects source evidence and external files even when a report path aliases their inode.
