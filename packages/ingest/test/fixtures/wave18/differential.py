@@ -94,6 +94,50 @@ cases = [
  case('wrong pct type',data('execution.json',['latest','kfp','rev','pctPlan'],'bad')),
 ]
 
+# Acceptance regressions; the original 68 cases and donor bytes remain unchanged.
+for path in (["data"], ["monthly"], ["monthly", "2024"], ["monthly", "2024", "kfp"],
+             ["data", "2024", "kfp"], ["plan2026", "nat"], ["latest", "kfp"],
+             ["latest", "nat"], ["latest", "eu"], ["pace"], ["pace", "2024"]):
+    for value in ([], [0], None, "invalid"):
+        cases.append(case("mapping " + "/".join(path) + " " + repr(value),
+                          data("execution.json", path, value)))
+        cases.append(case("encoded mapping " + "/".join(path) + " " + repr(value),
+                          dict(kind="encoded", path=path, value=value)))
+for path, needle, replacement, value in (
+    (["data", "2024", "months"], '\"months\":12', '\"months\":12.0', 12.0),
+    (["data", "2024", "months"], '\"months\":12', '\"months\":1.2e1', 12.0),
+    (["latest", "month"], '\"month\":9,\"asOf\":\"2026-09-30\"', '\"month\":9.0,\"asOf\":\"2026-09-30\"', 9.0),
+    (["latest", "month"], '\"month\":9,\"asOf\":\"2026-09-30\"', '\"month\":9e0,\"asOf\":\"2026-09-30\"', 9.0),
+):
+    cases.append(case("integer token " + "/".join(path) + " " + replacement,
+                      dict(kind="input", path=path, needle=needle, replacement=replacement, value=value)))
+from budget_pipeline.build.execution_law import LAW_ROWS
+for row in LAW_ROWS.values():
+    for field in ("units", "label", "page", "printed"):
+        cases.append(case("missing lineage row " + str(row) + " " + field,
+                          dict(kind="delete", name="forecast", path=["tables", "annex1_execution2026", "rows", row, field])))
+for field in ("units", "printed"):
+    cases.append(case("empty lineage " + field,
+                      data("forecast", ["tables", "annex1_execution2026", "rows", 0, field], [])))
+
+
+for year, count in (("2025", 12), ("2026", 9)):
+    needle = '"' + year + '":{"months":' + str(count)
+    replacement = needle + '.0'
+    cases.append(case("integer token data/" + year + "/months " + replacement,
+                      dict(kind="input", path=["data", year, "months"], needle=needle,
+                           replacement=replacement, value=float(count))))
+for field in ("units", "printed"):
+    for value in (None, {}, ""):
+        cases.append(case("invalid lineage " + field + " " + repr(value),
+                          data("forecast", ["tables", "annex1_execution2026", "rows", 0, field], value)))
+    cases.append(case("explicit null lineage " + field,
+                      data("forecast", ["tables", "annex1_execution2026", "rows", 0, field, 0], None)))
+for value in (None, False, "1", [], {}):
+    cases.append(case("invalid law value " + repr(value),
+                      data("forecast", ["tables", "annex1_execution2026", "rows", 0, "values", 0], value)))
+
+
 def change(obj, path, value=None, delete=False):
     for key in path[:-1]: obj=obj[key]
     if delete: del obj[path[-1]]
@@ -105,7 +149,7 @@ def run(case):
     orig_exists=os.path.exists; orig_listdir=os.listdir
     cells={}; dims={}; missing=set(); extra={}
     raw_ex=json.loads((ROOT/'data/release/execution.json').read_text(encoding='utf8'))
-    input_ops=[op for op in case['ops'] if op['kind']=='input']
+    input_ops=[op for op in case['ops'] if op['kind'] in ('input', 'encoded')]
     for op in input_ops: change(raw_ex,op['path'],op['value'])
     original_get=ctx.get
     if input_ops:

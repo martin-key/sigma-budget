@@ -3551,6 +3551,2769 @@
           "max deviation on the raw numbers (млн.): balance 0.000000, exp 0.000000, exp.interest 0.000000, fin 0.000000, fin.ext 0.000000, fin=-balance 0.001923, rev 0.000000, transfers 0.000000, к.2=к.3+к.4 0.000000"
         ]
       }
+    },
+    {
+      "name": "mapping data []",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "data"
+          ],
+          "value": []
+        }
+      ],
+      "expected": {
+        "crash": "ValueError: max() iterable argument is empty"
+      }
+    },
+    {
+      "name": "encoded mapping data []",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "data"
+          ],
+          "value": []
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'values'"
+      }
+    },
+    {
+      "name": "mapping data [0]",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "data"
+          ],
+          "value": [
+            0
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: 'int' object is not subscriptable"
+      }
+    },
+    {
+      "name": "encoded mapping data [0]",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "data"
+          ],
+          "value": [
+            0
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'values'"
+      }
+    },
+    {
+      "name": "mapping data None",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "data"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: 'NoneType' object is not iterable"
+      }
+    },
+    {
+      "name": "encoded mapping data None",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "data"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'NoneType' object has no attribute 'values'"
+      }
+    },
+    {
+      "name": "mapping data 'invalid'",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "data"
+          ],
+          "value": "invalid"
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: string indices must be integers, not 'str'"
+      }
+    },
+    {
+      "name": "encoded mapping data 'invalid'",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "data"
+          ],
+          "value": "invalid"
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'str' object has no attribute 'values'"
+      }
+    },
+    {
+      "name": "mapping monthly []",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "monthly"
+          ],
+          "value": []
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping monthly []",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "monthly"
+          ],
+          "value": []
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'values'"
+      }
+    },
+    {
+      "name": "mapping monthly [0]",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "monthly"
+          ],
+          "value": [
+            0
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping monthly [0]",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "monthly"
+          ],
+          "value": [
+            0
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'values'"
+      }
+    },
+    {
+      "name": "mapping monthly None",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "monthly"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'NoneType' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping monthly None",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "monthly"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'NoneType' object has no attribute 'values'"
+      }
+    },
+    {
+      "name": "mapping monthly 'invalid'",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "monthly"
+          ],
+          "value": "invalid"
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'str' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping monthly 'invalid'",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "monthly"
+          ],
+          "value": "invalid"
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'str' object has no attribute 'values'"
+      }
+    },
+    {
+      "name": "mapping monthly/2024 []",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "monthly",
+            "2024"
+          ],
+          "value": []
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping monthly/2024 []",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "monthly",
+            "2024"
+          ],
+          "value": []
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: list indices must be integers or slices, not str"
+      }
+    },
+    {
+      "name": "mapping monthly/2024 [0]",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "monthly",
+            "2024"
+          ],
+          "value": [
+            0
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping monthly/2024 [0]",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "monthly",
+            "2024"
+          ],
+          "value": [
+            0
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: list indices must be integers or slices, not str"
+      }
+    },
+    {
+      "name": "mapping monthly/2024 None",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "monthly",
+            "2024"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'NoneType' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping monthly/2024 None",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "monthly",
+            "2024"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: 'NoneType' object is not subscriptable"
+      }
+    },
+    {
+      "name": "mapping monthly/2024 'invalid'",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "monthly",
+            "2024"
+          ],
+          "value": "invalid"
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'str' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping monthly/2024 'invalid'",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "monthly",
+            "2024"
+          ],
+          "value": "invalid"
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: string indices must be integers, not 'str'"
+      }
+    },
+    {
+      "name": "mapping monthly/2024/kfp []",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "monthly",
+            "2024",
+            "kfp"
+          ],
+          "value": []
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping monthly/2024/kfp []",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "monthly",
+            "2024",
+            "kfp"
+          ],
+          "value": []
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "mapping monthly/2024/kfp [0]",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "monthly",
+            "2024",
+            "kfp"
+          ],
+          "value": [
+            0
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping monthly/2024/kfp [0]",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "monthly",
+            "2024",
+            "kfp"
+          ],
+          "value": [
+            0
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "mapping monthly/2024/kfp None",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "monthly",
+            "2024",
+            "kfp"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'NoneType' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping monthly/2024/kfp None",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "monthly",
+            "2024",
+            "kfp"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'NoneType' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "mapping monthly/2024/kfp 'invalid'",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "monthly",
+            "2024",
+            "kfp"
+          ],
+          "value": "invalid"
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'str' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping monthly/2024/kfp 'invalid'",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "monthly",
+            "2024",
+            "kfp"
+          ],
+          "value": "invalid"
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'str' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "mapping data/2024/kfp []",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "data",
+            "2024",
+            "kfp"
+          ],
+          "value": []
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping data/2024/kfp []",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "data",
+            "2024",
+            "kfp"
+          ],
+          "value": []
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "mapping data/2024/kfp [0]",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "data",
+            "2024",
+            "kfp"
+          ],
+          "value": [
+            0
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping data/2024/kfp [0]",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "data",
+            "2024",
+            "kfp"
+          ],
+          "value": [
+            0
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "mapping data/2024/kfp None",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "data",
+            "2024",
+            "kfp"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: 'NoneType' object is not iterable"
+      }
+    },
+    {
+      "name": "encoded mapping data/2024/kfp None",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "data",
+            "2024",
+            "kfp"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'NoneType' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "mapping data/2024/kfp 'invalid'",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "data",
+            "2024",
+            "kfp"
+          ],
+          "value": "invalid"
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'str' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping data/2024/kfp 'invalid'",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "data",
+            "2024",
+            "kfp"
+          ],
+          "value": "invalid"
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'str' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "mapping plan2026/nat []",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "plan2026",
+            "nat"
+          ],
+          "value": []
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'get'"
+      }
+    },
+    {
+      "name": "encoded mapping plan2026/nat []",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "plan2026",
+            "nat"
+          ],
+          "value": []
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "mapping plan2026/nat [0]",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "plan2026",
+            "nat"
+          ],
+          "value": [
+            0
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'get'"
+      }
+    },
+    {
+      "name": "encoded mapping plan2026/nat [0]",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "plan2026",
+            "nat"
+          ],
+          "value": [
+            0
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "mapping plan2026/nat None",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "plan2026",
+            "nat"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'NoneType' object has no attribute 'get'"
+      }
+    },
+    {
+      "name": "encoded mapping plan2026/nat None",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "plan2026",
+            "nat"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'NoneType' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "mapping plan2026/nat 'invalid'",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "plan2026",
+            "nat"
+          ],
+          "value": "invalid"
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'str' object has no attribute 'get'"
+      }
+    },
+    {
+      "name": "encoded mapping plan2026/nat 'invalid'",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "plan2026",
+            "nat"
+          ],
+          "value": "invalid"
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'str' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "mapping latest/kfp []",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "latest",
+            "kfp"
+          ],
+          "value": []
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping latest/kfp []",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "latest",
+            "kfp"
+          ],
+          "value": []
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "mapping latest/kfp [0]",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "latest",
+            "kfp"
+          ],
+          "value": [
+            0
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping latest/kfp [0]",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "latest",
+            "kfp"
+          ],
+          "value": [
+            0
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "mapping latest/kfp None",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "latest",
+            "kfp"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'NoneType' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping latest/kfp None",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "latest",
+            "kfp"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'NoneType' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "mapping latest/kfp 'invalid'",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "latest",
+            "kfp"
+          ],
+          "value": "invalid"
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'str' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping latest/kfp 'invalid'",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "latest",
+            "kfp"
+          ],
+          "value": "invalid"
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'str' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "mapping latest/nat []",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "latest",
+            "nat"
+          ],
+          "value": []
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping latest/nat []",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "latest",
+            "nat"
+          ],
+          "value": []
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "mapping latest/nat [0]",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "latest",
+            "nat"
+          ],
+          "value": [
+            0
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping latest/nat [0]",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "latest",
+            "nat"
+          ],
+          "value": [
+            0
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "mapping latest/nat None",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "latest",
+            "nat"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'NoneType' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping latest/nat None",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "latest",
+            "nat"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'NoneType' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "mapping latest/nat 'invalid'",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "latest",
+            "nat"
+          ],
+          "value": "invalid"
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'str' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping latest/nat 'invalid'",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "latest",
+            "nat"
+          ],
+          "value": "invalid"
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'str' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "mapping latest/eu []",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "latest",
+            "eu"
+          ],
+          "value": []
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping latest/eu []",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "latest",
+            "eu"
+          ],
+          "value": []
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "mapping latest/eu [0]",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "latest",
+            "eu"
+          ],
+          "value": [
+            0
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping latest/eu [0]",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "latest",
+            "eu"
+          ],
+          "value": [
+            0
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "mapping latest/eu None",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "latest",
+            "eu"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'NoneType' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping latest/eu None",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "latest",
+            "eu"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'NoneType' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "mapping latest/eu 'invalid'",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "latest",
+            "eu"
+          ],
+          "value": "invalid"
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'str' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping latest/eu 'invalid'",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "latest",
+            "eu"
+          ],
+          "value": "invalid"
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'str' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "mapping pace []",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "pace"
+          ],
+          "value": []
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping pace []",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "pace"
+          ],
+          "value": []
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "mapping pace [0]",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "pace"
+          ],
+          "value": [
+            0
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping pace [0]",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "pace"
+          ],
+          "value": [
+            0
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "mapping pace None",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "pace"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'NoneType' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping pace None",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "pace"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'NoneType' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "mapping pace 'invalid'",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "pace"
+          ],
+          "value": "invalid"
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'str' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping pace 'invalid'",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "pace"
+          ],
+          "value": "invalid"
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'str' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "mapping pace/2024 []",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "pace",
+            "2024"
+          ],
+          "value": []
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping pace/2024 []",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "pace",
+            "2024"
+          ],
+          "value": []
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "mapping pace/2024 [0]",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "pace",
+            "2024"
+          ],
+          "value": [
+            0
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping pace/2024 [0]",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "pace",
+            "2024"
+          ],
+          "value": [
+            0
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'list' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "mapping pace/2024 None",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "pace",
+            "2024"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'NoneType' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping pace/2024 None",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "pace",
+            "2024"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'NoneType' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "mapping pace/2024 'invalid'",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "execution.json",
+          "path": [
+            "pace",
+            "2024"
+          ],
+          "value": "invalid"
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'str' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "encoded mapping pace/2024 'invalid'",
+      "ops": [
+        {
+          "kind": "encoded",
+          "path": [
+            "pace",
+            "2024"
+          ],
+          "value": "invalid"
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'str' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "integer token data/2024/months \"months\":12.0",
+      "ops": [
+        {
+          "kind": "input",
+          "path": [
+            "data",
+            "2024",
+            "months"
+          ],
+          "needle": "\"months\":12",
+          "replacement": "\"months\":12.0",
+          "value": 12.0
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: 'float' object cannot be interpreted as an integer"
+      }
+    },
+    {
+      "name": "integer token data/2024/months \"months\":1.2e1",
+      "ops": [
+        {
+          "kind": "input",
+          "path": [
+            "data",
+            "2024",
+            "months"
+          ],
+          "needle": "\"months\":12",
+          "replacement": "\"months\":1.2e1",
+          "value": 12.0
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: 'float' object cannot be interpreted as an integer"
+      }
+    },
+    {
+      "name": "integer token latest/month \"month\":9.0,\"asOf\":\"2026-09-30\"",
+      "ops": [
+        {
+          "kind": "input",
+          "path": [
+            "latest",
+            "month"
+          ],
+          "needle": "\"month\":9,\"asOf\":\"2026-09-30\"",
+          "replacement": "\"month\":9.0,\"asOf\":\"2026-09-30\"",
+          "value": 9.0
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: list indices must be integers or slices, not float"
+      }
+    },
+    {
+      "name": "integer token latest/month \"month\":9e0,\"asOf\":\"2026-09-30\"",
+      "ops": [
+        {
+          "kind": "input",
+          "path": [
+            "latest",
+            "month"
+          ],
+          "needle": "\"month\":9,\"asOf\":\"2026-09-30\"",
+          "replacement": "\"month\":9e0,\"asOf\":\"2026-09-30\"",
+          "value": 9.0
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: list indices must be integers or slices, not float"
+      }
+    },
+    {
+      "name": "missing lineage row 0 units",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            0,
+            "units"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'units'"
+      }
+    },
+    {
+      "name": "missing lineage row 0 label",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            0,
+            "label"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'label'"
+      }
+    },
+    {
+      "name": "missing lineage row 0 page",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            0,
+            "page"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'page'"
+      }
+    },
+    {
+      "name": "missing lineage row 0 printed",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            0,
+            "printed"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'printed'"
+      }
+    },
+    {
+      "name": "missing lineage row 1 units",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            1,
+            "units"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'units'"
+      }
+    },
+    {
+      "name": "missing lineage row 1 label",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            1,
+            "label"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'label'"
+      }
+    },
+    {
+      "name": "missing lineage row 1 page",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            1,
+            "page"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'page'"
+      }
+    },
+    {
+      "name": "missing lineage row 1 printed",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            1,
+            "printed"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'printed'"
+      }
+    },
+    {
+      "name": "missing lineage row 6 units",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            6,
+            "units"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'units'"
+      }
+    },
+    {
+      "name": "missing lineage row 6 label",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            6,
+            "label"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'label'"
+      }
+    },
+    {
+      "name": "missing lineage row 6 page",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            6,
+            "page"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'page'"
+      }
+    },
+    {
+      "name": "missing lineage row 6 printed",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            6,
+            "printed"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'printed'"
+      }
+    },
+    {
+      "name": "missing lineage row 7 units",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            7,
+            "units"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'units'"
+      }
+    },
+    {
+      "name": "missing lineage row 7 label",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            7,
+            "label"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'label'"
+      }
+    },
+    {
+      "name": "missing lineage row 7 page",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            7,
+            "page"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'page'"
+      }
+    },
+    {
+      "name": "missing lineage row 7 printed",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            7,
+            "printed"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'printed'"
+      }
+    },
+    {
+      "name": "missing lineage row 8 units",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            8,
+            "units"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'units'"
+      }
+    },
+    {
+      "name": "missing lineage row 8 label",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            8,
+            "label"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'label'"
+      }
+    },
+    {
+      "name": "missing lineage row 8 page",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            8,
+            "page"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'page'"
+      }
+    },
+    {
+      "name": "missing lineage row 8 printed",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            8,
+            "printed"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'printed'"
+      }
+    },
+    {
+      "name": "missing lineage row 14 units",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            14,
+            "units"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'units'"
+      }
+    },
+    {
+      "name": "missing lineage row 14 label",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            14,
+            "label"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'label'"
+      }
+    },
+    {
+      "name": "missing lineage row 14 page",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            14,
+            "page"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'page'"
+      }
+    },
+    {
+      "name": "missing lineage row 14 printed",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            14,
+            "printed"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'printed'"
+      }
+    },
+    {
+      "name": "missing lineage row 15 units",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            15,
+            "units"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'units'"
+      }
+    },
+    {
+      "name": "missing lineage row 15 label",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            15,
+            "label"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'label'"
+      }
+    },
+    {
+      "name": "missing lineage row 15 page",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            15,
+            "page"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'page'"
+      }
+    },
+    {
+      "name": "missing lineage row 15 printed",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            15,
+            "printed"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'printed'"
+      }
+    },
+    {
+      "name": "missing lineage row 11 units",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            11,
+            "units"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'units'"
+      }
+    },
+    {
+      "name": "missing lineage row 11 label",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            11,
+            "label"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'label'"
+      }
+    },
+    {
+      "name": "missing lineage row 11 page",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            11,
+            "page"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'page'"
+      }
+    },
+    {
+      "name": "missing lineage row 11 printed",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            11,
+            "printed"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'printed'"
+      }
+    },
+    {
+      "name": "missing lineage row 12 units",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            12,
+            "units"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'units'"
+      }
+    },
+    {
+      "name": "missing lineage row 12 label",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            12,
+            "label"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'label'"
+      }
+    },
+    {
+      "name": "missing lineage row 12 page",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            12,
+            "page"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'page'"
+      }
+    },
+    {
+      "name": "missing lineage row 12 printed",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            12,
+            "printed"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'printed'"
+      }
+    },
+    {
+      "name": "missing lineage row 13 units",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            13,
+            "units"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'units'"
+      }
+    },
+    {
+      "name": "missing lineage row 13 label",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            13,
+            "label"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'label'"
+      }
+    },
+    {
+      "name": "missing lineage row 13 page",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            13,
+            "page"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'page'"
+      }
+    },
+    {
+      "name": "missing lineage row 13 printed",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            13,
+            "printed"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'printed'"
+      }
+    },
+    {
+      "name": "missing lineage row 17 units",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            17,
+            "units"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'units'"
+      }
+    },
+    {
+      "name": "missing lineage row 17 label",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            17,
+            "label"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'label'"
+      }
+    },
+    {
+      "name": "missing lineage row 17 page",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            17,
+            "page"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'page'"
+      }
+    },
+    {
+      "name": "missing lineage row 17 printed",
+      "ops": [
+        {
+          "kind": "delete",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            17,
+            "printed"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'printed'"
+      }
+    },
+    {
+      "name": "empty lineage units",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            0,
+            "units"
+          ],
+          "value": []
+        }
+      ],
+      "expected": {
+        "crash": "IndexError: list index out of range"
+      }
+    },
+    {
+      "name": "empty lineage printed",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            0,
+            "printed"
+          ],
+          "value": []
+        }
+      ],
+      "expected": {
+        "crash": "IndexError: list index out of range"
+      }
+    },
+    {
+      "name": "integer token data/2025/months \"2025\":{\"months\":12.0",
+      "ops": [
+        {
+          "kind": "input",
+          "path": [
+            "data",
+            "2025",
+            "months"
+          ],
+          "needle": "\"2025\":{\"months\":12",
+          "replacement": "\"2025\":{\"months\":12.0",
+          "value": 12.0
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: 'float' object cannot be interpreted as an integer"
+      }
+    },
+    {
+      "name": "integer token data/2026/months \"2026\":{\"months\":9.0",
+      "ops": [
+        {
+          "kind": "input",
+          "path": [
+            "data",
+            "2026",
+            "months"
+          ],
+          "needle": "\"2026\":{\"months\":9",
+          "replacement": "\"2026\":{\"months\":9.0",
+          "value": 9.0
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: 'float' object cannot be interpreted as an integer"
+      }
+    },
+    {
+      "name": "invalid lineage units None",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            0,
+            "units"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: 'NoneType' object is not subscriptable"
+      }
+    },
+    {
+      "name": "invalid lineage units {}",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            0,
+            "units"
+          ],
+          "value": {}
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 0"
+      }
+    },
+    {
+      "name": "invalid lineage units ''",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            0,
+            "units"
+          ],
+          "value": ""
+        }
+      ],
+      "expected": {
+        "crash": "IndexError: string index out of range"
+      }
+    },
+    {
+      "name": "explicit null lineage units",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            0,
+            "units",
+            0
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "name": "KFP",
+        "n": 5436,
+        "problems": [],
+        "warnings": [],
+        "facts": [
+          "2026-09 cumulative: revenue 33 898,5 · expenditure 37 567,6 · balance -3 669,2 млн. € (68,32 of the year's plan, +11,0% on 2025)",
+          "December 2024 report minus Annex 3 / Tables II-3, II-4 (2024 Отчет), млн. €: kfp rev -8.2 exp -21.3 balance +13.1; nat rev +30.3 exp +53.5 balance -39.5; eu rev -38.5 exp -74.8 balance +52.6",
+          "33 raw reports re-read (3267 values compared, 3 columns); December report vs Annex 3 differs by at most 121,8 млн. € (2024), 141,1 млн. € (2025)",
+          "known source differences (млн. лв., not corrected): financing vs −balance 2024-05 kfp 0.010047; 2024-05 nat 0.010047",
+          "max deviation on the raw numbers (млн.): balance 0.000000, exp 0.000000, exp.interest 0.000000, fin 0.000000, fin.ext 0.000000, fin=-balance 0.001923, rev 0.000000, transfers 0.000000, к.2=к.3+к.4 0.000000"
+        ]
+      }
+    },
+    {
+      "name": "invalid lineage printed None",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            0,
+            "printed"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: 'NoneType' object is not subscriptable"
+      }
+    },
+    {
+      "name": "invalid lineage printed {}",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            0,
+            "printed"
+          ],
+          "value": {}
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 0"
+      }
+    },
+    {
+      "name": "invalid lineage printed ''",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            0,
+            "printed"
+          ],
+          "value": ""
+        }
+      ],
+      "expected": {
+        "crash": "IndexError: string index out of range"
+      }
+    },
+    {
+      "name": "explicit null lineage printed",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            0,
+            "printed",
+            0
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "name": "KFP",
+        "n": 5436,
+        "problems": [],
+        "warnings": [],
+        "facts": [
+          "2026-09 cumulative: revenue 33 898,5 · expenditure 37 567,6 · balance -3 669,2 млн. € (68,32 of the year's plan, +11,0% on 2025)",
+          "December 2024 report minus Annex 3 / Tables II-3, II-4 (2024 Отчет), млн. €: kfp rev -8.2 exp -21.3 balance +13.1; nat rev +30.3 exp +53.5 balance -39.5; eu rev -38.5 exp -74.8 balance +52.6",
+          "33 raw reports re-read (3267 values compared, 3 columns); December report vs Annex 3 differs by at most 121,8 млн. € (2024), 141,1 млн. € (2025)",
+          "known source differences (млн. лв., not corrected): financing vs −balance 2024-05 kfp 0.010047; 2024-05 nat 0.010047",
+          "max deviation on the raw numbers (млн.): balance 0.000000, exp 0.000000, exp.interest 0.000000, fin 0.000000, fin.ext 0.000000, fin=-balance 0.001923, rev 0.000000, transfers 0.000000, к.2=к.3+к.4 0.000000"
+        ]
+      }
+    },
+    {
+      "name": "invalid law value None",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            0,
+            "values",
+            0
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "crash": "ValueError: Non-numeric extraction cell: F/tables/annex1_execution2026/rows/0/values/0"
+      }
+    },
+    {
+      "name": "invalid law value False",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            0,
+            "values",
+            0
+          ],
+          "value": false
+        }
+      ],
+      "expected": {
+        "crash": "ValueError: Non-numeric extraction cell: F/tables/annex1_execution2026/rows/0/values/0"
+      }
+    },
+    {
+      "name": "invalid law value '1'",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            0,
+            "values",
+            0
+          ],
+          "value": "1"
+        }
+      ],
+      "expected": {
+        "crash": "ValueError: Non-numeric extraction cell: F/tables/annex1_execution2026/rows/0/values/0"
+      }
+    },
+    {
+      "name": "invalid law value []",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            0,
+            "values",
+            0
+          ],
+          "value": []
+        }
+      ],
+      "expected": {
+        "crash": "ValueError: Non-numeric extraction cell: F/tables/annex1_execution2026/rows/0/values/0"
+      }
+    },
+    {
+      "name": "invalid law value {}",
+      "ops": [
+        {
+          "kind": "data",
+          "name": "forecast",
+          "path": [
+            "tables",
+            "annex1_execution2026",
+            "rows",
+            0,
+            "values",
+            0
+          ],
+          "value": {}
+        }
+      ],
+      "expected": {
+        "crash": "ValueError: Non-numeric extraction cell: F/tables/annex1_execution2026/rows/0/values/0"
+      }
     }
   ]
 }

@@ -21,6 +21,9 @@ const fixture = fileURLToPath(new URL('../../test/fixtures/wave18', import.meta.
 const previous = process.cwd();
 let dir: string, root: string;
 const report = 'tmp/ts-migration/candidates/18/report.json';
+const differential: {
+  cases: { name: string; ops: any[]; expected: { crash?: string } }[];
+} = JSON.parse(readFileSync(join(fixture, 'differential.json'), 'utf8'));
 const args = () => [
   '--root',
   root,
@@ -99,6 +102,118 @@ it('protects explicitly selected inputs when the input root is the working direc
   ];
   expect(main(bad)).toBe(2);
   expect(readFileSync(join(dir, report), 'utf8')).toBe('sentinel');
+});
+it.each([false, true])(
+  'allows repeated normal writes when the input root is cwd (alias: %s)',
+  (alias) => {
+    const physical = root;
+    if (alias) {
+      root = join(dir, 'root-alias');
+      symlinkSync(physical, root, 'dir');
+    }
+    process.chdir(physical);
+    for (let call = 0; call < 2; call++) {
+      expect(main(args())).toBe(0);
+      const result = JSON.parse(readFileSync(join(physical, report), 'utf8'));
+      expect(result.status).toBe('PASS');
+      expect(result.totals).toEqual({ checks: 5436, problems: 0, warnings: 0 });
+    }
+  },
+);
+it.each([
+  ['budget_forecast_2027.json', false],
+  ['budget_bill_2027.json', false],
+  ['budget_forecast_2027.json', true],
+  ['budget_bill_2027.json', true],
+] as const)(
+  'protects a dynamically referenced %s archive, including failed validation (%s)',
+  (name, damaged) => {
+    process.chdir(root);
+    mkdirSync(join(root, 'tmp/ts-migration/candidates/18'), { recursive: true });
+    const archive = readFileSync(join(root, 'data/originals/budget_2027/ZDBRB-2027.zip'));
+    const before = damaged ? Buffer.from('damaged archive input') : archive;
+    writeFileSync(join(root, report), before);
+    const inputPath = join(root, 'data/inputs', name);
+    const input = JSON.parse(readFileSync(inputPath, 'utf8'));
+    input.source.archive = report;
+    writeFileSync(inputPath, JSON.stringify(input));
+    expect(main(args())).toBe(2);
+    expect(readFileSync(join(root, report)).equals(before)).toBe(true);
+    expect(vi.mocked(process.stderr.write).mock.calls.flat().join('')).toContain(
+      'report must be outside validation input trees',
+    );
+  },
+);
+it('protects a referenced archive even when an earlier monthly rule cannot run', () => {
+  process.chdir(root);
+  mkdirSync(join(root, 'tmp/ts-migration/candidates/18'), { recursive: true });
+  const before = readFileSync(join(root, 'data/originals/budget_2027/ZDBRB-2027.zip'));
+  writeFileSync(join(root, report), before);
+  const source = join(root, 'data/inputs/budget_forecast_2027.json');
+  const forecast = JSON.parse(readFileSync(source, 'utf8'));
+  forecast.source.archive = report;
+  writeFileSync(source, JSON.stringify(forecast));
+  const execution = join(root, 'data/release/execution.json');
+  const doc = JSON.parse(readFileSync(execution, 'utf8'));
+  doc.monthly = [];
+  writeFileSync(execution, JSON.stringify(doc));
+  expect(main(args())).toBe(2);
+  expect(readFileSync(join(root, report)).equals(before)).toBe(true);
+});
+it('does not create a report over a missing declared archive', () => {
+  process.chdir(root);
+  const source = join(root, 'data/inputs/budget_bill_2027.json');
+  const bill = JSON.parse(readFileSync(source, 'utf8'));
+  bill.source.archive = report;
+  writeFileSync(source, JSON.stringify(bill));
+  expect(main(args())).toBe(2);
+  expect(existsSync(join(root, 'tmp'))).toBe(false);
+});
+it.each(
+  differential.cases.filter(
+    (scenario: any) =>
+      scenario.name.startsWith('integer token ') ||
+      [
+        'encoded mapping monthly []',
+        'encoded mapping pace []',
+        'encoded mapping latest/nat []',
+        'missing lineage row 0 units',
+        'missing lineage row 0 label',
+        'missing lineage row 0 page',
+        'missing lineage row 0 printed',
+      ].includes(scenario.name),
+  ),
+)('rejects encoded acceptance regression: $name', (scenario: any) => {
+  const op = scenario.ops[0];
+  const path = join(
+    root,
+    op.name === 'forecast'
+      ? 'data/inputs/budget_forecast_2027.json'
+      : 'data/release/execution.json',
+  );
+  const before = readFileSync(path, 'utf8');
+  if (op.needle) {
+    expect(before).toContain(op.needle);
+    writeFileSync(path, before.replace(op.needle, op.replacement));
+  } else {
+    const doc = JSON.parse(before);
+    let parent = doc;
+    for (const key of op.path.slice(0, -1)) parent = parent[key];
+    if (op.kind === 'delete') delete parent[op.path.at(-1)];
+    else parent[op.path.at(-1)] = op.value;
+    writeFileSync(path, JSON.stringify(doc));
+  }
+  const input = readFileSync(path);
+  expect(main(args())).toBe(1);
+  const result = JSON.parse(readFileSync(join(dir, report), 'utf8'));
+  expect(result.status).toBe('FAIL');
+  expect(result.groups[0]).toMatchObject({
+    n: 1,
+    problems: [`group crashed: ${scenario.expected.crash}`],
+    warnings: [],
+    facts: [],
+  });
+  expect(readFileSync(path).equals(input)).toBe(true);
 });
 it('distinguishes a missing month, extra report, corrupt evidence and corrupt available bytes', () => {
   const year = join(root, 'data/originals/kfp_2024'),

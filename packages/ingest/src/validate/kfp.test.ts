@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { expect, it } from 'vitest';
+import { parsePythonJson, pythonNumberAt } from '../common/numbers.js';
 import { Context } from './context.js';
 import { kfp, type KfpEvidence } from './kfp.js';
 import { runWave18 } from './kfp-runner.js';
@@ -24,30 +25,49 @@ const differential = JSON.parse(readFileSync(`${root}/differential.json`, 'utf8'
 for (const scenario of differential.cases) {
   it(`matches independent donor mutation: ${scenario.name}`, () => {
     const ctx = new Context(root);
-    const inputOps = scenario.ops.filter((op: any) => op.kind === 'input');
+    const inputOps = scenario.ops.filter((op: any) => op.kind === 'input' || op.kind === 'encoded');
     if (inputOps.length) {
       const originalText = ctx.text.bind(ctx),
         rawText = originalText('execution.json');
-      const parsed = JSON.parse(rawText);
-      const percent = inputOps[0].path[0] === 'latest',
-        row = inputOps[0].path[0] === 'rows';
-      const old = row
-        ? parsed.rows[0].row
-        : percent
-          ? parsed.latest.kfp.rev.pctPlan
-          : parsed.data['2024'].kfp.rev[0];
-      const prefix = row
-        ? `"short":${JSON.stringify(parsed.rows[0].short)},"row":`
-        : percent
-          ? '"pctPlan":'
-          : '"kfp":{"rev":[';
-      const needle = prefix + JSON.stringify(old);
-      if (!rawText.includes(needle)) throw new Error('encoded mutation target missing');
-      const changed = rawText.replace(
-        needle,
-        prefix + (inputOps[0].literal ?? JSON.stringify(inputOps[0].value)),
-      );
-      ctx.text = (name: string) => (name === 'execution.json' ? changed : originalText(name));
+      if (inputOps[0].kind === 'encoded') {
+        const doc = parsePythonJson<any>(rawText);
+        for (const op of inputOps) {
+          let parent = doc;
+          for (const key of op.path.slice(0, -1)) parent = parent[key];
+          parent[op.path.at(-1)] = op.value;
+        }
+        // Encode changed source JSON while retaining every untouched int/float distinction.
+        const changed = JSON.stringify(doc, function (key, value) {
+          return typeof value === 'number' && pythonNumberAt(this, key, value).kind === 'float'
+            ? `__kfp_float_${value}${/[.eE]/.test(String(value)) ? '' : '.0'}__`
+            : value;
+        }).replace(/"__kfp_float_([^"_]+)__"/g, '$1');
+        ctx.text = (name: string) => (name === 'execution.json' ? changed : originalText(name));
+      } else {
+        const parsed = JSON.parse(rawText);
+        const percent = inputOps[0].path[0] === 'latest',
+          row = inputOps[0].path[0] === 'rows';
+        const old = row
+          ? parsed.rows[0].row
+          : percent
+            ? parsed.latest.kfp.rev.pctPlan
+            : parsed.data['2024'].kfp.rev[0];
+        const prefix = row
+          ? `"short":${JSON.stringify(parsed.rows[0].short)},"row":`
+          : percent
+            ? '"pctPlan":'
+            : '"kfp":{"rev":[';
+        const needle = prefix + JSON.stringify(old);
+        if (!rawText.includes(needle)) throw new Error('encoded mutation target missing');
+        const changed = inputOps[0].needle
+          ? rawText.replace(inputOps[0].needle, inputOps[0].replacement)
+          : rawText.replace(
+              needle,
+              prefix + (inputOps[0].literal ?? JSON.stringify(inputOps[0].value)),
+            );
+        if (changed === rawText) throw new Error('encoded mutation did not change the input');
+        ctx.text = (name: string) => (name === 'execution.json' ? changed : originalText(name));
+      }
     }
     const docs: Record<string, any> = {};
     for (const name of [

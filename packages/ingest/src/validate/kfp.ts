@@ -1,9 +1,18 @@
 import { isDeepStrictEqual } from 'node:util';
 import { pythonFloat } from '../build/context.js';
+import { parsePythonJson } from '../common/numbers.js';
 import { Check, fmt, isnum, pyRepr, pyTruth } from './checks.js';
 import { readKfpCapture, unicodeDecimal, type KfpCapture } from './kfp-capture.js';
 import type { Context } from './context.js';
 import { validateKfpLaw } from './kfp-law.js';
+import {
+  executionGet,
+  executionInteger,
+  executionItems,
+  executionKeys,
+  executionRequired,
+  executionValues,
+} from './execution-python.js';
 
 const COLS = ['kfp', 'nat', 'eu'] as const;
 const SUMS: Record<string, string[]> = {
@@ -119,28 +128,32 @@ const sign1 = (x: number) =>
 const pyList = (x: string[]) => `[${x.map(pyRepr).join(', ')}]`;
 
 /** Preserve the donor's float-conversion failure when the shared adapter rejects a money scalar. */
+function* projectionMoney(doc: any): Generator<unknown> {
+  for (const blockName of ['data', 'monthly'])
+    for (const block of executionValues(executionRequired(doc, blockName)))
+      for (const col of COLS)
+        for (const [, arr] of executionItems(executionRequired(block, col))) yield* arr;
+  for (const col of COLS) {
+    for (const [, value] of executionItems(
+      executionRequired(executionRequired(doc, 'plan2026'), col),
+    ))
+      yield value;
+    for (const [, item] of executionItems(executionRequired(executionRequired(doc, 'latest'), col)))
+      for (const key of ['cum', 'plan', 'prevYearCum']) if (has(item, key)) yield item[key];
+  }
+  for (const [key, rec] of executionItems(executionRequired(doc, 'reconcile')))
+    if (rec && typeof rec === 'object' && !Array.isArray(rec) && key.startsWith('dec'))
+      for (const [, item] of executionItems(rec))
+        for (const field of ['kfp', 'annex3', 'diff']) yield val(item, field);
+}
 function executionInput(ctx: Context): any {
   try {
     return ctx.get('execution.json');
   } catch (error) {
     if (!(error instanceof Error) || error.message !== 'Invalid execution money') throw error;
     const doc = JSON.parse(ctx.text('execution.json'));
-    function* values(): Generator<unknown> {
-      for (const blockName of ['data', 'monthly'])
-        for (const block of Object.values(doc[blockName]) as any[])
-          for (const col of COLS)
-            for (const arr of Object.values(block[col]) as any[][]) yield* arr;
-      for (const col of COLS) {
-        yield* Object.values(doc.plan2026[col]);
-        for (const item of Object.values(doc.latest[col]) as any[])
-          for (const key of ['cum', 'plan', 'prevYearCum']) if (has(item, key)) yield item[key];
-      }
-      for (const [key, rec] of Object.entries(doc.reconcile) as [string, any][])
-        if (rec && typeof rec === 'object' && key.startsWith('dec'))
-          for (const item of Object.values(rec) as any[])
-            for (const field of ['kfp', 'annex3', 'diff']) yield val(item, field);
-    }
-    for (const value of values()) {
+    if (doc?.contract?.schema !== 2) throw error;
+    for (const value of projectionMoney(doc)) {
       try {
         pythonFloat(value);
       } catch (cause) {
@@ -171,6 +184,7 @@ export function kfp(ctx: Context, evidence: KfpEvidence): Check {
     outlook = ctx.get('outlook.json'),
     revenue = ctx.get('revenue.json'),
     expenditure = ctx.get('expenditure.json');
+  const rawNumbers = parsePythonJson<any>(ctx.text('execution.json'));
   const rows: any[] = ex.rows,
     ids: string[] = rows.map((r) => r.id),
     rowNo: Record<string, number> = Object.create(null);
@@ -221,7 +235,7 @@ export function kfp(ctx: Context, evidence: KfpEvidence): Check {
     'cols must be kfp/nat/eu = к.2/к.3/к.4',
   );
   const data = ex.data,
-    years = Object.keys(data).sort();
+    years = executionKeys(data).sort();
   c.ok(
     isDeepStrictEqual(
       years,
@@ -237,8 +251,8 @@ export function kfp(ctx: Context, evidence: KfpEvidence): Check {
     maxDev[key] = Math.max(maxDev[key] ?? 0, dev);
   };
   for (const y of years) {
-    const blk = data[y],
-      count = blk.months;
+    const blk = executionRequired(data, y),
+      count = executionRequired(blk, 'months');
     if (y !== years.at(-1))
       c.ok(
         count === 12,
@@ -257,10 +271,10 @@ export function kfp(ctx: Context, evidence: KfpEvidence): Check {
       c.ok(blk.converted === '÷1.95583', `${y}: converted note ${pyRepr(blk.converted ?? null)}`);
     for (const col of COLS) {
       c.ok(
-        isDeepStrictEqual(Object.keys(blk[col]).sort(), [...new Set(ids)].sort()),
+        isDeepStrictEqual(executionKeys(blk[col]).sort(), [...new Set(ids)].sort()),
         `${y}/${col}: row ids differ from rows[]`,
       );
-      for (const [rid, arr] of Object.entries(blk[col]) as [string, any[]][])
+      for (const [rid, arr] of executionItems(blk[col]) as [string, any[]][])
         c.ok(
           arr.length === count && arr.every(isnum),
           `${y}/${col}/${rid}: ${arr.length} values, expected ${count} numbers`,
@@ -389,7 +403,7 @@ export function kfp(ctx: Context, evidence: KfpEvidence): Check {
     }
   }
   for (const y of years) {
-    const count = n(data[y].months);
+    const count = executionInteger(data[y].months, 'range', rawNumbers.data[y], 'months');
     for (const col of COLS) {
       const s = data[y][col];
       for (let i = 0; i < count; i++) {
@@ -436,6 +450,11 @@ export function kfp(ctx: Context, evidence: KfpEvidence): Check {
         `${y} kfp/${rid}: the cumulative series does not grow every month`,
       );
     }
+  if (!years.length) {
+    const error = new Error('max() iterable argument is empty');
+    error.name = 'ValueError';
+    throw error;
+  }
   const lastY = years.at(-1)!,
     prevY = String(Number(lastY) - 1),
     lastN = n(data[lastY].months),
@@ -477,10 +496,10 @@ export function kfp(ctx: Context, evidence: KfpEvidence): Check {
     'latest: month/asOf do not point at the last report',
   );
   for (const col of COLS)
-    for (const [rid, item] of Object.entries(latest[col]) as [string, any][]) {
+    for (const [rid, item] of executionItems(latest[col]) as [string, any][]) {
       const cum = n(val(data[lastY][col][rid], lastN - 1)),
         prev = n(val(data[prevY][col][rid], lastN - 1)),
-        pv = plan[col][rid] ?? null;
+        pv = executionGet(plan[col], rid);
       near(val(item, 'cum'), round(cum, 1), 0.0001, `latest ${col}/${rid} cum`);
       near(val(item, 'prevYearCum'), round(prev, 1), 0.0001, `latest ${col}/${rid} prevYearCum`);
       c.ok(
@@ -520,10 +539,10 @@ export function kfp(ctx: Context, evidence: KfpEvidence): Check {
   c.fact(
     `${lastY}-${String(lastN).padStart(2, '0')} cumulative: revenue ${fmt(head[0])} · expenditure ${fmt(head[1])} · balance ${fmt(head[2])} млн. € (${pyStr(pct).replace('.', ',')} of the year's plan, +${yoyText.replace('.', ',')}% on ${prevY})`,
   );
-  for (const [y, py] of Object.entries(ex.pace) as [string, any][]) {
+  for (const [y, py] of executionItems(ex.pace) as [string, any][]) {
     const s = data[y].kfp;
     c.ok(data[y].months === 12, `pace: ${y} is not a complete year`);
-    for (const [rid, arr] of Object.entries(py) as [string, any[]][]) {
+    for (const [rid, arr] of executionItems(py) as [string, any[]][]) {
       c.ok(arr.length === 12 && arr.at(-1) === 100, `pace ${y}/${rid}: 12 values ending at 100`);
       for (let i = 0; i < 12; i++)
         near(
@@ -534,9 +553,9 @@ export function kfp(ctx: Context, evidence: KfpEvidence): Check {
         );
     }
   }
-  for (const [y, my] of Object.entries(ex.monthly) as [string, any][])
-    for (const [col, mc] of Object.entries(my) as [string, any][])
-      for (const [rid, arr] of Object.entries(mc) as [string, any[]][]) {
+  for (const [y, my] of executionItems(ex.monthly) as [string, any][])
+    for (const [col, mc] of executionItems(my) as [string, any][])
+      for (const [rid, arr] of executionItems(mc) as [string, any[]][]) {
         const cum = data[y][col][rid];
         for (let i = 0; i < cum.length; i++)
           near(
@@ -546,7 +565,7 @@ export function kfp(ctx: Context, evidence: KfpEvidence): Check {
             `monthly ${y}/${col}/${rid} month ${i + 1}`,
           );
       }
-  validateKfpLaw(c, ex, outlook, ctx);
+  validateKfpLaw(c, ex, outlook, ctx, rawNumbers);
   const rr = Object.fromEntries(revenue.rows.map((r: any) => [r.id, r])),
     ec = Object.fromEntries(expenditure.economic.rows.map((r: any) => [r.id, r]));
   const rowval = (source: any, rid: string, i: number) => {

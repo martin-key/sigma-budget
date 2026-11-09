@@ -4,6 +4,8 @@ import { isDeepStrictEqual } from 'node:util';
 import { zipMember } from '../build/annual-lineage.js';
 import { Check, isnum } from './checks.js';
 import { Context, safePath } from './context.js';
+import { parsePythonJson } from '../common/numbers.js';
+import { executionInteger, executionItems, executionRequired } from './execution-python.js';
 
 const LAW_ROWS: Record<string, number> = {
   rev: 0,
@@ -81,7 +83,13 @@ const own = (o: any, key: string) => Object.prototype.hasOwnProperty.call(o, key
 const memberDigests = new Map<string, string>();
 
 /** Independent Annex 1 calculations; the builder's plan output is never an expectation. */
-export function validateKfpLaw(c: Check, ex: any, outlook: any, ctx: Context): void {
+export function validateKfpLaw(
+  c: Check,
+  ex: any,
+  outlook: any,
+  ctx: Context,
+  rawExecution = parsePythonJson<any>(ctx.text('execution.json')),
+): void {
   const forecast: any = ctx.proto('budget_forecast_2027.json'),
     bill: any = ctx.proto('budget_bill_2027.json');
   for (const doc of [forecast, bill]) {
@@ -100,18 +108,27 @@ export function validateKfpLaw(c: Check, ex: any, outlook: any, ctx: Context): v
     }
     if (digest !== memberHash) throw new Error(`PDF member checksum mismatch: ${src.member}`);
   }
-  const table = forecast.tables.annex1_execution2026,
-    rows = table.rows;
-  const column = table.columns[0];
-  if (column.year !== 2026 || column.vintage !== 'програма')
+  const table = executionRequired(executionRequired(forecast, 'tables'), 'annex1_execution2026'),
+    rows = executionRequired(table, 'rows');
+  const column = executionRequired(executionRequired(table, 'columns'), 0);
+  if (executionRequired(column, 'year') !== 2026 || column.vintage !== 'програма')
     throw new Error('Wrong year or vintage in Annex 1');
   const values: Record<string, number> = {};
   for (const [rid, i] of Object.entries(LAW_ROWS)) {
-    const value = rows[i].values[0];
-    if (!isnum(value))
-      throw new TypeError(
+    const row = executionRequired(rows, i);
+    // Lineage.f reads these independently printed fields before accepting the numeric cell.
+    executionRequired(executionRequired(row, 'units'), 0);
+    executionRequired(row, 'label');
+    executionRequired(row, 'page');
+    executionRequired(executionRequired(row, 'printed'), 0);
+    const value = executionRequired(executionRequired(row, 'values'), 0);
+    if (!isnum(value)) {
+      const error = new Error(
         `Non-numeric extraction cell: F/tables/annex1_execution2026/rows/${i}/values/0`,
       );
+      error.name = 'ValueError';
+      throw error;
+    }
     values[rid] = value;
   }
   values.exp = asNumber(sub(decimal(values['exp.total']), decimal(values.eucontrib)));
@@ -132,13 +149,14 @@ export function validateKfpLaw(c: Check, ex: any, outlook: any, ctx: Context): v
     c.ok(isDeepStrictEqual(plan[key] ?? null, expected[key]), 'law plan metadata/coverage: ' + key);
   for (const scope of ['kfp', 'nat', 'eu']) {
     c.ok(isDeepStrictEqual(plan[scope], expected[scope]), 'law map exact: ' + scope);
-    for (const [rid, item] of Object.entries(ex.latest[scope]) as [string, any][]) {
+    for (const [rid, item] of executionItems(ex.latest[scope]) as [string, any][]) {
       const pv = expected[scope][rid] ?? null;
       c.ok((item.plan ?? null) === pv, `latest law denominator: ${scope}/${rid}`);
       const hasPct = pv !== null && pv > 0 && !['balance', 'fin', 'transfers'].includes(rid);
       c.ok(own(item, 'pctPlan') === hasPct, `latest law percent availability: ${scope}/${rid}`);
       if (hasPct) {
-        const cum = ex.data['2026'][scope][rid][ex.latest.month - 1];
+        const index = executionInteger(ex.latest.month, 'index', rawExecution.latest, 'month') - 1;
+        const cum = executionRequired(ex.data['2026'][scope][rid], index);
         const want = quantize2(div(mul(decimal(cum), hundred), decimal(pv)));
         c.ok(item.pctPlan === want, 'latest canonical law percent: ' + rid);
       }

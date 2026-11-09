@@ -1,4 +1,13 @@
-import { executionNumbers, pythonFloat } from '../build/context.js';
+import { pythonFloat } from '../build/context.js';
+import { pyTruth } from './checks.js';
+import {
+  executionContains,
+  executionGet,
+  executionIterable,
+  executionItems,
+  executionRequired,
+  executionValues,
+} from './execution-python.js';
 
 /** Wave 14: execution.json v2 decimal projections. Independent of the builders. */
 export const CONTRACT = {
@@ -142,20 +151,27 @@ type Dict = Record<string, any>;
 function mapMoney(doc: Dict, fn: (v: any, places: number) => unknown): Dict {
   const out = structuredClone(doc);
   for (const name of ['data', 'monthly'] as const)
-    for (const block of Object.values(out[name]) as Dict[])
+    for (const block of executionValues(executionRequired(out, name)) as Dict[])
       for (const col of cols)
-        for (const [id, arr] of Object.entries(block[col]) as [string, unknown[]][])
-          block[col][id] = arr.map((v) => fn(v, 3));
+        for (const [id, arr] of executionItems(executionRequired(block, col)) as [
+          string,
+          unknown[],
+        ][])
+          block[col][id] = executionIterable(arr).map((v) => fn(v, 3));
   for (const col of cols) {
-    for (const [id, value] of Object.entries(out.plan2026[col]))
+    for (const [id, value] of executionItems(
+      executionRequired(executionRequired(out, 'plan2026'), col),
+    ))
       out.plan2026[col][id] = fn(value, 1);
-    for (const row of Object.values(out.latest[col]) as Dict[])
-      for (const key of latest) if (key in row) row[key] = fn(row[key], 1);
+    for (const [, row] of executionItems(executionRequired(executionRequired(out, 'latest'), col)))
+      for (const key of latest)
+        if (executionContains(row, key)) row[key] = fn(executionRequired(row, key), 1);
   }
-  for (const [key, rec] of Object.entries(out.reconcile)) {
+  for (const [key, rec] of executionItems(executionRequired(out, 'reconcile'))) {
     if (key.startsWith('dec') && rec !== null && typeof rec === 'object' && !Array.isArray(rec))
-      for (const row of Object.values(rec) as Dict[])
-        for (const field of reconcile) row[field] = fn(row[field], field === 'kfp' ? 3 : 1);
+      for (const [, row] of executionItems(rec))
+        for (const field of reconcile)
+          row[field] = fn(executionRequired(row, field), field === 'kfp' ? 3 : 1);
   }
   return out;
 }
@@ -170,5 +186,8 @@ export function canonical(doc: ExecutionProjection): ExecutionProjection {
 export function numbers(doc: ExecutionProjection): ExecutionProjection;
 export function numbers<T>(doc: T): T;
 export function numbers<T>(doc: T): T {
-  return executionNumbers(doc) as T;
+  if (doc === null || typeof doc !== 'object' || Array.isArray(doc)) return doc;
+  const contract = (doc as Dict).contract;
+  if (executionGet(pyTruth(contract) ? contract : {}, 'schema') !== 2) return doc;
+  return mapMoney(doc as Dict, (value) => pythonFloat(value)) as T;
 }
