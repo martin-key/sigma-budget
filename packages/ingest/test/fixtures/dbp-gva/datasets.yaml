@@ -1,0 +1,9 @@
+schema: 1
+datasets:
+  - id: dbp2027
+    catalogId: null
+    files: [data/release/dbp2027.json]
+  - id: gva-sectors
+    catalogId: D31
+    files: [data/release/gva-sectors.json]
+    rebuild: null

@@ -1,0 +1,23 @@
+{
+  "baseline": "05d6f6eeca9991468f3c94c3c9c26e87d5b0fae0",
+  "archiveSha256": "9430d8acfe5bd178a1675041aaae22295c89f2768474ebd27af347b465ace5e3",
+  "files": {
+    "inputs/figures.json": "46a5398f715a651bfb560f2037349f39f5e4ceec7de086f020e5dab364429613",
+    "inputs/plan.pdf": "8c91cdf4778f2864e1eeb167f14b08d1f68a076ea4ad27a8a4305175a73f1182",
+    "inputs/editorial.json": "479afe048c27b298b0fc3d9e1cbc308cb6bddc1afebb67b984bad50917de8a69",
+    "inputs/gva-editorial.json": "033bccc2384dd39a17fbd090b4236bf6218973367dde2e68663cbe963b1dab22",
+    "inputs/nama.json": "3a19866da43b0adf64d115ba3a357ebc2aca27d46354235f0b7644fc37260cc3",
+    "inputs/gdp.json": "2e485f11dec78572ade3db5efda4d019adc67a71b0b9acb498113f606d4a43c5",
+    "inputs/outlook.json": "fff6b61908f1044befdfa20478a722157bb2477a4f9eb84219f01644cb4bba6b",
+    "donor/budget_plan.py": "4b6362da4db933c41b2fcc04e575f64a73155a91367acc193bf57daedf12eb4d",
+    "donor/gva_sectors.py": "a04b836fb4cf716ff8edb856fe05528a40e8c8c607c70952912ae3e4d7c65691",
+    "oracle/dbp2027.json": "be619a50350951b927187bc15769ec1e61d63cdd836aae4ba4d2e03506518d9b",
+    "oracle/synthetic-gva.json": "685df1ac779b056e8090be9c04be44289b43c8bc7116f776c19e5e177c2820c4",
+    "oracle/changed-dbp.json": "be5017d710e517fcf93ec15b81086ed7443df29d7ee628ec2e16c71d089b2e11",
+    "oracle/changed-gva.json": "2cf48b19eb6810403b85f8999855f000db0e0502aa4c68b5f6e5cff43e0d1ad3",
+    "published/dbp2027.json": "be619a50350951b927187bc15769ec1e61d63cdd836aae4ba4d2e03506518d9b",
+    "published/gva-sectors.json": "f1d96acd63f3db527e696194d23bd142f774168259aeb4dd6868ce1a23a447a2",
+    "datasets.yaml": "635570be151a7ac90759817a862b36d342d4062416341eac4d49bf2b15571cbd",
+    "policy.json": "8d6b79d8dbd05197eca0d0bb021023cb169f5146a4ab56de973a9af58bbf719b"
+  }
+}

@@ -19,6 +19,73 @@ it("rejects duplicate YAML keys and dataset ids", () => {
     parseRegistry("schema: 1\ndatasets: [{id: a}, {id: a}]"),
   ).toThrow();
 });
+it("rejects linked report files and parents without modifying their targets", async () => {
+  const root = await mkdtemp(join(tmpdir(), "budget-parity-report-"));
+  try {
+    const oracle = join(root, "oracle"),
+      candidate = join(root, "candidate");
+    await mkdir(oracle);
+    await mkdir(candidate);
+    await writeFile(join(oracle, "a.json"), "{}");
+    await writeFile(join(candidate, "a.json"), "{}");
+    const reg = join(root, "registry.yaml"),
+      pol = join(root, "policy.json");
+    await writeFile(
+      reg,
+      'schema: 1\ndatasets: [{id: ministry, files: ["data/release/*.json"]}]',
+    );
+    await writeFile(pol, JSON.stringify(exactPolicy));
+    const args = [
+      "--oracle",
+      oracle,
+      "--candidate",
+      candidate,
+      "--scope",
+      "ministry",
+      "--policy",
+      pol,
+    ];
+    const sentinel = join(root, "sentinel.json");
+    await writeFile(sentinel, "external sentinel\n");
+    const symlinkReport = join(root, "symlink.json"),
+      hardlinkReport = join(root, "hardlink.json");
+    await symlink(sentinel, symlinkReport);
+    await link(sentinel, hardlinkReport);
+    const parent = join(root, "linked-parent");
+    await symlink(root, parent);
+    for (const report of [
+      symlinkReport,
+      hardlinkReport,
+      join(parent, "sentinel.json"),
+      join(parent, "new.json"),
+    ]) {
+      await expect(
+        parityCli([...args, "--report", report], reg),
+      ).rejects.toThrow(/symlink|hard-linked/);
+      expect(await readFile(sentinel, "utf8")).toBe("external sentinel\n");
+    }
+    const missing = join(root, "missing.json"),
+      dangling = join(root, "dangling.json");
+    await symlink(missing, dangling);
+    await expect(
+      parityCli([...args, "--report", dangling], reg),
+    ).rejects.toThrow(/symlink/);
+    await expect(readFile(missing)).rejects.toThrow();
+    await mkdir(join(oracle, "..nested"));
+    await expect(
+      parityCli(
+        [...args, "--report", join(oracle, "..nested", "report.json")],
+        reg,
+      ),
+    ).rejects.toThrow(/outside input roots/);
+    const regular = join(root, "new", "report.json");
+    expect(await parityCli([...args, "--report", regular], reg)).toBe(0);
+    expect(await parityCli([...args, "--report", regular], reg)).toBe(0);
+    expect(JSON.parse(await readFile(regular, "utf8")).outcome).toBe("pass");
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
 it("protects the project release directory independently of the caller directory", async () => {
   const root = await mkdtemp(join(tmpdir(), "budget-parity-project-"));
   try {
