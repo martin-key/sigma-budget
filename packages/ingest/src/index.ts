@@ -70,3 +70,7 @@ export * from './build/wave13b.js';
 export * from './build/wave13b-fixture.js';
 export * from './build/wave13b-parity.js';
 export { budget2027 } from './validate/budget-2027.js';
+export * from './validate/kfp.js';
+export * from './validate/kfp-capture.js';
+export * from './validate/kfp-input.js';
+export * from './validate/kfp-runner.js';

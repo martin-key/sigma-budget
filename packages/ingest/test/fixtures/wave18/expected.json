@@ -1,0 +1,29 @@
+{
+  "present": {
+    "name": "KFP",
+    "n": 5436,
+    "problems": [],
+    "warnings": [],
+    "facts": [
+      "2026-09 cumulative: revenue 33 898,5 · expenditure 37 567,6 · balance -3 669,2 млн. € (68,32 of the year's plan, +11,0% on 2025)",
+      "December 2024 report minus Annex 3 / Tables II-3, II-4 (2024 Отчет), млн. €: kfp rev -8.2 exp -21.3 balance +13.1; nat rev +30.3 exp +53.5 balance -39.5; eu rev -38.5 exp -74.8 balance +52.6",
+      "33 raw reports re-read (3267 values compared, 3 columns); December report vs Annex 3 differs by at most 121,8 млн. € (2024), 141,1 млн. € (2025)",
+      "known source differences (млн. лв., not corrected): financing vs −balance 2024-05 kfp 0.010047; 2024-05 nat 0.010047",
+      "max deviation on the raw numbers (млн.): balance 0.000000, exp 0.000000, exp.interest 0.000000, fin 0.000000, fin.ext 0.000000, fin=-balance 0.001923, rev 0.000000, transfers 0.000000, к.2=к.3+к.4 0.000000"
+    ]
+  },
+  "absent": {
+    "name": "KFP",
+    "n": 3353,
+    "problems": [],
+    "warnings": [
+      "the raw monthly reports are not in the repository (data/originals, see docs/data-sources.md): the independent re-read was skipped"
+    ],
+    "facts": [
+      "2026-09 cumulative: revenue 33 898,5 · expenditure 37 567,6 · balance -3 669,2 млн. € (68,32 of the year's plan, +11,0% on 2025)",
+      "December 2024 report minus Annex 3 / Tables II-3, II-4 (2024 Отчет), млн. €: kfp rev -8.2 exp -21.3 balance +13.1; nat rev +30.3 exp +53.5 balance -39.5; eu rev -38.5 exp -74.8 balance +52.6",
+      "0 raw reports re-read (0 values compared, 3 columns); December report vs Annex 3 differs by at most 121,8 млн. € (2024), 141,1 млн. € (2025)",
+      "max deviation on the raw numbers (млн.): "
+    ]
+  }
+}

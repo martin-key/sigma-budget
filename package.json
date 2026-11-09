@@ -17,7 +17,9 @@
     "aggregation:compare-live": "pnpm --filter @sigma-budget/etl... build && pnpm exec budget-ts build --inputs packages/ingest/test/fixtures/aggregation --out tmp/ts-migration/candidates/11 --scope core,feed,feed-rss,search-index --build-date 2026-11-08 && pnpm exec budget-ts parity --registry packages/ingest/test/fixtures/aggregation/metadata/data/datasets.yaml --oracle data/release --candidate tmp/ts-migration/candidates/11/data --scope core,feed,feed-rss,search-index --policy packages/ingest/test/fixtures/aggregation/policy.json --report tmp/ts-migration/candidates/11/live-parity.json",
     "validate:wave14": "pnpm --filter @sigma-budget/ingest... build && node packages/ingest/dist/validate/cli.js",
     "validate:wave14-live": "pnpm --filter @sigma-budget/ingest... build && node packages/ingest/dist/validate/cli.js --live --report tmp/ts-migration/candidates/14/live.json",
-    "validate:wave15b": "pnpm --filter @sigma-budget/ingest... build && node packages/ingest/dist/validate/budget-2027-cli.js"
+    "validate:wave15b": "pnpm --filter @sigma-budget/ingest... build && node packages/ingest/dist/validate/budget-2027-cli.js",
+    "validate:wave18": "pnpm --filter @sigma-budget/ingest... build && node packages/ingest/dist/validate/kfp-cli.js --root packages/ingest/test/fixtures/wave18 --captures captures.json --manifest manifest.json --only KFP --report tmp/ts-migration/candidates/18/report.json",
+    "validate:wave18-live": "pnpm --filter @sigma-budget/ingest... build && node packages/ingest/dist/validate/kfp-cli.js --root . --captures packages/ingest/test/fixtures/wave18/captures.json --manifest packages/ingest/test/fixtures/wave18/manifest.json --only KFP --report tmp/ts-migration/candidates/18/report.json"
   },
   "packageManager": "pnpm@10.33.0",
   "engines": {
