@@ -9,6 +9,7 @@ import {
   appendFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
+import { spawnSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
 import { runWave17a, applyWave17aExceptions, WAVE17A_REMAINING } from './wave17a.js';
@@ -18,8 +19,18 @@ import { Context } from './context.js';
 const base = new URL('../../test/fixtures/validate17a/', import.meta.url);
 const load = (p: string): any => JSON.parse(readFileSync(new URL(p, base), 'utf8'));
 const originalCases: any[] = load('cases.json');
-const cases: any[] = [...originalCases, ...load('cases-extra.json'), ...load('review/cases.json')],
-  oracle = { ...load('oracle.json'), ...load('oracle-extra.json'), ...load('review/oracle.json') };
+const cases: any[] = [
+    ...originalCases,
+    ...load('cases-extra.json'),
+    ...load('review/cases.json'),
+    ...load('key-whitespace/cases.json'),
+  ],
+  oracle = {
+    ...load('oracle.json'),
+    ...load('oracle-extra.json'),
+    ...load('review/oracle.json'),
+    ...load('key-whitespace/oracle.json'),
+  };
 function mutate(root: string, op: any) {
   const p = join(root, op.file);
   mkdirSync(dirname(p), { recursive: true });
@@ -84,6 +95,34 @@ describe('CORE and CATALOG frozen Python differential', () => {
           const actual = capture(group === 'CORE' ? core : catalog, new Context(root));
           item.groups[group] = actual;
           expect(actual).toEqual(oracle[test.name][group]);
+          if (test.compiled) {
+            const run = spawnSync(
+              process.execPath,
+              [
+                new URL('../../dist/validate/cli17a.js', import.meta.url).pathname,
+                '--root',
+                root,
+                '--only',
+                group,
+              ],
+              { cwd: root, encoding: 'utf8' },
+            );
+            const output = JSON.parse(run.stdout),
+              expected = actual.crash
+                ? {
+                    name: group,
+                    n: 1,
+                    problems: ['group crashed: ' + actual.crash],
+                    warnings: [],
+                    facts: [],
+                  }
+                : oracle[test.name][group],
+              baseline = oracle['key-baseline'][group].problems,
+              problems = expected.problems.filter((p: string) => !baseline.includes(p));
+            expect(output.raw).toEqual([expected]);
+            expect(output.groups[0].problems).toEqual(problems);
+            expect(run.status, run.stderr).toBe(problems.length ? 1 : 0);
+          }
         }
         item.status = 'PASS';
       } finally {

@@ -88,7 +88,7 @@ function get(v: any, k: any): any {
     if (i < 0 || i >= v.length) error('IndexError', `${kind(v)} index out of range`);
     return v[i];
   }
-  if (!Object.hasOwn(v, k)) error('KeyError', pyRepr(k));
+  if (!contains(v, k)) error('KeyError', pyRepr(k));
   return v[k];
 }
 function opt(v: any, k: string, fallback: any = null): any {
@@ -108,7 +108,8 @@ function entries(v: any): [string, any][] {
   return Object.entries(v);
 }
 function len(v: any): number {
-  if (typeof v === 'string' || Array.isArray(v)) return v.length;
+  if (typeof v === 'string') return [...v].length;
+  if (Array.isArray(v)) return v.length;
   if (v && typeof v === 'object') return Object.keys(v).length;
   return error('TypeError', `object of type '${kind(v)}' has no len()`);
 }
@@ -151,9 +152,17 @@ function starts(v: any, x: string): boolean {
   return v.startsWith(x);
 }
 function contains(v: any, needle: any): boolean {
-  if (typeof v === 'string') return v.includes(needle);
+  if (typeof v === 'string') {
+    if (typeof needle !== 'string')
+      error('TypeError', "'in <string>' requires string as left operand, not " + kind(needle));
+    return v.includes(needle);
+  }
   if (Array.isArray(v)) return v.some((x) => equal(x, needle));
-  if (v && typeof v === 'object') return Object.hasOwn(v, needle);
+  if (v && typeof v === 'object') {
+    if (needle !== null && typeof needle === 'object')
+      error('TypeError', "unhashable type: '" + kind(needle) + "'");
+    return typeof needle === 'string' && Object.hasOwn(v, needle);
+  }
   return error('TypeError', `argument of type '${kind(v)}' is not iterable`);
 }
 function pySlice(v: any, start: number): any {
@@ -166,7 +175,13 @@ function pyMethod(v: any, method: string): string {
   return v;
 }
 function strField(v: any): boolean {
-  return typeof v === 'string' && !!v.trim();
+  return typeof v === 'string' && !!strip(v);
+}
+function strip(value: string): string {
+  return value.replace(
+    /^[\u0009-\u000d\u001c-\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]+|[\u0009-\u000d\u001c-\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]+$/g,
+    '',
+  );
 }
 function number(v: any): number {
   if (typeof v === 'number') return v;
@@ -315,7 +330,7 @@ export function core(ctx: Context): Check {
       `pending ${key}: shape`,
     );
     c.ok(
-      pyTruth(get(p, 'source')) && iterable(get(p, 'source')).every((x) => Object.hasOwn(src, x)),
+      pyTruth(get(p, 'source')) && iterable(get(p, 'source')).every((x) => contains(src, x)),
       `pending ${key}: source keys`,
     );
     c.ok(
@@ -535,7 +550,7 @@ function pageNeeds(ctx: Context): Record<string, string[]> {
     if (match)
       result[path.slice(0, 3).toUpperCase()] = match[1]!
         .split(',')
-        .map((s) => s.trim())
+        .map(strip)
         .filter(Boolean)
         .map((s) => s.replace(/^['"]+|['"]+$/g, ''));
   }
@@ -603,7 +618,7 @@ export function catalog(ctx: Context): Check {
       `${sl}: status/group/mock`,
     );
     c.ok(
-      pyTruth(source) && iterable(source).every((x) => Object.hasOwn(get(core, 'sources'), x)),
+      pyTruth(source) && iterable(source).every((x) => contains(get(core, 'sources'), x)),
       `${sl}: source keys ${pstr(source)}`,
     );
     c.ok(
@@ -626,9 +641,7 @@ export function catalog(ctx: Context): Check {
       const id = get(d, 'id'),
         pending = get(core, 'pending');
       c.ok(
-        equal(sl, id.toLowerCase()) &&
-          equal(get(d, 'contains'), [id]) &&
-          Object.hasOwn(pending, id),
+        equal(sl, id.toLowerCase()) && equal(get(d, 'contains'), [id]) && contains(pending, id),
         `${sl}: pending id`,
       );
       const p = get(pending, id);
@@ -651,7 +664,7 @@ export function catalog(ctx: Context): Check {
     if (format !== null && typeof format === 'object')
       error('TypeError', "unhashable type: '" + kind(format) + "'");
     c.ok(
-      equal(Object.hasOwn(formats, format) ? formats[format] : null, media),
+      equal(contains(formats, format) ? formats[format] : null, media),
       `${sl}: format/mediaType ${pstr(format)} / ${pstr(media)}`,
     );
     if (pyTruth(opt(d, 'fileTemplate'))) {
@@ -816,7 +829,7 @@ export function catalog(ctx: Context): Check {
     );
     c.ok(
       pyTruth(get(f, 'source')) &&
-        iterable(get(f, 'source')).every((x) => Object.hasOwn(get(core, 'sources'), x)),
+        iterable(get(f, 'source')).every((x) => contains(get(core, 'sources'), x)),
       `files ${pstr(get(f, 'name'))}: source keys`,
     );
     c.ok(

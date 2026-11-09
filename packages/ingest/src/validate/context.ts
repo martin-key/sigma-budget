@@ -61,6 +61,36 @@ export function safePath(root: string, path: string): string {
   inputObserver?.(base, out);
   return out;
 }
+/** Protect declared inputs before validation can fail at an earlier declaration.
+ * A glob protects its closest literal ancestor; rejected paths still reach capture.
+ * Observation must not change the validator's original first failure.
+ */
+export function protectDeclaredInput(root: string, value: unknown, glob = false): void {
+  if (value == null || value === '') return;
+  if (typeof value !== 'string') {
+    rejectInputInventory(root);
+    return;
+  }
+  let path = value;
+  if (glob) {
+    const wildcard = path.search(/[?*\[]/);
+    if (wildcard >= 0) path = path.slice(0, path.lastIndexOf('/', wildcard) + 1);
+  }
+  if (!path) {
+    inputObserver?.(resolve(root), resolve(root));
+    return;
+  }
+  try {
+    safePath(root, path);
+  } catch {
+    // safePath already recorded the rejected declaration. Preserve donor failure order.
+  }
+}
+/** A failed inventory cannot authorize writing a failure report over unknown inputs. */
+export function rejectInputInventory(root: string): void {
+  const base = resolve(root);
+  inputObserver?.(base, base, true);
+}
 export function files(root: string, path: string, excludeReleases = false): string[] {
   const start = safePath(root, path);
   if (!existsSync(start)) return [];
