@@ -17,6 +17,8 @@ import {
   pyDecimalInteger,
   pyLessEqual,
   sourceTypeAt,
+  pyDictKeysAt,
+  pyItem,
 } from './python-error.js';
 
 const TOL = 0.06,
@@ -48,12 +50,7 @@ const iso = (x: any) =>
 const nz = (x: any): number => (isnum(x) ? x : 0);
 const sorted = (x: any[]) => [...x].sort();
 const n = (o: any, k: string | number): PythonNumber => {
-  const value = o[k];
-  if (value === undefined)
-    throw new PythonError(
-      Array.isArray(o) ? 'IndexError' : 'KeyError',
-      Array.isArray(o) ? 'list index out of range' : pyRepr(String(k)),
-    );
+  const value = pyItem(o, k);
   return typeof value === 'boolean'
     ? { value: Number(value), kind: 'int' }
     : pythonNumberAt(o, String(k), value);
@@ -331,7 +328,10 @@ function lawBudgets(c: Check, law: any) {
     if (moved) changed.push(b.art);
   }
   const t = law.totals;
-  c.ok(t.count === bs.length && bs.length === 46, `totals.count ${t.count}`);
+  c.ok(
+    pyEqual(required(t, 'count'), bs.length) && bs.length === 46,
+    `totals.count ${stringField(t, 'count')}`,
+  );
   for (const s of ['bill', 'law'])
     for (const k of ['rev', 'exp']) {
       near(
@@ -377,7 +377,15 @@ function changes(c: Check, law: any, artRows: Map<string, any>) {
   for (const x of ch) {
     const w = `changes art. ${x.art}`,
       b = bs.get(x.art);
-    c.ok(x.art === 1 ? x.id === 'state' : x.id === b.id, `${w}: id ${x.id}`);
+    const id = required(x, 'id');
+    const expectedId =
+      x.art === 1
+        ? 'state'
+        : (() => {
+            if (b === undefined) throw new PythonError('KeyError', stringField(x, 'art'));
+            return required(b, 'id');
+          })();
+    c.ok(pyEqual(id, expectedId), `${w}: id ${x.id}`);
     c.ok(
       Array.isArray(x.notes) &&
         x.notes.length > 0 &&
@@ -474,7 +482,7 @@ function reconciliation(c: Check, law: any) {
     .filter((b: any) => Math.abs(nz(b.diff.rev)) > 0.05 || Math.abs(nz(b.diff.exp)) > 0.05)
     .map((b: any) => ({
       art: b.art,
-      name: b.name,
+      name: required(b, 'name'),
       rev: nz(b.diff.rev),
       exp: nz(b.diff.exp),
       source: b.diff,
@@ -608,10 +616,10 @@ function bills(c: Check, law: any, src: any, buildDate: string) {
     ['opinions', 'opinionDates'],
     ['proposals', 'proposalDates'],
   ] as const) {
-    const value = pyTypedSum(pyMap(Object.keys(cn[d]), (x) => n(cn[d], x)));
+    const value = pyTypedSum(pyMap(pyDictKeysAt(cn, d), (x) => n(cn[d], x)));
     c.ok(value.value === cn[k], `counts.${d} sums to ${displaySum(value)}, not ${display(cn, k)}`);
     c.ok(
-      Object.keys(cn[d]).every((x) => iso(x) && x <= buildDate),
+      pyDictKeysAt(cn, d).every((x) => iso(x) && x <= buildDate),
       `counts.${d} dates`,
     );
   }
@@ -667,7 +675,7 @@ function timeline(c: Check, law: any, ctx: Context) {
         !!pyStrip(t.dateText),
       `${w}: title/dateText`,
     );
-    c.ok(t.source, `${w}: source`);
+    c.ok(pyTruth(required(t, 'source')), `${w}: source`);
     const d = pyTruth(t.date) ? t.date : pyTruth(t.month) ? `${t.month}-01` : null;
     c.ok((d === null) === pyTruth(t.ongoing), `${w}: only an ongoing entry may have no date`);
     if (d !== null) {
@@ -697,7 +705,7 @@ function proposals(c: Check, law: any) {
     same(sorted(Object.keys(p)), ['byDate', 'count', 'items', 'note', 'urlPattern']),
     `proposals keys ${repr(sorted(Object.keys(p)))}`,
   );
-  const count = pyTypedSum(pyMap(Object.keys(p.byDate), (k) => n(p.byDate, k)));
+  const count = pyTypedSum(pyMap(pyDictKeysAt(p, 'byDate'), (k) => n(p.byDate, k)));
   c.ok(
     p.count === items.length && items.length === 69 && count.value === 69,
     `proposals: count ${display(p, 'count')}, items ${items.length}, byDate ${displaySum(count)}`,
@@ -725,7 +733,10 @@ function proposals(c: Check, law: any) {
   c.ok(p.urlPattern === 'https://www.parliament.bg/bills/52/{file}', 'proposals.urlPattern');
   const nx = law.next;
   c.ok(
-    nx.status === 'pending' && numbersIn(nx) === 0 && pyTruth(nx.expected) && pyTruth(nx.note),
+    nx.status === 'pending' &&
+      numbersIn(nx) === 0 &&
+      pyTruth(required(nx, 'expected')) &&
+      pyTruth(required(nx, 'note')),
     'next: a pending block without numbers',
   );
 }

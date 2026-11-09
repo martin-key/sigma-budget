@@ -15,6 +15,12 @@ import {
   pyMap,
   pyTypedSum,
   pyAddAssign,
+  pyGreaterThan,
+  pyItem,
+  sourceTypeAt,
+  pyDivide,
+  pyMultiply,
+  pySubtract,
 } from './python-error.js';
 const TOL = 0.06,
   TOL_SUM = 0.15,
@@ -79,10 +85,7 @@ const SENTINELS = { noData: -1, noGrowth: -101 };
 const same = (a: unknown, b: unknown) => pyEqual(a, b);
 const sorted = (x: any[]) => [...x].sort();
 const n = (o: any, k: string | number): PythonNumber => {
-  const v = o[k];
-  if (v === undefined && Array.isArray(o))
-    throw new PythonError('IndexError', 'list index out of range');
-  if (v === undefined) throw new PythonError('KeyError', pyRepr(String(k)));
+  const v = pyItem(o, k);
   if (typeof v === 'boolean') return { value: Number(v), kind: 'int' };
   return pythonNumberAt(o, String(k), v);
 };
@@ -109,20 +112,20 @@ function near(c: Check, a: any, b: any, tol: number, msg: string, ar?: string, b
 function nearSum(
   c: Check,
   values: Iterable<PythonNumber>,
-  b: any,
+  b: () => any,
   tolerance: number,
   message: string,
-  renderedTarget: string,
+  renderedTarget: () => string,
 ) {
   const result = pyTypedSum(values);
   return near(
     c,
     result.value,
-    b,
+    b(),
     tolerance,
     message,
     result.kind === 'float' ? pyfloat(result.value) : String(result.value),
-    renderedTarget,
+    renderedTarget(),
   );
 }
 function optional(c: Check, a: any, b: any, msg: string, ar?: string, br?: string) {
@@ -231,7 +234,10 @@ export function budgets(ctx: Context): Check {
       b = lb[i];
     if (!c.ok(b !== undefined, `${w}: not in law.json`)) continue;
     c.ok(
-      x.art === b.art && required(x, 'name') === b.name && x.short === b.short && x.kind === b.kind,
+      pyEqual(required(x, 'art'), required(b, 'art')) &&
+        pyEqual(required(x, 'name'), required(b, 'name')) &&
+        pyEqual(required(x, 'short'), required(b, 'short')) &&
+        pyEqual(required(x, 'kind'), required(b, 'kind')),
       `${w}: art/name/short/kind differ from law.json`,
     );
     c.ok(Object.hasOwn(m.kinds, x.kind), `${w}: kind ${x.kind}`);
@@ -270,10 +276,10 @@ export function budgets(ctx: Context): Check {
     nearSum(
       c,
       pyMap(pols, (q: any) => n(q, 'khil')),
-      x.policyTotalKhil,
+      () => required(x, 'policyTotalKhil'),
       TOL_SUM,
       `${w}: policies sum to policyTotalKhil`,
-      disp(x, 'policyTotalKhil'),
+      () => disp(x, 'policyTotalKhil'),
     );
     near(
       c,
@@ -289,10 +295,10 @@ export function budgets(ctx: Context): Check {
         nearSum(
           c,
           pyMap(q.parts, (p: any) => n(p, 'khil')),
-          q.khil,
+          () => required(q, 'khil'),
           TOL_SUM,
           `${w} policy ${q.n}: parts sum`,
-          disp(q, 'khil'),
+          () => disp(q, 'khil'),
         );
         c.ok(
           q.parts.every((p: any) => cleanName(p.name)),
@@ -303,10 +309,10 @@ export function budgets(ctx: Context): Check {
       nearSum(
         c,
         pyMap(x.bodies, (q: any) => n(q, 'khil')),
-        x.expKhil,
+        () => required(x, 'expKhil'),
         TOL_SUM,
         `${w}: bodies sum to the expenditure`,
-        disp(x, 'expKhil'),
+        () => disp(x, 'expKhil'),
       );
     const pb = x.programBudgetVsLaw,
       ch = x.change;
@@ -320,16 +326,27 @@ export function budgets(ctx: Context): Check {
           (ch.basis === 'program-budget') === (pb != null),
         `${w}: change.basis ${ch.basis}`,
       );
-      const base = pyTruth(pb) && ch.basis === 'program-budget' ? pb.prbKhil : x.expKhil;
-      if (x.exp2025Khil > 0)
+      const baseHolder = pyTruth(pb) && required(ch, 'basis') === 'program-budget' ? pb : x;
+      const baseKey = baseHolder === pb ? 'prbKhil' : 'expKhil';
+      const base = n(baseHolder, baseKey);
+      if (pyGreaterThan(required(x, 'exp2025Khil'), 0, sourceTypeAt(x, 'exp2025Khil')))
         near(
           c,
-          ch.pct,
-          100 * (base / x.exp2025Khil - 1),
+          required(ch, 'pct'),
+          pyMultiply(
+            { value: 100, kind: 'float' },
+            {
+              value: pySubtract(
+                { value: pyDivide(base, n(x, 'exp2025Khil')), kind: 'float' },
+                { value: 1, kind: 'float' },
+              ),
+              kind: 'float',
+            },
+          ),
           0.051,
           `${w}: change.pct`,
           disp(ch, 'pct'),
-          pyfloat(100 * (base / x.exp2025Khil - 1)),
+          pyfloat(100 * (Number(base.value) / x.exp2025Khil - 1)),
         );
     }
     const bl = x.billVsLaw;
@@ -532,7 +549,7 @@ function checkFile(c: Check, ctx: Context, item: any, d: any): Row[] {
     mt.id === 'D09' &&
       mt.status === 'real' &&
       same(mt.source, ['prb']) &&
-      mt.unit === 'хил. €' &&
+      required(mt, 'unit') === 'хил. €' &&
       mt.mock === false &&
       iso(mt.asOf) &&
       mt.asOf <= ctx.buildDate,
@@ -578,7 +595,7 @@ function checkFile(c: Check, ctx: Context, item: any, d: any): Row[] {
     if (lvl === 'policy' || (lvl === 'program' && !parent))
       c.ok(
         new RegExp(`^${i}\\.\\p{Decimal_Number}{2}\\.00$`, 'u').test(r.code) &&
-          r.kind === (lvl === 'policy' ? 'policy' : 'program'),
+          required(r, 'kind') === (lvl === 'policy' ? 'policy' : 'program'),
         `${ww}: policy code/kind`,
       );
     else
@@ -691,7 +708,7 @@ function checkFile(c: Check, ctx: Context, item: any, d: any): Row[] {
     );
     const sameLaw = Math.abs(ck.prbTotal2026 - ck.zdbExp) <= 0.05;
     c.ok(
-      ck.matchesLaw === sameLaw && sameLaw === (d.tier === 'validated'),
+      required(ck, 'matchesLaw') === sameLaw && sameLaw === (d.tier === 'validated'),
       `${w}: matchesLaw ${disp(ck, 'matchesLaw')} tier ${d.tier}`,
     );
     c.ok(
@@ -855,7 +872,10 @@ export function programs(ctx: Context): Check {
         r.growthPct === SENTINELS.noGrowth,
         `${w}: growthPct must be the no-growth sentinel, got ${r.growthPct}`,
       );
-    c.ok(pyEqual(r.isNew, 0 <= y25 && y25 <= 0.05 && y26 > 0 ? 1 : 0), `${w}: isNew ${r.isNew}`);
+    c.ok(
+      pyEqual(r.isNew, 0 <= y25 && y25 <= 0.05 && y26 > 0 ? 1 : 0),
+      `${w}: isNew ${disp(row, 8)}`,
+    );
   }
   const missing = Object.keys(expect)
     .filter((x) => !seen.has(x))

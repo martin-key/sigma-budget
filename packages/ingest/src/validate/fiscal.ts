@@ -23,6 +23,9 @@ import {
   pyLenAt,
   pyItemAt,
   pyIterAt,
+  pyDivide,
+  pyMultiply,
+  pyAddAssign,
 } from './python-error.js';
 
 const KFP_KEYS = ['revenue', 'expenditure', 'balance', 'interest', 'primaryBalance', 'financing'];
@@ -94,13 +97,13 @@ export function annex3(ctx: Context): Check {
     );
   }
   const gdp = g.mlnPrecise,
-    k = o.kfp;
+    k = required<any>(o, 'kfp');
   c.ok(
     same(Object.keys(k).sort(), [...KFP_KEYS].sort()),
     `kfp keys ${pyRepr(Object.keys(k).sort())}`,
   );
   for (const name of KFP_KEYS) {
-    const b = k[name];
+    const b = required<any>(k, name);
     required(b, 'mln');
     c.ok(
       pyLenAt(b, 'mln') === 5 && pyLenAt(b, 'pctGdp') === 5 && [...b.mln, ...b.pctGdp].every(isnum),
@@ -110,7 +113,13 @@ export function annex3(ctx: Context): Check {
     for (let i = 0; i < 5; i++)
       c.near(
         pyItemAt(b, 'pctGdp', i),
-        divide(100 * pyItemAt(b, 'mln', i), pyItem(gdp, i)),
+        pyDivide(
+          {
+            value: pyMultiply({ value: 100, kind: 'float' }, numeric(required(b, 'mln'), i)),
+            kind: 'float',
+          },
+          numeric(gdp, i),
+        ),
         tol,
         `${name} pctGdp ${2024 + i}`,
       );
@@ -130,7 +139,7 @@ export function annex3(ctx: Context): Check {
   c.ok(same(head, [49615.3, 56807.2, -7191.9, 1059.2, 125246.7]), `2026 headline ${tuple(head)}`);
   for (const [name, arr] of Object.entries(o.macro) as [string, any[]][])
     c.ok(arr.length === 5 && arr.every(isnum), `macro.${name}: five numbers`);
-  c.ok(o.macroVintage.length === 5, 'macroVintage length');
+  c.ok(pyLenAt(o, 'macroVintage') === 5, 'macroVintage length');
   const rows = o.macroRows,
     ids = rows.map((r: any) => r.id);
   c.ok(
@@ -161,7 +170,12 @@ export function annex3(ctx: Context): Check {
       `versions ${v.id}: 2024-2025 must be equal`,
     );
     for (let i = 0; i < 5; i++) {
-      c.near(v.diff[i], v.docx[i] - v.pdf[i], 0.0501, `versions ${v.id} diff ${i}`);
+      c.near(
+        pyItemAt(v, 'diff', i),
+        pySubtract(numeric(required(v, 'docx'), i), numeric(required(v, 'pdf'), i)),
+        0.0501,
+        `versions ${v.id} diff ${i}`,
+      );
       mx = Math.max(mx, Math.abs(v.diff[i]));
     }
     const row = other[v.id];
@@ -187,12 +201,7 @@ export function annex3(ctx: Context): Check {
 
 import { pythonNumberAt, pythonNumericText, type PythonNumber } from '../common/numbers.js';
 const numeric = (holder: any, key: string | number): PythonNumber => {
-  const v = holder[key];
-  if (v === undefined)
-    throw new PythonError(
-      Array.isArray(holder) ? 'IndexError' : 'KeyError',
-      Array.isArray(holder) ? 'list index out of range' : pyRepr(String(key)),
-    );
+  const v = pyItem(holder, key);
   if (typeof v === 'boolean') return { value: Number(v), kind: 'int' };
   return pythonNumberAt(holder, String(key), v);
 };
@@ -357,7 +366,8 @@ export function revenue(ctx: Context): Check {
   );
   const t = r.total;
   c.ok(
-    same(t.mln, o.kfp.revenue.mln) && same(t.pctGdp, o.kfp.revenue.pctGdp),
+    same(required(t, 'mln'), required(required<any>(required<any>(o, 'kfp'), 'revenue'), 'mln')) &&
+      same(required(t, 'pctGdp'), required(required<any>(o.kfp, 'revenue'), 'pctGdp')),
     'total must equal outlook.kfp.revenue',
   );
   const rows = required<any[]>(r, 'rows'),
@@ -389,8 +399,8 @@ export function revenue(ctx: Context): Check {
     if (!gr.rowIds.every((x: string) => Object.hasOwn(by, x))) continue;
     c.ok(
       same(
-        gr.annex3Rows,
-        gr.rowIds.map((i: string) => by[i].label),
+        required(gr, 'annex3Rows'),
+        gr.rowIds.map((i: string) => required(by[i], 'label')),
       ),
       `group ${gr.id}: annex3Rows differ from the row labels`,
     );
@@ -549,11 +559,17 @@ export function measures(ctx: Context): Check {
         `${i.id}: no estimate, so no numbers`,
       );
     if ('balanceEffectMln' in i) {
-      const sign = i.kind === 'revenue' ? 1 : -1;
+      const sign = required(i, 'kind') === 'revenue' ? 1 : -1;
       c.ok(
         same(Object.keys(i.balanceEffectMln).sort(), Object.keys(i.effectMln).sort()) &&
           Object.keys(i.effectMln).every(
-            (y) => Math.abs(i.balanceEffectMln[y] - sign * i.effectMln[y]) < 1e-9,
+            (y) =>
+              Math.abs(
+                pySubtract(numeric(i.balanceEffectMln, y), {
+                  value: pyMultiply({ value: sign, kind: 'float' }, numeric(i.effectMln, y)),
+                  kind: 'float',
+                }),
+              ) < 1e-9,
           ),
         `${i.id}: balanceEffectMln must be +effect (revenue) or -effect (expenditure)`,
       );
@@ -699,7 +715,9 @@ export function expenditure(ctx: Context): Check {
     gdp = o.gdp.mlnPrecise,
     f = required<any>(e, 'functions');
   c.ok(
-    same(f.years, [2025, 2026, 2027, 2028]) && f.vintage.length === 4 && f.yearLabels.length === 4,
+    same(required(f, 'years'), [2025, 2026, 2027, 2028]) &&
+      pyLenAt(f, 'vintage') === 4 &&
+      pyLenAt(f, 'yearLabels') === 4,
     'functions: years/vintage/yearLabels',
   );
   const items = f.items,
@@ -738,7 +756,21 @@ export function expenditure(ctx: Context): Check {
       `functions ${it.id}: four numbers each`,
     );
     for (let k = 0; k < 4; k++) {
-      gaps[k] = Math.max(gaps[k]!, Math.abs(it.pctGdp[k] - divide(100 * it.mln[k], gdp[k + 1])));
+      gaps[k] = Math.max(
+        gaps[k]!,
+        Math.abs(
+          pySubtract(numeric(required(it, 'pctGdp'), k), {
+            value: pyDivide(
+              {
+                value: pyMultiply({ value: 100, kind: 'float' }, numeric(required(it, 'mln'), k)),
+                kind: 'float',
+              },
+              numeric(gdp, k + 1),
+            ),
+            kind: 'float',
+          }),
+        ),
+      );
       nearComputed(
         c,
         it.share,
@@ -816,7 +848,12 @@ export function expenditure(ctx: Context): Check {
       `functions.versions ${v.id} ${v.part ?? ''}: the published numbers must be the .docx ones`,
     );
     c.ok(v.pdf[0] === v.docx[0], `functions.versions ${v.id}: 2025 must be equal`);
-    if (!('part' in v)) for (let k = 0; k < 4; k++) pdfTotal[k] += v.pdf[k] - v.docx[k];
+    if (!('part' in v))
+      for (let k = 0; k < 4; k++)
+        pdfTotal[k] = pyAddAssign(numeric(pdfTotal, k), {
+          value: pySubtract(numeric(required(v, 'pdf'), k), numeric(required(v, 'docx'), k)),
+          kind: 'float',
+        });
   }
   for (let k = 0; k < 4; k++)
     c.near(rc.pdfTotalMln[k], pdfTotal[k], 0.0501, `reconcile: pdfTotalMln ${2025 + k}`);

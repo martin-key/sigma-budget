@@ -94,6 +94,36 @@ export function pyLessEqual(
     `'<=' not supported between instances of '${leftType}' and '${rightType}'`,
   );
 }
+export function pyGreaterThan(
+  a: any,
+  b: any,
+  leftType = pythonType(a),
+  rightType = pythonType(b),
+): boolean {
+  if (
+    (typeof a === 'number' || typeof a === 'boolean') &&
+    (typeof b === 'number' || typeof b === 'boolean')
+  )
+    return Number(a) > Number(b);
+  if (typeof a === 'string' && typeof b === 'string') return a > b;
+  throw new PythonError(
+    'TypeError',
+    `'>' not supported between instances of '${leftType}' and '${rightType}'`,
+  );
+}
+/** The donor's dictionary methods visit source insertion order, including numeric keys. */
+export function pyDictKeys(
+  value: any,
+  method: 'values' | 'items' = 'values',
+  sourceType = pythonType(value),
+): string[] {
+  if (value === null || typeof value !== 'object' || Array.isArray(value))
+    throw new PythonError('AttributeError', `'${sourceType}' object has no attribute '${method}'`);
+  return pythonKeys(value);
+}
+export function pyDictKeysAt(holder: any, key: string | number): string[] {
+  return pyDictKeys(pyItem(holder, key), 'values', sourceTypeAt(holder, key));
+}
 export function pyAddAssign(a: PythonNumber, b: PythonNumber): number {
   if (typeof a.value !== 'number' || typeof b.value !== 'number')
     throw new PythonError(
@@ -105,6 +135,38 @@ export function pyAddAssign(a: PythonNumber, b: PythonNumber): number {
 export function divide(a: number, b: number): number {
   if (b === 0) throw new PythonError('ZeroDivisionError', 'float division by zero');
   return a / b;
+}
+function operandType(operand: PythonNumber): string {
+  return typeof operand.value === 'number' ? operand.kind : pythonType(operand.value);
+}
+export function pyMultiply(a: PythonNumber, b: PythonNumber): number {
+  if (typeof a.value !== 'number' || typeof b.value !== 'number') {
+    const left = operandType(a),
+      right = operandType(b);
+    if (
+      (['str', 'list'].includes(left) && right === 'float') ||
+      (['str', 'list'].includes(right) && left === 'float')
+    )
+      throw new PythonError('TypeError', "can't multiply sequence by non-int of type 'float'");
+    throw new PythonError(
+      'TypeError',
+      `unsupported operand type(s) for *: '${left}' and '${right}'`,
+    );
+  }
+  return a.value * b.value;
+}
+export function pyDivide(a: PythonNumber, b: PythonNumber): number {
+  if (typeof a.value !== 'number' || typeof b.value !== 'number')
+    throw new PythonError(
+      'TypeError',
+      `unsupported operand type(s) for /: '${operandType(a)}' and '${operandType(b)}'`,
+    );
+  if (b.value === 0)
+    throw new PythonError(
+      'ZeroDivisionError',
+      a.kind === 'float' || b.kind === 'float' ? 'float division by zero' : 'division by zero',
+    );
+  return a.value / b.value;
 }
 /** Display a Python float in diagnostics, retaining the float token's `.0`. */
 export function floatRepr(value: number): string {

@@ -8811,5 +8811,2242 @@
         "token": "[0.0,{\"2\":0.0,\"1\":1e0}]"
       }
     ]
+  },
+  {
+    "name": "review5-000-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "kfp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review5-001-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "macroVintage"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review5-002-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "primaryBalance",
+          "note"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review5-003-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "revenue.json",
+        "path": [
+          "total",
+          "pctGdp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review5-004-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          0,
+          "annex3Rows"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review5-005-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "label"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review5-006-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "years"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review5-007-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "yoy2026Pct"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review5-008-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "kind"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review5-009-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "name"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review5-010-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "estimateKind"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review5-011-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          1,
+          "changed"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review5-012-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "name"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review5-013-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "timeline",
+          0,
+          "source"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review5-014-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "next",
+          "expected"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review5-015-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "revKhil"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review5-016-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policyTotalKhil"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review5-017-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "art"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review5-018-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "check",
+          "matchesLaw"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review5-019-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "meta",
+          "unit"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review5-020-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "policies",
+          0,
+          "kind"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review5-021-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "revenue",
+          "mln",
+          0
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "review5-022-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "revenue",
+          "mln",
+          0
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "review5-023-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "revenue",
+          "mln",
+          0
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "review5-024-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "revenue",
+          "mln",
+          0
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "review5-025-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "revenue",
+          "mln",
+          0
+        ],
+        "value": "1"
+      }
+    ]
+  },
+  {
+    "name": "review5-026-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "versions",
+          0,
+          "pdf",
+          2
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "review5-027-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "versions",
+          0,
+          "pdf",
+          2
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "review5-028-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "versions",
+          0,
+          "pdf",
+          2
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "review5-029-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "versions",
+          0,
+          "pdf",
+          2
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "review5-030-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "versions",
+          0,
+          "pdf",
+          2
+        ],
+        "value": "1"
+      }
+    ]
+  },
+  {
+    "name": "review5-031-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "versions",
+          0,
+          "pdf",
+          1
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "review5-032-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "versions",
+          0,
+          "pdf",
+          1
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "review5-033-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "versions",
+          0,
+          "pdf",
+          1
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "review5-034-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "versions",
+          0,
+          "pdf",
+          1
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "review5-035-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "versions",
+          0,
+          "pdf",
+          1
+        ],
+        "value": "1"
+      }
+    ]
+  },
+  {
+    "name": "review5-036-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "pctGdp",
+          0
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "review5-037-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "pctGdp",
+          0
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "review5-038-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "pctGdp",
+          0
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "review5-039-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "pctGdp",
+          0
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "review5-040-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "pctGdp",
+          0
+        ],
+        "value": "1"
+      }
+    ]
+  },
+  {
+    "name": "review5-041-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "balanceEffectMln",
+          "2026"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "review5-042-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "balanceEffectMln",
+          "2026"
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "review5-043-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "balanceEffectMln",
+          "2026"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "review5-044-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "balanceEffectMln",
+          "2026"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "review5-045-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "balanceEffectMln",
+          "2026"
+        ],
+        "value": "1"
+      }
+    ]
+  },
+  {
+    "name": "review5-046-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "exp2025Khil"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "review5-047-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "exp2025Khil"
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "review5-048-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "exp2025Khil"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "review5-049-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "exp2025Khil"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "review5-050-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "exp2025Khil"
+        ],
+        "value": "1"
+      }
+    ]
+  },
+  {
+    "name": "review5-051-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mlnPrecise"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "review5-052-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mlnPrecise"
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "review5-053-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mlnPrecise"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "review5-054-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mlnPrecise"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "review5-055-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "years"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "review5-056-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "years"
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "review5-057-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "years"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "review5-058-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "years"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "review5-059-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "bill",
+          "rev"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "review5-060-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "bill",
+          "rev"
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "review5-061-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "bill",
+          "rev"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "review5-062-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "bill",
+          "rev"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "review5-063-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "expKhil"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "review5-064-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "expKhil"
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "review5-065-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "expKhil"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "review5-066-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "expKhil"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "review5-067-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries/0200.json",
+        "path": [
+          "check",
+          "policiesSumToTotal"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "review5-068-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries/0200.json",
+        "path": [
+          "check",
+          "policiesSumToTotal"
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "review5-069-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries/0200.json",
+        "path": [
+          "check",
+          "policiesSumToTotal"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "review5-070-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries/0200.json",
+        "path": [
+          "check",
+          "policiesSumToTotal"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "review5-071-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "changed"
+        ],
+        "value": {
+          "2": [
+            1.0,
+            {
+              "3": 0.0,
+              "1": 1.0
+            }
+          ],
+          "1": false
+        }
+      }
+    ]
+  },
+  {
+    "name": "review5-072-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "changed"
+        ],
+        "value": [
+          {
+            "7": 2.0,
+            "4": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review5-073-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "totals",
+          "count"
+        ],
+        "value": 0.0
+      }
+    ]
+  },
+  {
+    "name": "review5-074-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "art"
+        ],
+        "value": 0.0
+      }
+    ]
+  },
+  {
+    "name": "review5-075-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "gazette",
+          0,
+          "year"
+        ],
+        "value": 0.0
+      }
+    ]
+  },
+  {
+    "name": "review5-076-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "programs.json",
+        "path": [
+          "items",
+          0,
+          8
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "review5-077-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "programs.json",
+        "path": [
+          "items",
+          0,
+          8
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "review5-078-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "programs.json",
+        "path": [
+          "items",
+          0,
+          8
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "review5-079-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "programs.json",
+        "path": [
+          "items",
+          0,
+          8
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "review5-080-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "counts",
+          "reportDates"
+        ],
+        "value": {
+          "2": null,
+          "1": 0.0
+        }
+      }
+    ]
+  },
+  {
+    "name": "review5-081-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "counts",
+          "reportDates"
+        ],
+        "value": {
+          "2": 0.0,
+          "1": null
+        }
+      }
+    ]
+  },
+  {
+    "name": "review5-082-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "timeline",
+          0,
+          "source"
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "review5-083-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "timeline",
+          0,
+          "source"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "review5-084-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "timeline",
+          0,
+          "source"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "review5-085-budgets-evaluation-order",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "exp2025Khil"
+        ],
+        "value": null
+      },
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "change",
+          "pct"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review5-086-budgets-evaluation-order",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policies",
+          0,
+          "khil"
+        ],
+        "value": null
+      },
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policyTotalKhil"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review5-087-annex3-evaluation-order",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "revenue",
+          "mln",
+          0
+        ],
+        "value": null
+      },
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mlnPrecise",
+          0
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "review5-088-budgets-evaluation-order",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "exp2025Khil"
+        ],
+        "value": []
+      },
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "change",
+          "pct"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review5-089-budgets-evaluation-order",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policies",
+          0,
+          "khil"
+        ],
+        "value": []
+      },
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policyTotalKhil"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review5-090-annex3-evaluation-order",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "revenue",
+          "mln",
+          0
+        ],
+        "value": []
+      },
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mlnPrecise",
+          0
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "review5-091-budgets-evaluation-order",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "exp2025Khil"
+        ],
+        "value": {}
+      },
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "change",
+          "pct"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review5-092-budgets-evaluation-order",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policies",
+          0,
+          "khil"
+        ],
+        "value": {}
+      },
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policyTotalKhil"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review5-093-annex3-evaluation-order",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "revenue",
+          "mln",
+          0
+        ],
+        "value": {}
+      },
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mlnPrecise",
+          0
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "review5-094-budgets-evaluation-order",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "exp2025Khil"
+        ],
+        "value": "1"
+      },
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "change",
+          "pct"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review5-095-budgets-evaluation-order",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policies",
+          0,
+          "khil"
+        ],
+        "value": "1"
+      },
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policyTotalKhil"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review5-096-annex3-evaluation-order",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "revenue",
+          "mln",
+          0
+        ],
+        "value": "1"
+      },
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mlnPrecise",
+          0
+        ],
+        "value": "1"
+      }
+    ]
+  },
+  {
+    "name": "review5-097-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "counts",
+          "opinionDates"
+        ],
+        "value": {
+          "2": null,
+          "1": 0.0
+        }
+      }
+    ]
+  },
+  {
+    "name": "review5-098-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "counts",
+          "proposalDates"
+        ],
+        "value": {
+          "2": null,
+          "1": 0.0
+        }
+      }
+    ]
+  },
+  {
+    "name": "review5-099-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "proposals",
+          "byDate"
+        ],
+        "value": {
+          "2": null,
+          "1": 0.0
+        }
+      }
+    ]
+  },
+  {
+    "name": "review5-100-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "counts",
+          "opinionDates"
+        ],
+        "value": {
+          "2": 0.0,
+          "1": null
+        }
+      }
+    ]
+  },
+  {
+    "name": "review5-101-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "counts",
+          "proposalDates"
+        ],
+        "value": {
+          "2": 0.0,
+          "1": null
+        }
+      }
+    ]
+  },
+  {
+    "name": "review5-102-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "proposals",
+          "byDate"
+        ],
+        "value": {
+          "2": 0.0,
+          "1": null
+        }
+      }
+    ]
+  },
+  {
+    "name": "review5-103-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "counts",
+          "reportDates"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "review5-104-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "next",
+          "expected"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "review5-105-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "counts",
+          "reportDates"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "review5-106-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "next",
+          "expected"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "review5-107-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "counts",
+          "reportDates"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "review5-108-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "next",
+          "expected"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "review5-109-law-count-token",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "rawSet",
+        "file": "law.json",
+        "path": [
+          "totals",
+          "count"
+        ],
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "review5-110-law-count-token",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "rawSet",
+        "file": "law.json",
+        "path": [
+          "totals",
+          "count"
+        ],
+        "token": "0e0"
+      }
+    ]
+  },
+  {
+    "name": "review5-111-law-count-token",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "rawSet",
+        "file": "law.json",
+        "path": [
+          "totals",
+          "count"
+        ],
+        "token": "1.0"
+      }
+    ]
+  },
+  {
+    "name": "review5-112-law-map-evaluation-order",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "art"
+        ],
+        "value": 0.0
+      },
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "changes",
+          1,
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review5-113-law-mapping-token",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "rawSet",
+        "file": "law.json",
+        "path": [
+          "counts",
+          "reportDates"
+        ],
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "review5-114-law-mapping-token",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "rawSet",
+        "file": "law.json",
+        "path": [
+          "counts",
+          "reportDates"
+        ],
+        "token": "0e0"
+      }
+    ]
+  },
+  {
+    "name": "review5-115-law-mapping-token",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "rawSet",
+        "file": "law.json",
+        "path": [
+          "counts",
+          "reportDates"
+        ],
+        "token": "1.0"
+      }
+    ]
   }
 ]
