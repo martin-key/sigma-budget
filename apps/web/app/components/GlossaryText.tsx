@@ -7,6 +7,7 @@ const skip = new Set(
   ),
 );
 // Tokenize React text before commit; no scanner may mutate a React-owned subtree.
+// As apps/web/client/glossary-scan.js: the text you can see is linked first, then the folded text (a closed <details>, a [hidden] row).
 export function glossaryTree(
   tree: ReactNode,
   glossary: unknown,
@@ -14,15 +15,28 @@ export function glossaryTree(
 ): ReactNode {
   const done = new Set(),
     pats = patterns(index(glossary));
-  function walk(node: ReactNode, scan = false, blocked = false, box = { count: 0 }): ReactNode {
+  let pass: 'shown' | 'folded' = 'shown';
+  function walk(
+    node: ReactNode,
+    scan = false,
+    blocked = false,
+    box = { count: 0 },
+    folded = false,
+  ): ReactNode {
     if (Array.isArray(node))
       return node.map((n, i) => {
-        const child = walk(n, scan, blocked, box);
+        const child = walk(n, scan, blocked, box, folded);
         return isValidElement(child) && child.key === null
           ? cloneElement(child, { key: i })
           : child;
       });
-    if (typeof node === 'string' && scan && !blocked && node.trim().length >= 3) {
+    if (
+      typeof node === 'string' &&
+      scan &&
+      !blocked &&
+      folded === (pass === 'folded') &&
+      node.trim().length >= 3
+    ) {
       let text = node,
         out: ReactNode[] = [];
       while (box.count < 3) {
@@ -70,6 +84,8 @@ export function glossaryTree(
         className?: string;
         'data-gl-scan'?: string;
         'data-gl-skip'?: string;
+        hidden?: boolean;
+        open?: boolean;
       }>(node)
     )
       return node;
@@ -86,7 +102,10 @@ export function glossaryTree(
     )
       ? { count: 0 }
       : box;
-    return cloneElement(node, {}, walk(props.children, active, denied, nextBox));
+    const hides = props.hidden === true || (tag === 'details' && !props.open);
+    return cloneElement(node, {}, walk(props.children, active, denied, nextBox, folded || hides));
   }
-  return walk(tree);
+  const shown = walk(tree);
+  pass = 'folded';
+  return walk(shown);
 }
