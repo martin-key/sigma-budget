@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { lstat, mkdir, realpath, rename, unlink, writeFile } from 'node:fs/promises';
 import { isDeepStrictEqual } from 'node:util';
 import { fileURLToPath } from 'node:url';
-import { isAbsolute, join, relative, resolve } from 'node:path';
+import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 import {
   BuildContext,
   clean,
@@ -57,11 +57,9 @@ export async function dbpGvaBuildCli(args: string[]): Promise<number> {
   if ((await realpath(fixture)) !== fixture) throw new Error('Input path contains a symlink');
   const rel = relative(fixture, target),
     reverse = relative(target, fixture);
-  if (
-    (!rel.startsWith('..') && !isAbsolute(rel)) ||
-    (!reverse.startsWith('..') && !isAbsolute(reverse))
-  )
-    throw new Error('Input and output paths overlap');
+  const inside = (path: string) =>
+    !isAbsolute(path) && path !== '..' && !path.startsWith('..' + sep);
+  if (inside(rel) || inside(reverse)) throw new Error('Input and output paths overlap');
   const inventoryPath = join(fixture, 'provenance.json');
   const inventoryStat = await lstat(inventoryPath);
   if (

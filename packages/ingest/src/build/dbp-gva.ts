@@ -1,6 +1,7 @@
 import { metadata } from '../common/metadata.js';
 import type { Json } from '@sigma-budget/dataset-schema';
 import { pythonRound } from '../common/format.js';
+import { pythonFloatSum } from '../common/numbers.js';
 import type { JsonStat } from '../io/data.js';
 
 type FigureValue = number | string | null;
@@ -64,7 +65,10 @@ export function buildBudgetPlan(input: PlanInput, editorial: PlanEditorial, pdfS
   if (!/^[a-f0-9]{64}$/.test(pdfSha256)) throw new Error('Invalid PDF hash');
   const figures: Record<string, Record<string, unknown>> = {};
   for (const f of input.figures) {
+    if (typeof f.id !== 'string') throw new Error('Missing figure id');
     if (!USE.some((p) => f.id.startsWith(p)) || f.id === 'n27.MOD') continue;
+    if (['value', 'page', 'basis'].some((key) => !Object.hasOwn(f, key)))
+      throw new Error(`Missing figure field: ${f.id}`);
     const e: Record<string, unknown> = { v: f.value, u: unit(f.unit), p: f.page, b: f.basis };
     if (f.year != null) e.y = f.year;
     if (f.table) e.t = f.table;
@@ -75,8 +79,11 @@ export function buildBudgetPlan(input: PlanInput, editorial: PlanEditorial, pdfS
     if (Object.hasOwn(figures, id)) throw new Error(`duplicate id ${id}`);
     figures[id] = { v, u, y, p, t, b, k: 'reported' };
   }
-  for (const f of input.derived)
-    if (DERIVED.has(f.id))
+  for (const f of input.derived) {
+    if (typeof f.id !== 'string') throw new Error('Missing derived id');
+    if (DERIVED.has(f.id)) {
+      if (['value', 'unit', 'year', 'formula'].some((key) => !Object.hasOwn(f, key)))
+        throw new Error(`Missing derived field: ${f.id}`);
       figures[f.id] = {
         v: f.value,
         u: unit(f.unit),
@@ -85,6 +92,8 @@ export function buildBudgetPlan(input: PlanInput, editorial: PlanEditorial, pdfS
         k: 'derived',
         f: f.formula,
       };
+    }
+  }
   if (!figures['deficit.2027.eur']) throw new Error('Missing derived deficit');
   figures['deficit.2027.eur'].f = editorial.deficitFormula;
   return {
@@ -116,13 +125,40 @@ export interface Outlook {
 type Cell = [number, string | null];
 /** Slice JSON-stat in declared dimension order; absent and null cells are missing, not zero. */
 export function gvaSeries(doc: GvaStat, dim: string, key: string): Map<number, Cell> {
-  if (!doc.id.includes(dim) || !doc.id.includes('time') || doc.id.length !== doc.size.length)
+  if (
+    Object.hasOwn(doc, 'status') &&
+    (!doc.status || typeof doc.status !== 'object' || Array.isArray(doc.status))
+  )
+    throw new Error('Invalid observation status map');
+  if (
+    !doc.id.includes(dim) ||
+    !doc.id.includes('time') ||
+    doc.id.length !== doc.size.length ||
+    new Set(doc.id).size !== doc.id.length
+  )
     throw new Error('Invalid dimensions');
+  for (const [i, d] of doc.id.entries()) {
+    const size = doc.size[i],
+      category = doc.dimension[d]?.category.index;
+    if (!Number.isSafeInteger(size) || size! <= 0 || !category || typeof category !== 'object')
+      throw new Error(`Invalid dimension ${d}`);
+    const indices = Array.isArray(category) ? category.map((_, i) => i) : Object.values(category);
+    if (
+      indices.length !== size ||
+      new Set(indices).size !== size ||
+      indices.some((n) => !Number.isSafeInteger(n) || n < 0 || n >= size!) ||
+      (Array.isArray(category) &&
+        (new Set(category).size !== size ||
+          category.some((key) => typeof key !== 'string' || !key)))
+    )
+      throw new Error(`Invalid dimension category indices ${d}`);
+  }
   const index = (d: string, k: string): number => {
     const cat = doc.dimension[d]?.category.index;
     const n = Array.isArray(cat) ? cat.indexOf(k) : cat?.[k];
-    if (n === undefined || n < 0) throw new Error(`Missing category ${d}:${k}`);
-    return n;
+    if (!Number.isSafeInteger(n) || n! < 0 || n! >= doc.size[doc.id.indexOf(d)]!)
+      throw new Error(`Missing category ${d}:${k}`);
+    return n!;
   };
   for (let i = 0; i < doc.id.length; i++)
     if (doc.id[i] !== dim && doc.id[i] !== 'time' && doc.size[i] !== 1)
@@ -181,10 +217,7 @@ export function buildGva(
     return v;
   };
   for (const y of years) {
-    const sum = pythonRound(
-      branches.reduce((a, b) => a + cell(b.series, y)[0], 0),
-      1,
-    );
+    const sum = pythonRound(pythonFloatSum(branches.map((b) => cell(b.series, y)[0])), 1);
     if (Math.abs(sum - cell(total, y)[0]) > 0.3) throw new Error(`${y}: branches vs total`);
     if (Math.abs(pythonRound(cell(total, y)[0] + cell(tax, y)[0], 1) - cell(gdp, y)[0]) > 0.3)
       throw new Error(`${y}: GVA + taxes vs GDP`);

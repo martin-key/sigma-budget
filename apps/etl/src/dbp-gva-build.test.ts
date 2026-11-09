@@ -49,6 +49,21 @@ it('rejects traversal, output aliases and cwd aliases', () => {
   expect(run(args(fixture + '/../dbp-gva')).status).not.toBe(0);
   expect(run(args(), { PWD: root + '/..' }).status).not.toBe(0);
 });
+it('rejects nested inputs with a double-dot prefix while accepting an unrelated prefixed directory', () => {
+  const nested = mkdtempSync(join(out, '..review-inputs-'));
+  const external = mkdtempSync(join(tmpdir(), '..ts10-inputs-'));
+  try {
+    cpSync(fixture, nested, { recursive: true });
+    const result = run(args(nested));
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toMatch(/overlap/);
+    cpSync(fixture, external, { recursive: true });
+    expect(run(args(external)).status).toBe(0);
+  } finally {
+    rmSync(nested, { recursive: true, force: true });
+    rmSync(external, { recursive: true, force: true });
+  }
+});
 it('rejects altered evidence and linked outputs without changing their target', () => {
   const temp = mkdtempSync(join(tmpdir(), 'ts10-'));
   try {

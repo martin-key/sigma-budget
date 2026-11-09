@@ -22,6 +22,17 @@ const outlook = () => read<Outlook>('inputs/outlook.json');
 const gvaEd = read<GvaEditorial>('inputs/gva-editorial.json');
 
 describe('DBP from frozen extracted evidence', () => {
+  it.each(['id', 'value', 'unit', 'year', 'formula'])(
+    'rejects missing derived %s before filtering or editorial override',
+    (key) => {
+      const p = plan();
+      const figure = p.derived.find(
+        (f) => f.id === (key === 'formula' ? 'deficit.2027.eur' : 'gdp.2027'),
+      )!;
+      delete (figure as unknown as Record<string, unknown>)[key];
+      expect(() => buildBudgetPlan(p, editorial, hash)).toThrow(/derived/);
+    },
+  );
   it('matches independent Python and published snapshots', () => {
     const actual = buildBudgetPlan(plan(), editorial, hash);
     expect(actual).toEqual(read('oracle/dbp2027.json'));
@@ -70,6 +81,51 @@ describe('DBP from frozen extracted evidence', () => {
 });
 
 describe('GVA synthetic source and arithmetic', () => {
+  it('distinguishes absent status flags from a malformed present map', () => {
+    const n = nama();
+    delete n.status;
+    expect(() => buildGva(n, gdp(), outlook(), gvaEd)).not.toThrow();
+    n.status = null;
+    expect(() => buildGva(n, gdp(), outlook(), gvaEd)).toThrow(/status map/);
+  });
+  it.each([
+    [161.55, true],
+    [162.15, false],
+  ] as const)('preserves Python 3.12 branch-sum acceptance with TOTAL %s', (total, accepted) => {
+    const n = nama(),
+      g = gdp(),
+      o = outlook();
+    const values = [19.31, 12.45, 15.02, 18.41, 10.73, 17.47, 19.39, 16.52, 15.86, 16.69];
+    values.forEach(
+      (value, i) => ((n.value as Record<string, number>)[String((i + 1) * 4 + 1)] = value),
+    );
+    (n.value as Record<string, number>)['1'] = total;
+    (g.value as Record<string, number>)['4'] = total === 161.55 ? 181.6 : 182.2;
+    o.gdp.mlnPrecise[0] = total === 161.55 ? 181.6 : 182.2;
+    const run = () => buildGva(n, g, o, gvaEd);
+    if (accepted) expect(run().gva[0]).toBe(161.6);
+    else expect(run).toThrow(/branches/);
+  });
+  it.each([null, '11', -1, 1.5, 12])('rejects an invalid NACE category index: %j', (value) => {
+    const n = nama();
+    const category = n.dimension.nace_r2!.category;
+    category.index = Object.fromEntries((category.index as string[]).map((key, i) => [key, i]));
+    (category.index as Record<string, unknown>).C = value;
+    expect(() => buildGva(n, gdp(), outlook(), gvaEd)).toThrow(/indices/);
+  });
+  it.each(['geo', 'unit'])('requires singleton dimension metadata: %s', (name) => {
+    const n = nama();
+    delete n.dimension[name];
+    expect(() => buildGva(n, gdp(), outlook(), gvaEd)).toThrow(/dimension/);
+  });
+  it('rejects string time indices and invalid dimension sizes', () => {
+    const n = nama();
+    (n.dimension.time!.category.index as Record<string, unknown>)['2019'] = '1';
+    expect(() => buildGva(n, gdp(), outlook(), gvaEd)).toThrow(/indices/);
+    const bad = nama();
+    bad.size[0] = '1' as unknown as number;
+    expect(() => buildGva(bad, gdp(), outlook(), gvaEd)).toThrow(/dimension/);
+  });
   it('matches independent Python for dimensions, dates, flags, subsector and intersections', () => {
     const actual = buildGva(nama(), gdp(), outlook(), gvaEd);
     expect(actual).toEqual(read('oracle/synthetic-gva.json'));
