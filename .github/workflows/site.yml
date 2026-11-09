@@ -204,6 +204,44 @@ jobs:
           python3 -m tests.release.compat_check --env-url "$STAGING_ORIGIN"
           pnpm exec wrangler deploy -c apps/web/build/server/wrangler.json      # built with CLOUDFLARE_ENV=staging: the staging Worker, D1 and R2
 
+  validation-wave14:
+    # Frozen Python evidence and the independent scoped TypeScript checks. No live release oracle.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: pipeline/requirements.lock
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: |
+          python -m pip install --require-hashes -r pipeline/requirements.lock
+          pnpm install --frozen-lockfile
+          pnpm --filter @sigma-budget/dataset-schema build
+      - name: Verify frozen Python oracle and provenance
+        run: |
+          python packages/ingest/test/fixtures/validate14/generate_oracle.py --check
+          python packages/ingest/test/fixtures/validate14/generate_groups_oracle.py --check
+      - name: Scoped validation and corrupted corpus parity
+        env:
+          WAVE14_PARITY_REPORT: tmp/ts-migration/candidates/14/report.json
+        run: pnpm --filter @sigma-budget/ingest exec vitest run src/validate
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: validation-wave14-parity
+          path: tmp/ts-migration/candidates/14/report.json
+          if-no-files-found: error
+      - name: Release remains unchanged
+        if: always()
+        run: git diff --exit-code -- data/release
+
   common-parity:
     # Offline common-layer translation against Python-produced frozen evidence.
     runs-on: ubuntu-latest
