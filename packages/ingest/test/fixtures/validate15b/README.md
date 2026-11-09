@@ -34,4 +34,3 @@ Python 3.12 validator. Required archive/member fields are read before archive I/
 and checksum verification, for both documents. Direct and compiled CLI tests
 compare full group crash results, including counts, diagnostics and exit status.
 Run source_order.py --check alongside the original generators.
-
