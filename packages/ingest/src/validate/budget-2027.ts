@@ -1,8 +1,9 @@
 import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { isDeepStrictEqual } from 'node:util';
 import {
   AnnualLineage,
-  verifyDocument,
+  zipMember,
   type BillExtraction,
   type Extraction,
 } from '../build/annual-lineage.js';
@@ -417,30 +418,69 @@ export function budget2027(ctx: Context): Check {
   const forecast = parsePythonJson<Extraction>(
     read('data/inputs/budget_forecast_2027.json').toString('utf8'),
   );
-  const archive = (source: Extraction['source'], input: string): Buffer => {
-    const archivePath = executionRequired(source, 'archive');
-    executionRequired(source, 'member');
+  const archive = (extraction: Extraction | BillExtraction): Buffer => {
+    const source = executionRequired(extraction, 'source') as Extraction['source'];
+    const archivePath = executionRequired(source, 'archive', extraction, 'source');
+    const member = executionRequired(source, 'member', extraction, 'source');
     const bytes = read(archivePath);
+    const digest = (data: Uint8Array) => createHash('sha256').update(data).digest('hex');
+    const archiveHash = Object.hasOwn(source, 'archive_sha256')
+      ? source.archive_sha256
+      : source.sha256;
+    if (digest(bytes) !== archiveHash)
+      throw pythonError('ValueError', `Archive checksum mismatch: ${source.archive}`);
+    if (member !== null && typeof member === 'object')
+      throw pythonError(
+        'TypeError',
+        `unhashable type: '${Array.isArray(member) ? 'list' : 'dict'}'`,
+      );
+    let memberBytes: Buffer;
     try {
-      verifyDocument(source, input, bytes);
+      memberBytes = zipMember(bytes, member);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      if (message === 'Archive checksum mismatch')
-        throw pythonError('ValueError', `Archive checksum mismatch: ${source.archive}`);
-      if (message === 'PDF member checksum mismatch')
-        throw pythonError('ValueError', `PDF member checksum mismatch: ${source.member}`);
+      if (message.startsWith('ZIP member missing: ')) {
+        let label = pyRepr(member);
+        if (
+          typeof member === 'number' &&
+          pythonNumberAt(source, 'member', member).kind === 'float'
+        ) {
+          if (Object.is(member, -0)) label = '-0.0';
+          else if (!Number.isFinite(member))
+            label = Number.isNaN(member) ? 'nan' : member < 0 ? '-inf' : 'inf';
+          else {
+            const magnitude = Math.abs(member);
+            label =
+              magnitude !== 0 && (magnitude < 1e-4 || magnitude >= 1e16)
+                ? member.toExponential()
+                : String(member);
+            if (label.includes('e'))
+              label = label.replace(
+                /e([+-]?)(\d+)$/,
+                (_, sign: string, digits: string) => 'e' + (sign || '+') + digits.padStart(2, '0'),
+              );
+            else if (!label.includes('.')) label += '.0';
+          }
+        }
+        throw pythonError(
+          'KeyError',
+          pyRepr('There is no item named ' + label + ' in the archive'),
+        );
+      }
       throw error;
     }
+    const memberHash = Object.hasOwn(source, 'pdf_sha256')
+      ? source.pdf_sha256
+      : source.memberSha256;
+    if (digest(memberBytes) !== memberHash)
+      throw pythonError('ValueError', `PDF member checksum mismatch: ${source.member}`);
     return bytes;
   };
-  const forecastArchive = archive(
-    executionRequired(forecast, 'source'),
-    'budget_forecast_2027.json',
-  );
+  const forecastArchive = archive(forecast);
   const bill = parsePythonJson<BillExtraction>(
     read('data/inputs/budget_bill_2027.json').toString('utf8'),
   );
-  const billArchive = archive(executionRequired(bill, 'source'), 'budget_bill_2027.json');
+  const billArchive = archive(bill);
   const lineage = new AnnualLineage(forecast, bill, {
     forecast: forecastArchive,
     bill: billArchive,

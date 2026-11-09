@@ -49,11 +49,16 @@ export function executionIterable(value: any): any[] {
 }
 
 /** Required subscriptions preserve the expected-law reader's missing-evidence failures. */
-export function executionRequired(value: any, key: string | number): any {
+export function executionRequired(
+  value: any,
+  key: string | number,
+  holder?: object,
+  field?: string,
+): any {
   if (value === null || value === undefined)
     throw new TypeError(`'NoneType' object is not subscriptable`);
   if (typeof value !== 'object' && typeof value !== 'string')
-    throw new TypeError(`'${type(value)}' object is not subscriptable`);
+    throw new TypeError(`'${type(value, holder, field)}' object is not subscriptable`);
   const sequence = Array.isArray(value) || typeof value === 'string';
   if (sequence && typeof key !== 'number')
     throw new TypeError(

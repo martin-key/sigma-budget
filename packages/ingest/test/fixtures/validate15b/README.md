@@ -26,6 +26,7 @@ PYTHONDONTWRITEBYTECODE=1 python3.12 generate_oracle.py --check
 PYTHONDONTWRITEBYTECODE=1 python3.12 generate_helpers.py --check
 PYTHONDONTWRITEBYTECODE=1 python3.12 audit_pdf.py --check
 ```
+
 # Combined source metadata failures
 
 The supplemental source_order.py generator preserves the original inventory,
@@ -34,3 +35,9 @@ Python 3.12 validator. Required archive/member fields are read before archive I/
 and checksum verification, for both documents. Direct and compiled CLI tests
 compare full group crash results, including counts, diagnostics and exit status.
 Run source_order.py --check alongside the original generators.
+
+The separate source_methods.py capture adds 66 complete donor outcomes for
+ZIP-member lookup before hash comparison, unhashable member names, missing or
+null member hashes, and raw float/exponent source containers. Direct and compiled
+CLI comparisons preserve the exception type, first failure, counts and facts.
+It leaves all previous captures unchanged. Run source_methods.py --check as well.
