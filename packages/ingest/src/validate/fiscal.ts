@@ -26,7 +26,10 @@ import {
   pyHas,
   sourceTypeAt,
   pyLenAt,
+  pyDictKeysAt,
+  pyRegexAt,
   pyItemAt,
+  pyPath,
   pyIterAt,
   pyDivide,
   pyMultiply,
@@ -103,6 +106,7 @@ export function annex3(ctx: Context): Check {
     `vintage ${pyReprAt(o, 'vintage')}`,
   );
   const g = required<any>(o, 'gdp');
+  pyItemAt(o, 'gdp', 'mln');
   c.ok(pyLenAt(g, 'mln') === 5 && pyLenAt(g, 'mlnPrecise') === 5, 'gdp lengths');
   for (let i = 0; i < 5; i++) {
     const cell = pyItemAt(g, 'mln', i);
@@ -115,12 +119,12 @@ export function annex3(ctx: Context): Check {
   const gdp = required<any>(g, 'mlnPrecise'),
     k = required<any>(o, 'kfp');
   c.ok(
-    same(Object.keys(k).sort(), [...KFP_KEYS].sort()),
-    `kfp keys ${pyRepr(Object.keys(k).sort())}`,
+    same(pyIterAt(o, 'kfp').sort(), [...KFP_KEYS].sort()),
+    `kfp keys ${pyRepr(pyIterAt(o, 'kfp').sort())}`,
   );
   for (const name of KFP_KEYS) {
     const b = required<any>(k, name);
-    required(b, 'mln');
+    pyItemAt(k, name, 'mln');
     c.ok(
       pyLenAt(b, 'mln') === 5 &&
         pyLenAt(b, 'pctGdp') === 5 &&
@@ -155,16 +159,21 @@ export function annex3(ctx: Context): Check {
   );
   const head = [rev[2], exp[2], bal[2], itr[2], gdp[2]];
   c.ok(same(head, [49615.3, 56807.2, -7191.9, 1059.2, 125246.7]), `2026 headline ${tuple(head)}`);
-  for (const [name, arr] of Object.entries(required(o, 'macro')) as [string, any[]][])
-    c.ok(arr.length === 5 && arr.every(isnum), `macro.${name}: five numbers`);
+  for (const name of pyDictKeysAt(o, 'macro', 'items')) {
+    const macro = required<any>(o, 'macro');
+    c.ok(
+      pyLenAt(macro, name) === 5 && pyIterAt(macro, name).every(isnum),
+      `macro.${name}: five numbers`,
+    );
+  }
   c.ok(pyLenAt(o, 'macroVintage') === 5, 'macroVintage length');
-  const rows = required<any[]>(o, 'macroRows'),
+  const rows = pyIterAt(o, 'macroRows') as any[],
     ids = rows.map((r: any) => required(r, 'id'));
   c.ok(
     ids.length === pySet(ids).size && rows.length === 16,
     `macroRows: 16 unique ids, got ${rows.length}`,
   );
-  const inGroups = required<any[]>(o, 'macroGroups').flatMap((gr: any) => pyIterAt(gr, 'rows'));
+  const inGroups = (pyIterAt(o, 'macroGroups') as any[]).flatMap((gr: any) => pyIterAt(gr, 'rows'));
   c.ok(same(inGroups.sort(), [...ids].sort()), 'macroGroups must list every macroRow exactly once');
   for (const r of rows)
     c.ok(
@@ -172,15 +181,13 @@ export function annex3(ctx: Context): Check {
       `macroRow ${required(r, 'id')}: five numbers`,
     );
   const mr = byId(rows) as Record<string, any>;
-  c.ok(
-    same(required(required<any>(mr, 'gdp'), 'values'), required(g, 'mln')),
-    'macroRows gdp must equal gdp.mln',
-  );
-  const vs = required<any[]>(o, 'versions');
-  c.ok(vs.length === 9, `versions: ${vs.length} rows, expected 9`);
+  c.ok(same(pyPath(mr, 'gdp', 'values'), required(g, 'mln')), 'macroRows gdp must equal gdp.mln');
+  const versionLength = pyLenAt(o, 'versions');
+  c.ok(versionLength === 9, `versions: ${versionLength} rows, expected 9`);
+  const vs = pyIterAt(o, 'versions') as any[];
   const other = pyDict<any, any>([
     ...byId(required(ctx.get('revenue.json'), 'rows')),
-    ...byId(required(required<any>(ctx.get('expenditure.json'), 'economic'), 'rows')),
+    ...byId(pyPath(ctx.get('expenditure.json'), 'economic', 'rows')),
   ]);
   let mx = 0;
   for (const v of vs) {
@@ -414,7 +421,7 @@ export function revenue(ctx: Context): Check {
   const c = new Check('REVENUE'),
     r = ctx.get('revenue.json'),
     o = ctx.get('outlook.json'),
-    gdp = required<any>(required<any>(o, 'gdp'), 'mlnPrecise');
+    gdp = pyItemAt(o, 'gdp', 'mlnPrecise');
   c.ok(
     same(required(r, 'years'), required(o, 'years')) &&
       same(required(r, 'vintage'), required(o, 'vintage')),
@@ -422,29 +429,25 @@ export function revenue(ctx: Context): Check {
   );
   const t = required<any>(r, 'total');
   c.ok(
-    same(required(t, 'mln'), required(required<any>(required<any>(o, 'kfp'), 'revenue'), 'mln')) &&
-      same(
-        required(t, 'pctGdp'),
-        required(required<any>(required<any>(o, 'kfp'), 'revenue'), 'pctGdp'),
-      ),
+    same(pyItemAt(r, 'total', 'mln'), pyPath(o, 'kfp', 'revenue', 'mln')) &&
+      same(pyItemAt(r, 'total', 'pctGdp'), pyPath(o, 'kfp', 'revenue', 'pctGdp')),
     'total must equal outlook.kfp.revenue',
   );
-  const rows = required<any[]>(r, 'rows'),
+  const rows = pyIterAt(r, 'rows') as any[],
     by = byId(rows) as Record<string, any>;
   c.ok(
     rows.length === 31 && by.size === 31,
     `rows: ${rows.length} (unique ${by.size}), expected 31`,
   );
-  c.ok(
-    same(required(required<any>(by, 'r.total'), 'mln'), required(t, 'mln')),
-    'r.total must equal total',
-  );
+  c.ok(same(pyPath(by, 'r.total', 'mln'), required(t, 'mln')), 'r.total must equal total');
   const worst = tree(c, rows, 'revenue', gdp),
-    groups = required<any[]>(r, 'groups');
+    groupsLength = pyLenAt(r, 'groups');
   c.ok(
-    groups.length === 8 && pySet(groups.map((gr: any) => required(gr, 'id'))).size === 8,
+    groupsLength === 8 &&
+      pySet(pyIterAt(r, 'groups').map((gr: any) => required(gr, 'id'))).size === 8,
     'groups: 8 unique ids',
   );
+  const groups = pyIterAt(r, 'groups') as any[];
   const used = groups.flatMap((gr: any) => pyIterAt(gr, 'rowIds'));
   c.ok(
     used.length === pySet(used).size && used.every((id: any) => pyHas(by, id)),
@@ -452,10 +455,29 @@ export function revenue(ctx: Context): Check {
   );
   const gsum = [];
   for (let i = 0; i < 5; i++) {
-    const s = pySum(pyMap(groups, (gr: any) => numeric(required(gr, 'mln'), i)));
-    gsum.push(roundedOne(s));
-    c.near(s, required<any>(t, 'mln')[i], 0.15, `groups sum vs total, year ${2024 + i}`);
-    c.near(pyItemAt(r, 'groupSums', i), roundedOne(s), 0.0501, `groupSums[${i}]`);
+    const s = pyTypedSum(pyMap(groups, (gr: any) => numeric(required(gr, 'mln'), i)));
+    const rounded = roundedOne(s.value);
+    gsum.push(rounded);
+    const printed = s.kind === 'float' ? pyFloat(s.value) : String(s.value);
+    const total = pyItemAt(t, 'mln', i);
+    nearWithText(
+      c,
+      s.value,
+      total,
+      0.15,
+      `groups sum vs total, year ${2024 + i}`,
+      printed,
+      displayAt(required(t, 'mln'), i),
+    );
+    nearWithText(
+      c,
+      pyItemAt(r, 'groupSums', i),
+      rounded,
+      0.0501,
+      `groupSums[${i}]`,
+      displayAt(required(r, 'groupSums'), i),
+      s.kind === 'float' ? pyFloat(rounded) : String(rounded),
+    );
   }
   for (const gr of groups) {
     if (!required<any>(gr, 'rowIds').every((x: string) => pyHas(by, x))) continue;
@@ -524,11 +546,19 @@ export function revenue(ctx: Context): Check {
       `group ${required<any>(gr, 'id')} yoy2026Pct`,
     );
   }
-  const shares = pySum(pyMap(groups, (gr: any) => numeric(gr, 'share2026')));
-  nearWithText(c, shares, 100, 0.05, 'shares add up to 100', pyFloat(shares), '100.0');
+  const shares = pyTypedSum(pyMap(groups, (gr: any) => numeric(gr, 'share2026')));
+  nearWithText(
+    c,
+    shares.value,
+    100,
+    0.05,
+    'shares add up to 100',
+    shares.kind === 'float' ? pyFloat(shares.value) : String(shares.value),
+    '100.0',
+  );
   const ex = ctx.get('execution.json');
   c.ok(
-    required(required<any>(r, 'execution'), 'ref') === 'execution' &&
+    pyPath(r, 'execution', 'ref') === 'execution' &&
       pyIterAt(required<any>(r, 'execution'), 'rows').every((k: any) =>
         pySet(pyIterAt(ex, 'rows').map((x: any) => required(x, 'id'))).has(k),
       ),
@@ -549,7 +579,7 @@ export function measures(ctx: Context): Check {
     m = ctx.get('measures.json'),
     o = ctx.get('outlook.json'),
     t = required<any>(m, 'totals');
-  const tt = required<any>(t, 'discretionary2026');
+  const tt = pyItemAt(m, 'totals', 'discretionary2026');
   c.ok(
     same([required<any>(tt, 'II-8'), required<any>(tt, 'II-9')], [482, 604.4]),
     `discretionary 2026: II-8 / II-9 = ${displayAt(tt, 'II-8')} / ${displayAt(tt, 'II-9')}`,
@@ -566,16 +596,10 @@ export function measures(ctx: Context): Check {
     'short-term totals',
   );
   c.ok(
-    same(
-      [
-        required<any>(required<any>(m, 'check'), 'II-8'),
-        required<any>(required<any>(m, 'check'), 'II-9'),
-      ],
-      [482, 604.4],
-    ),
+    same([pyPath(m, 'check', 'II-8'), pyPath(m, 'check', 'II-9')], [482, 604.4]),
     'check.II-8 / II-9',
   );
-  const items = required<any[]>(m, 'items'),
+  const items = pyIterAt(m, 'items') as any[],
     ids = items.map((i: any) => required(i, 'id')),
     by = byId(items) as Record<string, any>,
     cnt = required<any>(m, 'counts');
@@ -590,7 +614,7 @@ export function measures(ctx: Context): Check {
     same(
       [short.length, disc.length, laws.length],
       [
-        required<any>(required<any>(cnt, 'short'), 'all'),
+        pyPath(cnt, 'short', 'all'),
         pyAdd(
           numeric(required<any>(cnt, 'discretionary'), 'revenue'),
           numeric(required<any>(cnt, 'discretionary'), 'expenditure'),
@@ -606,34 +630,30 @@ export function measures(ctx: Context): Check {
     count(
       short,
       (i) => required(i, 'kind') === 'revenue' && pyTruth(required(i, 'hasEstimate')),
-    ) === required<any>(required<any>(cnt, 'short'), 'revenue') &&
-      required<any>(required<any>(cnt, 'short'), 'revenue') === 8,
+    ) === pyPath(cnt, 'short', 'revenue') && pyPath(cnt, 'short', 'revenue') === 8,
     'counts: short revenue with estimate',
   );
   c.ok(
     count(
       short,
       (i) => required(i, 'kind') === 'expenditure' && pyTruth(required(i, 'hasEstimate')),
-    ) === required<any>(required<any>(cnt, 'short'), 'expenditure') &&
-      required<any>(required<any>(cnt, 'short'), 'expenditure') === 9,
+    ) === pyPath(cnt, 'short', 'expenditure') && pyPath(cnt, 'short', 'expenditure') === 9,
     'counts: short expenditure with estimate',
   );
   c.ok(
     count(short, (i) => !pyTruth(required(i, 'hasEstimate'))) ===
-      required<any>(required<any>(cnt, 'short'), 'noEstimate') &&
-      required<any>(required<any>(cnt, 'short'), 'noEstimate') === 7,
+      pyPath(cnt, 'short', 'noEstimate') && pyPath(cnt, 'short', 'noEstimate') === 7,
     'counts: short without estimate',
   );
   c.ok(
     count(disc, (i) => required(i, 'kind') === 'revenue') ===
-      required<any>(required<any>(cnt, 'discretionary'), 'revenue') &&
-      required<any>(required<any>(cnt, 'discretionary'), 'revenue') === 14,
+      pyPath(cnt, 'discretionary', 'revenue') && pyPath(cnt, 'discretionary', 'revenue') === 14,
     'counts: discretionary revenue',
   );
   c.ok(
     count(disc, (i) => required(i, 'kind') === 'expenditure') ===
-      required<any>(required<any>(cnt, 'discretionary'), 'expenditure') &&
-      required<any>(required<any>(cnt, 'discretionary'), 'expenditure') === 6,
+      pyPath(cnt, 'discretionary', 'expenditure') &&
+      pyPath(cnt, 'discretionary', 'expenditure') === 6,
     'counts: discretionary expenditure',
   );
   for (const i of items) {
@@ -658,11 +678,13 @@ export function measures(ctx: Context): Check {
     if (pyTruth(required(i, 'hasEstimate'))) {
       required(i, 'effectMln');
       c.ok(
-        Object.keys(required<any>(i, 'effectMln')).every((y) =>
-          ['2026', '2027', '2028'].includes(y),
+        [...pySet(pyIterAt(i, 'effectMln'))].every((y) =>
+          ['2026', '2027', '2028'].includes(y as string),
         ) &&
           pyTruth(required<any>(i, 'effectMln')) &&
-          Object.values(required<any>(i, 'effectMln')).every(isnum),
+          pyDictKeysAt(i, 'effectMln').every((y) =>
+            isnum(pyItem(required<any>(i, 'effectMln'), y)),
+          ),
         `${required(i, 'id')}: effectMln`,
       );
       if (required<any>(i, 'tab') === 'short')
@@ -679,16 +701,16 @@ export function measures(ctx: Context): Check {
       const sign = required(i, 'kind') === 'revenue' ? 1 : -1;
       c.ok(
         same(
-          Object.keys(required<any>(i, 'balanceEffectMln')).sort(),
-          Object.keys(required<any>(i, 'effectMln')).sort(),
+          [...pySet(pyIterAt(i, 'balanceEffectMln'))].sort(),
+          [...pySet(pyIterAt(i, 'effectMln'))].sort(),
         ) &&
-          Object.keys(required<any>(i, 'effectMln')).every(
+          pyIterAt(i, 'effectMln').every(
             (y) =>
               Math.abs(
-                pySubtract(numeric(required<any>(i, 'balanceEffectMln'), y), {
+                pySubtract(numeric(required<any>(i, 'balanceEffectMln'), y as string), {
                   value: pyMultiply(
                     { value: sign, kind: 'float' },
-                    numeric(required<any>(i, 'effectMln'), y),
+                    numeric(required<any>(i, 'effectMln'), y as string),
                   ),
                   kind: 'float',
                 }),
@@ -705,10 +727,11 @@ export function measures(ctx: Context): Check {
       );
     if ('from' in i)
       c.ok(
-        typeof required<any>(i, 'from') === 'string' &&
-          /^\p{Decimal_Number}{4}-\p{Decimal_Number}{2}-\p{Decimal_Number}{2}$/u.test(
-            required<any>(i, 'from'),
-          ),
+        pyRegexAt(
+          i,
+          'from',
+          /^\p{Decimal_Number}{4}-\p{Decimal_Number}{2}-\p{Decimal_Number}{2}$/u,
+        ),
         `${required(i, 'id')}: from ${pyReprAt(i, 'from')}`,
       );
   }
@@ -777,7 +800,7 @@ export function measures(ctx: Context): Check {
     stated.kind === 'float' ? pyFloat(stated.value) : String(stated.value),
     displayAt(t, 'expenditureMlnWithoutIndicative'),
   );
-  const gdp = required<any>(required<any>(o, 'gdp'), 'mlnPrecise')[2];
+  const gdp = pyPath(o, 'gdp', 'mlnPrecise')[2];
   for (const [tab, kind] of [
     ['II-8', 'revenue'],
     ['II-9', 'expenditure'],
@@ -785,7 +808,7 @@ export function measures(ctx: Context): Check {
     const its = disc.filter((i: any) => i.table === tab);
     c.ok(
       its.every((i: any) => required(i, 'kind') === kind) &&
-        its.length === required<any>(required<any>(cnt, 'discretionary'), kind),
+        its.length === pyPath(cnt, 'discretionary', kind),
       `${tab}: items`,
     );
     const sums = [];
@@ -793,7 +816,7 @@ export function measures(ctx: Context): Check {
       const s = pySum(
         pyMap(its, (i: any) =>
           pyHas(required<any>(i, 'effectMln'), y)
-            ? numeric(required<any>(i, 'effectMln'), y)
+            ? numeric(required<any>(i, 'effectMln'), y as string)
             : floatZero,
         ),
       );
@@ -801,26 +824,24 @@ export function measures(ctx: Context): Check {
       nearWithText(
         c,
         s,
-        required<any>(required<any>(required<any>(t, 'discretionary'), tab), y),
+        pyPath(t, 'discretionary', tab, y),
         0.15,
         `${tab} ${y}: items sum vs printed total`,
         pyFloat(s),
-        displayAt(required<any>(required<any>(t, 'discretionary'), tab), y),
+        displayAt(pyPath(t, 'discretionary', tab), y),
       );
     }
     c.ok(
-      same(required<any>(required<any>(required<any>(m, 'check'), 'rowSums'), tab), sums),
-      `check.rowSums[${tab}] [${required<any>(required<any>(m, 'check'), 'rowSums')
-        [tab].map((_: any, i: number) =>
-          displayAt(required<any>(required<any>(required<any>(m, 'check'), 'rowSums'), tab), i),
-        )
+      same(pyPath(m, 'check', 'rowSums', tab), sums),
+      `check.rowSums[${tab}] [${pyPath(m, 'check', 'rowSums')
+        [tab].map((_: any, i: number) => displayAt(pyPath(m, 'check', 'rowSums', tab), i))
         .join(', ')}] vs recomputed [${sums.map(pyFloat).join(', ')}]`,
     );
     c.near(
-      required<any>(required<any>(t, 'discretionaryPeriod'), tab),
+      pyPath(t, 'discretionaryPeriod', tab),
       pySum(
-        pyMap(Object.keys(required<any>(required<any>(t, 'discretionary'), tab)), (y) =>
-          numeric(required<any>(required<any>(t, 'discretionary'), tab), y),
+        pyMap(pyDictKeysAt(required<any>(t, 'discretionary'), tab), (y) =>
+          numeric(pyPath(t, 'discretionary', tab), y),
         ),
       ),
       0.15,
@@ -834,7 +855,7 @@ export function measures(ctx: Context): Check {
     () =>
       percentage(
         () => numeric(tt, 'II-8'),
-        () => numeric(required<any>(required<any>(o, 'gdp'), 'mlnPrecise'), 2),
+        () => numeric(pyPath(o, 'gdp', 'mlnPrecise'), 2),
       ),
     0.0051,
     'gdpShare2026 revenue',
@@ -847,14 +868,14 @@ export function measures(ctx: Context): Check {
     () =>
       percentage(
         () => numeric(tt, 'II-9'),
-        () => numeric(required<any>(required<any>(o, 'gdp'), 'mlnPrecise'), 2),
+        () => numeric(pyPath(o, 'gdp', 'mlnPrecise'), 2),
       ),
     0.0051,
     'gdpShare2026 expenditure',
     sourceTypeAt(t, 'gdpShare2026'),
   );
   const d = required<any>(m, 'document');
-  required(d, 'sha256');
+  pyItemAt(m, 'document', 'url');
   c.ok(
     required<string>(d, 'url').startsWith('https://www.parliament.bg/') &&
       pyLenAt(d, 'sha256') === 64,
@@ -878,19 +899,20 @@ export function expenditure(ctx: Context): Check {
     e = ctx.get('expenditure.json'),
     o = ctx.get('outlook.json'),
     core = ctx.get('core.json'),
-    gdp = required<any>(required<any>(o, 'gdp'), 'mlnPrecise'),
+    gdp = pyItemAt(o, 'gdp', 'mlnPrecise'),
     f = required<any>(e, 'functions');
   c.ok(
-    same(required(f, 'years'), [2025, 2026, 2027, 2028]) &&
+    same(pyItemAt(e, 'functions', 'years'), [2025, 2026, 2027, 2028]) &&
       pyLenAt(f, 'vintage') === 4 &&
       pyLenAt(f, 'yearLabels') === 4,
     'functions: years/vintage/yearLabels',
   );
-  const items = required<any[]>(f, 'items');
+  const itemsLength = pyLenAt(f, 'items');
   c.ok(
-    items.length === 9 && pySet(items.map((i: any) => required(i, 'id'))).size === 9,
+    itemsLength === 9 && pySet(pyIterAt(f, 'items').map((i: any) => required(i, 'id'))).size === 9,
     'functions: 9 unique items',
   );
+  const items = pyIterAt(f, 'items') as any[];
   const tot = required<any>(f, 'totalMln');
   for (let k = 0; k < 4; k++) {
     const s = pySum(pyMap(items, (i: any) => numeric(required(i, 'mln'), k)));
@@ -977,6 +999,7 @@ export function expenditure(ctx: Context): Check {
         );
   }
   const rc = required<any>(f, 'reconcile');
+  pyItemAt(f, 'reconcile', 'printedPctGdpMaxGap');
   for (let k = 0; k < 4; k++)
     c.ok(
       pyLessEqual(
@@ -987,7 +1010,7 @@ export function expenditure(ctx: Context): Check {
       ),
       `functions: printed % of GDP gap ${fixed(gaps[k]!, 3)} in ${2025 + k} exceeds the declared ${displayAt(required<any>(rc, 'printedPctGdpMaxGap'), k)}`,
     );
-  const ec = byId(required<any>(required<any>(e, 'economic'), 'rows')) as Record<string, any>;
+  const ec = byId(pyItemAt(e, 'economic', 'rows')) as Record<string, any>;
   for (let k = 0; k < 4; k++) {
     const value = at(pyItem(ec, 'x.exp'), k + 1);
     nearWithText(
@@ -1089,17 +1112,11 @@ export function expenditure(ctx: Context): Check {
   c.ok(rows.length === 30 && ec.size === 30, `economic: ${rows.length} rows, expected 30`);
   const worst = tree(c, rows, 'economic', gdp);
   c.ok(
-    same(
-      required<any>(pyItem(ec, 'x.total'), 'mln'),
-      required<any>(required<any>(required<any>(o, 'kfp'), 'expenditure'), 'mln'),
-    ),
+    same(required<any>(pyItem(ec, 'x.total'), 'mln'), pyPath(o, 'kfp', 'expenditure', 'mln')),
     'economic x.total must equal outlook expenditure',
   );
   c.ok(
-    same(
-      required<any>(pyItem(ec, 'x.interest'), 'mln'),
-      required<any>(required<any>(required<any>(o, 'kfp'), 'interest'), 'mln'),
-    ),
+    same(required<any>(pyItem(ec, 'x.interest'), 'mln'), pyPath(o, 'kfp', 'interest', 'mln')),
     'economic x.interest must equal outlook interest',
   );
   for (let i = 0; i < 5; i++)
@@ -1140,7 +1157,7 @@ export function expenditure(ctx: Context): Check {
     '55 525,0 + 1 282,2 vs 56 807,2',
   );
   const cf = required<any>(e, 'cofog'),
-    cit = required<any[]>(cf, 'items'),
+    cit = pyItemAt(e, 'cofog', 'items') as any[],
     top = cit.filter((x: any) => !pyTruth(x.memoOf));
   c.ok(
     pyLenAt(cf, 'years') === 10 &&
@@ -1153,7 +1170,7 @@ export function expenditure(ctx: Context): Check {
       Math.abs(
         pySubtract(
           pyTypedSum(pyMap(top, (x: any) => numeric(required(x, 'mln'), k))),
-          numeric(required(required<any>(cf, 'total'), 'mln'), k),
+          numeric(pyPath(cf, 'total', 'mln'), k),
         ),
       ) <= 0.3,
       `cofog ${required<any>(cf, 'years')[k]}: functions differ from the total`,
@@ -1178,16 +1195,8 @@ export function expenditure(ctx: Context): Check {
     'cofog: kfpFunctions must be function ids',
   );
   const implied = percentage(
-    () =>
-      numeric(
-        required<any>(required<any>(cf, 'total'), 'mln'),
-        required<any>(required<any>(cf, 'total'), 'mln').length - 1,
-      ),
-    () =>
-      numeric(
-        required<any>(required<any>(cf, 'total'), 'pctGdp'),
-        required<any>(required<any>(cf, 'total'), 'pctGdp').length - 1,
-      ),
+    () => numeric(pyPath(cf, 'total', 'mln'), pyPath(cf, 'total', 'mln').length - 1),
+    () => numeric(pyPath(cf, 'total', 'pctGdp'), pyPath(cf, 'total', 'pctGdp').length - 1),
   );
   c.ok(
     Math.abs(pyDivide(floating(implied), numeric(gdp, 0)) - 1) < 0.003,
@@ -1195,8 +1204,8 @@ export function expenditure(ctx: Context): Check {
   );
   const pc = required<any>(e, 'perCapita');
   c.ok(
-    required(pc, 'population') === required<any>(required<any>(core, 'population'), 'persons') &&
-      required(pc, 'year') === required<any>(required<any>(core, 'population'), 'year'),
+    required(pc, 'population') === pyPath(core, 'population', 'persons') &&
+      required(pc, 'year') === pyPath(core, 'population', 'year'),
     'perCapita: population must equal core.population',
   );
   c.fact(

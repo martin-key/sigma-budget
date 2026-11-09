@@ -106,6 +106,17 @@ export function pyItem(
   }
   throw new PythonError('TypeError', `'${sourceType}' object is not subscriptable`);
 }
+/** Preserve each parent token kind while traversing nested subscriptions. */
+export function pyPath(value: any, ...keys: (string | number | boolean)[]): any {
+  let kind = pythonType(value);
+  for (const key of keys) {
+    const next = pyItem(value, key, kind);
+    kind =
+      typeof next === 'number' ? pythonNumberAt(value, String(key), next).kind : pythonType(next);
+    value = next;
+  }
+  return value;
+}
 export function pyLen(value: unknown, sourceType = pythonType(value)): number {
   if (typeof value === 'string') return Array.from(value).length;
   if (Array.isArray(value)) return value.length;
@@ -136,10 +147,25 @@ export function pyItemAt(holder: any, key: string | number, index: string | numb
   const value = pyItem(holder, key);
   return pyItem(value, index, sourceTypeAt(holder, key));
 }
-export function pyHas(mapping: any, key: any): boolean {
-  hashable(key);
-  if (mapping instanceof Map) return mapping.has(key);
-  return typeof key === 'string' && Object.hasOwn(mapping, key);
+export function pyHas(mapping: any, key: any, sourceType = pythonType(mapping)): boolean {
+  if (Array.isArray(mapping)) return mapping.some((item) => pyEqual(item, key));
+  if (typeof mapping === 'string') {
+    if (typeof key !== 'string')
+      throw new PythonError(
+        'TypeError',
+        `'in <string>' requires string as left operand, not ${pythonType(key)}`,
+      );
+    return mapping.includes(key);
+  }
+  if (mapping instanceof Map || mapping instanceof Set) {
+    hashable(key);
+    return mapping.has(key);
+  }
+  if (mapping !== null && typeof mapping === 'object') {
+    hashable(key);
+    return typeof key === 'string' && Object.hasOwn(mapping, key);
+  }
+  throw new PythonError('TypeError', `argument of type '${sourceType}' is not iterable`);
 }
 
 /** Dict.get supplies its default only for an absent key, preserving explicit None. */
@@ -191,6 +217,7 @@ export function pyIterGet(mapping: any, key: string): unknown[] {
 
 class PythonDict<K, V> extends Map<K, V> {
   private readonly representations = new Map<K, string>();
+  private readonly types = new Map<K, string>();
   private storedKey(key: K): K {
     hashable(key);
     if (super.has(key)) return key;
@@ -205,13 +232,24 @@ class PythonDict<K, V> extends Map<K, V> {
   override get(key: K): V | undefined {
     return super.get(this.storedKey(key));
   }
-  override set(key: K, value: V, representation = pythonRepr(key)): this {
+  override set(
+    key: K,
+    value: V,
+    representation = pythonRepr(key),
+    sourceType = pythonType(key),
+  ): this {
     const stored = this.storedKey(key);
-    if (!super.has(stored)) this.representations.set(stored, representation);
+    if (!super.has(stored)) {
+      this.representations.set(stored, representation);
+      this.types.set(stored, sourceType);
+    }
     return super.set(stored, value);
   }
   keyRepr(key: K): string {
     return this.representations.get(this.storedKey(key))!;
+  }
+  keyType(key: K): string {
+    return this.types.get(this.storedKey(key))!;
   }
 }
 
@@ -219,6 +257,31 @@ export function pyDict<K, V>(entries: Iterable<readonly [K, V]> = []): PythonDic
   const result = new PythonDict<K, V>();
   for (const [key, value] of entries) result.set(key, value);
   return result;
+}
+
+/** Sorting actual Counter keys retains Python numeric equality and error types. */
+export function pySortedDictKeys<K>(mapping: PythonDict<K, unknown>): K[] {
+  return [...mapping.keys()].sort((a, b) => {
+    if (pyEqual(a, b)) return 0;
+    if (
+      (typeof a === 'number' || typeof a === 'boolean') &&
+      (typeof b === 'number' || typeof b === 'boolean')
+    )
+      return Number(a) < Number(b) ? -1 : 1;
+    if (typeof a === 'string' && typeof b === 'string') {
+      const left = Array.from(a),
+        right = Array.from(b);
+      for (let i = 0; i < Math.min(left.length, right.length); i++)
+        if (left[i] !== right[i])
+          return left[i]!.codePointAt(0)! < right[i]!.codePointAt(0)! ? -1 : 1;
+      return left.length - right.length;
+    }
+    if (a instanceof PythonTuple && b instanceof PythonTuple) return tupleCompare(a, b);
+    throw new PythonError(
+      'TypeError',
+      `'<' not supported between instances of '${mapping.keyType(a)}' and '${mapping.keyType(b)}'`,
+    );
+  });
 }
 
 /** Scoped by_id keeps Python dictionary keys instead of JavaScript property coercion. */
@@ -289,9 +352,14 @@ export function pyDictKeys(
     throw new PythonError('AttributeError', `'${sourceType}' object has no attribute '${method}'`);
   return pythonKeys(value);
 }
-export function pyDictKeysAt(holder: any, key: string | number): string[] {
-  return pyDictKeys(pyItem(holder, key), 'values', sourceTypeAt(holder, key));
+export function pyDictKeysAt(
+  holder: any,
+  key: string | number,
+  method: 'values' | 'items' = 'values',
+): string[] {
+  return pyDictKeys(pyItem(holder, key), method, sourceTypeAt(holder, key));
 }
+
 export function pyAddAssign(a: PythonNumber, b: PythonNumber): number {
   if (typeof a.value !== 'number' || typeof b.value !== 'number')
     throw new PythonError(
@@ -560,4 +628,15 @@ export function pySum(values: Iterable<PythonNumber>): number {
     }
   }
   return pythonSum(checked());
+}
+
+/** Regex.match raises on non-string operands before later checks run. */
+export function pyRegexAt(holder: any, key: string | number, pattern: RegExp): boolean {
+  const value = pyItem(holder, key);
+  if (typeof value !== 'string')
+    throw new PythonError(
+      'TypeError',
+      `expected string or bytes-like object, got '${sourceTypeAt(holder, key)}'`,
+    );
+  return pattern.test(value);
 }

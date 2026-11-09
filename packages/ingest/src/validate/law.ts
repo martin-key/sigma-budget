@@ -31,6 +31,11 @@ import {
   pyLessEqual,
   sourceTypeAt,
   pyDictKeysAt,
+  pyIterAt,
+  pyLenAt,
+  pyIter,
+  pyItemAt,
+  pyPath,
   pyItem,
   pySet,
   pySubtract,
@@ -58,9 +63,31 @@ const OWN: Record<string, number> = {
 };
 const same = (a: unknown, b: unknown) => pyEqual(a, b);
 const repr = pyRepr;
-const iso = (x: any) =>
-  typeof x === 'string' &&
-  /^\p{Decimal_Number}{4}-\p{Decimal_Number}{2}-\p{Decimal_Number}{2}$/u.test(x);
+const iso = (x: any, kind = pythonType(x)) => {
+  if (typeof x !== 'string')
+    throw new PythonError('TypeError', `expected string or bytes-like object, got '${kind}'`);
+  return /^\p{Decimal_Number}{4}-\p{Decimal_Number}{2}-\p{Decimal_Number}{2}$/u.test(x);
+};
+const isoAt = (holder: any, key: string | number) =>
+  iso(pyItem(holder, key), sourceTypeAt(holder, key));
+function sortedDates(rows: any[]) {
+  return rows
+    .map((row) => ({ value: required<any>(row, 'date'), type: sourceTypeAt(row, 'date') }))
+    .sort((a, b) => {
+      if (typeof a.value === 'string' && typeof b.value === 'string')
+        return a.value < b.value ? -1 : a.value > b.value ? 1 : 0;
+      if (
+        (typeof a.value === 'number' || typeof a.value === 'boolean') &&
+        (typeof b.value === 'number' || typeof b.value === 'boolean')
+      )
+        return Number(a.value) - Number(b.value);
+      throw new PythonError(
+        'TypeError',
+        `'<' not supported between instances of '${a.type}' and '${b.type}'`,
+      );
+    })
+    .map((x) => x.value);
+}
 const nz = (x: any): number => (isnum(x) ? x : 0);
 const sorted = (x: any[]) => [...x].sort();
 const n = (o: any, k: string | number): PythonNumber => {
@@ -94,8 +121,8 @@ function dd(c: Check, node: any, where: string, tol = TOL, nodeType = pythonType
 }
 function art1(c: Check, law: any): Map<PythonTuple, any> {
   const a = required<any>(law, 'art1'),
-    h = required<any>(a, 'headline');
-  c.ok(same(Object.keys(h), HEAD), `art1.headline keys ${repr(Object.keys(h))}`);
+    h = pyItemAt(law, 'art1', 'headline');
+  c.ok(same(pyIterAt(a, 'headline'), HEAD), `art1.headline keys ${repr(pyIterAt(a, 'headline'))}`);
   for (const k of HEAD) {
     for (const s of ['bill', 'law', 'diff'])
       c.ok(pyHas(h, k) && isnum(pyGetIn(h, k, s)), `art1.headline.${k}.${s} is not a number`);
@@ -207,7 +234,7 @@ function art1(c: Check, law: any): Map<PythonTuple, any> {
         near(
           c,
           get(HEAD_ROW[k]!, HEAD_ROW[k]!, s),
-          required<any>(required<any>(h, k), s),
+          pyPath(h, k, s),
           TOL,
           `art1 headline ${k} ${s} = line ${HEAD_ROW[k]}`,
           display(rows.get(key(HEAD_ROW[k]!, HEAD_ROW[k]!)), s),
@@ -280,8 +307,9 @@ function art1(c: Check, law: any): Map<PythonTuple, any> {
   return rows;
 }
 function lawBudgets(c: Check, law: any) {
-  const bs = required<any[]>(law, 'budgets');
-  c.ok(bs.length === 46, `${bs.length} budgets (46 expected: art. 2-47)`);
+  const budgetLength = pyLenAt(law, 'budgets');
+  c.ok(budgetLength === 46, `${budgetLength} budgets (46 expected: art. 2-47)`);
+  const bs = pyIterAt(law, 'budgets') as any[];
   c.ok(
     same(
       bs.map((b: any) => required<any>(b, 'art')),
@@ -302,7 +330,7 @@ function lawBudgets(c: Check, law: any) {
     for (const k of ['name', 'short', 'kind'])
       c.ok(typeof b[k] === 'string' && !!pyStrip(b[k]), `${w}: ${k}`);
     for (const k of ['rev', 'exp', 'transfers']) {
-      const sides = ['bill', 'law', 'diff'].map((s) => required(required<any>(b, s), k));
+      const sides = ['bill', 'law', 'diff'].map((s) => pyPath(b, s, k));
       c.ok(
         sides.every((x) => x === null) || sides.every(isnum),
         `${w}.${k}: the three sides must be all numbers or all null: [${['bill', 'law', 'diff'].map((s) => display(required<any>(b, s), k)).join(', ')}]`,
@@ -319,17 +347,11 @@ function lawBudgets(c: Check, law: any) {
         );
     }
     for (const s of ['bill', 'law']) {
-      c.ok(isnum(required<any>(required<any>(b, s), 'exp')), `${w}.${s}.exp must be a number`);
-      sums[s].rev += nz(required<any>(required<any>(b, s), 'rev'));
-      sums[s].exp += nz(required<any>(required<any>(b, s), 'exp'));
-      if (
-        isnum(required<any>(required<any>(b, s), 'exp')) &&
-        isnum(required<any>(required<any>(b, s), 'transfers'))
-      ) {
-        const gap =
-          required<any>(required<any>(b, s), 'transfers') -
-          (required<any>(required<any>(b, s), 'exp') -
-            nz(required<any>(required<any>(b, s), 'rev')));
+      c.ok(isnum(pyPath(b, s, 'exp')), `${w}.${s}.exp must be a number`);
+      sums[s].rev += nz(pyPath(b, s, 'rev'));
+      sums[s].exp += nz(pyPath(b, s, 'exp'));
+      if (isnum(pyPath(b, s, 'exp')) && isnum(pyPath(b, s, 'transfers'))) {
+        const gap = pyPath(b, s, 'transfers') - (pyPath(b, s, 'exp') - nz(pyPath(b, s, 'rev')));
         const want =
           required<any>(b, 'id') === '0600' && s === 'law'
             ? -7000
@@ -349,13 +371,13 @@ function lawBudgets(c: Check, law: any) {
     }
     const ln = required<any>(b, 'lines');
     c.ok(
-      same(sorted(Object.keys(ln)), ['add', 'chg', 'del']) &&
-        Object.keys(ln).every((k) => pyIntAt(ln, k) && Number(ln[k]) >= 0),
+      same(sorted(pyIterAt(b, 'lines')), ['add', 'chg', 'del']) &&
+        pyDictKeysAt(b, 'lines').every((k) => pyIntAt(ln, k) && Number(ln[k]) >= 0),
       `${w}: lines ${repr(ln)}`,
     );
     const moved =
       ['rev', 'exp', 'transfers'].some((k) => Math.abs(nz(required<any>(b, 'diff')[k])) > 0.05) ||
-      Object.values(ln).some(pyTruth);
+      pyDictKeysAt(b, 'lines').some((k) => pyTruth(pyItem(ln, k)));
     c.ok(
       pyEqual(required(b, 'changed'), moved),
       `${w}: changed flag ${display(b, 'changed')} vs differences`,
@@ -364,30 +386,24 @@ function lawBudgets(c: Check, law: any) {
   }
   const t = required<any>(law, 'totals');
   c.ok(
-    pyEqual(required(t, 'count'), bs.length) && bs.length === 46,
+    pyEqual(pyItemAt(law, 'totals', 'count'), bs.length) && bs.length === 46,
     `totals.count ${stringField(t, 'count')}`,
   );
   for (const s of ['bill', 'law'])
     for (const k of ['rev', 'exp']) {
       near(
         c,
-        required<any>(required<any>(t, s), k),
+        pyPath(t, s, k),
         sums[s][k],
         TOL_SUM,
         `totals.${s}.${k} = sum of the budgets`,
         display(t[s], k),
         pyfloat(sums[s][k]),
       );
-      near(
-        c,
-        required<any>(required<any>(t, s), k),
-        REF[s]![k],
-        TOL,
-        `totals.${s}.${k} reference value`,
-      );
+      near(c, pyPath(t, s, k), REF[s]![k], TOL, `totals.${s}.${k} reference value`);
     }
   for (const k of ['rev', 'exp']) {
-    const actual = required(required<any>(t, 'diff'), k);
+    const actual = pyPath(t, 'diff', k);
     const left = n(required(t, 'law'), k),
       right = n(required(t, 'bill'), k);
     const difference = pySubtract(left, right);
@@ -441,8 +457,10 @@ function changes(c: Check, law: any, artRows: Map<PythonTuple, any>) {
         required<any>(x, 'notes').every((v: any) => typeof v === 'string' && !!pyStrip(v)),
       `${w}: notes`,
     );
-    for (const [k, node] of Object.entries(required<Record<string, any>>(x, 'headline')))
-      dd(c, node, `${w} headline ${k}`, TOL, sourceTypeAt(required(x, 'headline'), k));
+    for (const k of pyDictKeysAt(x, 'headline', 'items')) {
+      const headline = required<any>(x, 'headline');
+      dd(c, pyItem(headline, k), `${w} headline ${k}`, TOL, sourceTypeAt(headline, k));
+    }
     for (const key of ['areas', 'bodies', 'commitments']) {
       const nodes = pyIterGet(x, key);
       for (const [i, node] of nodes.entries()) {
@@ -483,11 +501,11 @@ function changes(c: Check, law: any, artRows: Map<PythonTuple, any>) {
           for (const s of ['bill', 'law'])
             near(
               c,
-              required<any>(required<any>(required<any>(x, 'headline'), k), s),
-              required<any>(required<any>(b, s), k),
+              pyPath(x, 'headline', k, s),
+              pyPath(b, s, k),
               TOL,
               `${w} headline ${k} ${s} = the budget`,
-              display(required<any>(required<any>(x, 'headline'), k), s),
+              display(pyPath(x, 'headline', k), s),
               display(required<any>(b, s), k),
             );
       if ('areas' in x)
@@ -495,7 +513,7 @@ function changes(c: Check, law: any, artRows: Map<PythonTuple, any>) {
           near(
             c,
             sum(pyMap(required<any>(x, 'areas'), (a: any) => n(a, s))),
-            required<any>(required<any>(b, s), 'exp'),
+            pyPath(b, s, 'exp'),
             TOL_SUM,
             `${w} areas ${s} sum to the expenditure`,
           );
@@ -523,34 +541,29 @@ function changes(c: Check, law: any, artRows: Map<PythonTuple, any>) {
     }
   }
   c.ok(
-    same(sorted(Object.keys(required<any>(ch[0], 'headline'))), [
-      'balance',
-      'exp',
-      'financing',
-      'rev',
-    ]),
+    same(sorted(pyIterAt(ch[0], 'headline')), ['balance', 'exp', 'financing', 'rev']),
     'art. 1 change headline keys',
   );
 }
 function reconciliation(c: Check, law: any) {
   const rec = required<any>(law, 'reconciliation'),
-    h = required<any>(required<any>(law, 'art1'), 'headline');
+    h = pyPath(law, 'art1', 'headline');
   const rows = required<any>(law, 'budgets')
     .filter(
       (b: any) =>
-        Math.abs(nz(required<any>(required<any>(b, 'diff'), 'rev'))) > 0.05 ||
-        Math.abs(nz(required<any>(required<any>(b, 'diff'), 'exp'))) > 0.05,
+        Math.abs(nz(pyPath(b, 'diff', 'rev'))) > 0.05 ||
+        Math.abs(nz(pyPath(b, 'diff', 'exp'))) > 0.05,
     )
     .map((b: any) => ({
       art: required<any>(b, 'art'),
       name: required(b, 'name'),
-      rev: nz(required<any>(required<any>(b, 'diff'), 'rev')),
-      exp: nz(required<any>(required<any>(b, 'diff'), 'exp')),
+      rev: nz(pyPath(b, 'diff', 'rev')),
+      exp: nz(pyPath(b, 'diff', 'exp')),
       source: required<any>(b, 'diff'),
     }));
   c.ok(
     same(
-      required<any>(rec, 'rows').map((r: any) => [
+      pyItemAt(law, 'reconciliation', 'rows').map((r: any) => [
         required<any>(r, 'art'),
         required<any>(r, 'name'),
       ]),
@@ -582,7 +595,7 @@ function reconciliation(c: Check, law: any) {
   for (const k of ['rev', 'exp', 'balance']) {
     near(
       c,
-      required<any>(required<any>(rec, 'sum'), k),
+      pyPath(rec, 'sum', k),
       s[k],
       TOL_SUM,
       `reconciliation sum.${k}`,
@@ -591,8 +604,8 @@ function reconciliation(c: Check, law: any) {
     );
     near(
       c,
-      required<any>(required<any>(rec, 'art1'), k),
-      required<any>(required<any>(h, k), 'diff'),
+      pyPath(rec, 'art1', k),
+      pyPath(h, k, 'diff'),
       TOL,
       `reconciliation art1.${k} = art. 1 headline diff`,
       display(required<any>(rec, 'art1'), k),
@@ -600,25 +613,23 @@ function reconciliation(c: Check, law: any) {
     );
     near(
       c,
-      required<any>(required<any>(rec, 'sum'), k),
-      required<any>(required<any>(rec, 'art1'), k),
+      pyPath(rec, 'sum', k),
+      pyPath(rec, 'art1', k),
       TOL_SUM,
       `arts. 2 + 3 + 17 = art. 1 on ${k}`,
     );
   }
   c.ok(required<any>(rec, 'ok') === true, 'reconciliation.ok must be true');
   c.ok(
-    required<any>(rec, 'unit') === required<any>(required<any>(law, 'meta'), 'unit') &&
+    required<any>(rec, 'unit') === pyPath(law, 'meta', 'unit') &&
       required<any>(rec, 'unit') === 'хил. €',
     'reconciliation unit',
   );
   return s;
 }
 function bills(c: Check, law: any, src: any, buildDate: string) {
-  const gz = pySet(
-      required<any>(law, 'gazette').map((g: any) =>
-        JSON.stringify([required<any>(g, 'issue'), required<any>(g, 'date')]),
-      ),
+  const gz = pyDict<PythonTuple, any>(
+      pyIterAt(law, 'gazette').map((g: any) => [pyTupleAt(g, ['issue', 'date']), g] as const),
     ),
     bs = required<any>(law, 'bills');
   c.ok(
@@ -642,13 +653,22 @@ function bills(c: Check, law: any, src: any, buildDate: string) {
         required<any>(b, 'firstReading'),
         ...required<any>(b, 'secondReading'),
       ];
+    required(b, 'adopted');
+    pyItemAt(b, 'decree', 'issued');
+    pyItemAt(b, 'gazette', 'date');
+    const dateFields: [any, string | number][] = [
+      [b, 'submitted'],
+      [b, 'firstReading'],
+      ...required<any>(b, 'secondReading').map(
+        (_: any, i: number) => [required<any>(b, 'secondReading'), i] as [any, number],
+      ),
+      [b, 'adopted'],
+      [required<any>(b, 'decree'), 'issued'],
+      [required<any>(b, 'gazette'), 'date'],
+    ];
+    for (const [holder, key] of dateFields) pyItem(holder, key);
     c.ok(
-      [
-        ...days,
-        required<any>(b, 'adopted'),
-        required<any>(required<any>(b, 'decree'), 'issued'),
-        required<any>(required<any>(b, 'gazette'), 'date'),
-      ].every(iso),
+      dateFields.every(([holder, key]) => isoAt(holder, key)),
       `${w}: dates must be ISO`,
     );
     c.ok(
@@ -660,43 +680,38 @@ function bills(c: Check, law: any, src: any, buildDate: string) {
       `${w}: adopted = last second reading`,
     );
     c.ok(
-      required<any>(b, 'adopted') <= required<any>(required<any>(b, 'decree'), 'issued') &&
-        required<any>(required<any>(b, 'decree'), 'issued') <=
-          required<any>(required<any>(b, 'gazette'), 'date') &&
-        required<any>(required<any>(b, 'gazette'), 'date') <= buildDate,
+      required<any>(b, 'adopted') <= pyPath(b, 'decree', 'issued') &&
+        pyPath(b, 'decree', 'issued') <= pyPath(b, 'gazette', 'date') &&
+        pyPath(b, 'gazette', 'date') <= buildDate,
       `${w}: adopted <= decree <= gazette <= build date`,
     );
     c.ok(
-      gz.has(
-        JSON.stringify([
-          required<any>(required<any>(b, 'gazette'), 'issue'),
-          required<any>(required<any>(b, 'gazette'), 'date'),
-        ]),
-      ),
-      `${w}: gazette issue ${required<any>(required<any>(b, 'gazette'), 'issue')} of ${required<any>(required<any>(b, 'gazette'), 'date')} is not in law.gazette`,
+      gz.has(pyTupleAt(required<any>(b, 'gazette'), ['issue', 'date'])),
+      `${w}: gazette issue ${stringField(required<any>(b, 'gazette'), 'issue')} of ${stringField(required<any>(b, 'gazette'), 'date')} is not in law.gazette`,
     );
-    required(required<any>(b, 'decree'), 'no');
+    pyPath(b, 'decree', 'no');
     c.ok(
       pyIntAt(required<any>(b, 'decree'), 'no') && pyIntAt(required<any>(b, 'gazette'), 'issue'),
       `${w}: decree / issue numbers`,
     );
-    c.ok(iso(required<any>(required<any>(b, 'inForce'), 'from')), `${w}: inForce.from`);
-    for (const e of required<any>(required<any>(b, 'inForce'), 'exceptions')) {
+    c.ok(isoAt(required<any>(b, 'inForce'), 'from'), `${w}: inForce.from`);
+    for (const e of pyPath(b, 'inForce', 'exceptions')) {
       c.ok(
-        (required<any>(e, 'from') === null || iso(required<any>(e, 'from'))) &&
+        (required<any>(e, 'from') === null ||
+          (typeof required<any>(e, 'from') === 'string' && iso(required<any>(e, 'from')))) &&
           pyTruth(pyStrip(required<any>(e, 'when'))) &&
           pyTruth(pyStrip(required<any>(e, 'scope'))),
         `${w}: exception ${repr(e)}`,
       );
       c.ok(
         required<any>(e, 'from') === null ||
-          required<any>(e, 'from') >= required<any>(required<any>(b, 'gazette'), 'date'),
+          required<any>(e, 'from') >= pyPath(b, 'gazette', 'date'),
         `${w}: an exception starts before the gazette date: ${required<any>(e, 'from')}`,
       );
     }
     c.ok(
       ['committeeReports', 'opinions', 'proposals'].every((k) => {
-        required(required<any>(b, 'counts'), k);
+        pyPath(b, 'counts', k);
         return pyIntAt(required<any>(b, 'counts'), k) && Number(required<any>(b, 'counts')[k]) >= 0;
       }),
       `${w}: counts`,
@@ -731,32 +746,26 @@ function bills(c: Check, law: any, src: any, buildDate: string) {
     );
   }
   c.ok(
-    pyEqual(
-      required(required<any>(cn, 'committees'), 'reported'),
-      required(cn, 'committeeReports'),
-    ) &&
+    pyEqual(pyPath(cn, 'committees', 'reported'), required(cn, 'committeeReports')) &&
       pyLessEqual(
         required<any>(cn, 'committeeReports'),
-        required(required<any>(cn, 'committees'), 'total'),
+        pyPath(cn, 'committees', 'total'),
         sourceTypeAt(cn, 'committeeReports'),
         sourceTypeAt(required<any>(cn, 'committees'), 'total'),
       ) &&
-      pyEqual(required<any>(required<any>(cn, 'committees'), 'total'), 24),
+      pyEqual(pyPath(cn, 'committees', 'total'), 24),
     `counts.committees ${display(cn, 'committees')}`,
   );
   c.ok(
-    same(
-      required<any>(cn, 'proposalDates'),
-      required<any>(required<any>(law, 'proposals'), 'byDate'),
-    ),
+    same(required<any>(cn, 'proposalDates'), pyItemAt(law, 'proposals', 'byDate')),
     'counts.proposalDates = proposals.byDate',
   );
   const g = required<any>(law, 'gazette'),
     dates = g.map((x: any) => required<any>(x, 'date'));
-  c.ok(same(dates, sorted(dates)) && g.length === 4, 'gazette: 4 issues in date order');
+  c.ok(same(dates, sortedDates(g)) && g.length === 4, 'gazette: 4 issues in date order');
   for (const x of g)
     c.ok(
-      iso(required<any>(x, 'date')) &&
+      isoAt(x, 'date') &&
         Number(required<any>(x, 'date').slice(0, 4)) === required<any>(x, 'year') &&
         pyIntAt(x, 'issue') &&
         pyTruth(required<any>(x, 'laws')),
@@ -774,8 +783,7 @@ function bills(c: Check, law: any, src: any, buildDate: string) {
     'documents: 7 https links',
   );
   c.ok(
-    required<any>(docs[0], 'url') ===
-      required<any>(required<any>(required<any>(law, 'versions'), 'bill'), 'url'),
+    required<any>(docs[0], 'url') === pyPath(law, 'versions', 'bill', 'url'),
     'documents[0] is the bill file of versions.bill',
   );
 }
@@ -830,8 +838,8 @@ function proposals(c: Check, law: any) {
   const p = required<any>(law, 'proposals'),
     items = required<any>(p, 'items');
   c.ok(
-    same(sorted(Object.keys(p)), ['byDate', 'count', 'items', 'note', 'urlPattern']),
-    `proposals keys ${repr(sorted(Object.keys(p)))}`,
+    same(sorted(pyIter(p)), ['byDate', 'count', 'items', 'note', 'urlPattern']),
+    `proposals keys ${repr(sorted(pyIter(p)))}`,
   );
   const count = pyTypedSum(
     pyMap(pyDictKeysAt(p, 'byDate'), (k) => n(required<any>(p, 'byDate'), k)),
@@ -845,8 +853,8 @@ function proposals(c: Check, law: any) {
   for (const [i, r] of items.entries()) {
     const w = `proposals.items[${i}]`;
     c.ok(
-      same(sorted(Object.keys(r)), ['date', 'file', 'no']),
-      `${w}: keys ${repr(sorted(Object.keys(r)))} (only no, date, file: no author, no text)`,
+      same(sorted(pyIter(r)), ['date', 'file', 'no']),
+      `${w}: keys ${repr(sorted(pyIter(r)))} (only no, date, file: no author, no text)`,
     );
     required(r, 'no');
     c.ok(
@@ -856,7 +864,7 @@ function proposals(c: Check, law: any) {
       `${w}: no/file ${stringField(r, 'no')} ${stringField(r, 'file')}`,
     );
     c.ok(
-      iso(required<any>(r, 'date')) && pyHas(required<any>(p, 'byDate'), required<any>(r, 'date')),
+      isoAt(r, 'date') && pyHas(required<any>(p, 'byDate'), required<any>(r, 'date')),
       `${w}: date ${required<any>(r, 'date')}`,
     );
     c.ok(!nos.has(required<any>(r, 'no')), `${w}: duplicate number`);
@@ -904,10 +912,7 @@ export function law(ctx: Context): Check {
     'next',
     'pending',
   ];
-  c.ok(
-    same(sorted(Object.keys(data)), sorted(keys)),
-    `law.json keys ${repr(sorted(Object.keys(data)))}`,
-  );
+  c.ok(same(sorted(pyIter(data)), sorted(keys)), `law.json keys ${repr(sorted(pyIter(data)))}`);
   c.ok(
     required(m, 'id') === 'D10+D11' &&
       required<any>(m, 'status') === 'real' &&
@@ -917,21 +922,21 @@ export function law(ctx: Context): Check {
     'meta id/status/unit/pending',
   );
   c.ok(
-    iso(required<any>(m, 'asOf')) && required<any>(m, 'asOf') <= ctx.buildDate,
+    isoAt(m, 'asOf') && required<any>(m, 'asOf') <= ctx.buildDate,
     `meta.asOf ${required<any>(m, 'asOf')}`,
   );
   const v = required<any>(data, 'versions');
   c.ok(
-    required(required<any>(v, 'bill'), 'date') === '2026-07-01' &&
-      required<any>(required<any>(v, 'law'), 'date') === '2026-07-24' &&
-      required<any>(required<any>(v, 'bill'), 'ref') === '52-602-01-19',
+    required(pyItemAt(data, 'versions', 'bill'), 'date') === '2026-07-01' &&
+      pyPath(v, 'law', 'date') === '2026-07-24' &&
+      pyPath(v, 'bill', 'ref') === '52-602-01-19',
     'versions dates/ref',
   );
   c.ok(
-    Object.values(v).every(
-      (x: any) =>
-        required<string>(x, 'url').startsWith('https://') && pyTruth(required(x, 'label')),
-    ),
+    pyDictKeysAt(data, 'versions').every((k) => {
+      const x = pyItem(v, k);
+      return required<string>(x, 'url').startsWith('https://') && pyTruth(required(x, 'label'));
+    }),
     'versions urls',
   );
   const rows = art1(c, data);
@@ -943,7 +948,7 @@ export function law(ctx: Context): Check {
   proposals(c, data);
   const t = required<any>(data, 'totals');
   c.fact(
-    `46 budgets: revenue ${fmt(required<any>(required<any>(t, 'bill'), 'rev'))} -> ${fmt(required<any>(required<any>(t, 'law'), 'rev'))}, expenditure ${fmt(required<any>(required<any>(t, 'bill'), 'exp'))} -> ${fmt(required<any>(required<any>(t, 'law'), 'exp'))} хил. €; 4 differ (arts 2, 3, 16, 17); arts 2 + 3 + 17 = art. 1: revenue ${fmt(required<any>(s, 'rev'))}, expenditure ${fmt(required<any>(s, 'exp'))}, balance ${fmt(required<any>(s, 'balance'))}; ${required<any>(data, 'timeline').length} timeline entries, ${pyDecimalInteger(required(required<any>(data, 'counts'), 'committeeReports'))} committee reports, ${pyDecimalInteger(required(required<any>(data, 'counts'), 'opinions'))} opinions, ${pyDecimalInteger(required(required<any>(data, 'counts'), 'proposals'))} proposals`,
+    `46 budgets: revenue ${fmt(pyPath(t, 'bill', 'rev'))} -> ${fmt(pyPath(t, 'law', 'rev'))}, expenditure ${fmt(pyPath(t, 'bill', 'exp'))} -> ${fmt(pyPath(t, 'law', 'exp'))} хил. €; 4 differ (arts 2, 3, 16, 17); arts 2 + 3 + 17 = art. 1: revenue ${fmt(required<any>(s, 'rev'))}, expenditure ${fmt(required<any>(s, 'exp'))}, balance ${fmt(required<any>(s, 'balance'))}; ${required<any>(data, 'timeline').length} timeline entries, ${pyDecimalInteger(pyPath(data, 'counts', 'committeeReports'))} committee reports, ${pyDecimalInteger(pyPath(data, 'counts', 'opinions'))} opinions, ${pyDecimalInteger(pyPath(data, 'counts', 'proposals'))} proposals`,
   );
   return c;
 }
