@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { parsePythonJson } from '../common/numbers.js';
 import {
   AnnualLineage,
@@ -26,14 +26,30 @@ const inputs = () => {
   );
   return { forecast, bill, zip };
 };
-it('reproduces annual, every provenance entry and the bill from frozen Python donors', () => {
+function prepareBaseline() {
   const { forecast, bill, zip } = inputs();
   const lineage = new AnnualLineage(forecast, bill, { forecast: zip, bill: zip });
-  expect(buildAnnualPeriods(forecast, lineage)).toEqual(oracle('annual.json'));
-  expect(lineage.entries).toEqual(oracle('annual-entries.json'));
+  const annual = buildAnnualPeriods(forecast, lineage);
+  const entries = structuredClone(lineage.entries);
   const { budget, provenance } = buildBudget2027(lineage, '2026-11-08');
-  expect(budget).toEqual(oracle('budget2027.json'));
-  expect(provenance).toEqual(oracle('budget2027-provenance.json'));
+  return { forecast, annual, entries, budget, provenance };
+}
+let baseline: ReturnType<typeof prepareBaseline>;
+beforeAll(() => {
+  baseline = prepareBaseline();
+});
+it('reproduces every annual period and its provenance entries from the Python donor', () => {
+  expect(baseline.annual).toEqual(oracle('annual.json'));
+  expect(baseline.entries).toEqual(oracle('annual-entries.json'));
+});
+it('reproduces the complete bill from the frozen Python donor', () => {
+  expect(baseline.budget).toEqual(oracle('budget2027.json'));
+});
+it('reproduces every final provenance entry from the frozen Python donor', () => {
+  expect(baseline.provenance).toEqual(oracle('budget2027-provenance.json'));
+});
+it('retains every budget and municipality identity, blanks and the documented GDP discrepancy', () => {
+  const { forecast, budget } = baseline;
   expect(Object.keys(budget.budgets.bill)).toHaveLength(48); // Article 1 plus 47 budget identities.
   expect(budget.municipal.art52).toHaveLength(265);
   expect(budget.municipal.art53).toHaveLength(265);
@@ -43,7 +59,7 @@ it('reproduces annual, every provenance entry and the bill from frozen Python do
   );
 });
 
-it('matches the changed Python donor across bill variants, all measure years and debt ceilings', () => {
+function prepareChanged() {
   const { forecast, bill, zip } = inputs();
   const row = forecast.tables.II_7!.rows[0]!;
   row.values = [123, -12.5, 9];
@@ -54,12 +70,31 @@ it('matches the changed Python donor across bill variants, all measure years and
   const lineage = new AnnualLineage(forecast, bill, { forecast: zip, bill: zip });
   const { budget } = buildBudget2027(lineage, '2026-11-08');
   const changed = oracle('changed.json');
-  expect(budget.forecast.II_7[0]).toEqual(changed.measures);
-  expect(budget.debtLimits['67']).toEqual(changed.debt67);
-  expect(budget.budgets.bill['1'].rows).toEqual(changed.bill1rows);
-  expect(budget.budgets.billMc['1'].rows).toEqual(changed.billMc1rows);
-  expect(budget.budgets.bill['2']).toBeUndefined();
-  expect(budget.budgets.billMc['2']).toEqual(changed.billMcOnly);
+  return { budget, changed };
+}
+describe('changed Python donor', () => {
+  let prepared: ReturnType<typeof prepareChanged>;
+  beforeAll(() => {
+    prepared = prepareChanged();
+  });
+  it('matches the measures across all years', () => {
+    expect(prepared.budget.forecast.II_7[0]).toEqual(prepared.changed.measures);
+  });
+  it('matches the changed legal ceiling', () => {
+    expect(prepared.budget.debtLimits['67']).toEqual(prepared.changed.debt67);
+  });
+  it('matches the changed bill rows', () => {
+    expect(prepared.budget.budgets.bill['1'].rows).toEqual(prepared.changed.bill1rows);
+  });
+  it('preserves the separate Council-of-Ministers rows', () => {
+    expect(prepared.budget.budgets.billMc['1'].rows).toEqual(prepared.changed.billMc1rows);
+  });
+  it('preserves an absent bill budget', () => {
+    expect(prepared.budget.budgets.bill['2']).toBeUndefined();
+  });
+  it('preserves the budget present only in the Council-of-Ministers variant', () => {
+    expect(prepared.budget.budgets.billMc['2']).toEqual(prepared.changed.billMcOnly);
+  });
 });
 
 it('rejects altered archives, member hashes and null source hashes while using defaults only for absence', () => {
