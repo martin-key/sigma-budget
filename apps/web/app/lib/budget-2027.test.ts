@@ -154,6 +154,60 @@ async function page(address: string, absent = false) {
     document: parseHTML(String(frameHtml(vm))).document,
   };
 }
+it.each(['ministries', 'programs', 'measures', 'debt', 'municipalities'])(
+  'keeps the publication period in historical catalogue links: %s',
+  async (name) => {
+    const { document } = await page('/danni/' + name);
+    const links = [...document.querySelectorAll('.s24-facts a[href]')]
+      .map((a) => a.getAttribute('href')!.replace(/^#/, ''))
+      .filter((h) =>
+        /^\/(pari|razhodi|vedomstva|vedomstvo|merki|dalg|obshtini|obshtina|zakon)(?:\?|\/|$)/.test(
+          h,
+        ),
+      );
+    expect(links.length).toBeGreaterThan(0);
+    for (const link of links)
+      expect(new URL(link, 'https://budget.test').searchParams.get('per')).toBe('2026.law');
+  },
+);
+it.each([
+  's34-kratko',
+  's34-ppd',
+  's34-caps-fig',
+  's34-merki',
+  's34-prihodi',
+  's34-razhodi',
+  's34-dalg',
+  's34-esa-kfp',
+])('restores the original budget-plan document for a shared section: %s', async (target) => {
+  const { document, vm } = await page('/byudzhet-2027?to=' + target);
+  expect(vm.title).toContain('Проект на бюджетен план до ЕК');
+  expect(document.getElementById(target)).not.toBeNull();
+  expect(document.getElementById('s34-bill')).toBeNull();
+});
+it('keeps new bill targets and explicit document choices separate', async () => {
+  for (const address of [
+    '/byudzhet-2027',
+    '/byudzhet-2027?to=s34-bill',
+    '/byudzhet-2027?variant=billMc&to=s34-mc-budget',
+    '/byudzhet-2027?dokument=bill&to=s34-ppd',
+  ]) {
+    expect((await page(address)).vm.title).not.toContain('Проект на бюджетен план до ЕК');
+  }
+});
+it('keeps glossary references and the overview scope meaningful', async () => {
+  const { document } = await page('/rechnik/proekt-na-byudzheten-plan');
+  expect(document.querySelector('.s03-see a')?.getAttribute('href')?.replace(/^#/, '')).toBe(
+    '/byudzhet-2027?dokument=plan',
+  );
+  const overview = (await page('/pari')).html;
+  expect(overview).toContain('Бюджети на ведомствата');
+  expect(overview).toContain('не е целият бюджет');
+  expect(overview).not.toContain('ОБХВАТ: ZDB-VEDOMSTVA');
+  const plan = await page('/byudzhet-2027?dokument=plan');
+  expect(plan.html).toContain('основния изглед за бюджет 2027');
+  expect(plan.html).not.toContain('Не можем да потвърдим дали е публикуван');
+});
 it('preserves historical municipality next links and institution breadcrumbs', async () => {
   const law = await page('/zakon');
   expect(law.vm.view).toBe('ready');

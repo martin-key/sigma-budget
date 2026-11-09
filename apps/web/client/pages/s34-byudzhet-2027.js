@@ -1,5 +1,6 @@
 import { billOverview } from './bill-views.js';
 import { periodByKey } from '../periods.js';
+import { isBudgetPlan } from '../budget-documents.js';
 // S34 · Бюджет 2027 (проект) · #/byudzhet-2027 · next S13 · periods none
 // Data: dbp2027.json (D34), built by pipeline/budget_pipeline/build/budget_plan.py from the Draft Budgetary Plan of Bulgaria for 2027 (Министерство на финансите, 15.10.2026).
 // Every number printed here is read from `figures` (each has the page of the plan, the unit and the basis) or is a plain sum/difference of two such numbers
@@ -17,7 +18,7 @@ import { gl } from '../ui/gl.js';
 import { byId } from '../routes.js';
 import { num, pct, delta, money, moneyParts, date, NBSP } from '../format.js';
 
-export const needs = ctx => ctx.query.dokument === 'plan' ? ['core', 'dbp2027'] : ['core', 'budget2027?'];
+export const needs = ctx => isBudgetPlan(ctx.query) ? ['core', 'dbp2027', 'budget2027?'] : ['core', 'budget2027?'];
 export const styles = ['s34-byudzhet-2027'];
 
 /* ---------------------------------------------------------------- helpers */
@@ -425,22 +426,24 @@ function esaKfpBlocks(f) {
 }
 
 /* ---------------------------------------------------------------- 8 · Какво още липсва */
-function missingBlock(f) {
+function missingBlock(ctx, f) {
   const { d } = f;
+  const publication = ctx.data.budget2027?.publication;
+  const available = m => publication && ['zdbrb', 'asbp'].includes(m.id);
   return block({
-    id: 's34-lipsva', title: 'Какво още липсва', scope: 'esa', status: 'pending', statusLabel: 'Липсва · не е потвърдено', asOf: f.asOf, source: ['dbp2027', 'ec-dbp'],
-    sub: 'Неща, които този екран не може да покаже, и защо.',
+    id: 's34-lipsva', title: 'Какво липсва в този документ', scope: 'esa', status: 'pending', statusLabel: 'Липсва · не е потвърдено', asOf: f.asOf, source: ['dbp2027', 'ec-dbp'],
+    sub: 'Ограничения на проекта на бюджетен план до ЕК от 15.10.2026.',
     share: false,
     body: html`<div class="stack">
-      ${facts((d.missing || []).map(m => ({ k: m.title, v: m.text })))}
-      <p class="s34-note">Проверихме документа и страниците на Комисията. Някои сайтове (на Министерството на финансите, на Съвета на ЕС, EUR-Lex и страницата на Народното събрание със законопроектите) не се отвориха за автоматична проверка. Затова не можем да потвърдим дали законопроектът за бюджета и средносрочната прогноза вече са публикувани.</p>
+      ${facts((d.missing || []).map(m => ({ k: m.title, v: available(m) ? `Не е част от този документ. Публикуваният от МФ на ${date(publication)} документ вече е добавен към портала.` : m.text })))}
+      ${publication ? html`<p class="s34-note">Законопроектът и АСБП 2027–2029, публикувани на ${date(publication)}, са в <a href="${ctx.href('S34', {}, { dokument: 'bill' })}">основния изглед за бюджет 2027</a>. Числата тук остават от отделния проект на бюджетен план до ЕК.</p>` : html`<p class="s34-note">Описанието е според проверката на проекта на бюджетен план и страниците на Комисията към датата му.</p>`}
     </div>`
   });
 }
 
 /* ---------------------------------------------------------------- the screen */
 export function render(ctx) {
-  if (ctx.query.dokument !== 'plan') return billOverview({ ...ctx, period: periodByKey('2027.draft') });
+  if (!isBudgetPlan(ctx.query)) return billOverview({ ...ctx, period: periodByKey('2027.draft') });
   const f = fx(ctx);
   const when = date(f.d.doc.date);
   return {
@@ -455,7 +458,7 @@ export function render(ctx) {
       ${expenseBlock(f)}
       ${debtBlock(ctx, f)}
       ${esaKfpBlocks(f)}
-      ${missingBlock(f)}
+      ${missingBlock(ctx, f)}
       <p class="s34-links small">Още по темата: <a href="${ctx.href('S13')}">${byId.S13.title}</a> · <a href="${ctx.href('S12')}">${byId.S12.title}</a> · <a href="${ctx.href('S17')}">${byId.S17.title}</a></p>`
   };
 }

@@ -71,7 +71,7 @@ function cardSpend(ctx, O, X, Y) {
 function cardAgencies(ctx, O, M) {
   if (ctx.period.key === '2027.draft') {
     const items = institutions(ctx.data.budget2027), top = items.filter(i => cellValue(i.expenditure) !== null).sort((a,b) => b.expenditure.value-a.expenditure.value)[0];
-    return { ic:'landmark', q:'Кой харчи парите?', href:ctx.href('S10',{}, {per:'2027.draft'}), text:top ? `${top.name}. Общо ${items.length} бюджета по чл. 2–48 от основния проект.` : 'Това издание няма ведомствените бюджети за 2027 г.', kpi:{label:'Най-голям ведомствен бюджет · проект 2027',mln:top ? top.expenditure.value/1000 : null,scope:'zdb-vedomstva',source:['budget2027'],asOf:ctx.data.budget2027?.publication} };
+    return { ic:'landmark', q:'Кой харчи парите?', href:ctx.href('S10',{}, {per:'2027.draft'}), text:top ? `${top.name}. Общо ${items.length} бюджета по чл. 2–48 от основния проект.` : 'Това издание няма ведомствените бюджети за 2027 г.', kpi:{label:'Най-голям ведомствен бюджет · проект 2027',mln:top ? top.expenditure.value/1000 : null,scope:{key:'zdb-vedomstva',label:'Бюджети на ведомствата',note:'не е целият бюджет'},source:['budget2027'],asOf:ctx.data.budget2027?.publication} };
   }
   if (ctx.period.key !== '2026.law') return { ic: 'landmark', q: 'Кой харчи парите?', href: ctx.href('S10'), text: 'Няма извлечени ведомствени бюджети за избрания период.', kpi: { label: ctx.period.label, value: null, status: 'pending' } };
   const items = arr(M && M.items).filter(it => ok(it.expKhil));

@@ -132,11 +132,28 @@ class ProductSearchTest(unittest.TestCase):
 
     def test_eurostat_news_links_keep_the_reported_series_and_period(self):
         from urllib.parse import parse_qs, urlsplit
-        from budget_pipeline.build.context import Ctx
         from budget_pipeline.build.feed import _eurostat_events
-        ctx = Ctx()
-        for name in ('debt.json', 'expenditure.json'):
-            ctx.put(name, json.loads((ROOT / 'data/release' / name).read_text()))
+        published = {name: json.loads((ROOT / 'data/release' / name).read_text())
+                     for name in ('debt.json', 'expenditure.json')}
+        sources = {name: json.loads((ROOT / 'data/inputs' / (name + '.json')).read_text())
+                   for name in ('cofog_bg', 'population')}
+        population = sources['population']
+        # This unit test exercises news destinations, not the raw adapters. Use
+        # complete small source envelopes so a clean checkout needs no cache.
+        maastricht = published['debt.json']['latest']['maastricht']
+        raw = {
+            'eurostat/gov_10dd_edpt1_BG_EU.json': {'updated': maastricht['asOf']},
+            'eurostat/gov_10q_ggdebt_BG.json': {'updated': maastricht['quarter']['asOf']},
+            'eurostat/tps00001_BG.json': {
+                'id': ['geo', 'time'], 'size': [1, len(population['years'])],
+                'dimension': {
+                    'geo': {'category': {'index': {'BG': 0}}},
+                    'time': {'category': {'index': {str(y): i for i, y in enumerate(population['years'])}}},
+                },
+                'value': {str(i): v for i, v in enumerate(population['persons'])},
+            },
+        }
+        ctx = SimpleNamespace(get=published.get, src=sources.__getitem__, raw=raw.__getitem__)
         events = _eurostat_events(ctx)
         annual = next(e for e in events if e['id'].startswith('eurostat-gov_10dd_edpt1-'))
         quarter = next(e for e in events if e['id'].startswith('eurostat-gov_10q_ggdebt-'))
