@@ -28,6 +28,7 @@ import threading
 import time
 import urllib.error
 import urllib.request
+from urllib.parse import urlsplit, urlunsplit
 from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -4354,14 +4355,21 @@ def run_summary(findings, args, d, stats, t0):
 
 
 # ========================================================================================================= orchestrator
+def site_base(address):
+    """Normalize only the URL path; dots in a hostname never denote a file."""
+    parts = urlsplit(address)
+    path = parts.path or '/'
+    if not path.endswith('/'):
+        path = path[:path.rfind('/') + 1] if '.' in path.rsplit('/', 1)[-1] else path + '/'
+    return urlunsplit((parts.scheme, parts.netloc, path, '', ''))
+
+
 def main(argv=None):
     args = parse_args(argv)
     t0 = time.time()
     server = None
     if args.url:
-        base = args.url.split('#')[0].split('?')[0]
-        if not base.endswith('/'):
-            base = base[:base.rfind('/') + 1] if '.' in base.rsplit('/', 1)[-1] else base + '/'
+        base = site_base(args.url)
     else:
         if not (SITE / 'index.html').is_file():
             print(f'screens: {SITE / "index.html"} does not exist', file=sys.stderr)
