@@ -11,7 +11,7 @@ import { buildAnnualPeriods } from '../build/fiscal-annual.js';
 import { buildBudget2027 } from '../build/budget-2027.js';
 import { debtProseMatches, pythonDigitPattern } from '../build/budget-prose.js';
 import { parsePythonJson, pythonNumberAt, pythonNumericText } from '../common/numbers.js';
-import { Check, pyRepr } from './checks.js';
+import { Check, pyRepr, pyTruth } from './checks.js';
 import { Context, safePath } from './context.js';
 import { executionRequired } from './execution-python.js';
 
@@ -343,7 +343,7 @@ export function billIdentities(check: Check, bill: any): void {
         const error = decimal(h.rev)
           .add(decimal(h.exp).neg())
           .add(article === '1' ? transfers.neg() : transfers)
-          .add(decimal(h.eucontrib || 0).neg())
+          .add(decimal(pyTruth(h.eucontrib) ? h.eucontrib : 0).neg())
           .add(decimal(h.balance).neg());
         check.ok(error.within(halfUnits(5)), `${variant}/${article}: printed budget balance`);
       }

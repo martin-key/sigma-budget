@@ -41,3 +41,8 @@ ZIP-member lookup before hash comparison, unhashable member names, missing or
 null member hashes, and raw float/exponent source containers. Direct and compiled
 CLI comparisons preserve the exception type, first failure, counts and facts.
 It leaves all previous captures unchanged. Run source_methods.py --check as well.
+
+`optional_values.py --check` adds six complete donor outcomes for the optional
+EU-contribution fallback. Empty lists, empty mappings, null, false, zero and empty
+text all select the donor's zero fallback. Direct and compiled tests preserve
+all 20,986 checks, with original numeric source tokens retained in the inputs.
