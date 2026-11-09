@@ -84,7 +84,12 @@ function get(v: any, k: any): any {
     error('TypeError', `'${kind(v)}' object is not subscriptable`);
   if (Array.isArray(v) || typeof v === 'string') {
     if (typeof k !== 'number' || !Number.isInteger(k))
-      error('TypeError', `${kind(v)} indices must be integers or slices, not ${kind(k)}`);
+      error(
+        'TypeError',
+        typeof v === 'string'
+          ? `string indices must be integers, not '${kind(k)}'`
+          : `list indices must be integers or slices, not ${kind(k)}`,
+      );
     const i = k < 0 ? v.length + k : k;
     if (i < 0 || i >= v.length) error('IndexError', `${kind(v)} index out of range`);
     return v[i];
@@ -800,11 +805,9 @@ export function catalog(ctx: Context): Check {
       primarySources: fs.length,
     };
   c.ok(equal(n, want), `counts ${pyRepr(n)} do not match the catalog ${pyRepr(want)}`);
-  const traps = iterable(get(cat, 'traps')),
-    methodology = iterable(get(cat, 'methodology'));
   c.ok(
-    traps.length === 6 && methodology.length === 6,
-    `traps ${traps.length} / methodology ${methodology.length}, expected 6 / 6`,
+    len(get(cat, 'traps')) === 6 && len(get(cat, 'methodology')) === 6,
+    `traps ${len(get(cat, 'traps'))} / methodology ${len(get(cat, 'methodology'))}, expected 6 / 6`,
   );
   for (const kind of ['traps', 'methodology']) {
     const rows = iterable(get(cat, kind));
@@ -816,7 +819,7 @@ export function catalog(ctx: Context): Check {
       );
   }
   c.ok(
-    traps.some((x) => get(x, 'id') === 'two-versions'),
+    iterable(get(cat, 'traps')).some((x) => get(x, 'id') === 'two-versions'),
     'the two-versions trap must be listed',
   );
   for (const f of fs) {

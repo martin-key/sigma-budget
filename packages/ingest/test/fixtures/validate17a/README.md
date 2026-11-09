@@ -21,3 +21,10 @@ the pinned Python 3.12 default limit of 4,300 decimal digits. Plain, signed,
 underscored, fullwidth and whitespace variants preserve both the accepted
 4,300-digit control and the rejected 4,301-digit case, including leading zeroes.
 Four invalid-literal controls preserve Python's 200-codepoint diagnostic bound.
+
+`reader/generate_oracle.py --check` adds 46 separate full group scenarios for BOM
+bytes, route record shape, options expansion and identities, string subscriptions
+and container failure order. Another 27 direct route comparisons retain expanded
+identity order, matching behavior and errors. The route loader applies defaults
+and options before checking uniqueness; BOM bytes remain visible to JSON
+validation. All previous evidence files are unchanged.

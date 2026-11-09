@@ -1,6 +1,7 @@
 import { existsSync, lstatSync, readFileSync, readdirSync, realpathSync } from 'node:fs';
 import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { numbers } from './execution-contract.js';
+import { routeCatalogue } from './route-catalogue.js';
 import { parsePythonJson } from '../common/numbers.js';
 import { throwPythonJsonError } from './json-error.js';
 
@@ -147,7 +148,9 @@ export class Context {
     if (!this.textCache.has(rel))
       this.textCache.set(
         rel,
-        new TextDecoder('utf-8', { fatal: true }).decode(this.bytes(rel)).replace(/\r\n?/g, '\n'),
+        new TextDecoder('utf-8', { fatal: true, ignoreBOM: true })
+          .decode(this.bytes(rel))
+          .replace(/\r\n?/g, '\n'),
       );
     return this.textCache.get(rel)!;
   }
@@ -167,7 +170,7 @@ export class Context {
   }
   routes(): Routes {
     return (this.routeCache ??= new Routes(
-      JSON.parse(readFileSync(safePath(this.root, 'apps/web/app/lib/routes.json'), 'utf8')),
+      strictJson(readFileSync(safePath(this.root, 'apps/web/app/lib/routes.json'), 'utf8')),
     ));
   }
 }
@@ -178,26 +181,29 @@ export class Routes {
     segments: { literal?: string; re?: RegExp; optional: boolean }[];
   }[];
   constructor(catalog: any) {
-    this.ids = new Set(catalog.routes.map((r: any[]) => r[0]));
-    if (!catalog.routes.length || this.ids.size !== catalog.routes.length) {
-      const error = new Error('route catalogue must contain unique screen ids');
-      error.name = 'ValueError';
-      throw error;
-    }
-    this.entries = catalog.routes
-      .filter((r: any[]) => r[2] !== null)
-      .map((r: any[]) => ({
-        id: r[0],
-        segments: r[2]
-          .split('/')
-          .filter(Boolean)
-          .map((s: string) => {
-            const m = /^:(\w+)(?:\(([^)]+)\))?(\?)?$/.exec(s);
-            return m
-              ? { re: m[2] ? new RegExp(`^(?:${m[2]})$`) : undefined, optional: !!m[3] }
-              : { literal: s, optional: false };
-          }),
-      }));
+    const records = routeCatalogue(catalog);
+    this.ids = new Set(records.map((r) => r.id));
+    this.entries = records
+      .filter((r) => r.pattern !== null)
+      .map((r) => {
+        if (typeof r.pattern !== 'string') {
+          const error = new Error(`'${r.patternType}' object has no attribute 'split'`);
+          error.name = 'AttributeError';
+          throw error;
+        }
+        return {
+          id: r.id,
+          segments: r.pattern
+            .split('/')
+            .filter(Boolean)
+            .map((s: string) => {
+              const m = /^:(\w+)(?:\(([^)]+)\))?(\?)?$/.exec(s);
+              return m
+                ? { re: m[2] ? new RegExp(`^(?:${m[2]})$`) : undefined, optional: !!m[3] }
+                : { literal: s, optional: false };
+            }),
+        };
+      });
     this.entries.sort((a, b) => b.segments.length - a.segments.length);
   }
   match(href: string): string | null {

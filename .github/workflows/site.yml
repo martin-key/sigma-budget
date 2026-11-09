@@ -267,12 +267,13 @@ jobs:
           python packages/ingest/test/fixtures/validate17a/key-whitespace/generate_oracle.py --check
           python packages/ingest/test/fixtures/validate17a/integer/generate_oracle.py --check
           python packages/ingest/test/fixtures/validate17a/integer-limit/generate_oracle.py --check
+          python packages/ingest/test/fixtures/validate17a/reader/generate_oracle.py --check
           python packages/ingest/test/fixtures/validate17a/wrapper/generate.py --check
       - run: pnpm --filter @sigma-budget/ingest... build
       - name: Scoped differential and CLI safety tests
         env:
           WAVE17A_PARITY_REPORT: tmp/ts-migration/candidates/17a/report.json
-        run: pnpm --filter @sigma-budget/ingest exec vitest run src/validate/catalog.test.ts src/validate/catalog-integer.test.ts src/validate/cli17a.test.ts src/validate/json-error.test.ts src/validate/registry-report.test.ts
+        run: pnpm --filter @sigma-budget/ingest exec vitest run src/validate/catalog.test.ts src/validate/catalog-integer.test.ts src/validate/route-catalogue.test.ts src/validate/cli17a.test.ts src/validate/json-error.test.ts src/validate/registry-report.test.ts
       - uses: actions/upload-artifact@v4
         if: always()
         with:
