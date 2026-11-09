@@ -1,3 +1,4 @@
+import type { CatalogDefinition } from './catalog-build.js';
 import { isMap, isScalar, parseDocument } from 'yaml';
 import { metadata } from '../common/metadata.js';
 import {
@@ -23,16 +24,6 @@ export const SEARCH_GROUPS = [
 ] as const;
 type Group = (typeof SEARCH_GROUPS)[number];
 export type SearchRow = [number, string, string, string, string, string, string, string];
-interface CatalogDefinition {
-  file: string;
-  title: string;
-  slug: string;
-  group: string;
-  self?: boolean;
-  multi?: boolean;
-  contains?: string[];
-  search?: { period?: string; kw?: string };
-}
 interface Authored {
   sources: Record<string, unknown>;
   pending: Record<string, { title: string; reason: string; expected: string }>;

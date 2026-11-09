@@ -1,0 +1,165 @@
+{
+  "raw": {
+    "dv/zdb2026_dv69_idMat245041.html": {
+      "bytes": 5655187
+    },
+    "dv/zbdoo2026_dv68_idMat244982.html": {
+      "bytes": 1612264
+    },
+    "dv/zbnzok2026_dv68_idMat244981.html": {
+      "bytes": 191120
+    },
+    "parliament/52-602-01-19.docx": {
+      "bytes": 1936694
+    },
+    "parliament/52-602-01-19.zip": {
+      "bytes": 63488595
+    },
+    "parliament/bill_167157.json": {
+      "bytes": 201434
+    },
+    "parliament/bill_167156.json": {
+      "bytes": 37864
+    },
+    "parliament/bill_167155.json": {
+      "bytes": 35202
+    },
+    "nap/nap_prilozhenie_1_VK-30-10237_12.08.2026.pdf": {
+      "bytes": 409572
+    },
+    "eurostat/gov_10dd_edpt1_BG_EU.json": {
+      "bytes": 3624
+    },
+    "eurostat/gov_10q_ggdebt_BG.json": {
+      "bytes": 3390
+    },
+    "eurostat/tps00001_BG.json": {
+      "bytes": 4128
+    },
+    "bnb_sdmx/ggd.xml": {
+      "bytes": 42862
+    },
+    "bnb_sdmx/cgd.xml": {
+      "bytes": 44416
+    },
+    "sebra/midt_sebra_2026_page.html": {
+      "bytes": 75828
+    },
+    "sebra/midt_sebra_31.08.2026.xlsx": {
+      "bytes": 12173
+    },
+    "kfp_2024/2024-EU_funds_0124_BG_WEB.xls": {
+      "bytes": 43520
+    },
+    "kfp_2024/2024-EU_funds_0224_BG_WEB.xls": {
+      "bytes": 43520
+    },
+    "kfp_2024/2024-EU_funds_0324_BG_WEB.xls": {
+      "bytes": 44032
+    },
+    "kfp_2024/2024-EU_funds_0424_BG_WEB.xls": {
+      "bytes": 44032
+    },
+    "kfp_2024/2024-EU_funds_0524_BG_WEB.xls": {
+      "bytes": 44032
+    },
+    "kfp_2024/2024-EU_funds_0624_BG_WEB.xls": {
+      "bytes": 43520
+    },
+    "kfp_2024/2024-EU_funds_0724_BG_WEB.xls": {
+      "bytes": 44032
+    },
+    "kfp_2024/2024-EU_funds_0824_BG_WEB.xls": {
+      "bytes": 44032
+    },
+    "kfp_2024/2024-EU_funds_0924_BG_WEB.xls": {
+      "bytes": 44032
+    },
+    "kfp_2024/2024-EU_funds_1024_BG_WEB.xls": {
+      "bytes": 44032
+    },
+    "kfp_2024/2024-EU_funds_1124_BG_WEB.xls": {
+      "bytes": 44032
+    },
+    "kfp_2024/2024-EU_funds_1224_BG_WEB_1.xls": {
+      "bytes": 44032
+    },
+    "kfp_2025/2025-EU_funds_0125_BG_WEB.xls": {
+      "bytes": 44032
+    },
+    "kfp_2025/2025-EU_funds_0225_BG_WEB.xls": {
+      "bytes": 44032
+    },
+    "kfp_2025/2025-EU_funds_0325_BG_WEB.xls": {
+      "bytes": 44032
+    },
+    "kfp_2025/2025-EU_funds_0425_BG_WEB.xls": {
+      "bytes": 44032
+    },
+    "kfp_2025/2025-EU_funds_0525_BG_WEB.xls": {
+      "bytes": 44032
+    },
+    "kfp_2025/2025-EU_funds_0625_BG_WEB.xls": {
+      "bytes": 44032
+    },
+    "kfp_2025/2025-EU_funds_0725_BG_WEB.xls": {
+      "bytes": 44032
+    },
+    "kfp_2025/2025-EU_funds_0825_BG_WEB.xls": {
+      "bytes": 44032
+    },
+    "kfp_2025/2025-EU_funds_0925_BG_WEB.xls": {
+      "bytes": 44032
+    },
+    "kfp_2025/2025-EU_funds_1025_BG_WEB.xls": {
+      "bytes": 44032
+    },
+    "kfp_2025/2025-EU_funds_1125_BG_WEB.xls": {
+      "bytes": 44032
+    },
+    "kfp_2025/2025-EU_funds_1225_BG_WEB_4.xls": {
+      "bytes": 46592
+    },
+    "kfp_2026/2026-EU_funds_0126_BG_WEB.xls": {
+      "bytes": 45056
+    },
+    "kfp_2026/2026-EU_funds_0226_BG_WEB.xls": {
+      "bytes": 45568
+    },
+    "kfp_2026/2026-EU_funds_0326_BG_WEB.xls": {
+      "bytes": 45568
+    },
+    "kfp_2026/2026-EU_funds_0426_BG_WEB.xls": {
+      "bytes": 45568
+    },
+    "kfp_2026/2026-EU_funds_0526_BG_WEB.xls": {
+      "bytes": 46080
+    },
+    "kfp_2026/2026-EU_funds_0626_BG_WEB.xls": {
+      "bytes": 47616
+    },
+    "kfp_2026/2026-EU_funds_0726_BG_WEB.xls": {
+      "bytes": 45568
+    },
+    "kfp_2026/2026-EU_funds_0826_BG_WEB.xls": {
+      "bytes": 46080
+    },
+    "kfp_2026/2026-EU_funds_0926_BG_WEB.xls": {
+      "bytes": 46080
+    },
+    "asbp/UMTBF-2026-2028-motivi.pdf": {
+      "bytes": 3393872,
+      "sha256": "d951d866da468ae439ecbfc4131cf5005e28be39e3fcbb70d8660ca93337ac9b"
+    }
+  },
+  "cache": {
+    "sebra_27.08.2026.xlsx": {
+      "bytes": 12180,
+      "sha256": "4a27f0714b8f5812825a9e6181f01dfe91526af8774294a090adb9365774b936"
+    },
+    "sebra_28.08.2026.xlsx": {
+      "bytes": 12434,
+      "sha256": "3d3f09e4db49e75040001c4f262cb8a8f055031624a16988377962bffb10af11"
+    }
+  }
+}

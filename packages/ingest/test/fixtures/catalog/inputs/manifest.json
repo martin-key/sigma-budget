@@ -1,0 +1,173 @@
+{
+ "bnb_sdmx/cgd.xml": {
+  "bytes": 44416,
+  "file": "bnb_sdmx/cgd.xml",
+  "http_status": 200,
+  "note": "Дълг на централното управление, тримесечно",
+  "retrieved": "2026-11-07T23:40:23Z",
+  "sha256": "c3305fdfec374961891e9d1ef6aa8f6d4ab358bd11a69baba802ffc23c898644",
+  "url": "https://www.bnb.bg/bnbweb/groups/public/documents/bnb_sdmx/cgd.xml"
+ },
+ "bnb_sdmx/ggd.xml": {
+  "bytes": 42862,
+  "file": "bnb_sdmx/ggd.xml",
+  "http_status": 200,
+  "note": "Дълг на сектор „Държавно управление“, тримесечно",
+  "retrieved": "2026-11-07T23:37:22Z",
+  "sha256": "447b174a28e8b7ef2ab8ead01fb2e38607bc6d948fd0e6899e01a75153f84fa8",
+  "url": "https://www.bnb.bg/bnbweb/groups/public/documents/bnb_sdmx/ggd.xml"
+ },
+ "dv/zbdoo2026_dv68_idMat244982.html": {
+  "bytes": 1612264,
+  "file": "dv/zbdoo2026_dv68_idMat244982.html",
+  "http_status": 200,
+  "note": "Закон за бюджета на ДОО за 2026 г., ДВ бр. 68 от 28.07.2026",
+  "retrieved": "2026-11-08T01:01:22Z",
+  "sha256": "e6c8053b7a63e20a5502b6b151a322bf36aece1f09d7bad28fdc3fee6f4d5431",
+  "url": "https://dv.parliament.bg/DVWeb/showMaterialDV.jsp?idMat=244982"
+ },
+ "dv/zbnzok2026_dv68_idMat244981.html": {
+  "bytes": 191120,
+  "file": "dv/zbnzok2026_dv68_idMat244981.html",
+  "http_status": 200,
+  "note": "Закон за бюджета на НЗОК за 2026 г., ДВ бр. 68 от 28.07.2026",
+  "retrieved": "2026-11-08T01:04:24Z",
+  "sha256": "71a10a0b0e3edb9d3ee963c9325bfd4544048bc86665b0d4f44cdfd0bafeee5b",
+  "url": "https://dv.parliament.bg/DVWeb/showMaterialDV.jsp?idMat=244981"
+ },
+ "dv/zdb2026_dv69_idMat245041.html": {
+  "bytes": 5655187,
+  "file": "dv/zdb2026_dv69_idMat245041.html",
+  "http_status": 200,
+  "note": "Закон за държавния бюджет на РБ за 2026 г., ДВ бр. 69 от 31.07.2026",
+  "retrieved": "2026-11-08T01:01:19Z",
+  "sha256": "1f5e85a3e1ae95e55c4d331a5f0ab6e97efd1d64ede5ff529886df7e5e12e160",
+  "url": "https://dv.parliament.bg/DVWeb/showMaterialDV.jsp?idMat=245041"
+ },
+ "eurostat/demo_gind_BG_JAN.json": {
+  "bytes": 2695,
+  "file": "eurostat/demo_gind_BG_JAN.json",
+  "http_status": 200,
+  "note": "Население към 1 януари, demo_gind",
+  "retrieved": "2026-11-07T23:37:22Z",
+  "sha256": "6950d5f8aa460e819964aa7625e327e537506596d8b83e858c87be225db06617",
+  "url": "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/demo_gind?geo=BG&indic_de=JAN&sinceTimePeriod=2020"
+ },
+ "eurostat/gov_10dd_edpt1_BG_EU.json": {
+  "bytes": 3624,
+  "file": "eurostat/gov_10dd_edpt1_BG_EU.json",
+  "http_status": 200,
+  "note": "Консолидиран брутен дълг на сектор „Държавно управление“, млн. € и % от БВП",
+  "retrieved": "2026-11-07T23:37:22Z",
+  "sha256": "3017517bf6ee3c8cc3a42f895b08c162da02d4d046a5a64132799d5e6333dafd",
+  "url": "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/gov_10dd_edpt1?geo=BG&geo=EU27_2020&na_item=GD&sector=S13&unit=MIO_EUR&unit=PC_GDP&sinceTimePeriod=2015"
+ },
+ "eurostat/gov_10q_ggdebt_BG.json": {
+  "bytes": 3390,
+  "file": "eurostat/gov_10q_ggdebt_BG.json",
+  "http_status": 200,
+  "note": "Тримесечен дълг на сектор „Държавно управление“",
+  "retrieved": "2026-11-07T23:37:22Z",
+  "sha256": "7acad3d3154cfa6758a7e7fbba85987ae0bcd30f7ba72422e686b8a00052fdf1",
+  "url": "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/gov_10q_ggdebt?geo=BG&na_item=GD&sector=S13&unit=MIO_EUR&unit=PC_GDP&sinceTimePeriod=2024-Q1"
+ },
+ "eurostat/tps00001_BG.json": {
+  "bytes": 4128,
+  "file": "eurostat/tps00001_BG.json",
+  "http_status": 200,
+  "note": "Население към 1 януари (данни на НСИ)",
+  "retrieved": "2026-11-07T23:37:21Z",
+  "sha256": "ff04b43ce8535c36c4abadc6c10171b7132e09690e471a7cffb23ff03ced92fc",
+  "url": "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/tps00001?geo=BG&sinceTimePeriod=2020"
+ },
+ "nap/nap_prilozhenie_1_VK-30-10237_12.08.2026.pdf": {
+  "bytes": 409572,
+  "file": "nap/nap_prilozhenie_1_VK-30-10237_12.08.2026.pdf",
+  "http_status": 200,
+  "note": "НАП: размери на осигурителните вноски за 2026 г. и разпределението им",
+  "retrieved": "2026-11-07T23:37:22Z",
+  "sha256": "b0a02141c14d4358f656711edcf0a7ae52b5f02a50c465f31ba97b542219e3f4",
+  "url": "https://nra.bg/wps/wcm/connect/nra.bg25863/6f117462-1836-48f8-9e27-a4b02a1e55fb/%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5_1_%D0%92%D0%9A-30-10237_12.08.2026.pdf?MOD=AJPERES"
+ },
+ "parliament/52-602-01-19.docx": {
+  "bytes": 1936694,
+  "file": "parliament/52-602-01-19.docx",
+  "http_status": 200,
+  "note": "Законопроект за държавния бюджет 2026 + мотиви (АСБП 2026–2028), внесен 01.07.2026",
+  "retrieved": "2026-11-07T23:37:22Z",
+  "sha256": "378042f3c6f05aad760099f3b5ccceaf597fd287b28242fe89b99d2a981fc174",
+  "url": "https://www.parliament.bg/bills/52/52-602-01-19.docx"
+ },
+ "parliament/52-602-01-19.zip": {
+  "bytes": 63488595,
+  "file": "parliament/52-602-01-19.zip",
+  "http_status": 200,
+  "note": "Архивът към законопроекта: програмните бюджети на ПРБ (папка 7), становища, протоколи",
+  "retrieved": "2026-11-07T23:37:30Z",
+  "sha256": "59efdf6503c8ea92c033c73b48a8b20d817d61711f8e8dfe5d37587253fe35d8",
+  "url": "https://www.parliament.bg/bills/52/52-602-01-19.zip"
+ },
+ "parliament/bill_167155.json": {
+  "bytes": 35202,
+  "file": "parliament/bill_167155.json",
+  "http_status": 200,
+  "note": "ЗБНЗОК 2026 — данни за законопроекта",
+  "retrieved": "2026-11-07T23:37:22Z",
+  "sha256": "ae40704a16193a0bfd8387256f3888f61461f7944b1b96d6f5bbb4c4c9118769",
+  "url": "https://www.parliament.bg/api/v1/bill/167155"
+ },
+ "parliament/bill_167156.json": {
+  "bytes": 37864,
+  "file": "parliament/bill_167156.json",
+  "http_status": 200,
+  "note": "ЗБДОО 2026 — данни за законопроекта",
+  "retrieved": "2026-11-07T23:37:22Z",
+  "sha256": "972d815ff5147cc961a503ac026f6ccdc7181b51e8d3eb16eec8aaea3ea90549",
+  "url": "https://www.parliament.bg/api/v1/bill/167156"
+ },
+ "parliament/bill_167157.json": {
+  "bytes": 201434,
+  "file": "parliament/bill_167157.json",
+  "http_status": 200,
+  "note": "ЗДБ 2026 — данни за законопроекта",
+  "retrieved": "2026-11-07T23:37:22Z",
+  "sha256": "6ca68e171f639e9e15905774a13f2c0eb15816b3d8aa7ea0a15398c1ed432ff9",
+  "url": "https://www.parliament.bg/api/v1/bill/167157"
+ },
+ "probes/minfin_810.html": {
+  "http_status": 403,
+  "note": "МФ: данни за общините (проба за достъп)",
+  "retrieved": "2026-11-08T01:07:27Z",
+  "url": "https://www.minfin.bg/bg/810"
+ },
+ "probes/minfin_legislation1_609.html": {
+  "http_status": 403,
+  "note": "МФ: бюджет 2026 (проба за достъп)",
+  "retrieved": "2026-11-08T01:07:26Z",
+  "url": "https://www.minfin.bg/bg/legislation1/609"
+ },
+ "probes/minfin_statistics_5.html": {
+  "http_status": 403,
+  "note": "МФ: месечни отчети по КФП (проба за достъп)",
+  "retrieved": "2026-11-08T01:07:27Z",
+  "url": "https://www.minfin.bg/bg/statistics/5"
+ },
+ "sebra/midt_sebra_2026_page.html": {
+  "bytes": 75828,
+  "file": "sebra/midt_sebra_2026_page.html",
+  "http_status": 200,
+  "note": "МИДТ: страницата „СЕБРА 2026“",
+  "retrieved": "2026-11-08T01:07:25Z",
+  "sha256": "d51a8eff26110c6a0b07250c33a2320763e0d23d3a041243b94d5d704b3aa259",
+  "url": "https://midt.gov.bg/bg/transparency/sebra/2026"
+ },
+ "sebra/midt_sebra_31.08.2026.xlsx": {
+  "bytes": 12173,
+  "file": "sebra/midt_sebra_31.08.2026.xlsx",
+  "http_status": 200,
+  "note": "МИДТ: дневно обобщение за 31.08.2026",
+  "retrieved": "2026-11-07T23:37:22Z",
+  "sha256": "2fd48d3af2bc2cd77bf3175a748ea8f7c7bb44fdfcee810063891a1a13e4614f",
+  "url": "https://midt.gov.bg/upload/3788/31.08..2026.xlsx"
+ }
+}
