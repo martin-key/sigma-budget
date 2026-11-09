@@ -1,6 +1,20 @@
 import { expect, it } from 'vitest';
 import { pythonNumberAt, parsePythonJson } from '../common/numbers.js';
 import { parseOrderedPythonJson, pythonKeys } from './ordered-json.js';
+import { pyLenAt, pyItemAt, pyIterAt } from './python-error.js';
+
+it.each([
+  ['0', 'int'],
+  ['0.0', 'float'],
+  ['0e0', 'float'],
+  ['false', 'bool'],
+  ['null', 'NoneType'],
+])('retains the source type of invalid container token %s', (token, kind) => {
+  const object = parseOrderedPythonJson('{"value":' + token + '}');
+  expect(() => pyLenAt(object, 'value')).toThrow("object of type '" + kind + "' has no len()");
+  expect(() => pyItemAt(object, 'value', 0)).toThrow("'" + kind + "' object is not subscriptable");
+  expect(() => pyIterAt(object, 'value')).toThrow("'" + kind + "' object is not iterable");
+});
 
 it('retains source dictionary order alongside raw float kinds', () => {
   const value = parseOrderedPythonJson('{"2":0.0,"1":1e0}') as Record<string, number>;

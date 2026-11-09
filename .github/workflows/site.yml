@@ -271,7 +271,7 @@ jobs:
       - name: Fiscal and legal validation parity
         env:
           WAVE15_PARITY_REPORT: tmp/ts-migration/candidates/15/report.json
-        run: pnpm --filter @sigma-budget/ingest exec vitest run src/validate/wave15-parity.test.ts src/validate/wave15-sum.test.ts src/validate/cli15.test.ts
+        run: pnpm --filter @sigma-budget/ingest exec vitest run src/validate/wave15-parity.test.ts src/validate/wave15-sum.test.ts src/validate/ordered-json.test.ts src/validate/cli15.test.ts
       - uses: actions/upload-artifact@v4
         if: always()
         with:

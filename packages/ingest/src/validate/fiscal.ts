@@ -1,8 +1,10 @@
 /** Fiscal validation against the legacy 2024–28 Annex 3 contract. */
-import { Check, byId, fmt, isnum, pyRepr } from './checks.js';
+import { Check, byId, fmt, isnum } from './checks.js';
 import { Context } from './context.js';
 import {
   PythonError,
+  pythonRepr as pyRepr,
+  pyReprAt,
   required,
   divide,
   floatRepr,
@@ -15,9 +17,12 @@ import {
   pySubtract,
   pythonType,
   pyItem,
-  pyLen,
   pyIter,
   pyHas,
+  sourceTypeAt,
+  pyLenAt,
+  pyItemAt,
+  pyIterAt,
 } from './python-error.js';
 
 const KFP_KEYS = ['revenue', 'expenditure', 'balance', 'interest', 'primaryBalance', 'financing'];
@@ -73,16 +78,16 @@ function ptol(series: any): number {
 export function annex3(ctx: Context): Check {
   const c = new Check('ANNEX3'),
     o = ctx.get('outlook.json');
-  c.ok(same(required(o, 'years'), [2024, 2025, 2026, 2027, 2028]), `years ${pyRepr(o.years)}`);
+  c.ok(same(required(o, 'years'), [2024, 2025, 2026, 2027, 2028]), `years ${pyReprAt(o, 'years')}`);
   c.ok(
     same(required(o, 'vintage'), ['actual', 'prelim', 'plan', 'forecast', 'forecast']),
-    `vintage ${pyRepr(o.vintage)}`,
+    `vintage ${pyReprAt(o, 'vintage')}`,
   );
   const g = required<any>(o, 'gdp');
-  c.ok(pyLen(required(g, 'mln')) === 5 && pyLen(required(g, 'mlnPrecise')) === 5, 'gdp lengths');
+  c.ok(pyLenAt(g, 'mln') === 5 && pyLenAt(g, 'mlnPrecise') === 5, 'gdp lengths');
   for (let i = 0; i < 5; i++) {
-    const cell = pyItem(required(g, 'mln'), i);
-    const rounded = roundInteger(pyItem(required(g, 'mlnPrecise'), i));
+    const cell = pyItemAt(g, 'mln', i);
+    const rounded = roundInteger(pyItemAt(g, 'mlnPrecise', i));
     c.ok(
       isnum(cell) && Math.abs(cell - rounded) <= 1e-9,
       `gdp.mln[${i}] is the rounded precise value: ${displayAt(g.mln, i)} vs ${rounded} (tolerance 0.0)`,
@@ -98,16 +103,14 @@ export function annex3(ctx: Context): Check {
     const b = k[name];
     required(b, 'mln');
     c.ok(
-      pyLen(required(b, 'mln')) === 5 &&
-        pyLen(required(b, 'pctGdp')) === 5 &&
-        [...b.mln, ...b.pctGdp].every(isnum),
+      pyLenAt(b, 'mln') === 5 && pyLenAt(b, 'pctGdp') === 5 && [...b.mln, ...b.pctGdp].every(isnum),
       `${name}: five numbers each`,
     );
-    const tol = ptol(b.pctGdp);
+    const tol = ptol(pyIterAt(b, 'pctGdp'));
     for (let i = 0; i < 5; i++)
       c.near(
-        pyItem(b.pctGdp, i),
-        divide(100 * pyItem(b.mln, i), pyItem(gdp, i)),
+        pyItemAt(b, 'pctGdp', i),
+        divide(100 * pyItemAt(b, 'mln', i), pyItem(gdp, i)),
         tol,
         `${name} pctGdp ${2024 + i}`,
       );
@@ -230,9 +233,9 @@ function at(row: any, i: number): PythonNumber | null {
   const j = i - rowOffset(row, '-');
   if (!(j >= 0)) return null;
   const values = required<any>(row, 'mln');
-  if (j >= pyLen(values)) return null;
+  if (j >= pyLenAt(row, 'mln')) return null;
   requireOffsetIndex(row);
-  if (pyItem(values, j) === null) return null;
+  if (pyItemAt(row, 'mln', j) === null) return null;
   return numeric(values, j);
 }
 function tree(c: Check, rows: any[], what: string, gdp: number[], tolCap = 0.3): number {
@@ -247,21 +250,21 @@ function tree(c: Check, rows: any[], what: string, gdp: number[], tolCap = 0.3):
       if (c.ok(Object.hasOwn(by, p), `${what} ${q.id}: parent ${p} not in the table`)) {
         c.ok(
           pyEqual(by[p].level, q.level - 1),
-          `${what} ${q.id}: level ${pyRepr(q.level)} under parent level ${pyRepr(by[p].level)}`,
+          `${what} ${q.id}: level ${pyReprAt(q, 'level')} under parent level ${pyReprAt(by[p], 'level')}`,
         );
         (kids[p] ??= []).push(q);
       }
     } else c.ok(pyEqual(q.level, 0), `${what} ${q.id}: a row without parent must be level 0`);
-    const mlnLength = pyLen(required(q, 'mln'));
+    const mlnLength = pyLenAt(q, 'mln');
     const pct = required<any>(q, 'pctGdp');
-    const fits = mlnLength === pyLen(pct) && rowOffset(q) + mlnLength <= 5;
+    const fits = mlnLength === pyLenAt(q, 'pctGdp') && rowOffset(q) + mlnLength <= 5;
     const rawOffset = Object.hasOwn(q, 'y0') ? q.y0 : 0;
     c.ok(
       fits,
-      `${what} ${q.id}: mln/pctGdp lengths ${mlnLength}/${pyLen(pct)} (y0 ${pyDecimalInteger(rawOffset)})`,
+      `${what} ${q.id}: mln/pctGdp lengths ${mlnLength}/${pyLenAt(q, 'pctGdp')} (y0 ${pyDecimalInteger(rawOffset)})`,
     );
     const y0 = rowOffset(q);
-    const tol = ptol(q.pctGdp);
+    const tol = ptol(pyIterAt(q, 'pctGdp'));
     const ms = pyIter(q.mln),
       ps = pyIter(pct);
     for (let j = 0; j < Math.min(ms.length, ps.length); j++) {
@@ -277,6 +280,7 @@ function tree(c: Check, rows: any[], what: string, gdp: number[], tolCap = 0.3):
           () => divide(100 * m, listValue(gdp, j + y0)),
           tol,
           `${what} ${q.id} pctGdp ${j + y0}`,
+          sourceTypeAt(q, 'pctGdp'),
         );
       }
     }
@@ -331,8 +335,9 @@ function nearComputed(
   b: () => number,
   tolerance: number,
   message: string,
+  containerType?: string,
 ): void {
-  const a = pyItem(holder, key);
+  const a = pyItem(holder, key, containerType);
   const computed = b();
   const rendered = displayAt(holder, key);
   c.ok(
@@ -398,7 +403,7 @@ export function revenue(ctx: Context): Check {
       );
       c.near(gr.mln[i], s, 0.0501, `group ${gr.id} mln ${2024 + i}`);
     }
-    const tol = ptol(gr.pctGdp);
+    const tol = ptol(pyIterAt(gr, 'pctGdp'));
     for (let i = 0; i < 5; i++)
       nearComputed(
         c,
@@ -407,6 +412,7 @@ export function revenue(ctx: Context): Check {
         () => divide(100 * gr.mln[i], gdp[i]),
         tol,
         `group ${gr.id} pctGdp ${2024 + i}`,
+        sourceTypeAt(gr, 'pctGdp'),
       );
     nearComputed(
       c,
@@ -558,7 +564,7 @@ export function measures(ctx: Context): Check {
       c.ok(
         typeof i.from === 'string' &&
           /^\p{Decimal_Number}{4}-\p{Decimal_Number}{2}-\p{Decimal_Number}{2}$/u.test(i.from),
-        `${i.id}: from ${pyRepr(i.from)}`,
+        `${i.id}: from ${pyReprAt(i, 'from')}`,
       );
   }
   const grp = byId(m.groups) as Record<string, any>,
@@ -655,6 +661,7 @@ export function measures(ctx: Context): Check {
     () => divide(100 * tt['II-8'], gdp),
     0.0051,
     'gdpShare2026 revenue',
+    sourceTypeAt(t, 'gdpShare2026'),
   );
   nearComputed(
     c,
@@ -663,6 +670,7 @@ export function measures(ctx: Context): Check {
     () => divide(100 * tt['II-9'], gdp),
     0.0051,
     'gdpShare2026 expenditure',
+    sourceTypeAt(t, 'gdpShare2026'),
   );
   const d = m.document;
   required(d, 'sha256');
@@ -718,13 +726,14 @@ export function expenditure(ctx: Context): Check {
       () => divide(100 * tot[k], gdp[k + 1]),
       0.0051,
       `functions: totalPctGdp ${2025 + k}`,
+      sourceTypeAt(f, 'totalPctGdp'),
     );
   }
   c.ok(tot[1] === 55525, `functions: 2026 total ${displayAt(tot, 1)}, expected 55 525,0`);
   const gaps = [0, 0, 0, 0];
   for (const it of items) {
     c.ok(
-      ['mln', 'pctGdp', 'share'].every((x) => pyLen(required(it, x)) === 4) &&
+      ['mln', 'pctGdp', 'share'].every((x) => pyLenAt(it, x) === 4) &&
         ['mln', 'pctGdp', 'share'].every((x) => pyIter(required(it, x)).every(isnum)),
       `functions ${it.id}: four numbers each`,
     );
@@ -737,6 +746,7 @@ export function expenditure(ctx: Context): Check {
         () => divide(100 * it.mln[k], tot[k]),
         0.0061,
         `functions ${it.id} share ${2025 + k}`,
+        sourceTypeAt(it, 'share'),
       );
     }
     nearComputed(
@@ -778,7 +788,7 @@ export function expenditure(ctx: Context): Check {
           ? pyFloat(value.value)
           : typeof value.value === 'string'
             ? value.value
-            : pyRepr(value.value),
+            : pyReprAt(value, 'value'),
     );
     nearComputed(
       c,
@@ -787,6 +797,7 @@ export function expenditure(ctx: Context): Check {
       () => roundedOne(tot[k] - rc.annex3ExpenditureMln[k]),
       0.0501,
       `reconcile: diffMln ${2025 + k}`,
+      sourceTypeAt(rc, 'diffMln'),
     );
   }
   c.ok(
@@ -818,7 +829,7 @@ export function expenditure(ctx: Context): Check {
   for (const it of items)
     c.ok(
       (it.ministries ?? []).every((m: string) => mins.has(m)),
-      `functions ${it.id}: unknown ministry code in ${pyRepr(it.ministries)}`,
+      `functions ${it.id}: unknown ministry code in ${pyReprAt(it, 'ministries')}`,
     );
   const z = e.economic,
     rows = z.rows;

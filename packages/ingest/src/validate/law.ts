@@ -1,9 +1,11 @@
 /** Independent validation of the legacy enacted-law data against its published cross-references. */
 import { pythonNumberAt, type PythonNumber } from '../common/numbers.js';
-import { Check, fmt, isnum, numbersIn, pyRepr, pyTruth } from './checks.js';
+import { Check, fmt, isnum, numbersIn, pyTruth } from './checks.js';
 import { Context } from './context.js';
 import {
   PythonError,
+  pythonRepr as pyRepr,
+  pyReprAt,
   required,
   floatRepr,
   pyStrip,
@@ -14,8 +16,8 @@ import {
   pyTypedSum,
   pyDecimalInteger,
   pyLessEqual,
+  sourceTypeAt,
 } from './python-error.js';
-import { pythonKeys } from './ordered-json.js';
 
 const TOL = 0.06,
   TOL_SUM = 0.15;
@@ -58,16 +60,7 @@ const n = (o: any, k: string | number): PythonNumber => {
 };
 const sum = (xs: Iterable<PythonNumber>) => pySum(xs);
 const pyfloat = floatRepr;
-const display = (o: any, k: string | number): string => {
-  const value = o[k];
-  if (isnum(value) && n(o, k).kind === 'float') return pyfloat(value);
-  if (Array.isArray(value)) return `[${value.map((_, i) => display(value, i)).join(', ')}]`;
-  if (value && typeof value === 'object')
-    return `{${pythonKeys(value)
-      .map((key) => `${repr(key)}: ${display(value, key)}`)
-      .join(', ')}}`;
-  return repr(value);
-};
+const display = pyReprAt;
 const displaySum = (value: PythonNumber) =>
   value.kind === 'float' ? pyfloat(value.value) : String(value.value);
 const stringField = (holder: any, key: string) => {
@@ -169,7 +162,7 @@ function art1(c: Check, law: any): Map<string, any> {
       `${w}: changed flag ${display(r, 'changed')} vs diff ${display(r, 'diff')}`,
     );
     const rk = key(r.sec, r.no);
-    c.ok(!rows.has(rk), `${w}: duplicate row (${repr(r.sec)}, ${repr(r.no)})`);
+    c.ok(!rows.has(rk), `${w}: duplicate row (${pyReprAt(r, 'sec')}, ${pyReprAt(r, 'no')})`);
     rows.set(rk, r);
   }
   const get = (sec: string, no: string, s: string) => {
@@ -259,7 +252,7 @@ function art1(c: Check, law: any): Map<string, any> {
     }
   } catch (e) {
     if (!Array.isArray(e)) throw e;
-    c.fail(`art1: row (${repr(e[0])}, ${repr(e[1])}) is missing`);
+    c.fail(`art1: row (${pyReprAt(e, 0)}, ${pyReprAt(e, 1)}) is missing`);
     return new Map();
   }
   return rows;
@@ -420,7 +413,7 @@ function changes(c: Check, law: any, artRows: Map<string, any>) {
     if (b) {
       c.ok(
         same(ops, b.lines),
-        `${w}: op counts ${repr(ops)} vs the budget's lines ${repr(b.lines)}`,
+        `${w}: op counts ${repr(ops)} vs the budget's lines ${pyReprAt(b, 'lines')}`,
       );
       for (const k of ['rev', 'exp', 'transfers'])
         if (Object.hasOwn(x.headline, k))
@@ -454,7 +447,7 @@ function changes(c: Check, law: any, artRows: Map<string, any>) {
         .map((k) => JSON.parse(k));
       c.ok(
         diff.length === 0,
-        `art. 1: changed rows differ: [${diff.map((k) => `(${repr(k[0])}, ${repr(k[1])})`).join(', ')}]`,
+        `art. 1: changed rows differ: [${diff.map((k) => `(${pyReprAt(k, 0)}, ${pyReprAt(k, 1)})`).join(', ')}]`,
       );
       for (const [k, r] of marked)
         if (changed.has(k)) {
@@ -462,7 +455,7 @@ function changes(c: Check, law: any, artRows: Map<string, any>) {
             q = changed.get(k);
           c.ok(
             r.bill === q.bill && r.law === q.law,
-            `art. 1 row (${repr(pair[0])}, ${repr(pair[1])}) differs from art1.lines`,
+            `art. 1 row (${pyReprAt(pair, 0)}, ${pyReprAt(pair, 1)}) differs from art1.lines`,
           );
         }
       c.ok(ops.add === 0 && ops.del === 0, 'art. 1 has only changed rows');
@@ -627,7 +620,12 @@ function bills(c: Check, law: any, src: any, buildDate: string) {
       required(required<any>(cn, 'committees'), 'reported'),
       required(cn, 'committeeReports'),
     ) &&
-      pyLessEqual(cn.committeeReports, required(cn.committees, 'total')) &&
+      pyLessEqual(
+        cn.committeeReports,
+        required(cn.committees, 'total'),
+        sourceTypeAt(cn, 'committeeReports'),
+        sourceTypeAt(cn.committees, 'total'),
+      ) &&
       pyEqual(cn.committees.total, 24),
     `counts.committees ${display(cn, 'committees')}`,
   );

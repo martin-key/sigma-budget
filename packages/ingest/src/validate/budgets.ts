@@ -1,9 +1,11 @@
 /** Budget and programme validation, including all ministry files and their index. */
 import { pythonNumberAt, type PythonNumber } from '../common/numbers.js';
-import { Check, fmt, isnum, numbersIn, pyRepr, pyTruth } from './checks.js';
+import { Check, fmt, isnum, numbersIn, pyTruth } from './checks.js';
 import { Context } from './context.js';
 import {
   PythonError,
+  pythonRepr as pyRepr,
+  pyReprAt,
   required,
   floatRepr,
   pyStrip,
@@ -92,7 +94,7 @@ const disp = (o: any, k: string | number) =>
     ? pyfloat(o[k])
     : typeof o[k] === 'string'
       ? o[k]
-      : pyRepr(o[k]);
+      : pyReprAt(o, k);
 const iso = (x: any) =>
   typeof x === 'string' &&
   /^\p{Decimal_Number}{4}-\p{Decimal_Number}{2}-\p{Decimal_Number}{2}$/u.test(x);
@@ -236,7 +238,7 @@ export function budgets(ctx: Context): Check {
     kinds[x.kind] = (kinds[x.kind] ?? 0) + 1;
     c.ok(
       typeof required(x, 'lawName') === 'string' && cleanName(x.lawName),
-      `${w}: lawName ${pyRepr(x.lawName)}`,
+      `${w}: lawName ${pyReprAt(x, 'lawName')}`,
     );
     for (const [key, k] of [
       ['revKhil', 'rev'],
@@ -482,7 +484,7 @@ export function budgets(ctx: Context): Check {
   );
   c.ok(
     pt.policies === polTotal && polTotal === 82 && pt.programs === progTotal && progTotal === 190,
-    `programTotals policies/programs ${pyRepr(pt.policies)}/${pyRepr(pt.programs)} vs ${polTotal}/${progTotal}`,
+    `programTotals policies/programs ${pyReprAt(pt, 'policies')}/${pyReprAt(pt, 'programs')} vs ${polTotal}/${progTotal}`,
   );
   c.ok(
     same(sorted(Object.keys(kinds)), sorted(KINDS)) &&
@@ -572,7 +574,7 @@ function checkFile(c: Check, ctx: Context, item: any, d: any): Row[] {
   c.ok(new Set(codes).size === codes.length, `${w}: duplicate codes`);
   for (const [lvl, parent, r] of rows) {
     const ww = `${w} ${r.code}`;
-    c.ok(cleanName(required(r, 'name')), `${ww}: name ${pyRepr(r.name)}`);
+    c.ok(cleanName(required(r, 'name')), `${ww}: name ${pyReprAt(r, 'name')}`);
     if (lvl === 'policy' || (lvl === 'program' && !parent))
       c.ok(
         new RegExp(`^${i}\\.\\p{Decimal_Number}{2}\\.00$`, 'u').test(r.code) &&

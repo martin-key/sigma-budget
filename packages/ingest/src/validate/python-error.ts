@@ -14,7 +14,11 @@ export function required<T>(object: Record<string, T>, key: string): T {
 }
 
 /** Subscription, length and iteration retain Python's first failing operation. */
-export function pyItem(value: any, key: string | number | boolean): any {
+export function pyItem(
+  value: any,
+  key: string | number | boolean,
+  sourceType = pythonType(value),
+): any {
   if (Array.isArray(value) || typeof value === 'string') {
     if ((typeof key !== 'number' || !Number.isInteger(key)) && typeof key !== 'boolean')
       throw new PythonError(
@@ -36,26 +40,49 @@ export function pyItem(value: any, key: string | number | boolean): any {
     if (typeof key === 'string' && Object.hasOwn(value, key)) return value[key];
     throw new PythonError('KeyError', pyRepr(key));
   }
-  throw new PythonError('TypeError', `'${pythonType(value)}' object is not subscriptable`);
+  throw new PythonError('TypeError', `'${sourceType}' object is not subscriptable`);
 }
-export function pyLen(value: unknown): number {
+export function pyLen(value: unknown, sourceType = pythonType(value)): number {
   if (typeof value === 'string') return Array.from(value).length;
   if (Array.isArray(value)) return value.length;
   if (value && typeof value === 'object') return Object.keys(value).length;
-  throw new PythonError('TypeError', `object of type '${pythonType(value)}' has no len()`);
+  throw new PythonError('TypeError', `object of type '${sourceType}' has no len()`);
 }
-export function pyIter(value: unknown): unknown[] {
+export function pyIter(value: unknown, sourceType = pythonType(value)): unknown[] {
   if (typeof value === 'string') return Array.from(value);
   if (Array.isArray(value)) return value;
   if (value && typeof value === 'object') return pythonKeys(value);
-  throw new PythonError('TypeError', `'${pythonType(value)}' object is not iterable`);
+  throw new PythonError('TypeError', `'${sourceType}' object is not iterable`);
+}
+export function sourceTypeAt(holder: any, key: string | number): string {
+  const value = pyItem(holder, key);
+  return typeof value === 'number'
+    ? pythonNumberAt(holder, String(key), value).kind
+    : pythonType(value);
+}
+export function pyLenAt(holder: any, key: string | number): number {
+  const value = pyItem(holder, key);
+  return pyLen(value, sourceTypeAt(holder, key));
+}
+export function pyIterAt(holder: any, key: string | number): unknown[] {
+  const value = pyItem(holder, key);
+  return pyIter(value, sourceTypeAt(holder, key));
+}
+export function pyItemAt(holder: any, key: string | number, index: string | number | boolean): any {
+  const value = pyItem(holder, key);
+  return pyItem(value, index, sourceTypeAt(holder, key));
 }
 export function pyHas(mapping: any, key: any): boolean {
   if (key && typeof key === 'object')
     throw new PythonError('TypeError', `unhashable type: '${pythonType(key)}'`);
   return typeof key === 'string' && Object.hasOwn(mapping, key);
 }
-export function pyLessEqual(a: any, b: any): boolean {
+export function pyLessEqual(
+  a: any,
+  b: any,
+  leftType = pythonType(a),
+  rightType = pythonType(b),
+): boolean {
   if (
     (typeof a === 'number' || typeof a === 'boolean') &&
     (typeof b === 'number' || typeof b === 'boolean')
@@ -64,7 +91,7 @@ export function pyLessEqual(a: any, b: any): boolean {
   if (typeof a === 'string' && typeof b === 'string') return a <= b;
   throw new PythonError(
     'TypeError',
-    `'<=' not supported between instances of '${pythonType(a)}' and '${pythonType(b)}'`,
+    `'<=' not supported between instances of '${leftType}' and '${rightType}'`,
   );
 }
 export function pyAddAssign(a: PythonNumber, b: PythonNumber): number {
@@ -91,6 +118,22 @@ export function floatRepr(value: number): string {
     return `${mantissa}e${e < 0 ? '-' : '+'}${String(Math.abs(e)).padStart(2, '0')}`;
   }
   return Number.isInteger(value) ? `${value}.0` : String(value);
+}
+
+/** Scoped donor repr: nested dictionaries retain input order and numeric token kinds. */
+export function pythonRepr(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map((_, i) => pyReprAt(value, i)).join(', ')}]`;
+  if (value && typeof value === 'object')
+    return `{${pythonKeys(value)
+      .map((key) => `${pyRepr(key)}: ${pyReprAt(value, key)}`)
+      .join(', ')}}`;
+  return pyRepr(value);
+}
+export function pyReprAt(holder: any, key: string | number): string {
+  const value = holder[key];
+  return typeof value === 'number' && pythonNumberAt(holder, String(key), value).kind === 'float'
+    ? floatRepr(value)
+    : pythonRepr(value);
 }
 /** Python str.strip() whitespace differs from JavaScript trim (notably NEL and BOM). */
 export function pyStrip(value: string): string {

@@ -8465,5 +8465,351 @@
         "op": "delete"
       }
     ]
+  },
+  {
+    "name": "acceptance4-typed-gdp-len-float",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mlnPrecise"
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-typed-gdp-index-float",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mln"
+        ],
+        "op": "set",
+        "value": [
+          104767,
+          116018,
+          125247,
+          134592
+        ]
+      },
+      {
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mlnPrecise"
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-typed-gdp-len-exponent",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mlnPrecise"
+        ],
+        "op": "rawSet",
+        "token": "0e0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-typed-gdp-index-exponent",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mln"
+        ],
+        "op": "set",
+        "value": [
+          104767,
+          116018,
+          125247,
+          134592
+        ]
+      },
+      {
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mlnPrecise"
+        ],
+        "op": "rawSet",
+        "token": "0e0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-typed-row-length",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "pctGdp"
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-typed-share-length",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "share"
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-typed-share-index",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "mln"
+        ],
+        "op": "set",
+        "value": [
+          2515.8,
+          3002.6,
+          2794.9,
+          2615.5,
+          0
+        ]
+      },
+      {
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "share"
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-typed-group-iteration",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          0,
+          "pctGdp"
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-typed-counter-comparison",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "counts",
+          "committeeReports"
+        ],
+        "op": "rawSet",
+        "token": "22.0"
+      },
+      {
+        "file": "law.json",
+        "path": [
+          "counts",
+          "committees",
+          "total"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-typed-counter-comparison-exponent",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "counts",
+          "committeeReports"
+        ],
+        "op": "rawSet",
+        "token": "22e0"
+      },
+      {
+        "file": "law.json",
+        "path": [
+          "counts",
+          "committees",
+          "total"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-repr-year-token",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "file": "outlook.json",
+        "path": [
+          "years",
+          0
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-repr-vintage-order",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "file": "outlook.json",
+        "path": [
+          "vintage"
+        ],
+        "op": "rawSet",
+        "token": "{\"2\":0.0,\"1\":1e0}"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-repr-row-level",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "level"
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-repr-law-name",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "lawName"
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-repr-policy-name",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "file": "ministries/0200.json",
+        "path": [
+          "policies",
+          0,
+          "name"
+        ],
+        "op": "rawSet",
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "acceptance4-repr-nested-policy-name",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "file": "ministries/0200.json",
+        "path": [
+          "policies",
+          0,
+          "name"
+        ],
+        "op": "rawSet",
+        "token": "[0.0,{\"2\":0.0,\"1\":1e0}]"
+      }
+    ]
   }
 ]
