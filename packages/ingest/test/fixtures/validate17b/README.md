@@ -21,3 +21,9 @@ source preimages for population formatting. Invalid strings and containers retai
 Python format errors; integer, boolean, float, exponent and large-integer controls
 retain their printed form. Direct and compiled tests cover accepted and raw
 modes. The original donor, scenarios and supplemental observations are unchanged.
+
+The separate `years/generate.py` proof adds 36 complete donor outcomes for the
+population, Maastricht and COFOG owner years. Numeric strings and containers
+retain Python's `%d` errors; booleans, integer and float tokens, fractional
+values and large integers retain its printed form. Exact source preimages are
+tested directly and through the compiled CLI in both acceptance modes.

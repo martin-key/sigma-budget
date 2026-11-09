@@ -133,6 +133,17 @@ export function monthId(x: any): string {
     pyError('TypeError', `%d format: a real number is required, not ${typeName(x)}`);
   return `kfp-2026-${String(Math.trunc(Number(x))).padStart(2, '0')}`;
 }
+/** Python's %d formats a numeric owner value, never a numeric-looking string. */
+export function integerText(value: unknown, token?: string): string {
+  if (typeof value !== 'number' && typeof value !== 'boolean')
+    pyError('TypeError', `%d format: a real number is required, not ${typeName(value)}`);
+  if (typeof value === 'boolean') return value ? '1' : '0';
+  if (Number.isNaN(value)) pyError('ValueError', 'cannot convert float NaN to integer');
+  if (!Number.isFinite(value)) pyError('OverflowError', 'cannot convert float infinity to integer');
+  return token && !/[.eE]/.test(token)
+    ? BigInt(token).toString()
+    : BigInt(Math.trunc(value)).toString();
+}
 /** Match Python's UTF-8 decode exception without replacing invalid evidence bytes. */
 export function decodeUtf8(raw: Uint8Array): string {
   try {

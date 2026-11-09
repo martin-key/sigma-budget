@@ -611,10 +611,11 @@ jobs:
           python tmp/wave17b-git-export/packages/ingest/test/fixtures/validate17b/generate.py --check
           python tmp/wave17b-git-export/packages/ingest/test/fixtures/validate17b/generate-extra.py --verify-extra
           python tmp/wave17b-git-export/packages/ingest/test/fixtures/validate17b/population/generate.py --check
+          python tmp/wave17b-git-export/packages/ingest/test/fixtures/validate17b/years/generate.py --check
       - name: FEED differential and compiled CLI safety
         run: |
           pnpm --filter @sigma-budget/ingest... build
-          pnpm --filter @sigma-budget/ingest exec vitest run src/validate/feed-text.test.ts src/validate/feed.test.ts src/validate/feed-population.test.ts src/validate/feed-cli.test.ts
+          pnpm --filter @sigma-budget/ingest exec vitest run src/validate/feed-text.test.ts src/validate/feed.test.ts src/validate/feed-population.test.ts src/validate/feed-years.test.ts src/validate/feed-cli.test.ts
           node packages/ingest/dist/validate/feed-cli.js --root packages/ingest/test/fixtures/validate17b/corpus --only FEED --report tmp/ts-migration/candidates/17b/report.json
       - uses: actions/upload-artifact@v4
         if: always()
