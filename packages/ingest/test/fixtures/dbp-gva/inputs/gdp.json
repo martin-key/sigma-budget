@@ -1,0 +1,67 @@
+{
+  "id": [
+    "geo",
+    "na_item",
+    "unit",
+    "time"
+  ],
+  "size": [
+    1,
+    2,
+    1,
+    4
+  ],
+  "dimension": {
+    "geo": {
+      "category": {
+        "index": {
+          "BG": 0
+        }
+      }
+    },
+    "na_item": {
+      "category": {
+        "index": {
+          "D21X31": 0,
+          "B1GQ": 1
+        }
+      }
+    },
+    "unit": {
+      "category": {
+        "index": {
+          "CP_MEUR": 0
+        }
+      }
+    },
+    "time": {
+      "category": {
+        "index": {
+          "2019": 0,
+          "2020": 1,
+          "2021": 2,
+          "2022": 3
+        }
+      }
+    }
+  },
+  "value": {
+    "0": 20,
+    "1": 21,
+    "2": 22,
+    "3": 23,
+    "4": 175,
+    "5": 186,
+    "6": 197,
+    "7": 300
+  },
+  "status": {},
+  "extension": {
+    "annotation": [
+      {
+        "type": "UPDATE_DATA",
+        "date": "2026-10-09T12:00:00"
+      }
+    ]
+  }
+}

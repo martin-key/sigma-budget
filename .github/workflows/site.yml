@@ -284,6 +284,21 @@ jobs:
         env:
           PROGRAMMES_PARITY_REPORT: ${{ github.workspace }}/tmp/ts-migration/candidates/05/diff.json
         run: pnpm --filter @sigma-budget/ingest exec vitest run src/build/budgets.test.ts
+      - name: DBP and GVA frozen evidence and scoped proof
+        run: |
+          python packages/ingest/test/fixtures/dbp-gva/generate_oracle.py --check
+          pnpm --filter @sigma-budget/etl... build
+          pnpm --filter @sigma-budget/ingest exec vitest run src/build/dbp-gva.test.ts
+          pnpm --filter @sigma-budget/etl exec vitest run src/dbp-gva-build.test.ts
+          pnpm exec budget-ts build --inputs packages/ingest/test/fixtures/dbp-gva --out tmp/ts-migration/candidates/10 --scope dbp2027,gva-sectors --build-date 2026-11-08
+          pnpm exec budget-ts parity --registry packages/ingest/test/fixtures/dbp-gva/datasets.yaml --oracle packages/ingest/test/fixtures/dbp-gva/published --candidate tmp/ts-migration/candidates/10/data --scope dbp2027 --policy packages/ingest/test/fixtures/dbp-gva/policy.json --report tmp/ts-migration/candidates/10/dbp-parity.json
+          git diff --exit-code -- data/release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dbp-gva-proof
+          path: |
+            tmp/ts-migration/candidates/10/proof-report.json
+            tmp/ts-migration/candidates/10/dbp-parity.json
       - name: Fiscal frozen Python oracle and parity
         env:
           PYTHONPATH: pipeline
