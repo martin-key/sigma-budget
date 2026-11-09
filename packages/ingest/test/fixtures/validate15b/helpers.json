@@ -1,0 +1,1259 @@
+{
+  "oracles": [
+    {
+      "name": "escaped",
+      "docs": {
+        "sample.json": {
+          "a/b": {
+            "~key": {
+              "value": 1.2,
+              "unit": "млн. €",
+              "provenance": "leaf"
+            }
+          }
+        },
+        "budget2027-provenance.json": {
+          "entries": {
+            "leaf": {
+              "output": "sample.json#/a~1b/~0key",
+              "period": "2026.law",
+              "unit": "млн. €",
+              "document": "forecast",
+              "page": 1,
+              "printed": "1,2"
+            }
+          }
+        }
+      },
+      "oracles": [
+        {
+          "output": "sample.json#/a~1b/~0key",
+          "value": "1.2",
+          "unit": "млн. €",
+          "period": "2026.law",
+          "document": "forecast",
+          "sources": [
+            {
+              "page": 1,
+              "printed": "1,2"
+            }
+          ]
+        }
+      ],
+      "result": {
+        "name": "BUDGET2027",
+        "n": 6,
+        "problems": [],
+        "warnings": [],
+        "facts": []
+      }
+    },
+    {
+      "name": "missing-address",
+      "docs": {
+        "sample.json": {
+          "a/b": {}
+        },
+        "budget2027-provenance.json": {
+          "entries": {
+            "leaf": {
+              "output": "sample.json#/a~1b/~0key",
+              "period": "2026.law",
+              "unit": "млн. €",
+              "document": "forecast",
+              "page": 1,
+              "printed": "1,2"
+            }
+          }
+        }
+      },
+      "oracles": [
+        {
+          "output": "sample.json#/a~1b/~0key",
+          "value": "1.2",
+          "unit": "млн. €",
+          "period": "2026.law",
+          "document": "forecast",
+          "sources": [
+            {
+              "page": 1,
+              "printed": "1,2"
+            }
+          ]
+        }
+      ],
+      "result": {
+        "name": "BUDGET2027",
+        "n": 1,
+        "problems": [
+          "sample.json#/a~1b/~0key: independent PDF oracle cannot resolve: '~key'"
+        ],
+        "warnings": [],
+        "facts": []
+      }
+    },
+    {
+      "name": "wrong-page",
+      "docs": {
+        "sample.json": {
+          "a/b": {
+            "~key": {
+              "value": 1.2,
+              "unit": "млн. €",
+              "provenance": "leaf"
+            }
+          }
+        },
+        "budget2027-provenance.json": {
+          "entries": {
+            "leaf": {
+              "output": "sample.json#/a~1b/~0key",
+              "period": "2026.law",
+              "unit": "млн. €",
+              "document": "forecast",
+              "page": 2,
+              "printed": "1,2"
+            }
+          }
+        }
+      },
+      "oracles": [
+        {
+          "output": "sample.json#/a~1b/~0key",
+          "value": "1.2",
+          "unit": "млн. €",
+          "period": "2026.law",
+          "document": "forecast",
+          "sources": [
+            {
+              "page": 1,
+              "printed": "1,2"
+            }
+          ]
+        }
+      ],
+      "result": {
+        "name": "BUDGET2027",
+        "n": 6,
+        "problems": [
+          "sample.json#/a~1b/~0key: independent PDF pages and printed operands"
+        ],
+        "warnings": [],
+        "facts": []
+      }
+    },
+    {
+      "name": "bad-printed",
+      "docs": {
+        "sample.json": {
+          "a/b": {
+            "~key": {
+              "value": 1.2,
+              "unit": "млн. €",
+              "provenance": "leaf"
+            }
+          }
+        },
+        "budget2027-provenance.json": {
+          "entries": {
+            "leaf": {
+              "output": "sample.json#/a~1b/~0key",
+              "period": "2026.law",
+              "unit": "млн. €",
+              "document": "forecast",
+              "page": 1,
+              "printed": "not a number"
+            }
+          }
+        }
+      },
+      "oracles": [
+        {
+          "output": "sample.json#/a~1b/~0key",
+          "value": "1.2",
+          "unit": "млн. €",
+          "period": "2026.law",
+          "document": "forecast",
+          "sources": [
+            {
+              "page": 1,
+              "printed": "1,2"
+            }
+          ]
+        }
+      ],
+      "result": {
+        "name": "BUDGET2027",
+        "n": 6,
+        "problems": [
+          "sample.json#/a~1b/~0key: independent PDF oracle cannot resolve: Not a printed number: not a number"
+        ],
+        "warnings": [],
+        "facts": []
+      }
+    },
+    {
+      "name": "blank-printed",
+      "docs": {
+        "sample.json": {
+          "a/b": {
+            "~key": {
+              "value": 1.2,
+              "unit": "млн. €",
+              "provenance": "leaf"
+            }
+          }
+        },
+        "budget2027-provenance.json": {
+          "entries": {
+            "leaf": {
+              "output": "sample.json#/a~1b/~0key",
+              "period": "2026.law",
+              "unit": "млн. €",
+              "document": "forecast",
+              "page": 1,
+              "printed": ""
+            }
+          }
+        }
+      },
+      "oracles": [
+        {
+          "output": "sample.json#/a~1b/~0key",
+          "value": "1.2",
+          "unit": "млн. €",
+          "period": "2026.law",
+          "document": "forecast",
+          "sources": [
+            {
+              "page": 1,
+              "printed": "1,2"
+            }
+          ]
+        }
+      ],
+      "result": {
+        "name": "BUDGET2027",
+        "n": 6,
+        "problems": [
+          "sample.json#/a~1b/~0key: independent PDF oracle cannot resolve: Not a printed number: "
+        ],
+        "warnings": [],
+        "facts": []
+      }
+    },
+    {
+      "name": "null-printed",
+      "docs": {
+        "sample.json": {
+          "a/b": {
+            "~key": {
+              "value": 1.2,
+              "unit": "млн. €",
+              "provenance": "leaf"
+            }
+          }
+        },
+        "budget2027-provenance.json": {
+          "entries": {
+            "leaf": {
+              "output": "sample.json#/a~1b/~0key",
+              "period": "2026.law",
+              "unit": "млн. €",
+              "document": "forecast",
+              "page": 1,
+              "printed": null
+            }
+          }
+        }
+      },
+      "oracles": [
+        {
+          "output": "sample.json#/a~1b/~0key",
+          "value": "1.2",
+          "unit": "млн. €",
+          "period": "2026.law",
+          "document": "forecast",
+          "sources": [
+            {
+              "page": 1,
+              "printed": "1,2"
+            }
+          ]
+        }
+      ],
+      "result": {
+        "name": "BUDGET2027",
+        "n": 1,
+        "problems": [
+          "group crashed: AttributeError: 'NoneType' object has no attribute 'strip'"
+        ],
+        "warnings": [],
+        "facts": []
+      }
+    },
+    {
+      "name": "null-value",
+      "docs": {
+        "sample.json": {
+          "a/b": {
+            "~key": {
+              "value": null,
+              "unit": "млн. €",
+              "provenance": "leaf"
+            }
+          }
+        },
+        "budget2027-provenance.json": {
+          "entries": {
+            "leaf": {
+              "output": "sample.json#/a~1b/~0key",
+              "period": "2026.law",
+              "unit": "млн. €",
+              "document": "forecast",
+              "page": 1,
+              "printed": "1,2"
+            }
+          }
+        }
+      },
+      "oracles": [
+        {
+          "output": "sample.json#/a~1b/~0key",
+          "value": "1.2",
+          "unit": "млн. €",
+          "period": "2026.law",
+          "document": "forecast",
+          "sources": [
+            {
+              "page": 1,
+              "printed": "1,2"
+            }
+          ]
+        }
+      ],
+      "result": {
+        "name": "BUDGET2027",
+        "n": 1,
+        "problems": [
+          "group crashed: InvalidOperation: [<class 'decimal.ConversionSyntax'>]"
+        ],
+        "warnings": [],
+        "facts": []
+      }
+    },
+    {
+      "name": "malformed-index",
+      "docs": {
+        "sample.json": {
+          "a/b": {
+            "~key": {
+              "value": 1.2,
+              "unit": "млн. €",
+              "provenance": "leaf"
+            }
+          },
+          "array": []
+        },
+        "budget2027-provenance.json": {
+          "entries": {
+            "leaf": {
+              "output": "sample.json#/a~1b/~0key",
+              "period": "2026.law",
+              "unit": "млн. €",
+              "document": "forecast",
+              "page": 1,
+              "printed": "1,2"
+            }
+          }
+        }
+      },
+      "oracles": [
+        {
+          "output": "sample.json#/array/not-an-index",
+          "value": "1.2",
+          "unit": "млн. €",
+          "period": "2026.law",
+          "document": "forecast",
+          "sources": [
+            {
+              "page": 1,
+              "printed": "1,2"
+            }
+          ]
+        }
+      ],
+      "result": {
+        "name": "BUDGET2027",
+        "n": 1,
+        "problems": [
+          "sample.json#/array/not-an-index: independent PDF oracle cannot resolve: invalid literal for int() with base 10: 'not-an-index'"
+        ],
+        "warnings": [],
+        "facts": []
+      }
+    },
+    {
+      "name": "malformed-address",
+      "docs": {
+        "sample.json": {
+          "a/b": {
+            "~key": {
+              "value": 1.2,
+              "unit": "млн. €",
+              "provenance": "leaf"
+            }
+          }
+        },
+        "budget2027-provenance.json": {
+          "entries": {
+            "leaf": {
+              "output": "sample.json#/a~1b/~0key",
+              "period": "2026.law",
+              "unit": "млн. €",
+              "document": "forecast",
+              "page": 1,
+              "printed": "1,2"
+            }
+          }
+        }
+      },
+      "oracles": [
+        {
+          "output": "sample.json",
+          "value": "1.2",
+          "unit": "млн. €",
+          "period": "2026.law",
+          "document": "forecast",
+          "sources": [
+            {
+              "page": 1,
+              "printed": "1,2"
+            }
+          ]
+        }
+      ],
+      "result": {
+        "name": "BUDGET2027",
+        "n": 1,
+        "problems": [
+          "group crashed: ValueError: not enough values to unpack (expected 2, got 1)"
+        ],
+        "warnings": [],
+        "facts": []
+      }
+    },
+    {
+      "name": "unicode-index",
+      "docs": {
+        "sample.json": {
+          "a/b": {
+            "~key": {
+              "value": 1.2,
+              "unit": "млн. €",
+              "provenance": "leaf"
+            }
+          },
+          "array": [
+            null,
+            {
+              "value": 1.2,
+              "unit": "млн. €",
+              "provenance": "leaf"
+            },
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "budget2027-provenance.json": {
+          "entries": {
+            "leaf": {
+              "output": "sample.json#/array/١",
+              "period": "2026.law",
+              "unit": "млн. €",
+              "document": "forecast",
+              "page": 1,
+              "printed": "1,2"
+            }
+          }
+        }
+      },
+      "oracles": [
+        {
+          "output": "sample.json#/array/١",
+          "value": "1.2",
+          "unit": "млн. €",
+          "period": "2026.law",
+          "document": "forecast",
+          "sources": [
+            {
+              "page": 1,
+              "printed": "1,2"
+            }
+          ]
+        }
+      ],
+      "result": {
+        "name": "BUDGET2027",
+        "n": 6,
+        "problems": [],
+        "warnings": [],
+        "facts": []
+      }
+    },
+    {
+      "name": "underscored-index",
+      "docs": {
+        "sample.json": {
+          "a/b": {
+            "~key": {
+              "value": 1.2,
+              "unit": "млн. €",
+              "provenance": "leaf"
+            }
+          },
+          "array": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            {
+              "value": 1.2,
+              "unit": "млн. €",
+              "provenance": "leaf"
+            }
+          ]
+        },
+        "budget2027-provenance.json": {
+          "entries": {
+            "leaf": {
+              "output": "sample.json#/array/1_0",
+              "period": "2026.law",
+              "unit": "млн. €",
+              "document": "forecast",
+              "page": 1,
+              "printed": "1,2"
+            }
+          }
+        }
+      },
+      "oracles": [
+        {
+          "output": "sample.json#/array/1_0",
+          "value": "1.2",
+          "unit": "млн. €",
+          "period": "2026.law",
+          "document": "forecast",
+          "sources": [
+            {
+              "page": 1,
+              "printed": "1,2"
+            }
+          ]
+        }
+      ],
+      "result": {
+        "name": "BUDGET2027",
+        "n": 6,
+        "problems": [],
+        "warnings": [],
+        "facts": []
+      }
+    },
+    {
+      "name": "new-unicode-index",
+      "docs": {
+        "sample.json": {
+          "a/b": {
+            "~key": {
+              "value": 1.2,
+              "unit": "млн. €",
+              "provenance": "leaf"
+            }
+          },
+          "array": [
+            null,
+            {
+              "value": 1.2,
+              "unit": "млн. €",
+              "provenance": "leaf"
+            },
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "budget2027-provenance.json": {
+          "entries": {
+            "leaf": {
+              "output": "sample.json#/array/𐵀",
+              "period": "2026.law",
+              "unit": "млн. €",
+              "document": "forecast",
+              "page": 1,
+              "printed": "1,2"
+            }
+          }
+        }
+      },
+      "oracles": [
+        {
+          "output": "sample.json#/array/𐵀",
+          "value": "1.2",
+          "unit": "млн. €",
+          "period": "2026.law",
+          "document": "forecast",
+          "sources": [
+            {
+              "page": 1,
+              "printed": "1,2"
+            }
+          ]
+        }
+      ],
+      "result": {
+        "name": "BUDGET2027",
+        "n": 1,
+        "problems": [
+          "sample.json#/array/𐵀: independent PDF oracle cannot resolve: invalid literal for int() with base 10: '\\U00010d40'"
+        ],
+        "warnings": [],
+        "facts": []
+      }
+    },
+    {
+      "name": "cycle",
+      "docs": {
+        "sample.json": {
+          "a/b": {
+            "~key": {
+              "value": 1.2,
+              "unit": "млн. €",
+              "provenance": "derived"
+            }
+          }
+        },
+        "budget2027-provenance.json": {
+          "entries": {
+            "leaf": {
+              "output": "sample.json#/a~1b/~0key",
+              "period": "2026.law",
+              "unit": "млн. €",
+              "document": "forecast",
+              "page": 1,
+              "printed": "1,2"
+            },
+            "derived": {
+              "output": "sample.json#/array/𐵀",
+              "period": "2026.law",
+              "unit": "млн. €",
+              "document": "forecast",
+              "operation": "sum",
+              "operands": [
+                "derived"
+              ]
+            }
+          }
+        }
+      },
+      "oracles": [
+        {
+          "output": "sample.json#/a~1b/~0key",
+          "value": "1.2",
+          "unit": "млн. €",
+          "period": "2026.law",
+          "document": "forecast",
+          "sources": [
+            {
+              "page": 1,
+              "printed": "1,2"
+            }
+          ]
+        }
+      ],
+      "result": {
+        "name": "BUDGET2027",
+        "n": 1,
+        "problems": [
+          "sample.json#/a~1b/~0key: independent PDF oracle cannot resolve: Cyclic provenance operands: derived"
+        ],
+        "warnings": [],
+        "facts": []
+      }
+    },
+    {
+      "name": "missing-operand",
+      "docs": {
+        "sample.json": {
+          "a/b": {
+            "~key": {
+              "value": 1.2,
+              "unit": "млн. €",
+              "provenance": "derived"
+            }
+          }
+        },
+        "budget2027-provenance.json": {
+          "entries": {
+            "leaf": {
+              "output": "sample.json#/a~1b/~0key",
+              "period": "2026.law",
+              "unit": "млн. €",
+              "document": "forecast",
+              "page": 1,
+              "printed": "1,2"
+            },
+            "derived": {
+              "output": "sample.json#/array/𐵀",
+              "period": "2026.law",
+              "unit": "млн. €",
+              "document": "forecast",
+              "operation": "sum",
+              "operands": [
+                "missing"
+              ]
+            }
+          }
+        }
+      },
+      "oracles": [
+        {
+          "output": "sample.json#/a~1b/~0key",
+          "value": "1.2",
+          "unit": "млн. €",
+          "period": "2026.law",
+          "document": "forecast",
+          "sources": [
+            {
+              "page": 1,
+              "printed": "1,2"
+            }
+          ]
+        }
+      ],
+      "result": {
+        "name": "BUDGET2027",
+        "n": 1,
+        "problems": [
+          "sample.json#/a~1b/~0key: independent PDF oracle cannot resolve: 'missing'"
+        ],
+        "warnings": [],
+        "facts": []
+      }
+    },
+    {
+      "name": "duplicate-match",
+      "docs": {
+        "sample.json": {
+          "a/b": {
+            "~key": {
+              "value": 1.2,
+              "unit": "млн. €",
+              "provenance": "derived"
+            }
+          }
+        },
+        "budget2027-provenance.json": {
+          "entries": {
+            "leaf": {
+              "output": "sample.json#/a~1b/~0key",
+              "period": "2026.law",
+              "unit": "млн. €",
+              "document": "forecast",
+              "page": 1,
+              "printed": "1,2"
+            },
+            "derived": {
+              "output": "sample.json#/array/𐵀",
+              "period": "2026.law",
+              "unit": "млн. €",
+              "document": "forecast",
+              "operation": "sum",
+              "operands": [
+                "leaf",
+                "leaf"
+              ]
+            }
+          }
+        }
+      },
+      "oracles": [
+        {
+          "output": "sample.json#/a~1b/~0key",
+          "value": "1.2",
+          "unit": "млн. €",
+          "period": "2026.law",
+          "document": "forecast",
+          "sources": [
+            {
+              "page": 1,
+              "printed": "1,2"
+            },
+            {
+              "page": 1,
+              "printed": "1,2"
+            }
+          ]
+        }
+      ],
+      "result": {
+        "name": "BUDGET2027",
+        "n": 6,
+        "problems": [
+          "sample.json#/a~1b/~0key: independent output address"
+        ],
+        "warnings": [],
+        "facts": []
+      }
+    },
+    {
+      "name": "duplicate-mismatch",
+      "docs": {
+        "sample.json": {
+          "a/b": {
+            "~key": {
+              "value": 1.2,
+              "unit": "млн. €",
+              "provenance": "derived"
+            }
+          }
+        },
+        "budget2027-provenance.json": {
+          "entries": {
+            "leaf": {
+              "output": "sample.json#/a~1b/~0key",
+              "period": "2026.law",
+              "unit": "млн. €",
+              "document": "forecast",
+              "page": 1,
+              "printed": "1,2"
+            },
+            "derived": {
+              "output": "sample.json#/array/𐵀",
+              "period": "2026.law",
+              "unit": "млн. €",
+              "document": "forecast",
+              "operation": "sum",
+              "operands": [
+                "leaf",
+                "leaf"
+              ]
+            }
+          }
+        }
+      },
+      "oracles": [
+        {
+          "output": "sample.json#/a~1b/~0key",
+          "value": "1.2",
+          "unit": "млн. €",
+          "period": "2026.law",
+          "document": "forecast",
+          "sources": [
+            {
+              "page": 1,
+              "printed": "1,2"
+            }
+          ]
+        }
+      ],
+      "result": {
+        "name": "BUDGET2027",
+        "n": 6,
+        "problems": [
+          "sample.json#/a~1b/~0key: independent output address",
+          "sample.json#/a~1b/~0key: independent PDF pages and printed operands"
+        ],
+        "warnings": [],
+        "facts": []
+      }
+    }
+  ],
+  "laws": [
+    {
+      "name": "edge",
+      "docs": {
+        "outlook.json": {
+          "byPeriod": {
+            "2026.law": {
+              "series": {
+                "revenue": {
+                  "value": 10.15
+                },
+                "expenditure": {
+                  "value": 10
+                },
+                "balance": {
+                  "value": 0
+                },
+                "interest": {
+                  "value": 0
+                },
+                "primaryBalance": {
+                  "value": 0
+                }
+              }
+            }
+          }
+        }
+      },
+      "result": {
+        "name": "BUDGET2027",
+        "n": 2,
+        "problems": [],
+        "warnings": [],
+        "facts": []
+      }
+    },
+    {
+      "name": "outside",
+      "docs": {
+        "outlook.json": {
+          "byPeriod": {
+            "2026.law": {
+              "series": {
+                "revenue": {
+                  "value": 10.151
+                },
+                "expenditure": {
+                  "value": 10
+                },
+                "balance": {
+                  "value": 0
+                },
+                "interest": {
+                  "value": 0
+                },
+                "primaryBalance": {
+                  "value": 0
+                }
+              }
+            }
+          }
+        }
+      },
+      "result": {
+        "name": "BUDGET2027",
+        "n": 2,
+        "problems": [
+          "2026.law: published revenue - expenditure = balance"
+        ],
+        "warnings": [],
+        "facts": []
+      }
+    },
+    {
+      "name": "negative-edge",
+      "docs": {
+        "outlook.json": {
+          "byPeriod": {
+            "2026.law": {
+              "series": {
+                "revenue": {
+                  "value": 9.85
+                },
+                "expenditure": {
+                  "value": 10
+                },
+                "balance": {
+                  "value": 0
+                },
+                "interest": {
+                  "value": 0
+                },
+                "primaryBalance": {
+                  "value": 0
+                }
+              }
+            }
+          }
+        }
+      },
+      "result": {
+        "name": "BUDGET2027",
+        "n": 2,
+        "problems": [],
+        "warnings": [],
+        "facts": []
+      }
+    },
+    {
+      "name": "primary-exact",
+      "docs": {
+        "outlook.json": {
+          "byPeriod": {
+            "2026.law": {
+              "series": {
+                "revenue": {
+                  "value": 10
+                },
+                "expenditure": {
+                  "value": 10
+                },
+                "balance": {
+                  "value": 0
+                },
+                "interest": {
+                  "value": 0.1
+                },
+                "primaryBalance": {
+                  "value": 0.1000000001
+                }
+              }
+            }
+          }
+        }
+      },
+      "result": {
+        "name": "BUDGET2027",
+        "n": 2,
+        "problems": [
+          "2026.law: published balance + interest = primary balance"
+        ],
+        "warnings": [],
+        "facts": []
+      }
+    }
+  ],
+  "archives": [
+    {
+      "name": "archive",
+      "problem": "group crashed: ValueError: Archive checksum mismatch: data/originals/budget_2027/ZDBRB-2027.zip"
+    },
+    {
+      "name": "archive-before-metadata",
+      "problem": "group crashed: ValueError: Archive checksum mismatch: data/originals/budget_2027/ZDBRB-2027.zip"
+    },
+    {
+      "name": "member",
+      "problem": "group crashed: ValueError: PDF member checksum mismatch: ZDBRB-2027/4-UMTBF-2027-2029-motivi.pdf"
+    }
+  ],
+  "identities": [
+    {
+      "name": "forecast-balance",
+      "kind": "forecast",
+      "path": [
+        "tables",
+        "annex3_mln",
+        "rows",
+        61,
+        "values",
+        2
+      ],
+      "value": -4902.0,
+      "result": {
+        "name": "BUDGET2027",
+        "n": 16,
+        "problems": [
+          "annex3_mln c2: 61 = [0, 31], Decimal printed intervals",
+          "annex3_mln c2: 62 = [61], Decimal printed intervals"
+        ],
+        "warnings": [],
+        "facts": []
+      }
+    },
+    {
+      "name": "forecast-function",
+      "kind": "forecast",
+      "path": [
+        "tables",
+        "III_1",
+        "rows",
+        0,
+        "values",
+        1
+      ],
+      "value": 3018.7,
+      "result": {
+        "name": "BUDGET2027",
+        "n": 16,
+        "problems": [
+          "functions c2: sum equals expenditure excluding EU contribution"
+        ],
+        "warnings": [],
+        "facts": []
+      }
+    },
+    {
+      "name": "state-transfer",
+      "kind": "bill",
+      "path": [
+        "bill",
+        "1",
+        "headline",
+        "transfers"
+      ],
+      "value": 16623377.3,
+      "result": {
+        "name": "BUDGET2027",
+        "n": 97,
+        "problems": [
+          "bill/1: printed budget balance"
+        ],
+        "warnings": [],
+        "facts": []
+      }
+    },
+    {
+      "name": "institution-transfer",
+      "kind": "bill",
+      "path": [
+        "bill",
+        "2",
+        "headline",
+        "transfers"
+      ],
+      "value": 801642.3,
+      "result": {
+        "name": "BUDGET2027",
+        "n": 97,
+        "problems": [
+          "bill/2: printed budget balance"
+        ],
+        "warnings": [],
+        "facts": []
+      }
+    },
+    {
+      "name": "policy-total",
+      "kind": "bill",
+      "path": [
+        "bill",
+        "2",
+        "policyTotal"
+      ],
+      "value": 868110.3,
+      "result": {
+        "name": "BUDGET2027",
+        "n": 97,
+        "problems": [
+          "bill/2: policies equal expenditure"
+        ],
+        "warnings": [],
+        "facts": []
+      }
+    },
+    {
+      "name": "municipal-total",
+      "kind": "bill",
+      "path": [
+        "municipal",
+        "art52",
+        "total",
+        0
+      ],
+      "value": 5162189.3,
+      "result": {
+        "name": "BUDGET2027",
+        "n": 282,
+        "problems": [
+          "art52: printed column sum 0"
+        ],
+        "warnings": [],
+        "facts": []
+      }
+    },
+    {
+      "name": "municipal-part",
+      "kind": "bill",
+      "path": [
+        "municipal",
+        "art52",
+        "rows",
+        0,
+        "values",
+        1
+      ],
+      "value": 11797.4,
+      "result": {
+        "name": "BUDGET2027",
+        "n": 282,
+        "problems": [
+          "Банско: transfer parts"
+        ],
+        "warnings": [],
+        "facts": []
+      }
+    },
+    {
+      "name": "municipal-duplicate",
+      "kind": "bill",
+      "path": [
+        "municipal",
+        "art52",
+        "rows",
+        1,
+        "name"
+      ],
+      "value": "Банско",
+      "result": {
+        "name": "BUDGET2027",
+        "n": 282,
+        "problems": [
+          "art52: 265 unique identities"
+        ],
+        "warnings": [],
+        "facts": []
+      }
+    }
+  ],
+  "sourceCases": [
+    {
+      "name": "blank-required-cell",
+      "path": [
+        "tables",
+        "annex1_execution2026",
+        "rows",
+        0,
+        "values",
+        0
+      ],
+      "value": null,
+      "problem": "group crashed: ValueError: Non-numeric extraction cell: F/tables/annex1_execution2026/rows/0/values/0"
+    },
+    {
+      "name": "wrong-year",
+      "path": [
+        "tables",
+        "annex1_execution2026",
+        "columns",
+        0,
+        "year"
+      ],
+      "value": 2025,
+      "problem": "group crashed: ValueError: Wrong year in annex1_execution2026 column 0: 2026.law"
+    },
+    {
+      "name": "wrong-vintage",
+      "path": [
+        "tables",
+        "annex1_execution2026",
+        "columns",
+        0,
+        "vintage"
+      ],
+      "value": "проект",
+      "problem": "group crashed: ValueError: Wrong vintage in annex1_execution2026 column 0: 2026.law"
+    }
+  ]
+}
