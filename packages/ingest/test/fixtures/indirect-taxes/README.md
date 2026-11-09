@@ -1,0 +1,3 @@
+# Indirect-tax reader evidence
+
+The six originals can be checked with `capture.py`, after checking the pinned input archive and each source SHA-256. `reader-ir.json` retains named-sheet cells, HTML parser text, PDF page text and DOCX table cells, before interpreting rates, dates, products, years or conversions. `donor.py` and `data_io_donor.py` are unchanged Python 3.12 baseline sources. `regenerate.py` substitutes only the reader interfaces and verifies the independent donor output from the committed IR without reading the archive or release data. `provenance.json` pins all fixture bytes. This does not claim that the raw-reader adapters have been ported to TypeScript.

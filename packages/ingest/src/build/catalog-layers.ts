@@ -12,15 +12,20 @@ export interface CatalogProjectionInput {
   registry: CatalogRefreshInput['registry'];
   activeRoutes: CatalogRefreshInput['activeRoutes'];
 }
-/** Catalog-scoped wording, active-data filtering and refresh, in production order. */
-export function projectCatalog(input: CatalogProjectionInput): CatalogDocument {
-  let serialized = JSON.stringify(input.raw);
-  for (const [from, to] of Object.entries(input.wording))
+export function catalogWording(
+  raw: CatalogDocument,
+  wording: Readonly<Record<string, string>>,
+): CatalogDocument {
+  let serialized = JSON.stringify(raw);
+  for (const [from, to] of Object.entries(wording))
     serialized = serialized.replaceAll(
       JSON.stringify(from).slice(1, -1),
       JSON.stringify(to).slice(1, -1),
     );
-  const cat = JSON.parse(serialized) as CatalogDocument;
+  return JSON.parse(serialized) as CatalogDocument;
+}
+export function catalogActive(raw: CatalogDocument): CatalogDocument {
+  const cat = structuredClone(raw);
   const ids = new Set(['D24', 'M01', 'M02', 'M03', 'M04', 'M05']),
     slugs = new Set([
       'sebra',
@@ -48,6 +53,12 @@ export function projectCatalog(input: CatalogProjectionInput): CatalogDocument {
   if (!Array.isArray(cat.groups)) throw new Error('Invalid catalog groups');
   cat.groups = cat.groups.filter((g: any) => cat.datasets.some((d) => d.group === g.id));
   cat.counts = catalogCounts(cat, true);
+  return cat;
+}
+export function catalogFinalRefresh(
+  cat: CatalogDocument,
+  input: Omit<CatalogProjectionInput, 'raw' | 'wording'>,
+): CatalogDocument {
   const streams = new Map(input.ownerBytes);
   streams.set('catalog.json', Buffer.from(JSON.stringify(cat)));
   return refreshCatalog({
@@ -56,4 +67,9 @@ export function projectCatalog(input: CatalogProjectionInput): CatalogDocument {
     registry: input.registry,
     activeRoutes: input.activeRoutes,
   }).catalog;
+}
+
+/** Catalog-scoped wording, active-data filtering and refresh, in production order. */
+export function projectCatalog(input: CatalogProjectionInput): CatalogDocument {
+  return catalogFinalRefresh(catalogActive(catalogWording(input.raw, input.wording)), input);
 }

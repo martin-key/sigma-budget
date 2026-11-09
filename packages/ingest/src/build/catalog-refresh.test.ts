@@ -19,6 +19,10 @@ describe('catalog refresh', () => {
       enc('тест '.repeat(1000)),
       Buffer.from(Array.from({ length: 65537 }, (_, i) => (i * 73 + (i >> 7)) & 255)),
     ];
+    const mutable = Buffer.alloc(4096, 97);
+    catalogGzipSize(mutable);
+    for (let i = 0; i < mutable.length; i++) mutable[i] = (i * 73 + (i >> 7)) & 255;
+    samples.push(mutable);
     const code =
       'import sys,gzip,json,base64; assert sys.version_info[:2] == (3, 12); print(json.dumps([len(gzip.compress(base64.b64decode(s),9,mtime=0)) for s in json.load(sys.stdin)]))';
     const expected = JSON.parse(
@@ -28,6 +32,21 @@ describe('catalog refresh', () => {
       }),
     ) as number[];
     expect(samples.map(catalogGzipSize)).toEqual(expected);
+  });
+  it('reads changed owner bytes and keeps schema results independent', () => {
+    const owner = enc('{"xx":0,"meta":{"source":["a"]}}');
+    const first = catalogSchema(owner);
+    first.schema[0]!.key = 'changed';
+    first.source!.push('changed');
+    expect(catalogSchema(Uint8Array.from(owner))).toEqual({
+      schema: [{ key: 'xx', type: 'number' }],
+      source: ['a'],
+    });
+    owner.set(enc('{"yy":0,"meta":{"source":["b"]}}'));
+    expect(catalogSchema(owner)).toEqual({
+      schema: [{ key: 'yy', type: 'number' }],
+      source: ['b'],
+    });
   });
   it('preserves source key order and rejects malformed, non-finite and invalid UTF-8', () => {
     expect(catalogSchema(enc('{"2":[],"1":{},"meta":{"source":["a"]},"z":true}'))).toEqual({
