@@ -1,0 +1,10 @@
+{
+  "generatorSha256": "e76c74832c91e18ab5c9d87e887ef6144842bbfb714ad1c37a89d504ba7afd33",
+  "inputs": {
+    "inventory.json": "d000721d7d91be55de0a5916b09091bc3c23d73c1894881421e07fefdaf059ba",
+    "source_order.py": "eba05cd45758a453994c1d30cab7afbafa53d17a88b926116c1d7d9a20fe230f",
+    "source-methods-provenance.json": "20a4173be2d68fddb95d955a025ed5a95815df82b70ce8219281ce37882707af"
+  },
+  "oracleSha256": "ff795b6d5bf6bbddae0433faad00de5e8ee05912e3428eae1aec95aba87f6d03",
+  "cases": 6
+}
