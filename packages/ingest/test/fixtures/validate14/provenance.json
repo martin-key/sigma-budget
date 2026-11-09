@@ -1,0 +1,12 @@
+{
+  "baseline": "05d6f6eeca9991468f3c94c3c9c26e87d5b0fae0",
+  "python": "3.12",
+  "files": {
+    "execution_contract.py": "ffa32a7c6ee3a1ef661294049f77d8797a2e5dbc7fe4e160d7ebc5e7b5e70e5f",
+    "execution.json": "e9c75d84bb575c3a0287c0a7a56828b473bd53498336ce6d45cfbc6333533200",
+    "contract.json": "bc0105b7b1dfc195ba9a25a2c711fd703a200078864ce9ac9dbc20e3c9d4590b",
+    "oracle.json": "dec45f9c59bfd6b720fef7f70e1a1c333eba0cc19495a83aec34a4f25385d986",
+    "synthetic-execution.json": "982e6d965cc4a54ac0151c4efe09567bccd246beeedfc80b10765281886c545d"
+  },
+  "description": "execution.json is a byte-for-byte snapshot from data/release at the baseline; the donor is an unmodified copy of the Python execution_contract.py at that commit. The Python script generates oracle.json independently from those frozen files. This corpus covers the execution projections only, not the wave14 validator groups."
+}

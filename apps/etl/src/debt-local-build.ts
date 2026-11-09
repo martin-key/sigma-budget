@@ -32,6 +32,32 @@ export async function debtLocalBuildCli(args: string[]): Promise<number> {
   const allowed = join(projectRoot, 'tmp/ts-migration/candidates/07');
   if (resolve(flags['--out']) !== allowed)
     throw new Error('Output must be tmp/ts-migration/candidates/07 in this project');
+  const data = join(allowed, 'data');
+  const checkFiles = async (names: string[]) => {
+    for (const name of names) {
+      try {
+        const stat = await lstat(join(data, name));
+        if (stat.isSymbolicLink() || !stat.isFile() || stat.nlink !== 1)
+          throw new Error('Unsafe output file');
+      } catch (e) {
+        if ((e as NodeJS.ErrnoException).code !== 'ENOENT') throw e;
+      }
+    }
+  };
+  // Reject existing unsafe targets before loading and transforming the large geometry corpus.
+  let existing = projectRoot;
+  for (const part of ['tmp', 'ts-migration', 'candidates', '07', 'data', 'geo']) {
+    existing = join(existing, part);
+    try {
+      const stat = await lstat(existing);
+      if (stat.isSymbolicLink() || !stat.isDirectory() || (await realpath(existing)) !== existing)
+        throw new Error('Unsafe output directory');
+    } catch (e) {
+      if ((e as NodeJS.ErrnoException).code !== 'ENOENT') throw e;
+      break;
+    }
+  }
+  await checkFiles(['debt.json', 'municipalities.json', 'geo/obshtini.json', 'sebra.json']);
   const output = await loadDebtLocalFixture(flags['--inputs'], flags['--build-date']!);
   process.stderr.write(
     'Archival geometry reproduction: SZR36 (Chirpan) retains a pinned historical self-intersection; archived topology remains invalid.\n',
@@ -48,17 +74,7 @@ export async function debtLocalBuildCli(args: string[]): Promise<number> {
     if (stat.isSymbolicLink() || !stat.isDirectory() || (await realpath(dir)) !== dir)
       throw new Error('Unsafe output directory');
   }
-  const data = join(allowed, 'data');
-  for (const name of Object.keys(output)) {
-    const target = join(data, name);
-    try {
-      const stat = await lstat(target);
-      if (stat.isSymbolicLink() || !stat.isFile() || stat.nlink !== 1)
-        throw new Error('Unsafe output file');
-    } catch (e) {
-      if ((e as NodeJS.ErrnoException).code !== 'ENOENT') throw e;
-    }
-  }
+  await checkFiles(Object.keys(output));
   for (const [name, value] of Object.entries(output)) {
     const target = join(data, name),
       temp = join(dirname(target), `.ts07-${process.pid}-${name.replaceAll('/', '-')}.tmp`);

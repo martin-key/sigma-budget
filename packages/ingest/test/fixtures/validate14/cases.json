@@ -1,0 +1,1460 @@
+[
+  {
+    "name": "baseline",
+    "groups": [
+      "INPUTS",
+      "ENVELOPE",
+      "NUMBERS",
+      "SIZES",
+      "PRIVACY",
+      "GLOSSARY",
+      "REGISTRY"
+    ],
+    "ops": []
+  },
+  {
+    "name": "input-hash-changed",
+    "groups": [
+      "INPUTS"
+    ],
+    "ops": [
+      {
+        "op": "append",
+        "file": "data/inputs/editorial/guide.json",
+        "text": " "
+      }
+    ]
+  },
+  {
+    "name": "input-extra-missing",
+    "groups": [
+      "INPUTS"
+    ],
+    "ops": [
+      {
+        "op": "deleteFile",
+        "file": "data/inputs/editorial/guide.json"
+      },
+      {
+        "op": "write",
+        "file": "data/inputs/rogue.txt",
+        "text": "rogue"
+      }
+    ]
+  },
+  {
+    "name": "input-manifest-invalid-duplicate",
+    "groups": [
+      "INPUTS"
+    ],
+    "ops": [
+      {
+        "op": "append",
+        "file": "data/originals.sha256",
+        "text": "bad manifest line\n"
+      },
+      {
+        "op": "duplicateFirstLine",
+        "file": "data/originals.sha256"
+      }
+    ]
+  },
+  {
+    "name": "envelope-invalid",
+    "groups": [
+      "ENVELOPE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/revenue.json",
+        "path": [
+          "meta",
+          "status"
+        ],
+        "value": "broken"
+      },
+      {
+        "op": "set",
+        "file": "data/release/revenue.json",
+        "path": [
+          "meta",
+          "source"
+        ],
+        "value": [
+          "missing"
+        ]
+      },
+      {
+        "op": "set",
+        "file": "data/release/revenue.json",
+        "path": [
+          "meta",
+          "retrieved"
+        ],
+        "value": "2100-01-01"
+      },
+      {
+        "op": "set",
+        "file": "data/release/revenue.json",
+        "path": [
+          "badBlock"
+        ],
+        "value": {
+          "status": "pending",
+          "value": 3,
+          "source": [
+            "missing"
+          ]
+        }
+      },
+      {
+        "op": "set",
+        "file": "data/release/revenue.json",
+        "path": [
+          "byPeriod",
+          "2027.draft",
+          "status"
+        ],
+        "value": "law"
+      }
+    ]
+  },
+  {
+    "name": "envelope-missing-meta",
+    "groups": [
+      "ENVELOPE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/revenue.json",
+        "path": [
+          "meta"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "numbers-invalid",
+    "groups": [
+      "NUMBERS"
+    ],
+    "ops": [
+      {
+        "op": "write",
+        "file": "data/release/invalid.json",
+        "text": "{\"bad\":[null,\"\",\"123.45\",1.123456789,true]}"
+      }
+    ]
+  },
+  {
+    "name": "size-near-limit",
+    "groups": [
+      "SIZES"
+    ],
+    "ops": [
+      {
+        "op": "repeat",
+        "file": "data/release/warning.txt",
+        "char": "x",
+        "count": 150784
+      }
+    ]
+  },
+  {
+    "name": "size-over-limit",
+    "groups": [
+      "SIZES"
+    ],
+    "ops": [
+      {
+        "op": "repeat",
+        "file": "data/release/oversize.txt",
+        "char": "x",
+        "count": 153601
+      }
+    ]
+  },
+  {
+    "name": "privacy-leak",
+    "groups": [
+      "PRIVACY"
+    ],
+    "ops": [
+      {
+        "op": "write",
+        "file": "data/release/leak.txt",
+        "text": "private channel anthropic 12345678901234567"
+      },
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "files",
+          0,
+          "url"
+        ],
+        "value": "http://unsafe.example"
+      },
+      {
+        "op": "write",
+        "file": "apps/web/client/fixture-warning.txt",
+        "text": "private channel"
+      }
+    ]
+  },
+  {
+    "name": "glossary-invalid",
+    "groups": [
+      "GLOSSARY"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/glossary.json",
+        "path": [
+          "terms",
+          0,
+          "slug"
+        ],
+        "value": "invalid"
+      },
+      {
+        "op": "set",
+        "file": "data/release/glossary.json",
+        "path": [
+          "terms",
+          0,
+          "def"
+        ],
+        "value": ""
+      },
+      {
+        "op": "set",
+        "file": "data/release/glossary.json",
+        "path": [
+          "terms",
+          0,
+          "cat"
+        ],
+        "value": "unknown"
+      },
+      {
+        "op": "set",
+        "file": "data/release/glossary.json",
+        "path": [
+          "terms",
+          0,
+          "related"
+        ],
+        "value": [
+          {
+            "slug": "unknown"
+          }
+        ]
+      },
+      {
+        "op": "set",
+        "file": "data/release/glossary.json",
+        "path": [
+          "terms",
+          0,
+          "see"
+        ],
+        "value": [
+          {
+            "href": "#/missing-route"
+          }
+        ]
+      },
+      {
+        "op": "set",
+        "file": "data/release/glossary.json",
+        "path": [
+          "relations",
+          0,
+          "terms",
+          0
+        ],
+        "value": "unknown"
+      }
+    ]
+  },
+  {
+    "name": "registry-source-invalid",
+    "groups": [
+      "REGISTRY"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/sources.yaml",
+        "path": [
+          "sources",
+          0,
+          "access"
+        ],
+        "value": "invalid"
+      },
+      {
+        "op": "set",
+        "file": "data/sources.yaml",
+        "path": [
+          "sources",
+          0,
+          "parser"
+        ],
+        "value": "python -m budget_pipeline.missing"
+      },
+      {
+        "op": "set",
+        "file": "data/sources.yaml",
+        "path": [
+          "sources",
+          0,
+          "files",
+          0,
+          "path"
+        ],
+        "value": "data/originals/missing/*.xls"
+      },
+      {
+        "op": "set",
+        "file": "data/sources.yaml",
+        "path": [
+          "intermediates",
+          0,
+          "inputs"
+        ],
+        "value": [
+          "unknown-input"
+        ]
+      },
+      {
+        "op": "set",
+        "file": "data/sources.yaml",
+        "path": [
+          "intermediates",
+          0,
+          "reproducible"
+        ],
+        "value": "yes"
+      }
+    ]
+  },
+  {
+    "name": "registry-dataset-invalid",
+    "groups": [
+      "REGISTRY"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "producer"
+        ],
+        "value": "python -m budget_pipeline.missing"
+      },
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "layers"
+        ],
+        "value": [
+          "python -m budget_pipeline.missing"
+        ]
+      },
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "schema"
+        ],
+        "value": "docs/missing.md"
+      },
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "inputs"
+        ],
+        "value": [
+          "unknown-input"
+        ]
+      },
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "screens"
+        ],
+        "value": [
+          "bad"
+        ]
+      },
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "files"
+        ],
+        "value": [
+          "data/release/missing.json"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "registry-extra-file-and-path",
+    "groups": [
+      "REGISTRY"
+    ],
+    "ops": [
+      {
+        "op": "write",
+        "file": "data/release/unregistered.json",
+        "text": "{\"meta\":{\"status\":\"real\"}}"
+      },
+      {
+        "op": "write",
+        "file": "pipeline/fixture-path.py",
+        "text": "a = '/home/test/private/file'\n"
+      }
+    ]
+  },
+  {
+    "name": "registry-pin-mismatch",
+    "groups": [
+      "REGISTRY"
+    ],
+    "ops": [
+      {
+        "op": "append",
+        "file": "data/originals.sha256",
+        "text": "0000000000000000000000000000000000000000000000000000000000000000  data/originals/rogue.txt\n"
+      }
+    ]
+  },
+  {
+    "name": "envelope-pending",
+    "groups": [
+      "ENVELOPE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "pending",
+          "P01",
+          "id"
+        ],
+        "value": "wrong"
+      },
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "pending",
+          "P01",
+          "reason"
+        ],
+        "value": ""
+      },
+      {
+        "op": "set",
+        "file": "data/release/revenue.json",
+        "path": [
+          "meta",
+          "pending"
+        ],
+        "value": [
+          "not-found"
+        ]
+      },
+      {
+        "op": "set",
+        "file": "data/release/revenue.json",
+        "path": [
+          "meta",
+          "mock"
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "numbers-nonfinite",
+    "groups": [
+      "NUMBERS"
+    ],
+    "ops": [
+      {
+        "op": "write",
+        "file": "data/release/nonfinite.json",
+        "text": "{\"value\":NaN}"
+      }
+    ]
+  },
+  {
+    "name": "numbers-overflow-bool",
+    "groups": [
+      "NUMBERS"
+    ],
+    "ops": [
+      {
+        "op": "write",
+        "file": "data/release/overflow.json",
+        "text": "{\"a\":1e999,\"b\":true,\"c\":false}"
+      }
+    ]
+  },
+  {
+    "name": "glossary-count-duplicate",
+    "groups": [
+      "GLOSSARY"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/glossary.json",
+        "path": [
+          "terms",
+          1,
+          "slug"
+        ],
+        "value": "byudzhet"
+      },
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "counts",
+          "terms"
+        ],
+        "value": 1
+      },
+      {
+        "op": "set",
+        "file": "data/release/revenue.json",
+        "path": [
+          "groups",
+          0,
+          "glossary"
+        ],
+        "value": "missing"
+      }
+    ]
+  },
+  {
+    "name": "registry-duplicate-ids",
+    "groups": [
+      "REGISTRY"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/sources.yaml",
+        "path": [
+          "sources",
+          1,
+          "id"
+        ],
+        "value": "kfp"
+      },
+      {
+        "op": "set",
+        "file": "data/sources.yaml",
+        "path": [
+          "intermediates",
+          1,
+          "path"
+        ],
+        "value": "data/originals/MANIFEST.json"
+      },
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          1,
+          "id"
+        ],
+        "value": "outlook"
+      }
+    ]
+  },
+  {
+    "name": "registry-pending",
+    "groups": [
+      "REGISTRY"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          23,
+          "reason"
+        ],
+        "value": ""
+      },
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          23,
+          "expected"
+        ],
+        "value": ""
+      },
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          23,
+          "files"
+        ],
+        "value": [
+          "data/release/outlook.json"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "registry-descriptions",
+    "groups": [
+      "REGISTRY"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/sources.yaml",
+        "path": [
+          "intermediates",
+          26,
+          "category"
+        ],
+        "value": "wrong"
+      },
+      {
+        "op": "set",
+        "file": "data/sources.yaml",
+        "path": [
+          "intermediates",
+          26,
+          "decision"
+        ],
+        "value": "docs/missing.md"
+      },
+      {
+        "op": "set",
+        "file": "data/sources.yaml",
+        "path": [
+          "intermediates",
+          26,
+          "sha256"
+        ],
+        "value": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      {
+        "op": "set",
+        "file": "data/sources.yaml",
+        "path": [
+          "intermediates",
+          26,
+          "provenance"
+        ],
+        "value": ""
+      },
+      {
+        "op": "set",
+        "file": "data/sources.yaml",
+        "path": [
+          "intermediates",
+          26,
+          "producer"
+        ],
+        "value": "python -m budget_pipeline.missing"
+      },
+      {
+        "op": "set",
+        "file": "data/sources.yaml",
+        "path": [
+          "intermediates",
+          26,
+          "inputs"
+        ],
+        "value": [
+          "unknown"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "registry-dataset-guards",
+    "groups": [
+      "REGISTRY"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "status"
+        ],
+        "value": "alien"
+      },
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "rebuild"
+        ],
+        "value": null
+      },
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "inputs"
+        ],
+        "value": []
+      },
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "scope"
+        ],
+        "value": ""
+      },
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "sources"
+        ],
+        "value": [
+          "unknown"
+        ]
+      },
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "catalogId"
+        ],
+        "value": "BAD"
+      },
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "unit"
+        ],
+        "value": "bad"
+      }
+    ]
+  },
+  {
+    "name": "registry-file-status",
+    "groups": [
+      "REGISTRY"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/outlook.json",
+        "path": [
+          "meta",
+          "status"
+        ],
+        "value": "mock"
+      }
+    ]
+  },
+  {
+    "name": "registry-owner-duplicate",
+    "groups": [
+      "REGISTRY"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          1,
+          "files"
+        ],
+        "value": [
+          "data/release/outlook.json"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "registry-source-required",
+    "groups": [
+      "REGISTRY"
+    ],
+    "ops": [
+      {
+        "op": "deleteKey",
+        "file": "data/sources.yaml",
+        "path": [
+          "sources",
+          0,
+          "title"
+        ]
+      },
+      {
+        "op": "set",
+        "file": "data/sources.yaml",
+        "path": [
+          "sources",
+          0,
+          "acquisition"
+        ],
+        "value": "nope"
+      }
+    ]
+  },
+  {
+    "name": "registry-unpinned",
+    "groups": [
+      "REGISTRY"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/sources.yaml",
+        "path": [
+          "intermediates",
+          0,
+          "path"
+        ],
+        "value": "data/cache/unpinned.json"
+      },
+      {
+        "op": "set",
+        "file": "data/sources.yaml",
+        "path": [
+          "intermediates",
+          0,
+          "reproducible"
+        ],
+        "value": true
+      },
+      {
+        "op": "set",
+        "file": "data/sources.yaml",
+        "path": [
+          "intermediates",
+          0,
+          "producer"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "envelope-required-fields",
+    "groups": [
+      "ENVELOPE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/revenue.json",
+        "path": [
+          "meta",
+          "id"
+        ],
+        "value": ""
+      },
+      {
+        "op": "set",
+        "file": "data/release/revenue.json",
+        "path": [
+          "meta",
+          "title"
+        ],
+        "value": ""
+      },
+      {
+        "op": "set",
+        "file": "data/release/revenue.json",
+        "path": [
+          "meta",
+          "source"
+        ],
+        "value": []
+      },
+      {
+        "op": "set",
+        "file": "data/release/revenue.json",
+        "path": [
+          "meta",
+          "asOf"
+        ],
+        "value": "bad"
+      },
+      {
+        "op": "set",
+        "file": "data/release/revenue.json",
+        "path": [
+          "meta",
+          "retrieved"
+        ],
+        "value": null
+      },
+      {
+        "op": "set",
+        "file": "data/release/revenue.json",
+        "path": [
+          "bad"
+        ],
+        "value": {
+          "status": "bad",
+          "source": [
+            "missing"
+          ]
+        }
+      },
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "pending",
+          "P01",
+          "screens"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "numbers-infinity",
+    "groups": [
+      "NUMBERS"
+    ],
+    "ops": [
+      {
+        "op": "write",
+        "file": "data/release/nonfinite.json",
+        "text": "{\"value\":Infinity}"
+      }
+    ]
+  },
+  {
+    "name": "privacy-all-tokens",
+    "groups": [
+      "PRIVACY"
+    ],
+    "ops": [
+      {
+        "op": "write",
+        "file": "data/release/leak.txt",
+        "text": "private channel частен канал .secrets gdoc.txt lovable artifact-files /workspaces anthropic claude 12345678901234567890"
+      }
+    ]
+  },
+  {
+    "name": "sizes-core-gzip",
+    "groups": [
+      "SIZES"
+    ],
+    "ops": [
+      {
+        "op": "hashNoise",
+        "file": "data/release/core.json",
+        "count": 1000
+      }
+    ]
+  },
+  {
+    "name": "sizes-glossary-gzip",
+    "groups": [
+      "SIZES"
+    ],
+    "ops": [
+      {
+        "op": "hashNoise",
+        "file": "data/release/glossary.json",
+        "count": 2500
+      }
+    ]
+  },
+  {
+    "name": "sizes-ministry-geo",
+    "groups": [
+      "SIZES"
+    ],
+    "ops": [
+      {
+        "op": "repeat",
+        "file": "data/release/ministries/0101.json",
+        "char": "x",
+        "count": 81921
+      },
+      {
+        "op": "repeat",
+        "file": "data/release/geo/obshtini.json",
+        "char": "x",
+        "count": 409601
+      }
+    ]
+  },
+  {
+    "name": "registry-described-path",
+    "groups": [
+      "REGISTRY"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/sources.yaml",
+        "path": [
+          "intermediates",
+          26,
+          "path"
+        ],
+        "value": "data/inputs/editorial/unknown.json"
+      }
+    ]
+  },
+  {
+    "name": "registry-overlapping-source",
+    "groups": [
+      "REGISTRY"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/sources.yaml",
+        "path": [
+          "sources",
+          1,
+          "files",
+          0,
+          "path"
+        ],
+        "value": "data/originals/kfp_2024/*.xls"
+      }
+    ]
+  },
+  {
+    "name": "registry-catalog-guards",
+    "groups": [
+      "REGISTRY"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "id"
+        ],
+        "value": "BAD"
+      },
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "status"
+        ],
+        "value": "mock"
+      },
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "screens"
+        ],
+        "value": [
+          "bad"
+        ]
+      },
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "period"
+        ],
+        "value": "bad"
+      },
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "unit"
+        ],
+        "value": "bad"
+      },
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "file"
+        ],
+        "value": "data/not-there.json"
+      }
+    ]
+  },
+  {
+    "name": "registry-catalog-claim",
+    "groups": [
+      "REGISTRY"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "id"
+        ],
+        "value": "unknown-outlook"
+      }
+    ]
+  },
+  {
+    "name": "registry-catalog-unclaimed",
+    "groups": [
+      "REGISTRY"
+    ],
+    "ops": [
+      {
+        "op": "deleteKey",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "catalogId"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "registry-absent-fields",
+    "groups": [
+      "REGISTRY"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "producer"
+        ],
+        "value": ""
+      },
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "rebuild"
+        ],
+        "value": ""
+      },
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "inputs"
+        ],
+        "value": []
+      },
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "schema"
+        ],
+        "value": ""
+      },
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "scope"
+        ],
+        "value": ""
+      }
+    ]
+  },
+  {
+    "name": "envelope-quoted-diagnostic",
+    "groups": [
+      "ENVELOPE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/revenue.json",
+        "path": [
+          "meta",
+          "status"
+        ],
+        "value": "it's bad"
+      },
+      {
+        "op": "set",
+        "file": "data/release/revenue.json",
+        "path": [
+          "meta",
+          "source"
+        ],
+        "value": [
+          "it's missing"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "numbers-unicode-digits",
+    "groups": [
+      "NUMBERS"
+    ],
+    "ops": [
+      {
+        "op": "write",
+        "file": "data/release/unicode.json",
+        "text": "{\"amount\":\"１２.５\"}"
+      }
+    ]
+  },
+  {
+    "name": "privacy-unicode-digits",
+    "groups": [
+      "PRIVACY"
+    ],
+    "ops": [
+      {
+        "op": "write",
+        "file": "data/release/leak.txt",
+        "text": "１２３４５６７８９０１２３４５６７"
+      }
+    ]
+  },
+  {
+    "name": "envelope-prototype-key",
+    "groups": [
+      "ENVELOPE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/revenue.json",
+        "path": [
+          "meta",
+          "status"
+        ],
+        "value": "toString"
+      }
+    ]
+  },
+  {
+    "name": "registry-prototype-slug",
+    "groups": [
+      "REGISTRY"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "slug"
+        ],
+        "value": "__proto__"
+      }
+    ]
+  },
+  {
+    "name": "registry-empty-rebuild-mapping",
+    "groups": [
+      "REGISTRY"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "rebuild"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "registry-empty-notRebuilt-mapping",
+    "groups": [
+      "REGISTRY"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "notRebuilt"
+        ],
+        "value": {}
+      },
+      {
+        "op": "deleteKey",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "rebuild"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "registry-empty-schema-mapping",
+    "groups": [
+      "REGISTRY"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "schema"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "registry-empty-scope-mapping",
+    "groups": [
+      "REGISTRY"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "scope"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "registry-empty-catalogId-mapping",
+    "groups": [
+      "REGISTRY"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "catalogId"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "registry-empty-rebuild-retains-disclosure",
+    "groups": [
+      "REGISTRY"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "rebuild"
+        ],
+        "value": {}
+      },
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "notRebuilt"
+        ],
+        "value": "Frozen source disclosure"
+      }
+    ]
+  }
+]

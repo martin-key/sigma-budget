@@ -8,22 +8,14 @@ import {
   rename,
   rm,
   realpath,
-} from "node:fs/promises";
-import { randomUUID } from "node:crypto";
-import {
-  resolve,
-  dirname,
-  relative,
-  isAbsolute,
-  parse,
-  join,
-  sep,
-} from "node:path";
-import { fileURLToPath } from "node:url";
-import { parseYaml } from "../io/registry.js";
-import { object } from "@sigma-budget/dataset-schema";
-import { compare, type Report } from "./compare.js";
-import { parsePolicy } from "./policy.js";
+} from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
+import { resolve, dirname, relative, isAbsolute, parse, join, sep } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { parseYaml } from '../io/registry.js';
+import { object } from '@sigma-budget/dataset-schema';
+import { compare, type Report } from './compare.js';
+import { parsePolicy } from './policy.js';
 export interface RegistryEntry {
   id: string;
   files: string[];
@@ -31,24 +23,24 @@ export interface RegistryEntry {
 export function parseRegistry(text: string): RegistryEntry[] {
   const v: unknown = parseYaml(text);
   if (!object(v) || v.schema !== 1 || !Array.isArray(v.datasets))
-    throw new Error("Invalid dataset registry");
+    throw new Error('Invalid dataset registry');
   const ids = new Set<string>();
   return v.datasets.map((d) => {
     if (
       !object(d) ||
-      typeof d.id !== "string" ||
+      typeof d.id !== 'string' ||
       ids.has(d.id) ||
       (d.files !== undefined &&
         (!Array.isArray(d.files) ||
           !d.files.every(
             (f) =>
-              typeof f === "string" &&
-              f.startsWith("data/release/") &&
-              !f.includes("..") &&
-              !f.includes("\\"),
+              typeof f === 'string' &&
+              f.startsWith('data/release/') &&
+              !f.includes('..') &&
+              !f.includes('\\'),
           )))
     )
-      throw new Error("Invalid or duplicate dataset");
+      throw new Error('Invalid or duplicate dataset');
     ids.add(d.id);
     return { id: d.id, files: (d.files ?? []) as string[] };
   });
@@ -65,21 +57,20 @@ async function inventory(root: string): Promise<string[] | null> {
       await Promise.all(
         entries.map(async (e) => {
           const p = path ? `${path}/${e.name}` : e.name;
-          if (e.isSymbolicLink())
-            throw new Error(`Symlink in parity input: ${p}`);
+          if (e.isSymbolicLink()) throw new Error(`Symlink in parity input: ${p}`);
           return e.isDirectory() ? walk(p) : [p];
         }),
       )
     ).flat();
   }
-  return walk("");
+  return walk('');
 }
 function match(pattern: string, file: string): boolean {
   const re = pattern
-    .replace(/^data\/release\//, "")
-    .split("*")
-    .map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
-    .join("[^/]*");
+    .replace(/^data\/release\//, '')
+    .split('*')
+    .map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    .join('[^/]*');
   return new RegExp(`^${re}$`).test(file);
 }
 export async function compareScope(options: {
@@ -89,11 +80,8 @@ export async function compareScope(options: {
   registry: RegistryEntry[];
   policy: ReturnType<typeof parsePolicy>;
 }): Promise<Report> {
-  if (
-    !options.scope.length ||
-    new Set(options.scope).size !== options.scope.length
-  )
-    throw new Error("Scope must contain unique dataset ids");
+  if (!options.scope.length || new Set(options.scope).size !== options.scope.length)
+    throw new Error('Scope must contain unique dataset ids');
   const entries = options.scope.map((id) => {
     const d = options.registry.find((d) => d.id === id);
     if (!d) throw new Error(`Unknown scope: ${id}`);
@@ -103,32 +91,30 @@ export async function compareScope(options: {
     inventory(options.oracle),
     inventory(options.candidate),
   ]);
-  const report: Report = { outcome: "pass", differences: [], unverified: [] };
+  const report: Report = { outcome: 'pass', differences: [], unverified: [] };
   if (!oracle || !candidate)
     return {
       ...report,
-      outcome: "unverified",
-      unverified: ["Missing oracle or candidate directory"],
+      outcome: 'unverified',
+      unverified: ['Missing oracle or candidate directory'],
     };
   for (const entry of entries) {
-    if (!entry.files.length)
-      report.unverified.push(`${entry.id}: no published inputs`);
+    if (!entry.files.length) report.unverified.push(`${entry.id}: no published inputs`);
     for (const pattern of entry.files) {
       const a = oracle.filter((f) => match(pattern, f)),
         b = candidate.filter((f) => match(pattern, f));
-      if (!a.length)
-        report.unverified.push(`${entry.id}: missing oracle ${pattern}`);
+      if (!a.length) report.unverified.push(`${entry.id}: missing oracle ${pattern}`);
       for (const file of new Set([...a, ...b])) {
         if (!a.includes(file) || !b.includes(file)) {
           report.differences.push({
             dataset: entry.id,
             file,
-            pointer: "",
-            kind: "file-set",
+            pointer: '',
+            kind: 'file-set',
             expected: a.includes(file),
             actual: b.includes(file),
             tolerance: 0,
-            outcome: "different",
+            outcome: 'different',
           });
           continue;
         }
@@ -137,22 +123,28 @@ export async function compareScope(options: {
             readFile(resolve(options.oracle, file)),
             readFile(resolve(options.candidate, file)),
           ]);
-          if (entry.id === "feed-rss" && file === "feed.xml") {
-            if (!x.equals(y)) report.differences.push({
-              dataset: entry.id, file, pointer: "", kind: "bytes",
-              expected: `${x.length} bytes`, actual: `${y.length} bytes`,
-              tolerance: 0, outcome: "different",
-            });
+          if (entry.id === 'feed-rss' && file === 'feed.xml') {
+            if (!x.equals(y))
+              report.differences.push({
+                dataset: entry.id,
+                file,
+                pointer: '',
+                kind: 'bytes',
+                expected: `${x.length} bytes`,
+                actual: `${y.length} bytes`,
+                tolerance: 0,
+                outcome: 'different',
+              });
             continue;
           }
-          if (!file.endsWith(".json")) {
+          if (!file.endsWith('.json')) {
             report.unverified.push(`${file}: non-JSON adapter not implemented`);
             continue;
           }
           report.differences.push(
             ...compare(
-              JSON.parse(x.toString("utf8")),
-              JSON.parse(y.toString("utf8")),
+              JSON.parse(x.toString('utf8')),
+              JSON.parse(y.toString('utf8')),
               { dataset: entry.id, file },
               options.policy,
             ),
@@ -161,26 +153,26 @@ export async function compareScope(options: {
           report.differences.push({
             dataset: entry.id,
             file,
-            pointer: "",
-            kind: "invalid-json",
+            pointer: '',
+            kind: 'invalid-json',
             actual: String(e),
             tolerance: 0,
-            outcome: "different",
+            outcome: 'different',
           });
         }
       }
     }
   }
   report.outcome = report.unverified.length
-    ? "unverified"
-    : report.differences.some((d) => d.outcome === "different")
-      ? "fail"
-      : "pass";
+    ? 'unverified'
+    : report.differences.some((d) => d.outcome === 'different')
+      ? 'fail'
+      : 'pass';
   return report;
 }
 export async function parityCli(
   args: string[],
-  registryPath = "data/datasets.yaml",
+  registryPath = 'data/datasets.yaml',
 ): Promise<number> {
   const flags: Record<string, string> = {};
   for (let i = 0; i < args.length; i += 2) {
@@ -188,30 +180,17 @@ export async function parityCli(
       value = args[i + 1];
     if (
       !key ||
-      ![
-        "--oracle",
-        "--candidate",
-        "--scope",
-        "--policy",
-        "--report",
-        "--registry",
-      ].includes(key) ||
+      !['--oracle', '--candidate', '--scope', '--policy', '--report', '--registry'].includes(key) ||
       !value ||
-      value.startsWith("--") ||
+      value.startsWith('--') ||
       flags[key]
     )
-      throw new Error("Invalid parity arguments");
+      throw new Error('Invalid parity arguments');
     flags[key] = value;
   }
-  for (const k of [
-    "--oracle",
-    "--candidate",
-    "--scope",
-    "--policy",
-    "--report",
-  ])
+  for (const k of ['--oracle', '--candidate', '--scope', '--policy', '--report'])
     if (!flags[k]) throw new Error(`Required: ${k}`);
-  const requestedReport = resolve(flags["--report"]!);
+  const requestedReport = resolve(flags['--report']!);
   // Check the requested path, rather than following its links to a canonical target.
   async function checkReportPath(createParents = false): Promise<void> {
     const root = parse(requestedReport).root;
@@ -222,17 +201,13 @@ export async function parityCli(
       const last = i === parts.length - 1;
       try {
         const entry = await lstat(current);
-        if (entry.isSymbolicLink())
-          throw new Error("Report must not follow symlinks");
+        if (entry.isSymbolicLink()) throw new Error('Report must not follow symlinks');
         if (last) {
           if (!entry.isFile() || entry.nlink !== 1)
-            throw new Error(
-              "Report must not overwrite a hard-linked or non-regular file",
-            );
-        } else if (!entry.isDirectory())
-          throw new Error("Invalid report parent directory");
+            throw new Error('Report must not overwrite a hard-linked or non-regular file');
+        } else if (!entry.isDirectory()) throw new Error('Invalid report parent directory');
       } catch (e) {
-        if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw e;
+        if ((e as NodeJS.ErrnoException).code !== 'ENOENT') throw e;
         if (!last && createParents) await mkdir(current);
       }
     }
@@ -249,56 +224,44 @@ export async function parityCli(
     }
   }
   const reportPath = await canonical(requestedReport);
-  const effectiveRegistryPath = flags["--registry"] ?? registryPath;
+  const effectiveRegistryPath = flags['--registry'] ?? registryPath;
   for (const input of [
-    flags["--oracle"]!,
-    flags["--candidate"]!,
-    "data/release",
-    fileURLToPath(new URL("../../../../data/release", import.meta.url)),
+    flags['--oracle']!,
+    flags['--candidate']!,
+    'data/release',
+    fileURLToPath(new URL('../../../../data/release', import.meta.url)),
     effectiveRegistryPath,
-    flags["--policy"]!,
+    flags['--policy']!,
   ]) {
     const rel = relative(await canonical(resolve(input)), reportPath);
-    if (
-      rel === "" ||
-      (rel !== ".." && !rel.startsWith(`..${sep}`) && !isAbsolute(rel))
-    )
-      throw new Error("Report must be outside input roots and data/release");
+    if (rel === '' || (rel !== '..' && !rel.startsWith(`..${sep}`) && !isAbsolute(rel)))
+      throw new Error('Report must be outside input roots and data/release');
   }
   try {
     if ((await stat(reportPath)).nlink > 1)
-      throw new Error("Report must not overwrite a hard-linked file");
+      throw new Error('Report must not overwrite a hard-linked file');
   } catch (e) {
-    if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw e;
+    if ((e as NodeJS.ErrnoException).code !== 'ENOENT') throw e;
   }
-  const registry = parseRegistry(await readFile(effectiveRegistryPath, "utf8"));
-  const policy = parsePolicy(
-    JSON.parse(await readFile(flags["--policy"]!, "utf8")),
-  );
+  const registry = parseRegistry(await readFile(effectiveRegistryPath, 'utf8'));
+  const policy = parsePolicy(JSON.parse(await readFile(flags['--policy']!, 'utf8')));
   const report = await compareScope({
-    oracle: flags["--oracle"]!,
-    candidate: flags["--candidate"]!,
-    scope: flags["--scope"]!.split(","),
+    oracle: flags['--oracle']!,
+    candidate: flags['--candidate']!,
+    scope: flags['--scope']!.split(','),
     registry,
     policy,
   });
   await checkReportPath(true);
-  const temporary = join(
-    dirname(requestedReport),
-    `.parity-${randomUUID()}.tmp`,
-  );
+  const temporary = join(dirname(requestedReport), `.parity-${randomUUID()}.tmp`);
   try {
-    await writeFile(temporary, JSON.stringify(report, null, 2) + "\n", {
-      flag: "wx",
+    await writeFile(temporary, JSON.stringify(report, null, 2) + '\n', {
+      flag: 'wx',
     });
     await checkReportPath();
     await rename(temporary, requestedReport);
   } finally {
     await rm(temporary, { force: true });
   }
-  return report.outcome === "pass"
-    ? 0
-    : report.outcome === "unverified"
-      ? 2
-      : 1;
+  return report.outcome === 'pass' ? 0 : report.outcome === 'unverified' ? 2 : 1;
 }

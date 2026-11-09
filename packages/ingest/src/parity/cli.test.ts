@@ -1,151 +1,129 @@
-import {
-  mkdtemp,
-  mkdir,
-  writeFile,
-  readFile,
-  symlink,
-  link,
-  rm,
-} from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { fileURLToPath } from "node:url";
-import { it, expect } from "vitest";
-import { parseRegistry, compareScope, parityCli } from "./cli.js";
-import { exactPolicy } from "./policy.js";
-it("rejects duplicate YAML keys and dataset ids", () => {
-  expect(() => parseRegistry("schema: 1\nschema: 1\ndatasets: []")).toThrow();
-  expect(() =>
-    parseRegistry("schema: 1\ndatasets: [{id: a}, {id: a}]"),
-  ).toThrow();
+import { mkdtemp, mkdir, writeFile, readFile, symlink, link, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { it, expect } from 'vitest';
+import { parseRegistry, compareScope, parityCli } from './cli.js';
+import { exactPolicy } from './policy.js';
+it('rejects duplicate YAML keys and dataset ids', () => {
+  expect(() => parseRegistry('schema: 1\nschema: 1\ndatasets: []')).toThrow();
+  expect(() => parseRegistry('schema: 1\ndatasets: [{id: a}, {id: a}]')).toThrow();
 });
-it("rejects linked report files and parents without modifying their targets", async () => {
-  const root = await mkdtemp(join(tmpdir(), "budget-parity-report-"));
+it('rejects linked report files and parents without modifying their targets', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'budget-parity-report-'));
   try {
-    const oracle = join(root, "oracle"),
-      candidate = join(root, "candidate");
+    const oracle = join(root, 'oracle'),
+      candidate = join(root, 'candidate');
     await mkdir(oracle);
     await mkdir(candidate);
-    await writeFile(join(oracle, "a.json"), "{}");
-    await writeFile(join(candidate, "a.json"), "{}");
-    const reg = join(root, "registry.yaml"),
-      pol = join(root, "policy.json");
-    await writeFile(
-      reg,
-      'schema: 1\ndatasets: [{id: ministry, files: ["data/release/*.json"]}]',
-    );
+    await writeFile(join(oracle, 'a.json'), '{}');
+    await writeFile(join(candidate, 'a.json'), '{}');
+    const reg = join(root, 'registry.yaml'),
+      pol = join(root, 'policy.json');
+    await writeFile(reg, 'schema: 1\ndatasets: [{id: ministry, files: ["data/release/*.json"]}]');
     await writeFile(pol, JSON.stringify(exactPolicy));
     const args = [
-      "--oracle",
+      '--oracle',
       oracle,
-      "--candidate",
+      '--candidate',
       candidate,
-      "--scope",
-      "ministry",
-      "--policy",
+      '--scope',
+      'ministry',
+      '--policy',
       pol,
     ];
-    const sentinel = join(root, "sentinel.json");
-    await writeFile(sentinel, "external sentinel\n");
-    const symlinkReport = join(root, "symlink.json"),
-      hardlinkReport = join(root, "hardlink.json");
+    const sentinel = join(root, 'sentinel.json');
+    await writeFile(sentinel, 'external sentinel\n');
+    const symlinkReport = join(root, 'symlink.json'),
+      hardlinkReport = join(root, 'hardlink.json');
     await symlink(sentinel, symlinkReport);
     await link(sentinel, hardlinkReport);
-    const parent = join(root, "linked-parent");
+    const parent = join(root, 'linked-parent');
     await symlink(root, parent);
     for (const report of [
       symlinkReport,
       hardlinkReport,
-      join(parent, "sentinel.json"),
-      join(parent, "new.json"),
+      join(parent, 'sentinel.json'),
+      join(parent, 'new.json'),
     ]) {
-      await expect(
-        parityCli([...args, "--report", report], reg),
-      ).rejects.toThrow(/symlink|hard-linked/);
-      expect(await readFile(sentinel, "utf8")).toBe("external sentinel\n");
+      await expect(parityCli([...args, '--report', report], reg)).rejects.toThrow(
+        /symlink|hard-linked/,
+      );
+      expect(await readFile(sentinel, 'utf8')).toBe('external sentinel\n');
     }
-    const missing = join(root, "missing.json"),
-      dangling = join(root, "dangling.json");
+    const missing = join(root, 'missing.json'),
+      dangling = join(root, 'dangling.json');
     await symlink(missing, dangling);
-    await expect(
-      parityCli([...args, "--report", dangling], reg),
-    ).rejects.toThrow(/symlink/);
+    await expect(parityCli([...args, '--report', dangling], reg)).rejects.toThrow(/symlink/);
     await expect(readFile(missing)).rejects.toThrow();
-    await mkdir(join(oracle, "..nested"));
+    await mkdir(join(oracle, '..nested'));
     await expect(
-      parityCli(
-        [...args, "--report", join(oracle, "..nested", "report.json")],
-        reg,
-      ),
+      parityCli([...args, '--report', join(oracle, '..nested', 'report.json')], reg),
     ).rejects.toThrow(/outside input roots/);
-    const regular = join(root, "new", "report.json");
-    expect(await parityCli([...args, "--report", regular], reg)).toBe(0);
-    expect(await parityCli([...args, "--report", regular], reg)).toBe(0);
-    expect(JSON.parse(await readFile(regular, "utf8")).outcome).toBe("pass");
+    const regular = join(root, 'new', 'report.json');
+    expect(await parityCli([...args, '--report', regular], reg)).toBe(0);
+    expect(await parityCli([...args, '--report', regular], reg)).toBe(0);
+    expect(JSON.parse(await readFile(regular, 'utf8')).outcome).toBe('pass');
   } finally {
     await rm(root, { recursive: true, force: true });
   }
 });
-it("protects the project release directory independently of the caller directory", async () => {
-  const root = await mkdtemp(join(tmpdir(), "budget-parity-project-"));
+it('protects the project release directory independently of the caller directory', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'budget-parity-project-'));
   try {
     const report = fileURLToPath(
-      new URL(
-        "../../../../data/release/forbidden-report.json",
-        import.meta.url,
-      ),
+      new URL('../../../../data/release/forbidden-report.json', import.meta.url),
     );
     // The absent registry prevents a write if the path guard regresses.
     await expect(
       parityCli([
-        "--oracle",
-        join(root, "oracle"),
-        "--candidate",
-        join(root, "candidate"),
-        "--scope",
-        "ministry",
-        "--policy",
-        join(root, "policy.json"),
-        "--registry",
-        join(root, "missing-registry.yaml"),
-        "--report",
+        '--oracle',
+        join(root, 'oracle'),
+        '--candidate',
+        join(root, 'candidate'),
+        '--scope',
+        'ministry',
+        '--policy',
+        join(root, 'policy.json'),
+        '--registry',
+        join(root, 'missing-registry.yaml'),
+        '--report',
         report,
       ]),
-    ).rejects.toThrow("outside input roots");
+    ).rejects.toThrow('outside input roots');
   } finally {
     await rm(root, { recursive: true, force: true });
   }
 });
-it("preserves registry and policy inputs when reports alias their paths", async () => {
-  const root = await mkdtemp(join(tmpdir(), "budget-parity-inputs-"));
+it('preserves registry and policy inputs when reports alias their paths', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'budget-parity-inputs-'));
   try {
-    const oracle = join(root, "oracle"),
-      candidate = join(root, "candidate");
+    const oracle = join(root, 'oracle'),
+      candidate = join(root, 'candidate');
     await mkdir(oracle);
     await mkdir(candidate);
-    await writeFile(join(oracle, "a.json"), "{}");
-    await writeFile(join(candidate, "a.json"), "{}");
-    const reg = join(root, "registry.yaml"),
-      override = join(root, "override.yaml"),
-      pol = join(root, "policy.json");
-    const yaml =
-      'schema: 1\ndatasets: [{id: ministry, files: ["data/release/*.json"]}]';
+    await writeFile(join(oracle, 'a.json'), '{}');
+    await writeFile(join(candidate, 'a.json'), '{}');
+    const reg = join(root, 'registry.yaml'),
+      override = join(root, 'override.yaml'),
+      pol = join(root, 'policy.json');
+    const yaml = 'schema: 1\ndatasets: [{id: ministry, files: ["data/release/*.json"]}]';
     await writeFile(reg, yaml);
     await writeFile(override, yaml);
     await writeFile(pol, JSON.stringify(exactPolicy));
     const args = [
-      "--oracle",
+      '--oracle',
       oracle,
-      "--candidate",
+      '--candidate',
       candidate,
-      "--scope",
-      "ministry",
-      "--policy",
+      '--scope',
+      'ministry',
+      '--policy',
       pol,
     ];
     const cases = [
       { input: reg, extra: [] },
-      { input: override, extra: ["--registry", override] },
+      { input: override, extra: ['--registry', override] },
       { input: pol, extra: [] },
     ];
     for (const [i, c] of cases.entries()) {
@@ -155,92 +133,82 @@ it("preserves registry and policy inputs when reports alias their paths", async 
       await symlink(c.input, symbolic);
       await link(c.input, hard);
       for (const report of [c.input, symbolic, hard]) {
-        await expect(
-          parityCli([...args, ...c.extra, "--report", report], reg),
-        ).rejects.toThrow(/Report/);
+        await expect(parityCli([...args, ...c.extra, '--report', report], reg)).rejects.toThrow(
+          /Report/,
+        );
         expect(await readFile(c.input)).toEqual(before);
       }
     }
-    const report = join(root, "report.json");
-    expect(
-      await parityCli(
-        [...args, "--registry", override, "--report", report],
-        reg,
-      ),
-    ).toBe(0);
-    expect(JSON.parse(await readFile(report, "utf8")).outcome).toBe("pass");
+    const report = join(root, 'report.json');
+    expect(await parityCli([...args, '--registry', override, '--report', report], reg)).toBe(0);
+    expect(JSON.parse(await readFile(report, 'utf8')).outcome).toBe('pass');
   } finally {
     await rm(root, { recursive: true, force: true });
   }
 });
-it("compares exact scoped file sets, pending and absent inputs, and CLI exit codes", async () => {
-  const root = await mkdtemp(join(tmpdir(), "budget-parity-"));
+it('compares exact scoped file sets, pending and absent inputs, and CLI exit codes', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'budget-parity-'));
   try {
-    const oracle = join(root, "oracle"),
-      candidate = join(root, "candidate");
+    const oracle = join(root, 'oracle'),
+      candidate = join(root, 'candidate');
     await mkdir(oracle);
     await mkdir(candidate);
-    const registry = [{ id: "ministry", files: ["data/release/*.json"] }];
+    const registry = [{ id: 'ministry', files: ['data/release/*.json'] }];
     const opts = {
       oracle,
       candidate,
       registry,
-      scope: ["ministry"],
+      scope: ['ministry'],
       policy: exactPolicy,
     };
-    await writeFile(join(oracle, "a.json"), "{}");
-    expect((await compareScope(opts)).outcome).toBe("fail");
-    await writeFile(join(candidate, "a.json"), "{}");
-    expect((await compareScope(opts)).outcome).toBe("pass");
-    await writeFile(join(candidate, "stale.json"), "{}");
-    expect((await compareScope(opts)).differences[0]?.kind).toBe("file-set");
-    await rm(join(candidate, "stale.json"));
-    await writeFile(join(oracle, "a.json"), '{"id":9007199254740992}');
-    await writeFile(join(candidate, "a.json"), '{"id":9007199254740993}');
-    expect((await compareScope(opts)).outcome).toBe("fail");
-    await writeFile(join(oracle, "a.json"), "{}");
-    await writeFile(join(candidate, "a.json"), '{"value":NaN}');
-    expect((await compareScope(opts)).outcome).toBe("fail");
-    expect(
-      (await compareScope({ ...opts, oracle: join(root, "missing") })).outcome,
-    ).toBe("unverified");
+    await writeFile(join(oracle, 'a.json'), '{}');
+    expect((await compareScope(opts)).outcome).toBe('fail');
+    await writeFile(join(candidate, 'a.json'), '{}');
+    expect((await compareScope(opts)).outcome).toBe('pass');
+    await writeFile(join(candidate, 'stale.json'), '{}');
+    expect((await compareScope(opts)).differences[0]?.kind).toBe('file-set');
+    await rm(join(candidate, 'stale.json'));
+    await writeFile(join(oracle, 'a.json'), '{"id":9007199254740992}');
+    await writeFile(join(candidate, 'a.json'), '{"id":9007199254740993}');
+    expect((await compareScope(opts)).outcome).toBe('fail');
+    await writeFile(join(oracle, 'a.json'), '{}');
+    await writeFile(join(candidate, 'a.json'), '{"value":NaN}');
+    expect((await compareScope(opts)).outcome).toBe('fail');
+    expect((await compareScope({ ...opts, oracle: join(root, 'missing') })).outcome).toBe(
+      'unverified',
+    );
     expect(
       (
         await compareScope({
           ...opts,
-          registry: [{ id: "ministry", files: [] }],
+          registry: [{ id: 'ministry', files: [] }],
         })
       ).outcome,
-    ).toBe("unverified");
-    await expect(
-      compareScope({ ...opts, scope: ["unknown"] }),
-    ).rejects.toThrow();
-    const reg = join(root, "registry.yaml"),
-      pol = join(root, "policy.json");
-    await writeFile(
-      reg,
-      'schema: 1\ndatasets: [{id: ministry, files: ["data/release/*.json"]}]',
-    );
+    ).toBe('unverified');
+    await expect(compareScope({ ...opts, scope: ['unknown'] })).rejects.toThrow();
+    const reg = join(root, 'registry.yaml'),
+      pol = join(root, 'policy.json');
+    await writeFile(reg, 'schema: 1\ndatasets: [{id: ministry, files: ["data/release/*.json"]}]');
     await writeFile(pol, JSON.stringify(exactPolicy));
     const args = [
-      "--oracle",
+      '--oracle',
       oracle,
-      "--candidate",
+      '--candidate',
       candidate,
-      "--scope",
-      "ministry",
-      "--policy",
+      '--scope',
+      'ministry',
+      '--policy',
       pol,
-      "--report",
-      join(root, "report.json"),
+      '--report',
+      join(root, 'report.json'),
     ];
     expect(await parityCli(args, reg)).toBe(1);
     const unsafe = [...args];
-    unsafe[9] = join(oracle, "report.json");
-    await expect(parityCli(unsafe, reg)).rejects.toThrow("outside input roots");
-    await writeFile(join(candidate, "a.json"), "{}");
+    unsafe[9] = join(oracle, 'report.json');
+    await expect(parityCli(unsafe, reg)).rejects.toThrow('outside input roots');
+    await writeFile(join(candidate, 'a.json'), '{}');
     expect(await parityCli(args, reg)).toBe(0);
-    args[1] = join(root, "missing");
+    args[1] = join(root, 'missing');
     expect(await parityCli(args, reg)).toBe(2);
   } finally {
     await rm(root, { recursive: true, force: true });
