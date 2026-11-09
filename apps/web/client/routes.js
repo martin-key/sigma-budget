@@ -1,4 +1,4 @@
-import { resolvePeriod } from './periods.js';
+import { resolvePeriod, DEFAULT_PERIOD } from './periods.js';
 import { toHref } from './loc.js';
 import { ROUTES, GROUPS } from '../app/lib/routes.ts';
 export { ROUTES, GROUPS } from '../app/lib/routes.ts';
@@ -6,6 +6,13 @@ export { SCREEN_QUERY, screenQuery, screenSearch } from '../app/lib/query-params
 export const byId = Object.fromEntries(ROUTES.map(r => [r.id, r]));
 export const byKey = Object.fromEntries(ROUTES.map(r => [r.key, r]));
 export const NOT_FOUND = byId.S30;
+
+/** Keep a selected historical publication when the destination supports it. */
+export function periodHref(period, id, params = {}, query = {}) {
+  const target = byId[id] || byKey[id];
+  const preserve = period && period !== DEFAULT_PERIOD && (target?.periods === 'all' || target?.periods?.includes?.(period));
+  return href(id, params, { ...(preserve ? { per: period } : {}), ...query });
+}
 
 /* ---- matching ---- */
 // pattern segment grammar: literal | :name | :name? | :name(regex) | :name(regex)?   (optional only at the end)

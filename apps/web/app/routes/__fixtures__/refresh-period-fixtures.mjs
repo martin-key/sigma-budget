@@ -15,7 +15,7 @@ const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
 const check = process.argv.includes('--check');
 const inputs = JSON.parse(read('narrative-inputs.json'));
 const manifest = JSON.parse(read('narrative-manifest.json'));
-const files = ['S14-draft.html', 'S14-unsupported.html'];
+const files = ['S14.html', 'S14-draft.html', 'S14-unsupported.html'];
 for (const c of manifest.cases.filter((c) => files.includes(c.file))) {
   const url = new URL(c.address, manifest.origin);
   const scope = {
@@ -49,10 +49,10 @@ for (const c of manifest.cases.filter((c) => files.includes(c.file))) {
     c.sha256 = hash(output);
   } finally { provideScope(() => null); }
 }
-const sources = ['../../../client/render.js', '../../../client/periods.js',
+const sources = ['../../../client/render.js', '../../../client/periods.js', '../../../client/routes.js',
   '../../../client/seo.js', '../../../client/pages/s14-zakon.js', '../../lib/routes.json'];
 if (!check) manifest.periodContractOverrides = {
-  integrationBaseCommit: 'bd973a0a3dfbc8d8bd03ac85e6aa1f0784669bf2',
+  integrationBaseCommit: '05d6f6eeca9991468f3c94c3c9c26e87d5b0fae0',
   generator: 'refresh-period-fixtures.mjs',
   renderer: 'Legacy build()/frameHtml()/head() with frozen narrative inputs',
   sourceSha256: Object.fromEntries(sources.map((name) => [name, hash(readFileSync(file(name)))])),

@@ -17,6 +17,8 @@ import { requestState } from '../../client/store.js';
 import { build, frameHtml, resolve } from '../../client/render.js';
 import { tableData } from '../../client/ui/table.js';
 import { csvFor } from '../../client/share.js';
+import { getIndex, stageOf, metaOf } from '../../client/searchlib.js';
+import { planCsv } from '../../client/ui/plan.js';
 import { revExpChart } from '../../client/pages/s13-prognoza.js';
 const read = (path: string) =>
   readFileSync(new URL('../../../../' + path, import.meta.url), 'utf8');
@@ -26,6 +28,82 @@ const bill = JSON.parse(read('data/inputs/budget_bill_2027.json'));
 const forecast = JSON.parse(read('data/inputs/budget_forecast_2027.json'));
 const doc = release('budget2027');
 const sourceIndex = release('budget2027-provenance');
+it.each([
+  ['institutions', 'Проект 2027', '2027.draft', 'По законопроекта 2027'],
+  ['municipalities', 'Проект 2027', '2027.draft', 'По законопроекта 2027'],
+  ['indicators', 'Проект 2027', '2027.draft', 'По законопроекта 2027'],
+  ['indicators', 'Прогноза 2027', '2027.draft', 'Прогноза 2027'],
+  ['indicators', 'Прогноза 2028', '2028.forecast', 'Прогноза 2028'],
+  ['indicators', 'Прогноза 2029', '2029.forecast', 'Прогноза 2029'],
+])('labels %s from publication metadata: %s', (group, period, key, expected) => {
+  expect(stageOf(group, { period, href: `#/dalg?per=${key}` })).toBe(expected);
+});
+it('does not offer an old draft figure when annual search data is unavailable', async () => {
+  const scope = {
+    url: new URL('https://budget.test/tarsene'),
+    state: requestState(),
+    data: new Map(),
+    maps: {},
+    load: async (name: string) => {
+      if (name === 'expenditure') throw new Error('Unavailable');
+      return release(name);
+    },
+  };
+  provideScope(() => scope);
+  const index = await getIndex();
+  expect(index.entries.some((e: any) => e.title === 'ДДС' && !e.href.includes('per='))).toBe(false);
+  expect(
+    index.entries.some((e: any) => e.group === 'institutions' && e.stage === 'Закон 2027'),
+  ).toBe(false);
+  const budgets = index.entries.filter(
+    (e: any) =>
+      ['institutions', 'municipalities'].includes(e.group) && e.href.includes('per=2027.draft'),
+  );
+  expect(budgets).toHaveLength(47 + 265);
+  for (const entry of budgets) {
+    expect(entry.stage).toBe('По законопроекта 2027');
+    expect(metaOf(entry)).not.toContain('Закон 2027');
+  }
+  const forecasts = index.entries.filter((e: any) =>
+    /^Държавен дълг по ЗДД 202[789]$/.test(e.title),
+  );
+  expect(forecasts).toHaveLength(3);
+  for (const entry of forecasts) expect(metaOf(entry)).toContain('Прогноза ');
+});
+it('localizes declared canonical decimals without losing precision or weakening formula protection', () => {
+  const canonical = '-12345678901234567890.123456789';
+  const csv = csvFor({
+    table: {
+      columns: ['Код', 'Сума'],
+      decimalColumns: [1],
+      rows: [
+        ['01.02', canonical],
+        ['x', '=1+1'],
+      ],
+    },
+  });
+  expect(
+    csv
+      .split('\r\n')[1]
+      .split(';')
+      .slice(0, 2)
+      .map((s: string) => s.replace(/^"|"$/g, '')),
+  ).toEqual(['01.02', '-12345678901234567890,123456789']);
+  expect(csv).toContain("x;'=1+1;");
+  expect(canonical).toBe('-12345678901234567890.123456789');
+  const plan = planCsv({
+    asOf: '2026-09-30',
+    basis: { adopted: true, csvPlan: 'План' },
+    rows: [{ name: 'Приходи', canonical: { cum: '33898.5', plan: '49615.3' }, share: 68.32 }],
+  });
+  expect(
+    csvFor({ table: plan })
+      .split('\r\n')[1]
+      .split(';')
+      .slice(0, 4)
+      .map((s: string) => s.replace(/^"|"$/g, '')),
+  ).toEqual(['Приходи', '33898,5', '49615,3', '68,32']);
+});
 afterEach(() => provideScope(() => null));
 async function page(address: string, absent = false) {
   const url = new URL(address, 'https://budget.test');
@@ -47,6 +125,34 @@ async function page(address: string, absent = false) {
     document: parseHTML(String(frameHtml(vm))).document,
   };
 }
+it('preserves historical municipality next links and institution breadcrumbs', async () => {
+  const law = await page('/zakon');
+  expect(law.vm.view).toBe('ready');
+  expect(law.html).toContain('/vedomstvo/0600?per=2026.law');
+  const municipality = await page('/obshtina/BLG03?per=2026.law');
+  expect(municipality.html).toContain('/obshtini?per=2026.law');
+  const institution = await page('/vedomstvo/1300?per=2026.law');
+  expect(institution.vm.crumbs.some((c: any) => c.href === '/vedomstva?per=2026.law')).toBe(true);
+});
+it('exports each forecast debt row with its own unit', async () => {
+  const { scope } = await page('/dalg');
+  const table = tableData(scope.maps.table.get('s17-debt-table'));
+  const csv = csvFor({ table, period: '2027.draft', unit: 'По редове' });
+  for (const [i, row] of table.rows.entries()) {
+    const unit = table.units[i];
+    expect(csv.split('\r\n')[i + 1]).toContain(`;2027.draft;${unit};`);
+    expect(row[row.length - 1]).toBe(unit);
+  }
+  expect(csv).not.toContain(';хил. €;');
+});
+it.each(['2028.forecast', '2029.forecast'])(
+  'keeps the selected framework measures in the overview for %s',
+  async (period) => {
+    const { html } = await page('/pari?per=' + period);
+    expect(html).toContain('/merki?per=' + period);
+    expect(html).not.toContain('Мерки в бюджета за 2026');
+  },
+);
 it('uses the 2027 draft by default and preserves explicit reports, law, expected and aliases', async () => {
   expect(requestState().period).toBe('2027.draft');
   for (const key of ['2024.report', '2025.report', '2026.law', '2026.expected', ...FRAMEWORK])

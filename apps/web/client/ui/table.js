@@ -51,7 +51,8 @@ export function tableData(s) {
   return {
     columns: s.columns.map(unitLabel),
     rows: sorted(s).map(r => s.columns.map(c => { const v = r[c.key]; return v instanceof SafeHtml ? v.s.replace(/<[^>]*>/g, '') : v ?? ''; })),
-    statuses: sorted(s).map(r => (r._mock ? 'mock' : r._status))
+    statuses: sorted(s).map(r => (r._mock ? 'mock' : r._status)),
+    ...(s.rowUnitKey ? { units: sorted(s).map(r => r[s.rowUnitKey]) } : {})
   };
 }
 

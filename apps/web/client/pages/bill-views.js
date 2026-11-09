@@ -534,10 +534,11 @@ export function debtView(ctx) {
             dataTable({
               id: 's17-debt-table',
               caption: 'Таблица VI-1, АСБП 2027–2029',
+              rowUnitKey: 'unit',
               columns: [...cellColumns(''), { key: 'unit', label: 'Единица' }],
               rows: debtRows,
             }),
-            { status: 'forecast', statusLabel: 'Прогноза на МФ' },
+            { status: 'forecast', statusLabel: 'Прогноза на МФ', share: { period: ctx.period.key, unit: 'По редове' } },
           )}${base(ctx, 's17-b-zdd', 'Държавен дълг 2027–2029', chart(spec), {
             status: 'forecast',
             statusLabel: 'Прогноза на МФ',

@@ -7,7 +7,7 @@
 //   prepare(route, params, …)   the page module, its data (`needs`) and the ctx it renders with
 //   build(route, params, …)     the view model {route, view, title, eyebrow, lede, context, body, crumbs, next, …}
 //   frameHtml(vm), docTitle(vm) the article of the screen and the document title
-import { NOT_FOUND, byId, byKey, match, href as routeHref, chainOf, GROUPS, screenQuery } from './routes.js';
+import { NOT_FOUND, byId, byKey, match, href as routeHref, periodHref, chainOf, GROUPS, screenQuery } from './routes.js';
 import { annualView, annualCore } from './annual.js';
 import { annualGap } from './ui/annual.js';
 import { selectPeriod, periodByKey, PERIODS } from './periods.js';
@@ -79,9 +79,7 @@ function makeCtx(route, params, query, o) {
   const a = o.actions || {};
   const selectedPeriod = route.id === 'S04' ? periodByKey(DEFAULT_PERIOD) : query.per == null && Array.isArray(route.periods) && route.periods.length === 1 ? periodByKey(route.periods[0]) : store.period;
   const href = (id, params = {}, q = {}) => {
-    const target = byId[id] || byKey[id];
-    const preserve = ['S10','S11','S12','S20','S21'].includes(route.id) && selectedPeriod.key !== DEFAULT_PERIOD && (target?.periods === 'all' || target?.periods?.includes?.(selectedPeriod.key));
-    return routeHref(id, params, { ...(preserve ? {per:selectedPeriod.key} : {}), ...q });
+    return periodHref(selectedPeriod.key, id, params, q);
   };
   return {
     route, params, query, data: {}, missing: [], failed: [], period: selectedPeriod, store,
@@ -122,29 +120,29 @@ export async function prepare(route, params, query, o = {}) {
 
 /* ------------------------------------------------------------------ view model */
 export const periodsFor = (route, mod) => mod?.periods ?? route.periods;
-function supportsPeriod(route, mod) {
+function supportsPeriod(route, mod, period) {
   const p = periodsFor(route, mod);
-  return p === 'all' || p === 'none' || !Array.isArray(p) || p.includes(store.get('period'));
+  return p === 'all' || p === 'none' || !Array.isArray(p) || p.includes(period);
 }
-function nextTarget(id) {
+function nextTarget(id, link) {
   const r = byId[id];
   if (!r) return null;
-  if (r.id === 'S01') return { kicker: 'Начало', title: 'Към началото', text: '', href: routeHref('S01') };
-  return { kicker: groupLabel(r.group), title: r.title, text: r.desc, href: routeHref(r.id) };
+  if (r.id === 'S01') return { kicker: 'Начало', title: 'Към началото', text: '', href: link('S01') };
+  return { kicker: groupLabel(r.group), title: r.title, text: r.desc, href: link(r.id) };
 }
 function buildNext(route, mod, ctx) {
   if (route.bare) return '';
   let items;
   try { items = mod?.next ? mod.next(ctx) : route.next; } catch (e) { console.error(e); items = route.next; }
   if (!items || !items.length) return '';
-  const cards = items.map(it => (typeof it === 'string' ? nextTarget(it) : it)).filter(Boolean);
+  const cards = items.map(it => (typeof it === 'string' ? nextTarget(it, ctx.href) : it)).filter(Boolean);
   if (!cards.length) return '';
   const [first, ...more] = cards;
   return nextCard({ ...first, more: more.map(m => ({ label: m.title, href: m.href })) });
 }
-export function defaultCrumbs(route, title) {
+export function defaultCrumbs(route, title, link = routeHref) {
   if (route.id === 'S01') return [];
-  return [{ label: 'Начало', href: routeHref('S01') }, ...chainOf(route).map(r => ({ label: r.title, href: routeHref(r.id) })), { label: title }];
+  return [{ label: 'Начало', href: link('S01') }, ...chainOf(route).map(r => ({ label: r.title, href: link(r.id) })), { label: title }];
 }
 export function eyebrowFor(route) {
   if (route.bare) return '';
@@ -168,10 +166,11 @@ const safeCall = (fn, ctx, fallback) => { try { const v = fn(ctx); return v ?? f
 
 /** the frame of a state that is not the screen itself (loading, an error) */
 export function frameVm(route, params, query, view, body, extra = {}) {
-  const ctxLite = { period: store.period, query, route, params };
+  const period = store.period;
+  const ctxLite = { period, query, route, params, href: (id, p = {}, q = {}) => periodHref(period.key, id, p, q) };
   return {
     route, params, query, demo: null, view, body, title: route.title, eyebrow: eyebrowFor(route), lede: route.desc,
-    context: contextFor(route, ctxLite), crumbs: defaultCrumbs(route, route.title), next: buildNext(route, null, ctxLite), mod: null, ctx: null, ...extra
+    context: contextFor(route, ctxLite), crumbs: defaultCrumbs(route, route.title, ctxLite.href), next: buildNext(route, null, ctxLite), mod: null, ctx: null, ...extra
   };
 }
 export const loadingVm = (route, params, query) => ({ route, params, query, view: 'loading', title: route.title, eyebrow: eyebrowFor(route), lede: route.desc,
@@ -194,7 +193,7 @@ export async function build(route, params, query, o = {}) {
   const { mod, ctx, fail } = await prepare(route, params, query, { ...o, demo });
   if (o.stale?.()) throw aborted();
 
-  if (!supportsPeriod(route, mod)) {
+  if (!supportsPeriod(route, mod, ctx.period.key)) {
     const sup = periodsFor(route, mod).map(k => store.periodByKey(k)).filter(Boolean);
     return frame('empty', emptyState({
       title: `Няма данни за ${ctx.period.label} на този екран`,
@@ -236,7 +235,7 @@ export async function build(route, params, query, o = {}) {
     schema: parts.schema ?? (mod.schema ? safeCall(mod.schema, ctx, []) : []),
     context: contextFor(route, ctx, parts.context, parts.ownContext),
     body: toHtml(parts.body),
-    crumbs: pageCrumbs ? [{ label: 'Начало', href: routeHref('S01') }, ...pageCrumbs] : defaultCrumbs(route, title),
+    crumbs: pageCrumbs ? [{ label: 'Начало', href: ctx.href('S01') }, ...pageCrumbs] : defaultCrumbs(route, title, ctx.href),
     next: buildNext(route, mod, ctx)
   };
 }

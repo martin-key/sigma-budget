@@ -71,7 +71,7 @@ function cells100(shares) {
 }
 
 /** the table behind a picture: registered for the block's „Сподели“ (CSV) and named by data-attach on the figure */
-const twin = (id, columns, rows) => { share.attach(id, { table: () => ({ columns, rows }) }); return id; };
+const twin = (id, columns, rows, decimalColumns = []) => { share.attach(id, { table: () => ({ columns, rows, decimalColumns }) }); return id; };
 
 /* ------------------------------------------------------------------ pieces */
 
@@ -367,7 +367,7 @@ function scene6(ctx, core) {
   const exportValue = (id, key, fallback) => canonical?.[id]?.[key] ?? fallback;
   const id = twin('s04-fig6', ['Показател', `Към ${date(asOf)}, млн. €`, 'Годишен план, млн. €', 'Изпълнение, % от плана', 'Дял от 2025 г. до същия месец, %'], [
     ['Приходи', exportValue('rev', 'cum', r.execMln), exportValue('rev', 'plan', r.planMln), r.execPct, paceRev ?? null], ['Разходи', exportValue('exp.total', 'cum', e.execMln), exportValue('exp.total', 'plan', e.planMln), e.execPct, paceExp ?? null]
-  ]);
+  ], [1, 2]);
   const row = (label, kind, x, tick, item) => bar({
     label: html`<a href="${href('izpalnenie', {}, { pokazatel: item })}">${label}</a>`, kind, fill: x.execPct, tick,
     value: html`<strong>${amt(ctx, x.execMln, g(x.execMln))}</strong> <span class="s04-bar-p">${pct(x.execPct, 1)}${NBSP}от${NBSP}плана</span>`

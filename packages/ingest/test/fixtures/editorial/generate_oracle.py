@@ -72,6 +72,10 @@ guide.load_routes = lambda: routes
 published = json.loads((INPUTS / 'guide.json').read_text())
 outputs['guide-check.json'] = emit('guide-check.json', encoded(guide.check(published)))
 outputs['guide-apply.json'] = emit('guide-apply.json', encoded(guide.apply(copy.deepcopy(published))))
+aligned_routes = copy.deepcopy(routes)
+aligned_route = next(r for r in aligned_routes if r['id'] == published['steps'][3]['screen']['id'])
+aligned_route.update(title='Проверено ново заглавие', pattern='/provereni-merki')
+outputs['guide-aligned-oracle.json'] = emit('guide-aligned-oracle.json', encoded(guide.align_links(copy.deepcopy(published), aligned_routes)))
 provenance = {'baseline': 'e2954c957bd0659843609f870bcbc92d48d00c7c', 'buildDate': '2026-11-08', 'frozenInputSha256': inputs, 'fixtureSha256': outputs, 'oracle': 'Python 3.12 build.frozen_editorial, build.editorial.build_glossary and build.guide apply/check', 'registeredProvenance': {'guide.json': {'commit': '838c64c', 'path': 'data/release/guide.json', 'blob': '8fa4fcbe4475ead3130e1177efc22bcd04206813'}, 'glossary.json': {'commit': '838c64c', 'path': 'data/release/glossary.json', 'blob': 'd41851da551dd9eb70dad52e7e82371c274954e7'}}, 'guideRaw': 'Unavailable; the registered published snapshot is the frozen input. Original text cannot be regenerated.'}
 emit('provenance.json', encoded(provenance))
 print('editorial fixtures: byte-identical' if CHECK else 'editorial fixtures: regenerated')

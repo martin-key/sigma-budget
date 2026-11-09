@@ -1,6 +1,7 @@
-import { mkdir, readFile, realpath, lstat, writeFile } from 'node:fs/promises';
+import { constants } from 'node:fs';
+import { mkdir, readFile, realpath, lstat, open } from 'node:fs/promises';
 import { isAbsolute, join, relative, resolve } from 'node:path';
-import { loadEditorialRoutes, restoreEditorial } from '@sigma-budget/ingest';
+import { loadEditorialRoutes, restoreEditorial, alignGuideLinks } from '@sigma-budget/ingest';
 
 // Test-only build entry until the complete build DAG is ported. The destination
 // is confined to the migration candidate tree and may not traverse symlinks.
@@ -61,7 +62,7 @@ export async function editorialBuildCli(args: string[]): Promise<number> {
   }
   const inputs = resolve(flags['--inputs']);
   const routes = loadEditorialRoutes(
-    JSON.parse(await readFile(flags['--routes'] ?? join(inputs, 'routes.json'), 'utf8')),
+    JSON.parse(await readFile(join(inputs, 'routes.json'), 'utf8')),
   );
   const output = restoreEditorial(
     {
@@ -70,7 +71,31 @@ export async function editorialBuildCli(args: string[]): Promise<number> {
     },
     routes,
   );
-  for (const name of ['glossary.json', 'guide.json'] as const)
-    await writeFile(join(dataDir, name), output[name]);
+  if (flags['--routes']) {
+    const currentRoutes = loadEditorialRoutes(
+      JSON.parse(await readFile(flags['--routes'], 'utf8')),
+    );
+    const guide = alignGuideLinks(
+      JSON.parse(Buffer.from(output['guide.json']).toString('utf8')),
+      currentRoutes,
+    );
+    output['guide.json'] = Buffer.from(JSON.stringify(guide), 'utf8');
+  }
+  for (const name of ['glossary.json', 'guide.json'] as const) {
+    const file = await open(
+      join(dataDir, name),
+      constants.O_WRONLY | constants.O_CREAT | constants.O_NOFOLLOW,
+      0o600,
+    );
+    try {
+      const stat = await file.stat();
+      if (!stat.isFile() || stat.nlink !== 1)
+        throw new Error('Output is not a private regular file');
+      await file.truncate(0);
+      await file.writeFile(output[name]);
+    } finally {
+      await file.close();
+    }
+  }
   return 0;
 }

@@ -28,6 +28,16 @@ class ProductSearchTest(unittest.TestCase):
                 self.assertEqual(row[3], _money_khil(original['values'][0]))
         for code in ('VAR05', 'RSE04'):
             self.assertTrue(any('/'+code+'?' in r[6] for r in municipalities))
+        blagoevgrad = next(r for r in municipalities if '/BLG03?' in r[6])
+        self.assertIn('BLG03', blagoevgrad[7])
+
+    def test_annual_search_drops_unaddressable_old_drafts_and_pins_reports(self):
+        rows = _Rows()
+        for year in ('2026', '2027', '2028'):
+            rows.add('indicators', 'Old draft ' + year, 'КФП по видове, 2026', value='12,80 млрд. €', period=year, href='#/prihodi/dds')
+        self.assertEqual(rows.rows, [])
+        rows.add('indicators', 'Report', value='1 млн. €', period='2025', href='#/prihodi/dds')
+        self.assertTrue(rows.rows[0][6].endswith('per=2025.report'))
 
     def test_historical_search_destinations_are_pinned(self):
         rows = _Rows()
@@ -65,11 +75,12 @@ class ProductSearchTest(unittest.TestCase):
 
     def test_guide_navigation_follows_live_route_titles_without_changing_editorial_prose(self):
         from budget_pipeline.build.guide import align_links, check
+        from budget_pipeline.routes import load_routes
         import copy
         source = ROOT / 'data/inputs/editorial/guide.json'
         before = source.read_bytes()
         original = json.loads(before)
-        aligned = align_links(copy.deepcopy(original))
+        aligned = align_links(copy.deepcopy(original), load_routes())
         self.assertEqual(check(aligned), [])
         for old, new in zip(original['steps'], aligned['steps']):
             self.assertEqual(old['intro'], new['intro'])

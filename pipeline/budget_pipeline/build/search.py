@@ -128,6 +128,13 @@ class _Rows:
 
     def add(self, group, title, sub="", value="", period="", status="real", href="", kw=""):
         title, href = _clean(title), _clean(href)
+        # The older ASBP draft/forecast has no canonical destination in the current publication.
+        # Annual readers supply current-period search entries in the client. Keep only
+        # historical report years that can be opened with the same publication/status.
+        if group == "indicators" and value and "per=" not in href and re.match(r"^#/(?:pari|prihodi|razhodi|prognoza|bvp)(?:[/?]|$)", href):
+            if str(period) not in ("2024", "2025"):
+                return
+            href += ("&" if "?" in href else "?") + "per=" + str(period) + ".report"
         # Historical rows must retain their actual publication after the primary context changes.
         if "per=" not in href and re.search(r"#/(vedomstv|obshtin|dalg|merki|danaci)", href):
             historical = "2025.report" if str(period) == "2025" and href.startswith("#/dalg") else "2026.law"
@@ -312,7 +319,7 @@ def _publication_2027(ctx, rows):
             raise ValueError("2027 municipality identity is ambiguous: " + row["name"])
         municipality = matches[0]
         rows.add("municipalities", municipality["name"], "Основни бюджетни взаимоотношения, чл. 52, проект 2027",
-                 _money_khil(row["cells"][0]["value"]), "Проект 2027", href="#/obshtina/%s?per=2027.draft" % municipality["id"])
+                 _money_khil(row["cells"][0]["value"]), "Проект 2027", href="#/obshtina/%s?per=2027.draft" % municipality["id"], kw=_words("община", municipality["id"]))
     for key, column in (("2027.draft", "2"), ("2028.forecast", "3"), ("2029.forecast", "4")):
         cell = doc["forecast"]["VI_1"][0]["cells"][column]
         rows.add("indicators", "Държавен дълг по ЗДД " + key[:4], "Таблица VI-1, АСБП 2027–2029, прогноза на МФ",

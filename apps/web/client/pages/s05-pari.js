@@ -89,7 +89,7 @@ function cardAgencies(ctx, O, M) {
 
 /** 4 · what the measures change: how many, and what they add to revenue and take from expenditure (without the two indicative ones) */
 function cardMeasures(ctx, O, MS) {
-  if (ctx.period.key === '2027.draft') return {ic:'fileText',q:'Какво променят мерките?',href:ctx.href('S12',{}, {per:'2027.draft'}),text:'Приходните и разходните мерки в таблици II-7 и II-8 на АСБП 2027–2029. Празните годишни клетки са обозначени.',kpi:{label:'Мерки в проекта за 2027',value:'2027–2029',source:['budget2027'],asOf:ctx.data.budget2027?.publication}};
+  if (['2027.draft','2028.forecast','2029.forecast'].includes(ctx.period.key)) return {ic:'fileText',q:'Какво променят мерките?',href:ctx.href('S12',{}, {per:ctx.period.key}),text:'Приходните и разходните мерки в таблици II-7 и II-8 на АСБП 2027–2029. Празните годишни клетки са обозначени.',kpi:{label:ctx.period.year === 2027 ? 'Мерки в проекта за 2027' : `Мерки в прогнозата за ${ctx.period.year}`,value:'2027–2029',source:['budget2027'],asOf:ctx.data.budget2027?.publication}};
   const T = MS && MS.totals, C = MS && MS.counts, gdp = pick(O.periodKeys, O.gdp && O.gdp.mln, '2026.law');
   const part = v => amount(ctx, { mln: Math.abs(v), pctGdp: ok(gdp) ? (Math.abs(v) / gdp) * 100 : null, scale: 'mln' });
   const r = T && T.revenueMln, e = T && T.expenditureMlnWithoutIndicative;

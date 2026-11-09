@@ -213,8 +213,13 @@ function entry(group, title, o = {}) {
 /** The stage and year of a number as the result shows it („Закон 2026“, „Отчет 2025“, „Прогноза 2026“, „По законопроекта 2026“): a bare „2026“ next to a figure could be read as
  *  what was spent. Terms and data sets have no figure, so no stage. The index rows say it in their own words (sub / title), this only names it the same way everywhere. */
 export function stageOf(group, o) {
-  const yr = (/\b(20\d\d)\b/.exec(o.period || '') || [])[1] || '';
+  const canonical = /^(20\d\d)\.(draft|forecast|law|report|expected)$/.exec(new URLSearchParams(String(o.href || '').split('?')[1] || '').get('per') || '');
+  const yr = canonical?.[1] || (/\b(20\d\d)\b/.exec(o.period || '') || [])[1] || '';
   const txt = `${o.title || ''} ${o.sub || ''}`;
+  if (['indicators', 'institutions', 'municipalities', 'measures'].includes(group)) {
+    if (/^Прогноза\s+20\d\d$/i.test(o.period || '')) return `Прогноза ${yr}`;
+    if (canonical) return `${{draft:'По законопроекта', forecast:'Прогноза', law:'Закон', report:'Отчет', expected:'Очаквано изпълнение'}[canonical[2]]} ${yr}`;
+  }
   let w = '';
   if (group === 'measures') w = 'По законопроекта';
   else if (group === 'indicators') {
@@ -245,7 +250,7 @@ function fromDoc(doc) {
     const g = typeof r[F.g] === 'number' ? groups[r[F.g]] : r[F.g];
     const title = r[F.title], href = r[F.href];
     if (!g || !title || typeof href !== 'string' || !href.startsWith('#/')) continue;
-    out.push(entry(String(g), title, { sub: r[F.sub], value: r[F.value], period: r[F.period], status: r[F.status], href, kw: r[F.kw], stage: stageOf(String(g), { title, sub: r[F.sub], period: r[F.period] }) }));
+    out.push(entry(String(g), title, { sub: r[F.sub], value: r[F.value], period: r[F.period], status: r[F.status], href, kw: r[F.kw], stage: stageOf(String(g), { title, sub: r[F.sub], period: r[F.period], href }) }));
   }
   return out;
 }
@@ -326,7 +331,9 @@ export function getIndex() {
       entries = entries.filter(e=>!oldAnnual(e));
       entries.push(...annualSearch(...annual.map(result=>result.value)));
     } else {
-      entries = entries.map(e=>oldAnnual(e) ? entry(e.group,e.title,{...e,sub:`Историческа публикация: АСБП 2026–2028. ${e.sub}`,stage:'Исторически проект 2026'}) : e);
+      // Old published indexes may contain draft figures without a matching current
+      // destination. Do not offer those figures when annual data cannot replace them.
+      entries = entries.filter(e=>!oldAnnual(e));
     }
     entries.push(...fromRoutes());
     if (!entries.some(e => e.group === 'terms')) {

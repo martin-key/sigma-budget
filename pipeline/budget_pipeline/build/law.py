@@ -580,7 +580,7 @@ def build_law(ctx):
         "opinionsNote": "Становищата са постъпили в комисиите от организации и институции; докладите са на комисиите.",
     }
     # Only the current publication changes this navigation pointer; the 2026 history remains intact.
-    nxt = next_budget(ctx.out.get("budget2027.json"))
+    nxt = next_budget(ctx.get("budget2027.json"))
 
     dba = sum(1 for r in rows if r["changed"])
     note = ("„Законопроект“ е текстът, внесен на 01.07.2026 г. (№ %s); „закон“ е приетият на 24.07.2026 г. текст (ДВ бр. 69 от 31.07.2026 г.). "
