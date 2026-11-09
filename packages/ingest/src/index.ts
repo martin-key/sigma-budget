@@ -51,3 +51,11 @@ export * from './build/aggregation-rss.js';
 export * from './build/aggregation-search.js';
 export * from './build/aggregation-layers.js';
 export * from './build/aggregation-fixture.js';
+
+export * from './build/catalog-build.js';
+export * from './build/catalog-editorial.js';
+export * from './build/catalog-primary.js';
+export * from './build/catalog-refresh.js';
+export * from './build/catalog-layers.js';
+export * from './build/catalog-fixture.js';
+export * from './build/catalog-metadata.js';
