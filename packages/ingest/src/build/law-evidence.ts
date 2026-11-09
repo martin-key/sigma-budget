@@ -67,7 +67,18 @@ export function parliamentFacts(billId: number, data: RecordData): RecordData {
 }
 
 /** The 2027 stage is intentionally separate from the 2026 law computation. */
-export function next2027() {
+export function next2027(publication?: { publication: string } | null) {
+  // Python treats an empty mapping as false; a present nonempty mapping must
+  // contain the publication date, just as next_budget does.
+  if (publication && Object.keys(publication).length) {
+    const date = publication.publication.split('-').reverse().join('.');
+    return {
+      title: 'Законодателният път на бюджет 2027',
+      status: 'pending',
+      note: `Проектът за държавния бюджет за 2027 г. и АСБП 2027–2029, публикувани от МФ на ${date}, вече са на екрана „Бюджет 2027 (проект)“. Хронологията на обсъждането и решенията на Народното събрание за 2027 г. още не е извлечена. Проектът не е приет закон.`,
+      expected: 'parliament.bg',
+    };
+  }
   return {
     title: 'Бюджет 2027',
     status: 'pending',

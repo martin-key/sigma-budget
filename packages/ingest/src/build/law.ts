@@ -53,7 +53,11 @@ function event(kind: string, title: string, date?: string, options: Data = {}): 
     source: source || ['parliament'],
   };
 }
-export function buildLaw(evidence: LawEvidence, buildDate: string): LawDataset {
+export function buildLaw(
+  evidence: LawEvidence,
+  buildDate: string,
+  publication?: { publication: string } | null,
+): LawDataset {
   const L = evidence.law,
     P: Data = {},
     DV: Data = {};
@@ -404,7 +408,7 @@ export function buildLaw(evidence: LawEvidence, buildDate: string): LawDataset {
     gazette,
     documents,
     proposals,
-    next: next2027(),
+    next: next2027(publication),
     pending: ['P07'],
   } as unknown as LawDataset;
 }
