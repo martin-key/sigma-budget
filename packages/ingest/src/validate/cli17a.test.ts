@@ -18,8 +18,8 @@ const cli = join(repo, 'packages/ingest/dist/validate/cli17a.js');
 const fixture = new URL('../../test/fixtures/validate17a/corpus/', import.meta.url);
 const overlay = new URL('../../test/fixtures/validate17a/overlay/', import.meta.url);
 const candidates = join(repo, 'tmp/ts-migration/candidates/17a');
-function run(args: string[]) {
-  return spawnSync(process.execPath, [cli, ...args], { cwd: repo, encoding: 'utf8' });
+function run(args: string[], cwd = repo) {
+  return spawnSync(process.execPath, [cli, ...args], { cwd, encoding: 'utf8' });
 }
 it('compiled CLI rejects unsupported selections without making report directories', () => {
   const root = mkdtempSync(join(tmpdir(), 'sigma-17a-cli-'));
@@ -51,6 +51,45 @@ it('compiled CLI rejects unsupported selections without making report directorie
         'tmp/ts-migration/candidates/17a/../../release.json',
       ]).status,
     ).toBe(2);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+it('does not replace declared inputs after rejecting traversal or a symlink', () => {
+  const root = mkdtempSync(join(tmpdir(), 'sigma-17a-rejected-'));
+  try {
+    cpSync(fixture, root, { recursive: true });
+    cpSync(overlay, root, { recursive: true });
+    const report = 'tmp/ts-migration/candidates/17a/report.json',
+      path = join(root, report),
+      catalogPath = join(root, 'data/release/catalog.json'),
+      original = readFileSync(catalogPath, 'utf8'),
+      sentinel = '{"sentinel":"preserve"}';
+    mkdirSync(dirname(path), { recursive: true });
+    const link = join(root, 'alias.json');
+    symlinkSync(path, link);
+    for (const declaration of [
+      'data/../../' + report,
+      'data/../../tmp/../' + report,
+      'data/../../' + join(root, report),
+      'data/../../alias.json',
+    ]) {
+      const catalog = JSON.parse(original);
+      catalog.datasets[0].file = declaration;
+      writeFileSync(catalogPath, JSON.stringify(catalog));
+      writeFileSync(path, sentinel);
+      const args = ['--root', root, '--only', 'CATALOG'];
+      const rejected = run([...args, '--report', report], root);
+      expect(rejected.status, rejected.stderr).toBe(2);
+      expect(rejected.stderr).toContain('rejecting an input path');
+      expect(readFileSync(path, 'utf8')).toBe(sentinel);
+      const absent = 'tmp/ts-migration/candidates/17a/missing/report.json';
+      expect(run([...args, '--report', absent], root).status).toBe(2);
+      expect(existsSync(join(root, dirname(absent)))).toBe(false);
+      const consoleOnly = run(args, root);
+      expect(consoleOnly.status).toBe(1);
+      expect(JSON.parse(consoleOnly.stdout).status).toBe('FAIL');
+    }
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

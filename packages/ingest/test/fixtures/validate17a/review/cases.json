@@ -1,0 +1,400 @@
+[
+  {
+    "name": "review-month-10.0",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "rawSet",
+        "file": "data/release/execution.json",
+        "path": [
+          "pendingMonths",
+          0,
+          "month"
+        ],
+        "value": "10.0"
+      }
+    ]
+  },
+  {
+    "name": "review-month-10e0",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "rawSet",
+        "file": "data/release/execution.json",
+        "path": [
+          "pendingMonths",
+          0,
+          "month"
+        ],
+        "value": "10e0"
+      }
+    ]
+  },
+  {
+    "name": "review-month-10",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "rawSet",
+        "file": "data/release/execution.json",
+        "path": [
+          "pendingMonths",
+          0,
+          "month"
+        ],
+        "value": "10"
+      }
+    ]
+  },
+  {
+    "name": "review-month-true",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "rawSet",
+        "file": "data/release/execution.json",
+        "path": [
+          "pendingMonths",
+          0,
+          "month"
+        ],
+        "value": "true"
+      }
+    ]
+  },
+  {
+    "name": "review-month-false",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "rawSet",
+        "file": "data/release/execution.json",
+        "path": [
+          "pendingMonths",
+          0,
+          "month"
+        ],
+        "value": "false"
+      }
+    ]
+  },
+  {
+    "name": "review-month-0",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "rawSet",
+        "file": "data/release/execution.json",
+        "path": [
+          "pendingMonths",
+          0,
+          "month"
+        ],
+        "value": "0"
+      }
+    ]
+  },
+  {
+    "name": "review-bytes-5655187.0",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "rawSet",
+        "file": "data/release/catalog.json",
+        "path": [
+          "files",
+          0,
+          "bytes"
+        ],
+        "value": "5655187.0"
+      }
+    ]
+  },
+  {
+    "name": "review-bytes-5655187e0",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "rawSet",
+        "file": "data/release/catalog.json",
+        "path": [
+          "files",
+          0,
+          "bytes"
+        ],
+        "value": "5655187e0"
+      }
+    ]
+  },
+  {
+    "name": "review-bytes-5655187",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "rawSet",
+        "file": "data/release/catalog.json",
+        "path": [
+          "files",
+          0,
+          "bytes"
+        ],
+        "value": "5655187"
+      }
+    ]
+  },
+  {
+    "name": "review-bytes-true",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "rawSet",
+        "file": "data/release/catalog.json",
+        "path": [
+          "files",
+          0,
+          "bytes"
+        ],
+        "value": "true"
+      }
+    ]
+  },
+  {
+    "name": "review-bytes-false",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "rawSet",
+        "file": "data/release/catalog.json",
+        "path": [
+          "files",
+          0,
+          "bytes"
+        ],
+        "value": "false"
+      }
+    ]
+  },
+  {
+    "name": "review-bytes-0",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "rawSet",
+        "file": "data/release/catalog.json",
+        "path": [
+          "files",
+          0,
+          "bytes"
+        ],
+        "value": "0"
+      }
+    ]
+  },
+  {
+    "name": "review-format-12",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "format"
+        ],
+        "value": [
+          "JSON"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review-format-13",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "format"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "review-format-14",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "format"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "review-format-15",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "format"
+        ],
+        "value": "JSON"
+      }
+    ]
+  },
+  {
+    "name": "review-format-16",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "format"
+        ],
+        "value": "GeoJSON"
+      }
+    ]
+  },
+  {
+    "name": "review-format-17",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "format"
+        ],
+        "value": "RSS"
+      }
+    ]
+  },
+  {
+    "name": "review-format-18",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "format"
+        ],
+        "value": "toString"
+      }
+    ]
+  },
+  {
+    "name": "review-format-19",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "format"
+        ],
+        "value": "__proto__"
+      }
+    ]
+  },
+  {
+    "name": "review-format-20",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "format"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "review-format-21",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "format"
+        ],
+        "value": true
+      }
+    ]
+  }
+]

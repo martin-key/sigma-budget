@@ -2,6 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { Check, fmt, gzipSize, isnum, pyRepr, pyTruth } from './checks.js';
 import { Context, files, safePath } from './context.js';
+import { pythonNumberAt } from '../common/numbers.js';
 
 const sources = [
   'budget2027',
@@ -173,11 +174,15 @@ function number(v: any): number {
   return error('TypeError', `unsupported operand type: '${kind(v)}'`);
 }
 
-function monthName(value: any): string {
+function monthName(holder: any, field: string): string {
+  const value = get(holder, field);
   if (typeof value !== 'number' && typeof value !== 'boolean')
     error('TypeError', `unsupported operand type(s) for -: '${kind(value)}' and 'int'`);
   const index = number(value) - 1;
-  if (!Number.isInteger(index))
+  if (
+    !Number.isInteger(index) ||
+    (typeof value === 'number' && pythonNumberAt(holder, field, value).kind === 'float')
+  )
     error('TypeError', 'tuple indices must be integers or slices, not float');
   const actual = index < 0 ? months.length + index : index;
   if (actual < 0 || actual >= months.length) error('IndexError', 'tuple index out of range');
@@ -325,9 +330,9 @@ export function core(ctx: Context): Check {
     title = opt(p04, 'title', '');
   c.ok(
     starts(title, `Отчетът към ${nas.split('-').reverse().join('.')} г.`) &&
-      contains(reason, `за ${monthName(get(nxt, 'month'))} ${ny} г. още не е добавен`) &&
+      contains(reason, `за ${monthName(nxt, 'month')} ${ny} г. още не е добавен`) &&
       pyMethod(reason, 'endswith').endsWith(
-        `е за ${monthName(get(latest(), 'month'))} ${get(latest(), 'asOf').slice(0, 4)} г.`,
+        `е за ${monthName(latest(), 'month')} ${get(latest(), 'asOf').slice(0, 4)} г.`,
       ),
     `pending P04 must name the pending report ${nas} and the latest ${get(latest(), 'asOf')}`,
   );
@@ -643,8 +648,10 @@ export function catalog(ctx: Context): Check {
     );
     const format = get(d, 'format'),
       media = get(d, 'mediaType');
+    if (format !== null && typeof format === 'object')
+      error('TypeError', "unhashable type: '" + kind(format) + "'");
     c.ok(
-      equal(formats[format] ?? null, media),
+      equal(Object.hasOwn(formats, format) ? formats[format] : null, media),
       `${sl}: format/mediaType ${pstr(format)} / ${pstr(media)}`,
     );
     if (pyTruth(opt(d, 'fileTemplate'))) {
@@ -802,7 +809,8 @@ export function catalog(ctx: Context): Check {
       error('TypeError', `expected string or bytes-like object, got '${kind(sha)}'`);
     c.ok(
       /^[0-9a-f]{64}$/.test(sha) &&
-        (Number.isInteger(bytes) || typeof bytes === 'boolean') &&
+        ((Number.isInteger(bytes) && pythonNumberAt(f, 'bytes', bytes).kind === 'int') ||
+          typeof bytes === 'boolean') &&
         number(bytes) > 0,
       `files ${pstr(get(f, 'name'))}: sha256/bytes`,
     );

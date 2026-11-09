@@ -223,7 +223,7 @@ jobs:
       - run: |
           python -m pip install --require-hashes -r pipeline/requirements.lock
           pnpm install --frozen-lockfile
-          pnpm --filter @sigma-budget/dataset-schema build
+          pnpm --filter @sigma-budget/ingest... build
       - name: Verify frozen Python oracle and provenance
         run: |
           python packages/ingest/test/fixtures/validate14/generate_oracle.py --check
@@ -263,12 +263,13 @@ jobs:
         run: |
           python packages/ingest/test/fixtures/validate17a/generate_oracle.py --check
           python packages/ingest/test/fixtures/validate17a/generate_oracle.py --extra --check
+          python packages/ingest/test/fixtures/validate17a/review/generate_oracle.py --check
           python packages/ingest/test/fixtures/validate17a/wrapper/generate.py --check
       - run: pnpm --filter @sigma-budget/ingest... build
       - name: Scoped differential and CLI safety tests
         env:
           WAVE17A_PARITY_REPORT: tmp/ts-migration/candidates/17a/report.json
-        run: pnpm --filter @sigma-budget/ingest exec vitest run src/validate/catalog.test.ts src/validate/cli17a.test.ts
+        run: pnpm --filter @sigma-budget/ingest exec vitest run src/validate/catalog.test.ts src/validate/cli17a.test.ts src/validate/json-error.test.ts
       - uses: actions/upload-artifact@v4
         if: always()
         with:

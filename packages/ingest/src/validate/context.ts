@@ -1,23 +1,30 @@
 import { existsSync, lstatSync, readFileSync, readdirSync, realpathSync } from 'node:fs';
 import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { numbers } from './execution-contract.js';
+import { parsePythonJson } from '../common/numbers.js';
+import { throwPythonJsonError } from './json-error.js';
 
-let inputObserver: ((root: string, path: string) => void) | undefined;
+let inputObserver: ((root: string, path: string, rejected?: boolean) => void) | undefined;
 /** Record files and trees consulted by synchronous validators, including registry-defined paths. */
 export function captureInputPaths<T>(
   root: string,
   operation: () => T,
-): { value: T; paths: string[] } {
+): { value: T; paths: string[]; rejectedPaths: string[] } {
   const base = resolve(root),
     physical = realpathSync(base),
-    paths = new Set<string>();
+    paths = new Set<string>(),
+    rejectedPaths = new Set<string>();
   const previous = inputObserver;
-  inputObserver = (observedRoot, path) => {
-    previous?.(observedRoot, path);
-    if (observedRoot === base) paths.add(resolve(physical, relative(base, path)));
+  inputObserver = (observedRoot, path, rejected) => {
+    previous?.(observedRoot, path, rejected);
+    if (observedRoot === base) {
+      const identity = resolve(physical, relative(base, path));
+      paths.add(identity);
+      if (rejected) rejectedPaths.add(identity);
+    }
   };
   try {
-    return { value: operation(), paths: [...paths] };
+    return { value: operation(), paths: [...paths], rejectedPaths: [...rejectedPaths] };
   } finally {
     inputObserver = previous;
   }
@@ -25,26 +32,31 @@ export function captureInputPaths<T>(
 
 /** Resolve repository-relative paths without allowing traversal or symlink escapes. */
 export function safePath(root: string, path: string): string {
-  if (
-    !path ||
-    isAbsolute(path) ||
-    path.includes('\\') ||
-    path.split('/').some((p) => p === '..' || p === '.')
-  )
-    throw new Error(`unsafe path: ${path}`);
   const base = resolve(root),
-    out = resolve(base, path),
-    rel = relative(base, out);
-  if (!rel || rel.startsWith('..' + sep) || isAbsolute(rel))
-    throw new Error(`unsafe path: ${path}`);
-  let current = base;
-  for (const segment of rel.split(sep)) {
-    current = join(current, segment);
-    try {
-      if (lstatSync(current).isSymbolicLink()) throw new Error(`symlink in path: ${path}`);
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+    out = resolve(base, path);
+  try {
+    if (
+      !path ||
+      isAbsolute(path) ||
+      path.includes('\\') ||
+      path.split('/').some((p) => p === '..' || p === '.')
+    )
+      throw new Error(`unsafe path: ${path}`);
+    const rel = relative(base, out);
+    if (!rel || rel.startsWith('..' + sep) || isAbsolute(rel))
+      throw new Error(`unsafe path: ${path}`);
+    let current = base;
+    for (const segment of rel.split(sep)) {
+      current = join(current, segment);
+      try {
+        if (lstatSync(current).isSymbolicLink()) throw new Error(`symlink in path: ${path}`);
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+      }
     }
+  } catch (error) {
+    inputObserver?.(base, out, true);
+    throw error;
   }
   inputObserver?.(base, out);
   return out;
@@ -59,7 +71,10 @@ export function files(root: string, path: string, excludeReleases = false): stri
     )) {
       if (excludeReleases && !rel && ent.name === 'releases') continue;
       const name = rel ? `${rel}/${ent.name}` : ent.name;
-      if (ent.isSymbolicLink()) throw new Error(`symlink in path: ${path}/${name}`);
+      if (ent.isSymbolicLink()) {
+        inputObserver?.(resolve(root), join(dir, ent.name), true);
+        throw new Error(`symlink in path: ${path}/${name}`);
+      }
       if (ent.isDirectory()) visit(join(dir, ent.name), name);
       else if (ent.isFile()) out.push(name);
     }
@@ -69,49 +84,11 @@ export function files(root: string, path: string, excludeReleases = false): stri
 }
 /** Python json.loads(parse_constant=...) rejects NaN and Infinity tokens. */
 export function strictJson(text: string): unknown {
-  let inString = false,
-    escaped = false;
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i]!;
-    if (inString) {
-      if (escaped) escaped = false;
-      else if (ch === '\\') escaped = true;
-      else if (ch === '"') inString = false;
-      continue;
-    }
-    if (ch === '"') {
-      inString = true;
-      continue;
-    }
-    const m = /^(?:NaN|Infinity|-Infinity)(?![\w])/.exec(text.slice(i));
-    if (m) {
-      const error = new Error(`non-finite number ${m[0]} in JSON`);
-      error.name = 'ValueError';
-      throw error;
-    }
-  }
   try {
-    return JSON.parse(text);
+    return parsePythonJson(text);
   } catch (cause) {
-    if (!(cause instanceof SyntaxError)) throw cause;
-    const position = /position (\d+)/.exec(cause.message);
-    let pos = position ? Number(position[1]) : text.length;
-    let message = 'Expecting value';
-    if (/property name|double-quoted property name/.test(cause.message))
-      message = 'Expecting property name enclosed in double quotes';
-    else if (/after property name/.test(cause.message)) message = "Expecting ':' delimiter";
-    else if (/after property value|after array element/.test(cause.message))
-      message = "Expecting ',' delimiter";
-    else if (/Unterminated string/.test(cause.message)) {
-      message = 'Unterminated string starting at';
-      pos = text.lastIndexOf('"');
-    } else if (/non-whitespace character after JSON/.test(cause.message)) message = 'Extra data';
-    const before = text.slice(0, pos),
-      line = before.split('\n').length;
-    const column = pos - before.lastIndexOf('\n');
-    const error = new Error(`${message}: line ${line} column ${column} (char ${pos})`);
-    error.name = 'JSONDecodeError';
-    throw error;
+    if (cause instanceof SyntaxError) throwPythonJsonError(text);
+    throw cause;
   }
 }
 

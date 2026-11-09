@@ -53,9 +53,11 @@ export function main17a(argv: string[]): number {
       resolve(live ? process.cwd() : root),
       process.env.BUILD_DATE || '2026-11-08',
     );
-    const { value: result, paths: consulted } = captureInputPaths(ctx.root, () =>
-      runWave17a(ctx, names, accepted),
-    );
+    const {
+      value: result,
+      paths: consulted,
+      rejectedPaths,
+    } = captureInputPaths(ctx.root, () => runWave17a(ctx, names, accepted));
     const text =
       JSON.stringify(
         { ...result, inputMode: live ? 'live-diagnostic' : 'explicit-root' },
@@ -63,6 +65,7 @@ export function main17a(argv: string[]): number {
         2,
       ) + '\n';
     if (report) {
+      if (rejectedPaths.length) throw Error('cannot write a report after rejecting an input path');
       const path = safePath(process.cwd(), report),
         inputRoot = realpathSync(ctx.root);
       const protectedInputs = [

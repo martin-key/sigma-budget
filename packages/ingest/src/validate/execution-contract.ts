@@ -1,4 +1,5 @@
 import { pythonFloat } from '../build/context.js';
+import { clonePythonNumbers } from '../common/numbers.js';
 import { pyTruth } from './checks.js';
 import {
   executionContains,
@@ -149,7 +150,7 @@ export interface ExecutionProjection {
 
 type Dict = Record<string, any>;
 function mapMoney(doc: Dict, fn: (v: any, places: number) => unknown): Dict {
-  const out = structuredClone(doc);
+  const out = clonePythonNumbers(doc);
   for (const name of ['data', 'monthly'] as const)
     for (const block of executionValues(executionRequired(out, name)) as Dict[])
       for (const col of cols)

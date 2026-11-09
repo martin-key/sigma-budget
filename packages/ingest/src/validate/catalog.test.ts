@@ -18,8 +18,8 @@ import { Context } from './context.js';
 const base = new URL('../../test/fixtures/validate17a/', import.meta.url);
 const load = (p: string): any => JSON.parse(readFileSync(new URL(p, base), 'utf8'));
 const originalCases: any[] = load('cases.json');
-const cases: any[] = [...originalCases, ...load('cases-extra.json')],
-  oracle = { ...load('oracle.json'), ...load('oracle-extra.json') };
+const cases: any[] = [...originalCases, ...load('cases-extra.json'), ...load('review/cases.json')],
+  oracle = { ...load('oracle.json'), ...load('oracle-extra.json'), ...load('review/oracle.json') };
 function mutate(root: string, op: any) {
   const p = join(root, op.file);
   mkdirSync(dirname(p), { recursive: true });
@@ -35,8 +35,10 @@ function mutate(root: string, op: any) {
     let x = obj;
     for (const k of op.path.slice(0, -1)) x = x[k];
     if (op.op === 'deleteKey') delete x[op.path.at(-1)];
-    else x[op.path.at(-1)] = op.value;
-    writeFileSync(p, JSON.stringify(obj));
+    else x[op.path.at(-1)] = op.op === 'rawSet' ? '__review_raw_number__' : op.value;
+    let text = JSON.stringify(obj);
+    if (op.op === 'rawSet') text = text.replace('"__review_raw_number__"', op.value);
+    writeFileSync(p, text);
   }
 }
 const evidence: { name: string; status: string; groups: Record<string, unknown> }[] = [];
