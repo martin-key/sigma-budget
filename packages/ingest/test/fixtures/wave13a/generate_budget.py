@@ -116,6 +116,39 @@ with tempfile.TemporaryDirectory(prefix='sigma13a-') as tmp:
         except ValueError:
             negatives[key] = True
     output['negative-cases.json'] = negatives
+    # The required subscription is distinct from the donor's explicit blank fallback.
+    label_cases = []
+    for variant in ('bill', 'billMc'):
+        for section in ('rows', 'policiesRows', 'commitmentRows'):
+            article, row_index = next(
+                (article, i)
+                for article, item in lineage.inputs['B'][variant].items()
+                for i, row in enumerate(item[section])
+                if row.get('value') is not None
+            )
+            for state in ('missing', 'null', 'empty', 'skipped'):
+                probe = annual_periods.Lineage()
+                row = probe.inputs['B'][variant][article][section][row_index]
+                if state in ('missing', 'skipped'):
+                    del row['text']
+                else:
+                    row['text'] = None if state == 'null' else ''
+                if state == 'skipped':
+                    row['value'] = None
+                captured = {'variant': variant, 'article': article, 'section': section,
+                            'rowIndex': row_index, 'state': state}
+                try:
+                    projected = {'budgets': {}}
+                    budget_2027.add_budgets(probe, projected)
+                    rows = projected['budgets'][variant][article][section]
+                    captured['count'] = len(rows)
+                    if state != 'skipped':
+                        captured['label'] = rows[0]['label']
+                except Exception as error:
+                    captured['error'] = type(error).__name__
+                    captured['message'] = str(error)
+                label_cases.append(captured)
+    output['label-cases.json'] = label_cases
     hashes = {name: emit('oracle/' + name, value) for name, value in output.items()}
 
     law_source = (HERE / 'law-donor.py').read_bytes()

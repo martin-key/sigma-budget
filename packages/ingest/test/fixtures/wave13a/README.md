@@ -35,3 +35,5 @@ This is the current-publication function family, not the complete Wave13 DAG.
 The forecast and bill publication of 6 November remains distinct from the
 October draft budgetary plan. Historical missing originals described in the
 fiscal fixture remain limitations; these fixtures do not assert their recovery.
+
+The label oracle exercises the unchanged donor's required `row["text"]` subscription in both bill variants and all three budget row sections. It distinguishes an absent field from explicit null/empty text and retains the donor's skip before that subscription for rows without a numeric value. The 24 cases use fresh verified inputs and the real `add_budgets` function; all preceding oracle and six final output bytes remain unchanged.

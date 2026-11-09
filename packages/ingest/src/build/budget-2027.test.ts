@@ -97,6 +97,40 @@ describe('changed Python donor', () => {
   });
 });
 
+type LabelCase = {
+  variant: 'bill' | 'billMc';
+  article: string;
+  section: 'rows' | 'policiesRows' | 'commitmentRows';
+  rowIndex: number;
+} & (
+  | { state: 'missing'; error: string; message: string }
+  | { state: 'null' | 'empty'; count: number; label: string }
+  | { state: 'skipped'; count: number }
+);
+const labelCases: LabelCase[] = oracle('label-cases.json');
+it.each(labelCases)(
+  'retains the donor text contract for $variant/$article/$section: $state',
+  (test) => {
+    const { forecast, bill, zip } = inputs();
+    const item = bill[test.variant][test.article]!;
+    const row = item[test.section][test.rowIndex]!;
+    if (test.state === 'missing' || test.state === 'skipped') delete row.text;
+    else row.text = test.state === 'null' ? null : '';
+    if (test.state === 'skipped') row.value = null;
+    const lineage = new AnnualLineage(forecast, bill, { forecast: zip, bill: zip });
+    if (test.state === 'missing') {
+      expect(test.error).toBe('KeyError');
+      expect(test.message).toBe("'text'");
+      expect(() => buildBudget2027(lineage, '2026-11-08')).toThrow(/required budget row text/);
+    } else {
+      const { budget } = buildBudget2027(lineage, '2026-11-08');
+      const rows = budget.budgets[test.variant][test.article][test.section];
+      expect(rows).toHaveLength(test.count);
+      if (test.state !== 'skipped') expect(rows[0].label).toBe(test.label);
+    }
+  },
+);
+
 it('rejects altered archives, member hashes and null source hashes while using defaults only for absence', () => {
   const { forecast, bill, zip } = inputs();
   const corrupted = Buffer.from(zip);

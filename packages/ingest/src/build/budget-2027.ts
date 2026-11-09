@@ -207,6 +207,7 @@ export function buildBudget2027(
             DEFAULT,
             variant,
           );
+          if (!Object.hasOwn(row, 'text')) throw new Error('Missing required budget row text');
           target[section].push({
             no: pyOr(row.no, 'unprinted'),
             label: pyOr(row.text, 'Без отпечатан етикет'),
