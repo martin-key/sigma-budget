@@ -2247,7 +2247,7 @@ def share_ui_csv(page, s, F, W):
     except UnicodeDecodeError:
         F('share-csv', f'{sid}: the downloaded CSV is not valid UTF-8')
         return
-    if len(s['csv']) < 80000 and txt != s['csv']:
+    if txt != s['csv']:
         F('share-csv', f'{sid}: the downloaded CSV differs from csvFor(spec) ({len(txt)} against {len(s["csv"])} characters)')
 
 
