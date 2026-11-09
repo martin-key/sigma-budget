@@ -1,6 +1,7 @@
 /** Test/diagnostic-only entry point. Production continues to use Python validation. */
 import { isAbsolute, relative, resolve, sep } from 'node:path';
-import { Context, safePath } from './context.js';
+import { realpathSync } from 'node:fs';
+import { captureInputPaths, Context, safePath } from './context.js';
 import { PORTED_GROUPS, UNPORTED_GROUPS, runWave14 } from './runner.js';
 import { writeValidationReport } from './report.js';
 
@@ -43,7 +44,9 @@ export function main(argv: string[]): number {
           .map((s) => s.trim())
           .filter(Boolean)
       : [...PORTED_GROUPS];
-    const result = runWave14(context, names, accepted);
+    const { value: result, paths: consultedInputs } = captureInputPaths(context.root, () =>
+      runWave14(context, names, accepted),
+    );
     const text =
       JSON.stringify(
         { ...result, inputMode: live ? 'live-diagnostic' : 'explicit-root' },
@@ -54,14 +57,18 @@ export function main(argv: string[]): number {
       if (!report.startsWith('tmp/ts-migration/') || !report.endsWith('.json'))
         throw new Error('report must be a JSON path under tmp/ts-migration/');
       const path = safePath(process.cwd(), report);
-      const release = resolve(context.root, context.dataDir),
-        rel = relative(release, path);
-      if (
-        !rel ||
-        (!rel.startsWith(`..${sep}`) && !isAbsolute(rel)) ||
-        path.split(sep).some((part, i, parts) => part === 'data' && parts[i + 1] === 'release')
-      )
-        throw new Error('report cannot be written inside a release tree');
+      const inputRoot = realpathSync(context.root);
+      const protectedInputs = [
+        ...[context.dataDir, 'data', 'pipeline', 'apps', 'docs', 'tests', '.github', '.git'].map(
+          (tree) => resolve(inputRoot, tree),
+        ),
+        ...consultedInputs,
+      ];
+      for (const input of protectedInputs) {
+        const rel = relative(input, path);
+        if (!rel || (rel !== '..' && !rel.startsWith(`..${sep}`) && !isAbsolute(rel)))
+          throw new Error('report must be outside validation input trees');
+      }
       writeValidationReport(process.cwd(), report, text);
     }
     process.stdout.write(text);

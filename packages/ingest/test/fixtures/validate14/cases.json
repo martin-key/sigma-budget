@@ -1329,5 +1329,132 @@
         "value": "__proto__"
       }
     ]
+  },
+  {
+    "name": "registry-empty-rebuild-mapping",
+    "groups": [
+      "REGISTRY"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "rebuild"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "registry-empty-notRebuilt-mapping",
+    "groups": [
+      "REGISTRY"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "notRebuilt"
+        ],
+        "value": {}
+      },
+      {
+        "op": "deleteKey",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "rebuild"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "registry-empty-schema-mapping",
+    "groups": [
+      "REGISTRY"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "schema"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "registry-empty-scope-mapping",
+    "groups": [
+      "REGISTRY"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "scope"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "registry-empty-catalogId-mapping",
+    "groups": [
+      "REGISTRY"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "catalogId"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "registry-empty-rebuild-retains-disclosure",
+    "groups": [
+      "REGISTRY"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "rebuild"
+        ],
+        "value": {}
+      },
+      {
+        "op": "set",
+        "file": "data/datasets.yaml",
+        "path": [
+          "datasets",
+          0,
+          "notRebuilt"
+        ],
+        "value": "Frozen source disclosure"
+      }
+    ]
   }
 ]

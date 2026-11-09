@@ -170,6 +170,77 @@ it('writes new and existing regular reports without changing unrelated files', (
     rmSync(root, { recursive: true, force: true });
   }
 });
+it('preserves pinned inputs and other context input trees, including an aliased root', () => {
+  mkdirSync(resolve('tmp/ts-migration'), { recursive: true });
+  const root = mkdtempSync(resolve('tmp/ts-migration/wave14-input-trees-'));
+  const aliases = mkdtempSync(join(tmpdir(), 'sigma-input-alias-'));
+  const out = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+  const err = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
+  try {
+    fixture(root);
+    const seed = '{"value":1}\n';
+    make(root, 'data/inputs/seed.json', seed);
+    const pins = join(root, 'data/originals.sha256');
+    writeFileSync(
+      pins,
+      readFileSync(pins, 'utf8') +
+        `${createHash('sha256').update(seed).digest('hex')}  data/inputs/seed.json\n`,
+    );
+    expect(main(['--root', root, '--only', 'INPUTS'])).toBe(0);
+    const alias = join(aliases, 'root');
+    symlinkSync(root, alias);
+    for (const contextRoot of [root, alias]) {
+      const target = join(root, 'data/inputs/seed.json');
+      expect(
+        main([
+          '--root',
+          contextRoot,
+          '--only',
+          'INPUTS',
+          '--report',
+          relative(process.cwd(), target),
+        ]),
+      ).toBe(2);
+      expect(readFileSync(target, 'utf8')).toBe(seed);
+    }
+    const schema = 'tmp/ts-migration/custom-schema.json';
+    make(root, schema, 'schema sentinel\n');
+    const sourcesPath = join(root, 'data/sources.yaml');
+    const sources = JSON.parse(readFileSync(sourcesPath, 'utf8'));
+    sources.sources[0].files.push({ path: 'data/inputs/seed.json' });
+    writeFileSync(sourcesPath, JSON.stringify(sources));
+    const registryPath = join(root, 'data/datasets.yaml');
+    const registry = JSON.parse(readFileSync(registryPath, 'utf8'));
+    registry.datasets[0].schema = schema;
+    writeFileSync(registryPath, JSON.stringify(registry));
+    const registryCode = main(['--root', root, '--only', 'REGISTRY']);
+    expect(registryCode, String(out.mock.calls.at(-1)?.[0])).toBe(0);
+    expect(
+      main([
+        '--root',
+        root,
+        '--only',
+        'REGISTRY',
+        '--report',
+        relative(process.cwd(), join(root, schema)),
+      ]),
+    ).toBe(2);
+    expect(readFileSync(join(root, schema), 'utf8')).toBe('schema sentinel\n');
+    for (const tree of ['data/originals', 'pipeline', 'apps', 'docs', 'tests', '.github', '.git']) {
+      const target = join(root, tree, 'sentinel.json');
+      make(root, `${tree}/sentinel.json`, 'unchanged sentinel\n');
+      expect(
+        main(['--root', root, '--only', 'INPUTS', '--report', relative(process.cwd(), target)]),
+      ).toBe(2);
+      expect(readFileSync(target, 'utf8')).toBe('unchanged sentinel\n');
+    }
+  } finally {
+    out.mockRestore();
+    err.mockRestore();
+    rmSync(aliases, { recursive: true, force: true });
+    rmSync(root, { recursive: true, force: true });
+  }
+});
 it('reports explicit scope, unknown groups and safe CLI output paths', () => {
   const root = mkdtempSync(join(tmpdir(), 'sigma-runner-'));
   const out = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);

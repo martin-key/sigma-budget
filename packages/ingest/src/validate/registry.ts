@@ -3,7 +3,7 @@ import { existsSync, readFileSync, statSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { parseYaml } from '../io/registry.js';
 import { files, safePath } from './context.js';
-import { pyRepr as repr } from './checks.js';
+import { pyRepr as repr, pyTruth as truth } from './checks.js';
 
 const access = new Set(['auto', 'auto-bg', 'browser-only', 'supplied', 'reference', 'generated']);
 const acquisition = new Set([
@@ -19,7 +19,6 @@ const status = new Set(['real', 'mock', 'pending']);
 const other = /^(network|git tag mock-v\d+|every output of the release)$/;
 const absolute =
   /(?<![\p{L}\p{N}_.])(?:\/Users\/[^/\s'"]+\/|\/home\/[a-z][\p{L}\p{N}_-]*\/|[A-Za-z]:\\(?:Users|home)\\)/u;
-const truth = (x: any): boolean => !!x && (!Array.isArray(x) || x.length > 0);
 const duplicate = (a: string[]) => [...new Set(a.filter((v, i) => a.indexOf(v) !== i))].sort();
 function glob(pattern: string, path: string): boolean {
   let r = '^';
@@ -134,7 +133,7 @@ export function validateRegistry(root: string, options: RegistryOptions = {}): R
       `intermediate ${i.path}: reproducible must be true or false`,
     );
     r.ok(
-      i.producer != null || !i.reproducible,
+      i.producer != null || !truth(i.reproducible),
       `intermediate ${i.path}: reproducible without a producer`,
     );
     for (const x of i.inputs || [])
@@ -212,11 +211,12 @@ export function validateRegistry(root: string, options: RegistryOptions = {}): R
       for (const x of d.inputs || [])
         r.ok(allKnown.has(x) || other.test(x), `dataset ${did}: unknown input ${x}`);
       for (const k of ['schema', 'scope']) r.ok(truth(d[k]), `dataset ${did}: no ${k}`);
-      if (d.schema) r.ok(file(root, d.schema), `dataset ${did}: schema ${d.schema} does not exist`);
+      if (truth(d.schema))
+        r.ok(file(root, d.schema), `dataset ${did}: schema ${d.schema} does not exist`);
     }
     for (const s of d.sources || [])
       r.ok(known.has(s) && ids.includes(s), `dataset ${did}: unknown source ${s}`);
-    if (d.catalogId) {
+    if (truth(d.catalogId)) {
       if (
         !r.ok(
           did in catalog,
@@ -238,7 +238,7 @@ export function validateRegistry(root: string, options: RegistryOptions = {}): R
         `dataset ${did}: screens differ from catalog.json`,
       );
       for (const k of ['period', 'unit'])
-        if (c[k])
+        if (truth(c[k]))
           r.ok(
             c[k] === d[k],
             `dataset ${did}: ${k} ${repr(d[k])}, catalog.json says ${repr(c[k])}`,
@@ -317,10 +317,10 @@ export function validateRegistry(root: string, options: RegistryOptions = {}): R
       const i = byPath.get(x),
         dep = byId.get(x);
       if (i) {
-        if (!i.reproducible && i.category !== 'described-input') found.push(x);
+        if (!truth(i.reproducible) && i.category !== 'described-input') found.push(x);
         todo.push(...(i.inputs || []));
       } else if (dep) {
-        if (dep.notRebuilt && !dep.rebuild) found.push(`source-exception:${x}`);
+        if (truth(dep.notRebuilt) && !truth(dep.rebuild)) found.push(`source-exception:${x}`);
         todo.push(...(dep.inputs || []));
       }
     }
@@ -332,7 +332,7 @@ export function validateRegistry(root: string, options: RegistryOptions = {}): R
     describedInputs: inter.filter((i) => i.category === 'described-input').map((i) => i.path),
     sourceExceptions: Object.fromEntries(
       ds
-        .filter((d) => d.status !== 'pending' && d.notRebuilt && !d.rebuild)
+        .filter((d) => d.status !== 'pending' && truth(d.notRebuilt) && !truth(d.rebuild))
         .map((d) => [d.id, d.notRebuilt]),
     ),
   };

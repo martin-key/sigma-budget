@@ -1,6 +1,6 @@
 import { gzip } from 'pako';
 
-function pyTruth(value: unknown): boolean {
+export function pyTruth(value: unknown): boolean {
   if (value === null || value === undefined || value === false || value === 0 || value === '')
     return false;
   if (Array.isArray(value)) return value.length > 0;

@@ -3,7 +3,7 @@
   "python": "3.12",
   "description": "Frozen release and input file bytes, registry YAML, pins and route catalogue from baseline. The tracked path list captures existence only: test harness materializes empty placeholders for code/docs and replays synthetic path leaks. Historical originals are not restored; INPUTS intentionally reports them absent. Donor files are byte-identical baseline copies. Only catalog imports and annual module dependencies are stubbed; the donor period literal is read from the frozen original.",
   "inputs": {
-    "cases.json": "a820eb512f3ed4e0ce120cb905e56666ed354c5ebd0a1fa9f5d2394c361be5a2",
+    "cases.json": "aa66e449309d7e52b72f7e120e526775f75e118fbc67cffdde2da996eafadf0d",
     "corpus/apps/web/app/lib/routes.json": "07c6aaeae1a8d9da5e853f886be1ee3949e78c3eadb871a0da0a8a460fa5b765",
     "corpus/data/datasets.yaml": "cc89a63b620cf6ba602d1cd8790eacbabf046f25c5ad52650f9985af9de551e4",
     "corpus/data/inputs/budget_bill_2027.json": "ecb9e854f1998d1d89eee1c30da84cfbb44f3dec3ca64c022b774f1be60361d3",
@@ -124,6 +124,6 @@
     "code-path-capture.json": "8cd40d7fcaa3a75c650adbf438bfefe701c6163a75324397d6c532bbd05bb134",
     "generate_groups_oracle.py": "9e691ed35713b8be3108da185ecdfde523ed1d3bd63d1196aec24bd2866f3154"
   },
-  "oracleSha256": "9ec0519ded4fac46be7fd5fab27ac94ccac7e120b0746470ed0e8dd2ae33da0d",
+  "oracleSha256": "f5b5a69955ed3ed192558b2fa9f81ae16bbcfd126b7d70f8a2fb34f64dc623e8",
   "helpersOracleSha256": "87d02c92ad41e0e0554b6b311c68dbe8d12706ab64d69a46c94964726e1b6be6"
 }

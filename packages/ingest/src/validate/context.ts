@@ -2,6 +2,27 @@ import { existsSync, lstatSync, readFileSync, readdirSync, realpathSync } from '
 import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { numbers } from './execution-contract.js';
 
+let inputObserver: ((root: string, path: string) => void) | undefined;
+/** Record files and trees consulted by synchronous validators, including registry-defined paths. */
+export function captureInputPaths<T>(
+  root: string,
+  operation: () => T,
+): { value: T; paths: string[] } {
+  const base = resolve(root),
+    physical = realpathSync(base),
+    paths = new Set<string>();
+  const previous = inputObserver;
+  inputObserver = (observedRoot, path) => {
+    previous?.(observedRoot, path);
+    if (observedRoot === base) paths.add(resolve(physical, relative(base, path)));
+  };
+  try {
+    return { value: operation(), paths: [...paths] };
+  } finally {
+    inputObserver = previous;
+  }
+}
+
 /** Resolve repository-relative paths without allowing traversal or symlink escapes. */
 export function safePath(root: string, path: string): string {
   if (
@@ -25,6 +46,7 @@ export function safePath(root: string, path: string): string {
       if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
     }
   }
+  inputObserver?.(base, out);
   return out;
 }
 export function files(root: string, path: string, excludeReleases = false): string[] {
