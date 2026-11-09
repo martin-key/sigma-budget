@@ -2,17 +2,21 @@ import { INTEGER_DIGIT_ZEROES, INTEGER_NONPRINTABLE } from './catalog-integer-da
 
 /** Numeric-string whitespace differs from both JavaScript trim and Python str.strip. */
 export function catalogIntegerText(value: string): string {
-  return Array.from(
+  return catalogDecimalText(
     value.replace(
       /^[\u0009-\u000d\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]+|[\u0009-\u000d\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]+$/g,
       '',
     ),
-    (character) => {
-      const code = character.codePointAt(0)!;
-      const zero = INTEGER_DIGIT_ZEROES.find((start) => code >= start && code < start + 10);
-      return zero === undefined ? character : String(code - zero);
-    },
-  ).join('');
+  );
+}
+
+/** Decimal repertoire normalization without integer parsing's whitespace removal. */
+export function catalogDecimalText(value: string): string {
+  return Array.from(value, (character) => {
+    const code = character.codePointAt(0)!;
+    const zero = INTEGER_DIGIT_ZEROES.find((start) => code >= start && code < start + 10);
+    return zero === undefined ? character : String(code - zero);
+  }).join('');
 }
 
 /** Invalid integer diagnostics retain the frozen Python Unicode repertoire. */

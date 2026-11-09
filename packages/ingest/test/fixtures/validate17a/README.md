@@ -28,3 +28,9 @@ and container failure order. Another 27 direct route comparisons retain expanded
 identity order, matching behavior and errors. The route loader applies defaults
 and options before checking uniqueness; BOM bytes remain visible to JSON
 validation. All previous evidence files are unchanged.
+
+`boundaries/generate_oracle.py --check` adds 21 full donor outcomes for the
+frozen decimal repertoire in dataVersion, its final-newline rule, raw floating
+container diagnostics and unhashable screen IDs. Decimal normalization does
+not trim whitespace. Screen membership rejects containers before continuing
+validation. Earlier integer, reader and group observations remain unchanged.

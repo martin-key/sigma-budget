@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { Check, fmt, gzipSize, isnum, pyRepr, pyTruth } from './checks.js';
 import { Context, files, safePath } from './context.js';
 import { pythonNumberAt } from '../common/numbers.js';
-import { catalogIntegerRepr, catalogIntegerText } from './catalog-integer.js';
+import { catalogDecimalText, catalogIntegerRepr, catalogIntegerText } from './catalog-integer.js';
 
 const sources = [
   'budget2027',
@@ -62,7 +62,9 @@ function error(name: string, message: string): never {
   e.name = name;
   throw e;
 }
-function kind(v: any): string {
+function kind(v: any, holder?: object, key?: string | number): string {
+  if (typeof v === 'number' && holder && key !== undefined)
+    return pythonNumberAt(holder, String(key), v).kind;
   return v === null
     ? 'NoneType'
     : Array.isArray(v)
@@ -79,9 +81,9 @@ function kind(v: any): string {
               ? 'str'
               : 'NoneType';
 }
-function get(v: any, k: any): any {
+function get(v: any, k: any, sourceType = kind(v)): any {
   if (v === null || v === undefined || typeof v === 'number' || typeof v === 'boolean')
-    error('TypeError', `'${kind(v)}' object is not subscriptable`);
+    error('TypeError', `'${sourceType}' object is not subscriptable`);
   if (Array.isArray(v) || typeof v === 'string') {
     if (typeof k !== 'number' || !Number.isInteger(k))
       error(
@@ -96,6 +98,10 @@ function get(v: any, k: any): any {
   }
   if (!contains(v, k)) error('KeyError', pyRepr(k));
   return v[k];
+}
+function getAt(holder: any, key: string | number, field: any): any {
+  const value = get(holder, key);
+  return get(value, field, kind(value, holder, key));
 }
 function opt(v: any, k: string, fallback: any = null): any {
   if (v === null || typeof v !== 'object' || Array.isArray(v))
@@ -113,11 +119,20 @@ function entries(v: any): [string, any][] {
     error('AttributeError', `'${kind(v)}' object has no attribute 'items'`);
   return Object.entries(v);
 }
-function len(v: any): number {
+function len(v: any, sourceType = kind(v)): number {
   if (typeof v === 'string') return [...v].length;
   if (Array.isArray(v)) return v.length;
   if (v && typeof v === 'object') return Object.keys(v).length;
-  return error('TypeError', `object of type '${kind(v)}' has no len()`);
+  return error('TypeError', `object of type '${sourceType}' has no len()`);
+}
+function lenAt(holder: any, key: string | number): number {
+  const value = get(holder, key);
+  return len(value, kind(value, holder, key));
+}
+function hasRoute(routes: ReadonlySet<unknown>, value: unknown): boolean {
+  if (value !== null && typeof value === 'object')
+    error('TypeError', `unhashable type: '${kind(value)}'`);
+  return routes.has(value);
 }
 function equal(a: any, b: any): boolean {
   if (typeof a === 'boolean' && typeof b === 'number') return Number(a) === b;
@@ -268,14 +283,18 @@ export function core(ctx: Context): Check {
     `core keys ${pyRepr(iterable(core).sort())}`,
   );
   const b = get(core, 'build'),
-    dataver = get(b, 'dataVersion');
+    dataver = getAt(core, 'build', 'dataVersion');
   const latest = () => get(ex, 'latest'),
     kpis = () => get(core, 'kpis');
   if (typeof dataver !== 'string')
-    error('TypeError', `expected string or bytes-like object, got '${kind(dataver)}'`);
+    error(
+      'TypeError',
+      `expected string or bytes-like object, got '${kind(dataver, b, 'dataVersion')}'`,
+    );
   c.ok(
-    /^\d{4}-\d{2}-\d{2}\.\d+$/.test(dataver) && dataver.startsWith(ctx.buildDate),
-    `build.dataVersion ${pyRepr(dataver)}`,
+    /^\d{4}-\d{2}-\d{2}\.\d+\n?$/.test(catalogDecimalText(dataver)) &&
+      dataver.startsWith(ctx.buildDate),
+    `build.dataVersion ${catalogIntegerRepr(dataver)}`,
   );
   c.ok(
     equal(get(b, 'kfpLatest'), get(latest(), 'asOf')) &&
@@ -350,7 +369,8 @@ export function core(ctx: Context): Check {
       `pending ${key}: source keys`,
     );
     c.ok(
-      pyTruth(get(p, 'screens')) && iterable(get(p, 'screens')).every((x) => routes.ids.has(x)),
+      pyTruth(get(p, 'screens')) &&
+        iterable(get(p, 'screens')).every((x) => hasRoute(routes.ids, x)),
       `pending ${key}: screens ${pstr(get(p, 'screens'))}`,
     );
   }
@@ -638,7 +658,7 @@ export function catalog(ctx: Context): Check {
       `${sl}: source keys ${pstr(source)}`,
     );
     c.ok(
-      iterable(screens).every((x) => routes.has(x)) &&
+      iterable(screens).every((x) => hasRoute(routes, x)) &&
         len(screens) === uniq(iterable(screens)).length,
       `${sl}: screens ${pstr(screens)}`,
     );
@@ -806,8 +826,8 @@ export function catalog(ctx: Context): Check {
     };
   c.ok(equal(n, want), `counts ${pyRepr(n)} do not match the catalog ${pyRepr(want)}`);
   c.ok(
-    len(get(cat, 'traps')) === 6 && len(get(cat, 'methodology')) === 6,
-    `traps ${len(get(cat, 'traps'))} / methodology ${len(get(cat, 'methodology'))}, expected 6 / 6`,
+    lenAt(cat, 'traps') === 6 && lenAt(cat, 'methodology') === 6,
+    `traps ${lenAt(cat, 'traps')} / methodology ${lenAt(cat, 'methodology')}, expected 6 / 6`,
   );
   for (const kind of ['traps', 'methodology']) {
     const rows = iterable(get(cat, kind));
