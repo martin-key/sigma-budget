@@ -6,7 +6,6 @@ import {
   pythonRepr as pyRepr,
   pyReprAt,
   required,
-  divide,
   floatRepr,
   pyStrip,
   pyEqual,
@@ -26,12 +25,23 @@ import {
   pyDivide,
   pyMultiply,
   pyAddAssign,
+  pyAdd,
+  pyLessEqual,
 } from './python-error.js';
 
 const KFP_KEYS = ['revenue', 'expenditure', 'balance', 'interest', 'primaryBalance', 'financing'];
 const same = (a: unknown, b: unknown): boolean => pyEqual(a, b);
 const pyFloat = floatRepr;
 const fixed = (n: number, places: number) => fmt(n, places).replaceAll(' ', '').replace(',', '.');
+const floating = (value: number): PythonNumber => ({ value, kind: 'float' });
+function percentage(a: () => PythonNumber, b: () => PythonNumber): number {
+  const product = pyMultiply(floating(100), a());
+  return pyDivide(floating(product), b());
+}
+function growth(a: () => PythonNumber, b: () => PythonNumber): number {
+  const ratio = pyDivide(a(), b());
+  return pyMultiply(floating(100), floating(pySubtract(floating(ratio), floating(1))));
+}
 const tuple = (values: number[]): string => `(${values.map(pyFloat).join(', ')})`;
 // CPython round(x) uses ties-to-even, unlike Math.round.
 function roundInteger(x: number): number {
@@ -137,22 +147,22 @@ export function annex3(ctx: Context): Check {
   );
   const head = [rev[2], exp[2], bal[2], itr[2], gdp[2]];
   c.ok(same(head, [49615.3, 56807.2, -7191.9, 1059.2, 125246.7]), `2026 headline ${tuple(head)}`);
-  for (const [name, arr] of Object.entries(o.macro) as [string, any[]][])
+  for (const [name, arr] of Object.entries(required(o, 'macro')) as [string, any[]][])
     c.ok(arr.length === 5 && arr.every(isnum), `macro.${name}: five numbers`);
   c.ok(pyLenAt(o, 'macroVintage') === 5, 'macroVintage length');
-  const rows = o.macroRows,
-    ids = rows.map((r: any) => r.id);
+  const rows = required<any[]>(o, 'macroRows'),
+    ids = rows.map((r: any) => required(r, 'id'));
   c.ok(
     ids.length === new Set(ids).size && rows.length === 16,
     `macroRows: 16 unique ids, got ${rows.length}`,
   );
-  const inGroups = o.macroGroups.flatMap((gr: any) => gr.rows);
+  const inGroups = required<any[]>(o, 'macroGroups').flatMap((gr: any) => gr.rows);
   c.ok(same(inGroups.sort(), [...ids].sort()), 'macroGroups must list every macroRow exactly once');
   for (const r of rows)
     c.ok(r.values.length === 5 && r.values.every(isnum), `macroRow ${r.id}: five numbers`);
   const mr = byId(rows) as Record<string, any>;
   c.ok(same(required<any>(mr, 'gdp').values, g.mln), 'macroRows gdp must equal gdp.mln');
-  const vs = o.versions;
+  const vs = required<any[]>(o, 'versions');
   c.ok(vs.length === 9, `versions: ${vs.length} rows, expected 9`);
   const other: Record<string, any> = Object.assign(
     Object.create(null),
@@ -163,28 +173,33 @@ export function annex3(ctx: Context): Check {
   for (const v of vs) {
     c.ok(
       v.pdf.length === 5 && v.docx.length === 5 && v.diff.length === 5,
-      `versions ${v.id}: five values`,
+      `versions ${required<string>(v, 'id')}: five values`,
     );
     c.ok(
       same(v.pdf.slice(0, 2), v.docx.slice(0, 2)) && same(v.diff.slice(0, 2), [0, 0]),
-      `versions ${v.id}: 2024-2025 must be equal`,
+      `versions ${required<string>(v, 'id')}: 2024-2025 must be equal`,
     );
     for (let i = 0; i < 5; i++) {
       c.near(
         pyItemAt(v, 'diff', i),
         pySubtract(numeric(required(v, 'docx'), i), numeric(required(v, 'pdf'), i)),
         0.0501,
-        `versions ${v.id} diff ${i}`,
+        `versions ${required<string>(v, 'id')} diff ${i}`,
       );
       mx = Math.max(mx, Math.abs(v.diff[i]));
     }
-    const row = other[v.id];
-    if (c.ok(row !== undefined, `versions ${v.id}: no such row in revenue/economic`)) {
+    const row = other[required<string>(v, 'id')];
+    if (
+      c.ok(
+        row !== undefined,
+        `versions ${required<string>(v, 'id')}: no such row in revenue/economic`,
+      )
+    ) {
       const start = rowOffset(row);
       requireOffsetIndex(row, true);
       c.ok(
         same(row.mln, v.pdf.slice(start, start + row.mln.length)),
-        `versions ${v.id}: the published row must be the PDF version`,
+        `versions ${required<string>(v, 'id')}: the published row must be the PDF version`,
       );
     }
   }
@@ -286,7 +301,11 @@ function tree(c: Check, rows: any[], what: string, gdp: number[], tolCap = 0.3):
           c,
           q.pctGdp,
           j,
-          () => divide(100 * m, listValue(gdp, j + y0)),
+          () =>
+            percentage(
+              () => numeric(q.mln, j),
+              () => numeric(gdp, j + y0),
+            ),
           tol,
           `${what} ${q.id} pctGdp ${j + y0}`,
           sourceTypeAt(q, 'pctGdp'),
@@ -364,7 +383,7 @@ export function revenue(ctx: Context): Check {
       same(required(r, 'vintage'), required(o, 'vintage')),
     'years/vintage must equal outlook',
   );
-  const t = r.total;
+  const t = required<any>(r, 'total');
   c.ok(
     same(required(t, 'mln'), required(required<any>(required<any>(o, 'kfp'), 'revenue'), 'mln')) &&
       same(required(t, 'pctGdp'), required(required<any>(o.kfp, 'revenue'), 'pctGdp')),
@@ -378,7 +397,7 @@ export function revenue(ctx: Context): Check {
   );
   c.ok(same(by['r.total'].mln, t.mln), 'r.total must equal total');
   const worst = tree(c, rows, 'revenue', gdp),
-    groups = r.groups;
+    groups = required<any[]>(r, 'groups');
   c.ok(
     groups.length === 8 && new Set(groups.map((gr: any) => gr.id)).size === 8,
     'groups: 8 unique ids',
@@ -390,7 +409,7 @@ export function revenue(ctx: Context): Check {
   );
   const gsum = [];
   for (let i = 0; i < 5; i++) {
-    const s = pySum(pyMap(groups, (gr: any) => numeric(gr.mln, i)));
+    const s = pySum(pyMap(groups, (gr: any) => numeric(required(gr, 'mln'), i)));
     gsum.push(roundedOne(s));
     c.near(s, t.mln[i], 0.15, `groups sum vs total, year ${2024 + i}`);
     c.near(r.groupSums[i], roundedOne(s), 0.0501, `groupSums[${i}]`);
@@ -419,7 +438,11 @@ export function revenue(ctx: Context): Check {
         c,
         gr.pctGdp,
         i,
-        () => divide(100 * gr.mln[i], gdp[i]),
+        () =>
+          percentage(
+            () => numeric(required(gr, 'mln'), i),
+            () => numeric(gdp, i),
+          ),
         tol,
         `group ${gr.id} pctGdp ${2024 + i}`,
         sourceTypeAt(gr, 'pctGdp'),
@@ -428,7 +451,11 @@ export function revenue(ctx: Context): Check {
       c,
       gr,
       'share2026',
-      () => divide(100 * gr.mln[2], t.mln[2]),
+      () =>
+        percentage(
+          () => numeric(required(gr, 'mln'), 2),
+          () => numeric(required(t, 'mln'), 2),
+        ),
       0.0051,
       `group ${gr.id} share2026`,
     );
@@ -436,7 +463,11 @@ export function revenue(ctx: Context): Check {
       c,
       gr,
       'yoy2026Pct',
-      () => 100 * (divide(gr.mln[2], gr.mln[1]) - 1),
+      () =>
+        growth(
+          () => numeric(required(gr, 'mln'), 2),
+          () => numeric(gr.mln, 1),
+        ),
       0.0501,
       `group ${gr.id} yoy2026Pct`,
     );
@@ -445,7 +476,7 @@ export function revenue(ctx: Context): Check {
   nearWithText(c, shares, 100, 0.05, 'shares add up to 100', pyFloat(shares), '100.0');
   const ex = ctx.get('execution.json');
   c.ok(
-    r.execution.ref === 'execution' &&
+    required(required<any>(r, 'execution'), 'ref') === 'execution' &&
       (Array.isArray(r.execution.rows) ? r.execution.rows : Object.keys(r.execution.rows)).every(
         (k: string) => ex.rows.some((x: any) => x.id === k),
       ),
@@ -474,14 +505,18 @@ export function measures(ctx: Context): Check {
   );
   c.ok(
     same(
-      [t.revenueMln, t.expenditureMln, t.expenditureMlnWithoutIndicative],
+      [
+        required(t, 'revenueMln'),
+        required(t, 'expenditureMln'),
+        required(t, 'expenditureMlnWithoutIndicative'),
+      ],
       [745, -1710.5, -1060.8],
     ),
     'short-term totals',
   );
   c.ok(same([m.check['II-8'], m.check['II-9']], [482, 604.4]), 'check.II-8 / II-9');
   const items = m.items,
-    ids = items.map((i: any) => i.id),
+    ids = items.map((i: any) => required(i, 'id')),
     by = byId(items) as Record<string, any>,
     cnt = required<any>(m, 'counts');
   c.ok(
@@ -494,20 +529,28 @@ export function measures(ctx: Context): Check {
   c.ok(
     same(
       [short.length, disc.length, laws.length],
-      [cnt.short.all, cnt.discretionary.revenue + cnt.discretionary.expenditure, cnt.laws],
+      [
+        cnt.short.all,
+        cnt.discretionary.revenue + cnt.discretionary.expenditure,
+        required(cnt, 'laws'),
+      ],
     ),
     `counts by tab: ${short.length} / ${disc.length} / ${laws.length}`,
   );
   c.ok(cnt.all === items.length && items.length === 52, 'counts.all');
   const count = (xs: any[], f: (x: any) => boolean) => xs.filter(f).length;
   c.ok(
-    count(short, (i) => i.kind === 'revenue' && pyTruth(required(i, 'hasEstimate'))) ===
-      cnt.short.revenue && cnt.short.revenue === 8,
+    count(
+      short,
+      (i) => required(i, 'kind') === 'revenue' && pyTruth(required(i, 'hasEstimate')),
+    ) === cnt.short.revenue && cnt.short.revenue === 8,
     'counts: short revenue with estimate',
   );
   c.ok(
-    count(short, (i) => i.kind === 'expenditure' && pyTruth(required(i, 'hasEstimate'))) ===
-      cnt.short.expenditure && cnt.short.expenditure === 9,
+    count(
+      short,
+      (i) => required(i, 'kind') === 'expenditure' && pyTruth(required(i, 'hasEstimate')),
+    ) === cnt.short.expenditure && cnt.short.expenditure === 9,
     'counts: short expenditure with estimate',
   );
   c.ok(
@@ -516,12 +559,12 @@ export function measures(ctx: Context): Check {
     'counts: short without estimate',
   );
   c.ok(
-    count(disc, (i) => i.kind === 'revenue') === cnt.discretionary.revenue &&
+    count(disc, (i) => required(i, 'kind') === 'revenue') === cnt.discretionary.revenue &&
       cnt.discretionary.revenue === 14,
     'counts: discretionary revenue',
   );
   c.ok(
-    count(disc, (i) => i.kind === 'expenditure') === cnt.discretionary.expenditure &&
+    count(disc, (i) => required(i, 'kind') === 'expenditure') === cnt.discretionary.expenditure &&
       cnt.discretionary.expenditure === 6,
     'counts: discretionary expenditure',
   );
@@ -530,18 +573,18 @@ export function measures(ctx: Context): Check {
       (Array.isArray(m.tabs)
         ? m.tabs.includes(required(i, 'tab'))
         : pyHas(m.tabs, required(i, 'tab'))) && pyHas(m.stageLabels, required(i, 'stage')),
-      `${i.id}: tab/stage`,
+      `${required(i, 'id')}: tab/stage`,
     );
     c.ok(
       ['name', 'text', 'quote'].every((k) => typeof i[k] === 'string' && pyStrip(i[k])),
-      `${i.id}: name/text/quote must be text`,
+      `${required(i, 'id')}: name/text/quote must be text`,
     );
     c.ok(
       required(i, 'page') !== null &&
         typeof i.page === 'object' &&
         !Array.isArray(i.page) &&
         pyIntAt(i.page, 'docx'),
-      `${i.id}: page.docx`,
+      `${required(i, 'id')}: page.docx`,
     );
     if (pyTruth(required(i, 'hasEstimate'))) {
       required(i, 'effectMln');
@@ -549,14 +592,14 @@ export function measures(ctx: Context): Check {
         Object.keys(i.effectMln).every((y) => ['2026', '2027', '2028'].includes(y)) &&
           pyTruth(i.effectMln) &&
           Object.values(i.effectMln).every(isnum),
-        `${i.id}: effectMln`,
+        `${required(i, 'id')}: effectMln`,
       );
       if (i.tab === 'short')
-        c.ok(Object.hasOwn(m.estimateKinds, i.estimateKind), `${i.id}: estimateKind`);
+        c.ok(Object.hasOwn(m.estimateKinds, i.estimateKind), `${required(i, 'id')}: estimateKind`);
     } else
       c.ok(
         !('effectMln' in i) && !('balanceEffectMln' in i),
-        `${i.id}: no estimate, so no numbers`,
+        `${required(i, 'id')}: no estimate, so no numbers`,
       );
     if ('balanceEffectMln' in i) {
       const sign = required(i, 'kind') === 'revenue' ? 1 : -1;
@@ -571,16 +614,16 @@ export function measures(ctx: Context): Check {
                 }),
               ) < 1e-9,
           ),
-        `${i.id}: balanceEffectMln must be +effect (revenue) or -effect (expenditure)`,
+        `${required(i, 'id')}: balanceEffectMln must be +effect (revenue) or -effect (expenditure)`,
       );
     }
     for (const rid of i.related ?? [])
-      c.ok(Object.hasOwn(by, rid), `${i.id}: related ${rid} does not exist`);
+      c.ok(Object.hasOwn(by, rid), `${required(i, 'id')}: related ${rid} does not exist`);
     if ('from' in i)
       c.ok(
         typeof i.from === 'string' &&
           /^\p{Decimal_Number}{4}-\p{Decimal_Number}{2}-\p{Decimal_Number}{2}$/u.test(i.from),
-        `${i.id}: from ${pyReprAt(i, 'from')}`,
+        `${required(i, 'id')}: from ${pyReprAt(i, 'from')}`,
       );
   }
   const grp = byId(m.groups) as Record<string, any>,
@@ -607,7 +650,7 @@ export function measures(ctx: Context): Check {
     }
   }
   c.ok(
-    same(seen.sort(), short.map((i: any) => i.id).sort()),
+    same(seen.sort(), short.map((i: any) => required(i, 'id')).sort()),
     'groups must cover every short-term measure exactly once',
   );
   c.near(
@@ -638,7 +681,7 @@ export function measures(ctx: Context): Check {
   ] as const) {
     const its = disc.filter((i: any) => i.table === tab);
     c.ok(
-      its.every((i: any) => i.kind === kind) && its.length === cnt.discretionary[kind],
+      its.every((i: any) => required(i, 'kind') === kind) && its.length === cnt.discretionary[kind],
       `${tab}: items`,
     );
     const sums = [];
@@ -674,7 +717,11 @@ export function measures(ctx: Context): Check {
     c,
     t.gdpShare2026,
     'revenue',
-    () => divide(100 * tt['II-8'], gdp),
+    () =>
+      percentage(
+        () => numeric(tt, 'II-8'),
+        () => numeric(o.gdp.mlnPrecise, 2),
+      ),
     0.0051,
     'gdpShare2026 revenue',
     sourceTypeAt(t, 'gdpShare2026'),
@@ -683,7 +730,11 @@ export function measures(ctx: Context): Check {
     c,
     t.gdpShare2026,
     'expenditure',
-    () => divide(100 * tt['II-9'], gdp),
+    () =>
+      percentage(
+        () => numeric(tt, 'II-9'),
+        () => numeric(o.gdp.mlnPrecise, 2),
+      ),
     0.0051,
     'gdpShare2026 expenditure',
     sourceTypeAt(t, 'gdpShare2026'),
@@ -723,7 +774,7 @@ export function expenditure(ctx: Context): Check {
   const items = f.items,
     tot = f.totalMln;
   c.ok(
-    items.length === 9 && new Set(items.map((i: any) => i.id)).size === 9,
+    items.length === 9 && new Set(items.map((i: any) => required(i, 'id'))).size === 9,
     'functions: 9 unique items',
   );
   for (let k = 0; k < 4; k++) {
@@ -741,7 +792,11 @@ export function expenditure(ctx: Context): Check {
       c,
       f.totalPctGdp,
       k,
-      () => divide(100 * tot[k], gdp[k + 1]),
+      () =>
+        percentage(
+          () => numeric(tot, k),
+          () => numeric(gdp, k + 1),
+        ),
       0.0051,
       `functions: totalPctGdp ${2025 + k}`,
       sourceTypeAt(f, 'totalPctGdp'),
@@ -775,7 +830,11 @@ export function expenditure(ctx: Context): Check {
         c,
         it.share,
         k,
-        () => divide(100 * it.mln[k], tot[k]),
+        () =>
+          percentage(
+            () => numeric(required(it, 'mln'), k),
+            () => numeric(tot, k),
+          ),
         0.0061,
         `functions ${it.id} share ${2025 + k}`,
         sourceTypeAt(it, 'share'),
@@ -785,7 +844,11 @@ export function expenditure(ctx: Context): Check {
       c,
       it,
       'yoy2026Pct',
-      () => 100 * (divide(it.mln[1], it.mln[0]) - 1),
+      () =>
+        growth(
+          () => numeric(required(it, 'mln'), 1),
+          () => numeric(it.mln, 0),
+        ),
       0.0501,
       `functions ${it.id} yoy2026Pct`,
     );
@@ -798,11 +861,16 @@ export function expenditure(ctx: Context): Check {
           `functions ${it.id}: parts vs item, ${2025 + k}`,
         );
   }
-  const rc = f.reconcile;
+  const rc = required<any>(f, 'reconcile');
   for (let k = 0; k < 4; k++)
     c.ok(
-      gaps[k]! <= rc.printedPctGdpMaxGap[k] + 0.006,
-      `functions: printed % of GDP gap ${fixed(gaps[k]!, 3)} in ${2025 + k} exceeds the declared ${rc.printedPctGdpMaxGap[k]}`,
+      pyLessEqual(
+        gaps[k]!,
+        pyAdd(numeric(required(rc, 'printedPctGdpMaxGap'), k), floating(0.006)),
+        'float',
+        'float',
+      ),
+      `functions: printed % of GDP gap ${fixed(gaps[k]!, 3)} in ${2025 + k} exceeds the declared ${displayAt(rc.printedPctGdpMaxGap, k)}`,
     );
   const ec = byId(required<any>(e, 'economic').rows) as Record<string, any>;
   for (let k = 0; k < 4; k++) {
@@ -826,7 +894,8 @@ export function expenditure(ctx: Context): Check {
       c,
       rc.diffMln,
       k,
-      () => roundedOne(tot[k] - rc.annex3ExpenditureMln[k]),
+      () =>
+        roundedOne(pySubtract(numeric(tot, k), numeric(required(rc, 'annex3ExpenditureMln'), k))),
       0.0501,
       `reconcile: diffMln ${2025 + k}`,
       sourceTypeAt(rc, 'diffMln'),
@@ -841,13 +910,16 @@ export function expenditure(ctx: Context): Check {
     pdfTotal = [...tot];
   c.ok(vers.length === 7, `functions.versions: ${vers.length} rows, expected 7`);
   for (const v of vers) {
-    const it = by[v.id],
+    const it = by[required<string>(v, 'id')],
       pub = 'part' in v ? it.parts.filter((p: any) => p.name === v.part)[0].mln : it.mln;
     c.ok(
       same(v.docx, pub),
-      `functions.versions ${v.id} ${v.part ?? ''}: the published numbers must be the .docx ones`,
+      `functions.versions ${required<string>(v, 'id')} ${v.part ?? ''}: the published numbers must be the .docx ones`,
     );
-    c.ok(v.pdf[0] === v.docx[0], `functions.versions ${v.id}: 2025 must be equal`);
+    c.ok(
+      v.pdf[0] === v.docx[0],
+      `functions.versions ${required<string>(v, 'id')}: 2025 must be equal`,
+    );
     if (!('part' in v))
       for (let k = 0; k < 4; k++)
         pdfTotal[k] = pyAddAssign(numeric(pdfTotal, k), {
@@ -871,7 +943,7 @@ export function expenditure(ctx: Context): Check {
   const z = e.economic,
     rows = z.rows;
   c.ok(
-    same(z.years, o.years) && same(z.vintage, o.vintage),
+    same(required(z, 'years'), o.years) && same(z.vintage, o.vintage),
     'economic: years/vintage must equal outlook',
   );
   c.ok(
@@ -937,9 +1009,12 @@ export function expenditure(ctx: Context): Check {
     cit.every((x: any) => (x.kfpFunctions ?? []).every((id: string) => Object.hasOwn(by, id))),
     'cofog: kfpFunctions must be function ids',
   );
-  const implied = divide(100 * cf.total.mln.at(-1), cf.total.pctGdp.at(-1));
+  const implied = percentage(
+    () => numeric(cf.total.mln, cf.total.mln.length - 1),
+    () => numeric(cf.total.pctGdp, cf.total.pctGdp.length - 1),
+  );
   c.ok(
-    Math.abs(divide(implied, gdp[0]) - 1) < 0.003,
+    Math.abs(pyDivide(floating(implied), numeric(gdp, 0)) - 1) < 0.003,
     `cofog: the GDP implied by the 2024 percentages (${fmt(implied, 0)}) differs from Annex 3's 2024 GDP`,
   );
   const pc = required<any>(e, 'perCapita');

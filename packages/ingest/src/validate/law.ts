@@ -392,7 +392,8 @@ function changes(c: Check, law: any, artRows: Map<string, any>) {
         x.notes.every((v: any) => typeof v === 'string' && !!pyStrip(v)),
       `${w}: notes`,
     );
-    for (const [k, node] of Object.entries(x.headline)) dd(c, node, `${w} headline ${k}`);
+    for (const [k, node] of Object.entries(required<Record<string, any>>(x, 'headline')))
+      dd(c, node, `${w} headline ${k}`);
     for (const key of ['areas', 'bodies', 'commitments'])
       for (const [i, node] of (x[key] ?? []).entries()) {
         c.ok(isnum(node.bill) && isnum(node.law), `${w} ${key}[${i}]: both sides must be numbers`);
@@ -771,7 +772,7 @@ export function law(ctx: Context): Check {
   c.ok(
     m.id === 'D10+D11' &&
       m.status === 'real' &&
-      m.unit === 'хил. €' &&
+      required(m, 'unit') === 'хил. €' &&
       same(m.pending, ['P07']) &&
       same(data.pending, ['P07']),
     'meta id/status/unit/pending',
@@ -779,7 +780,9 @@ export function law(ctx: Context): Check {
   c.ok(iso(m.asOf) && m.asOf <= ctx.buildDate, `meta.asOf ${m.asOf}`);
   const v = data.versions;
   c.ok(
-    v.bill.date === '2026-07-01' && v.law.date === '2026-07-24' && v.bill.ref === '52-602-01-19',
+    required(v.bill, 'date') === '2026-07-01' &&
+      v.law.date === '2026-07-24' &&
+      v.bill.ref === '52-602-01-19',
     'versions dates/ref',
   );
   c.ok(

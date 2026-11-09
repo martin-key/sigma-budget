@@ -139,6 +139,22 @@ export function divide(a: number, b: number): number {
 function operandType(operand: PythonNumber): string {
   return typeof operand.value === 'number' ? operand.kind : pythonType(operand.value);
 }
+export function pyAdd(a: PythonNumber, b: PythonNumber): number {
+  if (typeof a.value !== 'number' || typeof b.value !== 'number') {
+    const left = operandType(a),
+      right = operandType(b);
+    if (left === 'str' || left === 'list')
+      throw new PythonError(
+        'TypeError',
+        `can only concatenate ${left} (not "${right}") to ${left}`,
+      );
+    throw new PythonError(
+      'TypeError',
+      `unsupported operand type(s) for +: '${left}' and '${right}'`,
+    );
+  }
+  return a.value + b.value;
+}
 export function pyMultiply(a: PythonNumber, b: PythonNumber): number {
   if (typeof a.value !== 'number' || typeof b.value !== 'number') {
     const left = operandType(a),

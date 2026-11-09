@@ -322,9 +322,9 @@ export function budgets(ctx: Context): Check {
     );
     if (ch != null) {
       c.ok(
-        ['law', 'program-budget'].includes(ch.basis) &&
-          (ch.basis === 'program-budget') === (pb != null),
-        `${w}: change.basis ${ch.basis}`,
+        ['law', 'program-budget'].includes(required(ch, 'basis')) &&
+          (required(ch, 'basis') === 'program-budget') === (pb != null),
+        `${w}: change.basis ${disp(ch, 'basis')}`,
       );
       const baseHolder = pyTruth(pb) && required(ch, 'basis') === 'program-budget' ? pb : x;
       const baseKey = baseHolder === pb ? 'prbKhil' : 'expKhil';
@@ -415,11 +415,11 @@ export function budgets(ctx: Context): Check {
         near(
           c,
           pb.diffKhil,
-          pb.lawKhil - pb.prbKhil,
+          pySubtract(n(pb, 'lawKhil'), n(pb, 'prbKhil')),
           TOL,
           `${w}: programBudgetVsLaw.diffKhil = law - program budget`,
           disp(pb, 'diffKhil'),
-          pyfloat(pb.lawKhil - pb.prbKhil),
+          pyfloat(pySubtract(n(pb, 'lawKhil'), n(pb, 'prbKhil'))),
         );
         near(
           c,
@@ -431,7 +431,10 @@ export function budgets(ctx: Context): Check {
           disp(b.bill, 'exp'),
         );
         c.ok(
-          pyEqual(pb.matchesBill, Math.abs(pb.prbKhil - pb.billKhil) <= 0.05),
+          pyEqual(
+            pb.matchesBill,
+            Math.abs(pySubtract(n(pb, 'prbKhil'), n(pb, 'billKhil'))) <= 0.05,
+          ),
           `${w}: programBudgetVsLaw.matchesBill`,
         );
         c.ok(Math.abs(pb.diffKhil) > 0.05, `${w}: a 'differs' tier needs a difference`);
@@ -500,7 +503,10 @@ export function budgets(ctx: Context): Check {
     `programTotals ${pyRepr(pt)} vs tiers ${pyRepr(tiers)}`,
   );
   c.ok(
-    pt.policies === polTotal && polTotal === 82 && pt.programs === progTotal && progTotal === 190,
+    required(pt, 'policies') === polTotal &&
+      polTotal === 82 &&
+      pt.programs === progTotal &&
+      progTotal === 190,
     `programTotals policies/programs ${pyReprAt(pt, 'policies')}/${pyReprAt(pt, 'programs')} vs ${polTotal}/${progTotal}`,
   );
   c.ok(
@@ -690,7 +696,7 @@ function checkFile(c: Check, ctx: Context, item: any, d: any): Row[] {
   if (pyTruth(t26)) {
     near(
       c,
-      ck.prbTotal2026,
+      required(ck, 'prbTotal2026'),
       t26[1],
       TOL,
       `${w}: check.prbTotal2026 = total 2026 (budget column)`,
@@ -706,7 +712,7 @@ function checkFile(c: Check, ctx: Context, item: any, d: any): Row[] {
       disp(ck, 'zdbExp'),
       disp(item, 'expKhil'),
     );
-    const sameLaw = Math.abs(ck.prbTotal2026 - ck.zdbExp) <= 0.05;
+    const sameLaw = Math.abs(pySubtract(n(ck, 'prbTotal2026'), n(ck, 'zdbExp'))) <= 0.05;
     c.ok(
       required(ck, 'matchesLaw') === sameLaw && sameLaw === (d.tier === 'validated'),
       `${w}: matchesLaw ${disp(ck, 'matchesLaw')} tier ${d.tier}`,
@@ -719,11 +725,11 @@ function checkFile(c: Check, ctx: Context, item: any, d: any): Row[] {
       near(
         c,
         ck.diffKhil,
-        ck.zdbExp - ck.prbTotal2026,
+        pySubtract(n(ck, 'zdbExp'), n(ck, 'prbTotal2026')),
         TOL,
         `${w}: diffKhil = law - program budget`,
         disp(ck, 'diffKhil'),
-        pyfloat(ck.zdbExp - ck.prbTotal2026),
+        pyfloat(pySubtract(n(ck, 'zdbExp'), n(ck, 'prbTotal2026'))),
       );
   }
   const p = item.programs,
@@ -804,7 +810,7 @@ export function programs(ctx: Context): Check {
     pm.id === 'D09' &&
       pm.status === 'real' &&
       same(sorted(pm.source), ['prb', 'zdb']) &&
-      pm.unit === 'хил. €' &&
+      required(pm, 'unit') === 'хил. €' &&
       iso(pm.asOf),
     'programs.json meta',
   );

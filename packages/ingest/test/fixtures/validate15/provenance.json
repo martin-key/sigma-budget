@@ -70,8 +70,8 @@
     "programme-pdf": "validate05 programme fixture inputs/pdf-evidence.json, independently extracted from pinned programme PDFs",
     "parliament": "validate04 law fixture inputs/parliament.json, captured parliamentary activity"
   },
-  "scenariosSha256": "737cb4cb44acabb388711d3111b7d0772c61ceb6fffc5cd0dbc292bbdf2ee0d7",
-  "oracleSha256": "d2a43779590ac41a2251b2f831717f4fcddf2868de2a081bd1a5c93ee9a83b2d",
+  "scenariosSha256": "ae8d9e241d7e38c99252311a60fd0cf9f73b49c91bcd57a6c3bf4c86c24ca77c",
+  "oracleSha256": "61f8010f16c1f1cb04fffa48b078e5879baa2a5bc8e0fc28bdff91ea1c6329ff",
   "sumCasesSha256": "fbc3b13f5a306614c9a2d0a1788c1729646a5113e7a46e20d383e82fff15e4d3",
   "sumOracleSha256": "e21d041151c7f2e31a455c80ee4869e4c38f685570d215bfbc825c51e6163aed"
 }
