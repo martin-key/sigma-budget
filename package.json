@@ -17,7 +17,8 @@
     "validate:wave14-live": "pnpm --filter @sigma-budget/ingest... build && node packages/ingest/dist/validate/cli.js --live --report tmp/ts-migration/candidates/14/live.json",
     "dbp-gva:compare-live": "pnpm --filter @sigma-budget/etl... build && pnpm exec budget-ts build --inputs packages/ingest/test/fixtures/dbp-gva --out tmp/ts-migration/candidates/10 --scope dbp2027,gva-sectors --build-date 2026-11-08 && pnpm exec budget-ts parity --registry packages/ingest/test/fixtures/dbp-gva/datasets.yaml --oracle data/release --candidate tmp/ts-migration/candidates/10/data --scope dbp2027,gva-sectors --policy packages/ingest/test/fixtures/dbp-gva/policy.json --report tmp/ts-migration/candidates/10/live-comparison.json",
     "validate:wave15": "pnpm --filter @sigma-budget/ingest... build && node packages/ingest/dist/validate/cli15.js",
-    "validate:wave15-live": "pnpm --filter @sigma-budget/ingest... build && node packages/ingest/dist/validate/cli15.js --live --report tmp/ts-migration/candidates/15/live.json"
+    "validate:wave15-live": "pnpm --filter @sigma-budget/ingest... build && node packages/ingest/dist/validate/cli15.js --live --report tmp/ts-migration/candidates/15/live.json",
+    "aggregation:compare-live": "pnpm --filter @sigma-budget/etl... build && pnpm exec budget-ts build --inputs packages/ingest/test/fixtures/aggregation --out tmp/ts-migration/candidates/11 --scope core,feed,feed-rss,search-index --build-date 2026-11-08 && pnpm exec budget-ts parity --registry packages/ingest/test/fixtures/aggregation/metadata/data/datasets.yaml --oracle data/release --candidate tmp/ts-migration/candidates/11/data --scope core,feed,feed-rss,search-index --policy packages/ingest/test/fixtures/aggregation/policy.json --report tmp/ts-migration/candidates/11/live-parity.json"
   },
   "packageManager": "pnpm@10.33.0",
   "engines": {

@@ -17,6 +17,7 @@ afterEach(() => {
 
 it.each([
   'components,rates',
+  'core,feed,feed-rss,search-index',
   'glossary,guide',
   'ministries,ministries-programs,programs',
   'outlook,revenue,expenditure,measures',

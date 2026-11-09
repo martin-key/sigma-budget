@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+<title>Бюджет на светло: какво е ново</title>
+<link>https://budget-na-svetlo.example/</link>
+<description>Събития по данните за държавния бюджет: месечни отчети, законодателен път, ставки и нови набори. Прототип с примерни данни, където е отбелязано.</description>
+<language>bg</language>
+<lastBuildDate>Sun, 08 Nov 2026 12:00:00 +0000</lastBuildDate>
+<atom:link href="https://budget-na-svetlo.example/data/feed.xml" rel="self" type="application/rss+xml"/>
+<item>
+<title>Проектът за бюджет 2027 и АСБП 2027–2029 са публикувани от МФ</title>
+<link>https://budget-na-svetlo.example/#/byudzhet-2027</link>
+<guid isPermaLink="false">mf-budget-2027</guid>
+<pubDate>Sat, 07 Nov 2026 12:00:00 +0000</pubDate>
+<category>Нови данни</category>
+<description>Налични са проектът за държавния бюджет за 2027 г. и средносрочната рамка за 2027–2029 г.: ведомствени бюджети, общини и предложени граници на дълга. Проектът не е приет закон.</description>
+</item>
+<item>
+<title>Евростат: дългът в края на второто тримесечие на 2026 г.</title>
+<link>https://budget-na-svetlo.example/#/dalg?obhvat=maastricht&amp;per=2025.report&amp;to=s17-b-quarterly</link>
+<guid isPermaLink="false">eurostat-gov_10q_ggdebt-2026-10-23</guid>
+<pubDate>Fri, 23 Oct 2026 12:00:00 +0000</pubDate>
+<category>Евростат</category>
+<description>Дългът по Маастрихт е 35,40 млрд. € (28,7% от БВП); данните са предварителни.</description>
+</item>
+<item>
+<title>Евростат: дългът на държавното управление за 2025 г.</title>
+<link>https://budget-na-svetlo.example/#/dalg?obhvat=maastricht&amp;per=2025.report&amp;to=s17-b-maastricht</link>
+<guid isPermaLink="false">eurostat-gov_10dd_edpt1-2026-10-22</guid>
+<pubDate>Thu, 22 Oct 2026 12:00:00 +0000</pubDate>
+<category>Евростат</category>
+<description>Дългът по Маастрихт е 34,80 млрд. € (29,9% от БВП). Това е друг обхват от държавния дълг в закона.</description>
+</item>
+<item>
+<title>Евростат: населението на 1 януари 2026 г.</title>
+<link>https://budget-na-svetlo.example/#/pari</link>
+<guid isPermaLink="false">eurostat-tps00001-2026-09-30</guid>
+<pubDate>Wed, 30 Sep 2026 12:00:00 +0000</pubDate>
+<category>Евростат</category>
+<description>Населението на България е 6 423 207 души. Ползваме го за показателите „на човек“.</description>
+</item>
+<item>
+<title>Месечен отчет на КФП към края на септември 2026 г.</title>
+<link>https://budget-na-svetlo.example/#/izpalnenie?mesec=9</link>
+<guid isPermaLink="false">kfp-2026-09</guid>
+<pubDate>Wed, 30 Sep 2026 12:00:00 +0000</pubDate>
+<category>Месечен отчет</category>
+<description>От началото на годината приходите са 33,90 млрд. €, разходите — 37,57 млрд. €, дефицитът е 3,67 млрд. €. Приходите са с 11,0% повече от същия период на 2025 г. Това е 68,3% от годишния план за приходите. Програма по ЗДБРБ 2026, МФ, приложение 1.</description>
+</item>
+<item>
+<title>СЕБРА: дневни обобщения на плащанията за август</title>
+<link>https://budget-na-svetlo.example/#/plashtania</link>
+<guid isPermaLink="false">sebra-2026-09-23</guid>
+<pubDate>Wed, 23 Sep 2026 12:00:00 +0000</pubDate>
+<category>Нови данни</category>
+<description>Страницата на МИДТ показва 3 дневни файла (27.08, 28.08 и 31.08): общо 69 плащания на стойност 830 688,13 €. Файловете не съдържат получателите и не са сума за месеца.</description>
+</item>
+<item>
+<title>Евростат: разходите по функции (COFOG) са допълнени до 2024 г.</title>
+<link>https://budget-na-svetlo.example/#/razhodi?per=2024.report</link>
+<guid isPermaLink="false">eurostat-gov_10a_exp-2026-09-17</guid>
+<pubDate>Thu, 17 Sep 2026 12:00:00 +0000</pubDate>
+<category>Евростат</category>
+<description>Разходите на сектор „Държавно управление“ за 2024 г. са 41,06 млрд. € (39,2% от БВП). Разрезът по функции на Евростат не съвпада с функциите на КФП.</description>
+</item>
+<item>
+<title>Месечен отчет на КФП към края на август 2026 г.</title>
+<link>https://budget-na-svetlo.example/#/izpalnenie?mesec=8</link>
+<guid isPermaLink="false">kfp-2026-08</guid>
+<pubDate>Mon, 31 Aug 2026 12:00:00 +0000</pubDate>
+<category>Месечен отчет</category>
+<description>От началото на годината приходите са 30,12 млрд. €, разходите — 33,19 млрд. €, дефицитът е 3,08 млрд. €. Приходите са с 11,9% повече от същия период на 2025 г.</description>
+</item>
+<item>
+<title>НАП публикува таблицата с осигурителните ставки</title>
+<link>https://budget-na-svetlo.example/#/danaci</link>
+<guid isPermaLink="false">rates-2026-08-12</guid>
+<pubDate>Thu, 13 Aug 2026 12:00:00 +0000</pubDate>
+<category>Данъци и осигуровки</category>
+<description>Писмо ВК-30-10237 от 13 август 2026 г. подрежда осигурителните ставки в 19 категории осигурени лица. За държавните служители (категория 5) от 1 август 6,5% от осигурителния доход се внася от самия служител (дотогава 0,0%), а работодателят внася 25,8% вместо 32,3%.</description>
+</item>
+<item>
+<title>Нови граници на осигурителния доход от 1 август</title>
+<link>https://budget-na-svetlo.example/#/danaci</link>
+<guid isPermaLink="false">rates-2026-08-01</guid>
+<pubDate>Sat, 01 Aug 2026 12:00:00 +0000</pubDate>
+<category>Данъци и осигуровки</category>
+<description>Максималният месечен осигурителен доход става 2 300 € (дотогава 2 111,64 €). Минималният за самоосигуряващите се е 620,20 € (дотогава 550,66 €). Минималният доход по икономически дейности и групи професии се променя във всички 744 попълнени клетки на таблицата.</description>
+</item>
+<item>
+<title>ДВ бр. 69: Закон за държавния бюджет на Република България за 2026 г.</title>
+<link>https://budget-na-svetlo.example/#/zakon</link>
+<guid isPermaLink="false">law-2026-07-31-gazette</guid>
+<pubDate>Fri, 31 Jul 2026 12:00:00 +0000</pubDate>
+<category>Законодателен път</category>
+<description>Указ № 271, издаден на 29 юли 2026 г. Законът влиза в сила от 1 януари 2026 г., с изключения (§ 48).</description>
+</item>
+<item>
+<title>Месечен отчет на КФП към края на юли 2026 г.</title>
+<link>https://budget-na-svetlo.example/#/izpalnenie?mesec=7</link>
+<guid isPermaLink="false">kfp-2026-07</guid>
+<pubDate>Fri, 31 Jul 2026 12:00:00 +0000</pubDate>
+<category>Месечен отчет</category>
+<description>От началото на годината приходите са 26,35 млрд. €, разходите — 28,55 млрд. €, дефицитът е 2,20 млрд. €. Приходите са с 11,2% повече от същия период на 2025 г.</description>
+</item>
+<item>
+<title>ДВ бр. 68: Закон за бюджета на ДОО и Закон за бюджета на НЗОК</title>
+<link>https://budget-na-svetlo.example/#/zakon</link>
+<guid isPermaLink="false">law-2026-07-28-gazette</guid>
+<pubDate>Tue, 28 Jul 2026 12:00:00 +0000</pubDate>
+<category>Законодателен път</category>
+<description>Указ № 269 и № 270, издадени на 24 юли 2026 г.</description>
+</item>
+<item>
+<title>Законът за държавния бюджет е приет</title>
+<link>https://budget-na-svetlo.example/#/zakon</link>
+<guid isPermaLink="false">law-2026-07-24-adopted</guid>
+<pubDate>Fri, 24 Jul 2026 12:00:00 +0000</pubDate>
+<category>Гласуване в залата</category>
+<description>Приет на второ гласуване.</description>
+</item>
+<item>
+<title>Второ гласуване на законопроекта за държавния бюджет</title>
+<link>https://budget-na-svetlo.example/#/zakon</link>
+<guid isPermaLink="false">law-2026-07-23-plenary-2</guid>
+<pubDate>Thu, 23 Jul 2026 12:00:00 +0000</pubDate>
+<category>Гласуване в залата</category>
+<description></description>
+</item>
+<item>
+<title>Приети са законите за бюджета на ДОО и на НЗОК</title>
+<link>https://budget-na-svetlo.example/#/zakon</link>
+<guid isPermaLink="false">law-2026-07-22-adopted</guid>
+<pubDate>Wed, 22 Jul 2026 12:00:00 +0000</pubDate>
+<category>Гласуване в залата</category>
+<description>Второ гласуване в залата.</description>
+</item>
+<item>
+<title>Комисията по бюджет и финанси приема доклад за второ гласуване</title>
+<link>https://budget-na-svetlo.example/#/zakon</link>
+<guid isPermaLink="false">law-2026-07-22-committee-2</guid>
+<pubDate>Wed, 22 Jul 2026 12:00:00 +0000</pubDate>
+<category>Законодателен път</category>
+<description></description>
+</item>
+<item>
+<title>Предложения между първо и второ гласуване</title>
+<link>https://budget-na-svetlo.example/#/zakon</link>
+<guid isPermaLink="false">law-2026-07-16-proposals</guid>
+<pubDate>Thu, 16 Jul 2026 12:00:00 +0000</pubDate>
+<category>Законодателен път</category>
+<description>69 предложения: 6 на 16 юли, 29 на 17 юли и 34 на 20 юли 2026 г.</description>
+</item>
+<item>
+<title>Първо гласуване на законопроекта за държавния бюджет в залата</title>
+<link>https://budget-na-svetlo.example/#/zakon</link>
+<guid isPermaLink="false">law-2026-07-15-plenary-1</guid>
+<pubDate>Wed, 15 Jul 2026 12:00:00 +0000</pubDate>
+<category>Гласуване в залата</category>
+<description>Законопроектът е приет на първо гласуване.</description>
+</item>
+<item>
+<title>Първо гласуване на законопроектите за бюджета на ДОО и на НЗОК</title>
+<link>https://budget-na-svetlo.example/#/zakon</link>
+<guid isPermaLink="false">law-2026-07-10-plenary-1</guid>
+<pubDate>Fri, 10 Jul 2026 12:00:00 +0000</pubDate>
+<category>Гласуване в залата</category>
+<description>И двата законопроекта са приети.</description>
+</item>
+<item>
+<title>Комисиите разглеждат законопроекта за първо гласуване</title>
+<link>https://budget-na-svetlo.example/#/zakon</link>
+<guid isPermaLink="false">law-2026-07-07-committees</guid>
+<pubDate>Tue, 07 Jul 2026 12:00:00 +0000</pubDate>
+<category>Законодателен път</category>
+<description>Законопроектът е разпределен на 24 комисии; водеща е Комисия по бюджет и финанси. 22 комисии внасят доклад за първо гласуване. В комисиите постъпват още 70 становища.</description>
+</item>
+<item>
+<title>Законопроектът за държавния бюджет е внесен в Народното събрание</title>
+<link>https://budget-na-svetlo.example/#/zakon</link>
+<guid isPermaLink="false">law-2026-07-01-submitted</guid>
+<pubDate>Wed, 01 Jul 2026 12:00:00 +0000</pubDate>
+<category>Законодателен път</category>
+<description>Внесен е заедно със законопроектите за бюджета на ДОО (№ 52-602-01-18) и на НЗОК (№ 52-602-01-17).</description>
+</item>
+<item>
+<title>Месечен отчет на КФП към края на юни 2026 г.</title>
+<link>https://budget-na-svetlo.example/#/izpalnenie?mesec=6</link>
+<guid isPermaLink="false">kfp-2026-06</guid>
+<pubDate>Tue, 30 Jun 2026 12:00:00 +0000</pubDate>
+<category>Месечен отчет</category>
+<description>От началото на годината приходите са 21,57 млрд. €, разходите — 23,99 млрд. €, дефицитът е 2,42 млрд. €. Приходите са с 8,1% повече от същия период на 2025 г.</description>
+</item>
+<item>
+<title>Месечен отчет на КФП към края на май 2026 г.</title>
+<link>https://budget-na-svetlo.example/#/izpalnenie?mesec=5</link>
+<guid isPermaLink="false">kfp-2026-05</guid>
+<pubDate>Sun, 31 May 2026 12:00:00 +0000</pubDate>
+<category>Месечен отчет</category>
+<description>От началото на годината приходите са 17,36 млрд. €, разходите — 19,86 млрд. €, дефицитът е 2,51 млрд. €. Приходите са с 7,7% повече от същия период на 2025 г.</description>
+</item>
+<item>
+<title>Месечен отчет на КФП към края на април 2026 г.</title>
+<link>https://budget-na-svetlo.example/#/izpalnenie?mesec=4</link>
+<guid isPermaLink="false">kfp-2026-04</guid>
+<pubDate>Thu, 30 Apr 2026 12:00:00 +0000</pubDate>
+<category>Месечен отчет</category>
+<description>От началото на годината приходите са 14,07 млрд. €, разходите — 15,83 млрд. €, дефицитът е 1,76 млрд. €. Приходите са с 12,4% повече от същия период на 2025 г.</description>
+</item>
+<item>
+<title>Месечен отчет на КФП към края на март 2026 г.</title>
+<link>https://budget-na-svetlo.example/#/izpalnenie?mesec=3</link>
+<guid isPermaLink="false">kfp-2026-03</guid>
+<pubDate>Tue, 31 Mar 2026 12:00:00 +0000</pubDate>
+<category>Месечен отчет</category>
+<description>От началото на годината приходите са 10,04 млрд. €, разходите — 11,57 млрд. €, дефицитът е 1,53 млрд. €. Приходите са с 16,6% повече от същия период на 2025 г.</description>
+</item>
+<item>
+<title>Месечен отчет на КФП към края на февруари 2026 г.</title>
+<link>https://budget-na-svetlo.example/#/izpalnenie?mesec=2</link>
+<guid isPermaLink="false">kfp-2026-02</guid>
+<pubDate>Sat, 28 Feb 2026 12:00:00 +0000</pubDate>
+<category>Месечен отчет</category>
+<description>От началото на годината приходите са 6,84 млрд. €, разходите — 7,41 млрд. €, дефицитът е 569,1 млн. €. Приходите са с 21,7% повече от същия период на 2025 г.</description>
+</item>
+<item>
+<title>Месечен отчет на КФП към края на януари 2026 г.</title>
+<link>https://budget-na-svetlo.example/#/izpalnenie?mesec=1</link>
+<guid isPermaLink="false">kfp-2026-01</guid>
+<pubDate>Sat, 31 Jan 2026 12:00:00 +0000</pubDate>
+<category>Месечен отчет</category>
+<description>От началото на годината приходите са 3,61 млрд. €, разходите — 3,39 млрд. €, излишъкът е 212,1 млн. €. Приходите са с 11,4% повече от същия период на 2025 г.</description>
+</item>
+</channel>
+</rss>
