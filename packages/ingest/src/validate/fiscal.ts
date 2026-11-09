@@ -697,10 +697,11 @@ export function measures(ctx: Context): Check {
         `${required(i, 'id')}: balanceEffectMln must be +effect (revenue) or -effect (expenditure)`,
       );
     }
-    for (const rid of pyIterGet(i, 'related'))
+    const related = pyIterGet(i, 'related');
+    for (const [index, rid] of related.entries())
       c.ok(
         pyHas(by, rid),
-        `${required(i, 'id')}: related ${typeof rid === 'string' ? rid : pyRepr(rid)} does not exist`,
+        `${required(i, 'id')}: related ${typeof rid === 'string' ? rid : pyReprAt(related, index)} does not exist`,
       );
     if ('from' in i)
       c.ok(

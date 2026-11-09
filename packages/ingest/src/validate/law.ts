@@ -4,7 +4,14 @@ import { Check, isnum, numbersIn, pyTruth } from './checks.js';
 import { Context } from './context.js';
 import {
   PythonError,
+  PythonTuple,
+  pyTuple,
+  pyTupleAt,
+  pySortedTuples,
   pyGet,
+  pyGetIn,
+  pyAsciiAt,
+  pythonType,
   pyPrefixStringAt,
   pyHas,
   pyDict,
@@ -77,24 +84,26 @@ function near(c: Check, a: any, b: any, tol: number, message: string, ar?: strin
     `${message}: ${ar ?? repr(a)} vs ${br ?? repr(b)} (tolerance ${tol})`,
   );
 }
-function dd(c: Check, node: any, where: string, tol = TOL) {
-  const b = node.bill,
-    l = node.law,
-    d = node.diff;
+function dd(c: Check, node: any, where: string, tol = TOL, nodeType = pythonType(node)) {
+  const b = pyGet(node, 'bill', undefined, nodeType),
+    l = pyGet(node, 'law', undefined, nodeType),
+    d = pyGet(node, 'diff', undefined, nodeType);
   if (isnum(b) && isnum(l))
     return near(c, d, l - b, tol, `${where} diff`, display(node, 'diff'), pyfloat(l - b));
   return c.ok(d == null, `${where}: a diff without both sides`);
 }
-function art1(c: Check, law: any): Map<string, any> {
+function art1(c: Check, law: any): Map<PythonTuple, any> {
   const a = required<any>(law, 'art1'),
     h = required<any>(a, 'headline');
   c.ok(same(Object.keys(h), HEAD), `art1.headline keys ${repr(Object.keys(h))}`);
   for (const k of HEAD) {
     for (const s of ['bill', 'law', 'diff'])
-      c.ok(pyHas(h, k) && isnum(h[k][s]), `art1.headline.${k}.${s} is not a number`);
-    if (pyHas(h, k)) dd(c, h[k], `art1.headline.${k}`);
+      c.ok(pyHas(h, k) && isnum(pyGetIn(h, k, s)), `art1.headline.${k}.${s} is not a number`);
+    if (pyHas(h, k)) dd(c, h[k], `art1.headline.${k}`, TOL, sourceTypeAt(h, k));
   }
-  if (HEAD.every((k) => pyHas(h, k) && ['bill', 'law', 'diff'].every((s) => isnum(h[k][s]))))
+  if (
+    HEAD.every((k) => pyHas(h, k) && ['bill', 'law', 'diff'].every((s) => isnum(pyGetIn(h, k, s))))
+  )
     for (const s of ['bill', 'law', 'diff']) {
       const v: any = Object.fromEntries(HEAD.map((k) => [k, h[k][s]]));
       near(
@@ -133,8 +142,8 @@ function art1(c: Check, law: any): Map<string, any> {
     ),
     'art1 line ids are a1.01.. consecutive',
   );
-  const rows = pyDict<string, any>();
-  const key = (sec: string, no: string) => JSON.stringify([sec, no]);
+  const rows = pyDict<PythonTuple, any>();
+  const key = (sec: string, no: string) => pyTuple(sec, no);
   for (const r of lines) {
     const w = `art1 line ${required<any>(r, 'id')}`;
     c.ok(
@@ -157,7 +166,7 @@ function art1(c: Check, law: any): Map<string, any> {
         required<any>(r, 'no') !== '' &&
         [...required<any>(r, 'no')].every((ch) => ch.codePointAt(0)! < 128) &&
         typeof r.sec === 'string',
-      `${w}: 'no' ${repr(r.no ?? null)} must be plain ASCII`,
+      `${w}: 'no' ${pyHas(r, 'no') ? pyReprAt(r, 'no') : 'None'} must be plain ASCII`,
     );
     if (
       !c.ok(
@@ -171,7 +180,7 @@ function art1(c: Check, law: any): Map<string, any> {
       pyEqual(r.changed, Math.abs(required<any>(r, 'diff')) > 0.05),
       `${w}: changed flag ${display(r, 'changed')} vs diff ${display(r, 'diff')}`,
     );
-    const rk = key(required<any>(r, 'sec'), required<any>(r, 'no'));
+    const rk = pyTupleAt(r, ['sec', 'no']);
     c.ok(!rows.has(rk), `${w}: duplicate row (${pyReprAt(r, 'sec')}, ${pyReprAt(r, 'no')})`);
     rows.set(rk, r);
   }
@@ -402,7 +411,7 @@ function lawBudgets(c: Check, law: any) {
     'law.note must name the 46 budgets and the four that differ',
   );
 }
-function changes(c: Check, law: any, artRows: Map<string, any>) {
+function changes(c: Check, law: any, artRows: Map<PythonTuple, any>) {
   const bs = pyDict<number, any>(
       required<any>(law, 'budgets').map((b: any) => [required<any>(b, 'art'), b]),
     ),
@@ -433,15 +442,17 @@ function changes(c: Check, law: any, artRows: Map<string, any>) {
       `${w}: notes`,
     );
     for (const [k, node] of Object.entries(required<Record<string, any>>(x, 'headline')))
-      dd(c, node, `${w} headline ${k}`);
-    for (const key of ['areas', 'bodies', 'commitments'])
-      for (const [i, node] of pyIterGet(x, key).entries()) {
+      dd(c, node, `${w} headline ${k}`, TOL, sourceTypeAt(required(x, 'headline'), k));
+    for (const key of ['areas', 'bodies', 'commitments']) {
+      const nodes = pyIterGet(x, key);
+      for (const [i, node] of nodes.entries()) {
         c.ok(
-          isnum(pyGet(node, 'bill')) && isnum(pyGet(node, 'law')),
+          isnum(pyGetIn(nodes, i, 'bill')) && isnum(pyGetIn(nodes, i, 'law')),
           `${w} ${key}[${i}]: both sides must be numbers`,
         );
-        dd(c, node, `${w} ${key}[${i}]`);
+        dd(c, node, `${w} ${key}[${i}]`, TOL, sourceTypeAt(nodes, i));
       }
+    }
     const ops: Record<string, number> = { chg: 0, add: 0, del: 0 };
     for (const [i, r] of required<any>(x, 'lines').entries()) {
       const ww = `${w} line ${i} (${r.sec ?? 'None'} ${r.no ?? 'None'})`;
@@ -451,10 +462,7 @@ function changes(c: Check, law: any, artRows: Map<string, any>) {
           !!pyStrip(required<any>(r, 'text')),
         `${ww}: op/text`,
       );
-      c.ok(
-        [...(required<any>(r, 'no') as string)].every((ch) => ch.codePointAt(0)! < 128),
-        `${ww}: 'no' must be plain ASCII`,
-      );
+      c.ok(pyAsciiAt(r, 'no'), `${ww}: 'no' must be plain ASCII`);
       if (pyHas(ops, required<any>(r, 'op'))) ops[required<any>(r, 'op')]!++;
       c.ok(
         (required<any>(r, 'op') !== 'add' || required<any>(r, 'bill') === null) &&
@@ -492,29 +500,23 @@ function changes(c: Check, law: any, artRows: Map<string, any>) {
             `${w} areas ${s} sum to the expenditure`,
           );
     } else {
-      const marked = pyDict<string, any>(
-        required<any>(x, 'lines').map((r: any) => [
-          JSON.stringify([required<any>(r, 'sec'), required<any>(r, 'no')]),
-          r,
-        ]),
+      const marked = pyDict<PythonTuple, any>(
+        required<any>(x, 'lines').map((r: any) => [pyTupleAt(r, ['sec', 'no']), r]),
       );
       const changed = pyDict([...artRows].filter(([, r]) => pyTruth(r.changed)));
-      const diff = [...pySet([...marked.keys(), ...changed.keys()])]
-        .filter((k) => marked.has(k) !== changed.has(k))
-        .sort()
-        .map((k) => JSON.parse(k));
-      c.ok(
-        diff.length === 0,
-        `art. 1: changed rows differ: [${diff.map((k) => `(${pyReprAt(k, 0)}, ${pyReprAt(k, 1)})`).join(', ')}]`,
+      const diff = pySortedTuples(
+        [...pySet([...marked.keys(), ...changed.keys()])].filter(
+          (k) => marked.has(k) !== changed.has(k),
+        ),
       );
+      c.ok(diff.length === 0, `art. 1: changed rows differ: ${repr(diff)}`);
       for (const [k, r] of marked)
         if (changed.has(k)) {
-          const pair = JSON.parse(k),
-            q = changed.get(k);
+          const q = changed.get(k);
           c.ok(
             required<any>(r, 'bill') === required<any>(q, 'bill') &&
               required<any>(r, 'law') === required<any>(q, 'law'),
-            `art. 1 row (${pyReprAt(pair, 0)}, ${pyReprAt(pair, 1)}) differs from art1.lines`,
+            `art. 1 row ${repr(k)} differs from art1.lines`,
           );
         }
       c.ok(ops.add === 0 && ops.del === 0, 'art. 1 has only changed rows');

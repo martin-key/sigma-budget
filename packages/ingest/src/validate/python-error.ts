@@ -9,6 +9,66 @@ export class PythonError extends Error {
     this.name = name;
   }
 }
+
+/** A real tuple key retains its components and source numeric representations. */
+export class PythonTuple {
+  constructor(
+    readonly items: readonly unknown[],
+    readonly representations: readonly string[],
+    readonly types: readonly string[],
+  ) {
+    Object.freeze(items);
+    Object.freeze(representations);
+    Object.freeze(types);
+    Object.freeze(this);
+  }
+}
+export function pyTuple(...items: unknown[]): PythonTuple {
+  return new PythonTuple(items, items.map(pythonRepr), items.map(pythonType));
+}
+export function pyTupleAt(holder: any, keys: readonly (string | number)[]): PythonTuple {
+  const items = keys.map((key) => pyItem(holder, key));
+  return new PythonTuple(
+    items,
+    keys.map((key) => pyReprAt(holder, key)),
+    keys.map((key) => sourceTypeAt(holder, key)),
+  );
+}
+function hashable(value: unknown): void {
+  if (value instanceof PythonTuple) {
+    for (const item of value.items) hashable(item);
+  } else if (value !== null && typeof value === 'object')
+    throw new PythonError('TypeError', `unhashable type: '${pythonType(value)}'`);
+}
+function tupleCompare(a: PythonTuple, b: PythonTuple): number {
+  for (let i = 0; i < Math.min(a.items.length, b.items.length); i++) {
+    const left = a.items[i],
+      right = b.items[i];
+    if (pyEqual(left, right)) continue;
+    if (
+      (typeof left === 'number' || typeof left === 'boolean') &&
+      (typeof right === 'number' || typeof right === 'boolean')
+    )
+      return Number(left) < Number(right) ? -1 : Number(left) > Number(right) ? 1 : 0;
+    if (typeof left === 'string' && typeof right === 'string') {
+      const l = Array.from(left),
+        r = Array.from(right);
+      for (let j = 0; j < Math.min(l.length, r.length); j++)
+        if (l[j] !== r[j]) return l[j]!.codePointAt(0)! < r[j]!.codePointAt(0)! ? -1 : 1;
+      return l.length - r.length;
+    }
+    if (left instanceof PythonTuple && right instanceof PythonTuple)
+      return tupleCompare(left, right);
+    throw new PythonError(
+      'TypeError',
+      `'<' not supported between instances of '${a.types[i]}' and '${b.types[i]}'`,
+    );
+  }
+  return a.items.length - b.items.length;
+}
+export function pySortedTuples(values: Iterable<PythonTuple>): PythonTuple[] {
+  return [...values].sort(tupleCompare);
+}
 export function required<T>(object: Record<string, T>, key: string): T {
   return pyItem(object, key) as T;
 }
@@ -77,24 +137,48 @@ export function pyItemAt(holder: any, key: string | number, index: string | numb
   return pyItem(value, index, sourceTypeAt(holder, key));
 }
 export function pyHas(mapping: any, key: any): boolean {
-  if (key && typeof key === 'object')
-    throw new PythonError('TypeError', `unhashable type: '${pythonType(key)}'`);
+  hashable(key);
   if (mapping instanceof Map) return mapping.has(key);
   return typeof key === 'string' && Object.hasOwn(mapping, key);
 }
 
 /** Dict.get supplies its default only for an absent key, preserving explicit None. */
-export function pyGet(mapping: any, key: any, fallback: any = undefined): any {
+export function pyGet(
+  mapping: any,
+  key: any,
+  fallback: any = undefined,
+  sourceType = pythonType(mapping),
+): any {
   if (mapping === null || typeof mapping !== 'object' || Array.isArray(mapping))
-    throw new PythonError(
-      'AttributeError',
-      `'${pythonType(mapping)}' object has no attribute 'get'`,
-    );
+    throw new PythonError('AttributeError', `'${sourceType}' object has no attribute 'get'`);
   return pyHas(mapping, key)
     ? mapping instanceof Map
       ? mapping.get(key)
       : mapping[key]
     : fallback;
+}
+
+/** Method errors on an iterated value keep its source integer/float kind. */
+export function pyGetIn(holder: any, key: string | number, field: string): any {
+  return pyGet(pyItem(holder, key), field, undefined, sourceTypeAt(holder, key));
+}
+
+/** The actual all(ord(ch) < 128 ...) operation, including lazy ord failures. */
+export function pyAsciiAt(holder: any, key: string): boolean {
+  const chars = pyIterAt(holder, key);
+  return chars.every((ch, index) => {
+    if (typeof ch !== 'string')
+      throw new PythonError(
+        'TypeError',
+        `ord() expected string of length 1, but ${sourceTypeAt(chars, index)} found`,
+      );
+    if (Array.from(ch).length !== 1)
+      throw new PythonError(
+        'TypeError',
+        `ord() expected a character, but string of length ${Array.from(ch).length} found`,
+      );
+    return ch.codePointAt(0)! < 128;
+  });
 }
 
 export function pyIterGet(mapping: any, key: string): unknown[] {
@@ -108,9 +192,10 @@ export function pyIterGet(mapping: any, key: string): unknown[] {
 class PythonDict<K, V> extends Map<K, V> {
   private readonly representations = new Map<K, string>();
   private storedKey(key: K): K {
-    if (key !== null && typeof key === 'object')
-      throw new PythonError('TypeError', `unhashable type: '${pythonType(key)}'`);
+    hashable(key);
     if (super.has(key)) return key;
+    if (key instanceof PythonTuple)
+      for (const stored of super.keys()) if (pyEqual(key, stored)) return stored;
     const equal = (typeof key === 'boolean' ? Number(key) : Boolean(key)) as K;
     return (typeof key === 'boolean' || key === 0 || key === 1) && super.has(equal) ? equal : key;
   }
@@ -287,6 +372,8 @@ export function floatRepr(value: number): string {
 
 /** Scoped donor repr: nested dictionaries retain input order and numeric token kinds. */
 export function pythonRepr(value: unknown): string {
+  if (value instanceof PythonTuple)
+    return `(${value.representations.join(', ')}${value.items.length === 1 ? ',' : ''})`;
   if (value instanceof Map)
     return `{${[...value].map(([key, item]) => `${value instanceof PythonDict ? value.keyRepr(key) : pythonRepr(key)}: ${pythonRepr(item)}`).join(', ')}}`;
   if (Array.isArray(value)) return `[${value.map((_, i) => pyReprAt(value, i)).join(', ')}]`;
@@ -318,6 +405,13 @@ export function pyStrip(value: string): string {
 /** Python equality treats bools as integers and numeric int/float values alike. */
 export function pyEqual(a: unknown, b: unknown): boolean {
   if (a === b) return true;
+  if (a instanceof PythonTuple || b instanceof PythonTuple)
+    return (
+      a instanceof PythonTuple &&
+      b instanceof PythonTuple &&
+      a.items.length === b.items.length &&
+      a.items.every((v, i) => pyEqual(v, b.items[i]))
+    );
   if (
     (typeof a === 'boolean' || typeof a === 'number') &&
     (typeof b === 'boolean' || typeof b === 'number')
@@ -355,6 +449,7 @@ export function pyIntAt(holder: any, key: string | number): boolean {
 }
 
 export function pythonType(value: unknown): string {
+  if (value instanceof PythonTuple) return 'tuple';
   if (value === null || value === undefined) return 'NoneType';
   if (typeof value === 'boolean') return 'bool';
   if (typeof value === 'number') return Number.isInteger(value) ? 'int' : 'float';
@@ -421,9 +516,10 @@ class PythonSet<T> extends Set<T> {
     for (const value of values) this.add(value);
   }
   override has(value: T): boolean {
-    if (value !== null && typeof value === 'object')
-      throw new PythonError('TypeError', `unhashable type: '${pythonType(value)}'`);
+    hashable(value);
     if (super.has(value)) return true;
+    if (value instanceof PythonTuple)
+      for (const stored of super.values()) if (pyEqual(value, stored)) return true;
     if (typeof value === 'boolean') return super.has(Number(value) as T);
     return (value === 0 || value === 1) && super.has(Boolean(value) as T);
   }
@@ -433,6 +529,8 @@ class PythonSet<T> extends Set<T> {
   }
   override delete(value: T): boolean {
     if (!this.has(value)) return false;
+    if (value instanceof PythonTuple)
+      for (const stored of super.values()) if (pyEqual(value, stored)) return super.delete(stored);
     if (super.delete(value)) return true;
     return super.delete((typeof value === 'boolean' ? Number(value) : Boolean(value)) as T);
   }
