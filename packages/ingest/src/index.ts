@@ -63,3 +63,7 @@ export * from './build/annual-lineage.js';
 export * from './build/budget-2027.js';
 export * from './build/wave13a.js';
 export * from './build/wave13a-fixture.js';
+export * from './validate/kfp.js';
+export * from './validate/kfp-capture.js';
+export * from './validate/kfp-input.js';
+export * from './validate/kfp-runner.js';
