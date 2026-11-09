@@ -59,9 +59,10 @@ function physicalFinder(bill: BillExtraction) {
   return (row: any, path: string, column: number | null): Physical => {
     const { value, text } = valueAt(bill, path);
     if (row.table != null) {
-      const table = bill.tables.find((t: any) => t.id === row.table);
+      const table = bill.tables.find((t: any) => pointer(t, '/id') === row.table);
       if (!table) throw new Error('Missing physical table');
-      if (table.page !== row.page) throw new Error('Physical table page mismatch');
+      const page = pointer(row, '/page');
+      if (table.page !== page) throw new Error('Physical table page mismatch');
       let values = printedValues.get(table.id);
       if (!values) {
         values = new Map();
@@ -76,13 +77,13 @@ function physicalFinder(bill: BillExtraction) {
       }
       const printed = values.get(text);
       if (printed === undefined) throw new Error(`Missing printed numeric evidence: ${path}`);
-      return { table: row.table, page: row.page, printed };
+      return { table: row.table, page, printed };
     }
     const pages = Object.hasOwn(row, 'pages') ? row.pages : [row.page];
     if (!Array.isArray(pages)) throw new Error('Invalid physical pages');
     const identity = Object.hasOwn(row, 'id') ? row.id : Object.hasOwn(row, 'name') ? row.name : '';
     const candidates: Physical[] = [];
-    const selectedTables = bill.tables.filter((table) => pages.includes(table.page));
+    const selectedTables = bill.tables.filter((table) => pages.includes(pointer(table, '/page')));
     for (const table of selectedTables) {
       for (const [rowIndex, raw] of table.rawCells.entries()) {
         if (
@@ -107,8 +108,8 @@ function physicalFinder(bill: BillExtraction) {
             : ordinal === column;
           if (parsed === value && (column === null || selected))
             candidates.push({
-              table: table.id,
-              page: table.page,
+              table: pointer(table, '/id'),
+              page: pointer(table, '/page'),
               printed: cell!,
               rawRow: rowIndex,
               rawColumn: columnIndex,
@@ -141,11 +142,12 @@ function billLeaf(
 ): AnnualCell {
   const physical = findPhysical(row, valuePath, column);
   const match = /\/(?:rows|policiesRows|commitmentRows)\/(\d+)\//.exec(valuePath);
+  const numberKey = ['no', 'n', 'name'].find((key) => Object.hasOwn(row, key) && truth(row[key]));
   return lineage.leaf('B', valuePath, `budget2027.json#/${path}`, UNIT, period, {
     table: physical.table,
     page: physical.page,
     label: pyOr(row.text, row.name, 'Без отпечатан етикет'),
-    no: String(pyOr(row.no, row.n, row.name, 'unprinted')),
+    no: numberKey ? catalogPythonStringAt(row, numberKey) : 'unprinted',
     column: {
       label: column === null ? 'Сума (хил. евро)' : `column ${column}`,
       year: Number(period.slice(0, 4)),
@@ -158,38 +160,21 @@ function billLeaf(
       : {}),
   });
 }
-/** Construct the current bill and provenance after the annual projection has used the same lineage. */
-export function buildBudget2027(
-  lineage: AnnualLineage,
-  buildDate: string,
-): { budget: Record<string, any>; provenance: Record<string, any> } {
+function budgetBill(lineage: AnnualLineage): BillExtraction {
   const bill = lineage.inputs.B;
-  const findPhysical = physicalFinder(bill);
   if (bill.year !== 2027 || bill.unit !== 'хил. евро') throw new Error('Wrong bill year or unit');
-  const budget: Record<string, any> = {
-    meta: metadata('D34', 'Бюджет 2027: проект на МФ', buildDate, {
-      source: ['budget2027'],
-      sourceNote: SOURCE_NOTE,
-      asOf: PUBLICATION,
-    }),
-    schema: 'budget2027/1',
-    publication: PUBLICATION,
-    defaultVariant: 'bill',
-    budgets: {},
-    municipal: {},
-    projects: [],
-    forecast: {},
-    gaps: {
-      programmes: 'Няма пълен програмен архив за 2027–2029.',
-      municipalForecast: 'Няма индивидуални общински разпределения за 2028–2029.',
-      law: 'Публикацията е проект; не е приет закон.',
-    },
-  };
+  return bill;
+}
+/** Semantic budget rows use the same boundary as the donor's add_budgets. */
+export function buildBudgetRows(lineage: AnnualLineage): Record<string, any> {
+  const bill = budgetBill(lineage);
+  const findPhysical = physicalFinder(bill);
+  const budgets: Record<string, any> = {};
   for (const variant of ['bill', 'billMc'] as const) {
-    budget.budgets[variant] = {};
+    budgets[variant] = {};
     for (const [article, item] of Object.entries(bill[variant]) as [string, any][]) {
       const target: Record<string, any> = {
-        name: item.name,
+        name: pointer(item, '/name'),
         rows: [],
         policiesRows: [],
         commitmentRows: [],
@@ -215,17 +200,22 @@ export function buildBudget2027(
             cell,
           });
         }
-      budget.budgets[variant][article] = target;
+      budgets[variant][article] = target;
     }
   }
+  return budgets;
+}
+/** These donor-aligned components record their own cells in the supplied lineage. */
+export function buildBudgetMunicipalities(lineage: AnnualLineage): Record<string, any> {
+  const bill = budgetBill(lineage),
+    findPhysical = physicalFinder(bill);
+  const budget: Record<string, any> = { municipal: {} };
   budget.municipalTotals = {};
   for (const section of ['art52', 'art53']) {
     const source = bill.municipal[section];
     if (!source) throw new Error(`Missing municipality section ${section}`);
-    budget.municipal[section] = source.rows.map((row: any, i: number) => ({
-      name: row.name,
-      region: row.region,
-      cells: row.values.map((_x: number, c: number) =>
+    budget.municipal[section] = source.rows.map((row: any, i: number) => {
+      const cells = row.values.map((_x: number, c: number) =>
         billLeaf(
           lineage,
           findPhysical,
@@ -236,8 +226,9 @@ export function buildBudget2027(
           'bill',
           c + 1,
         ),
-      ),
-    }));
+      );
+      return { name: pointer(row, '/name'), region: pointer(row, '/region'), cells };
+    });
     const row = { name: 'ВСИЧКО:', page: Math.max(...source.pages) };
     budget.municipalTotals[section] = source.total.map((_x: number, c: number) =>
       billLeaf(
@@ -252,11 +243,17 @@ export function buildBudget2027(
       ),
     );
   }
+  return budget;
+}
+export function buildBudgetProjects(lineage: AnnualLineage): Record<string, any> {
+  const bill = budgetBill(lineage),
+    findPhysical = physicalFinder(bill);
+  const budget: Record<string, any> = { projects: [] };
   for (const [i, row] of bill.projects.rows.entries()) {
     const project: Record<string, any> = {
-      id: row.id,
-      name: row.name,
-      institution: row.institution,
+      id: pointer(row, '/id'),
+      name: pointer(row, '/name'),
+      institution: pointer(row, '/institution'),
       gaps: {},
       cells: {},
     };
@@ -289,6 +286,11 @@ export function buildBudget2027(
       UNIT,
     );
   }
+  return budget;
+}
+export function buildBudgetDebtLimits(lineage: AnnualLineage): Record<string, any> {
+  const bill = budgetBill(lineage);
+  const budget: Record<string, any> = {};
   budget.debtLimits = {};
   for (const article of ['66', '67', '68']) {
     const row = bill.articles[article]?.[0];
@@ -303,7 +305,7 @@ export function buildBudget2027(
       operation: 'parse-billion-euro',
       period: DEFAULT,
       variant: 'bill',
-      page: row.page,
+      page: pointer(row, '/page'),
       unit: 'млрд. €',
       printed: match[0],
       label: pyOr(row.text, 'Без отпечатан етикет'),
@@ -314,6 +316,10 @@ export function buildBudget2027(
       provenance,
     };
   }
+  return budget.debtLimits;
+}
+export function buildBudgetForecast(lineage: AnnualLineage): Record<string, any> {
+  const budget: Record<string, any> = { forecast: {} };
   for (const tableId of ['II_5', 'II_7', 'II_8', 'VI_1', 'VI_2', 'annex9']) {
     const table = lineage.inputs.F.tables[tableId]!;
     budget.forecast[tableId] = table.rows.map((row, i) => {
@@ -334,9 +340,41 @@ export function buildBudget2027(
           period,
         );
       }
-      return { label: row.label, cells, gaps };
+      return { label: pointer(row, '/label'), cells, gaps };
     });
   }
+  return budget.forecast;
+}
+/** Construct the current bill and provenance after the annual projection has used the same lineage. */
+export function buildBudget2027(
+  lineage: AnnualLineage,
+  buildDate: string,
+): { budget: Record<string, any>; provenance: Record<string, any> } {
+  budgetBill(lineage);
+  const budget: Record<string, any> = {
+    meta: metadata('D34', 'Бюджет 2027: проект на МФ', buildDate, {
+      source: ['budget2027'],
+      sourceNote: SOURCE_NOTE,
+      asOf: PUBLICATION,
+    }),
+    schema: 'budget2027/1',
+    publication: PUBLICATION,
+    defaultVariant: 'bill',
+    budgets: {},
+    municipal: {},
+    projects: [],
+    forecast: {},
+    gaps: {
+      programmes: 'Няма пълен програмен архив за 2027–2029.',
+      municipalForecast: 'Няма индивидуални общински разпределения за 2028–2029.',
+      law: 'Публикацията е проект; не е приет закон.',
+    },
+  };
+  budget.budgets = buildBudgetRows(lineage);
+  Object.assign(budget, buildBudgetMunicipalities(lineage));
+  Object.assign(budget, buildBudgetProjects(lineage));
+  budget.debtLimits = buildBudgetDebtLimits(lineage);
+  budget.forecast = buildBudgetForecast(lineage);
   return {
     budget,
     provenance: {

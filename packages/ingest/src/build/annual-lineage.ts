@@ -149,6 +149,8 @@ export function verifyDocument(
   input: string,
   archive: Uint8Array,
 ): DocumentRecord {
+  if (!Object.hasOwn(source, 'archive') || typeof source.archive !== 'string' || !source.archive)
+    throw new Error('Invalid source archive');
   const archiveHash = getDefault(source.archive_sha256, source.sha256);
   const memberHash = getDefault(source.pdf_sha256, source.memberSha256);
   if (typeof archiveHash !== 'string' || sha(archive) !== archiveHash)
@@ -274,7 +276,7 @@ export class AnnualLineage {
       {
         table,
         row: rowIndex,
-        label: row.label,
+        label: pointer(row, '/label'),
         column,
         page: row.page,
         printed: row.printed[columnIndex],

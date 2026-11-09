@@ -36,4 +36,31 @@ The forecast and bill publication of 6 November remains distinct from the
 October draft budgetary plan. Historical missing originals described in the
 fiscal fixture remain limitations; these fixtures do not assert their recovery.
 
-The label oracle exercises the unchanged donor's required `row["text"]` subscription in both bill variants and all three budget row sections. It distinguishes an absent field from explicit null/empty text and retains the donor's skip before that subscription for rows without a numeric value. The 24 cases use fresh verified inputs and the real `add_budgets` function; all preceding oracle and six final output bytes remain unchanged.
+The label oracle exercises the unchanged donor's required `row["text"]`
+subscription in both bill variants and all three budget row sections. It
+distinguishes an absent field from explicit null/empty text and retains the
+donor's skip before that subscription for rows without a numeric value. The 24
+cases use fresh verified inputs and the real `add_budgets` function.
+
+The 20 metadata cases cover required budget names, municipal regions, project
+identities, debt pages, forecast labels and source archive paths. Explicit
+null/empty budget names remain copied values. Missing forecast labels are
+rejected even when every observation is blank. These expectations come from
+the unchanged donor functions and constructor, including their actual order
+of field access.
+
+The TypeScript budget components follow the donor's `add_budgets`,
+`add_municipalities`, `add_projects`, `add_debt_limits` and `add_forecast`
+boundaries. Focused changed-input tests call those components, while the full
+builder still composes all of them in order and retains the complete budget,
+provenance and six-owner integration comparisons. This avoids rebuilding the
+entire publication for each label case without changing test timeouts.
+
+The reader oracle adds seven row-number cases and nine physical-cell cases.
+Serialized Python row preimages retain integer/float distinctions for the
+provenance display. The small synthetic physical-cell inputs exercise required
+table/page fields and the donor's defaults for absent, null and empty values;
+they are algorithm evidence, not additional original PDF evidence. The full
+pinned publication still verifies its real archive, member and physical cells.
+All preceding oracle bytes, input hashes and six final/published outputs remain
+unchanged.

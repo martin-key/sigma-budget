@@ -8,9 +8,19 @@ import {
   zipMember,
   type Extraction,
   type BillExtraction,
+  type BillRow,
 } from './annual-lineage.js';
 import { buildAnnualPeriods } from './fiscal-annual.js';
-import { buildBudget2027, numericBillCell, physicalBillCell } from './budget-2027.js';
+import {
+  buildBudget2027,
+  buildBudgetRows,
+  buildBudgetMunicipalities,
+  buildBudgetProjects,
+  buildBudgetDebtLimits,
+  buildBudgetForecast,
+  numericBillCell,
+  physicalBillCell,
+} from './budget-2027.js';
 const fixtures = resolve(import.meta.dirname, '../../test/fixtures');
 const raw = (name: string) => readFileSync(resolve(fixtures, name), 'utf8');
 const oracle = (name: string) => JSON.parse(raw(`wave13a/oracle/${name}`));
@@ -121,15 +131,89 @@ it.each(labelCases)(
     if (test.state === 'missing') {
       expect(test.error).toBe('KeyError');
       expect(test.message).toBe("'text'");
-      expect(() => buildBudget2027(lineage, '2026-11-08')).toThrow(/required budget row text/);
+      expect(() => buildBudgetRows(lineage)).toThrow(/required budget row text/);
     } else {
-      const { budget } = buildBudget2027(lineage, '2026-11-08');
-      const rows = budget.budgets[test.variant][test.article][test.section];
+      const budgets = buildBudgetRows(lineage);
+      const rows = budgets[test.variant][test.article][test.section];
       expect(rows).toHaveLength(test.count);
       if (test.state !== 'skipped') expect(rows[0].label).toBe(test.label);
     }
   },
 );
+
+it('rejects missing budget text through the complete budget builder', () => {
+  const { forecast, bill, zip } = inputs();
+  delete bill.bill['1']!.rows[0]!.text;
+  const lineage = new AnnualLineage(forecast, bill, { forecast: zip, bill: zip });
+  expect(() => buildBudget2027(lineage, '2026-11-08')).toThrow(/required budget row text/);
+});
+
+interface MetadataCase {
+  kind: 'F' | 'B';
+  path: (string | number)[];
+  phase: 'construct' | 'rows' | 'forecastCell' | 'municipal' | 'projects' | 'debt' | 'forecast';
+  op: 'delete' | 'set' | 'blank';
+  value?: unknown;
+  fieldValue?: unknown;
+  column?: number;
+  error?: string;
+}
+const metadataCases: MetadataCase[] = oracle('metadata-cases.json');
+it.each(metadataCases)('retains required metadata for $kind/$path: $op', (test) => {
+  const { forecast, bill, zip } = inputs();
+  let node: any = test.kind === 'F' ? forecast : bill;
+  for (const key of test.path.slice(0, -1)) node = node[key];
+  const key = test.path.at(-1)!;
+  if (test.op === 'set') node[key] = test.value;
+  else delete node[key];
+  if (test.op === 'blank') node.values = Array(node.values.length).fill(null);
+  const construct = () => new AnnualLineage(forecast, bill, { forecast: zip, bill: zip });
+  if (test.phase === 'construct') {
+    expect(test.error).toBeTruthy();
+    expect(construct).toThrow(/source archive/);
+    return;
+  }
+  const lineage = construct();
+  if (test.phase === 'rows' && test.op === 'set') {
+    expect(test.error).toBeUndefined();
+    const budgets = buildBudgetRows(lineage);
+    expect(pointer(budgets, '/' + test.path.join('/'))).toEqual(test.fieldValue);
+  } else {
+    expect(test.error).toBe('KeyError');
+    const run =
+      test.phase === 'rows'
+        ? () => buildBudgetRows(lineage)
+        : test.phase === 'forecastCell'
+          ? () => lineage.f('II_5', 0, test.column!, 'probe.json#/cell', '2027.draft')
+          : test.phase === 'municipal'
+            ? () => buildBudgetMunicipalities(lineage)
+            : test.phase === 'projects'
+              ? () => buildBudgetProjects(lineage)
+              : test.phase === 'debt'
+                ? () => buildBudgetDebtLimits(lineage)
+                : () => buildBudgetForecast(lineage);
+    expect(run).toThrow(/Missing pointer/);
+  }
+});
+
+const readerCases: {
+  numbers: { token: string; inputRow: string; targetNo: unknown; display: string }[];
+  physical: { name: string; bill: BillExtraction; expected?: unknown; error?: string }[];
+} = oracle('reader-cases.json');
+it.each(readerCases.numbers)('preserves the Python row number display for $token', (test) => {
+  const { forecast, bill, zip } = inputs();
+  bill.bill['1']!.rows[0] = parsePythonJson<BillRow>(test.inputRow);
+  const lineage = new AnnualLineage(forecast, bill, { forecast: zip, bill: zip });
+  const rows = buildBudgetRows(lineage).bill['1'].rows;
+  expect(rows[0].no).toEqual(test.targetNo);
+  expect(lineage.entries[rows[0].cell.provenance]!.no).toBe(test.display);
+});
+it.each(readerCases.physical)('preserves physical reader defaults for $name', (test) => {
+  const row = test.bill.municipal.art52!.rows[0];
+  const read = () => physicalBillCell(test.bill, row, '/municipal/art52/rows/0/values/0', 1);
+  if (test.error) expect(read).toThrow();
+  else expect(read()).toEqual(test.expected);
+});
 
 it('rejects altered archives, member hashes and null source hashes while using defaults only for absence', () => {
   const { forecast, bill, zip } = inputs();

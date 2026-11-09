@@ -149,6 +149,108 @@ with tempfile.TemporaryDirectory(prefix='sigma13a-') as tmp:
                     captured['message'] = str(error)
                 label_cases.append(captured)
     output['label-cases.json'] = label_cases
+    metadata_cases = []
+    original_load = annual_periods.jload
+    def capture_metadata(kind, path, phase, op='delete', value=None):
+        captured = {'kind': kind, 'path': path, 'phase': phase, 'op': op}
+        if op == 'set':
+            captured['value'] = value
+        def mutate(obj):
+            node = obj
+            for key in path[:-1]:
+                node = node[key]
+            if op == 'set':
+                node[path[-1]] = value
+            else:
+                del node[path[-1]]
+            if op == 'blank':
+                node['values'] = [None] * len(node['values'])
+        try:
+            if phase == 'construct':
+                def load_case(filename):
+                    obj = original_load(filename)
+                    if filename.name == f'budget_{"forecast" if kind == "F" else "bill"}_2027.json':
+                        mutate(obj)
+                    return obj
+                annual_periods.jload = load_case
+                annual_periods.Lineage()
+            else:
+                probe = annual_periods.Lineage()
+                mutate(probe.inputs[kind])
+                if phase == 'rows':
+                    projected = {'budgets': {}}
+                    budget_2027.add_budgets(probe, projected)
+                    captured['fieldValue'] = projected['budgets'][path[0]][path[1]]['name']
+                elif phase == 'forecastCell':
+                    captured['column'] = next(i for i, column in enumerate(probe.inputs['F']['tables']['II_5']['columns']) if column.get('year') == 2027)
+                    probe.f('II_5', 0, captured['column'], 'probe.json#/cell', '2027.draft')
+                else:
+                    projected = {'municipal': {}, 'projects': [], 'forecast': {}}
+                    {'municipal': budget_2027.add_municipalities, 'projects': budget_2027.add_projects, 'debt': budget_2027.add_debt_limits, 'forecast': budget_2027.add_forecast}[phase](probe, projected)
+        except Exception as error:
+            captured['error'] = type(error).__name__
+        finally:
+            annual_periods.jload = original_load
+        metadata_cases.append(captured)
+    for variant in ('bill', 'billMc'):
+        capture_metadata('B', [variant, '1', 'name'], 'rows')
+        for value in (None, ''):
+            capture_metadata('B', [variant, '1', 'name'], 'rows', 'set', value)
+    for section in ('art52', 'art53'):
+        capture_metadata('B', ['municipal', section, 'rows', 0, 'region'], 'municipal')
+    for field in ('id', 'name', 'institution'):
+        capture_metadata('B', ['projects', 'rows', 0, field], 'projects')
+    capture_metadata('B', ['articles', '66', 0, 'page'], 'debt')
+    capture_metadata('F', ['tables', 'II_5', 'rows', 0, 'label'], 'forecastCell')
+    capture_metadata('F', ['tables', 'II_5', 'rows', 0, 'label'], 'forecast', 'blank')
+    for kind in ('F', 'B'):
+        capture_metadata(kind, ['source', 'archive'], 'construct')
+        for value in (None, ''):
+            capture_metadata(kind, ['source', 'archive'], 'construct', 'set', value)
+    output['metadata-cases.json'] = metadata_cases
+    number_cases = []
+    for token in ('1', '1.0', '1e0', '0.0', 'false', 'true', 'fallback-n'):
+        probe = annual_periods.Lineage()
+        row = probe.inputs['B']['bill']['1']['rows'][0]
+        row['no'] = json.loads(token) if token != 'fallback-n' else 0
+        if token == 'fallback-n':
+            row['n'] = 1.0
+        input_row = json.dumps(row, ensure_ascii=False)
+        projected = {'budgets': {}}
+        budget_2027.add_budgets(probe, projected)
+        target = projected['budgets']['bill']['1']['rows'][0]
+        number_cases.append({'token': token, 'inputRow': input_row, 'targetNo': target['no'],
+                             'display': probe.entries[target['cell']['provenance']]['no']})
+    reader_cases = []
+    for name in ('explicit', 'missing-pages', 'missing-id', 'missing-table-page',
+                 'default-pages', 'empty-pages', 'null-pages', 'explicit-id', 'null-id'):
+        row = {'name': 'X', 'values': [10], 'page': 1}
+        table = {'id': 't', 'page': 1, 'rawCells': [['X', '10']]}
+        sample = {'tables': [table], 'municipal': {'art52': {'rows': [row]}}}
+        if name in ('explicit', 'missing-pages', 'missing-id'):
+            row['table'] = 't'
+        if name == 'missing-pages':
+            del row['page']
+            del table['page']
+        if name == 'missing-id':
+            sample['tables'].insert(0, {'page': 2, 'rawCells': [['Z', '20']]})
+        if name == 'missing-table-page':
+            sample['tables'].insert(0, {'id': 'unrelated', 'rawCells': [['Z', '20']]})
+        if name in ('empty-pages', 'null-pages'):
+            row['pages'] = [] if name == 'empty-pages' else None
+        if name == 'explicit-id':
+            row['id'] = 'other'
+        if name == 'null-id':
+            row['id'] = None
+            sample['tables'].append({'id': 'other', 'page': 1, 'rawCells': [['Y', '10']]})
+        captured = {'name': name, 'bill': sample}
+        try:
+            table_id, page, printed, location = budget_2027.physical_cell(sample, row, '/municipal/art52/rows/0/values/0', 10, 1)
+            captured['expected'] = {'table': table_id, 'page': page, 'printed': printed, **location}
+        except Exception as error:
+            captured['error'] = type(error).__name__
+        reader_cases.append(captured)
+    output['reader-cases.json'] = {'numbers': number_cases, 'physical': reader_cases}
     hashes = {name: emit('oracle/' + name, value) for name, value in output.items()}
 
     law_source = (HERE / 'law-donor.py').read_bytes()
