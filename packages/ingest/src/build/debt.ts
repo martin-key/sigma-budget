@@ -1,6 +1,7 @@
 import type { Json } from '@sigma-budget/dataset-schema';
 import { jsonstatSeries, type JsonStat } from '../io/data.js';
 import { metadata } from '../common/metadata.js';
+import { pythonFloatSum as sum } from '../common/numbers.js';
 import { pythonRound as rnd } from '../common/format.js';
 import { stateDebtTable, percentage, type CleanPage, type StateDebtTableInput } from './fiscal.js';
 import {
@@ -44,7 +45,6 @@ export interface DebtInput {
 }
 const YEARS = [2024, 2025, 2026, 2027, 2028],
   ASOF = '2026-07-01';
-const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0);
 function same(a: number[], b: number[], tol: number, where: string): number {
   if (
     a.length !== b.length ||

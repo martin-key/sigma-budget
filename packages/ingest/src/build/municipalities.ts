@@ -2,6 +2,7 @@ import type { Json } from '@sigma-budget/dataset-schema';
 import { jsonstatSeries, type JsonStat } from '../io/data.js';
 import { formatNumber, pythonRound as rnd } from '../common/format.js';
 import { metadata } from '../common/metadata.js';
+import { pythonFloatSum as sum } from '../common/numbers.js';
 import { REGIONS, COLS, KINDS } from './municipality-definitions.js';
 
 type Point = [number, number];
@@ -36,7 +37,6 @@ export interface MunicipalityInput {
   oblast: { updated: string; jsonstat: JsonStat };
   population: { years: string[]; persons: number[] };
 }
-const sum = (values: number[]) => values.reduce((a, b) => a + b, 0);
 const norm = (s: string) =>
   s
     .replace(/[„“”"«»]/gu, '')
@@ -162,7 +162,16 @@ export function buildMunicipalities(
   const byId = new Map(gis.map((i) => [i.id, i])),
     rural = byId.get('DOB15'),
     city = byId.get('DOB28');
-  if (!rural || !city || rural.areaKm2 < 5 * city.areaKm2) throw new Error('Dobrich areas changed');
+  if (
+    !rural ||
+    !city ||
+    !Number.isFinite(rural.areaKm2) ||
+    !Number.isFinite(city.areaKm2) ||
+    rural.areaKm2 <= 0 ||
+    city.areaKm2 <= 0 ||
+    rural.areaKm2 < 5 * city.areaKm2
+  )
+    throw new Error('Dobrich areas changed');
   let popFix: {
     ids: string[];
     gisco: Record<string, number>;
@@ -191,11 +200,20 @@ export function buildMunicipalities(
     )
       throw new Error(`Municipal law copy differs: ${r.name}`);
   }
+  if (art.law.total.length !== COLS.length) throw new Error('Municipal column count differs');
   const sums = COLS.map((_, i) => rnd(sum(law.map((r) => nullable(r.values[i]!))), 1));
   if (sums.some((v, i) => v !== rnd(art.law.total[i]!, 1) || v !== rnd(proto.sums[pk[i]!]!, 1)))
     throw new Error('Municipal column sums differ');
   const worst = Math.max(
-    ...law.map((r) => Math.abs(nullable(r.values[0]!) - sum(r.values.slice(1, 5).map(nullable)))),
+    ...law.map((r) =>
+      Math.abs(
+        nullable(r.values[0]!) -
+          r.values
+            .slice(1, 5)
+            .map(nullable)
+            .reduce((a, b) => a + b, 0),
+      ),
+    ),
   );
   if (worst > 0.05) throw new Error('Municipal row does not add up');
   const nat = new Map(population.years.map((y, i) => [String(y), population.persons[i]!]));
@@ -213,7 +231,8 @@ export function buildMunicipalities(
     const series = jsonstatSeries(oblast.jsonstat, 'time', { geo: nuts });
     if (sum(gis.filter((i) => i.id.startsWith(code)).map((i) => i.pop)) !== series['2024']?.[0])
       throw new Error(`Oblast population differs: ${code}`);
-    if (!series['2025']) throw new Error('Missing oblast population');
+    if (!series['2025'] || !Number.isSafeInteger(series['2025'][0]))
+      throw new Error('Invalid oblast population');
     pop25[code] = series['2025'][0];
   }
   if (sum(Object.values(pop25)) !== nat.get('2025'))

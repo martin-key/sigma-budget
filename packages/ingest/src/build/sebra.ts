@@ -1,6 +1,8 @@
 import type { Json } from '@sigma-budget/dataset-schema';
 import { metadata } from '../common/metadata.js';
 import { pythonRound } from '../common/format.js';
+import { pythonFloatSum as sum, pythonNumericText } from '../common/numbers.js';
+import { pythonFloat } from './context.js';
 
 /** XLSX rows and page listing are captured by the unchanged Python readers. */
 export interface SebraCode {
@@ -62,19 +64,23 @@ function cyr(value: string): string {
     .join(' ');
 }
 function num(value: string | undefined): number {
-  if (!value || !/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(value))
+  if (typeof value !== 'string') throw new Error('Invalid SEBRA amount');
+  try {
+    const n = pythonFloat(value);
+    if (typeof n !== 'number' || !Number.isFinite(n)) throw new Error('Non-finite amount');
+    return n;
+  } catch {
     throw new Error('Invalid SEBRA amount');
-  const n = Number(value);
-  if (!Number.isFinite(n)) throw new Error('Invalid SEBRA amount');
-  return n;
+  }
 }
 function count(value: string | undefined): number {
-  if (!value || !/^\d+$/.test(value)) throw new Error('Invalid SEBRA count');
-  const n = Number(value);
+  if (typeof value !== 'string') throw new Error('Invalid SEBRA count');
+  const token = pythonNumericText(value);
+  if (!/^[+-]?\d(?:_?\d)*$/.test(token)) throw new Error('Invalid SEBRA count');
+  const n = Number(token.replaceAll('_', ''));
   if (!Number.isSafeInteger(n)) throw new Error('Invalid SEBRA count');
-  return n;
+  return n === 0 ? 0 : n;
 }
-const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0);
 const sortedCodes = (codes: SebraCode[]) =>
   [...codes].sort((a, b) => b.eur - a.eur || (a.code < b.code ? -1 : a.code > b.code ? 1 : 0));
 function totalsMatch(items: Total[], total: Total): boolean {
@@ -161,10 +167,12 @@ export function buildSebra(input: SebraEvidence, buildDate: string): Record<stri
     sizes: Record<string, number> = {};
   for (const f of listing.files) {
     const file = input.files[f.day];
-    if (!file) {
+    if (!Object.hasOwn(input.files, f.day)) {
       if (f.day === input.latest) throw new Error('Latest SEBRA file missing');
       continue;
     }
+    if (!file || typeof file !== 'object' || Array.isArray(file) || !Array.isArray(file.rows))
+      throw new Error('Invalid SEBRA file evidence');
     if (!Number.isSafeInteger(file.bytes) || pythonRound(file.bytes / 1024, 2) !== f.sizeKb)
       throw new Error('SEBRA file size mismatch');
     const day = parseSebraDay(file.rows);
