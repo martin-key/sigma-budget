@@ -1,3 +1,5 @@
+import { isFramework } from '../budget-2027.js';
+import { debtView, mountBillSearch, debtChart2027 } from './bill-views.js';
 // S17 Колко дължим? (G3). The state debt counted two ways: by the State Debt Act (ЗДД: table VI-1 of the budget motives, 2024-2028)
 // and by the Maastricht rules (Eurostat, 2015-2025, against the 60% line). Every number comes from debt.json (D13+D14); the financing of
 // the deficit from execution.json (D16), interest and balance from outlook.json (D15). Nothing is typed from memory.
@@ -922,10 +924,11 @@ function methodDisclosure(M) {
 }
 
 /* ------------------------------------------------------------------ the page */
-export const needs = ['core', 'debt', 'execution?', 'outlook?'];
+export const needs = ctx => isFramework(ctx) ? ['core', 'budget2027?'] : ['core', 'debt', 'execution?', 'outlook?'];
 export const styles = ['s17-dalg'];
 
 export function lede(ctx) {
+  if (isFramework(ctx)) return undefined;
   try {
     if (!ctx.data || !ctx.data.debt) return undefined;
     return ledeText(model(ctx)) || undefined;
@@ -942,7 +945,7 @@ const embedOf = (fn, pickSrc) => ctx => {
 };
 const outlookSrc = M => { const o = M.ctx.data.outlook; return { source: (o && o.meta && o.meta.source) || ['asbp'], asOf: o && o.meta && o.meta.asOf, status: 'partial' }; };
 
-export const embeds = {
+const historicalEmbeds = {
   's17-zdd': embedOf(zddSpec, M => ({ source: M.z.source || ['asbp'], asOf: M.z.asOf, status: 'partial' })),
   's17-maastricht': embedOf(maastrichtSpec, M => ({ source: M.m.source || ['eurostat'], asOf: M.m.asOf })),
   's17-eu': embedOf(euSpec, M => ({ source: M.m.source || ['eurostat'], asOf: M.m.asOf })),
@@ -959,6 +962,7 @@ export const embeds = {
 };
 
 export function render(ctx) {
+  if (isFramework(ctx)) return debtView(ctx);
   const M = model(ctx);
   const F = finModel(M);
   const top = M.scope === MAA ? [maastrichtBlock(M), euBlock(M), quarterBlock(M), compareBlock(M)] : [zddBlock(M), compareBlock(M)];
@@ -967,6 +971,7 @@ export function render(ctx) {
 
 let lastScope = null;
 export function mount(root, ctx) {
+  if (isFramework(ctx)) return mountBillSearch(root, ctx);
   const off = bindUnitSwitch(root, ctx, 's17-unit');
   if (ctx.data && ctx.data.debt) {
     const M = model(ctx);
@@ -976,3 +981,5 @@ export function mount(root, ctx) {
   }
   return off;
 }
+
+export const embeds = Object.fromEntries(Object.entries(historicalEmbeds).map(([id, fn]) => [id, ctx => isFramework(ctx) ? (id === 's17-zdd' ? { chart: debtChart2027(ctx), source: ['budget2027'], asOf: ctx.data.budget2027?.publication, status: 'forecast' } : null) : fn(ctx)]));

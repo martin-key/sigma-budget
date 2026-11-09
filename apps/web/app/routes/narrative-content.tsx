@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react';
 import { store, PERIODS } from '../../client/store.js';
-import { href, byId } from '../lib/legacy';
+import { byId } from '../lib/legacy';
+import { periodHref } from '../../client/routes.js';
 import { PageFrame } from '../components/PageFrame';
 import { TextState } from '../components/TextState';
 import { compactText, fixFiles } from '../components/ScreenTree';
@@ -32,7 +33,7 @@ export function NarrativeContent({
     query: model.query,
     origin: model.release.origin,
     unit,
-    href,
+    href: (id, params, query) => periodHref(model.period.key, id, params, query),
   };
   const parts =
     model.view === 'ready'

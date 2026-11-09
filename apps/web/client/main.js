@@ -38,7 +38,7 @@ async function boot() {
   const migration = migratePeriod({ address: location.href,
     get: key => localStorage.getItem(key), set: (key, value) => localStorage.setItem(key, value),
     replace: url => history.replaceState(history.state, '', url) });
-  if (location.href !== beforeMigration) { await router.rerender(); store.set('periodNotice', migration?.notice || ''); refreshChrome(); }
+  if (location.href !== beforeMigration) { await router.rerender(); store.set('periodNotice', migration?.resolved === store.get('period') ? migration.notice || '' : ''); refreshChrome(); }
   registerWorker();
 }
 

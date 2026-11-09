@@ -9,7 +9,7 @@ import { html, raw } from '../html.js';
 import { absolute } from '../loc.js';
 import { siteUrl, orgRef } from '../seo.js';
 import { date, num, plural } from '../format.js';
-import { href, byKey } from '../routes.js';
+import { href, byKey, periodHref } from '../routes.js';
 import { icon } from '../icons.js';
 import { data } from '../data.js';
 import { callout, facts, ext, reportLink } from '../ui/cards.js';
@@ -50,7 +50,9 @@ const fmtOf = set => set.format || set.ext.toUpperCase();
 const fileInfo = set => [fmtOf(set), isMulti(set) ? plural(set.parts.length, 'файл', 'файла') : '', C.sizeLabel(set.bytes)].filter(Boolean).join(' · ');
 const groupOf = (M, set) => M.groups.find(g => g.sets.includes(set));
 const srcShortLink = (k, M) => { const s = M.src(k); return s.url ? ext(s.url, srcShort(k)) : srcShort(k); };
-const screenLinks = set => joinList(set.screenRoutes.map(r => html`<a href="${href(r.key)}">${r.title}</a>`));
+const HISTORICAL_SETS = new Set(['ministries', 'programs', 'measures', 'debt', 'municipalities', 'ministries-programs', 'law', 'geo-obshtini']);
+const screenHref = (set, key) => periodHref(HISTORICAL_SETS.has(set.slug) ? '2026.law' : null, key);
+const screenLinks = set => joinList(set.screenRoutes.map(r => html`<a href="${screenHref(set, r.key)}">${r.title}</a>`));
 
 /** a section: the h2 carries the id (the target of ?to= and of the share block), so a jump lands on a heading */
 function block(id, title, build, o = {}) {
@@ -303,8 +305,8 @@ function passportRows(set, M) {
   const pend = set.status === 'pending';
   const real = set.source;
   const screens = set.screenRoutes.length ? { k: pend ? 'Засяга' : 'Къде се ползва', v: set.screenRoutes.length > 8
-    ? disclosure({ id: 's24-d-screens', title: 'Екрани', meta: plural(set.screenRoutes.length, 'екран', 'екрана'), body: chips({ items: set.screenRoutes.map(r => ({ label: r.title, href: href(r.key) })) }) })
-    : chips({ label: 'Екрани, които ползват набора', items: set.screenRoutes.map(r => ({ label: r.title, href: href(r.key) })) }) } : null;
+    ? disclosure({ id: 's24-d-screens', title: 'Екрани', meta: plural(set.screenRoutes.length, 'екран', 'екрана'), body: chips({ items: set.screenRoutes.map(r => ({ label: r.title, href: screenHref(set, r.key) })) }) })
+    : chips({ label: 'Екрани, които ползват набора', items: set.screenRoutes.map(r => ({ label: r.title, href: screenHref(set, r.key) })) }) } : null;
   return [
     { k: 'Статус', v: html`<span class="s24-st">${statusPill(set.status)}<span>${(STATUS[set.status] || STATUS.pending).text}</span></span>` },
     set.mock ? { k: 'Откъде са стойностите', v: 'Няма източник: стойностите са примерни, измислени за показване.' } : null,

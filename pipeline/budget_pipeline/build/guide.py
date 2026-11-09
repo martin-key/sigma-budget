@@ -44,6 +44,23 @@ def apply(g):
     return g
 
 
+def align_links(g, route_catalogue):
+    """Keep the frozen editorial prose; refresh only navigation labels against stable screen IDs."""
+    routes = {r["id"]: r for r in route_catalogue}
+    for step in g["steps"]:
+        route = routes[step["screen"]["id"]]
+        step["title"] = step["title"][:step["title"].index("„")] + "„%s“" % route["title"]
+        step["screen"]["label"] = route["title"]
+        step["screen"]["href"] = sample(route["pattern"])
+    for current, following in zip(g["steps"], g["steps"][1:]):
+        current["next"]["title"] = following["title"]
+        current["next"]["href"] = following["screen"]["href"]
+    note = " Имената на екраните и навигационните връзки следват актуалния каталог."
+    if note not in g["meta"]["sourceNote"]:
+        g["meta"]["sourceNote"] += note
+    return g
+
+
 def check(g):
     probs = []
     rs = load_routes()
@@ -73,7 +90,7 @@ def main():
     only = "--check" in sys.argv
     g = json.load(open(GUIDE, encoding="utf-8"))
     if not only:
-        g = apply(g)
+        g = align_links(g, load_routes()) if "--align-links" in sys.argv else apply(g)
     probs = check(g)
     if not only and not probs:
         with open(GUIDE, "w", encoding="utf-8") as f:

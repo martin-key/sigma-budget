@@ -8,8 +8,16 @@
 <lastBuildDate>Sun, 08 Nov 2026 12:00:00 +0000</lastBuildDate>
 <atom:link href="https://budget-na-svetlo.example/data/feed.xml" rel="self" type="application/rss+xml"/>
 <item>
+<title>Проектът за бюджет 2027 и АСБП 2027–2029 са публикувани от МФ</title>
+<link>https://budget-na-svetlo.example/#/byudzhet-2027</link>
+<guid isPermaLink="false">mf-budget-2027</guid>
+<pubDate>Fri, 06 Nov 2026 12:00:00 +0000</pubDate>
+<category>Нови данни</category>
+<description>Налични са проектът за държавния бюджет за 2027 г. и средносрочната рамка за 2027–2029 г.: ведомствени бюджети, общини и предложени граници на дълга. Проектът не е приет закон.</description>
+</item>
+<item>
 <title>Евростат: дългът в края на второто тримесечие на 2026 г.</title>
-<link>https://budget-na-svetlo.example/#/dalg?obhvat=maastricht</link>
+<link>https://budget-na-svetlo.example/#/dalg?obhvat=maastricht&amp;per=2025.report&amp;to=s17-b-quarterly</link>
 <guid isPermaLink="false">eurostat-gov_10q_ggdebt-2026-10-21</guid>
 <pubDate>Wed, 21 Oct 2026 12:00:00 +0000</pubDate>
 <category>Евростат</category>
@@ -17,7 +25,7 @@
 </item>
 <item>
 <title>Евростат: дългът на държавното управление за 2025 г.</title>
-<link>https://budget-na-svetlo.example/#/dalg?obhvat=maastricht</link>
+<link>https://budget-na-svetlo.example/#/dalg?obhvat=maastricht&amp;per=2025.report&amp;to=s17-b-maastricht</link>
 <guid isPermaLink="false">eurostat-gov_10dd_edpt1-2026-10-21</guid>
 <pubDate>Wed, 21 Oct 2026 12:00:00 +0000</pubDate>
 <category>Евростат</category>
@@ -41,7 +49,7 @@
 </item>
 <item>
 <title>Евростат: разходите по функции (COFOG) са допълнени до 2024 г.</title>
-<link>https://budget-na-svetlo.example/#/razhodi</link>
+<link>https://budget-na-svetlo.example/#/razhodi?per=2024.report</link>
 <guid isPermaLink="false">eurostat-gov_10a_exp-2026-09-16</guid>
 <pubDate>Wed, 16 Sep 2026 12:00:00 +0000</pubDate>
 <category>Евростат</category>

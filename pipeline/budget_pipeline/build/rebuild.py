@@ -31,6 +31,7 @@ def main(argv):
     run(["-m", "budget_pipeline.extract.kfp_full"], env)
     os.environ.update({k: v for k, v in env.items() if k == "BUILD_DATE"})
     run(["-m", "budget_pipeline.build.frozen_editorial"], env)
+    run(["-m", "budget_pipeline.build.guide", "--align-links"], env)
     run(["-m", "budget_pipeline.build.budget_plan"], env)
     # datasets.STEPS runs annual_periods then budget_2027 after the legacy fiscal builders.
     from budget_pipeline.build import datasets

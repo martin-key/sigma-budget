@@ -300,6 +300,32 @@ export function restoreEditorial(
   return inputs;
 }
 
+/** Project navigation onto an explicitly supplied catalogue after frozen restoration. */
+export function alignGuideLinks(g: GuideDataset, routes: EditorialRoute[]): GuideDataset {
+  const result = structuredClone(g);
+  const byId = new Map(routes.map((route) => [route.id, route]));
+  for (const step of result.steps) {
+    const route = byId.get(step.screen.id);
+    const quote = step.title.indexOf('„');
+    if (!route?.pattern || quote < 0) throw new Error(`Invalid guide route: ${step.screen.id}`);
+    step.title = step.title.slice(0, quote) + `„${route.title}“`;
+    step.screen.label = route.title;
+    step.screen.href = sample(route.pattern);
+  }
+  for (let i = 0; i < result.steps.length - 1; i++) {
+    const current = result.steps[i]!,
+      following = result.steps[i + 1]!;
+    if (!current.next) throw new Error('Missing guide next link');
+    current.next.title = following.title;
+    current.next.href = following.screen.href;
+  }
+  const note = ' Имената на екраните и навигационните връзки следват актуалния каталог.';
+  if (!result.meta.sourceNote.includes(note)) result.meta.sourceNote += note;
+  const errors = checkGuide(result, routes);
+  if (errors.length) throw new Error(errors.join('\n'));
+  return result;
+}
+
 const renamed: Record<number, [string, string | null, string | null]> = {
   1: [
     'Държавният бюджет на достъпен език',

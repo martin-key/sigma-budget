@@ -9,6 +9,7 @@ import json
 import os
 import re
 import sys
+import yaml
 
 from budget_pipeline.routes import load_routes
 
@@ -89,35 +90,15 @@ def refresh(cat):
             if msrc is not None and set(d["source"]) != set(msrc):
                 d["source"] = list(msrc)
                 changes.append("%s: source %s" % (slug, msrc))
-    # the screens of the datasets, by the pages' needs
-    file_ds = {}
+    # Conditional readers and linked provenance files cannot be inferred from a static needs regex.
+    # The audited dataset registry declares the complete consumer list.
+    registry = yaml.safe_load(open(os.path.join(ROOT, "data", "datasets.yaml"), encoding="utf-8"))
+    consumers = {entry["id"]: entry.get("screens", []) for entry in registry["datasets"]}
     for d in cat["datasets"]:
-        if d.get("file"):
-            file_ds[d["file"]] = d
-        for pp in d.get("parts", []):
-            file_ds[pp["file"]] = d
-    want = {}                                          # id(dataset) -> set of screens named by a needs list
-    for rid, lst in needs.items():
-        for nm in lst:
-            d = file_ds.get("data/%s.json" % nm)
-            if d is not None:
-                want.setdefault(id(d), set()).add(rid)
-    for d in cat["datasets"]:
-        if d["status"] == "pending" or d["id"] == "core":
-            continue
-        keep = [r for r in d["screens"] if r in routes and r not in needs]       # pages without a readable needs keep their entries
-        new = sorted(set(keep) | want.get(id(d), set()))
-        if not new:                                    # a file that a page only links to (feed.xml from S16) keeps its screen
-            new = [r for r in d["screens"] if r in routes]
-        if new != d["screens"]:
-            changes.append("%s: screens %s -> %s" % (d["slug"], ",".join(d["screens"]), ",".join(new)))
-            d["screens"] = new
-    # core.json is read by every page that names it; the validator does not compare it, keep only real routes
-    for d in cat["datasets"]:
-        if d["id"] == "core":
-            new = sorted(r for r in set(d["screens"]) | {k for k, v in needs.items() if "core" in v} if r in routes)
+        if d["slug"] in consumers:
+            new = [rid for rid in consumers[d["slug"]] if rid in routes]
             if new != d["screens"]:
-                changes.append("core: screens %s -> %s" % (",".join(d["screens"]), ",".join(new)))
+                changes.append("%s: screens %s -> %s" % (d["slug"], ",".join(d["screens"]), ",".join(new)))
                 d["screens"] = new
     counts = {
         "datasets": len(cat["datasets"]),

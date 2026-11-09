@@ -7,7 +7,7 @@
 //   prepare(route, params, …)   the page module, its data (`needs`) and the ctx it renders with
 //   build(route, params, …)     the view model {route, view, title, eyebrow, lede, context, body, crumbs, next, …}
 //   frameHtml(vm), docTitle(vm) the article of the screen and the document title
-import { NOT_FOUND, byId, match, href as routeHref, chainOf, GROUPS, screenQuery } from './routes.js';
+import { NOT_FOUND, byId, byKey, match, href as routeHref, periodHref, chainOf, GROUPS, screenQuery } from './routes.js';
 import { annualView, annualCore } from './annual.js';
 import { annualGap } from './ui/annual.js';
 import { selectPeriod, periodByKey, PERIODS } from './periods.js';
@@ -22,6 +22,7 @@ import { pageSkeleton, emptyState, errorState, pendingState } from './ui/states.
 import { redirect } from './redirects.js';
 import { here } from './loc.js';
 import { toHref } from './loc.js';
+import { publicationQuery } from './publication-query.js';
 
 export class NotFound extends Error { constructor(msg) { super(msg || 'not found'); this.name = 'NotFound'; } }
 
@@ -59,14 +60,14 @@ export function resolve(address) {
   const m = match(raw.segs);
   const route = m ? m.route : NOT_FOUND;
   const params = m ? m.params : { path: raw.segs.join('/') };
-  const query = canonQuery(raw.query);
+  const query = publicationQuery(route.id, params, canonQuery(raw.query));
   if (route.id === 'S31' && query.y != null) {
     const legacy = PERIODS.find(p => String(p.year) === query.y && p.status !== 'law');
     if (query.per == null && legacy) query.per = legacy.key;
     delete query.y;
   }
   const canon = m ? m.canon : raw.segs;
-  return { periodResolution: resolvePeriod(query.per), route, params, query, canon, want: canonHash(canon, query), screen: canonHash(canon, screenQuery(route, query)), found: !!m, segs: raw.segs };
+  return { periodResolution: resolvePeriod(query.per ?? (Array.isArray(route.periods) && route.periods.length === 1 ? route.periods[0] : undefined)), route, params, query, canon, want: canonHash(canon, query), screen: canonHash(canon, screenQuery(route, query)), found: !!m, segs: raw.segs };
 }
 
 /* ------------------------------------------------------------------ page module + data */
@@ -77,11 +78,18 @@ function parseNeeds(mod, ctx) {
 const noop = () => {};
 function makeCtx(route, params, query, o) {
   const a = o.actions || {};
+  const selectedPeriod = ['S01', 'S04'].includes(route.id) ? periodByKey(DEFAULT_PERIOD) : query.per == null && Array.isArray(route.periods) && route.periods.length === 1 ? periodByKey(route.periods[0]) : store.period;
+  const href = (id, params = {}, q = {}) => {
+    const target = byId[id] || byKey[id];
+    const variant = ['S10', 'S11'].includes(route.id) && ['S10', 'S11'].includes(target?.id) && ['bill', 'billMc'].includes(query.variant) ? { variant: query.variant } : {};
+    const primary = ['S01', 'S04'].includes(route.id) && (target?.periods === 'all' || target?.periods?.includes?.(DEFAULT_PERIOD)) ? { per: DEFAULT_PERIOD } : {};
+    return periodHref(selectedPeriod.key, id, params, { ...primary, ...variant, ...q });
+  };
   return {
-    route, params, query, data: {}, missing: [], failed: [], period: route.id === 'S04' ? periodByKey(DEFAULT_PERIOD) : store.period, store,
+    route, params, query, data: {}, missing: [], failed: [], period: selectedPeriod, store,
     get core() { return this.data.core || data.get('core'); },
     signal: o.signal, demo: o.demo || null, kind: o.kind || 'link',
-    setQuery: a.setQuery || noop, rerender: a.rerender || noop, announce: a.announce || noop, go: a.go || noop, href: routeHref,
+    setQuery: a.setQuery || noop, rerender: a.rerender || noop, announce: a.announce || noop, go: a.go || noop, href,
     notFound() { throw new NotFound(); }
   };
 }
@@ -107,7 +115,7 @@ export async function prepare(route, params, query, o = {}) {
   });
   const annualScreens = ['S04','S05','S06','S07','S08','S13','S31'];
   if (annualScreens.includes(route.id)) {
-    ctx.annualRaw = { outlook: ctx.data.outlook, revenue: ctx.data.revenue, expenditure: ctx.data.expenditure };
+    ctx.annualRaw = { core: ctx.data.core, outlook: ctx.data.outlook, revenue: ctx.data.revenue, expenditure: ctx.data.expenditure };
     if (route.id === 'S04') ctx.data.core = annualCore(ctx.data.core, ctx.data.outlook, ctx.data.revenue, ctx.data.expenditure, ctx.period.key);
     for (const key of ['outlook','revenue','expenditure']) if (ctx.data[key]) ctx.data[key] = annualView(ctx.data[key], key, ctx.annualRaw.outlook, ctx.period.key);
   }
@@ -116,29 +124,29 @@ export async function prepare(route, params, query, o = {}) {
 
 /* ------------------------------------------------------------------ view model */
 export const periodsFor = (route, mod) => mod?.periods ?? route.periods;
-function supportsPeriod(route, mod) {
+function supportsPeriod(route, mod, period) {
   const p = periodsFor(route, mod);
-  return p === 'all' || p === 'none' || !Array.isArray(p) || p.includes(store.get('period'));
+  return p === 'all' || p === 'none' || !Array.isArray(p) || p.includes(period);
 }
-function nextTarget(id) {
+function nextTarget(id, link) {
   const r = byId[id];
   if (!r) return null;
-  if (r.id === 'S01') return { kicker: 'Начало', title: 'Към началото', text: '', href: routeHref('S01') };
-  return { kicker: groupLabel(r.group), title: r.title, text: r.desc, href: routeHref(r.id) };
+  if (r.id === 'S01') return { kicker: 'Начало', title: 'Към началото', text: '', href: link('S01') };
+  return { kicker: groupLabel(r.group), title: r.title, text: r.desc, href: link(r.id) };
 }
 function buildNext(route, mod, ctx) {
   if (route.bare) return '';
   let items;
   try { items = mod?.next ? mod.next(ctx) : route.next; } catch (e) { console.error(e); items = route.next; }
   if (!items || !items.length) return '';
-  const cards = items.map(it => (typeof it === 'string' ? nextTarget(it) : it)).filter(Boolean);
+  const cards = items.map(it => (typeof it === 'string' ? nextTarget(it, ctx.href) : it)).filter(Boolean);
   if (!cards.length) return '';
   const [first, ...more] = cards;
   return nextCard({ ...first, more: more.map(m => ({ label: m.title, href: m.href })) });
 }
-export function defaultCrumbs(route, title) {
+export function defaultCrumbs(route, title, link = routeHref) {
   if (route.id === 'S01') return [];
-  return [{ label: 'Начало', href: routeHref('S01') }, ...chainOf(route).map(r => ({ label: r.title, href: routeHref(r.id) })), { label: title }];
+  return [{ label: 'Начало', href: link('S01') }, ...chainOf(route).map(r => ({ label: r.title, href: link(r.id) })), { label: title }];
 }
 export function eyebrowFor(route) {
   if (route.bare) return '';
@@ -162,10 +170,11 @@ const safeCall = (fn, ctx, fallback) => { try { const v = fn(ctx); return v ?? f
 
 /** the frame of a state that is not the screen itself (loading, an error) */
 export function frameVm(route, params, query, view, body, extra = {}) {
-  const ctxLite = { period: store.period, query, route, params };
+  const period = store.period;
+  const ctxLite = { period, query, route, params, href: (id, p = {}, q = {}) => periodHref(period.key, id, p, q) };
   return {
     route, params, query, demo: null, view, body, title: route.title, eyebrow: eyebrowFor(route), lede: route.desc,
-    context: contextFor(route, ctxLite), crumbs: defaultCrumbs(route, route.title), next: buildNext(route, null, ctxLite), mod: null, ctx: null, ...extra
+    context: contextFor(route, ctxLite), crumbs: defaultCrumbs(route, route.title, ctxLite.href), next: buildNext(route, null, ctxLite), mod: null, ctx: null, ...extra
   };
 }
 export const loadingVm = (route, params, query) => ({ route, params, query, view: 'loading', title: route.title, eyebrow: eyebrowFor(route), lede: route.desc,
@@ -188,7 +197,7 @@ export async function build(route, params, query, o = {}) {
   const { mod, ctx, fail } = await prepare(route, params, query, { ...o, demo });
   if (o.stale?.()) throw aborted();
 
-  if (!supportsPeriod(route, mod)) {
+  if (!supportsPeriod(route, mod, ctx.period.key)) {
     const sup = periodsFor(route, mod).map(k => store.periodByKey(k)).filter(Boolean);
     return frame('empty', emptyState({
       title: `Няма данни за ${ctx.period.label} на този екран`,
@@ -230,7 +239,7 @@ export async function build(route, params, query, o = {}) {
     schema: parts.schema ?? (mod.schema ? safeCall(mod.schema, ctx, []) : []),
     context: contextFor(route, ctx, parts.context, parts.ownContext),
     body: toHtml(parts.body),
-    crumbs: pageCrumbs ? [{ label: 'Начало', href: routeHref('S01') }, ...pageCrumbs] : defaultCrumbs(route, title),
+    crumbs: pageCrumbs ? [{ label: 'Начало', href: ctx.href('S01') }, ...pageCrumbs] : defaultCrumbs(route, title, ctx.href),
     next: buildNext(route, mod, ctx)
   };
 }

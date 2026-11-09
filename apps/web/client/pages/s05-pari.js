@@ -1,3 +1,4 @@
+import { institutions, cellValue } from '../budget-2027.js';
 import { periodIndex } from '../annual.js';
 import { selectPeriod } from '../periods.js';
 // S05 · Парите · #/pari · next S06 · periods all (G3, taken over from G1)
@@ -17,7 +18,7 @@ import { kpi } from '../ui/kpi.js';
 import { unitSwitch, bindUnitSwitch } from '../ui/unit-switch.js';
 import { amount, periodStatus } from '../view.js';
 
-export const needs = ['core', 'outlook', 'revenue?', 'expenditure?', 'ministries?', 'measures?'];
+export const needs = ['core', 'outlook', 'revenue?', 'expenditure?', 'ministries?', 'measures?', 'budget2027?'];
 export const styles = ['s05-pari'];
 export const lede = () => 'Пет въпроса за парите на държавата, всеки с едно число и кратък отговор. Натисни картата, за да видиш подробностите.';
 
@@ -68,6 +69,10 @@ function cardSpend(ctx, O, X, Y) {
 
 /** 3 · who spends: the biggest own budget among the budgets of the 2026 law (хил. € in the data, млн. € here) */
 function cardAgencies(ctx, O, M) {
+  if (ctx.period.key === '2027.draft') {
+    const items = institutions(ctx.data.budget2027), top = items.filter(i => cellValue(i.expenditure) !== null).sort((a,b) => b.expenditure.value-a.expenditure.value)[0];
+    return { ic:'landmark', q:'Кой харчи парите?', href:ctx.href('S10',{}, {per:'2027.draft'}), text:top ? `${top.name}. Общо ${items.length} бюджета по чл. 2–48 от основния проект.` : 'Това издание няма ведомствените бюджети за 2027 г.', kpi:{label:'Най-голям ведомствен бюджет · проект 2027',mln:top ? top.expenditure.value/1000 : null,scope:{key:'zdb-vedomstva',label:'Бюджети на ведомствата',note:'не е целият бюджет'},source:['budget2027'],asOf:ctx.data.budget2027?.publication} };
+  }
   if (ctx.period.key !== '2026.law') return { ic: 'landmark', q: 'Кой харчи парите?', href: ctx.href('S10'), text: 'Няма извлечени ведомствени бюджети за избрания период.', kpi: { label: ctx.period.label, value: null, status: 'pending' } };
   const items = arr(M && M.items).filter(it => ok(it.expKhil));
   const top = items.slice().sort((a, b) => b.expKhil - a.expKhil)[0];
@@ -84,6 +89,7 @@ function cardAgencies(ctx, O, M) {
 
 /** 4 · what the measures change: how many, and what they add to revenue and take from expenditure (without the two indicative ones) */
 function cardMeasures(ctx, O, MS) {
+  if (['2027.draft','2028.forecast','2029.forecast'].includes(ctx.period.key)) return {ic:'fileText',q:'Какво променят мерките?',href:ctx.href('S12',{}, {per:ctx.period.key}),text:'Приходните и разходните мерки в таблици II-7 и II-8 на АСБП 2027–2029. Празните годишни клетки са обозначени.',kpi:{label:ctx.period.year === 2027 ? 'Мерки в проекта за 2027' : `Мерки в прогнозата за ${ctx.period.year}`,value:'2027–2029',source:['budget2027'],asOf:ctx.data.budget2027?.publication}};
   const T = MS && MS.totals, C = MS && MS.counts, gdp = pick(O.periodKeys, O.gdp && O.gdp.mln, '2026.law');
   const part = v => amount(ctx, { mln: Math.abs(v), pctGdp: ok(gdp) ? (Math.abs(v) / gdp) * 100 : null, scale: 'mln' });
   const r = T && T.revenueMln, e = T && T.expenditureMlnWithoutIndicative;
@@ -100,13 +106,14 @@ function cardMeasures(ctx, O, MS) {
 function cardOutlook(ctx, O) {
   const publication = selectPeriod(ctx.annualRaw?.outlook, '2029.forecast');
   const B = O.kfp && O.kfp.balance;
-  const b26 = pick(O.periodKeys, B && B.mln, '2026.law'), b28 = pick(O.periodKeys, B && B.mln, '2029.forecast');
-  const p26 = pick(O.periodKeys, B && B.pctGdp, '2026.law'), p28 = pick(O.periodKeys, B && B.pctGdp, '2029.forecast');
+  const startKey = ctx.period.year >= 2027 ? '2027.draft' : '2026.law', startYear = ctx.period.year >= 2027 ? 2027 : 2026;
+  const b26 = pick(O.periodKeys, B && B.mln, startKey), b28 = pick(O.periodKeys, B && B.mln, '2029.forecast');
+  const p26 = pick(O.periodKeys, B && B.pctGdp, startKey), p28 = pick(O.periodKeys, B && B.pctGdp, '2029.forecast');
   const both = ok(b26) && ok(b28);
   const A = (v, p) => amount(ctx, { mln: v, pctGdp: p });
   let text = PENDING;
-  if (both && b26 < 0 && b28 < 0) text = `Прогнозата е дефицитът да ${b28 > b26 ? 'намалее' : 'нарасне'} от ${A(-b26, -p26)} през ${yr(2026)} до ${A(-b28, -p28)} през ${yr(2029)}`;
-  else if (both) text = `Салдото е ${A(b26, p26)} през ${yr(2026)} и ${A(b28, p28)} през ${yr(2029)}`;
+  if (both && b26 < 0 && b28 < 0) text = `Прогнозата е дефицитът да ${b28 > b26 ? 'намалее' : 'нарасне'} от ${A(-b26, -p26)} през ${yr(startYear)} до ${A(-b28, -p28)} през ${yr(2029)}`;
+  else if (both) text = `Салдото е ${A(b26, p26)} през ${yr(startYear)} и ${A(b28, p28)} през ${yr(2029)}`;
   return {
     ic: 'forecast', q: 'Накъде вървим?', href: ctx.href('S13'), text,
     kpi: { label: `${ok(b28) ? (b28 < 0 ? 'Дефицит' : 'Излишък') : 'Салдо'} през ${yr(2029)}`, mln: ok(b28) ? Math.abs(b28) : null, pctGdp: ok(p28) ? Math.abs(p28) : null, scope: 'kfp', status: 'forecast', source: publication.sourceRefs || [], asOf: publication.publication }

@@ -38,7 +38,7 @@ const sorted = s => {
 };
 
 function rowsHtml(s) {
-  return html`${sorted(s).map(r => html`<tr${r._mock ? raw(' data-mock="true"') : ''}>${s.columns.map((c, i) => {
+  return html`${sorted(s).map(r => html`<tr${r._id ? html` id="${r._id}" tabindex="-1"` : ''}${r._mock ? raw(' data-mock="true"') : ''}>${s.columns.map((c, i) => {
     const al = s.aligns[i] === 'end' ? ' class="t-end"' : '';
     const inner = i === 0 && r._href ? html`<a href="${r._href}">${cell(c, r)}</a>` : cell(c, r);
     const mock = i === 0 && r._mock ? html`<span class="sr-only"> (примерни данни)</span>` : '';
@@ -51,7 +51,8 @@ export function tableData(s) {
   return {
     columns: s.columns.map(unitLabel),
     rows: sorted(s).map(r => s.columns.map(c => { const v = r[c.key]; return v instanceof SafeHtml ? v.s.replace(/<[^>]*>/g, '') : v ?? ''; })),
-    statuses: sorted(s).map(r => (r._mock ? 'mock' : r._status))
+    statuses: sorted(s).map(r => (r._mock ? 'mock' : r._status)),
+    ...(s.rowUnitKey ? { units: sorted(s).map(r => r[s.rowUnitKey]) } : {})
   };
 }
 

@@ -301,10 +301,11 @@ def retired_examples(browser, port):
       const s08 = await import('./js/pages/s08-funkciya.js');
       const s12 = await import('./js/pages/s12-merki.js');
       const s18 = await import('./js/pages/s18-danaci.js');
-      return { a:s08.needs, b:s12.needs, c:s18.needs };
+      const b = typeof s12.needs === 'function' ? [...new Set(['2026.law','2027.draft','2028.forecast','2029.forecast'].flatMap(key => s12.needs({period:{key}})))] : s12.needs;
+      return { a:s08.needs, b, c:s18.needs };
     }""")
     ok('measures?' not in result['a'] and all('mock/' not in v for arr in result.values() for v in arr), 'screens have no retired dependencies or editorial S08 mapping')
-    ok('measures' in result['b'] and 'indirect-tax-parameters?' in result['c'], 'S12/S18 load official replacements')
+    ok('measures' in result['b'] and 'budget2027?' in result['b'] and 'indirect-tax-parameters?' in result['c'], 'S12/S18 load official replacements')
     ctx.close()
 
 

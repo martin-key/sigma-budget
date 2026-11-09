@@ -49,10 +49,12 @@ export function announce(msg) {
 /** go('/prihodi/dds') (or the old '#/prihodi/dds') — in-app navigation (history entry); the same address = scroll to top + refocus the h1 */
 export function go(addr, o = {}) {
   let target = internal(addr || '/');
+  const resolved = resolve(target);
+  target = internal(resolved.want);
   const { query, segs } = parseHash(target);
   if (query.per != null) target = internal(canonHash(segs, { ...query, per: resolvePeriod(query.per).resolved }));
   const per = store.get('period');
-  if (!query.per && per !== DEFAULT_PERIOD) target += (target.includes('?') ? '&' : '?') + 'per=' + per;
+  if (!query.per && per !== DEFAULT_PERIOD && (resolved.route.periods === 'all' || resolved.route.periods?.includes?.(per))) target += (target.includes('?') ? '&' : '?') + 'per=' + per;
   target = toHref(target);
   if (target === hereHref()) { window.scrollTo(0, 0); $view()?.querySelector('h1')?.focus({ preventScroll: true }); return; }
   saveScroll();
@@ -175,7 +177,7 @@ const focusKey = () => {
 };
 
 async function render(kind) {
-  const { route, params, query, want, segs } = resolve(here());     // an old address → the matching new screen, context kept (js/redirects.js)
+  const { route, params, query, want, segs, periodResolution } = resolve(here());     // an old address → the matching new screen, context kept (js/redirects.js)
   if (want !== hereHref() || (!HASH && location.hash.startsWith('#/'))) history.replaceState(history.state || { k: ++histK }, '', want);   // path mode: an old #/x link becomes /x
   const k = ensureKey();
   lastHref = location.href;
@@ -205,7 +207,7 @@ async function render(kind) {
   curK = k;
 
   applying = true;
-  try { store.set('periodRequested', query.per ?? null); store.set('periodNotice', ''); store.set('period', resolvePeriod(query.per).resolved); } finally { applying = false; }
+  try { store.set('periodRequested', query.per ?? null); store.set('periodNotice', ''); store.set('period', periodResolution.resolved); } finally { applying = false; }
 
   // the first render over a page the server drew (app/, apps/web/workers/app.ts; data-prerendered names its address): its HTML is already the screen, so no skeleton in between and no rise-in or count-up of what is already shown
   // (dropStalePrerender has taken the mark off an HTML that is the screen of another address)

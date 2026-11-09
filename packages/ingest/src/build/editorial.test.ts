@@ -8,6 +8,7 @@ import {
   loadEditorialRoutes,
   applyGuide,
   checkGuide,
+  alignGuideLinks,
 } from './editorial.js';
 import { compare } from '../parity/compare.js';
 const base = resolve(import.meta.dirname, '../../test/fixtures/editorial');
@@ -17,6 +18,21 @@ const routes = () => loadEditorialRoutes(json('inputs/routes.json'));
 const snapshots = () => ({
   'guide.json': bytes('inputs/guide.json'),
   'glossary.json': bytes('inputs/glossary.json'),
+});
+it('aligns navigation with injected routes after preserving the frozen snapshot', () => {
+  const original = snapshots();
+  const restored = restoreEditorial(original, routes());
+  const guide = JSON.parse(Buffer.from(restored['guide.json']).toString('utf8'));
+  const changed = routes();
+  Object.assign(changed.find((r) => r.id === guide.steps[3].screen.id)!, {
+    title: 'Проверено ново заглавие',
+    pattern: '/provereni-merki',
+  });
+  const actual = alignGuideLinks(guide, changed);
+  expect(actual).toEqual(json('guide-aligned-oracle.json'));
+  expect(checkGuide(actual, changed)).toEqual([]);
+  expect(alignGuideLinks(actual, changed)).toEqual(actual);
+  expect(Buffer.from(restored['guide.json'])).toEqual(bytes('inputs/guide.json'));
 });
 it('matches the frozen Python oracle and the historical glossary transform', () => {
   const actual = restoreEditorial(snapshots(), routes());

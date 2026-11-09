@@ -9,12 +9,12 @@ import urllib.request
 
 ROOT = Path(__file__).resolve().parents[2]
 os.environ.setdefault('PLAYWRIGHT_BROWSERS_PATH', str(ROOT / 'tmp/pw-browsers'))
-CASES = [(None, '2026.law', ''), ('2026.law', '2026.law', ''),
+CASES = [(None, '2027.draft', ''), ('2026.law', '2026.law', ''),
          ('2026.draft', '2026.law', 'Старият адрес'),
          ('2027.forecast', '2027.draft', 'Прогнозата за 2027'),
          ('2028.forecast', '2028.forecast', 'Прогнозата за 2028'),
          ('2026.expected', '2026.expected', ''), ('2027.draft', '2027.draft', ''),
-         ('2029.forecast', '2029.forecast', ''), ('unknown', '2026.law', 'Непознат период')]
+         ('2029.forecast', '2029.forecast', ''), ('unknown', '2027.draft', 'Непознат период')]
 
 
 def text(markup):
@@ -99,9 +99,40 @@ def main():
                 page.goto(base + ('/#/pari' if hash_mode else '/pari') + query)
                 page.wait_for_selector('article.page[data-ready="1"]')
                 actual = page.evaluate("async () => (await import('/js/store.js')).store.get('period')")
-                ok(actual == ('2026.expected' if variant == 'url-wins' else '2026.law'), variant + ' state')
+                ok(actual == ('2026.expected' if variant == 'url-wins' else '2027.draft'), variant + ' state')
                 ok(page.locator('.period-notice').count() == 0, variant + ' never shows the stored alias notice')
                 ctx.close()
+        # Product views: actual built-Worker first paint and client takeover agree.
+        product_cases = [
+            ('/vedomstva', '47', 's10-bill-table'),
+            ('/vedomstvo/3800', 'чл. 33', 's11-bill-rows'),
+            ('/obshtini', '5 162 139,3', 's20-bill-table'),
+            ('/obshtina/BLG03', '60 265,9', 's21-transfers-2027-table'),
+            ('/dalg', '44 343,9', 's17-debt-table'),
+            ('/prognoza', '2027–2029', 's13-rev-exp'),
+            ('/vedomstva?variant=billMc', 'Вариант на Министерския съвет', 's10-bill-table'),
+            ('/obshtini?per=2029.forecast', 'Няма индивидуално общинско разпределение', 's20-framework-table'),
+        ]
+        ctx = browser.new_context(service_workers='block', reduced_motion='reduce')
+        page = ctx.new_page()
+        for path, expected, target in product_cases:
+            with urllib.request.urlopen(base + path) as response:
+                markup = response.read().decode()
+            ok(expected in text(markup).replace('\u00a0', ' ').replace('\u202f', ' '), '2027 SSR product ' + path)
+            page.goto(base + path)
+            page.wait_for_selector('article.page[data-ready="1"]')
+            page.wait_for_selector('#' + target)
+            actual = page.locator('article.page').inner_text().replace('\u00a0', ' ').replace('\u202f', ' ')
+            ok(expected in actual, '2027 client product ' + path)
+        page.goto(base + '/vedomstva?variant=billMc')
+        page.wait_for_selector('article.page[data-ready="1"]')
+        page.click('[data-share="s10-bill-list"]')
+        with page.expect_download() as download:
+            page.get_by_role('button', name='CSV', exact=False).click()
+        csv = Path(download.value.path()).read_text(encoding='utf-8-sig')
+        ok('Вариант на Министерския съвет' in csv and '2027.draft' in csv, 'variant and period in real CSV download')
+        ok('budget2027-provenance.json#' in csv, 'cell provenance in real CSV download')
+        ctx.close()
         # The selector groups law and expected together without losing keyboard-operable radio labels.
         for width in (1280, 390):
             ctx = browser.new_context(viewport={'width': width, 'height': 900}, service_workers='block', reduced_motion='reduce')

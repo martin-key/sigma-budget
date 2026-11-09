@@ -1,3 +1,5 @@
+import { isFramework } from '../budget-2027.js';
+import { institutionView, mountBillSearch } from './bill-views.js';
 // S11 · Ведомство · #/vedomstvo/<код>[/<програма>] · next S15, S10 · period 2026.law only
 // Data, only through `needs`:
 //   ministries         D08+D09 REAL  the budget of the spender by the 2026 law (хил. €), the law's policy list, the bill-vs-law flags and where
@@ -21,6 +23,7 @@ import { unitSwitch, bindUnitSwitch } from '../ui/unit-switch.js';
 // the four budgets whose programmes are still pending (P03) have no file: used only to spare a direct load a 404 before the index is cached
 const NO_FILE = ['0100', '1800', '2300', '7400'];
 export const needs = ctx => {
+  if (isFramework(ctx)) return ['core', 'budget2027?'];
   const code = String(ctx?.params?.code ?? '');
   const list = ['core', 'ministries'];
   if (/^\d{4}$/.test(code)) {
@@ -30,7 +33,7 @@ export const needs = ctx => {
   return list;
 };
 export const styles = ['s11-vedomstvo'];
-export const periods = ['2026.law'];
+export const periods = ['2026.law', '2027.draft', '2028.forecast', '2029.forecast'];
 
 const ok = v => typeof v === 'number' && Number.isFinite(v);
 const LONG = 80;
@@ -292,12 +295,14 @@ function nodeBody(M) {
 
 /* ---------------------------------------------------------------- the module */
 export function render(ctx) {
+  if (isFramework(ctx)) return institutionView(ctx);
   const M = modelOf(ctx);
   const h = head(M);
   return { ...h, body: M.node ? nodeBody(M) : ministryBody(M) };
 }
 
 export function crumbs(ctx) {
+  if (isFramework(ctx)) return undefined;
   const M = modelOf(ctx);
   const c = [{ label: 'Кой харчи?', href: ctx.href('vedomstva') }];
   if (!M.node) return [...c, { label: labelOf(M.m) }];
@@ -307,12 +312,14 @@ export function crumbs(ctx) {
 }
 
 export function next(ctx) {
+  if (isFramework(ctx)) return ['S10'];
   const M = modelOf(ctx);
   if (!M.node) return ['S15', 'S10'];
   return [{ kicker: 'Следва', title: plainName(M.m), text: 'Всички политики и програми на ведомството.', href: ctx.href('vedomstvo', { code: M.code }) }, 'S10'];
 }
 
 export function mount(root, ctx) {
+  if (isFramework(ctx)) return mountBillSearch(root, ctx);
   const offs = [bindUnitSwitch(root, ctx, 's11-unit')];
   return () => offs.forEach(f => { try { f?.(); } catch { /* a cleanup must never throw */ } });
 }

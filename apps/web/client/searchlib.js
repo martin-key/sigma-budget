@@ -213,16 +213,23 @@ function entry(group, title, o = {}) {
 /** The stage and year of a number as the result shows it („Закон 2026“, „Отчет 2025“, „Прогноза 2026“, „По законопроекта 2026“): a bare „2026“ next to a figure could be read as
  *  what was spent. Terms and data sets have no figure, so no stage. The index rows say it in their own words (sub / title), this only names it the same way everywhere. */
 export function stageOf(group, o) {
-  const yr = (/\b(20\d\d)\b/.exec(o.period || '') || [])[1] || '';
+  const canonical = /^(20\d\d)\.(draft|forecast|law|report|expected)$/.exec(new URLSearchParams(String(o.href || '').split('?')[1] || '').get('per') || '');
+  const publication = /^(Проект|Прогноза|Закон|Отчет)\s+(20\d\d)$/i.exec(o.period || '');
+  const yr = publication?.[2] || (/\b(20\d\d)\b/.exec(o.period || '') || [])[1] || canonical?.[1] || '';
   const txt = `${o.title || ''} ${o.sub || ''}`;
+  if (['indicators', 'institutions', 'municipalities', 'measures'].includes(group)) {
+    if (publication) return `${{проект:'По законопроекта', прогноза:'Прогноза', закон:'Закон', отчет:'Отчет'}[publication[1].toLowerCase()]} ${yr}`;
+    // Publication wording describes the figure; the destination only selects
+    // its screen. Historical bill figures can be reached under a law period.
+    if (group === 'measures') return `По законопроекта ${yr}`.trim();
+    if (group === 'indicators' && /Макроикономическа прогноза/i.test(txt)) return `Прогноза ${yr}`.trim();
+    if (/законопроект/i.test(txt)) return `По законопроекта ${yr}`.trim();
+    if (group === 'indicators' && /^Изпълнение |^Салдо на КФП, януари|· отчет(?:\s|$)/i.test(txt)) return `Отчет ${yr}`.trim();
+    if (canonical) return `${{draft:'По законопроекта', forecast:'Прогноза', law:'Закон', report:'Отчет', expected:'Очаквано изпълнение'}[canonical[2]]} ${yr}`;
+  }
   let w = '';
-  if (group === 'measures') w = 'По законопроекта';
-  else if (group === 'indicators') {
-    if (/Макроикономическа прогноза/.test(txt)) w = 'Прогноза';
-    else if (/законопроект/i.test(txt)) w = 'По законопроекта';
-    else if ((yr && yr < '2026') || /^Изпълнение |^Салдо на КФП, януари|· отчет\b/.test(txt)) w = 'Отчет';
-    else w = 'Закон';
-  } else if (group === 'institutions' || group === 'municipalities') w = 'Закон';
+  if (group === 'indicators') w = yr && yr < '2026' ? 'Отчет' : 'Закон';
+  else if (group === 'institutions' || group === 'municipalities') w = 'Закон';
   return w ? `${w} ${yr}`.trim() : '';
 }
 /** the line under a result: its description, then stage + year (the plain year when the group has no stage) */
@@ -245,7 +252,7 @@ function fromDoc(doc) {
     const g = typeof r[F.g] === 'number' ? groups[r[F.g]] : r[F.g];
     const title = r[F.title], href = r[F.href];
     if (!g || !title || typeof href !== 'string' || !href.startsWith('#/')) continue;
-    out.push(entry(String(g), title, { sub: r[F.sub], value: r[F.value], period: r[F.period], status: r[F.status], href, kw: r[F.kw], stage: stageOf(String(g), { title, sub: r[F.sub], period: r[F.period] }) }));
+    out.push(entry(String(g), title, { sub: r[F.sub], value: r[F.value], period: r[F.period], status: r[F.status], href, kw: r[F.kw], stage: stageOf(String(g), { title, sub: r[F.sub], period: r[F.period], href }) }));
   }
   return out;
 }
@@ -326,7 +333,9 @@ export function getIndex() {
       entries = entries.filter(e=>!oldAnnual(e));
       entries.push(...annualSearch(...annual.map(result=>result.value)));
     } else {
-      entries = entries.map(e=>oldAnnual(e) ? entry(e.group,e.title,{...e,sub:`Историческа публикация: АСБП 2026–2028. ${e.sub}`,stage:'Исторически проект 2026'}) : e);
+      // Old published indexes may contain draft figures without a matching current
+      // destination. Do not offer those figures when annual data cannot replace them.
+      entries = entries.filter(e=>!oldAnnual(e));
     }
     entries.push(...fromRoutes());
     if (!entries.some(e => e.group === 'terms')) {
