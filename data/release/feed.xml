@@ -17,7 +17,7 @@
 </item>
 <item>
 <title>Евростат: дългът в края на второто тримесечие на 2026 г.</title>
-<link>https://budget-na-svetlo.example/#/dalg?obhvat=maastricht</link>
+<link>https://budget-na-svetlo.example/#/dalg?obhvat=maastricht&amp;per=2025.report&amp;to=s17-b-quarterly</link>
 <guid isPermaLink="false">eurostat-gov_10q_ggdebt-2026-10-21</guid>
 <pubDate>Wed, 21 Oct 2026 12:00:00 +0000</pubDate>
 <category>Евростат</category>
@@ -25,7 +25,7 @@
 </item>
 <item>
 <title>Евростат: дългът на държавното управление за 2025 г.</title>
-<link>https://budget-na-svetlo.example/#/dalg?obhvat=maastricht</link>
+<link>https://budget-na-svetlo.example/#/dalg?obhvat=maastricht&amp;per=2025.report&amp;to=s17-b-maastricht</link>
 <guid isPermaLink="false">eurostat-gov_10dd_edpt1-2026-10-21</guid>
 <pubDate>Wed, 21 Oct 2026 12:00:00 +0000</pubDate>
 <category>Евростат</category>
@@ -49,7 +49,7 @@
 </item>
 <item>
 <title>Евростат: разходите по функции (COFOG) са допълнени до 2024 г.</title>
-<link>https://budget-na-svetlo.example/#/razhodi</link>
+<link>https://budget-na-svetlo.example/#/razhodi?per=2024.report</link>
 <guid isPermaLink="false">eurostat-gov_10a_exp-2026-09-16</guid>
 <pubDate>Wed, 16 Sep 2026 12:00:00 +0000</pubDate>
 <category>Евростат</category>
