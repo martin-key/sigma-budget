@@ -24,12 +24,14 @@ const cases: any[] = [
     ...load('cases-extra.json'),
     ...load('review/cases.json'),
     ...load('key-whitespace/cases.json'),
+    ...load('integer/cases.json'),
   ],
   oracle = {
     ...load('oracle.json'),
     ...load('oracle-extra.json'),
     ...load('review/oracle.json'),
     ...load('key-whitespace/oracle.json'),
+    ...load('integer/oracle.json'),
   };
 function mutate(root: string, op: any) {
   const p = join(root, op.file);

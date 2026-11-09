@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { Check, fmt, gzipSize, isnum, pyRepr, pyTruth } from './checks.js';
 import { Context, files, safePath } from './context.js';
 import { pythonNumberAt } from '../common/numbers.js';
+import { catalogIntegerRepr, catalogIntegerText } from './catalog-integer.js';
 
 const sources = [
   'budget2027',
@@ -211,9 +212,9 @@ function pythonInt(value: any): number {
       'TypeError',
       `int() argument must be a string, a bytes-like object or a real number, not '${kind(value)}'`,
     );
-  const text = value.trim();
+  const text = catalogIntegerText(value);
   if (!/^[+-]?\d(?:_?\d)*$/.test(text))
-    error('ValueError', `invalid literal for int() with base 10: ${pyRepr(value)}`);
+    error('ValueError', `invalid literal for int() with base 10: ${catalogIntegerRepr(value)}`);
   return Number(text.replaceAll('_', ''));
 }
 function pythonMonth(v: any): number {

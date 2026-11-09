@@ -7,3 +7,11 @@ With Python 3.12, run `PYTHONDONTWRITEBYTECODE=1 python generate_oracle.py --che
 The raw complete-corpus baseline has one CORE problem, two CATALOG problems and 15 CATALOG warnings. The original 37-case capture has 17 warnings because it lacks the dynamic pointer. Production's existing broad compatibility patterns accept the three baseline findings. The scoped TypeScript runner accepts only these exact findings, retains the raw result and warnings, and rejects new drift that the older broad patterns could also match. `--no-accepted` reports all raw problems. The report is explicitly incomplete: SEARCH, FEED and other unported groups remain outside this scope.
 
 The frozen `search_feed.py` retains its original trailing blank line byte for byte, including the whitespace flagged by `git diff --check` on a newly copied file.
+
+`integer/generate_oracle.py --check` independently captures 148 population-year
+integer scenarios from the unchanged Python 3.12 donor. It covers numeric
+whitespace, underscore/sign grammar, every Unicode 15.0 decimal digit block,
+later Unicode digits and invalid nonprintable characters. Its separately pinned
+Unicode data supplies the decimal and diagnostic repertoire; direct and compiled
+CORE checks compare complete outcomes. Numeric whitespace deliberately differs
+from Python `str.strip` and JavaScript `trim`. Earlier captures remain immutable.
