@@ -267,6 +267,7 @@ export function buildGlossary(
 export function restoreEditorial(
   inputs: Record<keyof typeof EDITORIAL_HASHES, Uint8Array>,
   routes: EditorialRoute[],
+  options: { allowUnalignedGuide?: boolean } = {},
 ): Record<keyof typeof EDITORIAL_HASHES, Uint8Array> {
   for (const name of Object.keys(EDITORIAL_HASHES) as (keyof typeof EDITORIAL_HASHES)[]) {
     if (createHash('sha256').update(inputs[name]).digest('hex') !== EDITORIAL_HASHES[name])
@@ -295,8 +296,10 @@ export function restoreEditorial(
     for (const link of t.see) requireEditorialHref(routes, need(link.href, 'see.href'));
   }
   const guide = JSON.parse(Buffer.from(inputs['guide.json']).toString('utf8')) as GuideDataset;
-  const errors = checkGuide(guide, routes);
-  if (errors.length) throw new Error(errors.join('\n'));
+  if (!options.allowUnalignedGuide) {
+    const errors = checkGuide(guide, routes);
+    if (errors.length) throw new Error(errors.join('\n'));
+  }
   return inputs;
 }
 

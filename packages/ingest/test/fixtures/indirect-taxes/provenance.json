@@ -1,0 +1,13 @@
+{
+  "baseline": "027a262288c0b0ca4b188482a8b8da43bb378047",
+  "buildDate": "2026-11-08",
+  "mode": "frozen-python-reader-ir",
+  "files": {
+    "reader-ir.json": "a7333850711e590a433fb12bd118ce74c3f6cdf2b9e5f02623c7eb9bdfe0ee27",
+    "oracle.json": "adffb3ccd3be4536ca07aa86aaa67623137ed6cd779278fb3d025e9748ef6dc1",
+    "donor.py": "7e2800d7f04f6edfec601864cc9b918cd03a21a471623a7269884708f21e85cc",
+    "data_io_donor.py": "b827a40fe5c979f2cf0d689766fedc355fddeb8c897460578d6aeb26364b9d68",
+    "capture.py": "0256f2672c83c544ad6808c6d3fadebd24b9e6c69bf4994b526a2c3fbd5bed25",
+    "regenerate.py": "c9cdb7a448b956c7af7498c60e0e498c802bbae8c1e420054bdbb368860ba4af"
+  }
+}

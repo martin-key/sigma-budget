@@ -1,0 +1,1955 @@
+{
+  "baseline": "027a262288c0b0ca4b188482a8b8da43bb378047",
+  "date": "2026-11-08",
+  "artifacts": [
+    {
+      "file": "budget2027-provenance.json",
+      "dataset": "budget2027-provenance",
+      "producer": "python -m budget_pipeline.build.budget_2027",
+      "stage": "budget-2027",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "budget2027",
+        "data/inputs/budget_forecast_2027.json",
+        "data/inputs/budget_bill_2027.json"
+      ],
+      "limitations": [
+        "Draft bill for 2027; forecasts for 2028–2029. No complete programme archive or individual municipal allocations for forecast years."
+      ],
+      "sourceHashes": {
+        "fiscal/datasets-provenance.json": "e6a4281870ab0a2a971968403e602ddd9960091c2abb22d944b2fad590c50801",
+        "fiscal/inputs/data/cache/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json": "2d80b15c16e0e26f658f057577c1f4bf0badb589cd744781cd94c90a919eeff4",
+        "fiscal/inputs/data/inputs/budget_bill_2027.json": "ecb9e854f1998d1d89eee1c30da84cfbb44f3dec3ca64c022b774f1be60361d3",
+        "fiscal/inputs/data/inputs/budget_forecast_2027.json": "15f9fda9484633efa58a57122382184dc4fe2572e72de8a20863347053d0ff70",
+        "fiscal/inputs/data/inputs/cofog_bg.json": "434c599808e6a5ed5b2a3bc413b552fec57d504f7b3e7b686c141d0764acdca9",
+        "fiscal/inputs/data/inputs/kfp_functions_2026.json": "322adfe7744ce1e2abda44b5c2dc57bc9070feb31174c890e2763411c71ce573",
+        "fiscal/inputs/data/inputs/measure_excerpts.json": "f81bf8ad007f9e3f6692b4e0cd8d3764cfdc8f0b06367f2c2c5a6068f948ccda",
+        "fiscal/inputs/data/inputs/measures_2026.json": "8c24eef77bd6b2cfec5bd2613cca43dc403f108144a4ad7e317803aa5307bedd",
+        "fiscal/inputs/data/inputs/population.json": "5ec9392e4493e5aa399abd4a019881629d26e07d78b391dbc0d50f9d10811cb6",
+        "fiscal/inputs/data/originals/asbp/asbp_tables.json": "27b82e1b8059c88b70dab8cf588c944e444b3532d4eba9fe1b085a776e4b2d3a",
+        "fiscal/inputs/data/originals/budget_2027/ZDBRB-2027.zip": "6e0aeaab774eb5a0c5b10888b49bc4e9f8c72220188def8989e4ebdc3241b517",
+        "wave13a/inputs-sha256.json": "3e8b1ed66d5f3aeb221bda7cf9a56e880d632ceb96d68929f76434996660b2e2"
+      }
+    },
+    {
+      "file": "budget2027.json",
+      "dataset": "budget2027",
+      "producer": "python -m budget_pipeline.build.budget_2027",
+      "stage": "budget-2027",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "budget2027",
+        "data/inputs/budget_forecast_2027.json",
+        "data/inputs/budget_bill_2027.json"
+      ],
+      "limitations": [
+        "Draft bill for 2027; forecasts for 2028–2029. No complete programme archive or individual municipal allocations for forecast years."
+      ],
+      "sourceHashes": {
+        "fiscal/datasets-provenance.json": "e6a4281870ab0a2a971968403e602ddd9960091c2abb22d944b2fad590c50801",
+        "fiscal/inputs/data/cache/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json": "2d80b15c16e0e26f658f057577c1f4bf0badb589cd744781cd94c90a919eeff4",
+        "fiscal/inputs/data/inputs/budget_bill_2027.json": "ecb9e854f1998d1d89eee1c30da84cfbb44f3dec3ca64c022b774f1be60361d3",
+        "fiscal/inputs/data/inputs/budget_forecast_2027.json": "15f9fda9484633efa58a57122382184dc4fe2572e72de8a20863347053d0ff70",
+        "fiscal/inputs/data/inputs/cofog_bg.json": "434c599808e6a5ed5b2a3bc413b552fec57d504f7b3e7b686c141d0764acdca9",
+        "fiscal/inputs/data/inputs/kfp_functions_2026.json": "322adfe7744ce1e2abda44b5c2dc57bc9070feb31174c890e2763411c71ce573",
+        "fiscal/inputs/data/inputs/measure_excerpts.json": "f81bf8ad007f9e3f6692b4e0cd8d3764cfdc8f0b06367f2c2c5a6068f948ccda",
+        "fiscal/inputs/data/inputs/measures_2026.json": "8c24eef77bd6b2cfec5bd2613cca43dc403f108144a4ad7e317803aa5307bedd",
+        "fiscal/inputs/data/inputs/population.json": "5ec9392e4493e5aa399abd4a019881629d26e07d78b391dbc0d50f9d10811cb6",
+        "fiscal/inputs/data/originals/asbp/asbp_tables.json": "27b82e1b8059c88b70dab8cf588c944e444b3532d4eba9fe1b085a776e4b2d3a",
+        "fiscal/inputs/data/originals/budget_2027/ZDBRB-2027.zip": "6e0aeaab774eb5a0c5b10888b49bc4e9f8c72220188def8989e4ebdc3241b517",
+        "wave13a/inputs-sha256.json": "3e8b1ed66d5f3aeb221bda7cf9a56e880d632ceb96d68929f76434996660b2e2"
+      }
+    },
+    {
+      "file": "catalog.json",
+      "dataset": "catalog",
+      "producer": "python -m budget_pipeline.build.catalog (catalog)",
+      "stage": "catalog",
+      "mode": "frozen-source",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "asbp",
+        "components",
+        "core",
+        "execution",
+        "expenditure",
+        "feed",
+        "glossary",
+        "guide",
+        "gva-sectors",
+        "law",
+        "measures",
+        "midt-sebra",
+        "ministries",
+        "municipalities",
+        "outlook",
+        "programs",
+        "data/originals/MANIFEST.json",
+        "rates",
+        "revenue",
+        "sebra",
+        "indirect-tax-parameters"
+      ],
+      "limitations": [
+        "after catalog: the v5 wording and removals and catalog_refresh.py (layers)"
+      ],
+      "sourceHashes": {
+        "aggregation/archive/originals/eurostat/tps00001_BG.json": "ff04b43ce8535c36c4abadc6c10171b7132e09690e471a7cffb23ff03ced92fc",
+        "aggregation/authored.json": "b0d45f10d3f4cc2010e5c07c5e79768a43b65448b5acddf3fb06bdbe7be25fb2",
+        "aggregation/inputs/glossary.json": "35017812f53831a8403d28483adad64031f0361d6ecd1e5a4d74a76b13e7dc89",
+        "aggregation/inputs/wording.json": "20bde723e380e7879b01b1565dc9736a0fa1157621342a015cdea0ed0c0067a6",
+        "aggregation/upstream/execution-provenance.json": "e9e61e85566724fd93881404d6cc71cb7bb8f517cb6869d0a81c3b8c962917eb",
+        "aggregation/upstream/execution.json": "e9c75d84bb575c3a0287c0a7a56828b473bd53498336ce6d45cfbc6333533200",
+        "aggregation/upstream/gva-sectors.json": "f1d96acd63f3db527e696194d23bd142f774168259aeb4dd6868ce1a23a447a2",
+        "catalog/inputs/authored.json": "9024cd6ac44b7b4c0690f763ca85e2bbc030c154352290901ce08888fe17b204",
+        "catalog/inputs/datasets.yaml": "7a5dacf63fd371dfeef5d3c22bc1dcfc5a39cf5716ac8022598002953914a14a",
+        "catalog/inputs/file-facts.json": "e1e30adc135787523ee41bf1fcf15948a2f9251c30ff272ce58bfa3834829c31",
+        "catalog/inputs/manifest.json": "14bdab2e614b7bfc8a97978dbc7439e6e2bbeceaac0363ba62c9ee2d74b10339",
+        "catalog/inputs/routes.json": "d41a55e3a68f3d92192df348518c4e98e0289ea604f67b045b9fbc4c3c003f7f",
+        "catalog/provenance.json": "789cb9701a78700f20a7d49a5fc5b321e743df176de93512798541eefb934b68",
+        "components-rates/inputs/bill-blocks.json": "255ae51f9523d67edea10cf89d5471f7bdf251f42869a606e775167200e47781",
+        "components-rates/inputs/capture-source-hashes.json": "50e58e28dd8cb59f3e30eab2bc72ecb3199210ead6abeece6957fd267d3fa0ec",
+        "components-rates/inputs/doo-blocks.json": "1417e9ac2b3220803acbbdf9c1ba0481114ec2a7723f28efcf1cb84d305ee037",
+        "components-rates/inputs/kfp-components.json": "0d2ef157220e13fe0e66fa9406788935b1c4056500f85e0e3d8b540d73fbffb6",
+        "components-rates/inputs/nap-rows.json": "d0b37dcaa54cde932ef00f3c561fd63086b9b5a07cd239fa0d6303c9533b603f",
+        "components-rates/inputs/nzok-blocks.json": "057fc59b6436ca26f67f681550efa44a7f2cc75d70900cc73eae140135aabe08",
+        "components-rates/inputs/pages.json": "9cbfe0aa4d4927ab88d9f668a034f085e79d6cbe62285a3480e78047c0434af7",
+        "components-rates/inputs/tables.json": "cf62e4db0feb140033a5a41931daa6d6802d61dcd272d2f00e76f696933f8f80",
+        "components-rates/provenance.json": "f7e2c4472e1b90d7bcdfebeda5ed08a20144972c41bdcaeece70e50035f356fe",
+        "dbp-gva/inputs/editorial.json": "479afe048c27b298b0fc3d9e1cbc308cb6bddc1afebb67b984bad50917de8a69",
+        "dbp-gva/inputs/figures.json": "46a5398f715a651bfb560f2037349f39f5e4ceec7de086f020e5dab364429613",
+        "dbp-gva/inputs/plan.pdf": "8c91cdf4778f2864e1eeb167f14b08d1f68a076ea4ad27a8a4305175a73f1182",
+        "dbp-gva/provenance.json": "93a0dda20cb3175a700c1c33df11d8829b7abd1a8f96452ded70cd91fbccfb3e",
+        "debt-local/inputs/data/cache/eurostat_pop_nuts3_bg.json": "c5869aac65138237d190e14c0389f5688c8e5c85af72ac3edb3f5019cb19fc58",
+        "debt-local/inputs/data/cache/gisco_lau_bg.json": "b9793b72951e164b5a2bcdbf3004ac13fdbb15a071d5164dfc1d658d58f76208",
+        "debt-local/inputs/data/inputs/debt_gdp.json": "554a764d0ea883b5475097bf408a29c8d33e056e44e7a4931f6abbf23c1d001b",
+        "debt-local/inputs/data/inputs/debt_stock.json": "371fc6027ebe7a1c73af1a7cb1d2e8a0e11b11de6d03d01b873e606ccf279bbb",
+        "debt-local/inputs/data/inputs/municipal_transfers_2026.json": "0369d31e441d44082d483fe8a86da0dcbcbb9262ce728155d25b7663351194ce",
+        "debt-local/inputs/data/originals/eurostat/gov_10dd_edpt1_BG_EU.json": "3017517bf6ee3c8cc3a42f895b08c162da02d4d046a5a64132799d5e6333dafd",
+        "debt-local/inputs/data/originals/eurostat/gov_10q_ggdebt_BG.json": "7acad3d3154cfa6758a7e7fbba85987ae0bcd30f7ba72422e686b8a00052fdf1",
+        "debt-local/inputs/dv-blocks.json": "31e1c2121c1a25ea96617345e0066c9b043c0bcf915e29432a5f600d1ef98f11",
+        "debt-local/inputs/oblast-jsonstat.json": "c1be1f31c8c473adff38fa374472413a3ad8ae2dedce301401db3bf003dc6e24",
+        "debt-local/inputs/reader-captures.json": "fc5a6ad3a164973a89f809dde580782132efd2eb58f000cf496952c8ceecbc68",
+        "debt-local/provenance.json": "cd079c17f85e7ddef38b02f5eac1b8164547c58a4a61e51afdfd462d6688fcdf",
+        "editorial/inputs/glossary.json": "0d88665ab18f66da040adfe6ee525d5a7aacfcc72223df5ccfc7b4276c888a77",
+        "editorial/inputs/guide.json": "9a808bca21b3817350f1032d469e9dc242f397012be93a4b09d976557be05b09",
+        "editorial/provenance.json": "76f1ad35833ff8a1be378b88c8bcd4df34f3f20041223e7422b5500ba6a76b85",
+        "fiscal/datasets-provenance.json": "e6a4281870ab0a2a971968403e602ddd9960091c2abb22d944b2fad590c50801",
+        "fiscal/inputs/data/cache/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json": "2d80b15c16e0e26f658f057577c1f4bf0badb589cd744781cd94c90a919eeff4",
+        "fiscal/inputs/data/inputs/budget_bill_2027.json": "ecb9e854f1998d1d89eee1c30da84cfbb44f3dec3ca64c022b774f1be60361d3",
+        "fiscal/inputs/data/inputs/budget_forecast_2027.json": "15f9fda9484633efa58a57122382184dc4fe2572e72de8a20863347053d0ff70",
+        "fiscal/inputs/data/inputs/cofog_bg.json": "434c599808e6a5ed5b2a3bc413b552fec57d504f7b3e7b686c141d0764acdca9",
+        "fiscal/inputs/data/inputs/kfp_functions_2026.json": "322adfe7744ce1e2abda44b5c2dc57bc9070feb31174c890e2763411c71ce573",
+        "fiscal/inputs/data/inputs/measure_excerpts.json": "f81bf8ad007f9e3f6692b4e0cd8d3764cfdc8f0b06367f2c2c5a6068f948ccda",
+        "fiscal/inputs/data/inputs/measures_2026.json": "8c24eef77bd6b2cfec5bd2613cca43dc403f108144a4ad7e317803aa5307bedd",
+        "fiscal/inputs/data/inputs/population.json": "5ec9392e4493e5aa399abd4a019881629d26e07d78b391dbc0d50f9d10811cb6",
+        "fiscal/inputs/data/originals/asbp/asbp_tables.json": "27b82e1b8059c88b70dab8cf588c944e444b3532d4eba9fe1b085a776e4b2d3a",
+        "fiscal/inputs/data/originals/budget_2027/ZDBRB-2027.zip": "6e0aeaab774eb5a0c5b10888b49bc4e9f8c72220188def8989e4ebdc3241b517",
+        "indirect-taxes/provenance.json": "c240c8fa33d9e9dd9c3064259a159864b3b4395c5559b8b2c80c45abecfcd575",
+        "indirect-taxes/reader-ir.json": "a7333850711e590a433fb12bd118ce74c3f6cdf2b9e5f02623c7eb9bdfe0ee27",
+        "law/provenance.json": "f02033ff64588d9edec39740cdb3812d9c697aee7c594df08689ee91d38ba726",
+        "original:data/originals/ec-oil/duties-and-taxes-2026-11-07.xlsx": "3719f74988d59184896b91a108400ec62f2ac09f03e88b0c969b121b966618b6",
+        "original:data/originals/ec-oil/weekly-prices-2026-11-02.xlsx": "946947ad4cab9daa786578ac9b2c077d922c0f661671eb5cdb4004bd51763ebb",
+        "original:data/originals/excise-law/dv-69-2026-budget.html": "b08fb0a5ee9c1c32579b8851c69fcfb34988e0efebde32dbb3e897698e0f2b51",
+        "original:data/originals/excise-law/excise-law-dv54-2025.pdf": "cdc69fed256f73e91b7f0dba8d8340f5e5a9fe12c93f075227a2c84b389a6f8f",
+        "original:data/originals/nsi-pack/statistical-yearbook-2025.pdf": "b4d93c6439621a40bdf721635b0d4022d0d6bec640cb2d5a4ddcc86cb0564fa9",
+        "original:data/originals/parliament/52-602-01-19.docx": "378042f3c6f05aad760099f3b5ccceaf597fd287b28242fe89b99d2a981fc174",
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5",
+        "wave13a/inputs-sha256.json": "3e8b1ed66d5f3aeb221bda7cf9a56e880d632ceb96d68929f76434996660b2e2",
+        "wave13b/legal-evidence.json": "c4f04eec1e8bb12cb04c230dda6612eaba80ac774643f57e097ad40581ff4254",
+        "wave13b/releases-current.json": "b60a62b5ba15e42d630cb8e5056f841a0d066aa853771057152c1150dfb10fd8",
+        "wave13b/sources.yaml": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+      }
+    },
+    {
+      "file": "components.json",
+      "dataset": "components",
+      "producer": "python -m budget_pipeline.build.components (build_components)",
+      "stage": "components",
+      "mode": "frozen-source",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "execution",
+        "law",
+        "municipalities",
+        "outlook",
+        "data/originals/asbp/asbp_tables.json",
+        "data/inputs/kfp_components_2026.json",
+        "data/cache/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json",
+        "zbdoo",
+        "zbnzok"
+      ],
+      "limitations": [
+        "data/inputs/kfp_components_2026.json needs the missing July WEB_2 original; see docs/reproducibility.md"
+      ],
+      "sourceHashes": {
+        "aggregation/upstream/execution-provenance.json": "e9e61e85566724fd93881404d6cc71cb7bb8f517cb6869d0a81c3b8c962917eb",
+        "aggregation/upstream/execution.json": "e9c75d84bb575c3a0287c0a7a56828b473bd53498336ce6d45cfbc6333533200",
+        "aggregation/upstream/gva-sectors.json": "f1d96acd63f3db527e696194d23bd142f774168259aeb4dd6868ce1a23a447a2",
+        "components-rates/inputs/capture-source-hashes.json": "50e58e28dd8cb59f3e30eab2bc72ecb3199210ead6abeece6957fd267d3fa0ec",
+        "components-rates/inputs/doo-blocks.json": "1417e9ac2b3220803acbbdf9c1ba0481114ec2a7723f28efcf1cb84d305ee037",
+        "components-rates/inputs/kfp-components.json": "0d2ef157220e13fe0e66fa9406788935b1c4056500f85e0e3d8b540d73fbffb6",
+        "components-rates/inputs/nzok-blocks.json": "057fc59b6436ca26f67f681550efa44a7f2cc75d70900cc73eae140135aabe08",
+        "components-rates/inputs/pages.json": "9cbfe0aa4d4927ab88d9f668a034f085e79d6cbe62285a3480e78047c0434af7",
+        "components-rates/inputs/tables.json": "cf62e4db0feb140033a5a41931daa6d6802d61dcd272d2f00e76f696933f8f80",
+        "components-rates/provenance.json": "f7e2c4472e1b90d7bcdfebeda5ed08a20144972c41bdcaeece70e50035f356fe",
+        "debt-local/inputs/data/cache/eurostat_pop_nuts3_bg.json": "c5869aac65138237d190e14c0389f5688c8e5c85af72ac3edb3f5019cb19fc58",
+        "debt-local/inputs/data/cache/gisco_lau_bg.json": "b9793b72951e164b5a2bcdbf3004ac13fdbb15a071d5164dfc1d658d58f76208",
+        "debt-local/inputs/data/inputs/municipal_transfers_2026.json": "0369d31e441d44082d483fe8a86da0dcbcbb9262ce728155d25b7663351194ce",
+        "debt-local/inputs/oblast-jsonstat.json": "c1be1f31c8c473adff38fa374472413a3ad8ae2dedce301401db3bf003dc6e24",
+        "debt-local/provenance.json": "cd079c17f85e7ddef38b02f5eac1b8164547c58a4a61e51afdfd462d6688fcdf",
+        "fiscal/datasets-provenance.json": "e6a4281870ab0a2a971968403e602ddd9960091c2abb22d944b2fad590c50801",
+        "fiscal/inputs/data/cache/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json": "2d80b15c16e0e26f658f057577c1f4bf0badb589cd744781cd94c90a919eeff4",
+        "fiscal/inputs/data/inputs/budget_bill_2027.json": "ecb9e854f1998d1d89eee1c30da84cfbb44f3dec3ca64c022b774f1be60361d3",
+        "fiscal/inputs/data/inputs/budget_forecast_2027.json": "15f9fda9484633efa58a57122382184dc4fe2572e72de8a20863347053d0ff70",
+        "fiscal/inputs/data/inputs/cofog_bg.json": "434c599808e6a5ed5b2a3bc413b552fec57d504f7b3e7b686c141d0764acdca9",
+        "fiscal/inputs/data/inputs/kfp_functions_2026.json": "322adfe7744ce1e2abda44b5c2dc57bc9070feb31174c890e2763411c71ce573",
+        "fiscal/inputs/data/inputs/measure_excerpts.json": "f81bf8ad007f9e3f6692b4e0cd8d3764cfdc8f0b06367f2c2c5a6068f948ccda",
+        "fiscal/inputs/data/inputs/measures_2026.json": "8c24eef77bd6b2cfec5bd2613cca43dc403f108144a4ad7e317803aa5307bedd",
+        "fiscal/inputs/data/inputs/population.json": "5ec9392e4493e5aa399abd4a019881629d26e07d78b391dbc0d50f9d10811cb6",
+        "fiscal/inputs/data/originals/asbp/asbp_tables.json": "27b82e1b8059c88b70dab8cf588c944e444b3532d4eba9fe1b085a776e4b2d3a",
+        "fiscal/inputs/data/originals/budget_2027/ZDBRB-2027.zip": "6e0aeaab774eb5a0c5b10888b49bc4e9f8c72220188def8989e4ebdc3241b517",
+        "law/provenance.json": "f02033ff64588d9edec39740cdb3812d9c697aee7c594df08689ee91d38ba726",
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5",
+        "wave13a/inputs-sha256.json": "3e8b1ed66d5f3aeb221bda7cf9a56e880d632ceb96d68929f76434996660b2e2",
+        "wave13b/legal-evidence.json": "c4f04eec1e8bb12cb04c230dda6612eaba80ac774643f57e097ad40581ff4254",
+        "wave13b/releases-current.json": "b60a62b5ba15e42d630cb8e5056f841a0d066aa853771057152c1150dfb10fd8"
+      }
+    },
+    {
+      "file": "core.json",
+      "dataset": "core",
+      "producer": "python -m budget_pipeline.build.core (build_core)",
+      "stage": "core",
+      "mode": "frozen-source",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "execution",
+        "expenditure",
+        "glossary",
+        "measures",
+        "ministries",
+        "municipalities",
+        "outlook",
+        "programs",
+        "data/originals/asbp/asbp_tables.json",
+        "data/inputs/population.json",
+        "revenue",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [
+        "after build_core: the v5 wording, the v5 removal of СЕБРА and the generated sets, and the four S34 sources of v6 (layers)"
+      ],
+      "sourceHashes": {
+        "aggregation/authored.json": "b0d45f10d3f4cc2010e5c07c5e79768a43b65448b5acddf3fb06bdbe7be25fb2",
+        "aggregation/inputs/glossary.json": "35017812f53831a8403d28483adad64031f0361d6ecd1e5a4d74a76b13e7dc89",
+        "aggregation/inputs/wording.json": "20bde723e380e7879b01b1565dc9736a0fa1157621342a015cdea0ed0c0067a6",
+        "aggregation/upstream/execution-provenance.json": "e9e61e85566724fd93881404d6cc71cb7bb8f517cb6869d0a81c3b8c962917eb",
+        "aggregation/upstream/execution.json": "e9c75d84bb575c3a0287c0a7a56828b473bd53498336ce6d45cfbc6333533200",
+        "aggregation/upstream/gva-sectors.json": "f1d96acd63f3db527e696194d23bd142f774168259aeb4dd6868ce1a23a447a2",
+        "catalog/inputs/routes.json": "d41a55e3a68f3d92192df348518c4e98e0289ea604f67b045b9fbc4c3c003f7f",
+        "debt-local/inputs/data/cache/eurostat_pop_nuts3_bg.json": "c5869aac65138237d190e14c0389f5688c8e5c85af72ac3edb3f5019cb19fc58",
+        "debt-local/inputs/data/cache/gisco_lau_bg.json": "b9793b72951e164b5a2bcdbf3004ac13fdbb15a071d5164dfc1d658d58f76208",
+        "debt-local/inputs/data/inputs/municipal_transfers_2026.json": "0369d31e441d44082d483fe8a86da0dcbcbb9262ce728155d25b7663351194ce",
+        "debt-local/inputs/oblast-jsonstat.json": "c1be1f31c8c473adff38fa374472413a3ad8ae2dedce301401db3bf003dc6e24",
+        "debt-local/provenance.json": "cd079c17f85e7ddef38b02f5eac1b8164547c58a4a61e51afdfd462d6688fcdf",
+        "editorial/inputs/glossary.json": "0d88665ab18f66da040adfe6ee525d5a7aacfcc72223df5ccfc7b4276c888a77",
+        "editorial/inputs/guide.json": "9a808bca21b3817350f1032d469e9dc242f397012be93a4b09d976557be05b09",
+        "editorial/provenance.json": "76f1ad35833ff8a1be378b88c8bcd4df34f3f20041223e7422b5500ba6a76b85",
+        "fiscal/datasets-provenance.json": "e6a4281870ab0a2a971968403e602ddd9960091c2abb22d944b2fad590c50801",
+        "fiscal/inputs/data/cache/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json": "2d80b15c16e0e26f658f057577c1f4bf0badb589cd744781cd94c90a919eeff4",
+        "fiscal/inputs/data/inputs/budget_bill_2027.json": "ecb9e854f1998d1d89eee1c30da84cfbb44f3dec3ca64c022b774f1be60361d3",
+        "fiscal/inputs/data/inputs/budget_forecast_2027.json": "15f9fda9484633efa58a57122382184dc4fe2572e72de8a20863347053d0ff70",
+        "fiscal/inputs/data/inputs/cofog_bg.json": "434c599808e6a5ed5b2a3bc413b552fec57d504f7b3e7b686c141d0764acdca9",
+        "fiscal/inputs/data/inputs/kfp_functions_2026.json": "322adfe7744ce1e2abda44b5c2dc57bc9070feb31174c890e2763411c71ce573",
+        "fiscal/inputs/data/inputs/measure_excerpts.json": "f81bf8ad007f9e3f6692b4e0cd8d3764cfdc8f0b06367f2c2c5a6068f948ccda",
+        "fiscal/inputs/data/inputs/measures_2026.json": "8c24eef77bd6b2cfec5bd2613cca43dc403f108144a4ad7e317803aa5307bedd",
+        "fiscal/inputs/data/inputs/population.json": "5ec9392e4493e5aa399abd4a019881629d26e07d78b391dbc0d50f9d10811cb6",
+        "fiscal/inputs/data/originals/asbp/asbp_tables.json": "27b82e1b8059c88b70dab8cf588c944e444b3532d4eba9fe1b085a776e4b2d3a",
+        "fiscal/inputs/data/originals/budget_2027/ZDBRB-2027.zip": "6e0aeaab774eb5a0c5b10888b49bc4e9f8c72220188def8989e4ebdc3241b517",
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5",
+        "wave13a/inputs-sha256.json": "3e8b1ed66d5f3aeb221bda7cf9a56e880d632ceb96d68929f76434996660b2e2",
+        "wave13b/releases-current.json": "b60a62b5ba15e42d630cb8e5056f841a0d066aa853771057152c1150dfb10fd8",
+        "wave13b/sources.yaml": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+      }
+    },
+    {
+      "file": "dbp2027.json",
+      "dataset": "dbp2027",
+      "producer": "python -m budget_pipeline.build.budget_plan",
+      "stage": "budget-plan",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/cache/research/dbp-2027/dbp2027_figures.json",
+        "dbp2027"
+      ],
+      "limitations": [
+        "not listed in catalog.json (the catalog screen would change)"
+      ],
+      "sourceHashes": {
+        "dbp-gva/inputs/editorial.json": "479afe048c27b298b0fc3d9e1cbc308cb6bddc1afebb67b984bad50917de8a69",
+        "dbp-gva/inputs/figures.json": "46a5398f715a651bfb560f2037349f39f5e4ceec7de086f020e5dab364429613",
+        "dbp-gva/inputs/plan.pdf": "8c91cdf4778f2864e1eeb167f14b08d1f68a076ea4ad27a8a4305175a73f1182",
+        "dbp-gva/provenance.json": "93a0dda20cb3175a700c1c33df11d8829b7abd1a8f96452ded70cd91fbccfb3e"
+      }
+    },
+    {
+      "file": "debt.json",
+      "dataset": "debt",
+      "producer": "python -m budget_pipeline.build.debt (build_debt)",
+      "stage": "debt",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "bnb",
+        "eurostat",
+        "execution",
+        "data/originals/asbp/asbp_tables.json",
+        "data/inputs/debt_gdp.json",
+        "data/inputs/debt_stock.json",
+        "data/cache/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json",
+        "zdb"
+      ],
+      "limitations": [
+        "data/inputs/debt_gdp.json has no producer; debt_stock.json is a snapshot of an earlier Eurostat answer"
+      ],
+      "sourceHashes": {
+        "aggregation/upstream/execution-provenance.json": "e9e61e85566724fd93881404d6cc71cb7bb8f517cb6869d0a81c3b8c962917eb",
+        "aggregation/upstream/execution.json": "e9c75d84bb575c3a0287c0a7a56828b473bd53498336ce6d45cfbc6333533200",
+        "aggregation/upstream/gva-sectors.json": "f1d96acd63f3db527e696194d23bd142f774168259aeb4dd6868ce1a23a447a2",
+        "debt-local/inputs/data/cache/eurostat_pop_nuts3_bg.json": "c5869aac65138237d190e14c0389f5688c8e5c85af72ac3edb3f5019cb19fc58",
+        "debt-local/inputs/data/cache/gisco_lau_bg.json": "b9793b72951e164b5a2bcdbf3004ac13fdbb15a071d5164dfc1d658d58f76208",
+        "debt-local/inputs/data/inputs/debt_gdp.json": "554a764d0ea883b5475097bf408a29c8d33e056e44e7a4931f6abbf23c1d001b",
+        "debt-local/inputs/data/inputs/debt_stock.json": "371fc6027ebe7a1c73af1a7cb1d2e8a0e11b11de6d03d01b873e606ccf279bbb",
+        "debt-local/inputs/data/inputs/municipal_transfers_2026.json": "0369d31e441d44082d483fe8a86da0dcbcbb9262ce728155d25b7663351194ce",
+        "debt-local/inputs/data/originals/eurostat/gov_10dd_edpt1_BG_EU.json": "3017517bf6ee3c8cc3a42f895b08c162da02d4d046a5a64132799d5e6333dafd",
+        "debt-local/inputs/data/originals/eurostat/gov_10q_ggdebt_BG.json": "7acad3d3154cfa6758a7e7fbba85987ae0bcd30f7ba72422e686b8a00052fdf1",
+        "debt-local/inputs/dv-blocks.json": "31e1c2121c1a25ea96617345e0066c9b043c0bcf915e29432a5f600d1ef98f11",
+        "debt-local/inputs/oblast-jsonstat.json": "c1be1f31c8c473adff38fa374472413a3ad8ae2dedce301401db3bf003dc6e24",
+        "debt-local/inputs/reader-captures.json": "fc5a6ad3a164973a89f809dde580782132efd2eb58f000cf496952c8ceecbc68",
+        "debt-local/provenance.json": "cd079c17f85e7ddef38b02f5eac1b8164547c58a4a61e51afdfd462d6688fcdf",
+        "fiscal/inputs/data/cache/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json": "2d80b15c16e0e26f658f057577c1f4bf0badb589cd744781cd94c90a919eeff4",
+        "fiscal/inputs/data/originals/asbp/asbp_tables.json": "27b82e1b8059c88b70dab8cf588c944e444b3532d4eba9fe1b085a776e4b2d3a",
+        "wave13b/releases-current.json": "b60a62b5ba15e42d630cb8e5056f841a0d066aa853771057152c1150dfb10fd8"
+      }
+    },
+    {
+      "file": "execution-provenance.json",
+      "dataset": "execution-provenance",
+      "producer": "python -m budget_pipeline.extract.kfp_full",
+      "stage": "frozen-inputs",
+      "mode": "frozen-only",
+      "parityEligible": false,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "kfp",
+        "data/originals/asbp/asbp_tables.json",
+        "budget2027",
+        "data/inputs/budget_forecast_2027.json",
+        "data/inputs/budget_bill_2027.json"
+      ],
+      "limitations": [
+        "No adopted-law national/EU plan split in annex 1."
+      ],
+      "sourceHashes": {
+        "aggregation/upstream/execution-provenance.json": "e9e61e85566724fd93881404d6cc71cb7bb8f517cb6869d0a81c3b8c962917eb"
+      }
+    },
+    {
+      "file": "execution.json",
+      "dataset": "execution",
+      "producer": "python -m budget_pipeline.extract.kfp_full",
+      "stage": "frozen-inputs",
+      "mode": "frozen-only",
+      "parityEligible": false,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "kfp",
+        "data/originals/asbp/asbp_tables.json",
+        "budget2027",
+        "data/inputs/budget_forecast_2027.json",
+        "data/inputs/budget_bill_2027.json"
+      ],
+      "limitations": [
+        "Adopted-law denominators from MF annex 1; unavailable detailed and national/EU denominators are absent."
+      ],
+      "sourceHashes": {
+        "aggregation/upstream/execution.json": "e9c75d84bb575c3a0287c0a7a56828b473bd53498336ce6d45cfbc6333533200"
+      }
+    },
+    {
+      "file": "expenditure.json",
+      "dataset": "expenditure",
+      "producer": "python -m budget_pipeline.build.fiscal (build_expenditure)",
+      "stage": "annual-periods",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/asbp/asbp_tables.json",
+        "data/inputs/cofog_bg.json",
+        "data/inputs/kfp_functions_2026.json",
+        "data/inputs/population.json",
+        "data/cache/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json",
+        "data/inputs/budget_forecast_2027.json"
+      ],
+      "limitations": [
+        "data/inputs/cofog_bg.json and kfp_functions_2026.json have no producer (spec, section 4)"
+      ],
+      "sourceHashes": {
+        "fiscal/datasets-provenance.json": "e6a4281870ab0a2a971968403e602ddd9960091c2abb22d944b2fad590c50801",
+        "fiscal/inputs/data/cache/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json": "2d80b15c16e0e26f658f057577c1f4bf0badb589cd744781cd94c90a919eeff4",
+        "fiscal/inputs/data/inputs/budget_bill_2027.json": "ecb9e854f1998d1d89eee1c30da84cfbb44f3dec3ca64c022b774f1be60361d3",
+        "fiscal/inputs/data/inputs/budget_forecast_2027.json": "15f9fda9484633efa58a57122382184dc4fe2572e72de8a20863347053d0ff70",
+        "fiscal/inputs/data/inputs/cofog_bg.json": "434c599808e6a5ed5b2a3bc413b552fec57d504f7b3e7b686c141d0764acdca9",
+        "fiscal/inputs/data/inputs/kfp_functions_2026.json": "322adfe7744ce1e2abda44b5c2dc57bc9070feb31174c890e2763411c71ce573",
+        "fiscal/inputs/data/inputs/measure_excerpts.json": "f81bf8ad007f9e3f6692b4e0cd8d3764cfdc8f0b06367f2c2c5a6068f948ccda",
+        "fiscal/inputs/data/inputs/measures_2026.json": "8c24eef77bd6b2cfec5bd2613cca43dc403f108144a4ad7e317803aa5307bedd",
+        "fiscal/inputs/data/inputs/population.json": "5ec9392e4493e5aa399abd4a019881629d26e07d78b391dbc0d50f9d10811cb6",
+        "fiscal/inputs/data/originals/asbp/asbp_tables.json": "27b82e1b8059c88b70dab8cf588c944e444b3532d4eba9fe1b085a776e4b2d3a",
+        "fiscal/inputs/data/originals/budget_2027/ZDBRB-2027.zip": "6e0aeaab774eb5a0c5b10888b49bc4e9f8c72220188def8989e4ebdc3241b517",
+        "wave13a/inputs-sha256.json": "3e8b1ed66d5f3aeb221bda7cf9a56e880d632ceb96d68929f76434996660b2e2"
+      }
+    },
+    {
+      "file": "feed.json",
+      "dataset": "feed",
+      "producer": "python -m budget_pipeline.build.feed (build_feed)",
+      "stage": "feed",
+      "mode": "frozen-source",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "budget2027",
+        "debt",
+        "eurostat",
+        "execution",
+        "expenditure",
+        "law",
+        "data/inputs/cofog_bg.json",
+        "data/inputs/population.json",
+        "rates",
+        "sebra"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "aggregation/archive/originals/eurostat/tps00001_BG.json": "ff04b43ce8535c36c4abadc6c10171b7132e09690e471a7cffb23ff03ced92fc",
+        "aggregation/authored.json": "b0d45f10d3f4cc2010e5c07c5e79768a43b65448b5acddf3fb06bdbe7be25fb2",
+        "aggregation/inputs/wording.json": "20bde723e380e7879b01b1565dc9736a0fa1157621342a015cdea0ed0c0067a6",
+        "aggregation/upstream/execution-provenance.json": "e9e61e85566724fd93881404d6cc71cb7bb8f517cb6869d0a81c3b8c962917eb",
+        "aggregation/upstream/execution.json": "e9c75d84bb575c3a0287c0a7a56828b473bd53498336ce6d45cfbc6333533200",
+        "aggregation/upstream/gva-sectors.json": "f1d96acd63f3db527e696194d23bd142f774168259aeb4dd6868ce1a23a447a2",
+        "components-rates/inputs/bill-blocks.json": "255ae51f9523d67edea10cf89d5471f7bdf251f42869a606e775167200e47781",
+        "components-rates/inputs/capture-source-hashes.json": "50e58e28dd8cb59f3e30eab2bc72ecb3199210ead6abeece6957fd267d3fa0ec",
+        "components-rates/inputs/doo-blocks.json": "1417e9ac2b3220803acbbdf9c1ba0481114ec2a7723f28efcf1cb84d305ee037",
+        "components-rates/inputs/nap-rows.json": "d0b37dcaa54cde932ef00f3c561fd63086b9b5a07cd239fa0d6303c9533b603f",
+        "components-rates/inputs/nzok-blocks.json": "057fc59b6436ca26f67f681550efa44a7f2cc75d70900cc73eae140135aabe08",
+        "components-rates/provenance.json": "f7e2c4472e1b90d7bcdfebeda5ed08a20144972c41bdcaeece70e50035f356fe",
+        "debt-local/inputs/data/cache/eurostat_pop_nuts3_bg.json": "c5869aac65138237d190e14c0389f5688c8e5c85af72ac3edb3f5019cb19fc58",
+        "debt-local/inputs/data/cache/gisco_lau_bg.json": "b9793b72951e164b5a2bcdbf3004ac13fdbb15a071d5164dfc1d658d58f76208",
+        "debt-local/inputs/data/inputs/debt_gdp.json": "554a764d0ea883b5475097bf408a29c8d33e056e44e7a4931f6abbf23c1d001b",
+        "debt-local/inputs/data/inputs/debt_stock.json": "371fc6027ebe7a1c73af1a7cb1d2e8a0e11b11de6d03d01b873e606ccf279bbb",
+        "debt-local/inputs/data/inputs/municipal_transfers_2026.json": "0369d31e441d44082d483fe8a86da0dcbcbb9262ce728155d25b7663351194ce",
+        "debt-local/inputs/data/originals/eurostat/gov_10dd_edpt1_BG_EU.json": "3017517bf6ee3c8cc3a42f895b08c162da02d4d046a5a64132799d5e6333dafd",
+        "debt-local/inputs/data/originals/eurostat/gov_10q_ggdebt_BG.json": "7acad3d3154cfa6758a7e7fbba85987ae0bcd30f7ba72422e686b8a00052fdf1",
+        "debt-local/inputs/dv-blocks.json": "31e1c2121c1a25ea96617345e0066c9b043c0bcf915e29432a5f600d1ef98f11",
+        "debt-local/inputs/oblast-jsonstat.json": "c1be1f31c8c473adff38fa374472413a3ad8ae2dedce301401db3bf003dc6e24",
+        "debt-local/inputs/reader-captures.json": "fc5a6ad3a164973a89f809dde580782132efd2eb58f000cf496952c8ceecbc68",
+        "debt-local/provenance.json": "cd079c17f85e7ddef38b02f5eac1b8164547c58a4a61e51afdfd462d6688fcdf",
+        "fiscal/datasets-provenance.json": "e6a4281870ab0a2a971968403e602ddd9960091c2abb22d944b2fad590c50801",
+        "fiscal/inputs/data/cache/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json": "2d80b15c16e0e26f658f057577c1f4bf0badb589cd744781cd94c90a919eeff4",
+        "fiscal/inputs/data/inputs/budget_bill_2027.json": "ecb9e854f1998d1d89eee1c30da84cfbb44f3dec3ca64c022b774f1be60361d3",
+        "fiscal/inputs/data/inputs/budget_forecast_2027.json": "15f9fda9484633efa58a57122382184dc4fe2572e72de8a20863347053d0ff70",
+        "fiscal/inputs/data/inputs/cofog_bg.json": "434c599808e6a5ed5b2a3bc413b552fec57d504f7b3e7b686c141d0764acdca9",
+        "fiscal/inputs/data/inputs/kfp_functions_2026.json": "322adfe7744ce1e2abda44b5c2dc57bc9070feb31174c890e2763411c71ce573",
+        "fiscal/inputs/data/inputs/measure_excerpts.json": "f81bf8ad007f9e3f6692b4e0cd8d3764cfdc8f0b06367f2c2c5a6068f948ccda",
+        "fiscal/inputs/data/inputs/measures_2026.json": "8c24eef77bd6b2cfec5bd2613cca43dc403f108144a4ad7e317803aa5307bedd",
+        "fiscal/inputs/data/inputs/population.json": "5ec9392e4493e5aa399abd4a019881629d26e07d78b391dbc0d50f9d10811cb6",
+        "fiscal/inputs/data/originals/asbp/asbp_tables.json": "27b82e1b8059c88b70dab8cf588c944e444b3532d4eba9fe1b085a776e4b2d3a",
+        "fiscal/inputs/data/originals/budget_2027/ZDBRB-2027.zip": "6e0aeaab774eb5a0c5b10888b49bc4e9f8c72220188def8989e4ebdc3241b517",
+        "law/provenance.json": "f02033ff64588d9edec39740cdb3812d9c697aee7c594df08689ee91d38ba726",
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5",
+        "wave13a/inputs-sha256.json": "3e8b1ed66d5f3aeb221bda7cf9a56e880d632ceb96d68929f76434996660b2e2",
+        "wave13b/legal-evidence.json": "c4f04eec1e8bb12cb04c230dda6612eaba80ac774643f57e097ad40581ff4254",
+        "wave13b/releases-current.json": "b60a62b5ba15e42d630cb8e5056f841a0d066aa853771057152c1150dfb10fd8"
+      }
+    },
+    {
+      "file": "feed.xml",
+      "dataset": "feed-rss",
+      "producer": "python -m budget_pipeline.build.feed (build_feed)",
+      "stage": "feed",
+      "mode": "frozen-source",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "debt",
+        "eurostat",
+        "execution",
+        "expenditure",
+        "law",
+        "data/inputs/cofog_bg.json",
+        "data/inputs/population.json",
+        "rates",
+        "sebra"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "aggregation/archive/originals/eurostat/tps00001_BG.json": "ff04b43ce8535c36c4abadc6c10171b7132e09690e471a7cffb23ff03ced92fc",
+        "aggregation/authored.json": "b0d45f10d3f4cc2010e5c07c5e79768a43b65448b5acddf3fb06bdbe7be25fb2",
+        "aggregation/inputs/wording.json": "20bde723e380e7879b01b1565dc9736a0fa1157621342a015cdea0ed0c0067a6",
+        "aggregation/upstream/execution-provenance.json": "e9e61e85566724fd93881404d6cc71cb7bb8f517cb6869d0a81c3b8c962917eb",
+        "aggregation/upstream/execution.json": "e9c75d84bb575c3a0287c0a7a56828b473bd53498336ce6d45cfbc6333533200",
+        "aggregation/upstream/gva-sectors.json": "f1d96acd63f3db527e696194d23bd142f774168259aeb4dd6868ce1a23a447a2",
+        "components-rates/inputs/bill-blocks.json": "255ae51f9523d67edea10cf89d5471f7bdf251f42869a606e775167200e47781",
+        "components-rates/inputs/capture-source-hashes.json": "50e58e28dd8cb59f3e30eab2bc72ecb3199210ead6abeece6957fd267d3fa0ec",
+        "components-rates/inputs/doo-blocks.json": "1417e9ac2b3220803acbbdf9c1ba0481114ec2a7723f28efcf1cb84d305ee037",
+        "components-rates/inputs/nap-rows.json": "d0b37dcaa54cde932ef00f3c561fd63086b9b5a07cd239fa0d6303c9533b603f",
+        "components-rates/inputs/nzok-blocks.json": "057fc59b6436ca26f67f681550efa44a7f2cc75d70900cc73eae140135aabe08",
+        "components-rates/provenance.json": "f7e2c4472e1b90d7bcdfebeda5ed08a20144972c41bdcaeece70e50035f356fe",
+        "debt-local/inputs/data/cache/eurostat_pop_nuts3_bg.json": "c5869aac65138237d190e14c0389f5688c8e5c85af72ac3edb3f5019cb19fc58",
+        "debt-local/inputs/data/cache/gisco_lau_bg.json": "b9793b72951e164b5a2bcdbf3004ac13fdbb15a071d5164dfc1d658d58f76208",
+        "debt-local/inputs/data/inputs/debt_gdp.json": "554a764d0ea883b5475097bf408a29c8d33e056e44e7a4931f6abbf23c1d001b",
+        "debt-local/inputs/data/inputs/debt_stock.json": "371fc6027ebe7a1c73af1a7cb1d2e8a0e11b11de6d03d01b873e606ccf279bbb",
+        "debt-local/inputs/data/inputs/municipal_transfers_2026.json": "0369d31e441d44082d483fe8a86da0dcbcbb9262ce728155d25b7663351194ce",
+        "debt-local/inputs/data/originals/eurostat/gov_10dd_edpt1_BG_EU.json": "3017517bf6ee3c8cc3a42f895b08c162da02d4d046a5a64132799d5e6333dafd",
+        "debt-local/inputs/data/originals/eurostat/gov_10q_ggdebt_BG.json": "7acad3d3154cfa6758a7e7fbba85987ae0bcd30f7ba72422e686b8a00052fdf1",
+        "debt-local/inputs/dv-blocks.json": "31e1c2121c1a25ea96617345e0066c9b043c0bcf915e29432a5f600d1ef98f11",
+        "debt-local/inputs/oblast-jsonstat.json": "c1be1f31c8c473adff38fa374472413a3ad8ae2dedce301401db3bf003dc6e24",
+        "debt-local/inputs/reader-captures.json": "fc5a6ad3a164973a89f809dde580782132efd2eb58f000cf496952c8ceecbc68",
+        "debt-local/provenance.json": "cd079c17f85e7ddef38b02f5eac1b8164547c58a4a61e51afdfd462d6688fcdf",
+        "fiscal/datasets-provenance.json": "e6a4281870ab0a2a971968403e602ddd9960091c2abb22d944b2fad590c50801",
+        "fiscal/inputs/data/cache/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json": "2d80b15c16e0e26f658f057577c1f4bf0badb589cd744781cd94c90a919eeff4",
+        "fiscal/inputs/data/inputs/budget_bill_2027.json": "ecb9e854f1998d1d89eee1c30da84cfbb44f3dec3ca64c022b774f1be60361d3",
+        "fiscal/inputs/data/inputs/budget_forecast_2027.json": "15f9fda9484633efa58a57122382184dc4fe2572e72de8a20863347053d0ff70",
+        "fiscal/inputs/data/inputs/cofog_bg.json": "434c599808e6a5ed5b2a3bc413b552fec57d504f7b3e7b686c141d0764acdca9",
+        "fiscal/inputs/data/inputs/kfp_functions_2026.json": "322adfe7744ce1e2abda44b5c2dc57bc9070feb31174c890e2763411c71ce573",
+        "fiscal/inputs/data/inputs/measure_excerpts.json": "f81bf8ad007f9e3f6692b4e0cd8d3764cfdc8f0b06367f2c2c5a6068f948ccda",
+        "fiscal/inputs/data/inputs/measures_2026.json": "8c24eef77bd6b2cfec5bd2613cca43dc403f108144a4ad7e317803aa5307bedd",
+        "fiscal/inputs/data/inputs/population.json": "5ec9392e4493e5aa399abd4a019881629d26e07d78b391dbc0d50f9d10811cb6",
+        "fiscal/inputs/data/originals/asbp/asbp_tables.json": "27b82e1b8059c88b70dab8cf588c944e444b3532d4eba9fe1b085a776e4b2d3a",
+        "fiscal/inputs/data/originals/budget_2027/ZDBRB-2027.zip": "6e0aeaab774eb5a0c5b10888b49bc4e9f8c72220188def8989e4ebdc3241b517",
+        "law/provenance.json": "f02033ff64588d9edec39740cdb3812d9c697aee7c594df08689ee91d38ba726",
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5",
+        "wave13a/inputs-sha256.json": "3e8b1ed66d5f3aeb221bda7cf9a56e880d632ceb96d68929f76434996660b2e2",
+        "wave13b/legal-evidence.json": "c4f04eec1e8bb12cb04c230dda6612eaba80ac774643f57e097ad40581ff4254",
+        "wave13b/releases-current.json": "b60a62b5ba15e42d630cb8e5056f841a0d066aa853771057152c1150dfb10fd8"
+      }
+    },
+    {
+      "file": "geo/obshtini.json",
+      "dataset": "geo-obshtini",
+      "producer": "python -m budget_pipeline.build.municipalities (build_municipalities)",
+      "stage": "municipalities",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "eurostat",
+        "gisco",
+        "data/inputs/municipal_transfers_2026.json",
+        "data/inputs/population.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [
+        "the borders are simplified from the GISCO GeoJSON, which is streamed and not kept"
+      ],
+      "sourceHashes": {
+        "debt-local/inputs/data/cache/eurostat_pop_nuts3_bg.json": "c5869aac65138237d190e14c0389f5688c8e5c85af72ac3edb3f5019cb19fc58",
+        "debt-local/inputs/data/cache/gisco_lau_bg.json": "b9793b72951e164b5a2bcdbf3004ac13fdbb15a071d5164dfc1d658d58f76208",
+        "debt-local/inputs/data/inputs/municipal_transfers_2026.json": "0369d31e441d44082d483fe8a86da0dcbcbb9262ce728155d25b7663351194ce",
+        "debt-local/inputs/oblast-jsonstat.json": "c1be1f31c8c473adff38fa374472413a3ad8ae2dedce301401db3bf003dc6e24",
+        "debt-local/provenance.json": "cd079c17f85e7ddef38b02f5eac1b8164547c58a4a61e51afdfd462d6688fcdf",
+        "fiscal/inputs/data/inputs/population.json": "5ec9392e4493e5aa399abd4a019881629d26e07d78b391dbc0d50f9d10811cb6",
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291"
+      }
+    },
+    {
+      "file": "glossary.json",
+      "dataset": "glossary",
+      "producer": "python -m budget_pipeline.build.frozen_editorial",
+      "stage": "editorial",
+      "mode": "frozen-editorial",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/inputs/editorial/glossary.json"
+      ],
+      "limitations": [
+        "Published editorial snapshot; original supplied raw text unavailable."
+      ],
+      "sourceHashes": {
+        "catalog/inputs/routes.json": "d41a55e3a68f3d92192df348518c4e98e0289ea604f67b045b9fbc4c3c003f7f",
+        "editorial/inputs/glossary.json": "0d88665ab18f66da040adfe6ee525d5a7aacfcc72223df5ccfc7b4276c888a77",
+        "editorial/inputs/guide.json": "9a808bca21b3817350f1032d469e9dc242f397012be93a4b09d976557be05b09",
+        "editorial/provenance.json": "76f1ad35833ff8a1be378b88c8bcd4df34f3f20041223e7422b5500ba6a76b85"
+      }
+    },
+    {
+      "file": "guide.json",
+      "dataset": "guide",
+      "producer": "python -m budget_pipeline.build.frozen_editorial",
+      "stage": "editorial",
+      "mode": "frozen-editorial",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/inputs/editorial/guide.json"
+      ],
+      "limitations": [
+        "Published editorial snapshot; original supplied raw text unavailable."
+      ],
+      "sourceHashes": {
+        "catalog/inputs/routes.json": "d41a55e3a68f3d92192df348518c4e98e0289ea604f67b045b9fbc4c3c003f7f",
+        "editorial/inputs/glossary.json": "0d88665ab18f66da040adfe6ee525d5a7aacfcc72223df5ccfc7b4276c888a77",
+        "editorial/inputs/guide.json": "9a808bca21b3817350f1032d469e9dc242f397012be93a4b09d976557be05b09",
+        "editorial/provenance.json": "76f1ad35833ff8a1be378b88c8bcd4df34f3f20041223e7422b5500ba6a76b85"
+      }
+    },
+    {
+      "file": "gva-sectors.json",
+      "dataset": "gva-sectors",
+      "producer": "python -m budget_pipeline.build.gva_sectors",
+      "stage": "frozen-inputs",
+      "mode": "unverified-missing-original",
+      "parityEligible": false,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "eurostat",
+        "outlook"
+      ],
+      "limitations": [
+        "the answers of 05.11.2026 give GDP 105 279,0 (2024) and 116 548,5 (2025) млн. €, outlook.json 104 767,2 and 116 018,3: rebuilding it means a new release with the revised national accounts, not a reproduction"
+      ],
+      "sourceHashes": {
+        "aggregation/upstream/gva-sectors.json": "f1d96acd63f3db527e696194d23bd142f774168259aeb4dd6868ce1a23a447a2"
+      }
+    },
+    {
+      "file": "indirect-tax-parameters.json",
+      "dataset": "indirect-tax-parameters",
+      "producer": "python -m budget_pipeline.build.indirect_taxes",
+      "stage": "indirect-taxes",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "ec-oil",
+        "excise-law",
+        "customs-excise-law",
+        "nsi-pack",
+        "bill",
+        "data/inputs/indirect_tax_evidence.json"
+      ],
+      "limitations": [
+        "Цените са исторически справки; изчисленията са сценарий. Без LPG и периоди преди 01.08.2026."
+      ],
+      "sourceHashes": {
+        "indirect-taxes/provenance.json": "c240c8fa33d9e9dd9c3064259a159864b3b4395c5559b8b2c80c45abecfcd575",
+        "indirect-taxes/reader-ir.json": "a7333850711e590a433fb12bd118ce74c3f6cdf2b9e5f02623c7eb9bdfe0ee27",
+        "original:data/originals/ec-oil/duties-and-taxes-2026-11-07.xlsx": "3719f74988d59184896b91a108400ec62f2ac09f03e88b0c969b121b966618b6",
+        "original:data/originals/ec-oil/weekly-prices-2026-11-02.xlsx": "946947ad4cab9daa786578ac9b2c077d922c0f661671eb5cdb4004bd51763ebb",
+        "original:data/originals/excise-law/dv-69-2026-budget.html": "b08fb0a5ee9c1c32579b8851c69fcfb34988e0efebde32dbb3e897698e0f2b51",
+        "original:data/originals/excise-law/excise-law-dv54-2025.pdf": "cdc69fed256f73e91b7f0dba8d8340f5e5a9fe12c93f075227a2c84b389a6f8f",
+        "original:data/originals/nsi-pack/statistical-yearbook-2025.pdf": "b4d93c6439621a40bdf721635b0d4022d0d6bec640cb2d5a4ddcc86cb0564fa9",
+        "original:data/originals/parliament/52-602-01-19.docx": "378042f3c6f05aad760099f3b5ccceaf597fd287b28242fe89b99d2a981fc174"
+      }
+    },
+    {
+      "file": "law.json",
+      "dataset": "law",
+      "producer": "python -m budget_pipeline.build.law (build_law)",
+      "stage": "law",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "budget2027",
+        "ministries",
+        "parliament",
+        "data/cache/law_bill.json",
+        "zbdoo",
+        "zbnzok",
+        "zdb"
+      ],
+      "limitations": [
+        "the parliament API is live: a change in its counts stops the build until reviewed (law.py)"
+      ],
+      "sourceHashes": {
+        "fiscal/datasets-provenance.json": "e6a4281870ab0a2a971968403e602ddd9960091c2abb22d944b2fad590c50801",
+        "fiscal/inputs/data/cache/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json": "2d80b15c16e0e26f658f057577c1f4bf0badb589cd744781cd94c90a919eeff4",
+        "fiscal/inputs/data/inputs/budget_bill_2027.json": "ecb9e854f1998d1d89eee1c30da84cfbb44f3dec3ca64c022b774f1be60361d3",
+        "fiscal/inputs/data/inputs/budget_forecast_2027.json": "15f9fda9484633efa58a57122382184dc4fe2572e72de8a20863347053d0ff70",
+        "fiscal/inputs/data/inputs/cofog_bg.json": "434c599808e6a5ed5b2a3bc413b552fec57d504f7b3e7b686c141d0764acdca9",
+        "fiscal/inputs/data/inputs/kfp_functions_2026.json": "322adfe7744ce1e2abda44b5c2dc57bc9070feb31174c890e2763411c71ce573",
+        "fiscal/inputs/data/inputs/measure_excerpts.json": "f81bf8ad007f9e3f6692b4e0cd8d3764cfdc8f0b06367f2c2c5a6068f948ccda",
+        "fiscal/inputs/data/inputs/measures_2026.json": "8c24eef77bd6b2cfec5bd2613cca43dc403f108144a4ad7e317803aa5307bedd",
+        "fiscal/inputs/data/inputs/population.json": "5ec9392e4493e5aa399abd4a019881629d26e07d78b391dbc0d50f9d10811cb6",
+        "fiscal/inputs/data/originals/asbp/asbp_tables.json": "27b82e1b8059c88b70dab8cf588c944e444b3532d4eba9fe1b085a776e4b2d3a",
+        "fiscal/inputs/data/originals/budget_2027/ZDBRB-2027.zip": "6e0aeaab774eb5a0c5b10888b49bc4e9f8c72220188def8989e4ebdc3241b517",
+        "law/provenance.json": "f02033ff64588d9edec39740cdb3812d9c697aee7c594df08689ee91d38ba726",
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5",
+        "wave13a/inputs-sha256.json": "3e8b1ed66d5f3aeb221bda7cf9a56e880d632ceb96d68929f76434996660b2e2",
+        "wave13b/legal-evidence.json": "c4f04eec1e8bb12cb04c230dda6612eaba80ac774643f57e097ad40581ff4254"
+      }
+    },
+    {
+      "file": "measures.json",
+      "dataset": "measures",
+      "producer": "python -m budget_pipeline.build.measures (build_measures)",
+      "stage": "measures",
+      "mode": "frozen-source",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/inputs/measures_2026.json",
+        "data/inputs/measure_excerpts.json"
+      ],
+      "limitations": [
+        "data/inputs/measures_2026.json has no producer (spec, section 4)"
+      ],
+      "sourceHashes": {
+        "fiscal/inputs/data/inputs/measure_excerpts.json": "f81bf8ad007f9e3f6692b4e0cd8d3764cfdc8f0b06367f2c2c5a6068f948ccda",
+        "fiscal/inputs/data/inputs/measures_2026.json": "8c24eef77bd6b2cfec5bd2613cca43dc403f108144a4ad7e317803aa5307bedd"
+      }
+    },
+    {
+      "file": "ministries.json",
+      "dataset": "ministries",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/0200.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/0300.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/0400.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/0500.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/0600.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/1000.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/1100.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/1200.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/1300.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/1400.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/1500.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/1600.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/1700.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/1900.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/2000.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/2100.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/2200.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/2400.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/2500.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/3000.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/3200.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/3300.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/3400.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/3700.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/3800.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/3900.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/4000.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/4100.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/4200.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/4300.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/4400.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/4500.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/4600.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/4700.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/4800.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/5300.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/7100.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/8200.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/8300.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/8400.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/8500.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "ministries/8600.json",
+      "dataset": "ministries-programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "municipalities.json",
+      "dataset": "municipalities",
+      "producer": "python -m budget_pipeline.build.municipalities (build_municipalities)",
+      "stage": "municipalities",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "eurostat",
+        "gisco",
+        "data/inputs/municipal_transfers_2026.json",
+        "data/inputs/population.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [
+        "municipal_transfers_2026.json and population.json come from build_src.py, which no longer reproduces them"
+      ],
+      "sourceHashes": {
+        "debt-local/inputs/data/cache/eurostat_pop_nuts3_bg.json": "c5869aac65138237d190e14c0389f5688c8e5c85af72ac3edb3f5019cb19fc58",
+        "debt-local/inputs/data/cache/gisco_lau_bg.json": "b9793b72951e164b5a2bcdbf3004ac13fdbb15a071d5164dfc1d658d58f76208",
+        "debt-local/inputs/data/inputs/municipal_transfers_2026.json": "0369d31e441d44082d483fe8a86da0dcbcbb9262ce728155d25b7663351194ce",
+        "debt-local/inputs/oblast-jsonstat.json": "c1be1f31c8c473adff38fa374472413a3ad8ae2dedce301401db3bf003dc6e24",
+        "debt-local/provenance.json": "cd079c17f85e7ddef38b02f5eac1b8164547c58a4a61e51afdfd462d6688fcdf",
+        "fiscal/inputs/data/inputs/population.json": "5ec9392e4493e5aa399abd4a019881629d26e07d78b391dbc0d50f9d10811cb6",
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291"
+      }
+    },
+    {
+      "file": "outlook.json",
+      "dataset": "outlook",
+      "producer": "python -m budget_pipeline.build.fiscal (build_outlook)",
+      "stage": "annual-periods",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/asbp/asbp_tables.json",
+        "data/cache/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json",
+        "data/inputs/budget_forecast_2027.json"
+      ],
+      "limitations": [
+        "reads pdf_pages_clean.json, which asbp_pages.py makes from the asbp PDF (pinned in data/sources.yaml)"
+      ],
+      "sourceHashes": {
+        "fiscal/datasets-provenance.json": "e6a4281870ab0a2a971968403e602ddd9960091c2abb22d944b2fad590c50801",
+        "fiscal/inputs/data/cache/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json": "2d80b15c16e0e26f658f057577c1f4bf0badb589cd744781cd94c90a919eeff4",
+        "fiscal/inputs/data/inputs/budget_bill_2027.json": "ecb9e854f1998d1d89eee1c30da84cfbb44f3dec3ca64c022b774f1be60361d3",
+        "fiscal/inputs/data/inputs/budget_forecast_2027.json": "15f9fda9484633efa58a57122382184dc4fe2572e72de8a20863347053d0ff70",
+        "fiscal/inputs/data/inputs/cofog_bg.json": "434c599808e6a5ed5b2a3bc413b552fec57d504f7b3e7b686c141d0764acdca9",
+        "fiscal/inputs/data/inputs/kfp_functions_2026.json": "322adfe7744ce1e2abda44b5c2dc57bc9070feb31174c890e2763411c71ce573",
+        "fiscal/inputs/data/inputs/measure_excerpts.json": "f81bf8ad007f9e3f6692b4e0cd8d3764cfdc8f0b06367f2c2c5a6068f948ccda",
+        "fiscal/inputs/data/inputs/measures_2026.json": "8c24eef77bd6b2cfec5bd2613cca43dc403f108144a4ad7e317803aa5307bedd",
+        "fiscal/inputs/data/inputs/population.json": "5ec9392e4493e5aa399abd4a019881629d26e07d78b391dbc0d50f9d10811cb6",
+        "fiscal/inputs/data/originals/asbp/asbp_tables.json": "27b82e1b8059c88b70dab8cf588c944e444b3532d4eba9fe1b085a776e4b2d3a",
+        "fiscal/inputs/data/originals/budget_2027/ZDBRB-2027.zip": "6e0aeaab774eb5a0c5b10888b49bc4e9f8c72220188def8989e4ebdc3241b517",
+        "wave13a/inputs-sha256.json": "3e8b1ed66d5f3aeb221bda7cf9a56e880d632ceb96d68929f76434996660b2e2"
+      }
+    },
+    {
+      "file": "programs.json",
+      "dataset": "programs",
+      "producer": "python -m budget_pipeline.build.budgets (build_budgets)",
+      "stage": "budgets",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/program_budgets/*",
+        "data/inputs/program_budgets_2026.json",
+        "data/cache/law_bill.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5"
+      }
+    },
+    {
+      "file": "rates.json",
+      "dataset": "rates",
+      "producer": "python -m budget_pipeline.build.rates (build_rates)",
+      "stage": "rates",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "bill",
+        "nap",
+        "zbdoo",
+        "zbnzok"
+      ],
+      "limitations": [
+        "the NAP table (data/originals/nap/) is downloaded only from Bulgaria; from elsewhere nra.bg may serve a CAPTCHA page"
+      ],
+      "sourceHashes": {
+        "components-rates/inputs/bill-blocks.json": "255ae51f9523d67edea10cf89d5471f7bdf251f42869a606e775167200e47781",
+        "components-rates/inputs/capture-source-hashes.json": "50e58e28dd8cb59f3e30eab2bc72ecb3199210ead6abeece6957fd267d3fa0ec",
+        "components-rates/inputs/doo-blocks.json": "1417e9ac2b3220803acbbdf9c1ba0481114ec2a7723f28efcf1cb84d305ee037",
+        "components-rates/inputs/nap-rows.json": "d0b37dcaa54cde932ef00f3c561fd63086b9b5a07cd239fa0d6303c9533b603f",
+        "components-rates/inputs/nzok-blocks.json": "057fc59b6436ca26f67f681550efa44a7f2cc75d70900cc73eae140135aabe08",
+        "components-rates/provenance.json": "f7e2c4472e1b90d7bcdfebeda5ed08a20144972c41bdcaeece70e50035f356fe"
+      }
+    },
+    {
+      "file": "releases/current.json",
+      "dataset": "releases",
+      "producer": "python -m budget_pipeline.cli (build --site)",
+      "stage": "frozen-inputs",
+      "mode": "frozen-only",
+      "parityEligible": false,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "every output of the release"
+      ],
+      "limitations": [
+        "the manifest is not in catalog.json: it lists the sha256 of the catalog, and the catalog would have to list the manifest",
+        "no environment has the registry yet (it needs the Cloudflare account): the originals are public only from a registry"
+      ],
+      "sourceHashes": {
+        "wave13b/releases-current.json": "b60a62b5ba15e42d630cb8e5056f841a0d066aa853771057152c1150dfb10fd8"
+      }
+    },
+    {
+      "file": "revenue.json",
+      "dataset": "revenue",
+      "producer": "python -m budget_pipeline.build.fiscal (build_revenue)",
+      "stage": "annual-periods",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "data/originals/asbp/asbp_tables.json",
+        "data/inputs/budget_forecast_2027.json"
+      ],
+      "limitations": [],
+      "sourceHashes": {
+        "fiscal/datasets-provenance.json": "e6a4281870ab0a2a971968403e602ddd9960091c2abb22d944b2fad590c50801",
+        "fiscal/inputs/data/cache/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json": "2d80b15c16e0e26f658f057577c1f4bf0badb589cd744781cd94c90a919eeff4",
+        "fiscal/inputs/data/inputs/budget_bill_2027.json": "ecb9e854f1998d1d89eee1c30da84cfbb44f3dec3ca64c022b774f1be60361d3",
+        "fiscal/inputs/data/inputs/budget_forecast_2027.json": "15f9fda9484633efa58a57122382184dc4fe2572e72de8a20863347053d0ff70",
+        "fiscal/inputs/data/inputs/cofog_bg.json": "434c599808e6a5ed5b2a3bc413b552fec57d504f7b3e7b686c141d0764acdca9",
+        "fiscal/inputs/data/inputs/kfp_functions_2026.json": "322adfe7744ce1e2abda44b5c2dc57bc9070feb31174c890e2763411c71ce573",
+        "fiscal/inputs/data/inputs/measure_excerpts.json": "f81bf8ad007f9e3f6692b4e0cd8d3764cfdc8f0b06367f2c2c5a6068f948ccda",
+        "fiscal/inputs/data/inputs/measures_2026.json": "8c24eef77bd6b2cfec5bd2613cca43dc403f108144a4ad7e317803aa5307bedd",
+        "fiscal/inputs/data/inputs/population.json": "5ec9392e4493e5aa399abd4a019881629d26e07d78b391dbc0d50f9d10811cb6",
+        "fiscal/inputs/data/originals/asbp/asbp_tables.json": "27b82e1b8059c88b70dab8cf588c944e444b3532d4eba9fe1b085a776e4b2d3a",
+        "fiscal/inputs/data/originals/budget_2027/ZDBRB-2027.zip": "6e0aeaab774eb5a0c5b10888b49bc4e9f8c72220188def8989e4ebdc3241b517",
+        "wave13a/inputs-sha256.json": "3e8b1ed66d5f3aeb221bda7cf9a56e880d632ceb96d68929f76434996660b2e2"
+      }
+    },
+    {
+      "file": "search-index.json",
+      "dataset": "search-index",
+      "producer": "python -m budget_pipeline.build.search (search)",
+      "stage": "search",
+      "mode": "frozen-source",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "execution",
+        "glossary",
+        "guide",
+        "gva-sectors",
+        "indirect-tax-parameters"
+      ],
+      "limitations": [
+        "after search: the v5 wording and removals (layers)"
+      ],
+      "sourceHashes": {
+        "aggregation/archive/originals/eurostat/tps00001_BG.json": "ff04b43ce8535c36c4abadc6c10171b7132e09690e471a7cffb23ff03ced92fc",
+        "aggregation/authored.json": "b0d45f10d3f4cc2010e5c07c5e79768a43b65448b5acddf3fb06bdbe7be25fb2",
+        "aggregation/inputs/glossary.json": "35017812f53831a8403d28483adad64031f0361d6ecd1e5a4d74a76b13e7dc89",
+        "aggregation/inputs/wording.json": "20bde723e380e7879b01b1565dc9736a0fa1157621342a015cdea0ed0c0067a6",
+        "aggregation/upstream/execution-provenance.json": "e9e61e85566724fd93881404d6cc71cb7bb8f517cb6869d0a81c3b8c962917eb",
+        "aggregation/upstream/execution.json": "e9c75d84bb575c3a0287c0a7a56828b473bd53498336ce6d45cfbc6333533200",
+        "aggregation/upstream/gva-sectors.json": "f1d96acd63f3db527e696194d23bd142f774168259aeb4dd6868ce1a23a447a2",
+        "catalog/inputs/routes.json": "d41a55e3a68f3d92192df348518c4e98e0289ea604f67b045b9fbc4c3c003f7f",
+        "components-rates/inputs/bill-blocks.json": "255ae51f9523d67edea10cf89d5471f7bdf251f42869a606e775167200e47781",
+        "components-rates/inputs/capture-source-hashes.json": "50e58e28dd8cb59f3e30eab2bc72ecb3199210ead6abeece6957fd267d3fa0ec",
+        "components-rates/inputs/doo-blocks.json": "1417e9ac2b3220803acbbdf9c1ba0481114ec2a7723f28efcf1cb84d305ee037",
+        "components-rates/inputs/kfp-components.json": "0d2ef157220e13fe0e66fa9406788935b1c4056500f85e0e3d8b540d73fbffb6",
+        "components-rates/inputs/nap-rows.json": "d0b37dcaa54cde932ef00f3c561fd63086b9b5a07cd239fa0d6303c9533b603f",
+        "components-rates/inputs/nzok-blocks.json": "057fc59b6436ca26f67f681550efa44a7f2cc75d70900cc73eae140135aabe08",
+        "components-rates/inputs/pages.json": "9cbfe0aa4d4927ab88d9f668a034f085e79d6cbe62285a3480e78047c0434af7",
+        "components-rates/inputs/tables.json": "cf62e4db0feb140033a5a41931daa6d6802d61dcd272d2f00e76f696933f8f80",
+        "components-rates/provenance.json": "f7e2c4472e1b90d7bcdfebeda5ed08a20144972c41bdcaeece70e50035f356fe",
+        "dbp-gva/inputs/editorial.json": "479afe048c27b298b0fc3d9e1cbc308cb6bddc1afebb67b984bad50917de8a69",
+        "dbp-gva/inputs/figures.json": "46a5398f715a651bfb560f2037349f39f5e4ceec7de086f020e5dab364429613",
+        "dbp-gva/inputs/plan.pdf": "8c91cdf4778f2864e1eeb167f14b08d1f68a076ea4ad27a8a4305175a73f1182",
+        "dbp-gva/provenance.json": "93a0dda20cb3175a700c1c33df11d8829b7abd1a8f96452ded70cd91fbccfb3e",
+        "debt-local/inputs/data/cache/eurostat_pop_nuts3_bg.json": "c5869aac65138237d190e14c0389f5688c8e5c85af72ac3edb3f5019cb19fc58",
+        "debt-local/inputs/data/cache/gisco_lau_bg.json": "b9793b72951e164b5a2bcdbf3004ac13fdbb15a071d5164dfc1d658d58f76208",
+        "debt-local/inputs/data/inputs/debt_gdp.json": "554a764d0ea883b5475097bf408a29c8d33e056e44e7a4931f6abbf23c1d001b",
+        "debt-local/inputs/data/inputs/debt_stock.json": "371fc6027ebe7a1c73af1a7cb1d2e8a0e11b11de6d03d01b873e606ccf279bbb",
+        "debt-local/inputs/data/inputs/municipal_transfers_2026.json": "0369d31e441d44082d483fe8a86da0dcbcbb9262ce728155d25b7663351194ce",
+        "debt-local/inputs/data/originals/eurostat/gov_10dd_edpt1_BG_EU.json": "3017517bf6ee3c8cc3a42f895b08c162da02d4d046a5a64132799d5e6333dafd",
+        "debt-local/inputs/data/originals/eurostat/gov_10q_ggdebt_BG.json": "7acad3d3154cfa6758a7e7fbba85987ae0bcd30f7ba72422e686b8a00052fdf1",
+        "debt-local/inputs/dv-blocks.json": "31e1c2121c1a25ea96617345e0066c9b043c0bcf915e29432a5f600d1ef98f11",
+        "debt-local/inputs/oblast-jsonstat.json": "c1be1f31c8c473adff38fa374472413a3ad8ae2dedce301401db3bf003dc6e24",
+        "debt-local/inputs/reader-captures.json": "fc5a6ad3a164973a89f809dde580782132efd2eb58f000cf496952c8ceecbc68",
+        "debt-local/provenance.json": "cd079c17f85e7ddef38b02f5eac1b8164547c58a4a61e51afdfd462d6688fcdf",
+        "editorial/inputs/glossary.json": "0d88665ab18f66da040adfe6ee525d5a7aacfcc72223df5ccfc7b4276c888a77",
+        "editorial/inputs/guide.json": "9a808bca21b3817350f1032d469e9dc242f397012be93a4b09d976557be05b09",
+        "editorial/provenance.json": "76f1ad35833ff8a1be378b88c8bcd4df34f3f20041223e7422b5500ba6a76b85",
+        "fiscal/datasets-provenance.json": "e6a4281870ab0a2a971968403e602ddd9960091c2abb22d944b2fad590c50801",
+        "fiscal/inputs/data/cache/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json": "2d80b15c16e0e26f658f057577c1f4bf0badb589cd744781cd94c90a919eeff4",
+        "fiscal/inputs/data/inputs/budget_bill_2027.json": "ecb9e854f1998d1d89eee1c30da84cfbb44f3dec3ca64c022b774f1be60361d3",
+        "fiscal/inputs/data/inputs/budget_forecast_2027.json": "15f9fda9484633efa58a57122382184dc4fe2572e72de8a20863347053d0ff70",
+        "fiscal/inputs/data/inputs/cofog_bg.json": "434c599808e6a5ed5b2a3bc413b552fec57d504f7b3e7b686c141d0764acdca9",
+        "fiscal/inputs/data/inputs/kfp_functions_2026.json": "322adfe7744ce1e2abda44b5c2dc57bc9070feb31174c890e2763411c71ce573",
+        "fiscal/inputs/data/inputs/measure_excerpts.json": "f81bf8ad007f9e3f6692b4e0cd8d3764cfdc8f0b06367f2c2c5a6068f948ccda",
+        "fiscal/inputs/data/inputs/measures_2026.json": "8c24eef77bd6b2cfec5bd2613cca43dc403f108144a4ad7e317803aa5307bedd",
+        "fiscal/inputs/data/inputs/population.json": "5ec9392e4493e5aa399abd4a019881629d26e07d78b391dbc0d50f9d10811cb6",
+        "fiscal/inputs/data/originals/asbp/asbp_tables.json": "27b82e1b8059c88b70dab8cf588c944e444b3532d4eba9fe1b085a776e4b2d3a",
+        "fiscal/inputs/data/originals/budget_2027/ZDBRB-2027.zip": "6e0aeaab774eb5a0c5b10888b49bc4e9f8c72220188def8989e4ebdc3241b517",
+        "indirect-taxes/provenance.json": "c240c8fa33d9e9dd9c3064259a159864b3b4395c5559b8b2c80c45abecfcd575",
+        "indirect-taxes/reader-ir.json": "a7333850711e590a433fb12bd118ce74c3f6cdf2b9e5f02623c7eb9bdfe0ee27",
+        "law/provenance.json": "f02033ff64588d9edec39740cdb3812d9c697aee7c594df08689ee91d38ba726",
+        "original:data/originals/ec-oil/duties-and-taxes-2026-11-07.xlsx": "3719f74988d59184896b91a108400ec62f2ac09f03e88b0c969b121b966618b6",
+        "original:data/originals/ec-oil/weekly-prices-2026-11-02.xlsx": "946947ad4cab9daa786578ac9b2c077d922c0f661671eb5cdb4004bd51763ebb",
+        "original:data/originals/excise-law/dv-69-2026-budget.html": "b08fb0a5ee9c1c32579b8851c69fcfb34988e0efebde32dbb3e897698e0f2b51",
+        "original:data/originals/excise-law/excise-law-dv54-2025.pdf": "cdc69fed256f73e91b7f0dba8d8340f5e5a9fe12c93f075227a2c84b389a6f8f",
+        "original:data/originals/nsi-pack/statistical-yearbook-2025.pdf": "b4d93c6439621a40bdf721635b0d4022d0d6bec640cb2d5a4ddcc86cb0564fa9",
+        "original:data/originals/parliament/52-602-01-19.docx": "378042f3c6f05aad760099f3b5ccceaf597fd287b28242fe89b99d2a981fc174",
+        "programmes/inputs/law-cache.json": "a3d0dca8d545fc4acdcfac55be210d395b4170f819fff0b793ea4e7a0d3b2291",
+        "programmes/inputs/original-hashes.json": "18dfc9c1d0c9c36ec7f32745be6daf0d38c497307c2002e2af96d04916347d9b",
+        "programmes/inputs/pdf-evidence.json": "8dace600989470026163b92f56bada8e726886b383ccd308c4c7b039fa938507",
+        "programmes/inputs/program-budgets.json": "5ff600bcd8d8fabf43c2d35cdf7c7889411fbd4a16d2573616923f79429f90c9",
+        "programmes/provenance.json": "7633dbe26ee7c5eb0dfbd22675c4994f94506cc58ae19cdf37abf3b2570104f5",
+        "wave13a/inputs-sha256.json": "3e8b1ed66d5f3aeb221bda7cf9a56e880d632ceb96d68929f76434996660b2e2",
+        "wave13b/legal-evidence.json": "c4f04eec1e8bb12cb04c230dda6612eaba80ac774643f57e097ad40581ff4254",
+        "wave13b/releases-current.json": "b60a62b5ba15e42d630cb8e5056f841a0d066aa853771057152c1150dfb10fd8",
+        "wave13b/sources.yaml": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+      }
+    },
+    {
+      "file": "sebra.json",
+      "dataset": "sebra",
+      "producer": "python -m budget_pipeline.build.payments (build_sebra)",
+      "stage": "sebra",
+      "mode": "python-reader-ir",
+      "parityEligible": true,
+      "fullOriginalRegenerationEligible": false,
+      "inputs": [
+        "midt-sebra"
+      ],
+      "limitations": [
+        "built, but neither listed in catalog.json nor loaded by a screen: three days of one ministry, kept for phase 2"
+      ],
+      "sourceHashes": {
+        "debt-local/inputs/reader-captures.json": "fc5a6ad3a164973a89f809dde580782132efd2eb58f000cf496952c8ceecbc68",
+        "debt-local/provenance.json": "cd079c17f85e7ddef38b02f5eac1b8164547c58a4a61e51afdfd462d6688fcdf"
+      }
+    }
+  ]
+}
