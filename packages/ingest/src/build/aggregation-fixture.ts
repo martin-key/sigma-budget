@@ -1,6 +1,7 @@
 import { lstat, realpath } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { readPinned, parseJsonStat } from '../io/data.js';
+import { parsePythonJson } from '../common/numbers.js';
 import { executionNumbers } from './context.js';
 import { buildCore, zddTable, pendingFromExecution, type CoreInput } from './aggregation-core.js';
 import { buildFeed, type FeedInput } from './aggregation-feed.js';
@@ -41,7 +42,7 @@ export async function loadAggregationFixture(fixture: string, buildDate: string)
     if (!b) throw new Error('Missing pinned input: ' + name);
     return b.toString('utf8');
   };
-  const json = (name: string): any => JSON.parse(raw(name));
+  const json = (name: string): any => parsePythonJson(raw(name));
   const fallback: Record<string, any> = {};
   for (const name of bytes.keys())
     if (name.startsWith('upstream/') && name.endsWith('.json'))

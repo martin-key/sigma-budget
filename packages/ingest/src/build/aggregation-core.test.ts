@@ -63,4 +63,20 @@ describe('core donor aggregation', () => {
     rows[0].values = [];
     expect(() => zddTable(rows)).toThrow();
   });
+  it('rejects missing required owner values without dropping fields during serialization', () => {
+    for (const test of read('mutants/acceptance-regressions.json').missingCore) {
+      const input = make();
+      let parent = (input as any)[test.owner];
+      for (const key of test.path.slice(0, -1)) parent = parent[key];
+      const key = test.path.at(-1);
+      if (Array.isArray(parent)) parent.splice(key);
+      else delete parent[key];
+      expect(() => buildCore(input), test.owner + ': ' + test.path.join('.')).toThrow();
+    }
+    const nullable = make();
+    (nullable.revenue.groups[0] as any).share2026 = null;
+    expect(buildCore(nullable).revenueGroups[0]).toEqual(
+      read('mutants/acceptance-regressions.json').nullableCoreGroup,
+    );
+  });
 });

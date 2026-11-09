@@ -80,7 +80,6 @@ export async function aggregationBuildCli(args: string[]): Promise<number> {
     }
   }
   await preflight(false);
-  await preflight(true);
   const result = (await loadAggregationFixture(fixture, flags['--build-date']!)).projected;
   const outputs: Record<string, string> = {
     'core.json': jsonStringify(result.core) + '\n',
@@ -88,6 +87,7 @@ export async function aggregationBuildCli(args: string[]): Promise<number> {
     'feed.xml': result.rss,
     'search-index.json': jsonStringify(result.search) + '\n',
   };
+  await preflight(true);
   await preflight(false);
   for (const name of names) {
     const path = join(target, 'data', name),

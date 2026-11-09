@@ -1,6 +1,7 @@
 import { metadata } from '../common/metadata.js';
 import { monthName, pythonRound } from '../common/format.js';
 import { pythonNumericText } from '../common/numbers.js';
+import { clean } from '../io/data.js';
 
 interface ExecutionRow {
   plan: number;
@@ -222,7 +223,7 @@ export function buildCore(input: CoreInput) {
         ];
       }),
   );
-  return {
+  const result = {
     meta: metadata('core', 'Ядро: източници, предстоящи набори и основни числа', input.buildDate, {
       source: ['asbp', 'kfp', 'eurostat'],
       sourceNote:
@@ -292,4 +293,7 @@ export function buildCore(input: CoreInput) {
     functions,
     revenueGroups: groups,
   };
+  // A direct caller must not receive a projection with silently omitted required values.
+  clean(result);
+  return result;
 }

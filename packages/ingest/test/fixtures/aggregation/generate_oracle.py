@@ -127,6 +127,54 @@ def main():
         sample_rows = search._Rows()
         sample_rows.add('indicators', 'Тест', value=[], period='2026', href='#/pari')
         sample_rows.add('datasets', True, '\u0085  текст  \u0085', ['кирилица', 2], {'a': True}, href='#/danni/test')
+        # Direct-builder regressions: textual numeric identifiers and required projections.
+        regressions = {'programs': [], 'missingCore': []}
+        for field in ('code', 'ministry', 'name'):
+            for token in ('1', '1.0', '1e0', '-0.0', '1e-5', '1e16', '1.25', '1e-4',
+                          '"__proto__"', '"constructor"'):
+                case = Context(release)
+                case.out['core.json'] = ctx.out['core.json']
+                case.out['feed.json'] = ctx.out['feed.json']
+                case.texts['feed.xml'] = ctx.texts['feed.xml']
+                programs = case.out['programs.json']
+                fields = {name: i for i, name in enumerate(programs['fields'])}
+                row_index, row = next((i, row) for i, row in enumerate(programs['items'])
+                                      if row[fields['level']] != 'policy' and row[fields['name']])
+                row[fields[field]] = json.loads(token)
+                search.search(case)
+                href = '#/vedomstvo/%s/%s?per=2026.law' % (row[fields['ministry']], row[fields['code']])
+                result = next((entry for entry in case.out['search-index.json']['items']
+                               if entry[6] == href and entry[1] == str(row[fields['name']])), None)
+                assert (result is None) == (not row[fields['name']])
+                regressions['programs'].append({'field': field, 'token': token,
+                                                'row': row_index, 'href': href, 'expected': result})
+        missing = [
+            ('revenue', ['groups', 0, key]) for key in ('id', 'name', 'share2026')
+        ] + [('revenue', ['groups', 0, 'mln', 2])] + [
+            ('expenditure', ['functions', 'items', 0, key])
+            for key in ('id', 'name', 'short', 'yoy2026Pct')
+        ] + [
+            ('expenditure', ['functions', 'items', 0, key, 1])
+            for key in ('mln', 'pctGdp', 'share')
+        ] + [
+            ('execution', ['latest', 'kfp', 'rev', key])
+            for key in ('plan', 'cum', 'pctPlan', 'prevYearCum')
+        ] + [('outlook', ['gdp', 'mln', 2])]
+        for owner, path in missing:
+            case = Context(release)
+            node = case.execution if owner == 'execution' else case.out[owner + '.json']
+            for key in path[:-1]: node = node[key]
+            if isinstance(node, list): del node[path[-1]:]
+            else: del node[path[-1]]
+            try: core.build_core(case)
+            except (KeyError, IndexError) as exc:
+                regressions['missingCore'].append({'owner': owner, 'path': path,
+                                                  'error': type(exc).__name__})
+            else: raise AssertionError('Donor accepted missing core field: ' + repr((owner, path)))
+        nullable = Context(release)
+        nullable.out['revenue.json']['groups'][0]['share2026'] = None
+        core.build_core(nullable)
+        regressions['nullableCoreGroup'] = nullable.out['core.json']['revenueGroups'][0]
         # Exercise apply_sources' missing-five-term branch in a second isolated tree.
         glue_root = sandbox/'glue-case'; glue_release = glue_root/'data/release'
         shutil.copytree(HERE/'upstream', glue_release)
@@ -146,6 +194,7 @@ def main():
         apply_sources.W=glue_root; apply_sources.main()
         core.DATA = release; search.DATA = release
         artifacts={'authored.json':(json.dumps(authored,ensure_ascii=False,separators=(',',':'))+'\n').encode(),
+                   'mutants/acceptance-regressions.json':(data_io.jdumps(regressions)+'\n').encode(),
                    'mutants/core-fallback.json':(data_io.jdumps(changed.out['core.json'])+'\n').encode(),
                    'mutants/feed-changed.json':(data_io.jdumps(altered_feed.out['feed.json'])+'\n').encode(),
                    'mutants/feed-changed.xml':altered_feed.texts['feed.xml'].encode(),

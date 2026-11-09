@@ -10,6 +10,7 @@ import {
 } from '../common/format.js';
 import { isNumber } from '../io/data.js';
 import { pythonTextSpace } from '../common/text.js';
+import { pythonNumberAt } from '../common/numbers.js';
 import { aggregationInt } from './aggregation-core.js';
 
 export const SEARCH_GROUPS = [
@@ -158,6 +159,7 @@ interface PaymentsDoc {
   recipients: { name: string; kind: string; eur: number; eik: string }[];
 }
 // Documents are explicit owner outputs; optional disk fallbacks are passed separately.
+// Parse JSON owners with parsePythonJson to retain numeric identifier types (1 vs 1.0).
 export interface SearchInput {
   buildDate: string;
   out: Record<string, unknown>;
@@ -214,6 +216,20 @@ function pythonRepr(v: unknown): string {
       '}'
     );
   return String(v);
+}
+/** Python's text interpolation retains the JSON numeric type of identifier cells. */
+function programText(row: (string | number | null)[], index: number): string {
+  const value = row[index];
+  if (typeof value === 'string') return value;
+  if (typeof value !== 'number') return pythonRepr(value);
+  if (pythonNumberAt(row, String(index), value).kind === 'int') return String(value);
+  if (!Number.isFinite(value)) return Number.isNaN(value) ? 'nan' : value < 0 ? '-inf' : 'inf';
+  if (Object.is(value, -0)) return '-0.0';
+  const [mantissa, power] = value.toExponential().split('e'),
+    exponent = Number(power);
+  if (exponent < -4 || exponent >= 16)
+    return `${mantissa}e${exponent < 0 ? '-' : '+'}${String(Math.abs(exponent)).padStart(2, '0')}`;
+  return String(value) + (Number.isInteger(value) ? '.0' : '');
 }
 const clean = (v: unknown) =>
   stripPython(
@@ -587,17 +603,17 @@ export function buildSearch(input: SearchInput) {
       number
     >;
   for (const r of programs.items) {
-    const code = r[f.code!],
+    const code = programText(r, f.code!),
       name = r[f.name!],
       level = r[f.level!],
       y26 = r[f.y2026!];
     if (!name) continue;
-    const id = String(r[f.ministry!]),
-      who = names[id] ? names[id]!.short : id,
+    const id = programText(r, f.ministry!),
+      who = typeof r[f.ministry!] === 'string' && Object.hasOwn(names, id) ? names[id]!.short : id,
       val = y26 === programs.sentinels.noData ? '' : moneyKhil(y26);
     rows.add(
       'institutions',
-      name,
+      programText(r, f.name!),
       `${who} · ${level === 'policy' ? 'политика' : 'програма'} ${code}`,
       val,
       'Проект 2026',

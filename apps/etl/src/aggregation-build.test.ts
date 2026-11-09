@@ -9,6 +9,7 @@ import {
   cpSync,
   writeFileSync,
   rmSync,
+  existsSync,
 } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -85,6 +86,26 @@ describe('candidate 11 safety', () => {
       writeFileSync(join(copy, 'inputs/population.json'), '{}');
       await expect(aggregationBuildCli(args(copy))).rejects.toThrow(/hash mismatch/);
     } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+  it('leaves the candidate absent when a fixture is missing or fails its hash', async () => {
+    const dir = mkdtempSync(join(root, 'tmp/wave11-invalid-input-')),
+      saved = join(dir, 'candidate'),
+      empty = join(dir, 'empty'),
+      altered = join(dir, 'altered');
+    mkdirSync(empty);
+    renameSync(target, saved);
+    try {
+      await expect(aggregationBuildCli(args(empty))).rejects.toThrow(/ENOENT/);
+      expect(existsSync(target)).toBe(false);
+      cpSync(fixture, altered, { recursive: true });
+      writeFileSync(join(altered, 'inputs/population.json'), '{}');
+      await expect(aggregationBuildCli(args(altered))).rejects.toThrow(/hash mismatch/);
+      expect(existsSync(target)).toBe(false);
+    } finally {
+      rmSync(target, { recursive: true, force: true });
+      renameSync(saved, target);
       rmSync(dir, { recursive: true, force: true });
     }
   });
