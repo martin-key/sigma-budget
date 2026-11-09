@@ -5,6 +5,7 @@ import {
   buildBudgetPlan,
   buildGva,
   gvaSeries,
+  parseGvaStat,
   type PlanInput,
   type PlanEditorial,
   type GvaStat,
@@ -16,8 +17,8 @@ const read = <T>(name: string): T => JSON.parse(readFileSync(resolve(root, name)
 const plan = () => read<PlanInput>('inputs/figures.json');
 const editorial = read<PlanEditorial>('inputs/editorial.json');
 const hash = '8c91cdf4778f2864e1eeb167f14b08d1f68a076ea4ad27a8a4305175a73f1182';
-const nama = () => read<GvaStat>('inputs/nama.json');
-const gdp = () => read<GvaStat>('inputs/gdp.json');
+const nama = () => parseGvaStat(readFileSync(resolve(root, 'inputs/nama.json'), 'utf8'));
+const gdp = () => parseGvaStat(readFileSync(resolve(root, 'inputs/gdp.json'), 'utf8'));
 const outlook = () => read<Outlook>('inputs/outlook.json');
 const gvaEd = read<GvaEditorial>('inputs/gva-editorial.json');
 
@@ -89,6 +90,55 @@ describe('DBP from frozen extracted evidence', () => {
 });
 
 describe('GVA synthetic source and arithmetic', () => {
+  it.each(['nama', 'gdp'])('rejects dense %s cells unsupported by the frozen reader', (name) => {
+    const n = nama(),
+      g = gdp();
+    const document = name === 'nama' ? n : g;
+    document.value = Object.values(document.value) as unknown as GvaStat['value'];
+    expect(() => buildGva(n, g, outlook(), gvaEd)).toThrow(/observation map/);
+  });
+  it.each([[], {}, null, false, '2019', 2019.5, NaN, Infinity, 0, 10000])(
+    'rejects an invalid outlook year before it can bypass GDP reconciliation: %j',
+    (year) => {
+      const o = outlook();
+      o.years[0] = year as number;
+      o.gdp.mlnPrecise[0] = 275;
+      expect(() => buildGva(nama(), gdp(), o, gvaEd)).toThrow(/outlook/);
+    },
+  );
+  it.each([NaN, Infinity, null, '175'])('rejects malformed outlook GDP: %j', (value) => {
+    const o = outlook();
+    o.gdp.mlnPrecise[0] = value as number;
+    expect(() => buildGva(nama(), gdp(), o, gvaEd)).toThrow(/outlook/);
+  });
+  it.each([
+    [116.15, false, true],
+    [116.75, false, false],
+    [116.15, true, false],
+    [116.75, true, true],
+  ] as const)(
+    'matches mixed-number donor acceptance: total=%s floats=%s',
+    (total, floats, accepted) => {
+      const n = nama(),
+        g = gdp(),
+        o = outlook();
+      const values = [1, 15, 6, 28.99, 0.34, 23.21, 3, 27.61, 8.08, 3.22];
+      values.forEach((v, i) => ((n.value as Record<string, number>)[String((i + 1) * 4 + 1)] = v));
+      (n.value as Record<string, number>)['1'] = total;
+      (g.value as Record<string, number>)['4'] = total === 116.15 ? 136.2 : 136.8;
+      o.gdp.mlnPrecise[0] = total === 116.15 ? 136.2 : 136.8;
+      let source = JSON.stringify(n);
+      if (floats) {
+        // Preserve explicit 1.0 / 15.0 / 6.0 / 3.0 source cells through the real adapter.
+        for (const [i, v] of values.entries())
+          if (Number.isInteger(v))
+            source = source.replace(`"${(i + 1) * 4 + 1}":${v},`, `"${(i + 1) * 4 + 1}":${v}.0,`);
+      }
+      const run = () => buildGva(parseGvaStat(source), g, o, gvaEd);
+      if (accepted) expect(run().gva[0]).toBe(total === 116.15 ? 116.2 : 116.8);
+      else expect(run).toThrow(/branches/);
+    },
+  );
   it.each(
     [['2026-10-08'], {}, null, 20261008, '2026-99-99', '2026-02-29'].map((date) => ({ date })),
   )('rejects an invalid update date: %j', ({ date }) => {

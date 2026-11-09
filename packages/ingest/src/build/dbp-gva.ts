@@ -1,7 +1,12 @@
 import { metadata } from '../common/metadata.js';
 import type { Json } from '@sigma-budget/dataset-schema';
 import { pythonRound } from '../common/format.js';
-import { pythonFloatSum } from '../common/numbers.js';
+import {
+  parsePythonJson,
+  pythonNumberAt,
+  pythonSum,
+  type PythonNumber,
+} from '../common/numbers.js';
 import { isIsoDay } from '../common/dates.js';
 import type { JsonStat } from '../io/data.js';
 
@@ -119,8 +124,11 @@ export interface GvaEditorial {
   meta: SourceMeta;
 }
 export interface GvaStat extends JsonStat {
+  value: Record<string, number | null>;
   extension: { annotation: { type: string; date: string }[] };
 }
+/** Read GVA source JSON without conflating integer and float observation tokens. */
+export const parseGvaStat = (text: string): GvaStat => parsePythonJson<GvaStat>(text);
 export interface Outlook {
   years: number[];
   gdp: { mlnPrecise: number[] };
@@ -131,7 +139,13 @@ function annualYear(key: string): number {
   return Number(key);
 }
 /** Slice JSON-stat in declared dimension order; absent and null cells are missing, not zero. */
-export function gvaSeries(doc: GvaStat, dim: string, key: string): Map<number, Cell> {
+function typedGvaSeries(
+  doc: GvaStat,
+  dim: string,
+  key: string,
+): Map<number, [PythonNumber, string | null]> {
+  if (!doc.value || typeof doc.value !== 'object' || Array.isArray(doc.value))
+    throw new Error('Invalid GVA observation map');
   if (
     Object.hasOwn(doc, 'status') &&
     (!doc.status || typeof doc.status !== 'object' || Array.isArray(doc.status))
@@ -172,7 +186,7 @@ export function gvaSeries(doc: GvaStat, dim: string, key: string): Map<number, C
       throw new Error(`Unspecified dimension ${doc.id[i]}`);
   const times = doc.dimension.time?.category.index;
   if (!times || Array.isArray(times)) throw new Error('Invalid time dimension');
-  const out = new Map<number, Cell>();
+  const out = new Map<number, [PythonNumber, string | null]>();
   for (const [year, ti] of Object.entries(times)) {
     const calendarYear = annualYear(year);
     let pos = 0,
@@ -185,10 +199,21 @@ export function gvaSeries(doc: GvaStat, dim: string, key: string): Map<number, C
     const value = (doc.value as Record<string, number | null>)[String(pos)];
     if (value != null) {
       if (typeof value !== 'number' || !Number.isFinite(value)) throw new Error('Invalid cell');
-      out.set(calendarYear, [value, doc.status?.[String(pos)] ?? null]);
+      const number = pythonNumberAt(doc.value, String(pos), value);
+      if (number.kind === 'int' && !Number.isSafeInteger(value))
+        throw new Error('Unsafe cell integer');
+      out.set(calendarYear, [number, doc.status?.[String(pos)] ?? null]);
     }
   }
   return out;
+}
+export function gvaSeries(doc: GvaStat, dim: string, key: string): Map<number, Cell> {
+  return new Map(
+    [...typedGvaSeries(doc, dim, key)].map(([year, [number, flag]]) => [
+      year,
+      [number.value, flag],
+    ]),
+  );
 }
 export function buildGva(
   nama: GvaStat,
@@ -196,6 +221,15 @@ export function buildGva(
   outlook: Outlook,
   editorial: GvaEditorial,
 ) {
+  if (
+    !Array.isArray(outlook.years) ||
+    [...outlook.years].some((y) => !Number.isSafeInteger(y) || y < 1 || y > 9999) ||
+    new Set(outlook.years).size !== outlook.years.length ||
+    !Array.isArray(outlook.gdp.mlnPrecise) ||
+    outlook.gdp.mlnPrecise.length !== outlook.years.length ||
+    [...outlook.gdp.mlnPrecise].some((v) => typeof v !== 'number' || !Number.isFinite(v))
+  )
+    throw new Error('Invalid outlook years or GDP values');
   const updated = (d: GvaStat) => {
     for (const annotation of d.extension.annotation) {
       if (
@@ -224,6 +258,7 @@ export function buildGva(
     part = gvaSeries(nama, 'nace_r2', editorial.PART[0]),
     gdp = gvaSeries(gdpDoc, 'na_item', 'B1GQ'),
     tax = gvaSeries(gdpDoc, 'na_item', 'D21X31');
+  const typedBranches = editorial.BRANCHES.map(([id]) => typedGvaSeries(nama, 'nace_r2', id));
   const branches = editorial.BRANCHES.map(([id, name, desc]) => ({
     id,
     name,
@@ -236,7 +271,16 @@ export function buildGva(
     return v;
   };
   for (const y of years) {
-    const sum = pythonRound(pythonFloatSum(branches.map((b) => cell(b.series, y)[0])), 1);
+    const sum = pythonRound(
+      pythonSum(
+        typedBranches.map((s) => {
+          const value = s.get(y);
+          if (!value) throw new Error(`Missing observation ${y}`);
+          return value[0];
+        }),
+      ),
+      1,
+    );
     if (Math.abs(sum - cell(total, y)[0]) > 0.3) throw new Error(`${y}: branches vs total`);
     if (Math.abs(pythonRound(cell(total, y)[0] + cell(tax, y)[0], 1) - cell(gdp, y)[0]) > 0.3)
       throw new Error(`${y}: GVA + taxes vs GDP`);

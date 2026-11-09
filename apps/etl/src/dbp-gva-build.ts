@@ -8,11 +8,11 @@ import {
   clean,
   buildBudgetPlan,
   buildGva,
+  parseGvaStat,
   jsonStringify,
   readPinned,
   type PlanInput,
   type PlanEditorial,
-  type GvaStat,
   type GvaEditorial,
   type Outlook,
 } from '@sigma-budget/ingest';
@@ -89,8 +89,8 @@ export async function dbpGvaBuildCli(args: string[]): Promise<number> {
     createHash('sha256').update(bytes.get('inputs/plan.pdf')!).digest('hex'),
   );
   const synthetic = buildGva(
-    read<GvaStat>('inputs/nama.json'),
-    read<GvaStat>('inputs/gdp.json'),
+    parseGvaStat(bytes.get('inputs/nama.json')!.toString()),
+    parseGvaStat(bytes.get('inputs/gdp.json')!.toString()),
     read<Outlook>('inputs/outlook.json'),
     read<GvaEditorial>('inputs/gva-editorial.json'),
   );

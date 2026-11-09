@@ -49,6 +49,31 @@ it('rejects traversal, output aliases and cwd aliases', () => {
   expect(run(args(fixture + '/../dbp-gva')).status).not.toBe(0);
   expect(run(args(), { PWD: root + '/..' }).status).not.toBe(0);
 });
+it('the live diagnostic refuses a report symlink without changing the external file', () => {
+  const temp = mkdtempSync(join(tmpdir(), 'ts10-live-report-'));
+  const report = join(out, 'live-comparison.json');
+  const previous = (() => {
+    try {
+      return readFileSync(report);
+    } catch {
+      return undefined;
+    }
+  })();
+  try {
+    const sentinel = join(temp, 'sentinel.json');
+    writeFileSync(sentinel, 'external sentinel\n');
+    rmSync(report, { force: true });
+    symlinkSync(sentinel, report);
+    const result = spawnSync('pnpm', ['dbp-gva:compare-live'], { cwd: root, encoding: 'utf8' });
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toMatch(/symlink/);
+    expect(readFileSync(sentinel, 'utf8')).toBe('external sentinel\n');
+  } finally {
+    rmSync(report, { force: true });
+    if (previous) writeFileSync(report, previous);
+    rmSync(temp, { recursive: true, force: true });
+  }
+}, 60000);
 it('rejects nested inputs with a double-dot prefix while accepting an unrelated prefixed directory', () => {
   const nested = mkdtempSync(join(out, '..review-inputs-'));
   const external = mkdtempSync(join(tmpdir(), '..ts10-inputs-'));

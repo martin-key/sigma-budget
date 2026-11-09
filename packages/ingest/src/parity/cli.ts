@@ -2,11 +2,23 @@ import {
   readFile,
   readdir,
   stat,
+  lstat,
   mkdir,
   writeFile,
+  rename,
+  rm,
   realpath,
 } from "node:fs/promises";
-import { resolve, dirname, relative, isAbsolute } from "node:path";
+import { randomUUID } from "node:crypto";
+import {
+  resolve,
+  dirname,
+  relative,
+  isAbsolute,
+  parse,
+  join,
+  sep,
+} from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseYaml } from "../io/registry.js";
 import { object } from "@sigma-budget/dataset-schema";
@@ -191,6 +203,33 @@ export async function parityCli(
     "--report",
   ])
     if (!flags[k]) throw new Error(`Required: ${k}`);
+  const requestedReport = resolve(flags["--report"]!);
+  // Check the requested path, rather than following its links to a canonical target.
+  async function checkReportPath(createParents = false): Promise<void> {
+    const root = parse(requestedReport).root;
+    const parts = relative(root, requestedReport).split(sep);
+    let current = root;
+    for (const [i, part] of parts.entries()) {
+      current = join(current, part);
+      const last = i === parts.length - 1;
+      try {
+        const entry = await lstat(current);
+        if (entry.isSymbolicLink())
+          throw new Error("Report must not follow symlinks");
+        if (last) {
+          if (!entry.isFile() || entry.nlink !== 1)
+            throw new Error(
+              "Report must not overwrite a hard-linked or non-regular file",
+            );
+        } else if (!entry.isDirectory())
+          throw new Error("Invalid report parent directory");
+      } catch (e) {
+        if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw e;
+        if (!last && createParents) await mkdir(current);
+      }
+    }
+  }
+  await checkReportPath();
   // Reports must never overwrite an input, including through a symlinked parent.
   async function canonical(path: string): Promise<string> {
     try {
@@ -201,7 +240,7 @@ export async function parityCli(
       return resolve(await canonical(parent), relative(parent, path));
     }
   }
-  const reportPath = await canonical(resolve(flags["--report"]!));
+  const reportPath = await canonical(requestedReport);
   const effectiveRegistryPath = flags["--registry"] ?? registryPath;
   for (const input of [
     flags["--oracle"]!,
@@ -212,7 +251,10 @@ export async function parityCli(
     flags["--policy"]!,
   ]) {
     const rel = relative(await canonical(resolve(input)), reportPath);
-    if (rel === "" || (!rel.startsWith("..") && !isAbsolute(rel)))
+    if (
+      rel === "" ||
+      (rel !== ".." && !rel.startsWith(`..${sep}`) && !isAbsolute(rel))
+    )
       throw new Error("Report must be outside input roots and data/release");
   }
   try {
@@ -232,8 +274,20 @@ export async function parityCli(
     registry,
     policy,
   });
-  await mkdir(dirname(flags["--report"]!), { recursive: true });
-  await writeFile(flags["--report"]!, JSON.stringify(report, null, 2) + "\n");
+  await checkReportPath(true);
+  const temporary = join(
+    dirname(requestedReport),
+    `.parity-${randomUUID()}.tmp`,
+  );
+  try {
+    await writeFile(temporary, JSON.stringify(report, null, 2) + "\n", {
+      flag: "wx",
+    });
+    await checkReportPath();
+    await rename(temporary, requestedReport);
+  } finally {
+    await rm(temporary, { force: true });
+  }
   return report.outcome === "pass"
     ? 0
     : report.outcome === "unverified"
