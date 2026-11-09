@@ -12,6 +12,7 @@ import { debtProseMatches, pythonDigitPattern } from '../build/budget-prose.js';
 import { parsePythonJson, pythonNumberAt, pythonNumericText } from '../common/numbers.js';
 import { Check, pyRepr } from './checks.js';
 import { Context, safePath } from './context.js';
+import { executionRequired } from './execution-python.js';
 
 const periods = ['2026.law', '2026.expected', '2027.draft', '2028.forecast', '2029.forecast'];
 const functions = [0, 4, 10, 11, 12, 16, 19, 24, 31];
@@ -417,7 +418,9 @@ export function budget2027(ctx: Context): Check {
     read('data/inputs/budget_forecast_2027.json').toString('utf8'),
   );
   const archive = (source: Extraction['source'], input: string): Buffer => {
-    const bytes = read(source.archive);
+    const archivePath = executionRequired(source, 'archive');
+    executionRequired(source, 'member');
+    const bytes = read(archivePath);
     try {
       verifyDocument(source, input, bytes);
     } catch (error) {
@@ -430,11 +433,14 @@ export function budget2027(ctx: Context): Check {
     }
     return bytes;
   };
-  const forecastArchive = archive(forecast.source, 'budget_forecast_2027.json');
+  const forecastArchive = archive(
+    executionRequired(forecast, 'source'),
+    'budget_forecast_2027.json',
+  );
   const bill = parsePythonJson<BillExtraction>(
     read('data/inputs/budget_bill_2027.json').toString('utf8'),
   );
-  const billArchive = archive(bill.source, 'budget_bill_2027.json');
+  const billArchive = archive(executionRequired(bill, 'source'), 'budget_bill_2027.json');
   const lineage = new AnnualLineage(forecast, bill, {
     forecast: forecastArchive,
     bill: billArchive,

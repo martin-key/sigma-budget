@@ -37,5 +37,6 @@ jobs:
           python packages/ingest/test/fixtures/validate15b/generate_oracle.py --check
           python packages/ingest/test/fixtures/validate15b/generate_helpers.py --check
           python packages/ingest/test/fixtures/validate15b/audit_pdf.py --check
+          python packages/ingest/test/fixtures/validate15b/source_order.py --check
       - name: Differential and report safety tests
-        run: pnpm --filter @sigma-budget/ingest exec vitest run src/validate/budget-2027.test.ts
+        run: pnpm --filter @sigma-budget/ingest exec vitest run src/validate/budget-2027.test.ts src/validate/budget-2027-order.test.ts

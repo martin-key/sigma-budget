@@ -26,3 +26,12 @@ PYTHONDONTWRITEBYTECODE=1 python3.12 generate_oracle.py --check
 PYTHONDONTWRITEBYTECODE=1 python3.12 generate_helpers.py --check
 PYTHONDONTWRITEBYTECODE=1 python3.12 audit_pdf.py --check
 ```
+# Combined source metadata failures
+
+The supplemental source_order.py generator preserves the original inventory,
+donor and observations. It captures 16 combined-damage cases using the unchanged
+Python 3.12 validator. Required archive/member fields are read before archive I/O
+and checksum verification, for both documents. Direct and compiled CLI tests
+compare full group crash results, including counts, diagnostics and exit status.
+Run source_order.py --check alongside the original generators.
+
