@@ -12301,5 +12301,10842 @@
         "value": null
       }
     ]
+  },
+  {
+    "name": "boundary-types-000-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "macroGroups",
+          0,
+          "rows"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-001-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "macroRows",
+          0,
+          "values"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-002-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "notes",
+          0,
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-003-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "versions",
+          0,
+          "pdf"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-004-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          0,
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-005-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          0,
+          "rowIds"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-006-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "revenue.json",
+        "path": [
+          "notes",
+          0,
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-007-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "revenue.json",
+        "path": [
+          "groupSums"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-008-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "revenue.json",
+        "path": [
+          "execution",
+          "rows"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-009-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-010-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "totalMln"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-011-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "vintage"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-012-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "source"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-014-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "totals"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-015-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "counts",
+          "all"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-016-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "counts",
+          "short",
+          "revenue"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-018-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "document",
+          "url"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-019-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "meta",
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-021-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "lines"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-022-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "versions",
+          "bill",
+          "url"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-023-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "programTotals",
+          "programs"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-024-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policies",
+          0,
+          "name"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-025-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "kind"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-026-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "check",
+          "zdbExp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-027-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "meta",
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-028-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "doc",
+          "file"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-030-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "total",
+          "mln",
+          0
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-031-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "total",
+          "mln",
+          0
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-032-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "total",
+          "mln",
+          0
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-033-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "total",
+          "mln",
+          0
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-034-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "total",
+          "mln",
+          0
+        ],
+        "value": "1"
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-035-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          0,
+          "mln",
+          0
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-036-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          0,
+          "mln",
+          0
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-037-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          0,
+          "mln",
+          0
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-038-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          0,
+          "mln",
+          0
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-039-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          0,
+          "mln",
+          0
+        ],
+        "value": "1"
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-040-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          0,
+          "mln",
+          9
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-041-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          0,
+          "mln",
+          9
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-042-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          0,
+          "mln",
+          9
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-043-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          0,
+          "mln",
+          9
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-044-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          0,
+          "mln",
+          9
+        ],
+        "value": "1"
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-045-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "level"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-046-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "level"
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-047-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "level"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-048-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "level"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-049-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          1,
+          "level"
+        ],
+        "value": "1"
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-050-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "total",
+          "mln",
+          0
+        ],
+        "value": "18494.9"
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-051-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "reconcile",
+          "diffMln",
+          0
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-052-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "totals",
+          "law",
+          "rev"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-053-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "reconcile",
+          "diffMln",
+          0
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-054-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "totals",
+          "law",
+          "rev"
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-055-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "reconcile",
+          "diffMln",
+          0
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-056-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "totals",
+          "law",
+          "rev"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-057-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "reconcile",
+          "diffMln",
+          0
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-058-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "totals",
+          "law",
+          "rev"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-059-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "reconcile",
+          "diffMln",
+          0
+        ],
+        "value": "1"
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-060-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "totals",
+          "law",
+          "rev"
+        ],
+        "value": "1"
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-061-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "total",
+          "mln",
+          0
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-062-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "total",
+          "mln",
+          0
+        ],
+        "value": 0.0
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-063-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "total",
+          "mln",
+          0
+        ],
+        "value": 1.0
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-064-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "total",
+          "mln",
+          0
+        ],
+        "value": -1
+      }
+    ]
+  },
+  {
+    "name": "boundary-types-065-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "total",
+          "mln",
+          0
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "required-read-002-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "gdp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-006-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "revenue"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-008-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "revenue",
+          "pctGdp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-009-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "expenditure"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-010-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "expenditure",
+          "mln"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-011-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "expenditure",
+          "pctGdp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-012-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "balance"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-013-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "balance",
+          "mln"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-014-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "balance",
+          "pctGdp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-015-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "interest"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-016-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "interest",
+          "mln"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-017-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "interest",
+          "pctGdp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-018-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "primaryBalance"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-019-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "primaryBalance",
+          "mln"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-020-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "primaryBalance",
+          "pctGdp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-021-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "financing"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-022-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "financing",
+          "mln"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-023-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "financing",
+          "pctGdp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-028-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "macroGroups"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-031-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "versions"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-032-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "revenue.json",
+        "path": [
+          "rows"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-033-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          0,
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-034-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "economic"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-035-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-036-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          0,
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-038-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "versions",
+          0,
+          "docx"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-039-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "versions",
+          0,
+          "diff"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-041-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          23,
+          "mln"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-042-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          4,
+          "mln"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-043-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "notes"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-045-annex3",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "notes",
+          0,
+          "text"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-046-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "gdp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-047-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mlnPrecise"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-049-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "years"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-050-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "revenue.json",
+        "path": [
+          "vintage"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-051-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "vintage"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-053-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "revenue.json",
+        "path": [
+          "total",
+          "mln"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-054-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "kfp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-055-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "revenue"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-056-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "revenue",
+          "mln"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-058-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "revenue",
+          "pctGdp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-060-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          0,
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-061-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          0,
+          "mln"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-062-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          0,
+          "level"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-063-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          0,
+          "pctGdp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-070-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          11,
+          "label"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-071-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          0,
+          "pctGdp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-073-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          0,
+          "yoy2026Pct"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-074-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "revenue.json",
+        "path": [
+          "execution"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-077-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "execution.json",
+        "path": [
+          "rows"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-078-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "execution.json",
+        "path": [
+          "rows",
+          0,
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-079-revenue",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "revenue.json",
+        "path": [
+          "notes"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-081-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "gdp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-082-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mlnPrecise"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-085-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "vintage"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-086-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "yearLabels"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-088-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-090-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "mln"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-091-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "totalPctGdp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-092-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "pctGdp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-095-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "parts"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-096-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "parts",
+          0,
+          "mln"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-097-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "reconcile"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-100-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-101-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          0,
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-102-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "reconcile",
+          "annex3ExpenditureMln"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-103-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "mln"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-104-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "reconcile",
+          "diffMln"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-105-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "versions"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-106-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "versions",
+          0,
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-107-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "versions",
+          0,
+          "docx"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-108-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "versions",
+          0,
+          "pdf"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-109-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "items",
+          0,
+          "parts",
+          0,
+          "name"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-110-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "versions",
+          1,
+          "part"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-111-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "reconcile",
+          "pdfTotalMln"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-112-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "notes"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-113-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "notes",
+          0,
+          "text"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-114-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "notes",
+          0,
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-115-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-116-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-118-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "years"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-120-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "vintage"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-121-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          0,
+          "level"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-122-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          0,
+          "pctGdp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-123-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "kfp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-124-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "expenditure"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-125-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "expenditure",
+          "mln"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-126-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "interest"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-127-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "kfp",
+          "interest",
+          "mln"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-128-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "cofog"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-129-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-130-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "years"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-132-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          0,
+          "mln"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-133-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "total"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-134-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "total",
+          "mln"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-135-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          0,
+          "code"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-136-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          1,
+          "memoOf"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-137-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "total",
+          "pctGdp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-138-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "perCapita"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-139-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "expenditure.json",
+        "path": [
+          "perCapita",
+          "population"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-140-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "core.json",
+        "path": [
+          "population"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-141-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "core.json",
+        "path": [
+          "population",
+          "persons"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-143-expenditure",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "core.json",
+        "path": [
+          "population",
+          "year"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-145-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "discretionary2026"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-146-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "discretionary2026",
+          "II-8"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-147-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "discretionary2026",
+          "II-9"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-149-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "expenditureMln"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-150-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "expenditureMlnWithoutIndicative"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-151-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "check"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-152-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "check",
+          "II-8"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-153-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "check",
+          "II-9"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-154-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "items"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-158-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "counts",
+          "short"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-159-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "counts",
+          "short",
+          "all"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-160-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "counts",
+          "discretionary"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-161-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "counts",
+          "discretionary",
+          "revenue"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-162-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "counts",
+          "discretionary",
+          "expenditure"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-168-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "counts",
+          "short",
+          "expenditure"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-169-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "counts",
+          "short",
+          "noEstimate"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-170-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "tabs"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-172-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "stageLabels"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-174-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "text"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-175-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "quote"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-178-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "estimateKinds"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-179-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "balanceEffectMln"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-180-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "balanceEffectMln",
+          "2026"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-181-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "effectMln",
+          "2026"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-182-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "from"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-183-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "items",
+          24,
+          "balanceEffectMln",
+          "2027"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-184-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "items",
+          24,
+          "effectMln",
+          "2027"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-185-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "items",
+          24,
+          "balanceEffectMln",
+          "2028"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-186-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "items",
+          24,
+          "effectMln",
+          "2028"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-187-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "groups"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-188-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "groups",
+          0,
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-189-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "groups",
+          0,
+          "items"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-190-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "groups",
+          0,
+          "kind"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-191-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "groups",
+          0,
+          "totalMln"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-192-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "items",
+          8,
+          "estimateKind"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-193-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "gdp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-194-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "outlook.json",
+        "path": [
+          "gdp",
+          "mlnPrecise"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-195-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "discretionary"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-196-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "discretionary",
+          "II-8"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-197-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "discretionary",
+          "II-8",
+          "2026"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-198-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "discretionary",
+          "II-8",
+          "2027"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-199-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "discretionary",
+          "II-8",
+          "2028"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-200-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "check",
+          "rowSums"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-201-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "check",
+          "rowSums",
+          "II-8"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-202-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "discretionaryPeriod"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-203-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "discretionaryPeriod",
+          "II-8"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-204-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "discretionary",
+          "II-9"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-205-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "discretionary",
+          "II-9",
+          "2026"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-206-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "discretionary",
+          "II-9",
+          "2027"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-207-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "discretionary",
+          "II-9",
+          "2028"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-208-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "check",
+          "rowSums",
+          "II-9"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-209-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "discretionaryPeriod",
+          "II-9"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-210-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "gdpShare2026"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-211-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "gdpShare2026",
+          "revenue"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-212-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "gdpShare2026",
+          "expenditure"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-213-measures",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "measures.json",
+        "path": [
+          "document"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-216-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "meta"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-218-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "meta",
+          "status"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-220-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "meta",
+          "pending"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-221-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "pending"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-222-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "meta",
+          "asOf"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-223-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "versions"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-224-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "versions",
+          "bill"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-226-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "versions",
+          "law"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-227-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "versions",
+          "law",
+          "date"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-228-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "versions",
+          "bill",
+          "ref"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-230-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "versions",
+          "bill",
+          "label"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-231-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "versions",
+          "law",
+          "url"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-232-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "versions",
+          "law",
+          "label"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-233-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-234-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "headline"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-236-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "headline",
+          "exp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-237-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "headline",
+          "transfers"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-238-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "headline",
+          "eucontrib"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-239-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "headline",
+          "balance"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-240-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "headline",
+          "financing"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-241-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "headline",
+          "rev",
+          "bill"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-242-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "headline",
+          "exp",
+          "bill"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-243-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "headline",
+          "transfers",
+          "bill"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-244-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "headline",
+          "eucontrib",
+          "bill"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-245-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "headline",
+          "balance",
+          "bill"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-246-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "headline",
+          "financing",
+          "bill"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-247-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "headline",
+          "rev",
+          "law"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-248-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "headline",
+          "exp",
+          "law"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-249-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "headline",
+          "transfers",
+          "law"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-250-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "headline",
+          "eucontrib",
+          "law"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-251-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "headline",
+          "balance",
+          "law"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-252-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "headline",
+          "financing",
+          "law"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-253-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "headline",
+          "rev",
+          "diff"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-254-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "headline",
+          "exp",
+          "diff"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-255-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "headline",
+          "transfers",
+          "diff"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-256-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "headline",
+          "eucontrib",
+          "diff"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-257-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "headline",
+          "balance",
+          "diff"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-258-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "headline",
+          "financing",
+          "diff"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-259-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-261-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "text"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-262-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "level"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-263-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "no"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-264-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "diff"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-265-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "sec"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-266-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "bill"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-267-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "law"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-269-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "art"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-270-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-272-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "short"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-273-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "kind"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-274-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "bill"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-276-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "law"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-277-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "law",
+          "rev"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-278-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "diff"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-279-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "diff",
+          "rev"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-280-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "bill",
+          "exp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-281-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "law",
+          "exp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-282-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "diff",
+          "exp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-283-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "bill",
+          "transfers"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-284-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "law",
+          "transfers"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-285-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "diff",
+          "transfers"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-288-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "totals"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-289-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "totals",
+          "count"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-290-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "totals",
+          "bill"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-291-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "totals",
+          "bill",
+          "rev"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-292-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "totals",
+          "bill",
+          "exp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-293-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "totals",
+          "law"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-294-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "totals",
+          "law",
+          "rev"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-295-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "totals",
+          "law",
+          "exp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-296-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "totals",
+          "diff"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-297-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "totals",
+          "diff",
+          "rev"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-298-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "totals",
+          "diff",
+          "exp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-299-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "note"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-300-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "changes"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-301-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "art"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-302-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-303-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "notes"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-305-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "lines"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-306-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "lines",
+          0,
+          "op"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-307-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "lines",
+          0,
+          "text"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-308-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "lines",
+          0,
+          "no"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-309-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "lines",
+          0,
+          "bill"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-310-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "lines",
+          0,
+          "law"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-311-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "lines",
+          0,
+          "sec"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-312-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "changes",
+          1,
+          "headline",
+          "rev"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-313-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "changes",
+          1,
+          "headline",
+          "rev",
+          "bill"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-314-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "changes",
+          1,
+          "headline",
+          "rev",
+          "law"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-315-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "changes",
+          1,
+          "headline",
+          "exp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-316-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "changes",
+          1,
+          "headline",
+          "exp",
+          "bill"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-317-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "changes",
+          1,
+          "headline",
+          "exp",
+          "law"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-318-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "changes",
+          1,
+          "headline",
+          "transfers"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-319-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "changes",
+          1,
+          "headline",
+          "transfers",
+          "bill"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-320-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "changes",
+          1,
+          "headline",
+          "transfers",
+          "law"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-321-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "changes",
+          1,
+          "areas"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-322-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "changes",
+          1,
+          "areas",
+          0,
+          "bill"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-323-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "changes",
+          1,
+          "areas",
+          0,
+          "law"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-324-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "reconciliation"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-325-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "reconciliation",
+          "rows"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-326-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "reconciliation",
+          "rows",
+          0,
+          "art"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-327-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "reconciliation",
+          "rows",
+          0,
+          "name"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-328-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "reconciliation",
+          "rows",
+          0,
+          "rev"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-329-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "reconciliation",
+          "rows",
+          0,
+          "exp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-330-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "reconciliation",
+          "sum"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-331-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "reconciliation",
+          "sum",
+          "rev"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-332-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "reconciliation",
+          "art1"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-333-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "reconciliation",
+          "art1",
+          "rev"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-334-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "reconciliation",
+          "sum",
+          "exp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-335-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "reconciliation",
+          "art1",
+          "exp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-336-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "reconciliation",
+          "sum",
+          "balance"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-337-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "reconciliation",
+          "art1",
+          "balance"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-338-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "reconciliation",
+          "ok"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-339-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "reconciliation",
+          "unit"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-340-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "core.json",
+        "path": [
+          "sources"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-341-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "gazette"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-342-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "gazette",
+          0,
+          "issue"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-343-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "gazette",
+          0,
+          "date"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-344-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "bills"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-345-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-346-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "sign"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-347-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "submitted"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-348-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "firstReading"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-349-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "secondReading"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-350-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "adopted"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-351-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "decree"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-352-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "decree",
+          "issued"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-353-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "gazette"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-354-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "gazette",
+          "date"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-355-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "gazette",
+          "issue"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-356-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "decree",
+          "no"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-357-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "inForce"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-358-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "inForce",
+          "from"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-359-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "inForce",
+          "exceptions"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-360-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "inForce",
+          "exceptions",
+          0,
+          "from"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-361-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "inForce",
+          "exceptions",
+          0,
+          "when"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-362-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "inForce",
+          "exceptions",
+          0,
+          "scope"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-363-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "counts"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-364-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "counts",
+          "committeeReports"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-366-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "counts",
+          "proposals"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-367-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "page"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-368-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "law"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-370-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "counts"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-371-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "counts",
+          "committeeReports"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-372-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "counts",
+          "opinions"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-373-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "counts",
+          "proposals"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-374-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "counts",
+          "reportDates"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-375-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "counts",
+          "opinionDates"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-376-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "counts",
+          "proposalDates"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-377-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "counts",
+          "committees"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-378-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "counts",
+          "committees",
+          "reported"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-379-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "counts",
+          "committees",
+          "total"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-380-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "proposals"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-381-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "proposals",
+          "byDate"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-382-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "gazette",
+          0,
+          "year"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-383-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "gazette",
+          0,
+          "laws"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-384-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "documents"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-385-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "documents",
+          0,
+          "kind"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-386-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "documents",
+          0,
+          "title"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-387-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "documents",
+          0,
+          "url"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-388-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "timeline"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-389-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "timeline",
+          0,
+          "kind"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-390-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "kinds"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-391-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "timeline",
+          0,
+          "phase"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-392-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "timeline",
+          0,
+          "title"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-393-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "timeline",
+          0,
+          "dateText"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-395-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "timeline",
+          0,
+          "date"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-396-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "timeline",
+          1,
+          "month"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-397-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "timeline",
+          9,
+          "href"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-398-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "proposals",
+          "items"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-399-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "proposals",
+          "count"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-402-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "proposals",
+          "items",
+          0,
+          "date"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-403-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "proposals",
+          "urlPattern"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-404-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "next"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-405-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "next",
+          "status"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-407-law",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "next",
+          "note"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-408-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "meta"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-409-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "meta",
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-410-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "meta",
+          "status"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-411-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "meta",
+          "unit"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-412-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "meta",
+          "pending"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-413-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "meta",
+          "mock"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-414-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "meta",
+          "asOf"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-415-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "meta",
+          "source"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-416-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "core.json",
+        "path": [
+          "sources"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-417-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "core.json",
+        "path": [
+          "pending"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-418-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "core.json",
+        "path": [
+          "pending",
+          "P01",
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-419-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "core.json",
+        "path": [
+          "pending",
+          "P02",
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-420-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "core.json",
+        "path": [
+          "pending",
+          "P03",
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-421-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "kinds"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-422-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "tiers"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-423-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "scopeNote"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-425-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-426-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "totals"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-427-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "totals",
+          "count"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-428-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-429-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-431-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          1,
+          "art"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-432-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "name"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-433-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          1,
+          "name"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-434-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "short"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-435-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          1,
+          "short"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-437-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          1,
+          "kind"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-439-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          1,
+          "law"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-440-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          1,
+          "law",
+          "rev"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-441-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          1,
+          "law",
+          "exp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-442-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          1,
+          "law",
+          "transfers"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-444-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policies"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-445-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policiesKind"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-446-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policies",
+          0,
+          "n"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-448-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "policies",
+          0,
+          "khil"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-450-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          1,
+          "changed"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-451-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          1,
+          "diff"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-452-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          1,
+          "diff",
+          "rev"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-453-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          1,
+          "diff",
+          "exp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-454-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "billVsLaw",
+          "expKhil"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-455-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "billVsLaw",
+          "expKhil",
+          "bill"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-456-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          1,
+          "bill"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-457-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          1,
+          "bill",
+          "exp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-458-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "billVsLaw",
+          "expKhil",
+          "law"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-459-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "billVsLaw",
+          "expKhil",
+          "diff"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-460-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          1,
+          "diff",
+          "transfers"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-461-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "billVsLaw",
+          "transfersKhil"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-462-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "billVsLaw",
+          "transfersKhil",
+          "bill"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-463-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          1,
+          "bill",
+          "transfers"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-464-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "billVsLaw",
+          "transfersKhil",
+          "law"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-465-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "billVsLaw",
+          "transfersKhil",
+          "diff"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-466-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "billVsLaw",
+          "lines"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-467-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          1,
+          "lines"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-468-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "programs"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-469-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "programs",
+          "status"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-470-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "programs",
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-471-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "programs",
+          "reasonKind"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-472-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "programs",
+          "reason"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-474-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "exp2025Khil"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-475-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "change",
+          "pct"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-476-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "programs",
+          "tier"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-477-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "programs",
+          "file"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-478-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "programs",
+          "count"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-479-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "programs",
+          "policyCount"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-480-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          2,
+          "policies",
+          6,
+          "parts"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-481-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          2,
+          "policies",
+          6,
+          "parts",
+          0,
+          "khil"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-482-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          2,
+          "policies",
+          6,
+          "parts",
+          0,
+          "name"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-483-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          2,
+          "programBudgetVsLaw",
+          "prbKhil"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-484-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          2,
+          "programBudgetVsLaw",
+          "lawKhil"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-485-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          2,
+          "programBudgetVsLaw",
+          "diffKhil"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-486-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          2,
+          "programBudgetVsLaw",
+          "billKhil"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-487-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          2,
+          "programBudgetVsLaw",
+          "matchesBill"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-488-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          5,
+          "bodies"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-489-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          5,
+          "bodies",
+          0,
+          "khil"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-490-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          5,
+          "billVsLaw",
+          "revKhil"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-491-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          5,
+          "billVsLaw",
+          "revKhil",
+          "bill"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-492-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "bill",
+          "rev"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-493-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          5,
+          "billVsLaw",
+          "revKhil",
+          "law"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-494-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          5,
+          "billVsLaw",
+          "revKhil",
+          "diff"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-495-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "totals",
+          "revKhil"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-496-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "totals",
+          "expKhil"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-497-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "totals"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-498-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "totals",
+          "law"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-499-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "totals",
+          "law",
+          "rev"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-500-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "totals",
+          "law",
+          "exp"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-501-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "programTotals"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-502-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "programTotals",
+          "budgets"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-503-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "programTotals",
+          "pending"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-504-budgets",
+    "groups": [
+      "BUDGETS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "programTotals",
+          "differ"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-507-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-508-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "programs"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-509-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          0,
+          "programs",
+          "status"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-510-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-511-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "meta"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-513-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "meta",
+          "status"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-514-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "meta",
+          "source"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-516-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "meta",
+          "mock"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-517-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "meta",
+          "asOf"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-518-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-519-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "art"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-520-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "art"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-521-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "name"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-522-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "name"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-523-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "short"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-524-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "short"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-525-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "tier"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-526-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "programs",
+          "tier"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-527-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "policiesKind"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-528-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "policiesKind"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-529-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "years"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-530-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "yearLabels"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-531-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "vintage"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-532-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "cols"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-533-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "yearsComplete"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-534-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "skipped"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-535-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "skippedTotal"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-536-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "policies"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-538-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "policies",
+          0,
+          "programs",
+          0,
+          "code"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-542-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "policies",
+          0,
+          "programs",
+          0,
+          "name"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-543-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "policies",
+          0,
+          "programs",
+          0,
+          "values"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-544-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "total"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-545-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "total",
+          "2023"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-546-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "total",
+          "2024"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-547-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "total",
+          "2025"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-548-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "total",
+          "2026"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-549-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "total",
+          "2027"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-550-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "total",
+          "2028"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-551-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "check"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-553-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "check",
+          "programsSumToPolicies"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-556-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "expKhil"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-558-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "programs",
+          "policyCount"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-559-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries.json",
+        "path": [
+          "items",
+          1,
+          "programs",
+          "count"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-560-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "doc"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-563-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "doc",
+          "archive"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-566-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "programs.json",
+        "path": [
+          "meta"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-567-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "programs.json",
+        "path": [
+          "meta",
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-568-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "programs.json",
+        "path": [
+          "meta",
+          "status"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-569-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "programs.json",
+        "path": [
+          "meta",
+          "source"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-571-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "programs.json",
+        "path": [
+          "meta",
+          "asOf"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-573-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "programs.json",
+        "path": [
+          "sentinels"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-574-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "programs.json",
+        "path": [
+          "note"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-576-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "policies",
+          0,
+          "values",
+          "2026"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-577-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "policies",
+          0,
+          "values",
+          "2025"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-578-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "policies",
+          0,
+          "programs",
+          0,
+          "values",
+          "2026"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "required-read-579-programs",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "ministries/0200.json",
+        "path": [
+          "policies",
+          0,
+          "programs",
+          0,
+          "values",
+          "2025"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "hash-keys-revenue-list",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          0,
+          "id"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "hash-keys-revenue-mapping",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          0,
+          "id"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "hash-keys-revenue-true",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          0,
+          "id"
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "hash-keys-revenue-none",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          0,
+          "id"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "hash-keys-revenue-bool-int",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          0,
+          "id"
+        ],
+        "value": 1
+      },
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          1,
+          "id"
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "hash-keys-revenue-bool-zero",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          0,
+          "id"
+        ],
+        "value": 0
+      },
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          1,
+          "id"
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "hash-keys-revenue-bool-float",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          0,
+          "id"
+        ],
+        "value": 1.0
+      },
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          1,
+          "id"
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "hash-keys-annex-list",
+    "groups": [
+      "ANNEX3"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "macroRows",
+          1,
+          "id"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "hash-keys-law-mapping",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          1,
+          "id"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "hash-keys-measures-list",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "id"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "hash-keys-programs-list",
+    "groups": [
+      "PROGRAMS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "programs.json",
+        "path": [
+          "items",
+          0,
+          1
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-memo-cell-0",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          1,
+          "mln",
+          0
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-memo-cell-1",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          1,
+          "mln",
+          0
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-memo-cell-2",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          1,
+          "mln",
+          0
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-memo-cell-3",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          1,
+          "mln",
+          0
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-memo-cell-4",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          1,
+          "mln",
+          0
+        ],
+        "value": 0.0
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-memo-cell-5",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          1,
+          "mln",
+          0
+        ],
+        "value": "1"
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-memo-cell-6",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          1,
+          "mln",
+          0
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-memo-cell-7",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          1,
+          "mln",
+          0
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-memo-cell-8",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          1,
+          "mln",
+          0
+        ],
+        "value": [
+          1
+        ]
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-memo-cell-9",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          1,
+          "mln",
+          0
+        ],
+        "value": {
+          "n": 1
+        }
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-memo-sequence-0",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          1,
+          "mln"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-memo-sequence-1",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          1,
+          "mln"
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-memo-sequence-2",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          1,
+          "mln"
+        ],
+        "value": 3
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-memo-sequence-3",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          1,
+          "mln"
+        ],
+        "value": 3.0
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-memo-sequence-4",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          1,
+          "mln"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-memo-sequence-5",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "items",
+          1,
+          "mln"
+        ],
+        "value": "1"
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-tree-parent-1",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          0,
+          "mln",
+          0
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-tree-parent-2",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          0,
+          "mln",
+          0
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-tree-parent-4",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          0,
+          "mln",
+          0
+        ],
+        "value": 0.0
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-tree-parent-5",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          0,
+          "mln",
+          0
+        ],
+        "value": "1"
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-tree-parent-6",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          0,
+          "mln",
+          0
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-tree-parent-7",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          0,
+          "mln",
+          0
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-tree-parent-8",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          0,
+          "mln",
+          0
+        ],
+        "value": [
+          1
+        ]
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-tree-parent-9",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          0,
+          "mln",
+          0
+        ],
+        "value": {
+          "n": 1
+        }
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-tree-child-0",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          11,
+          "mln",
+          0
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-tree-child-1",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          11,
+          "mln",
+          0
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-tree-child-2",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          11,
+          "mln",
+          0
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-tree-child-3",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          11,
+          "mln",
+          0
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-tree-child-4",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          11,
+          "mln",
+          0
+        ],
+        "value": 0.0
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-tree-child-5",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          11,
+          "mln",
+          0
+        ],
+        "value": "1"
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-tree-child-6",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          11,
+          "mln",
+          0
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-tree-child-7",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          11,
+          "mln",
+          0
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-tree-child-8",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          11,
+          "mln",
+          0
+        ],
+        "value": [
+          1
+        ]
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-tree-child-9",
+    "groups": [
+      "REVENUE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "rows",
+          11,
+          "mln",
+          0
+        ],
+        "value": {
+          "n": 1
+        }
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-economic-row-0",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "mln",
+          1
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-economic-row-1",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "mln",
+          1
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-economic-row-2",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "mln",
+          1
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-economic-row-3",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "mln",
+          1
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-economic-row-4",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "mln",
+          1
+        ],
+        "value": 0.0
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-economic-row-5",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "mln",
+          1
+        ],
+        "value": "1"
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-economic-row-6",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "mln",
+          1
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-economic-row-7",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "mln",
+          1
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-economic-row-8",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "mln",
+          1
+        ],
+        "value": [
+          1
+        ]
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-economic-row-9",
+    "groups": [
+      "EXPENDITURE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "economic",
+          "rows",
+          1,
+          "mln",
+          1
+        ],
+        "value": {
+          "n": 1
+        }
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-counts-add-0",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "counts",
+          "discretionary",
+          "revenue"
+        ],
+        "value": "14"
+      },
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "counts",
+          "discretionary",
+          "expenditure"
+        ],
+        "value": 6
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-counts-add-1",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "counts",
+          "discretionary",
+          "revenue"
+        ],
+        "value": "14"
+      },
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "counts",
+          "discretionary",
+          "expenditure"
+        ],
+        "value": "6"
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-counts-add-2",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "counts",
+          "discretionary",
+          "revenue"
+        ],
+        "value": []
+      },
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "counts",
+          "discretionary",
+          "expenditure"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-counts-add-3",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "counts",
+          "discretionary",
+          "revenue"
+        ],
+        "value": [
+          1
+        ]
+      },
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "counts",
+          "discretionary",
+          "expenditure"
+        ],
+        "value": [
+          2
+        ]
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-counts-add-4",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "counts",
+          "discretionary",
+          "revenue"
+        ],
+        "value": null
+      },
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "counts",
+          "discretionary",
+          "expenditure"
+        ],
+        "value": 6
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-counts-add-5",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "counts",
+          "discretionary",
+          "revenue"
+        ],
+        "value": false
+      },
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "counts",
+          "discretionary",
+          "expenditure"
+        ],
+        "value": 6
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-counts-add-6",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "counts",
+          "discretionary",
+          "revenue"
+        ],
+        "value": 0.0
+      },
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "counts",
+          "discretionary",
+          "expenditure"
+        ],
+        "value": 6
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-counts-add-7",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "counts",
+          "discretionary",
+          "revenue"
+        ],
+        "value": {}
+      },
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "counts",
+          "discretionary",
+          "expenditure"
+        ],
+        "value": 6
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-printed-discretionary-0",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "discretionary2026",
+          "II-8"
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-printed-discretionary-1",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "discretionary2026",
+          "II-8"
+        ],
+        "value": 0.0
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-printed-discretionary-2",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "discretionary2026",
+          "II-8"
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-printed-discretionary-3",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "discretionary2026",
+          "II-8"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-printed-discretionary-4",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "discretionary2026",
+          "II-8"
+        ],
+        "value": "482"
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-printed-discretionary-5",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "discretionary2026",
+          "II-8"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-short-total-0",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "revenueMln"
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-short-total-1",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "revenueMln"
+        ],
+        "value": 0.0
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-short-total-2",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "revenueMln"
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-short-total-3",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "revenueMln"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-short-total-4",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "revenueMln"
+        ],
+        "value": "745"
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-short-total-5",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "revenueMln"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-short-total-6",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "revenueMln"
+        ],
+        "value": [
+          1,
+          0.0
+        ]
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-short-total-7",
+    "groups": [
+      "MEASURES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "totals",
+          "revenueMln"
+        ],
+        "value": {
+          "2": [
+            1.0
+          ],
+          "1": false
+        }
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-unicode-repr-0",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "changed"
+        ],
+        "value": "𐵃"
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-unicode-repr-1",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "changed"
+        ],
+        "value": "🫩"
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-unicode-repr-2",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "changed"
+        ],
+        "value": "Ᲊ"
+      }
+    ]
+  },
+  {
+    "name": "numeric-contract-unicode-repr-3",
+    "groups": [
+      "LAW"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "budgets",
+          0,
+          "changed"
+        ],
+        "value": "a'𐵃"
+      }
+    ]
   }
 ]

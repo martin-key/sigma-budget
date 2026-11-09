@@ -1,5 +1,5 @@
 import { pythonNumberAt, pythonSum, type PythonNumber } from '../common/numbers.js';
-import { pyRepr } from './checks.js';
+import { pyRepr, fmt, isnum } from './checks.js';
 import { pythonKeys } from './ordered-json.js';
 
 /** Donor-visible Python exception names for cases that terminate a validation group. */
@@ -139,7 +139,11 @@ export function divide(a: number, b: number): number {
 function operandType(operand: PythonNumber): string {
   return typeof operand.value === 'number' ? operand.kind : pythonType(operand.value);
 }
-export function pyAdd(a: PythonNumber, b: PythonNumber): number {
+export function pyAdd(a: PythonNumber, b: PythonNumber): any {
+  const av: unknown = a.value,
+    bv: unknown = b.value;
+  if (typeof av === 'string' && typeof bv === 'string') return av + bv;
+  if (Array.isArray(av) && Array.isArray(bv)) return [...av, ...bv];
   if (typeof a.value !== 'number' || typeof b.value !== 'number') {
     const left = operandType(a),
       right = operandType(b);
@@ -206,6 +210,11 @@ export function pythonRepr(value: unknown): string {
       .map((key) => `${pyRepr(key)}: ${pyReprAt(value, key)}`)
       .join(', ')}}`;
   return pyRepr(value);
+}
+
+/** The donor's fmt uses Python str for values outside its numeric domain. */
+export function pythonFormat(value: unknown, digits = 1): string {
+  return isnum(value) ? fmt(value, digits) : typeof value === 'string' ? value : pythonRepr(value);
 }
 export function pyReprAt(holder: any, key: string | number): string {
   const value = holder[key];
@@ -313,6 +322,40 @@ export function pySubtract(a: PythonNumber, b: PythonNumber): number {
     );
   }
   return a.value - b.value;
+}
+
+export function pyAbs(operand: PythonNumber): number {
+  if (typeof operand.value !== 'number')
+    throw new PythonError('TypeError', `bad operand type for abs(): '${operandType(operand)}'`);
+  return Math.abs(operand.value);
+}
+
+class PythonSet<T> extends Set<T> {
+  constructor(values: Iterable<T>) {
+    super();
+    for (const value of values) this.add(value);
+  }
+  override has(value: T): boolean {
+    if (value !== null && typeof value === 'object')
+      throw new PythonError('TypeError', `unhashable type: '${pythonType(value)}'`);
+    if (super.has(value)) return true;
+    if (typeof value === 'boolean') return super.has(Number(value) as T);
+    return (value === 0 || value === 1) && super.has(Boolean(value) as T);
+  }
+  override add(value: T): this {
+    if (!this.has(value)) super.add(value);
+    return this;
+  }
+  override delete(value: T): boolean {
+    if (!this.has(value)) return false;
+    if (super.delete(value)) return true;
+    return super.delete((typeof value === 'boolean' ? Number(value) : Boolean(value)) as T);
+  }
+}
+
+/** Sets reject JSON lists/mappings and equate boolean and numeric keys like Python. */
+export function pySet<T>(values: Iterable<T> = []): Set<T> {
+  return new PythonSet(values);
 }
 
 /** Python booleans participate in the integer fast path of sum. */

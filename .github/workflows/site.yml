@@ -268,10 +268,11 @@ jobs:
           python packages/ingest/test/fixtures/validate14/generate_oracle.py --check
           python packages/ingest/test/fixtures/validate14/generate_groups_oracle.py --check
           python packages/ingest/test/fixtures/validate15/generate_oracle.py --check
+          python packages/ingest/test/fixtures/validate15/generate_unicode.py --check
       - name: Fiscal and legal validation parity
         env:
           WAVE15_PARITY_REPORT: tmp/ts-migration/candidates/15/report.json
-        run: pnpm --filter @sigma-budget/ingest exec vitest run src/validate/wave15-parity.test.ts src/validate/wave15-sum.test.ts src/validate/ordered-json.test.ts src/validate/cli15.test.ts
+        run: pnpm --filter @sigma-budget/ingest exec vitest run src/validate/wave15-parity.test.ts src/validate/wave15-sum.test.ts src/validate/wave15-unicode.test.ts src/validate/ordered-json.test.ts src/validate/cli15.test.ts
       - uses: actions/upload-artifact@v4
         if: always()
         with:

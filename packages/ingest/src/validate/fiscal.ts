@@ -1,8 +1,9 @@
 /** Fiscal validation against the legacy 2024–28 Annex 3 contract. */
-import { Check, byId, fmt, isnum } from './checks.js';
+import { Check, byId, isnum } from './checks.js';
 import { Context } from './context.js';
 import {
   PythonError,
+  pythonFormat as fmt,
   pythonRepr as pyRepr,
   pyReprAt,
   required,
@@ -16,6 +17,7 @@ import {
   pySubtract,
   pythonType,
   pyItem,
+  pySet,
   pyIter,
   pyHas,
   sourceTypeAt,
@@ -27,8 +29,9 @@ import {
   pyAddAssign,
   pyAdd,
   pyLessEqual,
+  pyTypedSum,
+  pyAbs,
 } from './python-error.js';
-
 const KFP_KEYS = ['revenue', 'expenditure', 'balance', 'interest', 'primaryBalance', 'financing'];
 const same = (a: unknown, b: unknown): boolean => pyEqual(a, b);
 const pyFloat = floatRepr;
@@ -87,7 +90,6 @@ function ptol(series: any): number {
   });
   return 0.5 * 10 ** -Math.max(0, ...decimals) + 0.001;
 }
-
 export function annex3(ctx: Context): Check {
   const c = new Check('ANNEX3'),
     o = ctx.get('outlook.json');
@@ -103,10 +105,10 @@ export function annex3(ctx: Context): Check {
     const rounded = roundInteger(pyItemAt(g, 'mlnPrecise', i));
     c.ok(
       isnum(cell) && Math.abs(cell - rounded) <= 1e-9,
-      `gdp.mln[${i}] is the rounded precise value: ${displayAt(g.mln, i)} vs ${rounded} (tolerance 0.0)`,
+      `gdp.mln[${i}] is the rounded precise value: ${displayAt(required<any>(g, 'mln'), i)} vs ${rounded} (tolerance 0.0)`,
     );
   }
-  const gdp = g.mlnPrecise,
+  const gdp = required<any>(g, 'mlnPrecise'),
     k = required<any>(o, 'kfp');
   c.ok(
     same(Object.keys(k).sort(), [...KFP_KEYS].sort()),
@@ -116,7 +118,9 @@ export function annex3(ctx: Context): Check {
     const b = required<any>(k, name);
     required(b, 'mln');
     c.ok(
-      pyLenAt(b, 'mln') === 5 && pyLenAt(b, 'pctGdp') === 5 && [...b.mln, ...b.pctGdp].every(isnum),
+      pyLenAt(b, 'mln') === 5 &&
+        pyLenAt(b, 'pctGdp') === 5 &&
+        [...required<any>(b, 'mln'), ...required<any>(b, 'pctGdp')].every(isnum),
       `${name}: five numbers each`,
     );
     const tol = ptol(pyIterAt(b, 'pctGdp'));
@@ -134,7 +138,7 @@ export function annex3(ctx: Context): Check {
         `${name} pctGdp ${2024 + i}`,
       );
   }
-  const [rev, exp, bal, itr, pb, fin] = KFP_KEYS.map((name) => k[name].mln);
+  const [rev, exp, bal, itr, pb, fin] = KFP_KEYS.map((name) => required<any>(k[name], 'mln'));
   for (let i = 0; i < 5; i++) {
     const y = 2024 + i;
     c.near(rev[i] - exp[i], bal[i], 0.3, `${y}: revenue - expenditure vs balance`);
@@ -142,7 +146,7 @@ export function annex3(ctx: Context): Check {
     c.near(pb[i], bal[i] + itr[i], 0.3, `${y}: primary balance vs balance + interest`);
   }
   c.ok(
-    k.primaryBalance.computed === true && k.primaryBalance.note,
+    required<any>(k, 'primaryBalance').computed === true && required<any>(k, 'primaryBalance').note,
     'primaryBalance must be flagged computed with a note',
   );
   const head = [rev[2], exp[2], bal[2], itr[2], gdp[2]];
@@ -153,30 +157,37 @@ export function annex3(ctx: Context): Check {
   const rows = required<any[]>(o, 'macroRows'),
     ids = rows.map((r: any) => required(r, 'id'));
   c.ok(
-    ids.length === new Set(ids).size && rows.length === 16,
+    ids.length === pySet(ids).size && rows.length === 16,
     `macroRows: 16 unique ids, got ${rows.length}`,
   );
-  const inGroups = required<any[]>(o, 'macroGroups').flatMap((gr: any) => gr.rows);
+  const inGroups = required<any[]>(o, 'macroGroups').flatMap((gr: any) => pyIterAt(gr, 'rows'));
   c.ok(same(inGroups.sort(), [...ids].sort()), 'macroGroups must list every macroRow exactly once');
   for (const r of rows)
-    c.ok(r.values.length === 5 && r.values.every(isnum), `macroRow ${r.id}: five numbers`);
+    c.ok(
+      pyLenAt(r, 'values') === 5 && pyIterAt(r, 'values').every(isnum),
+      `macroRow ${required(r, 'id')}: five numbers`,
+    );
   const mr = byId(rows) as Record<string, any>;
-  c.ok(same(required<any>(mr, 'gdp').values, g.mln), 'macroRows gdp must equal gdp.mln');
+  c.ok(
+    same(required(required<any>(mr, 'gdp'), 'values'), required(g, 'mln')),
+    'macroRows gdp must equal gdp.mln',
+  );
   const vs = required<any[]>(o, 'versions');
   c.ok(vs.length === 9, `versions: ${vs.length} rows, expected 9`);
   const other: Record<string, any> = Object.assign(
     Object.create(null),
-    byId(ctx.get('revenue.json').rows),
-    byId(ctx.get('expenditure.json').economic.rows),
+    byId(required(ctx.get('revenue.json'), 'rows')),
+    byId(required(required<any>(ctx.get('expenditure.json'), 'economic'), 'rows')),
   );
   let mx = 0;
   for (const v of vs) {
     c.ok(
-      v.pdf.length === 5 && v.docx.length === 5 && v.diff.length === 5,
+      pyLenAt(v, 'pdf') === 5 && pyLenAt(v, 'docx') === 5 && pyLenAt(v, 'diff') === 5,
       `versions ${required<string>(v, 'id')}: five values`,
     );
     c.ok(
-      same(v.pdf.slice(0, 2), v.docx.slice(0, 2)) && same(v.diff.slice(0, 2), [0, 0]),
+      same(required<any>(v, 'pdf').slice(0, 2), required<any>(v, 'docx').slice(0, 2)) &&
+        same(required<any>(v, 'diff').slice(0, 2), [0, 0]),
       `versions ${required<string>(v, 'id')}: 2024-2025 must be equal`,
     );
     for (let i = 0; i < 5; i++) {
@@ -186,7 +197,7 @@ export function annex3(ctx: Context): Check {
         0.0501,
         `versions ${required<string>(v, 'id')} diff ${i}`,
       );
-      mx = Math.max(mx, Math.abs(v.diff[i]));
+      mx = Math.max(mx, Math.abs(required<any>(v, 'diff')[i]));
     }
     const row = other[required<string>(v, 'id')];
     if (
@@ -198,14 +209,18 @@ export function annex3(ctx: Context): Check {
       const start = rowOffset(row);
       requireOffsetIndex(row, true);
       c.ok(
-        same(row.mln, v.pdf.slice(start, start + row.mln.length)),
+        same(
+          required<any>(row, 'mln'),
+          required<any>(v, 'pdf').slice(start, start + required<any>(row, 'mln').length),
+        ),
         `versions ${required<string>(v, 'id')}: the published row must be the PDF version`,
       );
     }
   }
   c.ok(Math.abs(mx - 4.3) < 0.001, `versions: largest difference ${fixed(mx, 1)}, documented 4.3`);
   c.ok(
-    o.notes[0].id === 'twoVersions' && o.notes[0].text.includes('9 реда'),
+    required(pyItemAt(o, 'notes', 0), 'id') === 'twoVersions' &&
+      required<string>(pyItemAt(o, 'notes', 0), 'text').includes('9 реда'),
     'notes[0] must be twoVersions and name the 9 rows',
   );
   c.fact(
@@ -213,7 +228,6 @@ export function annex3(ctx: Context): Check {
   );
   return c;
 }
-
 import { pythonNumberAt, pythonNumericText, type PythonNumber } from '../common/numbers.js';
 const numeric = (holder: any, key: string | number): PythonNumber => {
   const v = pyItem(holder, key);
@@ -253,61 +267,73 @@ function listValue<T>(values: T[], index: number): T {
     throw new PythonError('IndexError', 'list index out of range');
   return values[position]!;
 }
-function at(row: any, i: number): PythonNumber | null {
+type RowValue = PythonNumber & { raw: unknown };
+function at(row: any, i: number): RowValue | null {
   const j = i - rowOffset(row, '-');
   if (!(j >= 0)) return null;
   const values = required<any>(row, 'mln');
   if (j >= pyLenAt(row, 'mln')) return null;
   requireOffsetIndex(row);
-  if (pyItemAt(row, 'mln', j) === null) return null;
-  return numeric(values, j);
+  const raw = pyItemAt(row, 'mln', j);
+  if (raw === null) return null;
+  return { ...numeric(values, j), raw };
 }
 function tree(c: Check, rows: any[], what: string, gdp: number[], tolCap = 0.3): number {
   const by = byId(rows) as Record<string, any>,
     kids: Record<string, any[]> = {};
   for (const q of rows) {
-    required(q, 'id');
-    required(q, 'level');
-    c.ok(isnum(q.level), `${what} ${q.id}: level`);
+    c.ok(isnum(required<any>(q, 'level')), `${what} ${required<any>(q, 'id')}: level`);
     const p = q.parent;
     if (pyTruth(p)) {
-      if (c.ok(Object.hasOwn(by, p), `${what} ${q.id}: parent ${p} not in the table`)) {
+      if (
         c.ok(
-          pyEqual(by[p].level, q.level - 1),
-          `${what} ${q.id}: level ${pyReprAt(q, 'level')} under parent level ${pyReprAt(by[p], 'level')}`,
+          Object.hasOwn(by, p),
+          `${what} ${required<any>(q, 'id')}: parent ${p} not in the table`,
+        )
+      ) {
+        c.ok(
+          pyEqual(
+            required(by[p], 'level'),
+            pySubtract(numeric(q, 'level'), { value: 1, kind: 'int' }),
+          ),
+          `${what} ${required<any>(q, 'id')}: level ${pyReprAt(q, 'level')} under parent level ${pyReprAt(by[p], 'level')}`,
         );
         (kids[p] ??= []).push(q);
       }
-    } else c.ok(pyEqual(q.level, 0), `${what} ${q.id}: a row without parent must be level 0`);
+    } else
+      c.ok(
+        pyEqual(required<any>(q, 'level'), 0),
+        `${what} ${required<any>(q, 'id')}: a row without parent must be level 0`,
+      );
     const mlnLength = pyLenAt(q, 'mln');
     const pct = required<any>(q, 'pctGdp');
     const fits = mlnLength === pyLenAt(q, 'pctGdp') && rowOffset(q) + mlnLength <= 5;
     const rawOffset = Object.hasOwn(q, 'y0') ? q.y0 : 0;
     c.ok(
       fits,
-      `${what} ${q.id}: mln/pctGdp lengths ${mlnLength}/${pyLenAt(q, 'pctGdp')} (y0 ${pyDecimalInteger(rawOffset)})`,
+      `${what} ${required<any>(q, 'id')}: mln/pctGdp lengths ${mlnLength}/${pyLenAt(q, 'pctGdp')} (y0 ${pyDecimalInteger(rawOffset)})`,
     );
     const y0 = rowOffset(q);
     const tol = ptol(pyIterAt(q, 'pctGdp'));
-    const ms = pyIter(q.mln),
+    const ms = pyIter(required<any>(q, 'mln')),
       ps = pyIter(pct);
     for (let j = 0; j < Math.min(ms.length, ps.length); j++) {
       const m = ms[j],
         p = ps[j];
-      c.ok(isnum(m) && isnum(p), `${what} ${q.id}: non-number at ${j}`);
+      c.ok(isnum(m) && isnum(p), `${what} ${required<any>(q, 'id')}: non-number at ${j}`);
       if (isnum(m) && isnum(p)) {
         requireOffsetIndex(q);
         nearComputed(
           c,
-          q.pctGdp,
+          required<any>(q, 'pctGdp'),
           j,
           () =>
             percentage(
-              () => numeric(q.mln, j),
+              () => numeric(required<any>(q, 'mln'), j),
               () => numeric(gdp, j + y0),
             ),
           tol,
-          `${what} ${q.id} pctGdp ${j + y0}`,
+          `${what} ${required<any>(q, 'id')} pctGdp ${j + y0}`,
           sourceTypeAt(q, 'pctGdp'),
         );
       }
@@ -322,13 +348,13 @@ function tree(c: Check, rows: any[], what: string, gdp: number[], tolCap = 0.3):
       if (parent === null) continue;
       const values = pyMap(real, (k) => {
         const n = at(k, i);
-        return n && n.value ? n : floatZero;
+        return n && pyTruth(n.raw) ? n : floatZero;
       });
-      const d = Math.abs(parent.value - pySum(values));
+      const d = Math.abs(pySubtract(parent, pyTypedSum(values)));
       worst = Math.max(worst, d);
       c.ok(
         d <= tol,
-        `${what} ${pid} year ${i}: ${fmt(parent.value)} differs from the sum of its ${real.length} parts by ${fixed(d, 2)}`,
+        `${what} ${pid} year ${i}: ${fmt(parent.raw)} differs from the sum of its ${real.length} parts by ${fixed(d, 2)}`,
       );
     }
   }
@@ -377,7 +403,7 @@ export function revenue(ctx: Context): Check {
   const c = new Check('REVENUE'),
     r = ctx.get('revenue.json'),
     o = ctx.get('outlook.json'),
-    gdp = o.gdp.mlnPrecise;
+    gdp = required<any>(required<any>(o, 'gdp'), 'mlnPrecise');
   c.ok(
     same(required(r, 'years'), required(o, 'years')) &&
       same(required(r, 'vintage'), required(o, 'vintage')),
@@ -386,7 +412,10 @@ export function revenue(ctx: Context): Check {
   const t = required<any>(r, 'total');
   c.ok(
     same(required(t, 'mln'), required(required<any>(required<any>(o, 'kfp'), 'revenue'), 'mln')) &&
-      same(required(t, 'pctGdp'), required(required<any>(o.kfp, 'revenue'), 'pctGdp')),
+      same(
+        required(t, 'pctGdp'),
+        required(required<any>(required<any>(o, 'kfp'), 'revenue'), 'pctGdp'),
+      ),
     'total must equal outlook.kfp.revenue',
   );
   const rows = required<any[]>(r, 'rows'),
@@ -395,48 +424,60 @@ export function revenue(ctx: Context): Check {
     rows.length === 31 && Object.keys(by).length === 31,
     `rows: ${rows.length} (unique ${Object.keys(by).length}), expected 31`,
   );
-  c.ok(same(by['r.total'].mln, t.mln), 'r.total must equal total');
+  c.ok(
+    same(required(required<any>(by, 'r.total'), 'mln'), required(t, 'mln')),
+    'r.total must equal total',
+  );
   const worst = tree(c, rows, 'revenue', gdp),
     groups = required<any[]>(r, 'groups');
   c.ok(
-    groups.length === 8 && new Set(groups.map((gr: any) => gr.id)).size === 8,
+    groups.length === 8 && pySet(groups.map((gr: any) => required(gr, 'id'))).size === 8,
     'groups: 8 unique ids',
   );
-  const used = groups.flatMap((gr: any) => gr.rowIds);
+  const used = groups.flatMap((gr: any) => pyIterAt(gr, 'rowIds'));
   c.ok(
-    used.length === new Set(used).size && used.every((id: string) => Object.hasOwn(by, id)),
+    used.length === pySet(used).size && used.every((id: any) => Object.hasOwn(by, id)),
     'groups: rowIds unique and existing',
   );
   const gsum = [];
   for (let i = 0; i < 5; i++) {
     const s = pySum(pyMap(groups, (gr: any) => numeric(required(gr, 'mln'), i)));
     gsum.push(roundedOne(s));
-    c.near(s, t.mln[i], 0.15, `groups sum vs total, year ${2024 + i}`);
-    c.near(r.groupSums[i], roundedOne(s), 0.0501, `groupSums[${i}]`);
+    c.near(s, required<any>(t, 'mln')[i], 0.15, `groups sum vs total, year ${2024 + i}`);
+    c.near(pyItemAt(r, 'groupSums', i), roundedOne(s), 0.0501, `groupSums[${i}]`);
   }
   for (const gr of groups) {
-    if (!gr.rowIds.every((x: string) => Object.hasOwn(by, x))) continue;
+    if (!required<any>(gr, 'rowIds').every((x: string) => Object.hasOwn(by, x))) continue;
     c.ok(
       same(
         required(gr, 'annex3Rows'),
-        gr.rowIds.map((i: string) => required(by[i], 'label')),
+        required<any>(gr, 'rowIds').map((i: string) => required(by[i], 'label')),
       ),
-      `group ${gr.id}: annex3Rows differ from the row labels`,
+      `group ${required<any>(gr, 'id')}: annex3Rows differ from the row labels`,
     );
     for (let i = 0; i < 5; i++) {
-      const s = pySum(
-        pyMap(gr.rowIds, (x: string) => {
+      const actual = pyItemAt(gr, 'mln', i);
+      const s = pyTypedSum(
+        pyMap(required<any>(gr, 'rowIds'), (x: string) => {
           const n = at(by[x], i);
-          return n && n.value ? n : floatZero;
+          return n && pyTruth(n.raw) ? n : floatZero;
         }),
       );
-      c.near(gr.mln[i], s, 0.0501, `group ${gr.id} mln ${2024 + i}`);
+      nearWithText(
+        c,
+        actual,
+        s.value,
+        0.0501,
+        `group ${required<any>(gr, 'id')} mln ${2024 + i}`,
+        displayAt(required<any>(gr, 'mln'), i),
+        s.kind === 'float' ? pyFloat(s.value) : String(s.value),
+      );
     }
     const tol = ptol(pyIterAt(gr, 'pctGdp'));
     for (let i = 0; i < 5; i++)
       nearComputed(
         c,
-        gr.pctGdp,
+        required<any>(gr, 'pctGdp'),
         i,
         () =>
           percentage(
@@ -444,7 +485,7 @@ export function revenue(ctx: Context): Check {
             () => numeric(gdp, i),
           ),
         tol,
-        `group ${gr.id} pctGdp ${2024 + i}`,
+        `group ${required<any>(gr, 'id')} pctGdp ${2024 + i}`,
         sourceTypeAt(gr, 'pctGdp'),
       );
     nearComputed(
@@ -457,7 +498,7 @@ export function revenue(ctx: Context): Check {
           () => numeric(required(t, 'mln'), 2),
         ),
       0.0051,
-      `group ${gr.id} share2026`,
+      `group ${required<any>(gr, 'id')} share2026`,
     );
     nearComputed(
       c,
@@ -466,10 +507,10 @@ export function revenue(ctx: Context): Check {
       () =>
         growth(
           () => numeric(required(gr, 'mln'), 2),
-          () => numeric(gr.mln, 1),
+          () => numeric(required<any>(gr, 'mln'), 1),
         ),
       0.0501,
-      `group ${gr.id} yoy2026Pct`,
+      `group ${required<any>(gr, 'id')} yoy2026Pct`,
     );
   }
   const shares = pySum(pyMap(groups, (gr: any) => numeric(gr, 'share2026')));
@@ -477,31 +518,30 @@ export function revenue(ctx: Context): Check {
   const ex = ctx.get('execution.json');
   c.ok(
     required(required<any>(r, 'execution'), 'ref') === 'execution' &&
-      (Array.isArray(r.execution.rows) ? r.execution.rows : Object.keys(r.execution.rows)).every(
-        (k: string) => ex.rows.some((x: any) => x.id === k),
+      pyIterAt(required<any>(r, 'execution'), 'rows').every((k: any) =>
+        pySet(pyIterAt(ex, 'rows').map((x: any) => required(x, 'id'))).has(k),
       ),
     'execution.rows must be ids of execution.json',
   );
-  const notes = r.notes.map((n: any) => n.id);
+  const notes = pyIterAt(r, 'notes').map((n: any) => required(n, 'id'));
   c.ok(same(notes, ['groups', 'rounding', 'byTax']), `notes ids ${pyRepr(notes)}`);
-  const max = Math.max(...gsum.map((a, i) => Math.abs(a - t.mln[i])));
+  const max = Math.max(...gsum.map((a, i) => Math.abs(a - required<any>(t, 'mln')[i])));
   c.fact(
-    `2026 revenue ${fmt(t.mln[2])} млн. €, ${groups.length} groups (sum differs from the total by at most ${fmt(max, 1)}), tree identities within ${fixed(worst, 1)}`,
+    `2026 revenue ${fmt(required<any>(t, 'mln')[2])} млн. €, ${groups.length} groups (sum differs from the total by at most ${fmt(max, 1)}), tree identities within ${fixed(worst, 1)}`,
   );
   return c;
 }
-
 import { createHash } from 'node:crypto';
 import { pyTruth } from './checks.js';
 export function measures(ctx: Context): Check {
   const c = new Check('MEASURES'),
     m = ctx.get('measures.json'),
     o = ctx.get('outlook.json'),
-    t = m.totals;
-  const tt = t.discretionary2026;
+    t = required<any>(m, 'totals');
+  const tt = required<any>(t, 'discretionary2026');
   c.ok(
-    same([tt['II-8'], tt['II-9']], [482, 604.4]),
-    `discretionary 2026: II-8 / II-9 = ${pyFloat(tt['II-8'])} / ${pyFloat(tt['II-9'])}`,
+    same([required<any>(tt, 'II-8'), required<any>(tt, 'II-9')], [482, 604.4]),
+    `discretionary 2026: II-8 / II-9 = ${displayAt(tt, 'II-8')} / ${displayAt(tt, 'II-9')}`,
   );
   c.ok(
     same(
@@ -514,14 +554,23 @@ export function measures(ctx: Context): Check {
     ),
     'short-term totals',
   );
-  c.ok(same([m.check['II-8'], m.check['II-9']], [482, 604.4]), 'check.II-8 / II-9');
-  const items = m.items,
+  c.ok(
+    same(
+      [
+        required<any>(required<any>(m, 'check'), 'II-8'),
+        required<any>(required<any>(m, 'check'), 'II-9'),
+      ],
+      [482, 604.4],
+    ),
+    'check.II-8 / II-9',
+  );
+  const items = required<any[]>(m, 'items'),
     ids = items.map((i: any) => required(i, 'id')),
     by = byId(items) as Record<string, any>,
     cnt = required<any>(m, 'counts');
   c.ok(
-    items.length === 52 && new Set(ids).size === 52,
-    `items: ${items.length} (unique ${new Set(ids).size}), expected 52`,
+    items.length === 52 && pySet(ids).size === 52,
+    `items: ${items.length} (unique ${pySet(ids).size}), expected 52`,
   );
   const short = items.filter((i: any) => required(i, 'tab') === 'short'),
     disc = items.filter((i: any) => required(i, 'tab') === 'discretionary'),
@@ -530,49 +579,58 @@ export function measures(ctx: Context): Check {
     same(
       [short.length, disc.length, laws.length],
       [
-        cnt.short.all,
-        cnt.discretionary.revenue + cnt.discretionary.expenditure,
+        required<any>(required<any>(cnt, 'short'), 'all'),
+        pyAdd(
+          numeric(required<any>(cnt, 'discretionary'), 'revenue'),
+          numeric(required<any>(cnt, 'discretionary'), 'expenditure'),
+        ),
         required(cnt, 'laws'),
       ],
     ),
     `counts by tab: ${short.length} / ${disc.length} / ${laws.length}`,
   );
-  c.ok(cnt.all === items.length && items.length === 52, 'counts.all');
+  c.ok(required(cnt, 'all') === items.length && items.length === 52, 'counts.all');
   const count = (xs: any[], f: (x: any) => boolean) => xs.filter(f).length;
   c.ok(
     count(
       short,
       (i) => required(i, 'kind') === 'revenue' && pyTruth(required(i, 'hasEstimate')),
-    ) === cnt.short.revenue && cnt.short.revenue === 8,
+    ) === required<any>(required<any>(cnt, 'short'), 'revenue') &&
+      required<any>(required<any>(cnt, 'short'), 'revenue') === 8,
     'counts: short revenue with estimate',
   );
   c.ok(
     count(
       short,
       (i) => required(i, 'kind') === 'expenditure' && pyTruth(required(i, 'hasEstimate')),
-    ) === cnt.short.expenditure && cnt.short.expenditure === 9,
+    ) === required<any>(required<any>(cnt, 'short'), 'expenditure') &&
+      required<any>(required<any>(cnt, 'short'), 'expenditure') === 9,
     'counts: short expenditure with estimate',
   );
   c.ok(
-    count(short, (i) => !pyTruth(required(i, 'hasEstimate'))) === cnt.short.noEstimate &&
-      cnt.short.noEstimate === 7,
+    count(short, (i) => !pyTruth(required(i, 'hasEstimate'))) ===
+      required<any>(required<any>(cnt, 'short'), 'noEstimate') &&
+      required<any>(required<any>(cnt, 'short'), 'noEstimate') === 7,
     'counts: short without estimate',
   );
   c.ok(
-    count(disc, (i) => required(i, 'kind') === 'revenue') === cnt.discretionary.revenue &&
-      cnt.discretionary.revenue === 14,
+    count(disc, (i) => required(i, 'kind') === 'revenue') ===
+      required<any>(required<any>(cnt, 'discretionary'), 'revenue') &&
+      required<any>(required<any>(cnt, 'discretionary'), 'revenue') === 14,
     'counts: discretionary revenue',
   );
   c.ok(
-    count(disc, (i) => required(i, 'kind') === 'expenditure') === cnt.discretionary.expenditure &&
-      cnt.discretionary.expenditure === 6,
+    count(disc, (i) => required(i, 'kind') === 'expenditure') ===
+      required<any>(required<any>(cnt, 'discretionary'), 'expenditure') &&
+      required<any>(required<any>(cnt, 'discretionary'), 'expenditure') === 6,
     'counts: discretionary expenditure',
   );
   for (const i of items) {
     c.ok(
-      (Array.isArray(m.tabs)
-        ? m.tabs.includes(required(i, 'tab'))
-        : pyHas(m.tabs, required(i, 'tab'))) && pyHas(m.stageLabels, required(i, 'stage')),
+      (Array.isArray(required<any>(m, 'tabs'))
+        ? required<any>(m, 'tabs').includes(required(i, 'tab'))
+        : pyHas(required<any>(m, 'tabs'), required(i, 'tab'))) &&
+        pyHas(required<any>(m, 'stageLabels'), required(i, 'stage')),
       `${required(i, 'id')}: tab/stage`,
     );
     c.ok(
@@ -581,21 +639,26 @@ export function measures(ctx: Context): Check {
     );
     c.ok(
       required(i, 'page') !== null &&
-        typeof i.page === 'object' &&
-        !Array.isArray(i.page) &&
-        pyIntAt(i.page, 'docx'),
+        typeof required<any>(i, 'page') === 'object' &&
+        !Array.isArray(required<any>(i, 'page')) &&
+        pyIntAt(required<any>(i, 'page'), 'docx'),
       `${required(i, 'id')}: page.docx`,
     );
     if (pyTruth(required(i, 'hasEstimate'))) {
       required(i, 'effectMln');
       c.ok(
-        Object.keys(i.effectMln).every((y) => ['2026', '2027', '2028'].includes(y)) &&
-          pyTruth(i.effectMln) &&
-          Object.values(i.effectMln).every(isnum),
+        Object.keys(required<any>(i, 'effectMln')).every((y) =>
+          ['2026', '2027', '2028'].includes(y),
+        ) &&
+          pyTruth(required<any>(i, 'effectMln')) &&
+          Object.values(required<any>(i, 'effectMln')).every(isnum),
         `${required(i, 'id')}: effectMln`,
       );
-      if (i.tab === 'short')
-        c.ok(Object.hasOwn(m.estimateKinds, i.estimateKind), `${required(i, 'id')}: estimateKind`);
+      if (required<any>(i, 'tab') === 'short')
+        c.ok(
+          Object.hasOwn(required<any>(m, 'estimateKinds'), i.estimateKind),
+          `${required(i, 'id')}: estimateKind`,
+        );
     } else
       c.ok(
         !('effectMln' in i) && !('balanceEffectMln' in i),
@@ -604,12 +667,18 @@ export function measures(ctx: Context): Check {
     if ('balanceEffectMln' in i) {
       const sign = required(i, 'kind') === 'revenue' ? 1 : -1;
       c.ok(
-        same(Object.keys(i.balanceEffectMln).sort(), Object.keys(i.effectMln).sort()) &&
-          Object.keys(i.effectMln).every(
+        same(
+          Object.keys(required<any>(i, 'balanceEffectMln')).sort(),
+          Object.keys(required<any>(i, 'effectMln')).sort(),
+        ) &&
+          Object.keys(required<any>(i, 'effectMln')).every(
             (y) =>
               Math.abs(
-                pySubtract(numeric(i.balanceEffectMln, y), {
-                  value: pyMultiply({ value: sign, kind: 'float' }, numeric(i.effectMln, y)),
+                pySubtract(numeric(required<any>(i, 'balanceEffectMln'), y), {
+                  value: pyMultiply(
+                    { value: sign, kind: 'float' },
+                    numeric(required<any>(i, 'effectMln'), y),
+                  ),
                   kind: 'float',
                 }),
               ) < 1e-9,
@@ -621,29 +690,38 @@ export function measures(ctx: Context): Check {
       c.ok(Object.hasOwn(by, rid), `${required(i, 'id')}: related ${rid} does not exist`);
     if ('from' in i)
       c.ok(
-        typeof i.from === 'string' &&
-          /^\p{Decimal_Number}{4}-\p{Decimal_Number}{2}-\p{Decimal_Number}{2}$/u.test(i.from),
+        typeof required<any>(i, 'from') === 'string' &&
+          /^\p{Decimal_Number}{4}-\p{Decimal_Number}{2}-\p{Decimal_Number}{2}$/u.test(
+            required<any>(i, 'from'),
+          ),
         `${required(i, 'id')}: from ${pyReprAt(i, 'from')}`,
       );
   }
-  const grp = byId(m.groups) as Record<string, any>,
+  const grp = byId(required<any>(m, 'groups')) as Record<string, any>,
     seen: string[] = [];
-  for (const gr of m.groups) {
-    seen.push(...gr.items);
+  for (const gr of required<any>(m, 'groups')) {
+    seen.push(...required<any>(gr, 'items'));
     c.ok(
-      gr.items.every(
-        (x: string) => Object.hasOwn(by, x) && by[x].tab === 'short' && by[x].kind === gr.kind,
+      required<any>(gr, 'items').every(
+        (x: string) =>
+          Object.hasOwn(by, x) &&
+          required<any>(by[x], 'tab') === 'short' &&
+          required<any>(by[x], 'kind') === required<any>(gr, 'kind'),
       ),
-      `group ${gr.id}: items must be short-term ${gr.kind} measures`,
+      `group ${required<any>(gr, 'id')}: items must be short-term ${required<any>(gr, 'kind')} measures`,
     );
     if ('totalMln' in gr) {
-      const s = pySum(pyMap(gr.items, (x: string) => numeric(by[x].effectMln, '2026')));
+      const s = pySum(
+        pyMap(required<any>(gr, 'items'), (x: string) =>
+          numeric(required<any>(by[x], 'effectMln'), '2026'),
+        ),
+      );
       nearWithText(
         c,
         s,
-        gr.totalMln,
-        0.05 * (gr.items.length + 1),
-        `group ${gr.id}: items sum vs totalMln`,
+        required<any>(gr, 'totalMln'),
+        0.05 * (required<any>(gr, 'items').length + 1),
+        `group ${required<any>(gr, 'id')}: items sum vs totalMln`,
         pyFloat(s),
         displayAt(gr, 'totalMln'),
       );
@@ -653,74 +731,95 @@ export function measures(ctx: Context): Check {
     same(seen.sort(), short.map((i: any) => required(i, 'id')).sort()),
     'groups must cover every short-term measure exactly once',
   );
-  c.near(
-    grp['short-revenue'].totalMln,
-    t.revenueMln,
+  nearWithText(
+    c,
+    required<any>(grp['short-revenue'], 'totalMln'),
+    required<any>(t, 'revenueMln'),
     0.0001,
     'group short-revenue vs totals.revenueMln',
+    displayAt(grp['short-revenue'], 'totalMln'),
+    displayAt(t, 'revenueMln'),
   );
-  c.near(
-    grp['short-expenditure'].totalMln,
-    t.expenditureMln,
+  nearWithText(
+    c,
+    required<any>(grp['short-expenditure'], 'totalMln'),
+    required<any>(t, 'expenditureMln'),
     0.0001,
     'group short-expenditure vs totals.expenditureMln',
+    displayAt(grp['short-expenditure'], 'totalMln'),
+    displayAt(t, 'expenditureMln'),
   );
-  const kk = grp['short-expenditure'].items
+  const kk = required<any>(grp['short-expenditure'], 'items')
     .map((x: string) => by[x])
-    .filter((x: any) => x.estimateKind === 'stated');
-  c.near(
-    pySum(pyMap(kk, (x: any) => numeric(x.effectMln, '2026'))),
-    t.expenditureMlnWithoutIndicative,
+    .filter((x: any) => required<any>(x, 'estimateKind') === 'stated');
+  const stated = pyTypedSum(pyMap(kk, (x: any) => numeric(required<any>(x, 'effectMln'), '2026')));
+  nearWithText(
+    c,
+    stated.value,
+    required<any>(t, 'expenditureMlnWithoutIndicative'),
     0.05 * (kk.length + 1),
     'stated expenditure measures vs totals.expenditureMlnWithoutIndicative',
+    stated.kind === 'float' ? pyFloat(stated.value) : String(stated.value),
+    displayAt(t, 'expenditureMlnWithoutIndicative'),
   );
-  const gdp = o.gdp.mlnPrecise[2];
+  const gdp = required<any>(required<any>(o, 'gdp'), 'mlnPrecise')[2];
   for (const [tab, kind] of [
     ['II-8', 'revenue'],
     ['II-9', 'expenditure'],
   ] as const) {
     const its = disc.filter((i: any) => i.table === tab);
     c.ok(
-      its.every((i: any) => required(i, 'kind') === kind) && its.length === cnt.discretionary[kind],
+      its.every((i: any) => required(i, 'kind') === kind) &&
+        its.length === required<any>(required<any>(cnt, 'discretionary'), kind),
       `${tab}: items`,
     );
     const sums = [];
     for (const y of ['2026', '2027', '2028']) {
       const s = pySum(
         pyMap(its, (i: any) =>
-          Object.hasOwn(i.effectMln, y) ? numeric(i.effectMln, y) : floatZero,
+          Object.hasOwn(required<any>(i, 'effectMln'), y)
+            ? numeric(required<any>(i, 'effectMln'), y)
+            : floatZero,
         ),
       );
       sums.push(roundedOne(s));
       nearWithText(
         c,
         s,
-        t.discretionary[tab][y],
+        required<any>(required<any>(required<any>(t, 'discretionary'), tab), y),
         0.15,
         `${tab} ${y}: items sum vs printed total`,
         pyFloat(s),
-        displayAt(t.discretionary[tab], y),
+        displayAt(required<any>(required<any>(t, 'discretionary'), tab), y),
       );
     }
     c.ok(
-      same(m.check.rowSums[tab], sums),
-      `check.rowSums[${tab}] [${m.check.rowSums[tab].map((_: any, i: number) => displayAt(m.check.rowSums[tab], i)).join(', ')}] vs recomputed [${sums.map(pyFloat).join(', ')}]`,
+      same(required<any>(required<any>(required<any>(m, 'check'), 'rowSums'), tab), sums),
+      `check.rowSums[${tab}] [${required<any>(required<any>(m, 'check'), 'rowSums')
+        [tab].map((_: any, i: number) =>
+          displayAt(required<any>(required<any>(required<any>(m, 'check'), 'rowSums'), tab), i),
+        )
+        .join(', ')}] vs recomputed [${sums.map(pyFloat).join(', ')}]`,
     );
     c.near(
-      t.discretionaryPeriod[tab],
-      pySum(pyMap(Object.keys(t.discretionary[tab]), (y) => numeric(t.discretionary[tab], y))),
+      required<any>(required<any>(t, 'discretionaryPeriod'), tab),
+      pySum(
+        pyMap(Object.keys(required<any>(required<any>(t, 'discretionary'), tab)), (y) =>
+          numeric(required<any>(required<any>(t, 'discretionary'), tab), y),
+        ),
+      ),
       0.15,
       `${tab}: period total`,
     );
   }
   nearComputed(
     c,
-    t.gdpShare2026,
+    required<any>(t, 'gdpShare2026'),
     'revenue',
     () =>
       percentage(
         () => numeric(tt, 'II-8'),
-        () => numeric(o.gdp.mlnPrecise, 2),
+        () => numeric(required<any>(required<any>(o, 'gdp'), 'mlnPrecise'), 2),
       ),
     0.0051,
     'gdpShare2026 revenue',
@@ -728,42 +827,43 @@ export function measures(ctx: Context): Check {
   );
   nearComputed(
     c,
-    t.gdpShare2026,
+    required<any>(t, 'gdpShare2026'),
     'expenditure',
     () =>
       percentage(
         () => numeric(tt, 'II-9'),
-        () => numeric(o.gdp.mlnPrecise, 2),
+        () => numeric(required<any>(required<any>(o, 'gdp'), 'mlnPrecise'), 2),
       ),
     0.0051,
     'gdpShare2026 expenditure',
     sourceTypeAt(t, 'gdpShare2026'),
   );
-  const d = m.document;
+  const d = required<any>(m, 'document');
   required(d, 'sha256');
   c.ok(
-    d.url.startsWith('https://www.parliament.bg/') && d.sha256.length === 64,
+    required<string>(d, 'url').startsWith('https://www.parliament.bg/') &&
+      pyLenAt(d, 'sha256') === 64,
     'document: url/sha256',
   );
   const path = 'parliament/52-602-01-19.docx';
   if (ctx.sourceExists(path))
     c.ok(
-      createHash('sha256').update(ctx.sourceBytes(path)).digest('hex') === d.sha256,
+      createHash('sha256').update(ctx.sourceBytes(path)).digest('hex') ===
+        required<any>(d, 'sha256'),
       'document.sha256 differs from the local copy of the bill',
     );
   else c.warn('local copy of the bill not found: document.sha256 not re-checked');
   c.fact(
-    `short-term: revenue ${fmt(t.revenueMln)}, expenditure ${fmt(t.expenditureMln)} (${fmt(t.expenditureMlnWithoutIndicative)} without indicative) млн. €; discretionary 2026: II-8 ${fmt(tt['II-8'])}, II-9 ${fmt(tt['II-9'])}; ${items.length} items (24 + 20 + 8)`,
+    `short-term: revenue ${fmt(required<any>(t, 'revenueMln'))}, expenditure ${fmt(required<any>(t, 'expenditureMln'))} (${fmt(required<any>(t, 'expenditureMlnWithoutIndicative'))} without indicative) млн. €; discretionary 2026: II-8 ${fmt(required<any>(tt, 'II-8'))}, II-9 ${fmt(required<any>(tt, 'II-9'))}; ${items.length} items (24 + 20 + 8)`,
   );
   return c;
 }
-
 export function expenditure(ctx: Context): Check {
   const c = new Check('EXPENDITURE'),
     e = ctx.get('expenditure.json'),
     o = ctx.get('outlook.json'),
     core = ctx.get('core.json'),
-    gdp = o.gdp.mlnPrecise,
+    gdp = required<any>(required<any>(o, 'gdp'), 'mlnPrecise'),
     f = required<any>(e, 'functions');
   c.ok(
     same(required(f, 'years'), [2025, 2026, 2027, 2028]) &&
@@ -771,14 +871,14 @@ export function expenditure(ctx: Context): Check {
       pyLenAt(f, 'yearLabels') === 4,
     'functions: years/vintage/yearLabels',
   );
-  const items = f.items,
-    tot = f.totalMln;
+  const items = required<any[]>(f, 'items');
   c.ok(
-    items.length === 9 && new Set(items.map((i: any) => required(i, 'id'))).size === 9,
+    items.length === 9 && pySet(items.map((i: any) => required(i, 'id'))).size === 9,
     'functions: 9 unique items',
   );
+  const tot = required<any>(f, 'totalMln');
   for (let k = 0; k < 4; k++) {
-    const s = pySum(pyMap(items, (i: any) => numeric(i.mln, k)));
+    const s = pySum(pyMap(items, (i: any) => numeric(required(i, 'mln'), k)));
     nearWithText(
       c,
       s,
@@ -790,7 +890,7 @@ export function expenditure(ctx: Context): Check {
     );
     nearComputed(
       c,
-      f.totalPctGdp,
+      required<any>(f, 'totalPctGdp'),
       k,
       () =>
         percentage(
@@ -808,7 +908,7 @@ export function expenditure(ctx: Context): Check {
     c.ok(
       ['mln', 'pctGdp', 'share'].every((x) => pyLenAt(it, x) === 4) &&
         ['mln', 'pctGdp', 'share'].every((x) => pyIter(required(it, x)).every(isnum)),
-      `functions ${it.id}: four numbers each`,
+      `functions ${required<any>(it, 'id')}: four numbers each`,
     );
     for (let k = 0; k < 4; k++) {
       gaps[k] = Math.max(
@@ -828,7 +928,7 @@ export function expenditure(ctx: Context): Check {
       );
       nearComputed(
         c,
-        it.share,
+        required<any>(it, 'share'),
         k,
         () =>
           percentage(
@@ -836,7 +936,7 @@ export function expenditure(ctx: Context): Check {
             () => numeric(tot, k),
           ),
         0.0061,
-        `functions ${it.id} share ${2025 + k}`,
+        `functions ${required<any>(it, 'id')} share ${2025 + k}`,
         sourceTypeAt(it, 'share'),
       );
     }
@@ -847,18 +947,18 @@ export function expenditure(ctx: Context): Check {
       () =>
         growth(
           () => numeric(required(it, 'mln'), 1),
-          () => numeric(it.mln, 0),
+          () => numeric(required<any>(it, 'mln'), 0),
         ),
       0.0501,
-      `functions ${it.id} yoy2026Pct`,
+      `functions ${required<any>(it, 'id')} yoy2026Pct`,
     );
     if (pyTruth(it.parts))
       for (let k = 0; k < 4; k++)
         c.near(
-          pySum(pyMap(it.parts, (p: any) => numeric(p.mln, k))),
-          it.mln[k],
+          pySum(pyMap(required<any>(it, 'parts'), (p: any) => numeric(required<any>(p, 'mln'), k))),
+          required<any>(it, 'mln')[k],
           0.15,
-          `functions ${it.id}: parts vs item, ${2025 + k}`,
+          `functions ${required<any>(it, 'id')}: parts vs item, ${2025 + k}`,
         );
   }
   const rc = required<any>(f, 'reconcile');
@@ -870,29 +970,29 @@ export function expenditure(ctx: Context): Check {
         'float',
         'float',
       ),
-      `functions: printed % of GDP gap ${fixed(gaps[k]!, 3)} in ${2025 + k} exceeds the declared ${displayAt(rc.printedPctGdpMaxGap, k)}`,
+      `functions: printed % of GDP gap ${fixed(gaps[k]!, 3)} in ${2025 + k} exceeds the declared ${displayAt(required<any>(rc, 'printedPctGdpMaxGap'), k)}`,
     );
-  const ec = byId(required<any>(e, 'economic').rows) as Record<string, any>;
+  const ec = byId(required<any>(required<any>(e, 'economic'), 'rows')) as Record<string, any>;
   for (let k = 0; k < 4; k++) {
     const value = at(ec['x.exp'], k + 1);
     nearWithText(
       c,
-      rc.annex3ExpenditureMln[k],
-      value?.value,
+      required<any>(rc, 'annex3ExpenditureMln')[k],
+      value?.raw,
       0.0001,
       `reconcile: annex3ExpenditureMln ${2025 + k} vs economic x.exp`,
-      displayAt(rc.annex3ExpenditureMln, k),
+      displayAt(required<any>(rc, 'annex3ExpenditureMln'), k),
       value === null
         ? 'None'
-        : typeof value.value === 'number' && value.kind === 'float'
-          ? pyFloat(value.value)
-          : typeof value.value === 'string'
-            ? value.value
-            : pyReprAt(value, 'value'),
+        : typeof value.raw === 'number' && value.kind === 'float'
+          ? pyFloat(value.raw)
+          : typeof value.raw === 'string'
+            ? value.raw
+            : pyReprAt(value, 'raw'),
     );
     nearComputed(
       c,
-      rc.diffMln,
+      required<any>(rc, 'diffMln'),
       k,
       () =>
         roundedOne(pySubtract(numeric(tot, k), numeric(required(rc, 'annex3ExpenditureMln'), k))),
@@ -902,22 +1002,35 @@ export function expenditure(ctx: Context): Check {
     );
   }
   c.ok(
-    Math.abs(rc.diffMln[0]) > 1000 && rc.diffMln.slice(1).every((d: number) => Math.abs(d) <= 0.15),
+    pyAbs(numeric(required(rc, 'diffMln'), 0)) > 1000 &&
+      required<any>(rc, 'diffMln')
+        .slice(1)
+        .every(
+          (_d: number, i: number) => pyAbs(numeric(required<any>(rc, 'diffMln'), i + 1)) <= 0.15,
+        ),
     "reconcile: only the 2025 'Програма' column may differ from Annex 3",
   );
-  const vers = f.versions,
+  const vers = required<any>(f, 'versions'),
     by = byId(items) as Record<string, any>,
     pdfTotal = [...tot];
   c.ok(vers.length === 7, `functions.versions: ${vers.length} rows, expected 7`);
   for (const v of vers) {
     const it = by[required<string>(v, 'id')],
-      pub = 'part' in v ? it.parts.filter((p: any) => p.name === v.part)[0].mln : it.mln;
+      pub =
+        'part' in v
+          ? required<any>(
+              required<any>(it, 'parts').filter(
+                (p: any) => required<any>(p, 'name') === required<any>(v, 'part'),
+              )[0],
+              'mln',
+            )
+          : required<any>(it, 'mln');
     c.ok(
-      same(v.docx, pub),
+      same(required<any>(v, 'docx'), pub),
       `functions.versions ${required<string>(v, 'id')} ${v.part ?? ''}: the published numbers must be the .docx ones`,
     );
     c.ok(
-      v.pdf[0] === v.docx[0],
+      required<any>(v, 'pdf')[0] === required<any>(v, 'docx')[0],
       `functions.versions ${required<string>(v, 'id')}: 2025 must be equal`,
     );
     if (!('part' in v))
@@ -928,22 +1041,34 @@ export function expenditure(ctx: Context): Check {
         });
   }
   for (let k = 0; k < 4; k++)
-    c.near(rc.pdfTotalMln[k], pdfTotal[k], 0.0501, `reconcile: pdfTotalMln ${2025 + k}`);
-  const note = f.notes[0].text.replaceAll('\u202f', ' ').replaceAll('\u00a0', ' ');
+    c.near(
+      required<any>(rc, 'pdfTotalMln')[k],
+      pdfTotal[k],
+      0.0501,
+      `reconcile: pdfTotalMln ${2025 + k}`,
+    );
+  const note = required<any>(required<any>(f, 'notes')[0], 'text')
+    .replaceAll('\u202f', ' ')
+    .replaceAll('\u00a0', ' ');
   c.ok(
-    f.notes[0].id === 'base' && note.includes('55 525,0') && note.includes('56 807,2'),
+    required<any>(required<any>(f, 'notes')[0], 'id') === 'base' &&
+      note.includes('55 525,0') &&
+      note.includes('56 807,2'),
     'functions.notes[0] must quote 55 525,0 and 56 807,2',
   );
-  const mins = new Set(ctx.get('ministries.json').items.map((m: any) => m.id));
+  const mins = pySet(
+    required<any>(ctx.get('ministries.json'), 'items').map((m: any) => required<any>(m, 'id')),
+  );
   for (const it of items)
     c.ok(
       (it.ministries ?? []).every((m: string) => mins.has(m)),
-      `functions ${it.id}: unknown ministry code in ${pyReprAt(it, 'ministries')}`,
+      `functions ${required<any>(it, 'id')}: unknown ministry code in ${pyReprAt(it, 'ministries')}`,
     );
-  const z = e.economic,
-    rows = z.rows;
+  const z = required<any>(e, 'economic'),
+    rows = required<any>(z, 'rows');
   c.ok(
-    same(required(z, 'years'), o.years) && same(z.vintage, o.vintage),
+    same(required(z, 'years'), required(o, 'years')) &&
+      same(required(z, 'vintage'), required(o, 'vintage')),
     'economic: years/vintage must equal outlook',
   );
   c.ok(
@@ -952,57 +1077,84 @@ export function expenditure(ctx: Context): Check {
   );
   const worst = tree(c, rows, 'economic', gdp);
   c.ok(
-    same(ec['x.total'].mln, o.kfp.expenditure.mln),
+    same(
+      required<any>(ec['x.total'], 'mln'),
+      required<any>(required<any>(required<any>(o, 'kfp'), 'expenditure'), 'mln'),
+    ),
     'economic x.total must equal outlook expenditure',
   );
   c.ok(
-    same(ec['x.interest'].mln, o.kfp.interest.mln),
+    same(
+      required<any>(ec['x.interest'], 'mln'),
+      required<any>(required<any>(required<any>(o, 'kfp'), 'interest'), 'mln'),
+    ),
     'economic x.interest must equal outlook interest',
   );
   for (let i = 0; i < 5; i++)
     c.near(
-      ec['x.nonint'].mln[i],
-      pySubtract(numeric(ec['x.exp'].mln, i), numeric(ec['x.interest'].mln, i)),
+      required<any>(ec['x.nonint'], 'mln')[i],
+      pySubtract(
+        numeric(required<any>(ec['x.exp'], 'mln'), i),
+        numeric(required<any>(ec['x.interest'], 'mln'), i),
+      ),
       0.15,
       `economic: memo x.nonint ${2024 + i}`,
     );
   c.ok(ec['x.nonint'].memo === true, 'economic: x.nonint must be a memo row');
   nearWithText(
     c,
-    ec['x.exp'].mln[2],
+    required<any>(ec['x.exp'], 'mln')[2],
     tot[1],
     0.0011,
     'economic x.exp 2026 vs functions total',
-    displayAt(ec['x.exp'].mln, 2),
+    displayAt(required<any>(ec['x.exp'], 'mln'), 2),
     displayAt(tot, 1),
   );
   c.ok(
-    same([ec['x.total'].mln[2], ec['x.eucontrib'].mln[2]], [56807.2, 1282.2]),
+    same(
+      [required<any>(ec['x.total'], 'mln')[2], required<any>(ec['x.eucontrib'], 'mln')[2]],
+      [56807.2, 1282.2],
+    ),
     'economic 2026: x.total/x.eucontrib',
   );
   c.near(
-    ec['x.exp'].mln[2] + ec['x.eucontrib'].mln[2],
-    ec['x.total'].mln[2],
+    required<any>(ec['x.exp'], 'mln')[2] + required<any>(ec['x.eucontrib'], 'mln')[2],
+    required<any>(ec['x.total'], 'mln')[2],
     0.15,
     '55 525,0 + 1 282,2 vs 56 807,2',
   );
-  const cf = e.cofog,
-    cit = cf.items,
+  const cf = required<any>(e, 'cofog'),
+    cit = required<any[]>(cf, 'items'),
     top = cit.filter((x: any) => !pyTruth(x.memoOf));
   c.ok(
-    cf.years.length === 10 && cf.years.at(-1) === 2024 && same(cf.source, ['eurostat']),
+    pyLenAt(cf, 'years') === 10 &&
+      pyItemAt(cf, 'years', -1) === 2024 &&
+      same(required(cf, 'source'), ['eurostat']),
     'cofog: ten years ending 2024, source eurostat',
   );
   for (let k = 0; k < 10; k++)
     c.ok(
-      Math.abs(pySum(pyMap(top, (x: any) => numeric(x.mln, k))) - cf.total.mln[k]) <= 0.3,
-      `cofog ${cf.years[k]}: functions differ from the total`,
+      Math.abs(
+        pySubtract(
+          pyTypedSum(pyMap(top, (x: any) => numeric(required(x, 'mln'), k))),
+          numeric(required(required<any>(cf, 'total'), 'mln'), k),
+        ),
+      ) <= 0.3,
+      `cofog ${required<any>(cf, 'years')[k]}: functions differ from the total`,
     );
   for (const m of cit.filter((x: any) => pyTruth(x.memoOf))) {
     const p = required<any>(byId(cit, 'code') as Record<string, any>, m.memoOf);
+    const memoMln = required<any>(m, 'mln'),
+      parentMln = required<any>(p, 'mln');
+    const left = pyIter(memoMln, sourceTypeAt(m, 'mln'));
+    const right = pyIter(parentMln, sourceTypeAt(p, 'mln'));
     c.ok(
-      m.mln.slice(0, p.mln.length).every((a: number, k: number) => a <= p.mln[k] + 0.05),
-      `cofog memo ${m.code} exceeds its parent`,
+      left
+        .slice(0, right.length)
+        .every((a, k) =>
+          pyLessEqual(a, pyAdd(numeric(right, k), floating(0.05)), sourceTypeAt(left, k), 'float'),
+        ),
+      `cofog memo ${required<any>(m, 'code')} exceeds its parent`,
     );
   }
   c.ok(
@@ -1010,8 +1162,16 @@ export function expenditure(ctx: Context): Check {
     'cofog: kfpFunctions must be function ids',
   );
   const implied = percentage(
-    () => numeric(cf.total.mln, cf.total.mln.length - 1),
-    () => numeric(cf.total.pctGdp, cf.total.pctGdp.length - 1),
+    () =>
+      numeric(
+        required<any>(required<any>(cf, 'total'), 'mln'),
+        required<any>(required<any>(cf, 'total'), 'mln').length - 1,
+      ),
+    () =>
+      numeric(
+        required<any>(required<any>(cf, 'total'), 'pctGdp'),
+        required<any>(required<any>(cf, 'total'), 'pctGdp').length - 1,
+      ),
   );
   c.ok(
     Math.abs(pyDivide(floating(implied), numeric(gdp, 0)) - 1) < 0.003,
@@ -1019,12 +1179,12 @@ export function expenditure(ctx: Context): Check {
   );
   const pc = required<any>(e, 'perCapita');
   c.ok(
-    required(pc, 'population') === core.population.persons &&
-      required(pc, 'year') === core.population.year,
+    required(pc, 'population') === required<any>(required<any>(core, 'population'), 'persons') &&
+      required(pc, 'year') === required<any>(required<any>(core, 'population'), 'year'),
     'perCapita: population must equal core.population',
   );
   c.fact(
-    `functions 2026 ${fmt(tot[1])} млн. € (+ EU contribution ${fmt(ec['x.eucontrib'].mln[2])} = ${fmt(ec['x.total'].mln[2])}); economic tree within ${fixed(worst, 1)}; Annex 3 2025 column differs from the printed 'Програма' by ${fmt(rc.diffMln[0])} млн. €`,
+    `functions 2026 ${fmt(tot[1])} млн. € (+ EU contribution ${fmt(required<any>(ec['x.eucontrib'], 'mln')[2])} = ${fmt(required<any>(ec['x.total'], 'mln')[2])}); economic tree within ${fixed(worst, 1)}; Annex 3 2025 column differs from the printed 'Програма' by ${fmt(required<any>(rc, 'diffMln')[0])} млн. €`,
   );
   return c;
 }

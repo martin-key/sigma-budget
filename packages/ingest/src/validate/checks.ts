@@ -1,4 +1,5 @@
 import { gzip } from 'pako';
+import { pythonPrintable } from './unicode15.js';
 
 export function pyTruth(value: unknown): boolean {
   if (value === null || value === undefined || value === false || value === 0 || value === '')
@@ -26,7 +27,7 @@ export function pyRepr(value: unknown): string {
       else if (ch === '\n') result += '\\n';
       else if (ch === '\r') result += '\\r';
       else if (ch === '\t') result += '\\t';
-      else if (ch !== ' ' && /[\p{C}\p{Z}]/u.test(ch)) {
+      else if (!pythonPrintable(code)) {
         if (code <= 0xff) result += `\\x${code.toString(16).padStart(2, '0')}`;
         else if (code <= 0xffff) result += `\\u${code.toString(16).padStart(4, '0')}`;
         else result += `\\U${code.toString(16).padStart(8, '0')}`;

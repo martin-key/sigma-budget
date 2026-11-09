@@ -1,9 +1,10 @@
 /** Budget and programme validation, including all ministry files and their index. */
 import { pythonNumberAt, type PythonNumber } from '../common/numbers.js';
-import { Check, fmt, isnum, numbersIn, pyTruth } from './checks.js';
+import { Check, isnum, numbersIn, pyTruth } from './checks.js';
 import { Context } from './context.js';
 import {
   PythonError,
+  pythonFormat as fmt,
   pythonRepr as pyRepr,
   pyReprAt,
   required,
@@ -17,6 +18,7 @@ import {
   pyAddAssign,
   pyGreaterThan,
   pyItem,
+  pySet,
   sourceTypeAt,
   pyDivide,
   pyMultiply,
@@ -102,7 +104,10 @@ const iso = (x: any) =>
   typeof x === 'string' &&
   /^\p{Decimal_Number}{4}-\p{Decimal_Number}{2}-\p{Decimal_Number}{2}$/u.test(x);
 const byid = (rows: any[]) =>
-  Object.assign(Object.create(null), Object.fromEntries(rows.map((x) => [x.id, x])));
+  Object.assign(
+    Object.create(null),
+    Object.fromEntries(rows.map((x) => [required<any>(x, 'id'), x])),
+  );
 function near(c: Check, a: any, b: any, tol: number, msg: string, ar?: string, br?: string) {
   return c.ok(
     isnum(a) && isnum(b) && Math.abs(a - b) <= tol + 1e-9,
@@ -152,7 +157,7 @@ function cleanName(s: any): boolean {
 type Row = [string, string, any];
 function progRows(d: any): Row[] {
   const out: Row[] = [];
-  for (const pol of d.policies)
+  for (const pol of required<any>(d, 'policies'))
     if (pyTruth(pol.programs)) {
       out.push(['policy', '', pol]);
       for (const pr of pol.programs) out.push(['program', required(pol, 'code'), pr]);
@@ -164,7 +169,7 @@ export function budgets(ctx: Context): Check {
     m = ctx.get('ministries.json'),
     law = ctx.get('law.json'),
     core = ctx.get('core.json'),
-    mm = m.meta;
+    mm = required<any>(m, 'meta');
   c.ok(
     same(Object.keys(m), [
       'meta',
@@ -178,47 +183,55 @@ export function budgets(ctx: Context): Check {
     `ministries.json keys ${pyRepr(Object.keys(m))}`,
   );
   c.ok(
-    mm.id === 'D08+D09' &&
-      mm.status === 'real' &&
-      mm.unit === 'хил. €' &&
-      same(mm.pending, ['P03']) &&
-      mm.mock === false,
+    required<any>(mm, 'id') === 'D08+D09' &&
+      required<any>(mm, 'status') === 'real' &&
+      required<any>(mm, 'unit') === 'хил. €' &&
+      same(required<any>(mm, 'pending'), ['P03']) &&
+      required<any>(mm, 'mock') === false,
     'meta id/status/unit/pending',
   );
   c.ok(
-    iso(mm.asOf) &&
-      mm.asOf <= ctx.buildDate &&
-      mm.source.every((s: string) => Object.hasOwn(core.sources, s)),
+    iso(required<any>(mm, 'asOf')) &&
+      required<any>(mm, 'asOf') <= ctx.buildDate &&
+      required<any>(mm, 'source').every((s: string) =>
+        Object.hasOwn(required<any>(core, 'sources'), s),
+      ),
     'meta asOf/source',
   );
   c.ok(
-    (Array.isArray(core.pending) ? core.pending : Object.values(core.pending)).some(
-      (p: any) => p.id === 'P03',
-    ),
+    (Array.isArray(required<any>(core, 'pending'))
+      ? required<any>(core, 'pending')
+      : Object.values(required<any>(core, 'pending'))
+    ).some((p: any) => required<any>(p, 'id') === 'P03'),
     'core.pending has P03',
   );
   c.ok(
-    same(Object.keys(m.kinds), KINDS) || same(sorted(Object.keys(m.kinds)), sorted(KINDS)),
-    `kinds ${pyRepr(Object.keys(m.kinds))}`,
+    same(Object.keys(required<any>(m, 'kinds')), KINDS) ||
+      same(sorted(Object.keys(required<any>(m, 'kinds'))), sorted(KINDS)),
+    `kinds ${pyRepr(Object.keys(required<any>(m, 'kinds')))}`,
   );
   c.ok(
-    same(sorted(Object.keys(m.tiers)), sorted(TIERS)) &&
-      Object.values(m.tiers).every((v) => typeof v === 'string' && pyTruth(v)),
-    `tiers ${pyRepr(Object.keys(m.tiers))}`,
+    same(sorted(Object.keys(required<any>(m, 'tiers'))), sorted(TIERS)) &&
+      Object.values(required<any>(m, 'tiers')).every((v) => typeof v === 'string' && pyTruth(v)),
+    `tiers ${pyRepr(Object.keys(required<any>(m, 'tiers')))}`,
   );
-  c.ok(typeof m.scopeNote === 'string' && pyStrip(m.scopeNote) !== '', 'scopeNote');
+  c.ok(
+    typeof required<any>(m, 'scopeNote') === 'string' &&
+      pyStrip(required<any>(m, 'scopeNote')) !== '',
+    'scopeNote',
+  );
   const items = required<any[]>(m, 'items'),
-    ids = items.map((x: any) => x.id),
-    lb = byid(law.budgets);
+    ids = items.map((x: any) => required<any>(x, 'id'));
   c.ok(
-    items.length === 46 && m.totals.count === 46,
-    `${items.length} items, totals.count ${m.totals.count} (46 expected)`,
+    items.length === 46 && required<any>(required<any>(m, 'totals'), 'count') === 46,
+    `${items.length} items, totals.count ${required<any>(required<any>(m, 'totals'), 'count')} (46 expected)`,
   );
   c.ok(
-    same(ids, sorted(ids)) && new Set(ids).size === ids.length,
+    same(ids, sorted(ids)) && pySet(ids).size === ids.length,
     'items are unique and sorted by id',
   );
-  const diff = [...new Set([...ids, ...Object.keys(lb)])]
+  const lb = byid(required<any>(law, 'budgets'));
+  const diff = [...pySet([...ids, ...Object.keys(lb)])]
     .filter((x) => ids.includes(x) !== Object.hasOwn(lb, x))
     .sort();
   c.ok(!diff.length, `ministries.json and law.json list different budgets: ${pyRepr(diff)}`);
@@ -229,7 +242,7 @@ export function budgets(ctx: Context): Check {
   const tiers: Record<string, number> = Object.create(null),
     kinds: Record<string, number> = Object.create(null);
   for (const x of items) {
-    const i = x.id,
+    const i = required<any>(x, 'id'),
       w = `budget ${i}`,
       b = lb[i];
     if (!c.ok(b !== undefined, `${w}: not in law.json`)) continue;
@@ -240,10 +253,13 @@ export function budgets(ctx: Context): Check {
         pyEqual(required(x, 'kind'), required(b, 'kind')),
       `${w}: art/name/short/kind differ from law.json`,
     );
-    c.ok(Object.hasOwn(m.kinds, x.kind), `${w}: kind ${x.kind}`);
-    kinds[x.kind] = (kinds[x.kind] ?? 0) + 1;
     c.ok(
-      typeof required(x, 'lawName') === 'string' && cleanName(x.lawName),
+      Object.hasOwn(required<any>(m, 'kinds'), required<any>(x, 'kind')),
+      `${w}: kind ${required<any>(x, 'kind')}`,
+    );
+    kinds[required<any>(x, 'kind')] = (kinds[required<any>(x, 'kind')] ?? 0) + 1;
+    c.ok(
+      typeof required(x, 'lawName') === 'string' && cleanName(required<any>(x, 'lawName')),
       `${w}: lawName ${pyReprAt(x, 'lawName')}`,
     );
     for (const [key, k] of [
@@ -251,7 +267,14 @@ export function budgets(ctx: Context): Check {
       ['expKhil', 'exp'],
       ['transfersKhil', 'transfers'],
     ] as const)
-      optional(c, x[key], b.law[k], `${w} ${key} = law.json`, disp(x, key), disp(b.law, k));
+      optional(
+        c,
+        x[key],
+        required<any>(required<any>(b, 'law'), k),
+        `${w} ${key} = law.json`,
+        disp(x, key),
+        disp(required<any>(b, 'law'), k),
+      );
     rev = pyAddAssign(
       { value: rev, kind: 'float' },
       pyTruth(x.revKhil) ? n(x, 'revKhil') : { value: 0, kind: 'float' },
@@ -259,18 +282,18 @@ export function budgets(ctx: Context): Check {
     exp = pyAddAssign({ value: exp, kind: 'float' }, n(x, 'expKhil'));
     const pols = required<any[]>(x, 'policies');
     c.ok(
-      ['policies', 'areas'].includes(x.policiesKind) && pyTruth(pols),
+      ['policies', 'areas'].includes(required<any>(x, 'policiesKind')) && pyTruth(pols),
       `${w}: policiesKind / policies`,
     );
     c.ok(
       same(
-        pols.map((q: any) => q.n),
+        pols.map((q: any) => required<any>(q, 'n')),
         pols.map((_: any, j: number) => j + 1),
       ),
-      `${w}: policy numbers ${pyRepr(pols.map((q: any) => q.n))}`,
+      `${w}: policy numbers ${pyRepr(pols.map((q: any) => required<any>(q, 'n')))}`,
     );
     c.ok(
-      pols.every((q: any) => cleanName(q.name) && isnum(q.khil)),
+      pols.every((q: any) => cleanName(required(q, 'name')) && isnum(required(q, 'khil'))),
       `${w}: policy names / amounts`,
     );
     nearSum(
@@ -283,8 +306,8 @@ export function budgets(ctx: Context): Check {
     );
     near(
       c,
-      x.policyTotalKhil,
-      x.expKhil,
+      required<any>(x, 'policyTotalKhil'),
+      required<any>(x, 'expKhil'),
       TOL,
       `${w}: policyTotalKhil = expKhil`,
       disp(x, 'policyTotalKhil'),
@@ -294,21 +317,21 @@ export function budgets(ctx: Context): Check {
       if (pyTruth(q.parts)) {
         nearSum(
           c,
-          pyMap(q.parts, (p: any) => n(p, 'khil')),
+          pyMap(required<any>(q, 'parts'), (p: any) => n(p, 'khil')),
           () => required(q, 'khil'),
           TOL_SUM,
-          `${w} policy ${q.n}: parts sum`,
+          `${w} policy ${required<any>(q, 'n')}: parts sum`,
           () => disp(q, 'khil'),
         );
         c.ok(
-          q.parts.every((p: any) => cleanName(p.name)),
-          `${w} policy ${q.n}: part names`,
+          required<any>(q, 'parts').every((p: any) => cleanName(required<any>(p, 'name'))),
+          `${w} policy ${required<any>(q, 'n')}: part names`,
         );
       }
     if ('bodies' in x)
       nearSum(
         c,
-        pyMap(x.bodies, (q: any) => n(q, 'khil')),
+        pyMap(required<any>(x, 'bodies'), (q: any) => n(q, 'khil')),
         () => required(x, 'expKhil'),
         TOL_SUM,
         `${w}: bodies sum to the expenditure`,
@@ -351,7 +374,7 @@ export function budgets(ctx: Context): Check {
     }
     const bl = x.billVsLaw;
     c.ok(
-      (bl != null) === pyTruth(b.changed),
+      (bl != null) === pyTruth(required<any>(b, 'changed')),
       `${w}: billVsLaw must exist exactly for the changed budgets`,
     );
     if (bl != null) {
@@ -360,7 +383,12 @@ export function budgets(ctx: Context): Check {
         ['expKhil', 'exp'],
         ['transfersKhil', 'transfers'],
       ] as const) {
-        const moved = Math.abs(pyTruth(b.diff[k]) ? b.diff[k] : 0) > 0.05;
+        const moved =
+          Math.abs(
+            pyTruth(required<any>(required<any>(b, 'diff'), k))
+              ? required<any>(required<any>(b, 'diff'), k)
+              : 0,
+          ) > 0.05;
         c.ok(
           Object.hasOwn(bl, key) === moved,
           `${w} billVsLaw.${key} present only when the amount moved`,
@@ -369,44 +397,44 @@ export function budgets(ctx: Context): Check {
           for (const s of ['bill', 'law', 'diff'])
             near(
               c,
-              bl[key][s],
-              b[s][k],
+              required<any>(required<any>(bl, key), s),
+              required<any>(required<any>(b, s), k),
               TOL,
               `${w} billVsLaw.${key}.${s}`,
               disp(bl[key], s),
-              disp(b[s], k),
+              disp(required<any>(b, s), k),
             );
       }
-      c.ok(same(required(bl, 'lines'), b.lines), `${w}: billVsLaw.lines`);
+      c.ok(same(required(bl, 'lines'), required<any>(b, 'lines')), `${w}: billVsLaw.lines`);
     }
     const p = required<any>(x, 'programs');
     tiers[p.tier ?? 'pending'] = (tiers[p.tier ?? 'pending'] ?? 0) + 1;
-    if (p.status === 'real') {
+    if (required<any>(p, 'status') === 'real') {
       const tier = required<string>(p, 'tier');
       c.ok(
         ['validated', 'program-budget-differs'].includes(tier) &&
-          p.file === `ministries/${i}.json` &&
-          ctx.exists(p.file),
+          required<any>(p, 'file') === `ministries/${i}.json` &&
+          ctx.exists(required<any>(p, 'file')),
         `${w}: programs block ${pyRepr(p)}`,
       );
       c.ok(
         pyIntAt(p, 'count') &&
           pyIntAt(p, 'policyCount') &&
-          p.count >= p.policyCount &&
-          p.policyCount >= 1,
+          required<any>(p, 'count') >= required<any>(p, 'policyCount') &&
+          required<any>(p, 'policyCount') >= 1,
         `${w}: programs counts`,
       );
-      polTotal += p.policyCount;
-      progTotal += p.count;
+      polTotal += required<any>(p, 'policyCount');
+      progTotal += required<any>(p, 'count');
       c.ok(
-        (p.tier === 'program-budget-differs') === (pb != null),
+        (required<any>(p, 'tier') === 'program-budget-differs') === (pb != null),
         `${w}: tier vs programBudgetVsLaw`,
       );
       if (pb != null) {
         near(
           c,
-          pb.lawKhil,
-          x.expKhil,
+          required<any>(pb, 'lawKhil'),
+          required<any>(x, 'expKhil'),
           TOL,
           `${w}: programBudgetVsLaw.lawKhil`,
           disp(pb, 'lawKhil'),
@@ -414,7 +442,7 @@ export function budgets(ctx: Context): Check {
         );
         near(
           c,
-          pb.diffKhil,
+          required<any>(pb, 'diffKhil'),
           pySubtract(n(pb, 'lawKhil'), n(pb, 'prbKhil')),
           TOL,
           `${w}: programBudgetVsLaw.diffKhil = law - program budget`,
@@ -423,28 +451,31 @@ export function budgets(ctx: Context): Check {
         );
         near(
           c,
-          pb.billKhil,
-          b.bill.exp,
+          required<any>(pb, 'billKhil'),
+          required<any>(required<any>(b, 'bill'), 'exp'),
           TOL,
           `${w}: programBudgetVsLaw.billKhil = the bill`,
           disp(pb, 'billKhil'),
-          disp(b.bill, 'exp'),
+          disp(required<any>(b, 'bill'), 'exp'),
         );
         c.ok(
           pyEqual(
-            pb.matchesBill,
+            required<any>(pb, 'matchesBill'),
             Math.abs(pySubtract(n(pb, 'prbKhil'), n(pb, 'billKhil'))) <= 0.05,
           ),
           `${w}: programBudgetVsLaw.matchesBill`,
         );
-        c.ok(Math.abs(pb.diffKhil) > 0.05, `${w}: a 'differs' tier needs a difference`);
+        c.ok(
+          Math.abs(required<any>(pb, 'diffKhil')) > 0.05,
+          `${w}: a 'differs' tier needs a difference`,
+        );
       }
     } else {
       c.ok(
-        p.status === 'pending' &&
-          p.id === 'P03' &&
-          ['format', 'source-sums'].includes(p.reasonKind) &&
-          pyTruth(pyStrip(p.reason)) &&
+        required<any>(p, 'status') === 'pending' &&
+          required<any>(p, 'id') === 'P03' &&
+          ['format', 'source-sums'].includes(required<any>(p, 'reasonKind')) &&
+          pyTruth(pyStrip(required<any>(p, 'reason'))) &&
           !('file' in p) &&
           numbersIn(p) === 0 &&
           !ctx.exists(`ministries/${i}.json`),
@@ -455,57 +486,57 @@ export function budgets(ctx: Context): Check {
   }
   near(
     c,
-    m.totals.revKhil,
+    required<any>(required<any>(m, 'totals'), 'revKhil'),
     rev,
     TOL_SUM,
     'totals.revKhil = sum of the items',
-    disp(m.totals, 'revKhil'),
+    disp(required<any>(m, 'totals'), 'revKhil'),
     pyfloat(rev),
   );
   near(
     c,
-    m.totals.expKhil,
+    required<any>(required<any>(m, 'totals'), 'expKhil'),
     exp,
     TOL_SUM,
     'totals.expKhil = sum of the items',
-    disp(m.totals, 'expKhil'),
+    disp(required<any>(m, 'totals'), 'expKhil'),
     pyfloat(exp),
   );
   near(
     c,
-    m.totals.revKhil,
-    law.totals.law.rev,
+    required<any>(required<any>(m, 'totals'), 'revKhil'),
+    required<any>(required<any>(required<any>(law, 'totals'), 'law'), 'rev'),
     TOL,
     'totals.revKhil = law totals',
-    disp(m.totals, 'revKhil'),
-    disp(law.totals.law, 'rev'),
+    disp(required<any>(m, 'totals'), 'revKhil'),
+    disp(required<any>(required<any>(law, 'totals'), 'law'), 'rev'),
   );
   near(
     c,
-    m.totals.expKhil,
-    law.totals.law.exp,
+    required<any>(required<any>(m, 'totals'), 'expKhil'),
+    required<any>(required<any>(required<any>(law, 'totals'), 'law'), 'exp'),
     TOL,
     'totals.expKhil = law totals (13 326 470,3)',
-    disp(m.totals, 'expKhil'),
-    disp(law.totals.law, 'exp'),
+    disp(required<any>(m, 'totals'), 'expKhil'),
+    disp(required<any>(required<any>(law, 'totals'), 'law'), 'exp'),
   );
-  const pt = m.programTotals,
+  const pt = required<any>(m, 'programTotals'),
     validated = tiers.validated ?? 0,
     differ = tiers['program-budget-differs'] ?? 0,
     pending = tiers.pending ?? 0;
   c.ok(
-    pt.budgets === validated + differ &&
-      pt.budgets === 42 &&
-      pt.pending === pending &&
+    required<any>(pt, 'budgets') === validated + differ &&
+      required<any>(pt, 'budgets') === 42 &&
+      required<any>(pt, 'pending') === pending &&
       pending === 4 &&
-      pt.differ === differ &&
+      required<any>(pt, 'differ') === differ &&
       differ === 3,
     `programTotals ${pyRepr(pt)} vs tiers ${pyRepr(tiers)}`,
   );
   c.ok(
     required(pt, 'policies') === polTotal &&
       polTotal === 82 &&
-      pt.programs === progTotal &&
+      required(pt, 'programs') === progTotal &&
       progTotal === 190,
     `programTotals policies/programs ${pyReprAt(pt, 'policies')}/${pyReprAt(pt, 'programs')} vs ${polTotal}/${progTotal}`,
   );
@@ -514,18 +545,20 @@ export function budgets(ctx: Context): Check {
       Object.values(kinds).reduce((a, b) => a + b, 0) === 46,
     `kinds used ${pyRepr(kinds)}`,
   );
-  const noChange = items.filter((x: any) => x.change == null).map((x: any) => x.id);
+  const noChange = items
+    .filter((x: any) => x.change == null)
+    .map((x: any) => required<any>(x, 'id'));
   c.ok(
     same(sorted(noChange), ['0100', '0500', '1800', '2300', '3200', '4700']),
     `budgets without a 2025 total: ${pyRepr(noChange)}`,
   );
   c.fact(
-    `46 budgets: revenue ${fmt(m.totals.revKhil)}, expenditure ${fmt(m.totals.expKhil)} хил. €; program budgets: ${validated} validated / ${differ} differ from the law / ${pending} pending (P03); ${Number(pt.policies)} policies, ${Number(pt.programs)} programs`,
+    `46 budgets: revenue ${fmt(required<any>(required<any>(m, 'totals'), 'revKhil'))}, expenditure ${fmt(required<any>(required<any>(m, 'totals'), 'expKhil'))} хил. €; program budgets: ${validated} validated / ${differ} differ from the law / ${pending} pending (P03); ${Number(required<any>(pt, 'policies'))} policies, ${Number(required<any>(pt, 'programs'))} programs`,
   );
   return c;
 }
 function checkFile(c: Check, ctx: Context, item: any, d: any): Row[] {
-  const i = item.id,
+  const i = required<any>(item, 'id'),
     w = `ministries/${i}.json`;
   c.ok(
     same(Object.keys(d), [
@@ -550,73 +583,73 @@ function checkFile(c: Check, ctx: Context, item: any, d: any): Row[] {
     ]),
     `${w}: keys ${pyRepr(Object.keys(d))}`,
   );
-  const mt = d.meta;
+  const mt = required<any>(d, 'meta');
   c.ok(
-    mt.id === 'D09' &&
-      mt.status === 'real' &&
-      same(mt.source, ['prb']) &&
+    required(mt, 'id') === 'D09' &&
+      required<any>(mt, 'status') === 'real' &&
+      same(required<any>(mt, 'source'), ['prb']) &&
       required(mt, 'unit') === 'хил. €' &&
-      mt.mock === false &&
-      iso(mt.asOf) &&
-      mt.asOf <= ctx.buildDate,
+      required<any>(mt, 'mock') === false &&
+      iso(required<any>(mt, 'asOf')) &&
+      required<any>(mt, 'asOf') <= ctx.buildDate,
     `${w}: meta`,
   );
   c.ok(
-    d.id === i &&
-      d.art === item.art &&
-      d.name === item.name &&
-      d.short === item.short &&
-      d.tier === item.programs.tier &&
-      d.policiesKind === item.policiesKind,
+    required<any>(d, 'id') === i &&
+      required<any>(d, 'art') === required<any>(item, 'art') &&
+      required<any>(d, 'name') === required<any>(item, 'name') &&
+      required<any>(d, 'short') === required<any>(item, 'short') &&
+      required<any>(d, 'tier') === required<any>(required<any>(item, 'programs'), 'tier') &&
+      required<any>(d, 'policiesKind') === required<any>(item, 'policiesKind'),
     `${w}: id/art/name/short/tier/policiesKind differ from ministries.json`,
   );
   c.ok(
-    same(d.years, YEARS) &&
-      same(d.yearLabels, LABELS) &&
-      same(d.vintage, VINTAGE) &&
-      same(d.cols, COLS),
+    same(required<any>(d, 'years'), YEARS) &&
+      same(required<any>(d, 'yearLabels'), LABELS) &&
+      same(required<any>(d, 'vintage'), VINTAGE) &&
+      same(required<any>(d, 'cols'), COLS),
     `${w}: years/labels/vintage/cols`,
   );
-  const yc = d.yearsComplete;
+  const yc = required<any>(d, 'yearsComplete');
   c.ok(
     same(
       yc,
-      [...new Set(yc)].sort((a: any, b: any) => a - b),
+      [...pySet(yc)].sort((a: any, b: any) => a - b),
     ) &&
       yc.every((y: number) => YEARS.includes(y)) &&
       yc.includes(2026),
     `${w}: yearsComplete ${pyRepr(yc)}`,
   );
   c.ok(
-    d.skipped.length === d.skippedTotal &&
-      d.skipped.every((s: any) => typeof s === 'string' && !!pyStrip(s)),
+    required<any>(d, 'skipped').length === required<any>(d, 'skippedTotal') &&
+      required<any>(d, 'skipped').every((s: any) => typeof s === 'string' && !!pyStrip(s)),
     `${w}: skipped list vs skippedTotal`,
   );
   const rows = progRows(d),
-    codes = rows.map(([, , r]) => r.code);
-  c.ok(new Set(codes).size === codes.length, `${w}: duplicate codes`);
+    codes = rows.map(([, , r]) => required<any>(r, 'code'));
+  c.ok(pySet(codes).size === codes.length, `${w}: duplicate codes`);
   for (const [lvl, parent, r] of rows) {
-    const ww = `${w} ${r.code}`;
+    const ww = `${w} ${required<any>(r, 'code')}`;
     c.ok(cleanName(required(r, 'name')), `${ww}: name ${pyReprAt(r, 'name')}`);
     if (lvl === 'policy' || (lvl === 'program' && !parent))
       c.ok(
-        new RegExp(`^${i}\\.\\p{Decimal_Number}{2}\\.00$`, 'u').test(r.code) &&
+        new RegExp(`^${i}\\.\\p{Decimal_Number}{2}\\.00$`, 'u').test(required<any>(r, 'code')) &&
           required(r, 'kind') === (lvl === 'policy' ? 'policy' : 'program'),
         `${ww}: policy code/kind`,
       );
     else
       c.ok(
         new RegExp(`^${i}\\.\\p{Decimal_Number}{2}\\.(?!00)\\p{Decimal_Number}{2}$`, 'u').test(
-          r.code,
-        ) && r.code.slice(0, 7) === parent.slice(0, 7),
+          required<any>(r, 'code'),
+        ) && required<any>(r, 'code').slice(0, 7) === parent.slice(0, 7),
         `${ww}: program code under policy ${parent}`,
       );
     required(r, 'values');
     c.ok(
-      Object.keys(r.values).every((y) => YEARS.map(String).includes(y)),
-      `${ww}: value years ${pyRepr(sorted(Object.keys(r.values)))}`,
+      Object.keys(required<any>(r, 'values')).every((y) => YEARS.map(String).includes(y)),
+      `${ww}: value years ${pyRepr(sorted(Object.keys(required<any>(r, 'values'))))}`,
     );
-    for (const [y, v] of Object.entries(r.values) as [string, any[]][]) {
+    for (const [y, v] of Object.entries(required<any>(r, 'values')) as [string, any[]][]) {
       if (!c.ok(v.length === 9 && v.every(isnum), `${ww} ${y}: nine numbers`)) continue;
       for (const k of [0, 3, 6])
         near(
@@ -643,20 +676,22 @@ function checkFile(c: Check, ctx: Context, item: any, d: any): Row[] {
     progOk = true;
   for (const y of yc) {
     const ys = String(y),
-      total = d.total[ys];
+      total = required<any>(d, 'total')[ys];
     if (
       !c.ok(
-        Object.hasOwn(d.total, ys) && total.length === 9 && total.every(isnum),
+        Object.hasOwn(required<any>(d, 'total'), ys) && total.length === 9 && total.every(isnum),
         `${w}: total ${y}`,
       )
     )
       continue;
-    const pols = d.policies,
+    const pols = required<any>(d, 'policies'),
       tol = Math.min(0.3, 0.05 * (pols.length + 1) + 0.01);
     for (let k = 0; k < 9; k++) {
       const s = sum(
         pyMap(pols, (p: any) =>
-          Object.hasOwn(p.values, ys) ? n(p.values[ys], k) : { value: 0, kind: 'float' },
+          Object.hasOwn(required<any>(p, 'values'), ys)
+            ? n(required<any>(p, 'values')[ys], k)
+            : { value: 0, kind: 'float' },
         ),
       );
       if (Math.abs(s - total[k]) > tol + 1e-9) {
@@ -671,20 +706,24 @@ function checkFile(c: Check, ctx: Context, item: any, d: any): Row[] {
       for (let k = 0; k < 9; k++) {
         const s = sum(
             pyMap(progs, (r: any) =>
-              Object.hasOwn(r.values, ys) ? n(r.values[ys], k) : { value: 0, kind: 'float' },
+              Object.hasOwn(required<any>(r, 'values'), ys)
+                ? n(required<any>(r, 'values')[ys], k)
+                : { value: 0, kind: 'float' },
             ),
           ),
-          pv = Object.hasOwn(pol.values, ys) ? pol.values[ys][k] : 0;
+          pv = Object.hasOwn(required<any>(pol, 'values'), ys)
+            ? required<any>(pol, 'values')[ys][k]
+            : 0;
         if (Math.abs(s - pv) > tolerance + 1e-9) {
           progOk = false;
           c.fail(
-            `${w} ${y} ${COLS[k]}: programs of ${pol.code} sum to ${fixed(s, 1)}, policy ${fixed(Number(pv), 1)}`,
+            `${w} ${y} ${COLS[k]}: programs of ${required<any>(pol, 'code')} sum to ${fixed(s, 1)}, policy ${fixed(Number(pv), 1)}`,
           );
         }
       }
     }
   }
-  const ck = d.check;
+  const ck = required<any>(d, 'check');
   c.ok(
     required(ck, 'policiesSumToTotal') === polOk &&
       required(ck, 'programsSumToPolicies') === progOk &&
@@ -692,7 +731,7 @@ function checkFile(c: Check, ctx: Context, item: any, d: any): Row[] {
       progOk,
     `${w}: check flags vs recomputed sums`,
   );
-  const t26 = d.total['2026'];
+  const t26 = required<any>(d, 'total')['2026'];
   if (pyTruth(t26)) {
     near(
       c,
@@ -705,8 +744,8 @@ function checkFile(c: Check, ctx: Context, item: any, d: any): Row[] {
     );
     near(
       c,
-      ck.zdbExp,
-      item.expKhil,
+      required<any>(ck, 'zdbExp'),
+      required<any>(item, 'expKhil'),
       TOL,
       `${w}: check.zdbExp = the law`,
       disp(ck, 'zdbExp'),
@@ -714,8 +753,9 @@ function checkFile(c: Check, ctx: Context, item: any, d: any): Row[] {
     );
     const sameLaw = Math.abs(pySubtract(n(ck, 'prbTotal2026'), n(ck, 'zdbExp'))) <= 0.05;
     c.ok(
-      required(ck, 'matchesLaw') === sameLaw && sameLaw === (d.tier === 'validated'),
-      `${w}: matchesLaw ${disp(ck, 'matchesLaw')} tier ${d.tier}`,
+      required(ck, 'matchesLaw') === sameLaw &&
+        sameLaw === (required<any>(d, 'tier') === 'validated'),
+      `${w}: matchesLaw ${disp(ck, 'matchesLaw')} tier ${required<any>(d, 'tier')}`,
     );
     c.ok(
       'diffKhil' in ck === !sameLaw,
@@ -724,7 +764,7 @@ function checkFile(c: Check, ctx: Context, item: any, d: any): Row[] {
     if ('diffKhil' in ck)
       near(
         c,
-        ck.diffKhil,
+        required<any>(ck, 'diffKhil'),
         pySubtract(n(ck, 'zdbExp'), n(ck, 'prbTotal2026')),
         TOL,
         `${w}: diffKhil = law - program budget`,
@@ -732,34 +772,39 @@ function checkFile(c: Check, ctx: Context, item: any, d: any): Row[] {
         pyfloat(pySubtract(n(ck, 'zdbExp'), n(ck, 'prbTotal2026'))),
       );
   }
-  const p = item.programs,
+  const p = required<any>(item, 'programs'),
     pc = rows.filter(([lvl]) => lvl === 'policy').length,
     pr = rows.filter(([lvl]) => lvl === 'program').length;
   c.ok(
-    p.policyCount === pc && p.count === pr,
-    `${w}: counts (${p.policyCount}, ${p.count}) vs ${pc} policies / ${pr} programs`,
+    required<any>(p, 'policyCount') === pc && required<any>(p, 'count') === pr,
+    `${w}: counts (${required<any>(p, 'policyCount')}, ${required<any>(p, 'count')}) vs ${pc} policies / ${pr} programs`,
   );
-  const doc = d.doc;
+  const doc = required<any>(d, 'doc');
   c.ok(
     same(sorted(Object.keys(doc)), ['archive', 'archiveUrl', 'file', 'pages', 'pagesByYear']) &&
-      doc.file.toLowerCase().endsWith('.pdf') &&
-      !doc.file.includes('/') &&
-      doc.archiveUrl === ARCHIVE &&
-      typeof doc.archive === 'string' &&
-      pyTruth(doc.archive),
+      required<any>(doc, 'file').toLowerCase().endsWith('.pdf') &&
+      !required<any>(doc, 'file').includes('/') &&
+      required<any>(doc, 'archiveUrl') === ARCHIVE &&
+      typeof required<any>(doc, 'archive') === 'string' &&
+      pyTruth(required<any>(doc, 'archive')),
     `${w}: doc ${pyRepr(sorted(Object.keys(doc)))}`,
   );
   required(doc, 'pages');
   c.ok(
     same(
-      doc.pages,
-      [...new Set(doc.pages)].sort((a: any, b: any) => a - b),
-    ) && doc.pages.every((n: any, i: number) => pyIntAt(doc.pages, i) && n > 0),
+      required<any>(doc, 'pages'),
+      [...pySet(required<any>(doc, 'pages'))].sort((a: any, b: any) => a - b),
+    ) &&
+      required<any>(doc, 'pages').every(
+        (n: any, i: number) => pyIntAt(required<any>(doc, 'pages'), i) && n > 0,
+      ),
     `${w}: doc.pages`,
   );
   c.ok(
     Object.keys(required(doc, 'pagesByYear')).every((y) => YEARS.map(String).includes(y)) &&
-      Object.values(doc.pagesByYear).every((v: any) => v.every((x: any) => doc.pages.includes(x))),
+      Object.values(required<any>(doc, 'pagesByYear')).every((v: any) =>
+        v.every((x: any) => required<any>(doc, 'pages').includes(x)),
+      ),
     `${w}: doc.pagesByYear`,
   );
   const text = Object.entries(doc)
@@ -781,19 +826,19 @@ export function programs(ctx: Context): Check {
       .dataDirectory('ministries')
       .filter((f) => f.endsWith('.json'))
       .sort(),
-    real = m.items
-      .filter((x: any) => x.programs.status === 'real')
-      .map((x: any) => x.id)
+    real = required<any>(m, 'items')
+      .filter((x: any) => required<any>(required<any>(x, 'programs'), 'status') === 'real')
+      .map((x: any) => required<any>(x, 'id'))
       .sort();
   const actual = files.map((f) => f.slice(0, -5)),
-    diff = [...new Set([...actual, ...real])]
+    diff = [...pySet([...actual, ...real])]
       .filter((x) => actual.includes(x) !== real.includes(x))
       .sort();
   c.ok(
     same(actual, real) && real.length === 42,
     `ministries/ holds ${files.length} files, ministries.json announces ${real.length}: ${pyRepr(diff)}`,
   );
-  const by = byid(m.items),
+  const by = byid(required<any>(m, 'items')),
     expect: Record<string, [string, string, string, any]> = Object.create(null);
   for (const i of real) {
     const rel = `ministries/${i}.json`;
@@ -803,23 +848,23 @@ export function programs(ctx: Context): Check {
         `[Errno 2] No such file or directory: '${ctx.root}/${ctx.dataDir}/${rel}'`,
       );
     for (const [lvl, parent, r] of checkFile(c, ctx, by[i], ctx.get(rel)))
-      expect[r.code] = [i, lvl, parent, r];
+      expect[required<any>(r, 'code')] = [i, lvl, parent, r];
   }
-  const pm = pj.meta;
+  const pm = required<any>(pj, 'meta');
   c.ok(
-    pm.id === 'D09' &&
-      pm.status === 'real' &&
-      same(sorted(pm.source), ['prb', 'zdb']) &&
+    required<any>(pm, 'id') === 'D09' &&
+      required<any>(pm, 'status') === 'real' &&
+      same(sorted(required<any>(pm, 'source')), ['prb', 'zdb']) &&
       required(pm, 'unit') === 'хил. €' &&
-      iso(pm.asOf),
+      iso(required<any>(pm, 'asOf')),
     'programs.json meta',
   );
   c.ok(
     same(Object.keys(pj), ['meta', 'fields', 'sentinels', 'note', 'items']) &&
-      same(pj.fields, FIELDS) &&
-      same(pj.sentinels, SENTINELS) &&
-      typeof pj.note === 'string' &&
-      pyTruth(pj.note),
+      same(required<any>(pj, 'fields'), FIELDS) &&
+      same(required<any>(pj, 'sentinels'), SENTINELS) &&
+      typeof required<any>(pj, 'note') === 'string' &&
+      pyTruth(required<any>(pj, 'note')),
     'programs.json keys / fields / sentinels',
   );
   const rows = required<any[]>(pj, 'items');
@@ -827,7 +872,7 @@ export function programs(ctx: Context): Check {
     rows.length === Object.keys(expect).length && rows.length === 272,
     `programs.json has ${rows.length} rows, the files ${Object.keys(expect).length} (272 expected)`,
   );
-  const seen = new Set<string>(),
+  const seen = pySet<string>(),
     levels: Record<string, number> = Object.create(null);
   for (const row of rows) {
     c.ok(row.length === FIELDS.length, `programs.json row length ${row.length}`);
@@ -838,12 +883,15 @@ export function programs(ctx: Context): Check {
     seen.add(code);
     if (!c.ok(Object.hasOwn(expect, code), `${w}: no such row in ministries/<code>.json`)) continue;
     const [i, lvl, parent, src] = expect[code]!;
-    levels[r.level] = (levels[r.level] ?? 0) + 1;
+    levels[required<any>(r, 'level')] = (levels[required<any>(r, 'level')] ?? 0) + 1;
     c.ok(
-      r.ministry === i && r.level === lvl && r.policy === parent && r.name === src.name,
+      required<any>(r, 'ministry') === i &&
+        required<any>(r, 'level') === lvl &&
+        required<any>(r, 'policy') === parent &&
+        required<any>(r, 'name') === required<any>(src, 'name'),
       `${w}: ministry/level/policy/name differ from the file`,
     );
-    const v = src.values,
+    const v = required<any>(src, 'values'),
       y26 = '2026' in v ? v['2026'][0] : -1,
       p26 = '2026' in v ? v['2026'][1] : -1,
       y25 = '2025' in v ? v['2025'][0] : -1,
@@ -856,7 +904,7 @@ export function programs(ctx: Context): Check {
     ] as const)
       near(
         c,
-        r[field],
+        required<any>(r, field),
         value,
         TOL,
         `${w} ${field}`,
@@ -866,7 +914,7 @@ export function programs(ctx: Context): Check {
     if (y25 > 0 && y26 >= 0)
       near(
         c,
-        r.growthPct,
+        required<any>(r, 'growthPct'),
         100 * (y26 / y25 - 1),
         0.051,
         `${w} growthPct`,
@@ -875,11 +923,11 @@ export function programs(ctx: Context): Check {
       );
     else
       c.ok(
-        r.growthPct === SENTINELS.noGrowth,
-        `${w}: growthPct must be the no-growth sentinel, got ${r.growthPct}`,
+        required<any>(r, 'growthPct') === SENTINELS.noGrowth,
+        `${w}: growthPct must be the no-growth sentinel, got ${required<any>(r, 'growthPct')}`,
       );
     c.ok(
-      pyEqual(r.isNew, 0 <= y25 && y25 <= 0.05 && y26 > 0 ? 1 : 0),
+      pyEqual(required<any>(r, 'isNew'), 0 <= y25 && y25 <= 0.05 && y26 > 0 ? 1 : 0),
       `${w}: isNew ${disp(row, 8)}`,
     );
   }

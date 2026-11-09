@@ -1,0 +1,75 @@
+{
+  "python": "3.12",
+  "unicode": "15.0.0",
+  "donorSha256": "25d7d0e984c5214efb2786f0f72f50cd6666b5f4565802fbb998d1cd52cc0567",
+  "planes": [
+    {
+      "plane": 0,
+      "sha256": "9ff6a51227b37eb2ca05dffbf0fc3f8b80bb01430000f1a18cf75144e72e6c4a"
+    },
+    {
+      "plane": 1,
+      "sha256": "a05e5cd86e67276cdd7978a515108cb11bdafd4c1be804d28fd9660024c81618"
+    },
+    {
+      "plane": 2,
+      "sha256": "1c4f1779f20540bb31a5b53f673c2d59a4a982255e7ace38251ec83fee47c28f"
+    },
+    {
+      "plane": 3,
+      "sha256": "b5423ad8b37f02b1369c45d8c22243babdd19109f38d54358d9f159d6bcd911c"
+    },
+    {
+      "plane": 4,
+      "sha256": "e64c9be4149c375f9767a14be5201e637f89a9b9bfac8d764b071f37cff9bcd3"
+    },
+    {
+      "plane": 5,
+      "sha256": "4e4ab997dfa3d61c1cef478683666f17a7566b664c5000b4517b7b5140baaba1"
+    },
+    {
+      "plane": 6,
+      "sha256": "84cf72b73537814698ccd37236c813fbb62d5d3f1e6f9d89a41c52d7c87a53e5"
+    },
+    {
+      "plane": 7,
+      "sha256": "49339705304be8fbdafaf80f15b2321f54f077e97324435431f0d8ece628c4de"
+    },
+    {
+      "plane": 8,
+      "sha256": "dceda67ab7d42d358416263948afcce8cc86f8803fee28cb70fb42b324da4055"
+    },
+    {
+      "plane": 9,
+      "sha256": "9c7bc91e9f554b7dd7f29efe61c3d538ff27041aac0de92a5b012bf5d08799ae"
+    },
+    {
+      "plane": 10,
+      "sha256": "401ba0500758f1e98c65981d09955c52d3e9702dedf2ab58349b30c3c7923b1a"
+    },
+    {
+      "plane": 11,
+      "sha256": "9e2ed40ceb9318845675713a4cdb1dc5f6fa9dfbb42bfad7c44fd61ffe7f5a19"
+    },
+    {
+      "plane": 12,
+      "sha256": "27a9d4de683c427307e31a7fceecc58c93885c0f6255e996539dd2872a5878d8"
+    },
+    {
+      "plane": 13,
+      "sha256": "697a793135513d56ad10e18f7fbfa3a1914a16da6d5d042fe89243f97f9e7789"
+    },
+    {
+      "plane": 14,
+      "sha256": "7a8fa0abcc338bb2b2c663eb274793ede107267c5800762ab3529435980ec9e2"
+    },
+    {
+      "plane": 15,
+      "sha256": "90043c4915f6e37121b1d65b79cdac0684ec7621ec5d33225136ee63d123bac3"
+    },
+    {
+      "plane": 16,
+      "sha256": "12bdea9e784a48682d2913f9e5c59975920a6d916b8e7cd3475e94ae2ddf9992"
+    }
+  ]
+}

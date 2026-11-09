@@ -49,6 +49,29 @@ provenance changes together. The scoped CLI requires explicit `--root` or
 continues to use Python, and BUDGET2027 and the other listed unported groups
 remain outside the TypeScript scope.
 
-The acceptance additions preserve the original 206 scenario definitions and all 212 observations byte-semantically. There are now 642 definitions yielding 648 donor observations. The additions cover absent/null/integer/float/bool offsets, list/slice errors, empty memo containers, boolean-number equality, required subscription callsites, explicit invalid arithmetic/sequence operands, lazy evaluation and first-error order, blank cells and exact diagnostic representations. Nested integer-like mapping keys retain their source order alongside raw float kinds. Composite cases check short-circuit behavior rather than imposing an eager validation pass. The fifth acceptance additions also cover nonnumeric comparison operands, missing required fields after lazy sums, typed multiplication/division/subtraction, timeline truth values and insertion-ordered mapping sums. All 64 original input pins and the frozen donor files remain unchanged; only the appended scenarios, mutations and oracle digests change.
+The corpus preserves the original 206 definitions and 212 observations, and
+every subsequent prefix. It now contains 1,263 definitions producing 1,269
+independent donor observations. The scenarios cover actual required reads,
+nullable and sparse values, raw integer/float distinctions, boolean-number
+identity, hashability, numeric and sequence operations, lazy evaluation,
+short-circuit behavior and exact diagnostics. Required fields are checked at
+their real read sites; optional donor lookups retain their original semantics.
 
-The sixth acceptance additions preserve all 574 preceding definitions and 580 observations. They cover the remaining reported required subscriptions, typed GDP division and programme reconciliation, invalid printed-gap addition, exact boolean diagnostics, and raw numeric/evaluation-order controls.
+A trace of the unchanged donor's successful reads selected 580 additional
+single-field deletion probes across the seven groups. These are representative
+callsite checks, not a claim of exhaustive schema validation. The appended
+corpus also retains all 66 reproductions from the seventh acceptance, adds
+set-key controls and exercises COFOG memo comparisons, tree values, counts,
+formatted totals and Unicode diagnostic strings. The 64 original input pins,
+all donor bytes and the original scenario generator remain unchanged.
+
+`generate_unicode.py` separately captures the Python 3.12 / Unicode 15.0
+printability ranges and hashes the actual builtin `repr` of every codepoint,
+including surrogates. Seventeen bounded tests compare the TypeScript renderer
+against those independent full-plane digests. This prevents a newer Node
+Unicode version from changing diagnostics. The generated source table is
+verified by the same check; its values are independent of TypeScript output.
+
+```sh
+python packages/ingest/test/fixtures/validate15/generate_unicode.py --check
+```
