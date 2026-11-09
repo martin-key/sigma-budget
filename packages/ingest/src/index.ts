@@ -40,6 +40,7 @@ export * from './build/debt-text.js';
 export * from './build/components.js';
 export * from './build/rates.js';
 export { verifyComponentsRatesInputs } from './build/components-rates-fixture.js';
+export * from './build/dbp-gva.js';
 export * from './build/debt.js';
 export * from './build/municipalities.js';
 export * from './build/sebra.js';
