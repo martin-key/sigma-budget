@@ -16,7 +16,8 @@ it.each(['maastricht', 'eu', 'quarterly', 'interest', 'balance', 'finance', 'new
   (chart) => {
     expect(screenSearch('/embed/dalg.s17-' + chart, '')).toBe('?per=2026.law');
     expect(screenSearch('/dalg', '?to=s17-b-' + (chart === 'finance' ? 'fin' : chart))).toBe(
-      '?per=2026.law',
+      '?per=2026.law' +
+        (['maastricht', 'eu', 'quarterly'].includes(chart) ? '&obhvat=maastricht' : ''),
     );
     expect(resolve('/embed/dalg.s17-' + chart).periodResolution.resolved).toBe('2026.law');
     expect(resolve('/dalg?to=s17-b-' + chart + '&per=2027.draft').periodResolution.resolved).toBe(
