@@ -5,10 +5,12 @@ import { byId } from '../lib/legacy';
 import { AboutContent } from '../routes/about-content';
 import { notFoundParts } from '../routes/not-found-content';
 import { PageFrame } from '../components/PageFrame';
+import { FeedbackContent } from '../routes/vrazka-content';
+import { CatalogContent } from '../routes/danni-content';
 import type { TextScreenModel, Navigation } from '../lib/screen-state';
 export { textModel, textMetadata } from '../lib/screens/text';
 export const migrated = (id: string): id is TextScreenModel['screen'] =>
-  ['S26', 'S30', 'S25', 'S35', 'S14', 'S16'].includes(id);
+  ['S26', 'S30', 'S25', 'S35', 'S14', 'S16', 'S27', 'S24'].includes(id);
 export function MigratedScreen({
   model,
   navigation,
@@ -24,6 +26,8 @@ export function MigratedScreen({
       </PageFrame>
     );
   if ('documents' in model) return <MetadataContent model={model} navigation={navigation} />;
+  if (model.screen === 'S27') return <FeedbackContent model={model} navigation={navigation} />;
+  if (model.screen === 'S24') return <CatalogContent model={model} navigation={navigation} />;
   if (model.screen === 'S30') {
     const parts = notFoundParts(model.params, navigation);
     return (

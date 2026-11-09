@@ -1,0 +1,283 @@
+{
+  "referenceCommit": "fdc18c3",
+  "releaseId": "7883978eb79d4cbfa8c649b8e467ce0b87f6536c9872077199d1db43e378f174",
+  "origin": "https://sigma-budget.my-data.bg",
+  "generator": "capture-reference.mjs",
+  "inputs": [
+    "catalog",
+    "core",
+    "execution",
+    "glossary",
+    "ministries"
+  ],
+  "inputsSha256": "ccb63e9debd7e6b4f10b4bafa041f56b92e968f15e5a0356ad8b3040e5dc1511",
+  "cases": [
+    {
+      "screen": "S27",
+      "address": "/vrazka",
+      "params": {},
+      "query": {},
+      "status": 200,
+      "file": "S27.html",
+      "sha256": "3d74de71a37dd0b70a622d92526aa2fb9e4408f1ebe07d7cf8ff4ee05052b7ad"
+    },
+    {
+      "screen": "S27",
+      "address": "/vrazka?tab=neyasno",
+      "params": {},
+      "query": {
+        "tab": "neyasno"
+      },
+      "status": 200,
+      "file": "S27-neyasno.html",
+      "sha256": "31f9e624a372619b53f035103c910db028e340b76751d4d8e6a761a9f991ced4"
+    },
+    {
+      "screen": "S27",
+      "address": "/vrazka?tab=ideya",
+      "params": {},
+      "query": {
+        "tab": "ideya"
+      },
+      "status": 200,
+      "file": "S27-ideya.html",
+      "sha256": "018efdae018cf98fb39b858e810a53be8e3f16ff6d521863aad78e65c073d39b"
+    },
+    {
+      "screen": "S27",
+      "address": "/vrazka?type=error&from=prihodi&val=33+898%2C5&src=kfp&block=s06-total",
+      "params": {},
+      "query": {
+        "type": "error",
+        "from": "prihodi",
+        "val": "33 898,5",
+        "src": "kfp",
+        "block": "s06-total"
+      },
+      "status": 200,
+      "file": "S27-context.html",
+      "sha256": "2c93e9fe50632462bef03b4dfc96787bd38a6692e73572832edec9acec578a31"
+    },
+    {
+      "screen": "S27",
+      "address": "/vrazka?type=idea",
+      "params": {},
+      "query": {
+        "type": "idea"
+      },
+      "status": 200,
+      "file": "S27-type.html",
+      "sha256": "25e56fb68b8241ac20cdf5596af83907d886c5c2c2ddc9fc51d057de6f80f7e6"
+    },
+    {
+      "screen": "S27",
+      "address": "/vrazka?from=nonsense&src=unknown&block=bad+id",
+      "params": {},
+      "query": {
+        "from": "nonsense",
+        "src": "unknown",
+        "block": "bad id"
+      },
+      "status": 200,
+      "file": "S27-rejected.html",
+      "sha256": "8c47fd9d797f00d9dac6fb7334dd9fd5db9830cbf430ce611fe9b37485c57d68"
+    },
+    {
+      "screen": "S24",
+      "address": "/danni",
+      "params": {},
+      "query": {},
+      "status": 200,
+      "file": "S24.html",
+      "sha256": "12aae2d680e4777ea70ccdaf9791431b39d2e80bd5a3fadb4841c9441a7f1388"
+    },
+    {
+      "screen": "S24",
+      "address": "/danni?status=pending",
+      "params": {},
+      "query": {
+        "status": "pending"
+      },
+      "status": 200,
+      "file": "S24-status.html",
+      "sha256": "5db8147de349f9e70cc701e9fc02f8220b9073bca41a39543bb57ee8c2193ee4"
+    },
+    {
+      "screen": "S24",
+      "address": "/danni?q=%D0%B4%D1%8A%D0%BB%D0%B3",
+      "params": {},
+      "query": {
+        "q": "дълг"
+      },
+      "status": 200,
+      "file": "S24-q.html",
+      "sha256": "9e982d77526e748f73fd11cc5b22f85d820f355709bd1c79effda1481b7c5d23"
+    },
+    {
+      "screen": "S24",
+      "address": "/danni?ekran=dalg&izvor=bnb",
+      "params": {},
+      "query": {
+        "ekran": "dalg",
+        "izvor": "bnb"
+      },
+      "status": 200,
+      "file": "S24-ekran.html",
+      "sha256": "e48dfbcba763374e2dcd49f4657fa6253252808302ac1c6c6de3ea47303d1242"
+    },
+    {
+      "screen": "S24",
+      "address": "/danni?q=zzzz",
+      "params": {},
+      "query": {
+        "q": "zzzz"
+      },
+      "status": 200,
+      "file": "S24-none.html",
+      "sha256": "d958a025bd4a7f810b603ff787802bf6e0b851e9592cd94c854b485323a559b3"
+    },
+    {
+      "screen": "S24",
+      "address": "/danni/execution",
+      "params": {
+        "set": "execution"
+      },
+      "query": {},
+      "status": 200,
+      "file": "S24-execution.html",
+      "sha256": "a51826d3477f0699579114a538eafc22259656b0de7d180907804291d890110a"
+    },
+    {
+      "screen": "S24",
+      "address": "/danni/ministries-programs",
+      "params": {
+        "set": "ministries-programs"
+      },
+      "query": {},
+      "status": 200,
+      "file": "S24-parts.html",
+      "sha256": "b21ce6c64a153c9c742fb215d1babf662679f8ec05ad5c25674fff3f4e2c4e5b"
+    },
+    {
+      "screen": "S24",
+      "address": "/danni/p01",
+      "params": {
+        "set": "p01"
+      },
+      "query": {},
+      "status": 200,
+      "file": "S24-pending-set.html",
+      "sha256": "fbff38afed09992d75386ed9de8426b8f702be4798b3f94a8210b51e1a064a57"
+    },
+    {
+      "screen": "S24",
+      "address": "/danni/feed-rss",
+      "params": {
+        "set": "feed-rss"
+      },
+      "query": {},
+      "status": 200,
+      "file": "S24-rss.html",
+      "sha256": "058976420afaf114952213e2e9705a7161453fee8654ac8b7c544d5b94687ae0"
+    },
+    {
+      "screen": "S24",
+      "address": "/danni/nope",
+      "params": {
+        "set": "nope"
+      },
+      "query": {},
+      "status": 404,
+      "file": "S24-unknown.html",
+      "sha256": "22316e0e644c77c82e2edd5284fc0eab34c72e19b7a5cb4bb88013b1bf2277b9"
+    },
+    {
+      "screen": "S24",
+      "address": "/danni?demo=loading",
+      "params": {},
+      "query": {
+        "demo": "loading"
+      },
+      "status": 200,
+      "file": "S24-loading.html",
+      "sha256": "bee39dc8e3124a21b56a7fa6ee02d7c73639518cd7ceff09ff346ecf560e9c53"
+    },
+    {
+      "screen": "S27",
+      "address": "/vrazka?demo=loading",
+      "params": {},
+      "query": {
+        "demo": "loading"
+      },
+      "status": 200,
+      "file": "S27-loading.html",
+      "sha256": "0f1a743b692252c01cc9ec812a396dd807479e433b27393bb26ea88e3feca626"
+    },
+    {
+      "screen": "S24",
+      "address": "/danni?demo=empty",
+      "params": {},
+      "query": {
+        "demo": "empty"
+      },
+      "status": 200,
+      "file": "S24-empty.html",
+      "sha256": "ef3951e7465df85488386178512c4fdc9e8c0542e553f004f3a2731cddaa420a"
+    },
+    {
+      "screen": "S27",
+      "address": "/vrazka?demo=empty",
+      "params": {},
+      "query": {
+        "demo": "empty"
+      },
+      "status": 200,
+      "file": "S27-empty.html",
+      "sha256": "f262cc0f2d77e849bedff19e09dee65073ae48b638a365aa10c85fb70dcd6c7d"
+    },
+    {
+      "screen": "S24",
+      "address": "/danni?demo=error",
+      "params": {},
+      "query": {
+        "demo": "error"
+      },
+      "status": 200,
+      "file": "S24-error.html",
+      "sha256": "732cc88af276a6a43ad7835530b17424263fa154a712c843494f5be39ce82f1f"
+    },
+    {
+      "screen": "S27",
+      "address": "/vrazka?demo=error",
+      "params": {},
+      "query": {
+        "demo": "error"
+      },
+      "status": 200,
+      "file": "S27-error.html",
+      "sha256": "6a646021bc56cce9833cbeaf52eb77ae4d7e4463d494ff9b58e114853251918b"
+    },
+    {
+      "screen": "S24",
+      "address": "/danni?demo=pending",
+      "params": {},
+      "query": {
+        "demo": "pending"
+      },
+      "status": 200,
+      "file": "S24-pending.html",
+      "sha256": "afbba4cd161ba45e3e903836c28bd55f171e7093815fd9f074dde00b9eb02709"
+    },
+    {
+      "screen": "S27",
+      "address": "/vrazka?demo=pending",
+      "params": {},
+      "query": {
+        "demo": "pending"
+      },
+      "status": 200,
+      "file": "S27-pending.html",
+      "sha256": "22a616b12b3480524093d6fd70fdd1c7f912b062dadc68e807ffab1db43ed22a"
+    }
+  ]
+}

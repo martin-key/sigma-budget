@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 // React screen content; Bulgarian copy retained from main 26f82ea.
 import { toHref } from '../../client/loc.js';
 import { byId, href as routeHref } from '../lib/legacy';
@@ -76,7 +77,7 @@ export function notFoundParts(
             {START.map((id) => byId[id])
               .filter(Boolean)
               .map((r) => (
-                <>
+                <Fragment key={r.id}>
                   <li>
                     {linkCard({
                       href: routeHref(r.id),
@@ -85,7 +86,7 @@ export function notFoundParts(
                       icon: r.icon,
                     })}
                   </li>
-                </>
+                </Fragment>
               ))}
           </ul>
         </div>

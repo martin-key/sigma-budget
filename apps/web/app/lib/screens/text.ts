@@ -5,6 +5,9 @@ import { href } from '../legacy';
 import { metadataModel } from './metadata';
 import { render as apiContent } from '../../routes/api-content';
 import { render as proofContent } from '../../routes/proverka-content';
+import { lede as feedbackLede } from '../../routes/vrazka-content';
+import { frame as catalogFrame, schema as catalogSchema } from '../../routes/danni-content';
+import { catalogModel } from './catalog';
 import type { EditorialCore } from '../editorial-types';
 import type { ReleaseReader } from '../release-types';
 import type { TextScreenModel } from '../screen-state';
@@ -21,6 +24,7 @@ export async function textModel(
 ): Promise<TextScreenModel> {
   if (screen === 'S14' || screen === 'S16') return narrativeModel(screen, params, query, reader);
   if (screen === 'S25' || screen === 'S35') return metadataModel(screen, params, query, reader);
+  if (screen === 'S24') return catalogModel(params, query, reader);
   let core: EditorialCore = {},
     glossary: unknown = {};
   try {
@@ -43,17 +47,20 @@ export async function textModel(
 /** Shared by the server and the temporary navigation adapter; no screen renderer. */
 export function textMetadata(model: TextScreenModel) {
   const route = byId[model.screen],
-    title = route.title,
     view = model.view || 'ready';
+  const catalog = model.screen === 'S24' && view === 'ready' ? catalogFrame(model) : undefined;
+  const title = catalog?.title ?? route.title;
   const shown = String(model.params.path || '').trim(),
     path = shown.length > 80 ? shown.slice(0, 79) + '…' : shown;
   const lede =
-    model.screen === 'S30' && view === 'ready'
-      ? html`${path
-          ? html`Адресът <code class="s30-path">${toHref('/' + path)}</code>`
-          : 'Този адрес'}
-        не води до екран от сайта. Може да е изписан грешно или страницата да е преместена.`
-      : route.desc;
+    model.screen === 'S27' && view === 'ready'
+      ? feedbackLede
+      : model.screen === 'S30' && view === 'ready'
+        ? html`${path
+            ? html`Адресът <code class="s30-path">${toHref('/' + path)}</code>`
+            : 'Този адрес'}
+          не води до екран от сайта. Може да е изписан грешно или страницата да е преместена.`
+        : route.desc;
   const narrative =
     'content' in model && view === 'ready'
       ? model.screen === 'S14'
@@ -94,7 +101,7 @@ export function textMetadata(model: TextScreenModel) {
             failed: model.failed,
             fileMeta: model.fileMeta,
           }).lede
-        : lede),
+        : (catalog?.ledeText ?? lede)),
     answer:
       'documents' in model && model.screen === 'S35' && view === 'ready'
         ? proofContent({
@@ -105,7 +112,8 @@ export function textMetadata(model: TextScreenModel) {
           }).answer
         : '',
 
-    crumbs: [{ label: 'Начало', href: toHref('/') }, { label: title }],
+    crumbs: catalog?.crumbs ?? [{ label: 'Начало', href: toHref('/') }, { label: title }],
+    schema: model.screen === 'S24' && view === 'ready' ? catalogSchema(model) : undefined,
     mod: {
       styles: view === 'ready' || ('content' in model && !model.query.demo) ? [route.file] : [],
     },

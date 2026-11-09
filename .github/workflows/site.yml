@@ -119,6 +119,7 @@ jobs:
           for i in $(seq 1 60); do curl -sf -o /dev/null http://127.0.0.1:8814/robots.txt && break; sleep 1; done
           python -m tests.e2e.screens --url http://127.0.0.1:8814/
           python -m tests.e2e.narrative_adoption --url http://127.0.0.1:8814/
+          python -m tests.e2e.reference_adoption --url http://127.0.0.1:8814/
       - name: Annual periods, aliases, SSR notices and stored preferences
         run: python -m tests.e2e.period_matrix --url http://127.0.0.1:8814/
       - name: Old addresses

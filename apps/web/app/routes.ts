@@ -21,6 +21,8 @@ export default [
               S35: 'routes/proverka.tsx',
               S14: 'routes/zakon.tsx',
               S16: 'routes/novo.tsx',
+              S27: 'routes/vrazka.tsx',
+              S24: 'routes/danni.tsx',
             } as Record<string, string>
           )[r.id] || SCREEN,
           { id: r.id },
