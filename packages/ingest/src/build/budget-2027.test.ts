@@ -215,6 +215,29 @@ it.each(readerCases.physical)('preserves physical reader defaults for $name', (t
   else expect(read()).toEqual(test.expected);
 });
 
+const debtCases: {
+  name: string;
+  text: string;
+  value?: number;
+  printed?: string;
+  error?: string;
+  message?: string;
+}[] = oracle('debt-prose-cases.json');
+it.each(debtCases)('preserves debt prose matching for $name', (test) => {
+  const { forecast, bill, zip } = inputs();
+  bill.articles['67']![0]!.text = test.text;
+  const lineage = new AnnualLineage(forecast, bill, { forecast: zip, bill: zip });
+  const run = () => buildBudgetDebtLimits(lineage);
+  if (test.error) {
+    expect(test.error).toBe('ValueError');
+    expect(() => run()).toThrow(test.message);
+  } else {
+    const limits = run();
+    expect(limits['67'].value).toBe(test.value);
+    expect(lineage.entries[limits['67'].provenance]!.printed).toBe(test.printed);
+  }
+});
+
 it('rejects altered archives, member hashes and null source hashes while using defaults only for absence', () => {
   const { forecast, bill, zip } = inputs();
   const corrupted = Buffer.from(zip);

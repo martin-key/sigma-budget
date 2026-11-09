@@ -251,6 +251,25 @@ with tempfile.TemporaryDirectory(prefix='sigma13a-') as tmp:
             captured['error'] = type(error).__name__
         reader_cases.append(captured)
     output['reader-cases.json'] = {'numbers': number_cases, 'physical': reader_cases}
+    debt_cases = []
+    whitespace = [*range(9, 14), *range(28, 33), 133, 160, 5760, *range(8192, 8203), 8232, 8233, 8239, 8287, 12288, 65279, 8203, 6158]
+    texts = [('space-U+%04X' % code, '31,25' + chr(code) + 'млрд. евро') for code in whitespace]
+    texts += [('no-space', '31,25млрд. евро')]
+    texts += [('digits-' + name, amount + ' млрд. евро') for name, amount in [('arabic', '٣١,٢٥'), ('devanagari', '३१,२५'), ('fullwidth', '３１,２５'), ('astral', '𝟛𝟙,𝟚𝟝'), ('mixed', '3１,٢५'), ('integer', '31')]]
+    texts += [('currency-U+%04X' % code, '31,25 млрд.' + chr(code) + 'евро') for code in (32, 133, 160, 8239, 65279)]
+    for name, amount in texts:
+        probe = annual_periods.Lineage()
+        probe.inputs['B']['articles']['67'][0]['text'] = text = 'Граничен размер ' + amount + '.'
+        captured = {'name': name, 'text': text}
+        try:
+            projected = {}
+            budget_2027.add_debt_limits(probe, projected)
+            captured['value'] = projected['debtLimits']['67']['value']
+            captured['printed'] = probe.entries[projected['debtLimits']['67']['provenance']]['printed']
+        except Exception as error:
+            captured.update(error=type(error).__name__, message=str(error))
+        debt_cases.append(captured)
+    output['debt-prose-cases.json'] = debt_cases
     hashes = {name: emit('oracle/' + name, value) for name, value in output.items()}
 
     law_source = (HERE / 'law-donor.py').read_bytes()

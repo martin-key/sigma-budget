@@ -64,3 +64,9 @@ they are algorithm evidence, not additional original PDF evidence. The full
 pinned publication still verifies its real archive, member and physical cells.
 All preceding oracle bytes, input hashes and six final/published outputs remain
 unchanged.
+
+The debt-prose oracle adds 44 cases from the unchanged `add_debt_limits` donor.
+They cover every Python whitespace character, BOM/zero-width exclusions, the
+required literal space in `млрд. евро`, and Unicode decimal digits. Matching
+retains the exact printed substring; numeric conversion and provenance
+verification use the same Python-compatible digit handling.

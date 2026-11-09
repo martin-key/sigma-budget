@@ -295,7 +295,11 @@ export function buildBudgetDebtLimits(lineage: AnnualLineage): Record<string, an
   for (const article of ['66', '67', '68']) {
     const row = bill.articles[article]?.[0];
     if (!row) throw new Error(`Missing debt limit article ${article}`);
-    const matches = [...row.text.matchAll(/(\d+(?:,\d+)?)\s+млрд\. евро/gu)];
+    const matches = [
+      ...row.text.matchAll(
+        /(\p{Decimal_Number}+(?:,\p{Decimal_Number}+)?)[\u0009-\u000d\u001c-\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]+млрд\. евро/gu,
+      ),
+    ];
     if (matches.length !== 1) throw new Error(`Ambiguous debt limit prose: ${article}`);
     const match = matches[0]!,
       output = `budget2027.json#/debtLimits/${article}`;
@@ -311,7 +315,7 @@ export function buildBudgetDebtLimits(lineage: AnnualLineage): Record<string, an
       label: pyOr(row.text, 'Без отпечатан етикет'),
     });
     budget.debtLimits[article] = {
-      value: Number(match[1]!.replace(',', '.')),
+      value: pythonFloat(match[1]!.replace(',', '.')),
       unit: 'млрд. €',
       provenance,
     };
