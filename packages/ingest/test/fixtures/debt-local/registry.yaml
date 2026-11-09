@@ -1,0 +1,10 @@
+schema: 1
+datasets:
+  - id: debt
+    files: [data/release/debt.json]
+  - id: municipalities
+    files: [data/release/municipalities.json]
+  - id: geo-obshtini
+    files: [data/release/geo/obshtini.json]
+  - id: sebra
+    files: [data/release/sebra.json]
