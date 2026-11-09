@@ -7,7 +7,7 @@ import unittest
 import zipfile
 import fitz
 from budget_pipeline.build.annual_periods import Lineage, annual, pointer
-from budget_pipeline.build.budget_2027 import budget
+from budget_pipeline.build.budget_2027 import budget, tables
 from budget_pipeline.validate.annual_oracles import check_output_oracles
 from budget_pipeline.validate.checks import Check
 
@@ -16,6 +16,7 @@ class PdfOraclesTest(unittest.TestCase):
         l = Lineage()
         data = {k+'.json': {'byPeriod':v} for k,v in annual(l).items()}
         data['budget2027.json'] = budget(l)
+        data['budget2027-tables.json'] = tables(l)
         data['budget2027-provenance.json'] = {'documents':l.documents, 'entries':l.entries}
         ctx = type('Memory', (), {'get':lambda self,name:data[name]})()
         check = Check('PDF_OUTPUTS')

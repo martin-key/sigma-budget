@@ -29,7 +29,7 @@ import { emptyState, errorState, pendingState } from '../ui/states.js';
 import { gl } from '../ui/gl.js';
 import { unitSwitch, bindUnitSwitch } from '../ui/unit-switch.js';
 
-export const needs = ctx => isFramework(ctx) ? ['core', 'budget2027?'] : ['core', 'ministries', 'programs?'];
+export const needs = ctx => isFramework(ctx) ? ['core', 'budget2027?', 'budget2027-tables?'] : ['core', 'ministries', 'programs?'];
 export const styles = ['s10-vedomstva'];
 export const periods = ['2026.law', '2027.draft', '2028.forecast', '2029.forecast'];
 

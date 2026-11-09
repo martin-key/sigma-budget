@@ -698,7 +698,7 @@ datasets:
   limitations:
   - 'built, but neither listed in catalog.json nor loaded by a screen: three days of one ministry, kept for phase 2'
 - id: dbp2027
-  catalogId: null
+  catalogId: D36
   title: Проект на бюджетен план 2027
   status: real
   files:
@@ -708,11 +708,12 @@ datasets:
   - data/cache/research/dbp-2027/dbp2027_figures.json
   - dbp2027
   schema: docs/data-spec.md
-  screens: []
+  screens: [S34]
   scope: сектор „Държавно управление“ (S.13), ESA 2010
+  unit: '% от БВП и млн. €'
   rebuild: python -m budget_pipeline.build.rebuild
   limitations:
-  - not listed in catalog.json (the catalog screen would change)
+  - 'ESA 2010 accrual basis for the whole general government sector: not comparable with the cash КФП screens'
 - id: releases
   catalogId: null
   title: Изданията на данните
@@ -750,6 +751,26 @@ datasets:
   rebuild: python -m budget_pipeline.build.rebuild --build-date 2026-11-08
   limitations:
   - Draft bill for 2027; forecasts for 2028–2029. No complete programme archive or individual municipal allocations for forecast years.
+- id: budget2027-tables
+  catalogId: D37
+  title: 'Бюджет 2027: тавани по ведомства и още таблици'
+  status: real
+  files:
+  - data/release/budget2027-tables.json
+  producer: python -m budget_pipeline.build.budget_2027
+  inputs:
+  - budget2027
+  - data/inputs/budget_forecast_2027.json
+  - data/inputs/budget_bill_2027.json
+  schema: docs/data-spec.md
+  screens: [S10, S11, S13]
+  period: 2025–2029
+  scope: MF publication 2026-11-06; the tables of the bill and the forecast that budget2027.json leaves out
+  unit: хил. € / млн. € / %
+  rebuild: python -m budget_pipeline.build.rebuild --build-date 2026-11-08
+  limitations:
+  - 'Ceilings for 2028–2029 are a forecast (Annexes 4–8 of the motives), not a law; the judiciary ceiling of Annex 5 is the one MF recommends, not the judiciary''s own budget.'
+  - 'Table II-1 is not repeated: the same КФП totals come from Annex 3 (outlook, revenue, expenditure).'
 - id: budget2027-provenance
   catalogId: D35
   title: Произход на бюджетните числа за 2027

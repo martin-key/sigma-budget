@@ -173,7 +173,7 @@ def main():
     sha = hashlib.sha256(PDF.read_bytes()).hexdigest()
     out = {
         'meta': {
-            'id': 'D34',
+            'id': 'D36',  # D34 is budget2027.json (the November bill); the catalog lists both
             'title': 'Проект на бюджетен план на Република България за 2027 г. (ЕСС 2010)',
             'status': 'real',
             'source': ['dbp2027', 'ec-edp-bg', 'ec-fiscal-bg', 'ec-dbp'],

@@ -864,6 +864,188 @@
         }
       ],
       "operation": "parse-billion-euro"
+    },
+    {
+      "output": "budget2027-tables.json#/forecast/annex4/6/cells/1",
+      "value": "3564396.9",
+      "unit": "хил. €",
+      "period": "2028.forecast",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 195,
+          "label": "Министерство на отбраната",
+          "printed": "3 564 396,9",
+          "column": 1,
+          "occurrence": 0,
+          "labelMode": "contains"
+        }
+      ]
+    },
+    {
+      "output": "budget2027-tables.json#/forecast/annex5/1/cells/2",
+      "value": "762362.7",
+      "unit": "хил. €",
+      "period": "2029.forecast",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 197,
+          "label": "Висш съдебен съвет",
+          "printed": "762 362,7",
+          "column": 2,
+          "occurrence": 0,
+          "labelMode": "contains"
+        }
+      ]
+    },
+    {
+      "output": "budget2027-tables.json#/forecast/annex8/2/cells/0",
+      "value": "9203.3",
+      "unit": "хил. €",
+      "period": "2027.draft",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 199,
+          "label": "Селскостопанска академия",
+          "printed": "9 203,3",
+          "column": 0,
+          "occurrence": 0,
+          "labelMode": "contains"
+        }
+      ]
+    },
+    {
+      "output": "budget2027-tables.json#/forecast/III_2/0/cells/1",
+      "value": "3151.0",
+      "unit": "млн. €",
+      "period": "2027.draft",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 89,
+          "label": "на НАТО",
+          "printed": "3 151,0",
+          "column": 1,
+          "occurrence": 2,
+          "labelMode": "contains"
+        }
+      ]
+    },
+    {
+      "output": "budget2027-tables.json#/forecast/V_1/2/cells/2",
+      "value": "1935.3",
+      "unit": "млн. €",
+      "period": "2029.forecast",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 142,
+          "label": "Общо",
+          "printed": "1 935,3",
+          "column": 2,
+          "occurrence": 0
+        }
+      ]
+    },
+    {
+      "output": "budget2027-tables.json#/forecast/annex10/4/cells/0",
+      "value": "873365",
+      "unit": "хил. €",
+      "period": "2025.report",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 201,
+          "label": "Общо данъчни разходи",
+          "printed": "873 365",
+          "column": 0,
+          "occurrence": 0
+        }
+      ]
+    },
+    {
+      "output": "budget2027-tables.json#/forecast/II_2/0/cells/2",
+      "value": "48283.2",
+      "unit": "млн. €",
+      "period": "2027.draft",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 36,
+          "label": "ПРИХОДИ, ПОМОЩИ И ДАРЕНИЯ",
+          "printed": "48 283,2",
+          "column": 2,
+          "occurrence": 0
+        }
+      ]
+    },
+    {
+      "output": "budget2027-tables.json#/forecast/II_3/0/cells/0",
+      "value": "3138.0",
+      "unit": "млн. €",
+      "period": "2025.report",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 36,
+          "label": "ПРИХОДИ, ПОМОЩИ И ДАРЕНИЯ",
+          "printed": "3 138,0",
+          "column": 0,
+          "occurrence": 1
+        }
+      ]
+    },
+    {
+      "output": "budget2027-tables.json#/budgets/bill/2/bodiesRows/0/cell",
+      "value": "79196.6",
+      "unit": "хил. €",
+      "period": "2027.draft",
+      "document": "bill",
+      "sources": [
+        {
+          "page": 7,
+          "label": "Висш съдебен съвет",
+          "printed": "79 196,6",
+          "column": 0,
+          "occurrence": 0
+        }
+      ]
+    },
+    {
+      "output": "budget2027-tables.json#/articleTables/49/rows/2/cell",
+      "value": "51145.9",
+      "unit": "хил. €",
+      "period": "2027.draft",
+      "document": "bill",
+      "sources": [
+        {
+          "page": 75,
+          "label": "Българска национална телевизия",
+          "printed": "51 145,9",
+          "column": 0,
+          "occurrence": 0,
+          "labelMode": "contains"
+        }
+      ]
+    },
+    {
+      "output": "budget2027-tables.json#/articleTables/50/rows/44/cell",
+      "value": "19656.5",
+      "unit": "хил. €",
+      "period": "2027.draft",
+      "document": "bill",
+      "sources": [
+        {
+          "page": 77,
+          "label": "Всичко:",
+          "printed": "19 656,5",
+          "column": 0,
+          "occurrence": 0
+        }
+      ]
     }
-  ]
+  ],
+  "added": "2026-11-10: the budget2027-tables.json cells were read from the pinned PDF page text (get_text, sort=True) by their printed row label; no extractor or builder value was used."
 }

@@ -2,7 +2,7 @@ import { billOverview } from './bill-views.js';
 import { periodByKey } from '../periods.js';
 import { isBudgetPlan } from '../budget-documents.js';
 // S34 · Бюджет 2027 (проект) · #/byudzhet-2027 · next S13 · periods none
-// Data: dbp2027.json (D34), built by pipeline/budget_pipeline/build/budget_plan.py from the Draft Budgetary Plan of Bulgaria for 2027 (Министерство на финансите, 15.10.2026).
+// Data: dbp2027.json (D36), built by pipeline/budget_pipeline/build/budget_plan.py from the Draft Budgetary Plan of Bulgaria for 2027 (Министерство на финансите, 15.10.2026).
 // Every number printed here is read from `figures` (each has the page of the plan, the unit and the basis) or is a plain sum/difference of two such numbers
 // that the text names. The plan is on the ESA 2010 accrual basis (the whole „Държавно управление“ sector), NOT on the cash КФП basis: the two never share a chart or
 // a table on this screen. The document is a forecast and a draft; nothing here is adopted. The screen has no period line (periods: none) and no controls.
