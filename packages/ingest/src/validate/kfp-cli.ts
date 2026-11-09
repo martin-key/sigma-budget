@@ -43,13 +43,12 @@ function preflight(
 function referencedArchives(context: Context): string[] {
   const paths: string[] = [];
   for (const name of ['budget_forecast_2027.json', 'budget_bill_2027.json']) {
-    try {
-      const doc = context.proto(name) as { source?: { archive?: unknown } } | null;
-      if (typeof doc?.source?.archive === 'string')
-        paths.push(safePath(realpathSync(context.root), doc.source.archive));
-    } catch {
-      // Confinement inspection leaves malformed-input diagnostics to the group runner.
-    }
+    const doc = context.proto(name) as { source?: { archive?: unknown } } | null;
+    const archive = doc?.source?.archive;
+    if (typeof archive !== 'string')
+      throw new Error('archive path must be a repository-relative string');
+    // A rejected spelling must abort before a failure report can replace the declared input.
+    paths.push(safePath(realpathSync(context.root), archive));
   }
   return paths;
 }

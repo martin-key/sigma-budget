@@ -169,6 +169,68 @@ it('does not create a report over a missing declared archive', () => {
   expect(main(args())).toBe(2);
   expect(existsSync(join(root, 'tmp'))).toBe(false);
 });
+it.each(['budget_forecast_2027.json', 'budget_bill_2027.json'])(
+  'preserves archives rejected for unsafe spellings in %s',
+  (name) => {
+    process.chdir(root);
+    mkdirSync(join(root, 'tmp/ts-migration/candidates/18/inner'), { recursive: true });
+    const before = readFileSync(join(root, 'data/originals/budget_2027/ZDBRB-2027.zip'));
+    const source = join(root, 'data/inputs', name);
+    const doc = JSON.parse(readFileSync(source, 'utf8'));
+    const paths = [
+      'tmp/ts-migration/candidates/18/./report.json',
+      'tmp/ts-migration/candidates/18/inner/../report.json',
+      './' + report,
+      join(root, report),
+      report.replaceAll('/', '\\'),
+      'tmp/ts-migration/candidates/18/archive-alias.zip',
+    ];
+    symlinkSync(join(root, report), join(root, paths.at(-1)!));
+    for (const archive of paths) {
+      writeFileSync(join(root, report), before);
+      doc.source.archive = archive;
+      writeFileSync(source, JSON.stringify(doc));
+      expect(main(args()), archive).toBe(2);
+      expect(readFileSync(join(root, report)).equals(before), archive).toBe(true);
+    }
+  },
+);
+it('preserves an archive outside an explicit input root when a traversal spelling is rejected', () => {
+  mkdirSync(join(dir, 'tmp/ts-migration/candidates/18'), { recursive: true });
+  const before = readFileSync(join(root, 'data/originals/budget_2027/ZDBRB-2027.zip'));
+  writeFileSync(join(dir, report), before);
+  const source = join(root, 'data/inputs/budget_bill_2027.json');
+  const doc = JSON.parse(readFileSync(source, 'utf8'));
+  doc.source.archive = '../' + report;
+  writeFileSync(source, JSON.stringify(doc));
+  expect(main(args())).toBe(2);
+  expect(readFileSync(join(dir, report)).equals(before)).toBe(true);
+});
+it.each([undefined, null, [], {}, 0, false].map((archive) => ({ archive })))(
+  'rejects a missing or non-string archive reference before writing ($archive)',
+  ({ archive }) => {
+    const source = join(root, 'data/inputs/budget_bill_2027.json');
+    const doc = JSON.parse(readFileSync(source, 'utf8'));
+    doc.source.archive = archive;
+    writeFileSync(source, JSON.stringify(doc));
+    expect(main(args())).toBe(2);
+    expect(existsSync(join(dir, 'tmp'))).toBe(false);
+  },
+);
+it.each(['missing', 'malformed'])(
+  'refuses report writes when the declared input inventory cannot be read (%s)',
+  (state) => {
+    process.chdir(root);
+    mkdirSync(join(root, 'tmp/ts-migration/candidates/18'), { recursive: true });
+    const before = readFileSync(join(root, 'data/originals/budget_2027/ZDBRB-2027.zip'));
+    writeFileSync(join(root, report), before);
+    const source = join(root, 'data/inputs/budget_bill_2027.json');
+    if (state === 'missing') unlinkSync(source);
+    else writeFileSync(source, `{"source":{"archive":${JSON.stringify(report)}},}`);
+    expect(main(args())).toBe(2);
+    expect(readFileSync(join(root, report)).equals(before)).toBe(true);
+  },
+);
 it.each(
   differential.cases.filter(
     (scenario: any) =>

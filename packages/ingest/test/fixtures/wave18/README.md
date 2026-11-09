@@ -19,4 +19,6 @@ Run `pnpm validate:wave18` for the frozen scoped report. `pnpm validate:wave18-l
 
 Before any report write, the CLI protects both declared law archives and all consulted inputs. This also applies to failed validation, unavailable referenced archives, root aliases, symlinks and hard links; a report/input collision exits with code 2 without changing the input bytes or creating a missing target.
 
+The declared archive inventory must be readable before a report can be written. Missing or malformed extraction JSON, missing/non-string archive references, and unsafe archive paths abort the CLI with code 2. Rejected paths, including `./`, `../`, absolute paths and symlink aliases, are never discarded to permit a failure report to overwrite the available archive. Logical validation failures with valid input paths still produce a failure report and exit code 1.
+
 `--raw-absent` explicitly simulates the donor's `RAW_PRESENT = False` branch for monthly reports while retaining the separate law archive needed by the statutory checks. Without that flag, an existing `data/originals` directory follows the donor's present-tree behavior and missing months fail. Malformed capture grids and recorded read failures fail closed instead of being treated as absent.
