@@ -71,6 +71,9 @@ it('rejects traversal, outside paths, symlinks, hardlinks and changed fixture by
     await expect(debtLocalBuildCli(args(join(fixture, 'inputs')))).rejects.toThrow(/Output/);
     mkdirSync(join(root, 'tmp/ts-migration/candidates'), { recursive: true });
     symlinkSync(outside, candidate);
+    await expect(
+      debtLocalBuildCli(args(candidate, join(outside, 'missing-fixture'))),
+    ).rejects.toThrow(/Unsafe/);
     await expect(debtLocalBuildCli(args())).rejects.toThrow(/Unsafe/);
     expect(existsSync(join(outside, 'data'))).toBe(false);
     rmSync(candidate);
