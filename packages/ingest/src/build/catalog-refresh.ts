@@ -1,4 +1,5 @@
 import { gzip } from 'pako';
+import { createHash } from 'node:crypto';
 import { clean } from '../io/data.js';
 
 export interface CatalogSchemaField {
@@ -40,14 +41,41 @@ export interface CatalogRefreshInput {
   activeRoutes: readonly string[];
 }
 
-/** Python 3.12 uses zlib for gzip; pako is independent of Node's zlib-ng. */
-export const catalogGzipSize = (bytes: Uint8Array): number => gzip(bytes, { level: 9 }).length;
-
-/** Read the top-level key order from the stream, including integer-like keys. */
-export function catalogSchema(bytes: Uint8Array): {
+interface CatalogShape {
   schema: CatalogSchemaField[];
   source?: string[];
-} {
+}
+const gzipSizes = new Map<string, number>(),
+  schemas = new Map<string, CatalogShape>();
+const contentKey = (bytes: Uint8Array) => createHash('sha256').update(bytes).digest('hex');
+function remember<T>(cache: Map<string, T>, key: string, value: T): void {
+  if (cache.size >= 128) cache.delete(cache.keys().next().value!);
+  cache.set(key, value);
+}
+
+/** Python 3.12 uses zlib for gzip; pako is independent of Node's zlib-ng. */
+export function catalogGzipSize(bytes: Uint8Array): number {
+  const key = contentKey(bytes),
+    known = gzipSizes.get(key);
+  if (known !== undefined) return known;
+  const size = gzip(bytes, { level: 9 }).length;
+  remember(gzipSizes, key, size);
+  return size;
+}
+
+/** Each layer hashes its actual bytes; callers receive independent schema values. */
+export function catalogSchema(bytes: Uint8Array): CatalogShape {
+  const key = contentKey(bytes);
+  let shape = schemas.get(key);
+  if (!shape) {
+    shape = readCatalogSchema(bytes);
+    remember(schemas, key, shape);
+  }
+  return structuredClone(shape);
+}
+
+/** Read the top-level key order from the stream, including integer-like keys. */
+function readCatalogSchema(bytes: Uint8Array): CatalogShape {
   const text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
   const value: unknown = JSON.parse(text);
   clean(value);
