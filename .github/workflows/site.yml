@@ -223,7 +223,7 @@ jobs:
       - run: |
           python -m pip install --require-hashes -r pipeline/requirements.lock
           pnpm install --frozen-lockfile
-          pnpm --filter @sigma-budget/dataset-schema build
+          pnpm --filter @sigma-budget/ingest... build
       - name: Verify frozen Python oracle and provenance
         run: |
           python packages/ingest/test/fixtures/validate14/generate_oracle.py --check

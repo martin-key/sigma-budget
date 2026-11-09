@@ -1,0 +1,869 @@
+{
+  "note": "Hand-transcribed from pinned PDF text on 2026-11-08; no builder constants or generated values used.",
+  "cells": [
+    {
+      "output": "outlook.json#/byPeriod/2026.law/series/revenue",
+      "value": "49615.3",
+      "unit": "млн. €",
+      "period": "2026.law",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 174,
+          "label": "ПРИХОДИ, ПОМОЩИ И ДАРЕНИЯ",
+          "printed": "49 615,3",
+          "column": 0,
+          "occurrence": 0
+        }
+      ]
+    },
+    {
+      "output": "outlook.json#/byPeriod/2026.law/series/expenditure",
+      "value": "56807.2",
+      "unit": "млн. €",
+      "period": "2026.law",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 174,
+          "label": "РАЗХОДИ И ВНОСКА В БЮДЖЕТА НА ЕС",
+          "printed": "56 807,2",
+          "column": 0,
+          "occurrence": 0
+        }
+      ]
+    },
+    {
+      "output": "outlook.json#/byPeriod/2026.law/series/balance",
+      "value": "-7191.9",
+      "unit": "млн. €",
+      "period": "2026.law",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 174,
+          "label": "БЮДЖЕТНО САЛДО",
+          "printed": "-7 191,9",
+          "column": 0,
+          "occurrence": 0
+        }
+      ]
+    },
+    {
+      "output": "outlook.json#/byPeriod/2026.law/series/interest",
+      "value": "1059.2",
+      "unit": "млн. €",
+      "period": "2026.law",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 174,
+          "label": "Лихвени",
+          "printed": "1 059,2",
+          "column": 0,
+          "occurrence": 0
+        }
+      ]
+    },
+    {
+      "output": "outlook.json#/byPeriod/2026.law/series/primaryBalance",
+      "value": "-6132.7",
+      "unit": "млн. €",
+      "period": "2026.law",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 174,
+          "label": "БЮДЖЕТНО САЛДО",
+          "printed": "-7 191,9",
+          "column": 0,
+          "occurrence": 0
+        },
+        {
+          "page": 174,
+          "label": "Лихвени",
+          "printed": "1 059,2",
+          "column": 0,
+          "occurrence": 0
+        }
+      ],
+      "operation": "sum"
+    },
+    {
+      "output": "outlook.json#/byPeriod/2027.draft/series/revenue",
+      "value": "51065.2",
+      "unit": "млн. €",
+      "period": "2027.draft",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 191,
+          "label": "Приходи, помощи и дарения",
+          "printed": "51 065,2",
+          "column": 2,
+          "occurrence": 0
+        }
+      ]
+    },
+    {
+      "output": "outlook.json#/byPeriod/2027.draft/series/expenditure",
+      "value": "55972.1",
+      "unit": "млн. €",
+      "period": "2027.draft",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 192,
+          "label": "Общо разходи и Вноска в общия бюджет на ЕС",
+          "printed": "55 972,1",
+          "column": 2,
+          "occurrence": 0
+        }
+      ]
+    },
+    {
+      "output": "outlook.json#/byPeriod/2027.draft/series/balance",
+      "value": "-4907.0",
+      "unit": "млн. €",
+      "period": "2027.draft",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 192,
+          "label": "Бюджетно салдо (+/-)",
+          "printed": "-4 907,0",
+          "column": 2,
+          "occurrence": 0
+        }
+      ]
+    },
+    {
+      "output": "outlook.json#/byPeriod/2027.draft/series/interest",
+      "value": "1425.6",
+      "unit": "млн. €",
+      "period": "2027.draft",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 192,
+          "label": "Лихви",
+          "printed": "1 425,6",
+          "column": 2,
+          "occurrence": 0
+        }
+      ]
+    },
+    {
+      "output": "outlook.json#/byPeriod/2027.draft/series/financing",
+      "value": "4907.0",
+      "unit": "млн. €",
+      "period": "2027.draft",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 192,
+          "label": "Финансиране (+/-)",
+          "printed": "4 907,0",
+          "column": 2,
+          "occurrence": 0
+        }
+      ]
+    },
+    {
+      "output": "outlook.json#/byPeriod/2027.draft/series/gdp",
+      "value": "141301.8",
+      "unit": "млн. €",
+      "period": "2027.draft",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 194,
+          "label": "Б В П",
+          "printed": "141 301,8",
+          "column": 2,
+          "occurrence": 0
+        }
+      ]
+    },
+    {
+      "output": "outlook.json#/byPeriod/2027.draft/series/primaryBalance",
+      "value": "-3481.4",
+      "unit": "млн. €",
+      "period": "2027.draft",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 192,
+          "label": "Бюджетно салдо (+/-)",
+          "printed": "-4 907,0",
+          "column": 2,
+          "occurrence": 0
+        },
+        {
+          "page": 192,
+          "label": "Лихви",
+          "printed": "1 425,6",
+          "column": 2,
+          "occurrence": 0
+        }
+      ],
+      "operation": "sum"
+    },
+    {
+      "output": "revenue.json#/byPeriod/2026.expected/groups/dds",
+      "value": "12803.8",
+      "unit": "млн. €",
+      "period": "2026.expected",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 191,
+          "label": "ДДС",
+          "printed": "12803,8",
+          "column": 1,
+          "occurrence": 0
+        }
+      ],
+      "operation": "sum"
+    },
+    {
+      "output": "revenue.json#/byPeriod/2026.expected/groups/osiguritelni",
+      "value": "11617.1",
+      "unit": "млн. €",
+      "period": "2026.expected",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 191,
+          "label": "Приходи на социалното и здравното осигуряване",
+          "printed": "11617,1",
+          "column": 1,
+          "occurrence": 0
+        }
+      ],
+      "operation": "sum"
+    },
+    {
+      "output": "revenue.json#/byPeriod/2026.expected/groups/drugi",
+      "value": "1793.3",
+      "unit": "млн. €",
+      "period": "2026.expected",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 191,
+          "label": "Данък върху застрахователните премии",
+          "printed": "43,4",
+          "column": 1,
+          "occurrence": 0
+        },
+        {
+          "page": 191,
+          "label": "Мита и митнически такси",
+          "printed": "220,0",
+          "column": 1,
+          "occurrence": 0
+        },
+        {
+          "page": 191,
+          "label": "Други данъци",
+          "printed": "1 529,9",
+          "column": 1,
+          "occurrence": 0
+        }
+      ],
+      "operation": "sum"
+    },
+    {
+      "output": "expenditure.json#/byPeriod/2026.expected/functions/2/cell",
+      "value": "5599.7",
+      "unit": "млн. €",
+      "period": "2026.expected",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 73,
+          "label": "Образование",
+          "printed": "5599,7",
+          "column": 0,
+          "occurrence": 0
+        }
+      ]
+    },
+    {
+      "output": "revenue.json#/byPeriod/2027.draft/groups/dds",
+      "value": "13485.8",
+      "unit": "млн. €",
+      "period": "2027.draft",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 191,
+          "label": "ДДС",
+          "printed": "13485,8",
+          "column": 2,
+          "occurrence": 0
+        }
+      ],
+      "operation": "sum"
+    },
+    {
+      "output": "revenue.json#/byPeriod/2027.draft/groups/osiguritelni",
+      "value": "12883.2",
+      "unit": "млн. €",
+      "period": "2027.draft",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 191,
+          "label": "Приходи на социалното и здравното осигуряване",
+          "printed": "12883,2",
+          "column": 2,
+          "occurrence": 0
+        }
+      ],
+      "operation": "sum"
+    },
+    {
+      "output": "revenue.json#/byPeriod/2027.draft/groups/drugi",
+      "value": "1929.4",
+      "unit": "млн. €",
+      "period": "2027.draft",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 191,
+          "label": "Данък върху застрахователните премии",
+          "printed": "48,3",
+          "column": 2,
+          "occurrence": 0
+        },
+        {
+          "page": 191,
+          "label": "Мита и митнически такси",
+          "printed": "248,5",
+          "column": 2,
+          "occurrence": 0
+        },
+        {
+          "page": 191,
+          "label": "Други данъци",
+          "printed": "1 632,6",
+          "column": 2,
+          "occurrence": 0
+        }
+      ],
+      "operation": "sum"
+    },
+    {
+      "output": "expenditure.json#/byPeriod/2027.draft/functions/2/cell",
+      "value": "5582.2",
+      "unit": "млн. €",
+      "period": "2027.draft",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 73,
+          "label": "Образование",
+          "printed": "5582,2",
+          "column": 1,
+          "occurrence": 0
+        }
+      ]
+    },
+    {
+      "output": "revenue.json#/byPeriod/2028.forecast/groups/dds",
+      "value": "14636.5",
+      "unit": "млн. €",
+      "period": "2028.forecast",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 191,
+          "label": "ДДС",
+          "printed": "14636,5",
+          "column": 3,
+          "occurrence": 0
+        }
+      ],
+      "operation": "sum"
+    },
+    {
+      "output": "revenue.json#/byPeriod/2028.forecast/groups/osiguritelni",
+      "value": "14134.8",
+      "unit": "млн. €",
+      "period": "2028.forecast",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 191,
+          "label": "Приходи на социалното и здравното осигуряване",
+          "printed": "14134,8",
+          "column": 3,
+          "occurrence": 0
+        }
+      ],
+      "operation": "sum"
+    },
+    {
+      "output": "revenue.json#/byPeriod/2028.forecast/groups/drugi",
+      "value": "1873.0",
+      "unit": "млн. €",
+      "period": "2028.forecast",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 191,
+          "label": "Данък върху застрахователните премии",
+          "printed": "51,5",
+          "column": 3,
+          "occurrence": 0
+        },
+        {
+          "page": 191,
+          "label": "Мита и митнически такси",
+          "printed": "264,6",
+          "column": 3,
+          "occurrence": 0
+        },
+        {
+          "page": 191,
+          "label": "Други данъци",
+          "printed": "1 556,9",
+          "column": 3,
+          "occurrence": 0
+        }
+      ],
+      "operation": "sum"
+    },
+    {
+      "output": "expenditure.json#/byPeriod/2028.forecast/functions/2/cell",
+      "value": "5670.1",
+      "unit": "млн. €",
+      "period": "2028.forecast",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 73,
+          "label": "Образование",
+          "printed": "5670,1",
+          "column": 2,
+          "occurrence": 0
+        }
+      ]
+    },
+    {
+      "output": "revenue.json#/byPeriod/2029.forecast/groups/dds",
+      "value": "15825.3",
+      "unit": "млн. €",
+      "period": "2029.forecast",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 191,
+          "label": "ДДС",
+          "printed": "15825,3",
+          "column": 4,
+          "occurrence": 0
+        }
+      ],
+      "operation": "sum"
+    },
+    {
+      "output": "revenue.json#/byPeriod/2029.forecast/groups/osiguritelni",
+      "value": "15066.7",
+      "unit": "млн. €",
+      "period": "2029.forecast",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 191,
+          "label": "Приходи на социалното и здравното осигуряване",
+          "printed": "15066,7",
+          "column": 4,
+          "occurrence": 0
+        }
+      ],
+      "operation": "sum"
+    },
+    {
+      "output": "revenue.json#/byPeriod/2029.forecast/groups/drugi",
+      "value": "2027.5",
+      "unit": "млн. €",
+      "period": "2029.forecast",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 191,
+          "label": "Данък върху застрахователните премии",
+          "printed": "55,0",
+          "column": 4,
+          "occurrence": 0
+        },
+        {
+          "page": 191,
+          "label": "Мита и митнически такси",
+          "printed": "278,6",
+          "column": 4,
+          "occurrence": 0
+        },
+        {
+          "page": 191,
+          "label": "Други данъци",
+          "printed": "1 693,9",
+          "column": 4,
+          "occurrence": 0
+        }
+      ],
+      "operation": "sum"
+    },
+    {
+      "output": "expenditure.json#/byPeriod/2029.forecast/functions/2/cell",
+      "value": "5618.6",
+      "unit": "млн. €",
+      "period": "2029.forecast",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 73,
+          "label": "Образование",
+          "printed": "5618,6",
+          "column": 3,
+          "occurrence": 0
+        }
+      ]
+    },
+    {
+      "output": "outlook.json#/byPeriod/2027.draft/macro/0/cell",
+      "value": "141302.0",
+      "unit": "млн. €",
+      "period": "2027.draft",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 27,
+          "label": "БВП (млн. евро)",
+          "printed": "141 302",
+          "column": 3,
+          "occurrence": 0
+        }
+      ]
+    },
+    {
+      "output": "outlook.json#/byPeriod/2027.draft/macro/1/cell",
+      "value": "2.5",
+      "unit": "%",
+      "period": "2027.draft",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 27,
+          "label": "БВП (реален растеж, %)",
+          "printed": "2,5",
+          "column": 3,
+          "occurrence": 0
+        }
+      ]
+    },
+    {
+      "output": "outlook.json#/byPeriod/2027.draft/printedPctGdp/revenue",
+      "value": "36.1",
+      "unit": "% от БВП",
+      "period": "2027.draft",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 193,
+          "label": "Приходи, помощи и дарения",
+          "printed": "36,1%",
+          "column": 2,
+          "occurrence": 0
+        }
+      ]
+    },
+    {
+      "output": "expenditure.json#/byPeriod/2028.forecast/functions/2/printedPctGdp",
+      "value": "3.8",
+      "unit": "% от БВП",
+      "period": "2028.forecast",
+      "document": "forecast",
+      "sources": [
+        {
+          "page": 73,
+          "label": "Образование",
+          "printed": "3,8%",
+          "column": 6,
+          "occurrence": 0
+        }
+      ]
+    },
+    {
+      "output": "budget2027.json#/budgets/bill/1/rows/0/cell",
+      "value": "30942719.3",
+      "unit": "хил. €",
+      "period": "2027.draft",
+      "document": "bill",
+      "sources": [
+        {
+          "page": 1,
+          "label": "ПРИХОДИ, ПОМОЩИ И ДАРЕНИЯ",
+          "printed": "30 942 719,3",
+          "column": 0,
+          "occurrence": 0
+        }
+      ]
+    },
+    {
+      "output": "budget2027.json#/budgets/bill/1/rows/12/cell",
+      "value": "18345717.4",
+      "unit": "хил. €",
+      "period": "2027.draft",
+      "document": "bill",
+      "sources": [
+        {
+          "page": 2,
+          "label": "РАЗХОДИ",
+          "printed": "18 345 717,4",
+          "column": 0,
+          "occurrence": 0
+        }
+      ]
+    },
+    {
+      "output": "budget2027.json#/budgets/billMc/1/rows/0/cell",
+      "value": "30949719.3",
+      "unit": "хил. €",
+      "period": "2027.draft",
+      "document": "bill",
+      "sources": [
+        {
+          "page": 3,
+          "label": "ПРИХОДИ, ПОМОЩИ И ДАРЕНИЯ",
+          "printed": "30 949 719,3",
+          "column": 0,
+          "occurrence": 0
+        }
+      ]
+    },
+    {
+      "output": "budget2027.json#/budgets/billMc/1/rows/12/cell",
+      "value": "18229796.1",
+      "unit": "хил. €",
+      "period": "2027.draft",
+      "document": "bill",
+      "sources": [
+        {
+          "page": 4,
+          "label": "РАЗХОДИ",
+          "printed": "18 229 796,1",
+          "column": 0,
+          "occurrence": 0
+        }
+      ]
+    },
+    {
+      "output": "budget2027.json#/budgets/bill/2/rows/0/cell",
+      "value": "66468.0",
+      "unit": "хил. €",
+      "period": "2027.draft",
+      "document": "bill",
+      "sources": [
+        {
+          "page": 6,
+          "label": "ПРИХОДИ, ПОМОЩИ И ДАРЕНИЯ",
+          "printed": "66 468,0",
+          "column": 0,
+          "occurrence": 0
+        }
+      ]
+    },
+    {
+      "output": "budget2027.json#/budgets/bill/2/rows/6/cell",
+      "value": "868105.3",
+      "unit": "хил. €",
+      "period": "2027.draft",
+      "document": "bill",
+      "sources": [
+        {
+          "page": 6,
+          "label": "РАЗХОДИ",
+          "printed": "868 105,3",
+          "column": 0,
+          "occurrence": 0
+        }
+      ]
+    },
+    {
+      "output": "budget2027.json#/budgets/billMc/2/rows/0/cell",
+      "value": "73468.0",
+      "unit": "хил. €",
+      "period": "2027.draft",
+      "document": "bill",
+      "sources": [
+        {
+          "page": 8,
+          "label": "ПРИХОДИ, ПОМОЩИ И ДАРЕНИЯ",
+          "printed": "73 468,0",
+          "column": 0,
+          "occurrence": 0
+        }
+      ]
+    },
+    {
+      "output": "budget2027.json#/budgets/billMc/2/rows/6/cell",
+      "value": "752184.0",
+      "unit": "хил. €",
+      "period": "2027.draft",
+      "document": "bill",
+      "sources": [
+        {
+          "page": 9,
+          "label": "РАЗХОДИ",
+          "printed": "752 184,0",
+          "column": 0,
+          "occurrence": 0
+        }
+      ]
+    },
+    {
+      "output": "budget2027.json#/municipal/art52/0/cells/0",
+      "value": "12389.1",
+      "unit": "хил. €",
+      "period": "2027.draft",
+      "document": "bill",
+      "sources": [
+        {
+          "page": 79,
+          "label": "Банско",
+          "printed": "12 389,1",
+          "column": 0,
+          "occurrence": 0
+        }
+      ]
+    },
+    {
+      "output": "budget2027.json#/municipalTotals/art52/0",
+      "value": "5162139.3",
+      "unit": "хил. €",
+      "period": "2027.draft",
+      "document": "bill",
+      "sources": [
+        {
+          "page": 89,
+          "label": "ВСИЧКО:",
+          "printed": "5 162 139,3",
+          "column": 0,
+          "occurrence": 0
+        }
+      ]
+    },
+    {
+      "output": "budget2027.json#/projects/0/cells/0",
+      "value": "1609.5",
+      "unit": "хил. €",
+      "period": "2027.draft",
+      "document": "bill",
+      "sources": [
+        {
+          "page": 126,
+          "label": "NP-25.001-0001",
+          "printed": "1 609,5",
+          "column": 0,
+          "occurrence": 0,
+          "labelMode": "contains"
+        }
+      ]
+    },
+    {
+      "output": "budget2027.json#/projects/0/cells/1",
+      "value": "1473.7",
+      "unit": "хил. €",
+      "period": "2028.forecast",
+      "document": "bill",
+      "sources": [
+        {
+          "page": 126,
+          "label": "NP-25.001-0001",
+          "printed": "1 473,7",
+          "column": 1,
+          "occurrence": 0,
+          "labelMode": "contains"
+        }
+      ]
+    },
+    {
+      "output": "budget2027.json#/projects/0/cells/2",
+      "value": "1444.9",
+      "unit": "хил. €",
+      "period": "2029.forecast",
+      "document": "bill",
+      "sources": [
+        {
+          "page": 126,
+          "label": "NP-25.001-0001",
+          "printed": "1 444,9",
+          "column": 2,
+          "occurrence": 0,
+          "labelMode": "contains"
+        }
+      ]
+    },
+    {
+      "output": "budget2027.json#/debtLimits/66",
+      "value": "2.6",
+      "unit": "млрд. €",
+      "period": "2027.draft",
+      "document": "bill",
+      "sources": [
+        {
+          "page": 104,
+          "label": "Чл. 66.",
+          "printed": "2,6",
+          "column": 2,
+          "occurrence": 0,
+          "labelMode": "prose",
+          "unitText": "млрд. евро"
+        }
+      ],
+      "operation": "parse-billion-euro"
+    },
+    {
+      "output": "budget2027.json#/debtLimits/67",
+      "value": "44.4",
+      "unit": "млрд. €",
+      "period": "2027.draft",
+      "document": "bill",
+      "sources": [
+        {
+          "page": 104,
+          "label": "Чл. 67.",
+          "printed": "44,4",
+          "column": 1,
+          "occurrence": 0,
+          "labelMode": "prose",
+          "unitText": "млрд. евро"
+        }
+      ],
+      "operation": "parse-billion-euro"
+    },
+    {
+      "output": "budget2027.json#/debtLimits/68",
+      "value": "8.6",
+      "unit": "млрд. €",
+      "period": "2027.draft",
+      "document": "bill",
+      "sources": [
+        {
+          "page": 104,
+          "label": "Чл. 68.",
+          "printed": "8,6",
+          "column": 1,
+          "occurrence": 0,
+          "labelMode": "prose",
+          "unitText": "млрд. евро"
+        }
+      ],
+      "operation": "parse-billion-euro"
+    }
+  ]
+}
