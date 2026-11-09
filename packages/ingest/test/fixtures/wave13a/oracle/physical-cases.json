@@ -1,0 +1,1 @@
+{"numeric":[{"text":"-","value":0.0},{"text":" 1 234,5 ","value":1234.5},{"text":"","error":"invalid"},{"text":"0x10","error":"invalid"},{"text":"3x","error":"invalid"},{"text":"﻿1","error":"invalid"}],"ambiguous":true,"printedInt":"1","printedFloat":"1.0"}

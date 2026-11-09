@@ -67,7 +67,8 @@ export function parliamentFacts(billId: number, data: RecordData): RecordData {
 }
 
 /** The 2027 stage is intentionally separate from the 2026 law computation. */
-export function next2027(publication?: { publication: string } | null) {
+export type CurrentPublication = { publication: string } | Record<string, never>;
+export function next2027(publication?: CurrentPublication | null) {
   // Python treats an empty mapping as false; a present nonempty mapping must
   // contain the publication date, just as next_budget does.
   if (publication && Object.keys(publication).length) {
