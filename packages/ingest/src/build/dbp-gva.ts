@@ -2,6 +2,7 @@ import { metadata } from '../common/metadata.js';
 import type { Json } from '@sigma-budget/dataset-schema';
 import { pythonRound } from '../common/format.js';
 import { pythonFloatSum } from '../common/numbers.js';
+import { isIsoDay } from '../common/dates.js';
 import type { JsonStat } from '../io/data.js';
 
 type FigureValue = number | string | null;
@@ -69,6 +70,8 @@ export function buildBudgetPlan(input: PlanInput, editorial: PlanEditorial, pdfS
     if (!USE.some((p) => f.id.startsWith(p)) || f.id === 'n27.MOD') continue;
     if (['value', 'page', 'basis'].some((key) => !Object.hasOwn(f, key)))
       throw new Error(`Missing figure field: ${f.id}`);
+    if (f.table != null && typeof f.table !== 'string')
+      throw new Error(`Invalid figure table: ${f.id}`);
     const e: Record<string, unknown> = { v: f.value, u: unit(f.unit), p: f.page, b: f.basis };
     if (f.year != null) e.y = f.year;
     if (f.table) e.t = f.table;
@@ -123,6 +126,10 @@ export interface Outlook {
   gdp: { mlnPrecise: number[] };
 }
 type Cell = [number, string | null];
+function annualYear(key: string): number {
+  if (!/^\d{4}$/.test(key) || Number(key) < 1) throw new Error(`Invalid time year: ${key}`);
+  return Number(key);
+}
 /** Slice JSON-stat in declared dimension order; absent and null cells are missing, not zero. */
 export function gvaSeries(doc: GvaStat, dim: string, key: string): Map<number, Cell> {
   if (
@@ -167,6 +174,7 @@ export function gvaSeries(doc: GvaStat, dim: string, key: string): Map<number, C
   if (!times || Array.isArray(times)) throw new Error('Invalid time dimension');
   const out = new Map<number, Cell>();
   for (const [year, ti] of Object.entries(times)) {
+    const calendarYear = annualYear(year);
     let pos = 0,
       stride = 1;
     for (let i = doc.id.length - 1; i >= 0; i--) {
@@ -176,9 +184,8 @@ export function gvaSeries(doc: GvaStat, dim: string, key: string): Map<number, C
     }
     const value = (doc.value as Record<string, number | null>)[String(pos)];
     if (value != null) {
-      if (typeof value !== 'number' || !Number.isFinite(value) || !/^\d{4}$/.test(year))
-        throw new Error('Invalid cell');
-      out.set(Number(year), [value, doc.status?.[String(pos)] ?? null]);
+      if (typeof value !== 'number' || !Number.isFinite(value)) throw new Error('Invalid cell');
+      out.set(calendarYear, [value, doc.status?.[String(pos)] ?? null]);
     }
   }
   return out;
@@ -190,12 +197,24 @@ export function buildGva(
   editorial: GvaEditorial,
 ) {
   const updated = (d: GvaStat) => {
-    const date = d.extension.annotation.find((a) => a.type === 'UPDATE_DATA')?.date;
-    if (!date || !/^\d{4}-\d{2}-\d{2}/.test(date)) throw new Error('Missing source update date');
-    return date;
+    for (const annotation of d.extension.annotation) {
+      if (
+        !annotation ||
+        typeof annotation !== 'object' ||
+        Array.isArray(annotation) ||
+        typeof annotation.type !== 'string'
+      )
+        throw new Error('Invalid source update annotation');
+      if (annotation.type !== 'UPDATE_DATA') continue;
+      const date = annotation.date;
+      if (typeof date !== 'string' || !isIsoDay(date.slice(0, 10)))
+        throw new Error('Missing or invalid source update date');
+      return date;
+    }
+    throw new Error('Missing source update date');
   };
   const asOf = [updated(nama), updated(gdpDoc)].sort()[0]!.slice(0, 10);
-  const yearsOf = (d: GvaStat) => Object.keys(d.dimension.time!.category.index).map(Number);
+  const yearsOf = (d: GvaStat) => Object.keys(d.dimension.time!.category.index).map(annualYear);
   const other = new Set(yearsOf(gdpDoc));
   const years = yearsOf(nama)
     .filter((y) => other.has(y))

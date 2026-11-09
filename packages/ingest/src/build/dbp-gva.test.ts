@@ -22,6 +22,14 @@ const outlook = () => read<Outlook>('inputs/outlook.json');
 const gvaEd = read<GvaEditorial>('inputs/gva-editorial.json');
 
 describe('DBP from frozen extracted evidence', () => {
+  it.each([[], {}].map((table) => ({ table })))(
+    'rejects a non-string reported table instead of relying on JS truthiness: %j',
+    ({ table }) => {
+      const p = plan();
+      p.figures.find((f) => f.id === 't4.rev.D2.lvl.2025')!.table = table as unknown as string;
+      expect(() => buildBudgetPlan(p, editorial, hash)).toThrow(/figure table/);
+    },
+  );
   it.each(['id', 'value', 'unit', 'year', 'formula'])(
     'rejects missing derived %s before filtering or editorial override',
     (key) => {
@@ -81,6 +89,34 @@ describe('DBP from frozen extracted evidence', () => {
 });
 
 describe('GVA synthetic source and arithmetic', () => {
+  it.each(
+    [['2026-10-08'], {}, null, 20261008, '2026-99-99', '2026-02-29'].map((date) => ({ date })),
+  )('rejects an invalid update date: %j', ({ date }) => {
+    const n = nama();
+    n.extension.annotation[0]!.date = date as string;
+    expect(() => buildGva(n, gdp(), outlook(), gvaEd)).toThrow(/update date/);
+  });
+  it('rejects malformed annotations encountered before the update record', () => {
+    const n = nama();
+    n.extension.annotation.unshift({} as GvaStat['extension']['annotation'][number]);
+    expect(() => buildGva(n, gdp(), outlook(), gvaEd)).toThrow(/annotation/);
+  });
+  it.each(['null', 'absent'])(
+    'validates unused annual keys independently of %s observations',
+    (mode) => {
+      const n = nama();
+      const index = n.dimension.time!.category.index as Record<string, number>;
+      index.invalid = index['2018']!;
+      delete index['2018'];
+      const values = n.value as Record<string, number | null>;
+      for (let i = 0; i < 12; i++) {
+        if (mode === 'null') values[String(i * 4)] = null;
+        else delete values[String(i * 4)];
+      }
+      expect(() => buildGva(n, gdp(), outlook(), gvaEd)).toThrow(/time year/);
+      expect(() => gvaSeries(n, 'nace_r2', 'A')).toThrow(/time year/);
+    },
+  );
   it('distinguishes absent status flags from a malformed present map', () => {
     const n = nama();
     delete n.status;
