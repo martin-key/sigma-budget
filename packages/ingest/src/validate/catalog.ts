@@ -214,8 +214,18 @@ function pythonInt(value: any): number {
     );
   const text = catalogIntegerText(value);
   if (!/^[+-]?\d(?:_?\d)*$/.test(text))
-    error('ValueError', `invalid literal for int() with base 10: ${catalogIntegerRepr(value)}`);
-  return Number(text.replaceAll('_', ''));
+    error(
+      'ValueError',
+      `invalid literal for int() with base 10: ${[...catalogIntegerRepr(value)].slice(0, 200).join('')}`,
+    );
+  const decimal = text.replaceAll('_', '');
+  const digits = decimal.replace(/^[+-]/, '').length;
+  if (digits > 4300)
+    error(
+      'ValueError',
+      `Exceeds the limit (4300 digits) for integer string conversion: value has ${digits} digits; use sys.set_int_max_str_digits() to increase the limit`,
+    );
+  return Number(decimal);
 }
 function pythonMonth(v: any): number {
   if (typeof v !== 'number' && typeof v !== 'boolean')

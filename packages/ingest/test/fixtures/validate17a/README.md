@@ -15,3 +15,9 @@ later Unicode digits and invalid nonprintable characters. Its separately pinned
 Unicode data supplies the decimal and diagnostic repertoire; direct and compiled
 CORE checks compare complete outcomes. Numeric whitespace deliberately differs
 from Python `str.strip` and JavaScript `trim`. Earlier captures remain immutable.
+
+`integer-limit/generate_oracle.py --check` adds fourteen complete donor outcomes at
+the pinned Python 3.12 default limit of 4,300 decimal digits. Plain, signed,
+underscored, fullwidth and whitespace variants preserve both the accepted
+4,300-digit control and the rejected 4,301-digit case, including leading zeroes.
+Four invalid-literal controls preserve Python's 200-codepoint diagnostic bound.
