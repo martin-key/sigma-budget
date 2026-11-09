@@ -27,6 +27,6 @@ export function publicationQuery(routeId, params = {}, query = {}) {
     const historicDebtEmbed = routeId === 'S29' && HISTORICAL_DEBT_EMBEDS.has(params.chart);
     if (historicDebtTarget || historicDebtEmbed) result.per = '2026.law';
   }
-  if (routeId === 'S17' && result.obhvat == null && /^s17-(?:b-)?(?:maastricht|quarterly|eu)(?:-|$)/.test(result.to || '')) result.obhvat = 'maastricht';
+  if (routeId === 'S17' && result.obhvat == null && /^s17-(?:(?:b-)?(?:maastricht|quarterly|eu)|meter)(?:-|$)/.test(result.to || '')) result.obhvat = 'maastricht';
   return result;
 }

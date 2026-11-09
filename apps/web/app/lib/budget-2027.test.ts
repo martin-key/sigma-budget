@@ -231,11 +231,39 @@ it.each([
   ['/dalg', 's17-debt-2027', 'Държавен дълг по Закона за държавния дълг'],
   ['/dalg', 's17-limits-2027', 'фискалния резерв и държавния дълг'],
   ['/merki', 's12-II_7', 'Приходни мерки'],
+  ['/5-minuti', 's04-scene5', 'Приходни и разходни мерки по АСБП 2027–2029'],
 ])('exports a semantic CSV scope for %s', async (path, id, scopeText) => {
   const { scope } = await page(path);
   const spec = scope.maps.share.get(id);
   expect(spec, id).toBeDefined();
   expect(csvFor({ ...spec, table: { columns: ['x'], rows: [[1]] } })).toContain(scopeText);
+});
+it.each([
+  ['/merki', 's12-II_7', 's12-II_7-table'],
+  ['/merki', 's12-II_8', 's12-II_8-table'],
+  ['/obshtini', 's20-municipal-framework', 's20-framework-table'],
+])(
+  'keeps multi-year CSV row statuses independent of the selected period: %s %s',
+  async (path, id, tableId) => {
+    const exports: string[] = [];
+    for (const per of FRAMEWORK) {
+      const { scope, html } = await page(path + '?per=' + per);
+      const spec = scope.maps.share.get(id);
+      const table = tableData(scope.maps.table.get(tableId));
+      expect(html).toContain('Проект 2027 и прогноза 2028–2029');
+      expect(table.statuses).toEqual(
+        table.rows.map((row: unknown[]) => (String(row[0]).includes('2027') ? 'real' : 'forecast')),
+      );
+      exports.push(csvFor({ ...spec, table }));
+    }
+    expect(exports[1]).toBe(exports[0]);
+    expect(exports[2]).toBe(exports[0]);
+  },
+);
+it('exports investment years with their own statuses', async () => {
+  const { scope } = await page('/byudzhet-2027');
+  const table = tableData(scope.maps.table.get('s34-projects-table'));
+  expect(table.statuses).toEqual(['real', 'forecast', 'forecast']);
 });
 it('keeps glossary references and the overview scope meaningful', async () => {
   const { document } = await page('/rechnik/proekt-na-byudzheten-plan');

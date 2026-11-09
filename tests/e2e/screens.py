@@ -1983,7 +1983,7 @@ SHARE_LIST_JS = r"""async () => {
     try { text = sh.textFor(s); link = sh.linkFor(s); embed = sh.embedFor(s); embedHash = sh.embedHash(s); } catch (e) { textErr = String(e); }
     const rel = (await import('./js/data.js')).data.get('releases/current');
     out.push({ id, route: s.route || '', title: s.title || '', source: [].concat(s.source || []).filter(Boolean), status: s.status || '', mock: sh.isMock(s), release: rel ? rel.release_id || '' : null,
-      el: !!el, btn: !!btn, btnVisible: !!btn && btn.getClientRects().length > 0, hasChart, hasStat, report: s.report || '', csv: csv.slice(0, 80000), csvErr, text, link, embed, embedHash, textErr });
+      el: !!el, btn: !!btn, btnVisible: !!btn && btn.getClientRects().length > 0, hasChart, hasStat, report: s.report || '', csv, csvErr, text, link, embed, embedHash, textErr });
   }
   return { specs: out, orphans: [...new Set([...document.querySelectorAll('[data-share]')].map(b => b.dataset.share).filter(id => !sh.get(id)))],
            labels: Object.values(st.STATUS).map(x => x.label) };

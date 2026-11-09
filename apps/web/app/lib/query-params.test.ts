@@ -35,6 +35,17 @@ it.each(['/', '/5-minuti'])(
     expect(resolved.periodResolution.resolved).toBe('2027.draft');
   },
 );
+it.each(['s17-meter', 's17-meter-l', 's17-meter-l-value'])(
+  'resolves the legacy debt meter %s to its historical Maastricht scope',
+  (target) => {
+    expect(screenSearch('/dalg', '?to=' + target)).toBe('?per=2026.law&obhvat=maastricht');
+    expect(resolve('/dalg?to=' + target).query.obhvat).toBe('maastricht');
+    expect(screenSearch('/dalg', '?to=' + target + '&obhvat=zdd')).toBe('?obhvat=zdd&per=2026.law');
+    expect(screenSearch('/dalg', '?to=' + target + '&per=2027.draft')).toBe(
+      '?per=2027.draft&obhvat=maastricht',
+    );
+  },
+);
 it('server and edge retain only the matched screens declared state', () => {
   const r = ROUTES.find((r) => r.id === 'S07')!;
   expect(

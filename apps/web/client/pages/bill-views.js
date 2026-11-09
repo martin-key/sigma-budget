@@ -74,6 +74,11 @@ const cellRow = (label, cell, extra = {}) => ({
   origin: provenanceUrl(cell),
   ...extra,
 });
+const frameworkRow = (key) => ({
+  period: periodByKey(key).label,
+  _status: periodByKey(key).status === 'forecast' ? 'forecast' : 'real',
+});
+const frameworkStatus = { status: 'real', statusLabel: 'Проект 2027 и прогноза 2028–2029' };
 export const cellColumns = (unit = 'хил. €') => [
   { key: 'label', label: 'Показател' },
   { key: 'value', label: 'Стойност', unit, num: true, d: 1 },
@@ -338,7 +343,7 @@ export function municipalityView(ctx) {
   }
   const forecast = doc.forecast.annex9 || [];
   const frows = forecast.flatMap((r) =>
-    FRAMEWORK.map((key, i) => cellRow(r.label, r.cells?.[i], { period: periodByKey(key).label })),
+    FRAMEWORK.map((key, i) => cellRow(r.label, r.cells?.[i], frameworkRow(key))),
   );
   const forecastBlock = base(
     ctx,
@@ -352,6 +357,7 @@ export function municipalityView(ctx) {
     }),
     {
       sub: 'Приложение 9 към АСБП. Подредовете „от тях“ са включени в общите суми.',
+      ...frameworkStatus,
       share: { period: '2027.draft / 2028.forecast / 2029.forecast', unit: 'хил. €' },
     },
   );
@@ -640,12 +646,13 @@ export function billOverview(ctx) {
           columns: [{ key: 'period', label: 'Период' }, ...cellColumns()],
           rows: FRAMEWORK.map((key) =>
             cellRow('Сбор на публикуваните годишни стойности', doc.projectAnnualSums[key], {
-              period: periodByKey(key).label,
+              ...frameworkRow(key),
             }),
           ),
         }),
         {
           sub: 'Изчислен сбор само на отпечатаните числови клетки в 226 проекта, не отпечатан общ ред. Празните клетки не са оценка за нулев разход. Произходът съдържа всички участващи клетки.',
+          ...frameworkStatus,
           share: { period: '2027.draft / 2028.forecast / 2029.forecast', unit: 'хил. €' },
         },
       )}
@@ -663,7 +670,7 @@ export function billOverview(ctx) {
           rows: doc.projects.flatMap((r) =>
             FRAMEWORK.map((key, i) =>
               cellRow(`${r.id}: ${r.name}`, r.cells[i], {
-                period: periodByKey(key).label,
+                ...frameworkRow(key),
                 gap: r.gaps[i] || '',
               }),
             ),
@@ -709,7 +716,7 @@ export function measuresView(ctx) {
   const body = ['II_7', 'II_8'].map((table, i) => {
     const rows = doc.forecast[table].flatMap((r, rowIndex) =>
       FRAMEWORK.map((key, k) =>
-        cellRow(r.label, r.cells[k], { period: periodByKey(key).label, gap: r.gaps[k] || '', _id: `s12-${table}-${rowIndex}-${k}` }),
+        cellRow(r.label, r.cells[k], { ...frameworkRow(key), gap: r.gaps[k] || '', _id: `s12-${table}-${rowIndex}-${k}` }),
       ),
     );
     return base(
@@ -728,6 +735,7 @@ export function measuresView(ctx) {
       }),
       {
         sub: 'Показани са отпечатаните ефекти и общият ред. Празните клетки не са нула. Знаците и разликите между годините са запазени.',
+        ...frameworkStatus,
         share: { period: '2027.draft / 2028.forecast / 2029.forecast', unit: 'млн. €' },
       },
     );

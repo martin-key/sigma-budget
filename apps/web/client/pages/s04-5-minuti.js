@@ -294,7 +294,7 @@ function scene5(ctx) {
   if (ctx.period.key === '2027.draft') {
     const doc = ctx.data.budget2027, rev = doc?.forecast?.II_7?.at(-1)?.cells?.[0], exp = doc?.forecast?.II_8?.at(-1)?.cells?.[0];
     const id = twin('s04-fig5-2027', ['Показател', 'Ефект 2027, млн. €', 'Произход'], [['Приходни мерки: общ ред II-7', cellValue(rev), rev?.provenance], ['Разходни мерки: общ ред II-8', cellValue(exp), exp?.provenance]]);
-    return block({id:'s04-scene5',title:'Мерките в проекта за 2027 г.',source:['budget2027'],asOf:doc?.publication,status:'real',statusLabel:'Проект 2027',share:{period:'2027.draft',unit:'млн. €'},body:html`<div data-attach="${id}"><p>Отпечатаният общ ефект за 2027 г. е ${money(cellValue(rev))} за приходните мерки (таблица II-7) и ${money(cellValue(exp))} за разходните мерки (таблица II-8). Това са предложени мерки в АСБП 2027–2029.</p><p><a href="${href('S12',{}, {per:'2027.draft'})}">Всички мерки и годишните им ефекти за 2027–2029</a></p></div>`});
+    return block({id:'s04-scene5',title:'Мерките в проекта за 2027 г.',scope:{key:'fiscal-measures',label:'Фискални мерки',long:'Приходни и разходни мерки по АСБП 2027–2029'},source:['budget2027'],asOf:doc?.publication,status:'real',statusLabel:'Проект 2027',share:{period:'2027.draft',unit:'млн. €'},body:html`<div data-attach="${id}"><p>Отпечатаният общ ефект за 2027 г. е ${money(cellValue(rev))} за приходните мерки (таблица II-7) и ${money(cellValue(exp))} за разходните мерки (таблица II-8). Това са предложени мерки в АСБП 2027–2029.</p><p><a href="${href('S12',{}, {per:'2027.draft'})}">Всички мерки и годишните им ефекти за 2027–2029</a></p></div>`});
   }
   const m = ctx.data.measures;
   if (!m) return failed(5, 'Данните за мерките не се заредиха.');
