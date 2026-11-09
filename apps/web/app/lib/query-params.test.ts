@@ -11,11 +11,13 @@ it('normalizes the October document before SSR filtering and cache identity', ()
   expect(resolve('/byudzhet-2027?dokument=bill&to=s34-ppd').query.dokument).toBe('bill');
   expect(resolve('/byudzhet-2027?to=s34-bill').query.dokument).toBeUndefined();
 });
-it.each(['maastricht', 'quarterly'])(
+it.each(['maastricht', 'eu', 'quarterly', 'interest', 'balance', 'finance', 'newdebt'])(
   'restores old historical debt chart %s before filtering and preserves explicit periods',
   (chart) => {
     expect(screenSearch('/embed/dalg.s17-' + chart, '')).toBe('?per=2026.law');
-    expect(screenSearch('/dalg', '?to=s17-b-' + chart)).toBe('?per=2026.law');
+    expect(screenSearch('/dalg', '?to=s17-b-' + (chart === 'finance' ? 'fin' : chart))).toBe(
+      '?per=2026.law',
+    );
     expect(resolve('/embed/dalg.s17-' + chart).periodResolution.resolved).toBe('2026.law');
     expect(resolve('/dalg?to=s17-b-' + chart + '&per=2027.draft').periodResolution.resolved).toBe(
       '2027.draft',
