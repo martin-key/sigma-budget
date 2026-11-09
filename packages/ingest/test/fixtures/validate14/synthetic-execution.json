@@ -1,0 +1,120 @@
+{
+  "meta": {
+    "schema": "execution/1",
+    "id": "synthetic"
+  },
+  "data": {
+    "2026": {
+      "kfp": {
+        "a": [
+          1.2345,
+          -1.2345,
+          null,
+          false
+        ]
+      },
+      "nat": {
+        "a": [
+          1.2345,
+          -1.2345,
+          null,
+          false
+        ]
+      },
+      "eu": {
+        "a": [
+          1.2345,
+          -1.2345,
+          null,
+          false
+        ]
+      }
+    }
+  },
+  "monthly": {
+    "2026": {
+      "kfp": {
+        "a": [
+          0.0005,
+          -0.0005,
+          null
+        ]
+      },
+      "nat": {
+        "a": [
+          0.0005,
+          -0.0005,
+          null
+        ]
+      },
+      "eu": {
+        "a": [
+          0.0005,
+          -0.0005,
+          null
+        ]
+      }
+    }
+  },
+  "plan2026": {
+    "kfp": {
+      "a": 2.55,
+      "b": null
+    },
+    "nat": {
+      "a": 2.55,
+      "b": null
+    },
+    "eu": {
+      "a": 2.55,
+      "b": null
+    }
+  },
+  "latest": {
+    "kfp": {
+      "a": {
+        "cum": -1.25,
+        "plan": 2.55,
+        "pctPlan": 42.125
+      },
+      "b": {
+        "prevYearCum": null
+      }
+    },
+    "nat": {
+      "a": {
+        "cum": -1.25,
+        "plan": 2.55,
+        "pctPlan": 42.125
+      },
+      "b": {
+        "prevYearCum": null
+      }
+    },
+    "eu": {
+      "a": {
+        "cum": -1.25,
+        "plan": 2.55,
+        "pctPlan": 42.125
+      },
+      "b": {
+        "prevYearCum": null
+      }
+    }
+  },
+  "reconcile": {
+    "dec2026": {
+      "a": {
+        "kfp": 1.2345,
+        "annex3": -2.25,
+        "diff": null
+      }
+    },
+    "other": {
+      "keep": 2
+    }
+  },
+  "pace": {
+    "unchanged": 2.5
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "schema": 2,
+  "money": {
+    "encoding": "decimal-string",
+    "currency": "EUR",
+    "unit": "млн. €",
+    "scale": 1000000,
+    "rounding": "half away from zero (as Excel and the MF releases)",
+    "places": {
+      "data": 3,
+      "monthly": 3,
+      "plan2026": 1,
+      "latest": 1,
+      "reconcile.kfp": 3,
+      "reconcile.annex3": 1,
+      "reconcile.diff": 1
+    }
+  },
+  "scope": {
+    "kfp": "Консолидирана фискална програма (к.2 на отчета)",
+    "nat": "Национален бюджет (к.3)",
+    "eu": "Европейски средства (к.4)"
+  },
+  "accountingBasis": "cash",
+  "missing": "null; a missing value is never 0",
+  "conversion": {
+    "from": "BGN",
+    "rate": "1 € = 1.95583 лв.",
+    "years": "2024 and 2025",
+    "rule": "the original number in млн. лв. ÷ 1.95583, rounded to 3 places after dividing"
+  },
+  "blocks": {
+    "data": {
+      "evidence": "real",
+      "budget": "report",
+      "value": "observed",
+      "note": "cumulative since 1 January; 2024 and 2025 are derived by the conversion from BGN"
+    },
+    "monthly": {
+      "evidence": "real",
+      "budget": "report",
+      "value": "derived",
+      "rule": "cumulative(m) − cumulative(m − 1); January = cumulative(1)"
+    },
+    "plan2026": {
+      "evidence": "real",
+      "budget": "law",
+      "value": "observed",
+      "note": "Програма по ЗДБРБ 2026, МФ, приложение 1"
+    },
+    "latest": {
+      "evidence": "real",
+      "budget": "report",
+      "value": "derived",
+      "rule": "cum and prevYearCum: data at the latest month, rounded to 1 place; plan: plan2026 (budget status law); pctPlan and yoyPct: % from the unrounded cumulative values"
+    },
+    "pace": {
+      "evidence": "real",
+      "budget": "report",
+      "value": "derived",
+      "rule": "% of the year's December cumulative value"
+    },
+    "reconcile": {
+      "evidence": "real",
+      "budget": "report",
+      "value": "derived",
+      "rule": "the December report against Приложение 3 (annex3: budget status report for 2024, expected report for 2025)"
+    }
+  },
+  "provenance": "execution-provenance.json"
+}

@@ -1,0 +1,93 @@
+{
+  "cigarettes": [
+    {
+      "adValoremPct": 21.0,
+      "minimumPer1000": 120.0,
+      "specificPer1000": 77.0,
+      "validFrom": "2026-08-01",
+      "validTo": "2027-02-28"
+    },
+    {
+      "adValoremPct": 20.5,
+      "minimumPer1000": 126.0,
+      "specificPer1000": 82.0,
+      "validFrom": "2027-03-01",
+      "validTo": "2027-12-31"
+    },
+    {
+      "adValoremPct": 20.0,
+      "minimumPer1000": 132.0,
+      "specificPer1000": 87.0,
+      "validFrom": "2028-01-01"
+    }
+  ],
+  "fuels": {
+    "diesel": {
+      "conversionRate": 1.95583,
+      "excisePerLitre": 0.33029,
+      "originalBgnPer1000": 646.0,
+      "originalExcise": 330.29,
+      "originalPrice": 1892.7,
+      "priceDate": "2026-11-02",
+      "pricePerLitre": 1.8927,
+      "validFrom": "2026-01-01"
+    },
+    "petrol": {
+      "conversionRate": 1.95583,
+      "excisePerLitre": 0.36302,
+      "originalBgnPer1000": 710.0,
+      "originalExcise": 363.02,
+      "originalPrice": 1604.5,
+      "priceDate": "2026-11-02",
+      "pricePerLitre": 1.6045,
+      "validFrom": "2026-01-01"
+    }
+  },
+  "pack": {
+    "conversionRate": 1.95583,
+    "originalValue": 6.87,
+    "period": "2025",
+    "priceEur": 3.51257522,
+    "yearHeaders": [
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025
+    ]
+  },
+  "schema": "indirect-tax-evidence/1",
+  "sources": {
+    "bill": {
+      "path": "data/originals/parliament/52-602-01-19.docx",
+      "sha256": "378042f3c6f05aad760099f3b5ccceaf597fd287b28242fe89b99d2a981fc174"
+    },
+    "customs": {
+      "path": "data/originals/excise-law/excise-law-dv54-2025.pdf",
+      "sha256": "cdc69fed256f73e91b7f0dba8d8340f5e5a9fe12c93f075227a2c84b389a6f8f"
+    },
+    "duties": {
+      "path": "data/originals/ec-oil/duties-and-taxes-2026-11-07.xlsx",
+      "sha256": "3719f74988d59184896b91a108400ec62f2ac09f03e88b0c969b121b966618b6"
+    },
+    "gazette": {
+      "path": "data/originals/excise-law/dv-69-2026-budget.html",
+      "sha256": "b08fb0a5ee9c1c32579b8851c69fcfb34988e0efebde32dbb3e897698e0f2b51"
+    },
+    "nsi": {
+      "path": "data/originals/nsi-pack/statistical-yearbook-2025.pdf",
+      "sha256": "b4d93c6439621a40bdf721635b0d4022d0d6bec640cb2d5a4ddcc86cb0564fa9"
+    },
+    "prices": {
+      "path": "data/originals/ec-oil/weekly-prices-2026-11-02.xlsx",
+      "sha256": "946947ad4cab9daa786578ac9b2c077d922c0f661671eb5cdb4004bd51763ebb"
+    }
+  },
+  "vat": {
+    "reducedPct": 9.0,
+    "standardPct": 20.0,
+    "standardSince": "1999-01-01",
+    "unit": "%"
+  }
+}
