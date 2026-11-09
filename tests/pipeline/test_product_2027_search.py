@@ -3,11 +3,22 @@ import json
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
-from budget_pipeline.build.search import _Rows, _publication_2027, _money_khil, GROUPS
+from budget_pipeline.build.search import _Rows, _publication_2027, _institutions, _money_khil, GROUPS
 
 ROOT = Path(__file__).resolve().parents[2]
 
 class ProductSearchTest(unittest.TestCase):
+    def test_historical_programme_values_keep_bill_publication_status(self):
+        rows = _Rows()
+        _institutions(SimpleNamespace(out={}), rows)
+        self.assertEqual(len(rows.rows), 272)
+        for row in rows.rows:
+            self.assertEqual(row[4], 'Проект 2026')
+            self.assertIn('per=2026.law', row[6])
+        programme = next(row for row in rows.rows if '/0200.01.01?' in row[6])
+        self.assertIn('0200.01.01', programme[2])
+        self.assertEqual(programme[3].replace('\u00a0', ' '), '6,60 млн. €')
+
     def test_publication_rows_and_identities(self):
         rows = _Rows()
         _publication_2027(SimpleNamespace(out={}), rows)

@@ -16,7 +16,8 @@ import { parse } from '../../client/data.js';
 import { requestState } from '../../client/store.js';
 import { build, frameHtml, resolve } from '../../client/render.js';
 import { tableData } from '../../client/ui/table.js';
-import { csvFor } from '../../client/share.js';
+import { csvFor, linkFor, shortLink, reset as resetShare } from '../../client/share.js';
+import { head } from '../../client/seo.js';
 import { getIndex, stageOf, metaOf } from '../../client/searchlib.js';
 import { planCsv } from '../../client/ui/plan.js';
 import { revExpChart } from '../../client/pages/s13-prognoza.js';
@@ -37,6 +38,7 @@ it.each([
   ['indicators', 'Прогноза 2029', '2029.forecast', 'Прогноза 2029'],
   ['measures', '2026', '2026.law', 'По законопроекта 2026'],
   ['measures', 'Прогноза 2028', '2028.forecast', 'Прогноза 2028'],
+  ['institutions', 'Проект 2026', '2026.law', 'По законопроекта 2026'],
 ])('labels %s from publication metadata: %s', (group, period, key, expected) => {
   expect(stageOf(group, { period, href: `#/dalg?per=${key}` })).toBe(expected);
 });
@@ -154,22 +156,26 @@ async function page(address: string, absent = false) {
     document: parseHTML(String(frameHtml(vm))).document,
   };
 }
-it.each(['ministries', 'programs', 'measures', 'debt', 'municipalities'])(
-  'keeps the publication period in historical catalogue links: %s',
-  async (name) => {
-    const { document } = await page('/danni/' + name);
-    const links = [...document.querySelectorAll('.s24-facts a[href]')]
-      .map((a) => a.getAttribute('href')!.replace(/^#/, ''))
-      .filter((h) =>
-        /^\/(pari|razhodi|vedomstva|vedomstvo|merki|dalg|obshtini|obshtina|zakon)(?:\?|\/|$)/.test(
-          h,
-        ),
-      );
-    expect(links.length).toBeGreaterThan(0);
-    for (const link of links)
-      expect(new URL(link, 'https://budget.test').searchParams.get('per')).toBe('2026.law');
-  },
-);
+it.each([
+  'ministries',
+  'programs',
+  'measures',
+  'debt',
+  'municipalities',
+  'ministries-programs',
+  'law',
+  'geo-obshtini',
+])('keeps the publication period in historical catalogue links: %s', async (name) => {
+  const { document } = await page('/danni/' + name);
+  const links = [...document.querySelectorAll('.s24-facts a[href]')]
+    .map((a) => a.getAttribute('href')!.replace(/^#/, ''))
+    .filter((h) =>
+      /^\/(pari|razhodi|vedomstva|vedomstvo|merki|dalg|obshtini|obshtina|zakon)(?:\?|\/|$)/.test(h),
+    );
+  expect(links.length).toBeGreaterThan(0);
+  for (const link of links)
+    expect(new URL(link, 'https://budget.test').searchParams.get('per')).toBe('2026.law');
+});
 it.each([
   's34-kratko',
   's34-ppd',
@@ -194,6 +200,42 @@ it('keeps new bill targets and explicit document choices separate', async () => 
   ]) {
     expect((await page(address)).vm.title).not.toContain('Проект на бюджетен план до ЕК');
   }
+});
+it('keeps the inferred October document in canonical and both sharing links', async () => {
+  const { vm } = await page('/byudzhet-2027?to=s34-ppd');
+  resetShare(vm.route);
+  expect(linkFor({ id: 's34-ppd' })).toContain('dokument=plan');
+  expect(shortLink({ id: 's34-ppd' })).toContain('dokument=plan');
+  const canonical = head(vm, vm.title).tags.find((tag: any) => tag.attrs?.rel === 'canonical');
+  expect(canonical && 'href' in canonical.attrs ? canonical.attrs.href : undefined).toContain(
+    'dokument=plan',
+  );
+});
+it.each(['/', '/5-minuti'])(
+  'pins annual destinations on primary page %s to its displayed year',
+  async (path) => {
+    const { document, vm } = await page(path + '?per=2026.law');
+    expect(vm.ctx!.period!.key).toBe('2027.draft');
+    const links = [...document.querySelectorAll('a[href]')]
+      .map((a) => a.getAttribute('href') || '')
+      .filter((href) => /^\/(?:prihodi|razhodi|vedomstva)(?:[/?]|$)/.test(href));
+    expect(links.length).toBeGreaterThan(0);
+    for (const href of links)
+      expect(new URL(href, 'https://budget.test').searchParams.get('per')).toBe('2027.draft');
+  },
+);
+it.each([
+  ['/vedomstva', 's10-bill-list', 'Бюджети на ведомствата'],
+  ['/vedomstvo/0600', 's11-budget-2027', 'Бюджети на ведомствата'],
+  ['/obshtina/BLG03', 's21-transfers-2027', 'Трансфери от държавния бюджет'],
+  ['/dalg', 's17-debt-2027', 'Държавен дълг по Закона за държавния дълг'],
+  ['/dalg', 's17-limits-2027', 'фискалния резерв и държавния дълг'],
+  ['/merki', 's12-II_7', 'Приходни мерки'],
+])('exports a semantic CSV scope for %s', async (path, id, scopeText) => {
+  const { scope } = await page(path);
+  const spec = scope.maps.share.get(id);
+  expect(spec, id).toBeDefined();
+  expect(csvFor({ ...spec, table: { columns: ['x'], rows: [[1]] } })).toContain(scopeText);
 });
 it('keeps glossary references and the overview scope meaningful', async () => {
   const { document } = await page('/rechnik/proekt-na-byudzheten-plan');

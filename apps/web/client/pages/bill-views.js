@@ -38,11 +38,23 @@ const publication = (doc) =>
         документа</a
       >.
     </p>`;
+const namedScope = (key, label, long = label, note) => ({ key, label, long, note, gl: null });
+function scopeFor(ctx, id) {
+  if (ctx.route.id === 'S17') return id === 's17-limits-2027'
+    ? namedScope('budget-and-debt-limits', 'Държавен бюджет и дълг', 'Предложени граници за фискалния резерв и държавния дълг по законопроекта')
+    : 'zdd';
+  if (['S20', 'S21'].includes(ctx.route.id)) return namedScope('municipal-transfers', 'Трансфери към общините', 'Трансфери от държавния бюджет към общинските бюджети');
+  if (ctx.route.id === 'S12') return namedScope('fiscal-measures', 'Фискални мерки', `${id === 's12-II_7' ? 'Приходни' : 'Разходни'} мерки по АСБП 2027–2029`);
+  if (id === 's34-projects') return namedScope('investment-projects', 'Инвестиционни проекти', 'Инвестиционни проекти по законопроекта за държавния бюджет');
+  if (ctx.route.id === 'S34' || ctx.params?.code === 'art1') return namedScope('state-budget', 'Държавен бюджет', 'Държавен бюджет по законопроекта за ЗДБРБ');
+  return namedScope('institution-budgets', 'Бюджети на ведомствата', 'Бюджети на ведомствата по законопроекта за ЗДБРБ, не е целият бюджет', 'не е целият бюджет');
+}
 const base = (ctx, id, title, body, extra = {}) =>
   block({
     id,
     title,
     body,
+    scope: scopeFor(ctx, id),
     source,
     asOf: ctx.data.budget2027?.publication,
     status: ctx.period.status === 'forecast' ? 'forecast' : 'real',

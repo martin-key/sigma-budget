@@ -22,6 +22,7 @@ import { pageSkeleton, emptyState, errorState, pendingState } from './ui/states.
 import { redirect } from './redirects.js';
 import { here } from './loc.js';
 import { toHref } from './loc.js';
+import { publicationQuery } from './publication-query.js';
 
 export class NotFound extends Error { constructor(msg) { super(msg || 'not found'); this.name = 'NotFound'; } }
 
@@ -59,7 +60,7 @@ export function resolve(address) {
   const m = match(raw.segs);
   const route = m ? m.route : NOT_FOUND;
   const params = m ? m.params : { path: raw.segs.join('/') };
-  const query = canonQuery(raw.query);
+  const query = publicationQuery(route.id, params, canonQuery(raw.query));
   if (route.id === 'S31' && query.y != null) {
     const legacy = PERIODS.find(p => String(p.year) === query.y && p.status !== 'law');
     if (query.per == null && legacy) query.per = legacy.key;
@@ -77,11 +78,12 @@ function parseNeeds(mod, ctx) {
 const noop = () => {};
 function makeCtx(route, params, query, o) {
   const a = o.actions || {};
-  const selectedPeriod = route.id === 'S04' ? periodByKey(DEFAULT_PERIOD) : query.per == null && Array.isArray(route.periods) && route.periods.length === 1 ? periodByKey(route.periods[0]) : store.period;
+  const selectedPeriod = ['S01', 'S04'].includes(route.id) ? periodByKey(DEFAULT_PERIOD) : query.per == null && Array.isArray(route.periods) && route.periods.length === 1 ? periodByKey(route.periods[0]) : store.period;
   const href = (id, params = {}, q = {}) => {
     const target = byId[id] || byKey[id];
     const variant = ['S10', 'S11'].includes(route.id) && ['S10', 'S11'].includes(target?.id) && ['bill', 'billMc'].includes(query.variant) ? { variant: query.variant } : {};
-    return periodHref(selectedPeriod.key, id, params, { ...variant, ...q });
+    const primary = ['S01', 'S04'].includes(route.id) && (target?.periods === 'all' || target?.periods?.includes?.(DEFAULT_PERIOD)) ? { per: DEFAULT_PERIOD } : {};
+    return periodHref(selectedPeriod.key, id, params, { ...primary, ...variant, ...q });
   };
   return {
     route, params, query, data: {}, missing: [], failed: [], period: selectedPeriod, store,

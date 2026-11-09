@@ -1,4 +1,5 @@
 import { resolvePeriod } from './periods.js';
+import { publicationQuery } from './publication-query.js';
 // Sharing: registry of shareable blocks + the ONE block menu „Сподели“ (V5: „Изтегли изображение“ and „Копирай връзка“; the table file for experts; „Намерих грешка“).
 // A block registers a spec while its screen renders (ui/block.js does this for you); the router clears the registry on every navigation.
 //   share.register(id, {title, sub, text, source:['kfp'], asOf, status, mock, chart:'chartDomId', table:{columns,rows,statuses?} | ()=>…, embed:true|'routeKey.chartId', embedParams:{code:'1000'}, report:'#/vrazka?…',
@@ -88,7 +89,7 @@ const PERSONAL = new Set(['demo', 'brutno', 'bruto', 'zaplata', 'dohod', 'neto',
 /** link to this block on the current screen: keeps the state of the address (?per=, ?g1=…), adds the block's own `link` parameters (the same result on every opening) and ?to=<block> */
 export function linkFor(spec, { to = true } = {}) {
   const { path, query: qs } = addrParts(here());
-  const q = new URLSearchParams(qs);
+  const q = new URLSearchParams(publicationQuery(currentRoute()?.id, {}, Object.fromEntries(new URLSearchParams(qs))));
   PERSONAL.forEach(k => q.delete(k));
   const own = val(spec?.link);
   if (own && typeof own === 'object') for (const [k, v] of Object.entries(own)) { if (v == null || v === '') q.delete(k); else if (!PERSONAL.has(k)) q.set(k, String(v)); }
@@ -133,7 +134,7 @@ export function csvMeta(spec) {
   return {
     period: per || (spec.asOf ? `към ${date(spec.asOf)}` : ''),
     unit: spec.unit || rest.join(' · '),
-    scope: scope ? SCOPES[scope]?.long || SCOPES[scope]?.label || scope : '',
+    scope: scope ? spec.scope?.long || SCOPES[scope]?.long || spec.scope?.label || SCOPES[scope]?.label || scope : '',
     release: data.get('releases/current')?.release_id || '',
   };
 }

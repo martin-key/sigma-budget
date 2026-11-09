@@ -11,11 +11,11 @@ import { cellValue, stateDebt } from '../budget-2027.js';
 // Numbers: only from core (kpis, functions, revenueGroups), execution (the 2025 pace), debt (limits, ZDD) and measures; all through the
 // format helpers and view.amount, so „% от БВП“, „на човек“ and „и в лева“ apply. A failed optional file turns only its own scene into a note.
 // Motion: bars and cells grow once when their scene scrolls into view; nothing moves under prefers-reduced-motion, and nothing is hidden first.
-import { selectPeriod } from '../periods.js';
+import { selectPeriod, DEFAULT_PERIOD } from '../periods.js';
 import { planBasis } from '../exec.js';
 import { html, raw } from '../html.js';
 import { num, pct, money, date, monthName, NBSP } from '../format.js';
-import { byKey, href } from '../routes.js';
+import { byKey, byId, href as routeHref } from '../routes.js';
 import { amount } from '../view.js';
 import * as share from '../share.js';
 import { block } from '../ui/block.js';
@@ -27,6 +27,11 @@ import { gl } from '../ui/gl.js';
 
 export const needs = ['core', 'outlook', 'revenue?', 'expenditure?', 'execution?', 'measures?', 'debt?', 'budget2027?', 'guide?'];
 export const styles = ['s04-5-minuti'];
+const href = (id, params = {}, query = {}) => {
+  const target = byId[id] || byKey[id];
+  const primary = target?.periods === 'all' || target?.periods?.includes?.(DEFAULT_PERIOD);
+  return routeHref(id, params, { ...(primary ? { per: DEFAULT_PERIOD } : {}), ...query });
+};
 
 const SCENES = [
   { id: 's04-scene1', nav: 'Приходи и разходи', title: 'Повече разходи, отколкото приходи' },

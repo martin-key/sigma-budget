@@ -272,10 +272,10 @@ def _institutions(ctx, rows):
         who = (b["short"] if b else r[f["ministry"]])
         val = "" if y26 == prog["sentinels"]["noData"] else _money_khil(y26)
         if level == "policy":
-            rows.add("institutions", name, "%s · политика %s" % (who, code), val, str(PLAN_YEAR), href="#/vedomstvo/%s" % r[f["ministry"]], kw=code)
+            rows.add("institutions", name, "%s · политика %s" % (who, code), val, "Проект %s" % PLAN_YEAR, href="#/vedomstvo/%s" % r[f["ministry"]])
         else:
-            rows.add("institutions", name, "%s · програма %s" % (who, code), val, str(PLAN_YEAR),
-                     href="#/vedomstvo/%s/%s" % (r[f["ministry"]], code), kw=code)
+            rows.add("institutions", name, "%s · програма %s" % (who, code), val, "Проект %s" % PLAN_YEAR,
+                     href="#/vedomstvo/%s/%s" % (r[f["ministry"]], code))
 
 
 # ----------------------------------------------------------------------------------------------- municipalities

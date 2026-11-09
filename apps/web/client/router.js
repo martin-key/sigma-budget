@@ -49,10 +49,12 @@ export function announce(msg) {
 /** go('/prihodi/dds') (or the old '#/prihodi/dds') — in-app navigation (history entry); the same address = scroll to top + refocus the h1 */
 export function go(addr, o = {}) {
   let target = internal(addr || '/');
+  const resolved = resolve(target);
+  target = internal(resolved.want);
   const { query, segs } = parseHash(target);
   if (query.per != null) target = internal(canonHash(segs, { ...query, per: resolvePeriod(query.per).resolved }));
   const per = store.get('period');
-  if (!query.per && per !== DEFAULT_PERIOD) target += (target.includes('?') ? '&' : '?') + 'per=' + per;
+  if (!query.per && per !== DEFAULT_PERIOD && (resolved.route.periods === 'all' || resolved.route.periods?.includes?.(per))) target += (target.includes('?') ? '&' : '?') + 'per=' + per;
   target = toHref(target);
   if (target === hereHref()) { window.scrollTo(0, 0); $view()?.querySelector('h1')?.focus({ preventScroll: true }); return; }
   saveScroll();

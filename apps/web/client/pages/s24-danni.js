@@ -50,7 +50,7 @@ const fmtOf = set => set.format || set.ext.toUpperCase();
 const fileInfo = set => [fmtOf(set), isMulti(set) ? plural(set.parts.length, 'файл', 'файла') : '', C.sizeLabel(set.bytes)].filter(Boolean).join(' · ');
 const groupOf = (M, set) => M.groups.find(g => g.sets.includes(set));
 const srcShortLink = (k, M) => { const s = M.src(k); return s.url ? ext(s.url, srcShort(k)) : srcShort(k); };
-const HISTORICAL_SETS = new Set(['ministries', 'programs', 'measures', 'debt', 'municipalities']);
+const HISTORICAL_SETS = new Set(['ministries', 'programs', 'measures', 'debt', 'municipalities', 'ministries-programs', 'law', 'geo-obshtini']);
 const screenHref = (set, key) => periodHref(HISTORICAL_SETS.has(set.slug) ? '2026.law' : null, key);
 const screenLinks = set => joinList(set.screenRoutes.map(r => html`<a href="${screenHref(set, r.key)}">${r.title}</a>`));
 
