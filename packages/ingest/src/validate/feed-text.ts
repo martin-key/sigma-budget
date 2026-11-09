@@ -3,11 +3,12 @@ import { pythonNumericText } from '../common/numbers.js';
 import { Check, isnum, pyRepr, pyTruth } from './checks.js';
 
 // Python 3.12 uses Unicode 15.0; Node's Unicode repertoire may be newer.
-const digit =
+export const pythonDigitPattern =
   '[\\u{30}-\\u{39}\\u{660}-\\u{669}\\u{6F0}-\\u{6F9}\\u{7C0}-\\u{7C9}\\u{966}-\\u{96F}\\u{9E6}-\\u{9EF}\\u{A66}-\\u{A6F}\\u{AE6}-\\u{AEF}\\u{B66}-\\u{B6F}\\u{BE6}-\\u{BEF}\\u{C66}-\\u{C6F}\\u{CE6}-\\u{CEF}\\u{D66}-\\u{D6F}\\u{DE6}-\\u{DEF}\\u{E50}-\\u{E59}\\u{ED0}-\\u{ED9}\\u{F20}-\\u{F29}\\u{1040}-\\u{1049}\\u{1090}-\\u{1099}\\u{17E0}-\\u{17E9}\\u{1810}-\\u{1819}\\u{1946}-\\u{194F}\\u{19D0}-\\u{19D9}\\u{1A80}-\\u{1A89}\\u{1A90}-\\u{1A99}\\u{1B50}-\\u{1B59}\\u{1BB0}-\\u{1BB9}\\u{1C40}-\\u{1C49}\\u{1C50}-\\u{1C59}\\u{A620}-\\u{A629}\\u{A8D0}-\\u{A8D9}\\u{A900}-\\u{A909}\\u{A9D0}-\\u{A9D9}\\u{A9F0}-\\u{A9F9}\\u{AA50}-\\u{AA59}\\u{ABF0}-\\u{ABF9}\\u{FF10}-\\u{FF19}\\u{104A0}-\\u{104A9}\\u{10D30}-\\u{10D39}\\u{11066}-\\u{1106F}\\u{110F0}-\\u{110F9}\\u{11136}-\\u{1113F}\\u{111D0}-\\u{111D9}\\u{112F0}-\\u{112F9}\\u{11450}-\\u{11459}\\u{114D0}-\\u{114D9}\\u{11650}-\\u{11659}\\u{116C0}-\\u{116C9}\\u{11730}-\\u{11739}\\u{118E0}-\\u{118E9}\\u{11950}-\\u{11959}\\u{11C50}-\\u{11C59}\\u{11D50}-\\u{11D59}\\u{11DA0}-\\u{11DA9}\\u{11F50}-\\u{11F59}\\u{16A60}-\\u{16A69}\\u{16AC0}-\\u{16AC9}\\u{16B50}-\\u{16B59}\\u{1D7CE}-\\u{1D7FF}\\u{1E140}-\\u{1E149}\\u{1E2F0}-\\u{1E2F9}\\u{1E4F0}-\\u{1E4F9}\\u{1E950}-\\u{1E959}\\u{1FBF0}-\\u{1FBF9}]';
 const NBSP = '\u00a0',
   NNBSP = '\u202f',
   MINUS = '\u2212';
+const digit = pythonDigitPattern;
 const num = `(${MINUS})?(${digit}{1,3}(?:${NNBSP}${digit}{3})+|${digit}+)(?:,(${digit}+))?`;
 const money = new RegExp(num + `${NBSP}(млрд|млн|хил)\\.${NBSP}€`, 'gu');
 const euro = new RegExp(num + `${NBSP}€`, 'gu');
@@ -36,18 +37,21 @@ export function amounts(
   moneyWant: unknown[] = [],
   eurWant: unknown[] = [],
   pctWant: unknown[] = [],
+  floatKinds: (boolean | boolean[])[] = [],
 ): void {
-  for (const [kind, got, want] of [
-    ['млн. €', moneyIn(text), moneyWant],
-    ['€', eurIn(text), eurWant],
-    ['%', pctIn(text), pctWant],
-  ] as [string, PrintedAmount[], unknown[]][]) {
+  for (const [index, [kind, got, want]] of (
+    [
+      ['млн. €', moneyIn(text), moneyWant],
+      ['€', eurIn(text), eurWant],
+      ['%', pctIn(text), pctWant],
+    ] as [string, PrintedAmount[], unknown[]][]
+  ).entries()) {
     const good =
       got.length === want.length &&
       got.every(([v, t], i) => isnum(want[i]) && Math.abs(v - (want[i] as number)) <= t + 1e-9);
     c.ok(
       good,
-      `${label}: amounts in ${kind} are [${got.map(([v]) => roundedFloatRepr(v)).join(', ')}], expected ${pyRepr(want)}`,
+      `${label}: amounts in ${kind} are [${got.map(([v]) => roundedFloatRepr(v)).join(', ')}], expected ${floatKinds[index] ? '[' + want.map((v, j) => ((Array.isArray(floatKinds[index]) ? (floatKinds[index] as boolean[])[j] : floatKinds[index]) && typeof v === 'number' && Number.isInteger(v) ? String(v) + '.0' : pyRepr(v))).join(', ') + ']' : pyRepr(want)}`,
     );
   }
 }
