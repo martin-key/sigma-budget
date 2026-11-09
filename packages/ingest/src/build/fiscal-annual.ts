@@ -1,13 +1,17 @@
 import { createHash } from 'node:crypto';
+import type { AnnualLineage } from './annual-lineage.js';
 
 export interface AnnualColumn {
   year: number;
   vintage?: string;
+  unit?: string;
 }
 export interface AnnualRow {
   label: string;
   values: (number | null)[];
   units: string[];
+  page?: number;
+  printed?: string[];
 }
 export interface AnnualTable {
   columns: AnnualColumn[];
@@ -69,7 +73,7 @@ const functionRows = [0, 4, 10, 11, 12, 16, 19, 24, 31];
 const hash = (path: string) => createHash('sha256').update(path).digest('hex').slice(0, 24);
 
 // Python Decimal(str(number)) sums the printed decimal values before converting back to float.
-function decimalSum(values: number[]): number {
+export function decimalSum(values: number[]): number {
   const pieces = values.map((v) => {
     if (!Number.isFinite(v)) throw new Error('Non-finite annual operand');
     const [mantissa, exponentText] = String(v).toLowerCase().split('e');
@@ -87,7 +91,11 @@ function decimalSum(values: number[]): number {
 }
 
 /** Pure projection of the independently extracted 2027 forecast tables. */
-export function buildAnnualPeriods(forecast: AnnualForecast): AnnualProjection {
+export function buildAnnualPeriods(
+  forecast: AnnualForecast,
+  lineage?: AnnualLineage,
+): AnnualProjection {
+  if (lineage && lineage.inputs.F !== forecast) throw new Error('Lineage forecast mismatch');
   const result: AnnualProjection = { outlook: {}, revenue: {}, expenditure: {} };
   for (const [period, status, vintage, header] of periods) {
     const law = period === '2026.law';
@@ -117,6 +125,8 @@ export function buildAnnualPeriods(forecast: AnnualForecast): AnnualProjection {
       col: number,
       path: string,
     ): AnnualCell => {
+      if (lineage)
+        return lineage.f(name, rowIndex, col, `${file}.json#/byPeriod/${period}/${path}`, period);
       const source = forecast.tables[name];
       const row = source?.rows[rowIndex],
         colInfo = source?.columns[col];
@@ -131,11 +141,14 @@ export function buildAnnualPeriods(forecast: AnnualForecast): AnnualProjection {
         throw new Error(`Non-numeric extraction cell: ${name} ${rowIndex}/${col}`);
       return { value, unit, provenance: hash(`${file}.json#/byPeriod/${period}/${path}`) };
     };
-    const derived = (file: string, path: string, operands: AnnualCell[]): AnnualCell => ({
-      value: decimalSum(operands.map((x) => x.value)),
-      unit: 'млн. €',
-      provenance: hash(`${file}.json#/byPeriod/${period}/${path}`),
-    });
+    const derived = (file: string, path: string, operands: AnnualCell[]): AnnualCell =>
+      lineage
+        ? lineage.derived(`${file}.json#/byPeriod/${period}/${path}`, period, 'sum', operands)
+        : {
+            value: decimalSum(operands.map((x) => x.value)),
+            unit: 'млн. €',
+            provenance: hash(`${file}.json#/byPeriod/${period}/${path}`),
+          };
     const mapping: Record<string, number> = {
       revenue: 0,
       expenditure: law ? 8 : 31,

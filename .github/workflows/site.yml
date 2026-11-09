@@ -504,3 +504,44 @@ jobs:
             tmp/ts-migration/candidates/12/*-parity.json
             tmp/ts-migration/candidates/12/metadata-diff.json
           if-no-files-found: error
+
+  wave13a-parity:
+    # Frozen current-publication donors and six scoped owner projections.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm --filter @sigma-budget/etl... build
+      - name: Frozen Python donors
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          python packages/ingest/test/fixtures/wave13a/generate_law_next.py --check
+          python packages/ingest/test/fixtures/wave13a/generate_budget.py --check
+      - name: Scoped tests and parity
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          pnpm --filter @sigma-budget/ingest exec vitest run src/build/budget-2027.test.ts src/build/wave13a.test.ts src/build/fiscal-annual.test.ts src/build/law.test.ts
+          pnpm --filter @sigma-budget/etl exec vitest run src/wave13a-build.test.ts
+          pnpm exec budget-ts build --inputs packages/ingest/test/fixtures --out tmp/ts-migration/candidates/13a --scope outlook,revenue,expenditure,budget2027,budget2027-provenance,law --build-date 2026-11-08
+          for stage in final published; do
+            pnpm exec budget-ts parity --registry packages/ingest/test/fixtures/wave13a/datasets.yaml --oracle packages/ingest/test/fixtures/wave13a/$stage --candidate tmp/ts-migration/candidates/13a/data --scope outlook,revenue,expenditure,budget2027,budget2027-provenance,law --policy packages/ingest/test/fixtures/wave13a/policy.json --protect packages/ingest/test/fixtures --report tmp/ts-migration/candidates/13a/$stage-parity.json
+          done
+          git diff --exit-code -- data/release
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wave13a-parity
+          path: tmp/ts-migration/candidates/13a/*-parity.json
+          if-no-files-found: error

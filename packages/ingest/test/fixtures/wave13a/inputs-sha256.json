@@ -1,0 +1,19 @@
+{
+  "fiscal/inputs/data/inputs/budget_forecast_2027.json": "15f9fda9484633efa58a57122382184dc4fe2572e72de8a20863347053d0ff70",
+  "fiscal/inputs/data/inputs/budget_bill_2027.json": "ecb9e854f1998d1d89eee1c30da84cfbb44f3dec3ca64c022b774f1be60361d3",
+  "fiscal/inputs/data/originals/budget_2027/ZDBRB-2027.zip": "6e0aeaab774eb5a0c5b10888b49bc4e9f8c72220188def8989e4ebdc3241b517",
+  "fiscal/donor/outlook.json": "0c1ad81af1fca17c0ab32009f4188beeaad86d24275f818664dcc0f9b484aa22",
+  "fiscal/donor/revenue.json": "8406a8784c5cd736b3b4801a929a28334ad2aceac138bb59101e9db3c8f9262f",
+  "fiscal/donor/expenditure.json": "11e9a05bd3f67d933b32f50d4b0f7c7c87863709e935bde9eb3025db5ac4d019",
+  "law/oracle.json": "fde32fd3a62f29c953a452e3e4bb68e10c7e6a7f4265b4a01fcf64d652e9f8d0",
+  "wave13a/law-donor.py": "ecdbc2fffd48630c9b2de59e0495966c30557ebc32ff5f0190ae6ef149eaee6a",
+  "wave13a/published/outlook.json": "739f52dd3970505e39e819edb412ed4c189f3a15ca70d2124e32ff6c01aea5b5",
+  "wave13a/published/revenue.json": "304117c59f0e2f661abf8f207b2599fa912ebdcd6036c000b46aab60cd4a15ef",
+  "wave13a/published/expenditure.json": "e2f30abd6158a6cee1746fc54a0bf12d334a4e867c68e3a6ffbf8f05c8e0cb7f",
+  "wave13a/published/budget2027.json": "14e268a9ab7e2112d7711c6ccc3e7268b5a8bcec3c263fc655c72e87fd13a9ee",
+  "wave13a/published/budget2027-provenance.json": "6f7e859f628ed8a15c1f27f6f01b87c6939a45a3262ff462148f0c5e12030e23",
+  "wave13a/published/law.json": "01ae90ee740ef1dc50f3881d1f476510b2e42d9b1eaeb61fa3ed8635560355b1",
+  "wave13a/datasets.yaml": "7a5dacf63fd371dfeef5d3c22bc1dcfc5a39cf5716ac8022598002953914a14a",
+  "wave13a/sources.yaml": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a",
+  "wave13a/policy.json": "8d6b79d8dbd05197eca0d0bb021023cb169f5146a4ab56de973a9af58bbf719b"
+}
