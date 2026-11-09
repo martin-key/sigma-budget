@@ -5,7 +5,7 @@ debt.json, expenditure.json, sebra.json, core.json); the amounts printed in a te
 dataset (so a wrong number fails, a different wording does not); highlights and the five sentences are tied to the latest
 KFP report; feed.xml is parsed and compared item by item with the events.
 SEARCH: every row of search-index.json is checked for shape, link (must resolve in the route table), status and for its
-numbers against the dataset it was copied from; the groups are tied 1:1 to their sources (265 municipalities, 52 measures,
+numbers against the dataset it was copied from; the groups are tied 1:1 to their sources (265 municipalities, 52 historical measures plus current printed annual rows,
 the glossary, the catalog, the mock sets); a Python port of the client engine (apps/web/client/searchlib.js: norm, lat, stem, SYN,
 parse, tokScore, score) confirms that each popular query of the search page has hits.
 Pure standard library; nothing here writes a file.
@@ -622,6 +622,13 @@ def g_search(ctx):
     bill = ctx.get("budget2027.json")
     article_codes = {b["art"] + (1 if b["art"] >= 32 else 0): b["id"] for b in mi["items"]}
     current_budgets = {article_codes.get(int(a), "art" + a): b for a, b in bill["budgets"]["bill"].items() if int(a) >= 2}
+    current_measures = {}
+    for table in ("II_7", "II_8"):
+        for ordinal, row in enumerate(bill["forecast"][table]):
+            for column, period in enumerate(("2027.draft", "2028.forecast", "2029.forecast")):
+                href = "#/merki?per=%s&to=s12-%s-%d-%d" % (period, table, ordinal, column)
+                publication = ("Проект " if column == 0 else "Прогноза ") + period[:4]
+                current_measures[href] = (row, row["cells"].get(str(column)), row["gaps"].get(str(column)), publication, table)
     ids = {"vedomstvo": {b["id"] for b in mi["items"]}, "obshtina": {m["id"] for m in mu["items"]}, "merki": {m["id"] for m in me["items"]},
            "rechnik": {t["slug"] for t in gl["terms"]}, "danni": {d["slug"] for d in cat["datasets"]}}
     ids["vedomstvo"].update(current_budgets)
@@ -631,6 +638,7 @@ def g_search(ctx):
     seen, per, n_mock, rows5 = set(), [0] * len(S_GROUPS), 0, {}
     items = s["items"]
     seen_current = set()
+    seen_measures = set()
     for i, r in enumerate(items):
         tag = "row %d %r" % (i, r[1] if isinstance(r, list) and len(r) > 1 else r)
         if not c.ok(isinstance(r, list) and len(r) == len(S_FIELDS) and isinstance(r[0], int) and 0 <= r[0] < len(S_GROUPS)
@@ -641,6 +649,17 @@ def g_search(ctx):
         c.ok(r[3] == "" or (re.search("\\d", r[3]) is not None and r[3][-1] in "€%" or r[3].endswith(" от БВП")), "%s: value %r" % (tag, r[3]))
         c.ok(r[5] in S_STATUS, "%s: status %r" % (tag, r[5]))
         c.ok(r[6].startswith("#/") and routes.match(r[6]) is not None, "%s: href %r opens no screen" % (tag, r[6]))
+        if r[0] == 3 and r[6].startswith("#/merki?"):
+            expected = current_measures.get(r[6])
+            if c.ok(expected is not None, "%s: unexpected current measure destination" % tag):
+                source_row, cell, gap, publication, table = expected
+                c.ok(r[1] == re.sub(r"\s+", " ", source_row["label"]).strip(), "%s: current measure label" % tag)
+                c.ok(r[4] == publication and ("Таблица " + table.replace("_", "-")) in r[2], "%s: current measure publication" % tag)
+                if cell is not None:
+                    amounts(c, tag, r[3], money=[cell["value"]])
+                else:
+                    c.ok(r[3] == "" and bool(gap) and gap in r[2], "%s: missing printed measure cell must remain blank" % tag)
+                seen_measures.add(r[6])
         m = _ID_RE.match(r[6])
         if m:
             c.ok(m.group(2) in ids[m.group(1)], "%s: %s id %r is not in its dataset" % (tag, m.group(1), m.group(2)))
@@ -662,9 +681,10 @@ def g_search(ctx):
             n_mock += 1
             c.ok(r[0] == 5, "%s: a mock row outside the datasets group" % tag)
     n_prog = sum(1 for p in pr["items"] if p[f["name"]])
-    for g, n in ((1, len(current_budgets) + n_prog), (2, len(mu["items"])), (3, len(me["items"])), (4, len(gl["terms"]))):
+    for g, n in ((1, len(current_budgets) + n_prog), (2, len(mu["items"])), (3, len(me["items"]) + len(current_measures)), (4, len(gl["terms"]))):
         c.ok(per[g] == n, "%s: %d rows, the datasets hold %d" % (S_GROUPS[g], per[g], n))
     c.ok(seen_current == set(current_budgets), "current bill budgets: missing or extra search rows")
+    c.ok(seen_measures == set(current_measures), "current measures: missing or extra search rows")
     c.ok(per[0] >= 15, "indicators: only %d rows" % per[0])
     real = [d for d in cat["datasets"] if d["status"] == "real"]
     c.ok(per[5] == len(real), "datasets: %d rows, the catalog has %d real datasets" % (per[5], len(real)))

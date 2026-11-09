@@ -226,7 +226,7 @@
     "generator": "refresh-period-fixtures.mjs",
     "renderer": "Legacy build()/frameHtml()/head() with frozen narrative inputs",
     "sourceSha256": {
-      "../../../client/render.js": "9eb4c39ba982b28ae2a205eeaee3166a2c8494d0e92b806442cd751406638d30",
+      "../../../client/render.js": "e8b74f233e1492582eca079fe7c6e22f2176acd19b56ebae8b0bd94033fa98aa",
       "../../../client/periods.js": "2b658e09e3c934aee774a565e0899ad4b1f2710cbba00e0fd96a71b14bdff753",
       "../../../client/routes.js": "75156e25fb5e401d65eb182956be450f81a01c2a14e5bed649d0f0ff30f96095",
       "../../../client/seo.js": "9c27cb073712dc8a047e8870c000dae798ea20efbacbb7bfa19eaaaacc88f0b1",

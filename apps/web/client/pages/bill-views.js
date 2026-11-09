@@ -299,7 +299,7 @@ export function municipalityView(ctx) {
       MUNICIPAL_COLUMNS,
     );
   if (specific) {
-    const m = all.find((x) => x.id === ctx.params.code);
+    const m = all.find((x) => x.id === String(ctx.params.code).toUpperCase());
     if (!m) ctx.notFound();
     return {
       title: `Община ${m.displayName}${all.filter((x) => x.displayName === m.displayName).length > 1 ? ' · ' + m.region : ''}`,
@@ -695,9 +695,9 @@ export function measuresView(ctx) {
       ],
     };
   const body = ['II_7', 'II_8'].map((table, i) => {
-    const rows = doc.forecast[table].flatMap((r) =>
+    const rows = doc.forecast[table].flatMap((r, rowIndex) =>
       FRAMEWORK.map((key, k) =>
-        cellRow(r.label, r.cells[k], { period: periodByKey(key).label, gap: r.gaps[k] || '' }),
+        cellRow(r.label, r.cells[k], { period: periodByKey(key).label, gap: r.gaps[k] || '', _id: `s12-${table}-${rowIndex}-${k}` }),
       ),
     );
     return base(

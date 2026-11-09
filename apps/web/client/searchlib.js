@@ -214,10 +214,14 @@ function entry(group, title, o = {}) {
  *  what was spent. Terms and data sets have no figure, so no stage. The index rows say it in their own words (sub / title), this only names it the same way everywhere. */
 export function stageOf(group, o) {
   const canonical = /^(20\d\d)\.(draft|forecast|law|report|expected)$/.exec(new URLSearchParams(String(o.href || '').split('?')[1] || '').get('per') || '');
-  const yr = canonical?.[1] || (/\b(20\d\d)\b/.exec(o.period || '') || [])[1] || '';
+  const publication = /^(Проект|Прогноза|Закон|Отчет)\s+(20\d\d)$/i.exec(o.period || '');
+  const yr = publication?.[2] || (/\b(20\d\d)\b/.exec(o.period || '') || [])[1] || canonical?.[1] || '';
   const txt = `${o.title || ''} ${o.sub || ''}`;
   if (['indicators', 'institutions', 'municipalities', 'measures'].includes(group)) {
-    if (/^Прогноза\s+20\d\d$/i.test(o.period || '')) return `Прогноза ${yr}`;
+    if (publication) return `${{проект:'По законопроекта', прогноза:'Прогноза', закон:'Закон', отчет:'Отчет'}[publication[1].toLowerCase()]} ${yr}`;
+    // Historical measure pages remain reachable under the law period, but their
+    // source is the unverified bill. A destination is not a publication status.
+    if (group === 'measures') return `По законопроекта ${yr}`.trim();
     if (canonical) return `${{draft:'По законопроекта', forecast:'Прогноза', law:'Закон', report:'Отчет', expected:'Очаквано изпълнение'}[canonical[2]]} ${yr}`;
   }
   let w = '';

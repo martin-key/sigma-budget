@@ -35,6 +35,8 @@ it.each([
   ['indicators', 'Прогноза 2027', '2027.draft', 'Прогноза 2027'],
   ['indicators', 'Прогноза 2028', '2028.forecast', 'Прогноза 2028'],
   ['indicators', 'Прогноза 2029', '2029.forecast', 'Прогноза 2029'],
+  ['measures', '2026', '2026.law', 'По законопроекта 2026'],
+  ['measures', 'Прогноза 2028', '2028.forecast', 'Прогноза 2028'],
 ])('labels %s from publication metadata: %s', (group, period, key, expected) => {
   expect(stageOf(group, { period, href: `#/dalg?per=${key}` })).toBe(expected);
 });
@@ -69,6 +71,11 @@ it('does not offer an old draft figure when annual search data is unavailable', 
   );
   expect(forecasts).toHaveLength(3);
   for (const entry of forecasts) expect(metaOf(entry)).toContain('Прогноза ');
+  const historicalMeasures = index.entries.filter(
+    (e: any) => e.group === 'measures' && e.period === '2026',
+  );
+  expect(historicalMeasures).toHaveLength(52);
+  for (const entry of historicalMeasures) expect(entry.stage).toBe('По законопроекта 2026');
 });
 it('localizes declared canonical decimals without losing precision or weakening formula protection', () => {
   const canonical = '-12345678901234567890.123456789';
@@ -133,6 +140,37 @@ it('preserves historical municipality next links and institution breadcrumbs', a
   expect(municipality.html).toContain('/obshtini?per=2026.law');
   const institution = await page('/vedomstvo/1300?per=2026.law');
   expect(institution.vm.crumbs.some((c: any) => c.href === '/vedomstva?per=2026.law')).toBe(true);
+});
+it('preserves the Council-of-Ministers variant in institution return links', async () => {
+  const { document, vm } = await page('/vedomstvo/0600?variant=billMc');
+  expect(
+    document.querySelectorAll('a[href="/vedomstva?variant=billMc"]').length,
+  ).toBeGreaterThanOrEqual(2);
+  if (!vm.ctx) throw new Error('Institution context missing');
+  expect(vm.ctx.href('S10')).toBe('/vedomstva?variant=billMc');
+  expect(vm.ctx.href('S10', {}, { variant: 'bill' })).toBe('/vedomstva?variant=bill');
+});
+it.each(['blg03', 'bLg03'])(
+  'accepts municipality codes with existing case-insensitive semantics: %s',
+  async (code) => {
+    const expected = await page('/obshtina/BLG03');
+    const actual = await page('/obshtina/' + code);
+    expect(actual.vm.view).toBe('ready');
+    expect(actual.vm.title).toBe(expected.vm.title);
+    expect(actual.scope.maps.table.get('s21-transfers-2027-table').rows).toEqual(
+      expected.scope.maps.table.get('s21-transfers-2027-table').rows,
+    );
+  },
+);
+it('provides row anchors for searched measures, preserving effects and blank cells', async () => {
+  const { document } = await page('/merki?per=2028.forecast&to=s12-II_7-1-1');
+  const effect = document.getElementById('s12-II_7-1-1')!;
+  expect(effect.textContent).toContain('електронно фактуриране');
+  expect(effect.textContent).toContain('400,0');
+  expect(effect.textContent).toContain('2028');
+  const missing = document.getElementById('s12-II_7-1-0')!;
+  expect(missing.textContent).toContain('Празна печатна клетка.');
+  expect(missing.getAttribute('tabindex')).toBe('-1');
 });
 it('exports each forecast debt row with its own unit', async () => {
   const { scope } = await page('/dalg');

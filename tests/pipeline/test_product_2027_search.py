@@ -46,6 +46,22 @@ class ProductSearchTest(unittest.TestCase):
         self.assertTrue(rows.rows[0][6].endswith('per=2026.law'))
         self.assertTrue(rows.rows[1][6].endswith('per=2025.report'))
 
+    def test_current_measures_follow_all_printed_effects_and_blank_cells(self):
+        rows = _Rows()
+        _publication_2027(SimpleNamespace(out={}), rows)
+        current = [r for r in rows.rows if GROUPS[r[0]] == 'measures']
+        forecast = json.loads((ROOT / 'data/inputs/budget_forecast_2027.json').read_text())
+        expected_count = 3 * sum(len(forecast['tables'][key]['rows']) for key in ('II_7','II_8'))
+        self.assertEqual(len(current), expected_count)
+        invoice = [r for r in current if 'електронно фактуриране' in r[1]]
+        self.assertEqual(len(invoice), 3)
+        self.assertEqual([r[4] for r in invoice], ['Проект 2027','Прогноза 2028','Прогноза 2029'])
+        self.assertEqual(invoice[0][3], '')
+        self.assertIn('Празна печатна клетка.', invoice[0][2])
+        for row in invoice[1:]:
+            self.assertIn('400,0', row[3])
+            self.assertIn('to=s12-II_7-1-', row[6])
+
     def test_validator_rejects_wrong_current_budget_value_period_and_missing_row(self):
         from budget_pipeline.build.context import Ctx as Build
         from budget_pipeline.build.search import search
@@ -69,6 +85,18 @@ class ProductSearchTest(unittest.TestCase):
             if mutation == 'value': row[3] = '999'+chr(160)+'млрд.'+chr(160)+'€'
             elif mutation == 'period': row[6] = '#/vedomstvo/1300?per=2026.law'
             else: changed['items'].remove(row)
+            v = Validation()
+            v._json['search-index.json'] = changed
+            self.assertTrue(g_search(v).problems, mutation)
+        for mutation in ('value', 'period', 'missing', 'blank'):
+            changed = copy.deepcopy(index)
+            row = next(r for r in changed['items'] if r[6] == '#/merki?per=2028.forecast&to=s12-II_7-1-1')
+            if mutation == 'value': row[3] = '999 млн. €'
+            elif mutation == 'period': row[4] = 'Закон 2028'
+            elif mutation == 'missing': changed['items'].remove(row)
+            else:
+                row = next(r for r in changed['items'] if r[6] == '#/merki?per=2027.draft&to=s12-II_7-1-0')
+                row[3] = '0 млн. €'
             v = Validation()
             v._json['search-index.json'] = changed
             self.assertTrue(g_search(v).problems, mutation)

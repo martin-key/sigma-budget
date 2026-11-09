@@ -328,6 +328,16 @@ def _publication_2027(ctx, rows):
         label = {"66": "Минимален фискален резерв", "67": "Максимален държавен дълг", "68": "Максимален нов държавен дълг"}[article]
         rows.add("indicators", label + " 2027", "Предложена граница, чл. " + article + ", не прогноза и не приет закон",
                  fmt_money(cell["value"] * 1000), "Проект 2027", href="#/dalg?per=2027.draft")
+    for table, kind in (("II_7", "Приходна мярка"), ("II_8", "Разходна мярка")):
+        for row_index, row in enumerate(doc["forecast"][table]):
+            label_kind = "Общ ред" if row["label"].strip().lower().startswith("общо:") else kind
+            for column, period in enumerate(("2027.draft", "2028.forecast", "2029.forecast")):
+                cell = row["cells"].get(str(column))
+                publication = ("Проект " if column == 0 else "Прогноза ") + period[:4]
+                gap = row["gaps"].get(str(column), "")
+                rows.add("measures", row["label"], "%s · Таблица %s%s" % (label_kind, table.replace("_", "-"), " · " + gap if gap else ""),
+                         fmt_money(cell["value"]) if cell else "", publication,
+                         href="#/merki?per=%s&to=s12-%s-%d-%d" % (period, table, row_index, column))
 
 
 # ----------------------------------------------------------------------------------------------- measures

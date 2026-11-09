@@ -79,7 +79,9 @@ function makeCtx(route, params, query, o) {
   const a = o.actions || {};
   const selectedPeriod = route.id === 'S04' ? periodByKey(DEFAULT_PERIOD) : query.per == null && Array.isArray(route.periods) && route.periods.length === 1 ? periodByKey(route.periods[0]) : store.period;
   const href = (id, params = {}, q = {}) => {
-    return periodHref(selectedPeriod.key, id, params, q);
+    const target = byId[id] || byKey[id];
+    const variant = ['S10', 'S11'].includes(route.id) && ['S10', 'S11'].includes(target?.id) && ['bill', 'billMc'].includes(query.variant) ? { variant: query.variant } : {};
+    return periodHref(selectedPeriod.key, id, params, { ...variant, ...q });
   };
   return {
     route, params, query, data: {}, missing: [], failed: [], period: selectedPeriod, store,
