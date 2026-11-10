@@ -26,7 +26,9 @@ Import from `@sigma-budget/ingest/readers/workbooks`:
   Coordinates are zero-based in the cell objects and A1 in the address.
 - `numericCell(sheet, address)` requires a finite numeric value and a saved
   cache when a formula exists. Formulae are retained and never evaluated.
-  Missing caches remain null. Excel errors cannot become numbers.
+  Missing caches remain null. Excel errors cannot become numbers. Original OOXML
+  numeric tokens, including formula caches, must have a complete finite numeric
+  lexical form; truncated text such as `123garbage` is rejected before engine decoding.
 - `workbookCellText(cell)` returns exact OOXML numeric `<v>` text for decimal
   consumers, resolved shared strings for labels and null for missing values.
   `cell.rawValue` retains the original OOXML scalar token, including shared
@@ -67,7 +69,9 @@ All amounts preserve the published execution/2 decimal-string contract.
 2024/2025 BGN is divided by 1.95583 before rounding to three places; 2026 is
 already EUR. Cumulative-to-monthly differences use decimal arithmetic, and
 annual pace exists only for complete years. Law denominators come exclusively
-from the sparse adopted-law Annex 1 map. National/EU law splits and unavailable
+from the sparse adopted-law Annex 1 map. Every consumed law cell must be in
+`млн. €`; a differently denominated, re-pinned column and its agreeing rows fail
+before their values can enter the EUR plan. National/EU law splits and unavailable
 row denominators remain absent, with the existing coverage reasons. Historical
 Annex 3 is used only for December reconciliation.
 

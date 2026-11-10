@@ -6,6 +6,7 @@ import type * as SheetJS from 'xlsx';
 import { expect, it } from 'vitest';
 import {
   decodeWorkbook,
+  numericCell,
   readWorkbook,
   sha256,
   sheetByName,
@@ -45,6 +46,42 @@ it('decodes every actual BIFF cell against independent saved xlrd grids, not cap
     expect(sourceCellSha256(wb, sheet, 'B11')).not.toBe(sourceCellSha256(wb, sheet, 'C11'));
   }
   expect(count).toBe(33 * 54 * 4);
+});
+it.each([false, true])('validates complete OOXML numeric tokens (formula cache: %s)', (formula) => {
+  const engine = createRequire(import.meta.url)('xlsx') as typeof SheetJS;
+  const source = engine.utils.book_new();
+  engine.utils.book_append_sheet(
+    source,
+    { '!ref': 'A1', A1: { t: 'n', v: 123, ...(formula ? { f: '1+122' } : {}) } },
+    'Named',
+  );
+  const original = engine.write(source, { type: 'buffer', bookType: 'xlsx' });
+  const withToken = (token: string): Buffer => {
+    const archive = engine.CFB.read(original, { type: 'buffer' });
+    const index = archive.FullPaths.indexOf('Root Entry/xl/worksheets/sheet1.xml');
+    if (index < 0) throw new Error('Missing generated worksheet');
+    const entry = archive.FileIndex[index];
+    const xml = Buffer.from(entry.content).toString('utf8');
+    if (!xml.includes('<v>123</v>')) throw new Error('Missing generated numeric token');
+    entry.content = Buffer.from(xml.replace('<v>123</v>', `<v>${token}</v>`));
+    entry.size = entry.content.length;
+    return engine.CFB.write(archive, { type: 'buffer', fileType: 'zip' });
+  };
+  for (const token of ['123garbage', '0x10', '1 2', '1e309']) {
+    const bytes = withToken(token);
+    expect(() => decodeWorkbook(bytes, { sha256: sha256(bytes), format: 'xlsx' })).toThrow(
+      /Invalid OOXML numeric value/,
+    );
+  }
+  for (const token of ['123.000000000000000001', '1.23e+2', '-.5']) {
+    const bytes = withToken(token);
+    const sheet = sheetByName(
+      decodeWorkbook(bytes, { sha256: sha256(bytes), format: 'xlsx' }),
+      'Named',
+    );
+    expect(numericCell(sheet, 'A1')).toBe(Number(token));
+    expect(workbookCellText(workbookCell(sheet, 'A1'))).toBe(token);
+  }
 });
 it('reads tracked SEBRA XLSX names, shared strings, sparse grids and amounts against saved donor evidence', () => {
   const base = join(root, 'packages/ingest/test/fixtures/debt-local/inputs');

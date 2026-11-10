@@ -85,6 +85,8 @@ export function decodeWorkbook(
     zipMember(buffer, '[Content_Types].xml');
     zipMember(buffer, 'xl/workbook.xml');
   } else throw new Error('Unsupported workbook format');
+  // Validate original numeric tokens before the engine can truncate malformed text.
+  const scalars = options.format === 'xlsx' ? ooxmlCells(buffer) : null;
   const decoded = engine.read(buffer, {
     type: 'buffer',
     cellFormula: true,
@@ -94,7 +96,6 @@ export function decodeWorkbook(
     sheetStubs: true,
     WTF: true,
   });
-  const scalars = options.format === 'xlsx' ? ooxmlCells(buffer) : null;
   if (!decoded.SheetNames.length || new Set(decoded.SheetNames).size !== decoded.SheetNames.length)
     throw new Error('Missing or duplicate workbook sheets');
   const sheets: Record<string, WorkbookSheet> = Object.create(null);

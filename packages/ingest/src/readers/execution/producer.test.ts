@@ -146,4 +146,22 @@ describe('real monthly BIFF -> complete published execution contract', () => {
       rmSync(temp, { recursive: true, force: true });
     }
   });
+  it('requires million EUR even when a repinned annual column and all its rows agree on another unit', () => {
+    const temp = mkdtempSync(join(tmpdir(), 'sigma-execution-annual-unit-'));
+    try {
+      for (const unit of ['млн. лв.', 'хил. €']) {
+        const input = config();
+        const doc = JSON.parse(readFileSync(input.annual.forecast.path, 'utf8'));
+        const table = doc.tables.annex1_execution2026;
+        table.columns[0].unit = unit;
+        for (const row of table.rows) row.units[0] = unit;
+        const path = join(temp, 'forecast.json');
+        writeFileSync(path, JSON.stringify(doc));
+        input.annual.forecast = pinned(path);
+        expect(() => build(input)).toThrow(/Wrong adopted-law unit/);
+      }
+    } finally {
+      rmSync(temp, { recursive: true, force: true });
+    }
+  });
 });

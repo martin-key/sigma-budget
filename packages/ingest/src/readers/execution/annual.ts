@@ -76,6 +76,8 @@ export function executionAnnualFromPrepared(
     cells: Record<string, unknown> = {};
   for (const [id, rowIndex] of Object.entries(LAW_ROWS)) {
     const cell = lineage.f(table, rowIndex, 0, `execution.json#/plan2026/kfp/${id}`, '2026.law');
+    if (cell.unit !== 'млн. €')
+      throw new Error(`Wrong adopted-law unit in Annex 1 row ${rowIndex}: expected млн. €`);
     const row = rows[rowIndex]!;
     values[id] = cell.value;
     cells[id] = { ...lineage.entries[cell.provenance], row: row.label, rowIndex };

@@ -13,6 +13,9 @@ const main = new Set([
 ]);
 const attribute = (tag: SaxesTagNS, local: string) =>
   Object.values(tag.attributes).find((a) => a.local === local)?.value;
+// XML Schema double syntax, with only XML whitespace around the complete token.
+const numericToken =
+  /^[ \t\r\n]*[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?[ \t\r\n]*$/;
 function xml(
   bytes: Uint8Array,
   member: string,
@@ -64,6 +67,7 @@ export function ooxmlCells(bytes: Uint8Array): Record<string, Record<string, Oox
     const cells: Record<string, OoxmlCell> = Object.create(null);
     let address: string | undefined,
       cell: OoxmlCell | undefined,
+      numeric = false,
       field: 'rawValue' | 'formula' | undefined;
     xml(
       bytes,
@@ -75,6 +79,7 @@ export function ooxmlCells(bytes: Uint8Array): Record<string, Record<string, Oox
           if (!address || !/^[A-Z]+[1-9][0-9]*$/.test(address) || cells[address])
             throw new Error('Missing or duplicate OOXML cell coordinate');
           cell = {};
+          numeric = !attribute(tag, 't') || attribute(tag, 't') === 'n';
           cells[address] = cell;
         } else if (cell && (tag.local === 'v' || tag.local === 'f')) {
           field = tag.local === 'v' ? 'rawValue' : 'formula';
@@ -88,8 +93,16 @@ export function ooxmlCells(bytes: Uint8Array): Record<string, Record<string, Oox
       (tag) => {
         if (!main.has(tag.uri)) return;
         if (tag.local === 'c') {
+          if (
+            numeric &&
+            cell?.rawValue !== undefined &&
+            cell.rawValue !== '' &&
+            (!numericToken.test(cell.rawValue) || !Number.isFinite(Number(cell.rawValue)))
+          )
+            throw new Error(`Invalid OOXML numeric value: ${name}!${address}`);
           address = undefined;
           cell = undefined;
+          numeric = false;
           field = undefined;
         } else if (tag.local === 'v' || tag.local === 'f') field = undefined;
       },
