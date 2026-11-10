@@ -2,7 +2,7 @@ import { existsSync, lstatSync, readFileSync, readdirSync, realpathSync } from '
 import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { numbers } from './execution-contract.js';
 import { routeCatalogue } from './route-catalogue.js';
-import { parsePythonJson } from '../common/numbers.js';
+import { parseOrderedPythonJson } from './ordered-json.js';
 import { throwPythonJsonError } from './json-error.js';
 
 let inputObserver: ((root: string, path: string, rejected?: boolean) => void) | undefined;
@@ -116,7 +116,7 @@ export function files(root: string, path: string, excludeReleases = false): stri
 /** Python json.loads(parse_constant=...) rejects NaN and Infinity tokens. */
 export function strictJson(text: string): unknown {
   try {
-    return parsePythonJson(text);
+    return parseOrderedPythonJson(text);
   } catch (cause) {
     if (cause instanceof SyntaxError) throwPythonJsonError(text);
     throw cause;

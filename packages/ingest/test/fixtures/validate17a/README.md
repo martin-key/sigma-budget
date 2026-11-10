@@ -50,3 +50,11 @@ Required source keys are tested before optional name lookup. Four paired boolean
 and numeric cases preserve Python equality within sets.
 Every case is compared directly and through the compiled CLI; previous captures
 remain unchanged.
+
+`catalog-semantics/generate_oracle.py --check` adds 90 full donor outcomes for
+the SHA, date and dataset-ID regex boundaries, duplicate KFP filenames and the
+data values operation. Coherent controls reconcile actual owner byte/gzip sizes
+without replacing the original corpus. Dictionary keys retain source order,
+including integer-like year keys, across parsing and the execution deep copy;
+later equal keys overwrite values at their original position. Reversed-year
+and first-error controls cover this independently of the frozen golden output.

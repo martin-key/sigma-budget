@@ -4,6 +4,7 @@ import { Check, fmt, gzipSize, isnum, pyRepr as baseRepr, pyTruth } from './chec
 import { Context, files, safePath } from './context.js';
 import { pythonNumberAt } from '../common/numbers.js';
 import { catalogDecimalText, catalogIntegerRepr, catalogIntegerText } from './catalog-integer.js';
+import { pythonKeys } from './ordered-json.js';
 
 const sources = [
   'budget2027',
@@ -111,13 +112,18 @@ function opt(v: any, k: string, fallback: any = null, sourceType = kind(v)): any
 function iterable(v: any, sourceType = kind(v)): any[] {
   if (Array.isArray(v)) return v;
   if (typeof v === 'string') return [...v];
-  if (v && typeof v === 'object') return Object.keys(v);
+  if (v && typeof v === 'object') return pythonKeys(v);
   return error('TypeError', `'${sourceType}' object is not iterable`);
 }
 function entries(v: any, sourceType = kind(v)): [string, any][] {
   if (!v || typeof v !== 'object' || Array.isArray(v))
     error('AttributeError', `'${sourceType}' object has no attribute 'items'`);
-  return Object.entries(v);
+  return pythonKeys(v).map((key) => [key, v[key]]);
+}
+function values(v: any, sourceType = kind(v)): any[] {
+  if (!v || typeof v !== 'object' || Array.isArray(v))
+    error('AttributeError', `'${sourceType}' object has no attribute 'values'`);
+  return pythonKeys(v).map((key) => v[key]);
 }
 function len(v: any, sourceType = kind(v)): number {
   if (typeof v === 'string') return [...v].length;
@@ -153,6 +159,17 @@ function equal(a: any, b: any): boolean {
     );
   return a === b;
 }
+function dictSet(map: Map<any, any>, key: any, value: any): void {
+  if (key !== null && typeof key === 'object')
+    error('TypeError', `unhashable type: '${kind(key)}'`);
+  const existing = [...map.keys()].find((other) => equal(other, key));
+  map.set(existing === undefined ? key : existing, value);
+}
+function dictGet(map: Map<any, any>, key: any): any {
+  if (key !== null && typeof key === 'object')
+    error('TypeError', `unhashable type: '${kind(key)}'`);
+  return [...map].find(([other]) => equal(other, key))?.[1] ?? null;
+}
 function uniq(values: any[]): any[] {
   const result: any[] = [];
   for (const value of values) {
@@ -184,7 +201,7 @@ function pyRepr(value: any, sourceType = kind(value)): string {
   if (Array.isArray(value))
     return `[${value.map((item, index, __rowValues11) => pyRepr(item, kind(item, value, index))).join(', ')}]`;
   if (value && typeof value === 'object')
-    return `{${Object.entries(value)
+    return `{${entries(value)
       .map(([key, item]) => `${pyRepr(key)}: ${pyRepr(item, kind(item, value, key))}`)
       .join(', ')}}`;
   return baseRepr(value);
@@ -973,7 +990,9 @@ export function catalog(ctx: Context): Check {
     }
     const asOf = opt(d, 'asOf', undefined, kind(d, dss, __rowIndex0));
     c.ok(
-      typeof asOf === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(asOf) && asOf <= ctx.buildDate,
+      typeof asOf === 'string' &&
+        /^\d{4}-\d{2}-\d{2}\n?$/.test(catalogDecimalText(asOf)) &&
+        asOf <= ctx.buildDate,
       `${sl}: asOf ${pyRepr(asOf, kind(asOf, d, 'asOf'))}`,
     );
     const format = get(d, 'format', kind(d, dss, __rowIndex0)),
@@ -1101,7 +1120,7 @@ export function catalog(ctx: Context): Check {
         'split',
         kind(opt(m, 'id', ''), m, 'id'),
       ).split('+');
-      if (mid.every((x: string) => /^[DMP]\d\d$/.test(x)))
+      if (mid.every((x: string) => /^[DMP]\d\d\n?$/.test(catalogDecimalText(x))))
         c.ok(
           sameSet(
             get(d, 'contains', kind(d, dss, __rowIndex0)),
@@ -1201,9 +1220,9 @@ export function catalog(ctx: Context): Check {
     const sha = get(f, 'sha256', kind(f, fs, __rowIndex5)),
       bytes = get(f, 'bytes', kind(f, fs, __rowIndex5));
     if (typeof sha !== 'string')
-      error('TypeError', `expected string or bytes-like object, got '${kind(sha)}'`);
+      error('TypeError', `expected string or bytes-like object, got '${kind(sha, f, 'sha256')}'`);
     c.ok(
-      /^[0-9a-f]{64}$/.test(sha) &&
+      /^[0-9a-f]{64}\n?$/.test(sha) &&
         ((Number.isInteger(bytes) && pythonNumberAt(f, 'bytes', bytes).kind === 'int') ||
           typeof bytes === 'boolean') &&
         number(bytes) > 0,
@@ -1260,23 +1279,32 @@ export function catalog(ctx: Context): Check {
       ).length === fs.length,
     'files: names and checksums must be unique',
   );
-  const kfpFiles = entries(
-      get(ctx.get('execution.json'), 'data'),
-      kind(get(ctx.get('execution.json'), 'data'), ctx.get('execution.json'), 'data'),
-    ).flatMap(([, y]) => iterable(get(y, 'files'), kind(get(y, 'files'), y, 'files'))),
-    got = new Map(
-      fs.map((f, __rowIndex52, __rowValues53) => [
-        get(f, 'name', kind(f, __rowValues53, __rowIndex52)),
-        get(f, 'sha256', kind(f, __rowValues53, __rowIndex52)),
-      ]),
+  const execution = ctx.get('execution.json'),
+    data = get(execution, 'data'),
+    years = values(data, kind(data, execution, 'data')),
+    yearKeys = pythonKeys(data),
+    kfpFiles = new Map<any, any>(),
+    got = new Map<any, any>();
+  for (const [yearIndex, year] of years.entries()) {
+    const files = iterable(
+      get(year, 'files', kind(year, data, yearKeys[yearIndex])),
+      kind(get(year, 'files', kind(year, data, yearKeys[yearIndex])), year, 'files'),
+    );
+    for (const [fileIndex, file] of files.entries())
+      dictSet(
+        kfpFiles,
+        get(file, 'file', kind(file, files, fileIndex)),
+        get(file, 'sha256', kind(file, files, fileIndex)),
+      );
+  }
+  for (const [index, file] of fs.entries())
+    dictSet(
+      got,
+      get(file, 'name', kind(file, fs, index)),
+      get(file, 'sha256', kind(file, fs, index)),
     );
   c.ok(
-    kfpFiles.every((x, __rowIndex54, __rowValues55) =>
-      equal(
-        got.get(get(x, 'file', kind(x, __rowValues55, __rowIndex54))) ?? null,
-        get(x, 'sha256', kind(x, __rowValues55, __rowIndex54)),
-      ),
-    ),
+    [...kfpFiles].every(([key, sha]) => equal(dictGet(got, key), sha)),
     'the 19 KFP reports of execution.json must be listed with the same checksums',
   );
   const needs = pageNeeds(ctx),

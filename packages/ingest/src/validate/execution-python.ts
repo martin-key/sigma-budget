@@ -1,5 +1,6 @@
 import { pythonNumberAt } from '../common/numbers.js';
 import { pyRepr } from './checks.js';
+import { pythonKeys } from './ordered-json.js';
 
 /** Runtime operations used by the execution projection and independent monthly checks. */
 
@@ -28,10 +29,14 @@ function mapping(
   }
   return value;
 }
-export const executionItems = (value: any): [string, any][] =>
-  Object.entries(mapping(value, 'items'));
-export const executionValues = (value: any, holder?: object, field?: string): any[] =>
-  Object.values(mapping(value, 'values', holder, field));
+export const executionItems = (value: any): [string, any][] => {
+  const dict = mapping(value, 'items');
+  return pythonKeys(dict).map((key) => [key, dict[key]]);
+};
+export const executionValues = (value: any, holder?: object, field?: string): any[] => {
+  const dict = mapping(value, 'values', holder, field);
+  return pythonKeys(dict).map((key) => dict[key]);
+};
 export const executionGet = (value: any, key: string): any => {
   const dict = mapping(value, 'get');
   return Object.hasOwn(dict, key) ? dict[key] : null;
@@ -41,7 +46,7 @@ export function executionKeys(value: any): string[] {
   if (typeof value === 'string') return Array.from(value);
   if (value === null || typeof value !== 'object')
     throw new TypeError(`'${type(value)}' object is not iterable`);
-  return Object.keys(value);
+  return pythonKeys(value);
 }
 export function executionContains(value: any, key: string): boolean {
   if (typeof value === 'string' || Array.isArray(value)) return value.includes(key);
