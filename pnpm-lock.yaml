@@ -105,6 +105,9 @@ importers:
       '@sigma-budget/dataset-schema':
         specifier: workspace:*
         version: link:../dataset-schema
+      htmlparser2:
+        specifier: 10.1.0
+        version: 10.1.0
       jsts:
         specifier: 2.12.1
         version: 2.12.1
@@ -114,6 +117,9 @@ importers:
       pako:
         specifier: 2.1.0
         version: 2.1.0
+      saxes:
+        specifier: 6.0.0
+        version: 6.0.0
       yaml:
         specifier: 2.9.1
         version: 2.9.1
