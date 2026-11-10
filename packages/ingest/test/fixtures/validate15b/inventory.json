@@ -1,0 +1,24 @@
+{
+  "revision": "8b68ae1bd5617152dc45c6ed168f788345a27ec5",
+  "date": "2026-11-08",
+  "sha256": {
+    "fiscal/inputs/data/inputs/budget_bill_2027.json": "ecb9e854f1998d1d89eee1c30da84cfbb44f3dec3ca64c022b774f1be60361d3",
+    "fiscal/inputs/data/inputs/budget_forecast_2027.json": "15f9fda9484633efa58a57122382184dc4fe2572e72de8a20863347053d0ff70",
+    "fiscal/inputs/data/originals/budget_2027/ZDBRB-2027.zip": "6e0aeaab774eb5a0c5b10888b49bc4e9f8c72220188def8989e4ebdc3241b517",
+    "validate15b/donor/budget_pipeline/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "validate15b/donor/budget_pipeline/build/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "validate15b/donor/budget_pipeline/build/annual_periods.py": "3a036c4d9e999897dc4737340da72772a27b8c1e40e3c5bff4f5b678d11a41cb",
+    "validate15b/donor/budget_pipeline/build/budget_2027.py": "dab10117524264be11f28be6d8325ca0b089f646d801751c0bd7974943d2850f",
+    "validate15b/donor/budget_pipeline/build/data_io.py": "b827a40fe5c979f2cf0d689766fedc355fddeb8c897460578d6aeb26364b9d68",
+    "validate15b/donor/budget_pipeline/validate/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "validate15b/donor/budget_pipeline/validate/annual_oracles.py": "6cce4ec2592eb084b35e57b2b8fe9641fafa5cd54d3256cbe2886b8cebac3fc9",
+    "validate15b/donor/budget_pipeline/validate/budget_2027.py": "ed607b8498a9693c52c8398f4c70f7770b001aa7592c9bf079d7beca415453c2",
+    "validate15b/donor/budget_pipeline/validate/checks.py": "25d7d0e984c5214efb2786f0f72f50cd6666b5f4565802fbb998d1cd52cc0567",
+    "validate15b/donor/budget_pipeline/validate/fixtures/budget_2027_cells.json": "e48dc1f5055b0f9c70809c532f7417fff003859d96abfe2e470b07fa420020bb",
+    "wave13a/published/budget2027-provenance.json": "6f7e859f628ed8a15c1f27f6f01b87c6939a45a3262ff462148f0c5e12030e23",
+    "wave13a/published/budget2027.json": "14e268a9ab7e2112d7711c6ccc3e7268b5a8bcec3c263fc655c72e87fd13a9ee",
+    "wave13a/published/expenditure.json": "e2f30abd6158a6cee1746fc54a0bf12d334a4e867c68e3a6ffbf8f05c8e0cb7f",
+    "wave13a/published/outlook.json": "739f52dd3970505e39e819edb412ed4c189f3a15ca70d2124e32ff6c01aea5b5",
+    "wave13a/published/revenue.json": "304117c59f0e2f661abf8f207b2599fa912ebdcd6036c000b46aab60cd4a15ef"
+  }
+}

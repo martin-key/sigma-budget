@@ -1,0 +1,408 @@
+[
+  {
+    "output": "outlook.json#/byPeriod/2026.law/series/revenue",
+    "document": "forecast",
+    "page": 174,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "outlook.json#/byPeriod/2026.law/series/expenditure",
+    "document": "forecast",
+    "page": 174,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "outlook.json#/byPeriod/2026.law/series/balance",
+    "document": "forecast",
+    "page": 174,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "outlook.json#/byPeriod/2026.law/series/interest",
+    "document": "forecast",
+    "page": 174,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "outlook.json#/byPeriod/2026.law/series/primaryBalance",
+    "document": "forecast",
+    "page": 174,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "outlook.json#/byPeriod/2026.law/series/primaryBalance",
+    "document": "forecast",
+    "page": 174,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "outlook.json#/byPeriod/2027.draft/series/revenue",
+    "document": "forecast",
+    "page": 191,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "outlook.json#/byPeriod/2027.draft/series/expenditure",
+    "document": "forecast",
+    "page": 192,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "outlook.json#/byPeriod/2027.draft/series/balance",
+    "document": "forecast",
+    "page": 192,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "outlook.json#/byPeriod/2027.draft/series/interest",
+    "document": "forecast",
+    "page": 192,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "outlook.json#/byPeriod/2027.draft/series/financing",
+    "document": "forecast",
+    "page": 192,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "outlook.json#/byPeriod/2027.draft/series/gdp",
+    "document": "forecast",
+    "page": 194,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "outlook.json#/byPeriod/2027.draft/series/primaryBalance",
+    "document": "forecast",
+    "page": 192,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "outlook.json#/byPeriod/2027.draft/series/primaryBalance",
+    "document": "forecast",
+    "page": 192,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "revenue.json#/byPeriod/2026.expected/groups/dds",
+    "document": "forecast",
+    "page": 191,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "revenue.json#/byPeriod/2026.expected/groups/osiguritelni",
+    "document": "forecast",
+    "page": 191,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "revenue.json#/byPeriod/2026.expected/groups/drugi",
+    "document": "forecast",
+    "page": 191,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "revenue.json#/byPeriod/2026.expected/groups/drugi",
+    "document": "forecast",
+    "page": 191,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "revenue.json#/byPeriod/2026.expected/groups/drugi",
+    "document": "forecast",
+    "page": 191,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "expenditure.json#/byPeriod/2026.expected/functions/2/cell",
+    "document": "forecast",
+    "page": 73,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "revenue.json#/byPeriod/2027.draft/groups/dds",
+    "document": "forecast",
+    "page": 191,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "revenue.json#/byPeriod/2027.draft/groups/osiguritelni",
+    "document": "forecast",
+    "page": 191,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "revenue.json#/byPeriod/2027.draft/groups/drugi",
+    "document": "forecast",
+    "page": 191,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "revenue.json#/byPeriod/2027.draft/groups/drugi",
+    "document": "forecast",
+    "page": 191,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "revenue.json#/byPeriod/2027.draft/groups/drugi",
+    "document": "forecast",
+    "page": 191,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "expenditure.json#/byPeriod/2027.draft/functions/2/cell",
+    "document": "forecast",
+    "page": 73,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "revenue.json#/byPeriod/2028.forecast/groups/dds",
+    "document": "forecast",
+    "page": 191,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "revenue.json#/byPeriod/2028.forecast/groups/osiguritelni",
+    "document": "forecast",
+    "page": 191,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "revenue.json#/byPeriod/2028.forecast/groups/drugi",
+    "document": "forecast",
+    "page": 191,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "revenue.json#/byPeriod/2028.forecast/groups/drugi",
+    "document": "forecast",
+    "page": 191,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "revenue.json#/byPeriod/2028.forecast/groups/drugi",
+    "document": "forecast",
+    "page": 191,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "expenditure.json#/byPeriod/2028.forecast/functions/2/cell",
+    "document": "forecast",
+    "page": 73,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "revenue.json#/byPeriod/2029.forecast/groups/dds",
+    "document": "forecast",
+    "page": 191,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "revenue.json#/byPeriod/2029.forecast/groups/osiguritelni",
+    "document": "forecast",
+    "page": 191,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "revenue.json#/byPeriod/2029.forecast/groups/drugi",
+    "document": "forecast",
+    "page": 191,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "revenue.json#/byPeriod/2029.forecast/groups/drugi",
+    "document": "forecast",
+    "page": 191,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "revenue.json#/byPeriod/2029.forecast/groups/drugi",
+    "document": "forecast",
+    "page": 191,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "expenditure.json#/byPeriod/2029.forecast/functions/2/cell",
+    "document": "forecast",
+    "page": 73,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "outlook.json#/byPeriod/2027.draft/macro/0/cell",
+    "document": "forecast",
+    "page": 27,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "outlook.json#/byPeriod/2027.draft/macro/1/cell",
+    "document": "forecast",
+    "page": 27,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "outlook.json#/byPeriod/2027.draft/printedPctGdp/revenue",
+    "document": "forecast",
+    "page": 193,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "expenditure.json#/byPeriod/2028.forecast/functions/2/printedPctGdp",
+    "document": "forecast",
+    "page": 73,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "budget2027.json#/budgets/bill/1/rows/0/cell",
+    "document": "bill",
+    "page": 1,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "budget2027.json#/budgets/bill/1/rows/12/cell",
+    "document": "bill",
+    "page": 2,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "budget2027.json#/budgets/billMc/1/rows/0/cell",
+    "document": "bill",
+    "page": 3,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "budget2027.json#/budgets/billMc/1/rows/12/cell",
+    "document": "bill",
+    "page": 4,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "budget2027.json#/budgets/bill/2/rows/0/cell",
+    "document": "bill",
+    "page": 6,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "budget2027.json#/budgets/bill/2/rows/6/cell",
+    "document": "bill",
+    "page": 6,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "budget2027.json#/budgets/billMc/2/rows/0/cell",
+    "document": "bill",
+    "page": 8,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "budget2027.json#/budgets/billMc/2/rows/6/cell",
+    "document": "bill",
+    "page": 9,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "budget2027.json#/municipal/art52/0/cells/0",
+    "document": "bill",
+    "page": 79,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "budget2027.json#/municipalTotals/art52/0",
+    "document": "bill",
+    "page": 89,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "budget2027.json#/projects/0/cells/0",
+    "document": "bill",
+    "page": 126,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "budget2027.json#/projects/0/cells/1",
+    "document": "bill",
+    "page": 126,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "budget2027.json#/projects/0/cells/2",
+    "document": "bill",
+    "page": 126,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "budget2027.json#/debtLimits/66",
+    "document": "bill",
+    "page": 104,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "budget2027.json#/debtLimits/67",
+    "document": "bill",
+    "page": 104,
+    "labelPresent": true,
+    "printedPresent": true
+  },
+  {
+    "output": "budget2027.json#/debtLimits/68",
+    "document": "bill",
+    "page": 104,
+    "labelPresent": true,
+    "printedPresent": true
+  }
+]

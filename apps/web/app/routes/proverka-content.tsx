@@ -175,7 +175,7 @@ function coverageBlock(m: Manifest) {
           { key: 'status', label: 'Статус', fmt: statusCell },
           { key: 'period', label: 'Период' },
           { key: 'unit', label: 'Единица' },
-          { key: 'rebuilt', label: 'Сглобен от оригиналите' },
+          { key: 'rebuilt', label: 'Пресглобен в това издание' },
         ],
         rows,
       })}
@@ -254,6 +254,11 @@ function filesBlock(rid: string, m: Manifest) {
   );
   const ins = m.inputs || [],
     outs = m.outputs || [];
+  const sources = ins.filter((i) => i.kind === 'source').length;
+  const intermediates = ins.filter((i) => i.kind === 'intermediate').length;
+  const other = ins.length - sources - intermediates;
+  const inputKind = (v: unknown) =>
+    v === 'source' ? 'източников' : v === 'intermediate' ? 'междинен' : String(v || 'непосочен');
   const cols = (first: string): Column<ReleaseFile>[] => [
     { key: 'path', label: first, fmt: (v) => link(String(v)) },
     { key: 'mime', label: 'Формат' },
@@ -262,7 +267,7 @@ function filesBlock(rid: string, m: Manifest) {
   ];
   return block(
     's35-files',
-    'Оригинали и файлове',
+    'Входни и изходни файлове',
     <>
       <p>
         {
@@ -272,24 +277,34 @@ function filesBlock(rid: string, m: Manifest) {
 
       {disclosure({
         id: 's35-inputs',
-        title: `Оригиналите (${ins.length})`,
+        title: `Входни файлове (${ins.length})`,
         body: (
           <>
             <p>
-              {
-                'Отчетите, законите и таблиците, от които са сглобени данните, с източника и начина на получаване в '
-              }
+              {'Източниковите и запазените междинни файлове са описани с начина на получаване в '}
               <a href={'/data/releases/' + rid + '/manifest.json'}>{'манифеста'}</a>
-              {'. HTML и XML оригиналите се свалят, а не се отварят като страница на сайта.'}
+              {'. HTML и XML файловете се свалят, а не се отварят като страница на сайта.'}
+            </p>
+
+            <p>
+              {`Манифестът посочва източникови (${num(sources)}) и междинни (${num(intermediates)}) файлове${other ? `, както и ${num(other)} с друг или непосочен тип` : ''}. `}
+              {
+                'Междинните файлове са запазени резултати от предходна обработка. Пресглобяването с тях не доказва възстановяване от първоначалните източници.'
+              }
             </p>
 
             {dataTable({
               id: 's35-in',
-              caption: 'Оригиналите на изданието',
+              caption: 'Входните файлове на изданието',
               dense: true,
-              columns: cols('Файл'),
+              columns: [
+                cols('Файл')[0],
+                { key: 'kind', label: 'Тип', fmt: inputKind },
+                ...cols('Файл').slice(1),
+              ],
               rows: ins.map((i) => ({
                 path: i.path,
+                kind: i.kind,
                 mime: i.mime,
                 bytes: i.bytes,
                 sha256: i.sha256,
@@ -418,7 +433,7 @@ function checksBlock(v: Validation | undefined) {
 
       <p>
         {
-          'Всеки може да сглоби изданието отново от оригиналите и да сравни всеки файл байт по байт. Нужни са само кодът и Docker:'
+          'Изданието може да се пресъздаде от входните му файлове, включително запазените междинни данни, и всеки изходен файл да се сравни байт по байт. Нужни са кодът и Docker:'
         }
       </p>
 
@@ -433,7 +448,7 @@ function checksBlock(v: Validation | undefined) {
 
       <p>
         {
-          'Командата чете манифеста на текущото издание, сваля оригиналите му оттук и сглобява commit-а му в закования образ. Изходът е '
+          'Командата чете манифеста на текущото издание, сваля входните му файлове оттук и сглобява commit-а му в закования образ. Изходът е '
         }
         <code lang="en">{'reproduced byte for byte'}</code>
         {' или списък с разликите. Подробности: '}
@@ -564,8 +579,8 @@ export function render(ctx: MetadataContext) {
   const ins = (m.inputs || []).length,
     outs = (m.outputs || []).length;
   return {
-    lede: `Откъде са данните на тази страница: изданието ${short(rid)} с ${num(ins)} оригинала и ${num(outs)} файла, всеки с SHA-256, кодът, който ги сглобява, проверките и как всеки може да го пресъздаде.`,
-    answer: `Данните са от издание ${short(rid)}: ${num(ins)} оригинала и ${num(outs)} файла с данни, сглобени от commit ${short(m.processing?.code?.commit)} и проверими байт по байт.`,
+    lede: `Откъде са данните на тази страница: изданието ${short(rid)} с ${num(ins)} входни файла и ${num(outs)} файла, всеки с SHA-256, кодът, който ги сглобява, проверките и как всеки може да го пресъздаде.`,
+    answer: `Данните са от издание ${short(rid)}: ${num(ins)} входни файла и ${num(outs)} файла с данни, сглобени от commit ${short(m.processing?.code?.commit)} и проверими байт по байт.`,
     body: (
       <>
         {releaseBlock(rid, m, journal, journalFailed, ctx.newer)}

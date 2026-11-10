@@ -1,0 +1,19 @@
+{
+  "python": "3.12",
+  "inputs": {
+    "cases.json": "5290aeeff01834c6aa56119e0741bb9c19f52edde4915227c8ce2900606d87b7",
+    "json-cases.json": "64b7a0cb569b796d081238e47cd18c533b7bbeb41964a7c67c68eb0cb5b24083",
+    "generate_oracle.py": "8f0a5d0b28e50a38b7d2a06bc55b40904dfca4ea1c038834d8b2b702cfae173c",
+    "../generate_oracle.py": "a834a8b2d739eb87e8918f08d8fd7e8c81fbcccf81a7a0609f9746cba3cee354",
+    "../provenance.json": "04b585d13e68c4ad8eafbc56977ee0163539b70e4702e9695405909d88628fe1",
+    "../cases.json": "d9ac1121abe749089f07560ff0fbbc60822faec691e903bd1cea2f7089ef492b",
+    "../oracle.json": "abf32465cfb0da34d652e1a4f2b786458084d8763f3c84e989066d81bd60ab60",
+    "../cases-extra.json": "e75abb643bd768e8918660c38b1d0570bbdd58d64a5f91631dbaff638502b397",
+    "../oracle-extra.json": "50bc25507f9ec4f55a025674707fc4268b4b6b8ed71c8d660c509ce51120da47",
+    "../extra-provenance.json": "d44385094e36ceb88ea274dae7728a5ef3176d8479d1faae11ed42229d8f1fe5"
+  },
+  "outputs": {
+    "oracle.json": "8f2d933dbedc7636557e22c7fefd3027b390794b9795a8e2485dd2138ca0b660",
+    "json-oracle.json": "e2312e6253afa5fa66d354b052136f16f865efac47c43e58fc52f220c5d87e86"
+  }
+}

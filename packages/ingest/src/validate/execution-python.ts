@@ -1,5 +1,6 @@
 import { pythonNumberAt } from '../common/numbers.js';
 import { pyRepr } from './checks.js';
+import { pythonKeys } from './ordered-json.js';
 
 /** Runtime operations used by the execution projection and independent monthly checks. */
 
@@ -15,17 +16,27 @@ function type(value: unknown, holder?: object, key?: string): string {
   const names: Record<string, string> = { boolean: 'bool', string: 'str', object: 'dict' };
   return names[typeof value] ?? typeof value;
 }
-function mapping(value: any, method: 'items' | 'values' | 'get'): Record<string, any> {
+function mapping(
+  value: any,
+  method: 'items' | 'values' | 'get',
+  holder?: object,
+  field?: string,
+): Record<string, any> {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) {
-    const error = new Error(`'${type(value)}' object has no attribute '${method}'`);
+    const error = new Error(`'${type(value, holder, field)}' object has no attribute '${method}'`);
     error.name = 'AttributeError';
     throw error;
   }
   return value;
 }
-export const executionItems = (value: any): [string, any][] =>
-  Object.entries(mapping(value, 'items'));
-export const executionValues = (value: any): any[] => Object.values(mapping(value, 'values'));
+export const executionItems = (value: any): [string, any][] => {
+  const dict = mapping(value, 'items');
+  return pythonKeys(dict).map((key) => [key, dict[key]]);
+};
+export const executionValues = (value: any, holder?: object, field?: string): any[] => {
+  const dict = mapping(value, 'values', holder, field);
+  return pythonKeys(dict).map((key) => dict[key]);
+};
 export const executionGet = (value: any, key: string): any => {
   const dict = mapping(value, 'get');
   return Object.hasOwn(dict, key) ? dict[key] : null;
@@ -35,7 +46,7 @@ export function executionKeys(value: any): string[] {
   if (typeof value === 'string') return Array.from(value);
   if (value === null || typeof value !== 'object')
     throw new TypeError(`'${type(value)}' object is not iterable`);
-  return Object.keys(value);
+  return pythonKeys(value);
 }
 export function executionContains(value: any, key: string): boolean {
   if (typeof value === 'string' || Array.isArray(value)) return value.includes(key);
@@ -49,11 +60,16 @@ export function executionIterable(value: any): any[] {
 }
 
 /** Required subscriptions preserve the expected-law reader's missing-evidence failures. */
-export function executionRequired(value: any, key: string | number): any {
+export function executionRequired(
+  value: any,
+  key: string | number,
+  holder?: object,
+  field?: string,
+): any {
   if (value === null || value === undefined)
     throw new TypeError(`'NoneType' object is not subscriptable`);
   if (typeof value !== 'object' && typeof value !== 'string')
-    throw new TypeError(`'${type(value)}' object is not subscriptable`);
+    throw new TypeError(`'${type(value, holder, field)}' object is not subscriptable`);
   const sequence = Array.isArray(value) || typeof value === 'string';
   if (sequence && typeof key !== 'number')
     throw new TypeError(
