@@ -261,12 +261,18 @@ export async function prepareInputs(
     )
       return false;
     safeRelative(path);
+    const entryPin = declaration.entry.sha256;
+    if (entryPin !== undefined && (typeof entryPin !== 'string' || !HEX.test(entryPin)))
+      fail('Invalid registry pin: ' + path);
+    if (pins.get(path) && entryPin && pins.get(path) !== entryPin)
+      fail('Registry/pin disagreement: ' + path);
+    const legacyPin = pins.get(path) ?? (entryPin as string | undefined);
     if (!missingIntermediates.some((i) => i.path === path))
       missingIntermediates.push({
         path,
         declaration: pattern,
         datasets: declaration.datasets,
-        ...(pins.get(path) ? { legacyPin: pins.get(path) } : {}),
+        ...(legacyPin ? { legacyPin } : {}),
       });
     return true;
   }

@@ -225,8 +225,8 @@ async function makeManifest(
               ...f,
               declaration: prepared.missingIntermediates.find((i) => i.path === f.path)!
                 .declaration,
-              legacy_pin_sha256: prepared.missingIntermediates.find((i) => i.path === f.path)!
-                .legacyPin,
+              legacy_pin_sha256:
+                prepared.missingIntermediates.find((i) => i.path === f.path)!.legacyPin ?? null,
               origin: 'recorded-code-generation',
               originalPinVerified:
                 f.sha256 ===

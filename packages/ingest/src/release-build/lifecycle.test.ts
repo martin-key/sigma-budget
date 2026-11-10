@@ -1,7 +1,17 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { chmod, link, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
+import {
+  chmod,
+  link,
+  mkdir,
+  mkdtemp,
+  readFile,
+  rm,
+  symlink,
+  writeFile,
+  cp,
+} from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import {
@@ -340,6 +350,70 @@ describe('recorded Node build lifecycle (synthetic numeric executor)', () => {
     await expect(readFile(join(f.options.outputRoot, 'receipt.json'))).rejects.toMatchObject({
       code: 'ENOENT',
     });
+  });
+  it('records an unpinned generated cache separately and verifies its complete owned view', async () => {
+    const f = await fixture(),
+      path = 'data/cache/intermediate.json',
+      bytes = Buffer.from('{"fresh":true}\n');
+    Object.assign(f.source.intermediates[0]!, { reproducible: true, pinned: false });
+    await put(join(f.repo, 'data/sources.yaml'), JSON.stringify(f.source));
+    const pins = join(f.repo, 'data/originals.sha256');
+    await put(
+      pins,
+      (await readFile(pins, 'utf8'))
+        .split('\n')
+        .filter((l) => !l.endsWith(path))
+        .join('\n'),
+    );
+    await rm(join(f.input, path));
+    await exec('git', ['-C', f.repo, 'add', '.']);
+    await exec('git', [
+      '-C',
+      f.repo,
+      '-c',
+      'user.name=Test',
+      '-c',
+      'user.email=t@example.invalid',
+      'commit',
+      '-qm',
+      'test: generated cache without historical pin',
+    ]);
+    const executor = await withResult(f, async (result, context) => {
+      const view = join(context.scratchRoot, 'prepared-inputs');
+      await cp(context.exportRoot, view, { recursive: true });
+      await put(join(view, path), bytes);
+      result.generatedIntermediates = [
+        {
+          path,
+          bytes: bytes.length,
+          sha256: sha256(bytes),
+          mime: 'application/json',
+          kind: 'generated-intermediate',
+          datasets: ['catalog', 'core'],
+        },
+      ];
+    });
+    const built = await buildRelease({
+      ...f.options,
+      commit: 'HEAD',
+      executor: { ...executor, generatedIntermediates: [path] },
+    });
+    expect(built.manifest.inputs.some((f) => f.path === path)).toBe(false);
+    expect(built.manifest.processing.generated_intermediates).toEqual([
+      {
+        path,
+        bytes: bytes.length,
+        sha256: sha256(bytes),
+        mime: 'application/json',
+        kind: 'generated-intermediate',
+        datasets: ['catalog', 'core'],
+        declaration: path,
+        legacy_pin_sha256: null,
+        origin: 'recorded-code-generation',
+        originalPinVerified: false,
+      },
+    ]);
+    await checkReleaseDirectory({ releaseRoot: built.outputRoot, inputRoot: f.input });
   });
   it.each(['FAIL', 'SKIP', 'absent', 'crash', 'empty', 'incomplete'])(
     'never installs a PASS package on %s validation',
