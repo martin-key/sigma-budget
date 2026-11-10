@@ -1,0 +1,2805 @@
+[
+  {
+    "name": "raw_month_9.0",
+    "ops": [
+      {
+        "op": "text",
+        "file": "execution.json",
+        "old": "\"2026\":{\"months\":9,",
+        "new": "\"2026\":{\"months\":9.0,"
+      }
+    ]
+  },
+  {
+    "name": "raw_month_9e0",
+    "ops": [
+      {
+        "op": "text",
+        "file": "execution.json",
+        "old": "\"2026\":{\"months\":9,",
+        "new": "\"2026\":{\"months\":9e0,"
+      }
+    ]
+  },
+  {
+    "name": "raw_month_true",
+    "ops": [
+      {
+        "op": "text",
+        "file": "execution.json",
+        "old": "\"2026\":{\"months\":9,",
+        "new": "\"2026\":{\"months\":true,"
+      }
+    ]
+  },
+  {
+    "name": "raw_month_false",
+    "ops": [
+      {
+        "op": "text",
+        "file": "execution.json",
+        "old": "\"2026\":{\"months\":9,",
+        "new": "\"2026\":{\"months\":false,"
+      }
+    ]
+  },
+  {
+    "name": "raw_month_null",
+    "ops": [
+      {
+        "op": "text",
+        "file": "execution.json",
+        "old": "\"2026\":{\"months\":9,",
+        "new": "\"2026\":{\"months\":null,"
+      }
+    ]
+  },
+  {
+    "name": "raw_month_[]",
+    "ops": [
+      {
+        "op": "text",
+        "file": "execution.json",
+        "old": "\"2026\":{\"months\":9,",
+        "new": "\"2026\":{\"months\":[],"
+      }
+    ]
+  },
+  {
+    "name": "raw_month_{}",
+    "ops": [
+      {
+        "op": "text",
+        "file": "execution.json",
+        "old": "\"2026\":{\"months\":9,",
+        "new": "\"2026\":{\"months\":{},"
+      }
+    ]
+  },
+  {
+    "name": "raw_month_\"9\"",
+    "ops": [
+      {
+        "op": "text",
+        "file": "execution.json",
+        "old": "\"2026\":{\"months\":9,",
+        "new": "\"2026\":{\"months\":\"9\","
+      }
+    ]
+  },
+  {
+    "name": "missing_kind",
+    "ops": [
+      {
+        "op": "delete",
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "kind"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "null_event",
+    "ops": [
+      {
+        "op": "set",
+        "file": "feed.json",
+        "path": [
+          "events",
+          0
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "array_event",
+    "ops": [
+      {
+        "op": "set",
+        "file": "feed.json",
+        "path": [
+          "events",
+          0
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "null_source",
+    "ops": [
+      {
+        "op": "set",
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "source"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "source_string",
+    "ops": [
+      {
+        "op": "set",
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "source"
+        ],
+        "value": "budget2027"
+      }
+    ]
+  },
+  {
+    "name": "false_title",
+    "ops": [
+      {
+        "op": "set",
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "title"
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "false_text",
+    "ops": [
+      {
+        "op": "set",
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "text"
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "event_date_to_bad",
+    "ops": [
+      {
+        "op": "set",
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "dateTo"
+        ],
+        "value": "2025-01-01"
+      }
+    ]
+  },
+  {
+    "name": "events_map",
+    "ops": [
+      {
+        "op": "set",
+        "file": "feed.json",
+        "path": [
+          "events"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "kinds_null",
+    "ops": [
+      {
+        "op": "set",
+        "file": "feed.json",
+        "path": [
+          "kinds"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "datekinds_null",
+    "ops": [
+      {
+        "op": "set",
+        "file": "feed.json",
+        "path": [
+          "dateKinds"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "expected_null",
+    "ops": [
+      {
+        "op": "set",
+        "file": "feed.json",
+        "path": [
+          "expected"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "highlights_null",
+    "ops": [
+      {
+        "op": "set",
+        "file": "feed.json",
+        "path": [
+          "highlights"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "highlight_month_float",
+    "ops": [
+      {
+        "op": "text",
+        "file": "feed.json",
+        "old": "\"highlights\":{\"month\":9,",
+        "new": "\"highlights\":{\"month\":9.0,"
+      }
+    ]
+  },
+  {
+    "name": "sentences_null",
+    "ops": [
+      {
+        "op": "set",
+        "file": "feed.json",
+        "path": [
+          "sentences"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "pending_note_null",
+    "ops": [
+      {
+        "op": "set",
+        "file": "feed.json",
+        "path": [
+          "expected",
+          0,
+          "note"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "event_date_null",
+    "ops": [
+      {
+        "op": "set",
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "date"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "latest_asof",
+    "ops": [
+      {
+        "op": "set",
+        "file": "execution.json",
+        "path": [
+          "latest",
+          "asOf"
+        ],
+        "value": "2026-09-29"
+      }
+    ]
+  },
+  {
+    "name": "plan_source",
+    "ops": [
+      {
+        "op": "set",
+        "file": "execution.json",
+        "path": [
+          "plan2026",
+          "source"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "monthly_asof",
+    "ops": [
+      {
+        "op": "set",
+        "file": "execution.json",
+        "path": [
+          "data",
+          "2026",
+          "asOf",
+          8
+        ],
+        "value": "2026-09-29"
+      }
+    ]
+  },
+  {
+    "name": "previous_zero",
+    "ops": [
+      {
+        "op": "set",
+        "file": "execution.json",
+        "path": [
+          "data",
+          "2025",
+          "kfp",
+          "rev",
+          8
+        ],
+        "value": "0"
+      }
+    ]
+  },
+  {
+    "name": "xml_cdata",
+    "ops": [
+      {
+        "op": "text",
+        "file": "feed.xml",
+        "old": "<language>bg</language>",
+        "new": "<language><![CDATA[bg]]></language>"
+      }
+    ]
+  },
+  {
+    "name": "xml_dtd",
+    "ops": [
+      {
+        "op": "text",
+        "file": "feed.xml",
+        "old": "<rss version=\"2.0\"",
+        "new": "<!DOCTYPE rss [<!ENTITY x \"ok\">]><rss version=\"2.0\""
+      }
+    ]
+  },
+  {
+    "name": "xml_prefix",
+    "ops": [
+      {
+        "op": "text",
+        "file": "feed.xml",
+        "old": "xmlns:atom=\"http://www.w3.org/2005/Atom\"",
+        "new": "xmlns:atom=\"urn:bad\""
+      }
+    ]
+  },
+  {
+    "name": "xml_empty_title",
+    "ops": [
+      {
+        "op": "text",
+        "file": "feed.xml",
+        "old": "<title>Бюджет на светло: какво е ново</title>",
+        "new": "<title/>"
+      }
+    ]
+  },
+  {
+    "name": "xml_item_title",
+    "ops": [
+      {
+        "op": "text",
+        "file": "feed.xml",
+        "old": "Проектът за бюджет 2027 и АСБП 2027–2029 са публикувани от МФ",
+        "new": "Променено заглавие"
+      }
+    ]
+  },
+  {
+    "name": "top_meta_missing",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "meta"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "top_meta_null",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "meta"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "top_meta_bool",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "meta"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "top_meta_array",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "meta"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "top_meta_map",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "meta"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "top_kinds_missing",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "kinds"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "top_kinds_null",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "kinds"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "top_kinds_bool",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "kinds"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "top_kinds_array",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "kinds"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "top_kinds_map",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "kinds"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "top_dateKinds_missing",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "dateKinds"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "top_dateKinds_null",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "dateKinds"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "top_dateKinds_bool",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "dateKinds"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "top_dateKinds_array",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "dateKinds"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "top_dateKinds_map",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "dateKinds"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "top_events_missing",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "top_events_null",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "top_events_bool",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "top_events_array",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "top_events_map",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "top_expected_missing",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "expected"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "top_expected_null",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "expected"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "top_expected_bool",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "expected"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "top_expected_array",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "expected"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "top_expected_map",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "expected"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "top_highlights_missing",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "top_highlights_null",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "top_highlights_bool",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "top_highlights_array",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "top_highlights_map",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "top_sentences_missing",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "sentences"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "top_sentences_null",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "sentences"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "top_sentences_bool",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "sentences"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "top_sentences_array",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "sentences"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "top_sentences_map",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "sentences"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "row_id_missing",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "id"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "row_id_null",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "id"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "row_id_bool",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "id"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "row_id_array",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "id"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "row_id_map",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "id"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "row_date_missing",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "date"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "row_date_null",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "date"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "row_date_bool",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "date"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "row_date_array",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "date"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "row_date_map",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "date"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "row_dateKind_missing",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "dateKind"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "row_dateKind_null",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "dateKind"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "row_dateKind_bool",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "dateKind"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "row_dateKind_array",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "dateKind"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "row_dateKind_map",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "dateKind"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "row_kind_missing",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "kind"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "row_kind_null",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "kind"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "row_kind_bool",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "kind"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "row_kind_array",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "kind"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "row_kind_map",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "kind"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "row_title_missing",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "title"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "row_title_null",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "title"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "row_title_bool",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "title"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "row_title_array",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "title"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "row_title_map",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "title"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "row_text_missing",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "text"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "row_text_null",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "text"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "row_text_bool",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "text"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "row_text_array",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "text"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "row_text_map",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "text"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "row_href_missing",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "href"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "row_href_null",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "href"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "row_href_bool",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "href"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "row_href_array",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "href"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "row_href_map",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "href"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "row_status_missing",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "status"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "row_status_null",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "status"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "row_status_bool",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "status"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "row_status_array",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "status"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "row_status_map",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "status"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "row_source_missing",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "source"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "row_source_null",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "source"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "row_source_bool",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "source"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "row_source_array",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "source"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "row_source_map",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "source"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "owner_ex_latest_null",
+    "ops": [
+      {
+        "op": "set",
+        "file": "execution.json",
+        "path": [
+          "latest"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "owner_ex_plan_null",
+    "ops": [
+      {
+        "op": "set",
+        "file": "execution.json",
+        "path": [
+          "plan2026"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "owner_law_timeline_null",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "timeline"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "owner_rates_changes_null",
+    "ops": [
+      {
+        "op": "set",
+        "file": "rates.json",
+        "path": [
+          "changes"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "owner_debt_latest_null",
+    "ops": [
+      {
+        "op": "set",
+        "file": "debt.json",
+        "path": [
+          "latest"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "owner_pending_null",
+    "ops": [
+      {
+        "op": "set",
+        "file": "execution.json",
+        "path": [
+          "pendingMonths"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "owner_core_population_null",
+    "ops": [
+      {
+        "op": "set",
+        "file": "core.json",
+        "path": [
+          "population"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "highlight_month_missing",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "month"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "highlight_month_null",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "month"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "highlight_month_false",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "month"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "highlight_month_array",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "month"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "highlight_asOf_missing",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "asOf"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "highlight_asOf_null",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "asOf"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "highlight_asOf_false",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "asOf"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "highlight_asOf_array",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "asOf"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "highlight_revenueMln_missing",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "revenueMln"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "highlight_revenueMln_null",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "revenueMln"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "highlight_revenueMln_false",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "revenueMln"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "highlight_revenueMln_array",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "revenueMln"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "highlight_revenueYoyPct_missing",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "revenueYoyPct"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "highlight_revenueYoyPct_null",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "revenueYoyPct"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "highlight_revenueYoyPct_false",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "revenueYoyPct"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "highlight_revenueYoyPct_array",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "revenueYoyPct"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "highlight_expenditureMln_missing",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "expenditureMln"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "highlight_expenditureMln_null",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "expenditureMln"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "highlight_expenditureMln_false",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "expenditureMln"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "highlight_expenditureMln_array",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "expenditureMln"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "highlight_expenditureYoyPct_missing",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "expenditureYoyPct"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "highlight_expenditureYoyPct_null",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "expenditureYoyPct"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "highlight_expenditureYoyPct_false",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "expenditureYoyPct"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "highlight_expenditureYoyPct_array",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "expenditureYoyPct"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "highlight_deficitMln_missing",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "deficitMln"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "highlight_deficitMln_null",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "deficitMln"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "highlight_deficitMln_false",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "deficitMln"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "highlight_deficitMln_array",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "deficitMln"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "highlight_deficitPrevYearMln_missing",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "deficitPrevYearMln"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "highlight_deficitPrevYearMln_null",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "deficitPrevYearMln"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "highlight_deficitPrevYearMln_false",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "deficitPrevYearMln"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "highlight_deficitPrevYearMln_array",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "deficitPrevYearMln"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "highlight_capexPctPlan_missing",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "capexPctPlan"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "highlight_capexPctPlan_null",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "capexPctPlan"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "highlight_capexPctPlan_false",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "capexPctPlan"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "highlight_capexPctPlan_array",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "capexPctPlan"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "highlight_planBasis_missing",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "planBasis"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "highlight_planBasis_null",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "planBasis"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "highlight_planBasis_false",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "planBasis"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "highlight_planBasis_array",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "planBasis"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "highlight_newBorrowingMln_missing",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "newBorrowingMln"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "highlight_newBorrowingMln_null",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "newBorrowingMln"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "highlight_newBorrowingMln_false",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "newBorrowingMln"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "highlight_newBorrowingMln_array",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "newBorrowingMln"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "highlight_newBorrowingPrevYearMln_missing",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "newBorrowingPrevYearMln"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "highlight_newBorrowingPrevYearMln_null",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "newBorrowingPrevYearMln"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "highlight_newBorrowingPrevYearMln_false",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "newBorrowingPrevYearMln"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "highlight_newBorrowingPrevYearMln_array",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "newBorrowingPrevYearMln"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "latest_rev_null",
+    "ops": [
+      {
+        "file": "execution.json",
+        "path": [
+          "latest",
+          "kfp",
+          "rev",
+          "cum"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "latest_month_null",
+    "ops": [
+      {
+        "file": "execution.json",
+        "path": [
+          "latest",
+          "month"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "monthly_prev_null",
+    "ops": [
+      {
+        "file": "execution.json",
+        "path": [
+          "data",
+          "2025",
+          "kfp",
+          "rev",
+          8
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "kfp_rev_null",
+    "ops": [
+      {
+        "file": "execution.json",
+        "path": [
+          "data",
+          "2026",
+          "kfp",
+          "rev",
+          8
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "denom_source_null",
+    "ops": [
+      {
+        "file": "execution.json",
+        "path": [
+          "plan2026",
+          "source"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "pending_ref_missing",
+    "ops": [
+      {
+        "file": "core.json",
+        "path": [
+          "pending",
+          "P04"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "law_step_missing_date",
+    "ops": [
+      {
+        "file": "law.json",
+        "path": [
+          "timeline",
+          0,
+          "date"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "cofog_total_null",
+    "ops": [
+      {
+        "file": "expenditure.json",
+        "path": [
+          "cofog",
+          "total"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "budget_publication_null",
+    "ops": [
+      {
+        "file": "budget2027.json",
+        "path": [
+          "publication"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "rates_empty",
+    "ops": [
+      {
+        "file": "rates.json",
+        "path": [
+          "changes"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "xml_latin_encoding",
+    "ops": [
+      {
+        "op": "text",
+        "file": "feed.xml",
+        "old": "encoding=\"UTF-8\"",
+        "new": "encoding=\"ISO-8859-1\""
+      }
+    ]
+  },
+  {
+    "name": "xml_ascii_encoding",
+    "ops": [
+      {
+        "op": "text",
+        "file": "feed.xml",
+        "old": "encoding=\"UTF-8\"",
+        "new": "encoding=\"US-ASCII\""
+      }
+    ]
+  },
+  {
+    "name": "xml_utf16_encoding",
+    "ops": [
+      {
+        "op": "text",
+        "file": "feed.xml",
+        "old": "encoding=\"UTF-8\"",
+        "new": "encoding=\"UTF-16\""
+      }
+    ]
+  },
+  {
+    "name": "xml_numeric_entity",
+    "ops": [
+      {
+        "op": "text",
+        "file": "feed.xml",
+        "old": "<language>bg</language>",
+        "new": "<language>b&#103;</language>"
+      }
+    ]
+  },
+  {
+    "name": "xml_cdata_title",
+    "ops": [
+      {
+        "op": "text",
+        "file": "feed.xml",
+        "old": "<title>Бюджет на светло: какво е ново</title>",
+        "new": "<title><![CDATA[Бюджет на светло: какво е ново]]></title>"
+      }
+    ]
+  },
+  {
+    "name": "xml_nested_title",
+    "ops": [
+      {
+        "op": "text",
+        "file": "feed.xml",
+        "old": "<title>Бюджет на светло: какво е ново</title>",
+        "new": "<title>Бюджет <b>на светло</b>: какво е ново</title>"
+      }
+    ]
+  },
+  {
+    "name": "xml_root_namespace",
+    "ops": [
+      {
+        "op": "text",
+        "file": "feed.xml",
+        "old": "<rss version=\"2.0\"",
+        "new": "<rss xmlns=\"urn:other\" version=\"2.0\""
+      }
+    ]
+  },
+  {
+    "name": "xml_remove_lastbuild",
+    "ops": [
+      {
+        "op": "text",
+        "file": "feed.xml",
+        "old": "<lastBuildDate>Sun, 08 Nov 2026 12:00:00 +0000</lastBuildDate>",
+        "new": ""
+      }
+    ]
+  },
+  {
+    "name": "xml_cdata_unclosed",
+    "ops": [
+      {
+        "op": "text",
+        "file": "feed.xml",
+        "old": "<language>bg</language>",
+        "new": "<language><![CDATA[bg</language>"
+      }
+    ]
+  },
+  {
+    "name": "xml_comment",
+    "ops": [
+      {
+        "op": "text",
+        "file": "feed.xml",
+        "old": "<channel>",
+        "new": "<channel><!-- comment -->"
+      }
+    ]
+  },
+  {
+    "name": "xml_atom_prefix",
+    "ops": [
+      {
+        "op": "text",
+        "file": "feed.xml",
+        "old": "xmlns:atom=",
+        "new": "xmlns:other="
+      },
+      {
+        "op": "text",
+        "file": "feed.xml",
+        "old": "<atom:link",
+        "new": "<other:link"
+      }
+    ]
+  },
+  {
+    "name": "xml_invalid_utf8",
+    "ops": [
+      {
+        "op": "bytes",
+        "file": "feed.xml",
+        "append": [
+          255
+        ]
+      }
+    ]
+  },
+  {
+    "name": "xml_truncated_utf8",
+    "ops": [
+      {
+        "op": "bytes",
+        "file": "feed.xml",
+        "append": [
+          226,
+          130
+        ]
+      }
+    ]
+  },
+  {
+    "name": "unicode_date_coherent",
+    "ops": [
+      {
+        "op": "set",
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "date"
+        ],
+        "value": "٢٠٢٦-١١-٠٦"
+      },
+      {
+        "op": "set",
+        "file": "budget2027.json",
+        "path": [
+          "publication"
+        ],
+        "value": "٢٠٢٦-١١-٠٦"
+      }
+    ]
+  },
+  {
+    "name": "short_date",
+    "ops": [
+      {
+        "op": "set",
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "date"
+        ],
+        "value": "2026-11-6"
+      },
+      {
+        "op": "set",
+        "file": "budget2027.json",
+        "path": [
+          "publication"
+        ],
+        "value": "2026-11-6"
+      }
+    ]
+  },
+  {
+    "name": "nonnumeric_date",
+    "ops": [
+      {
+        "op": "set",
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "date"
+        ],
+        "value": "2026-xx-06"
+      },
+      {
+        "op": "set",
+        "file": "budget2027.json",
+        "path": [
+          "publication"
+        ],
+        "value": "2026-xx-06"
+      }
+    ]
+  },
+  {
+    "name": "overflow_date",
+    "ops": [
+      {
+        "op": "set",
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "date"
+        ],
+        "value": "2026-13-06"
+      },
+      {
+        "op": "set",
+        "file": "budget2027.json",
+        "path": [
+          "publication"
+        ],
+        "value": "2026-13-06"
+      }
+    ]
+  },
+  {
+    "name": "root_null",
+    "ops": [
+      {
+        "op": "root",
+        "file": "feed.json",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "root_bool",
+    "ops": [
+      {
+        "op": "root",
+        "file": "feed.json",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "root_list",
+    "ops": [
+      {
+        "op": "root",
+        "file": "feed.json",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "root_map",
+    "ops": [
+      {
+        "op": "root",
+        "file": "feed.json",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "source_prototype",
+    "ops": [
+      {
+        "op": "set",
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "source"
+        ],
+        "value": [
+          "toString"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "coherent_month_end_drift",
+    "ops": [
+      {
+        "op": "set",
+        "file": "execution.json",
+        "path": [
+          "data",
+          "2026",
+          "asOf",
+          8
+        ],
+        "value": "2026-09-29"
+      },
+      {
+        "op": "set",
+        "file": "execution.json",
+        "path": [
+          "latest",
+          "asOf"
+        ],
+        "value": "2026-09-29"
+      },
+      {
+        "op": "set",
+        "file": "feed.json",
+        "path": [
+          "events",
+          4,
+          "date"
+        ],
+        "value": "2026-09-29"
+      },
+      {
+        "op": "set",
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "asOf"
+        ],
+        "value": "2026-09-29"
+      },
+      {
+        "op": "text",
+        "file": "feed.xml",
+        "old": "<guid isPermaLink=\"false\">kfp-2026-09</guid>\n<pubDate>Wed, 30 Sep 2026 12:00:00 +0000</pubDate>",
+        "new": "<guid isPermaLink=\"false\">kfp-2026-09</guid>\n<pubDate>Tue, 29 Sep 2026 12:00:00 +0000</pubDate>"
+      }
+    ]
+  }
+]

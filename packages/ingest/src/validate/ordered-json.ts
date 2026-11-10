@@ -28,8 +28,11 @@ export function transferPythonKeyOrder(source: unknown, target: unknown): void {
 }
 
 /** Add validation-only key-order metadata without replacing raw numeric tokens. */
-export function parseOrderedPythonJson(text: string): unknown {
-  const result = parsePythonJson<unknown>(text);
+export function parseOrderedPythonJson(
+  text: string,
+  parse: (text: string) => unknown = parsePythonJson<unknown>,
+): unknown {
+  const result = parse(text);
   let i = 0;
   const space = () => {
     while (i < text.length && [9, 10, 13, 32].includes(text.charCodeAt(i))) i++;

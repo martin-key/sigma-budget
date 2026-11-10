@@ -1,0 +1,781 @@
+[
+  {
+    "name": "baseline",
+    "ops": []
+  },
+  {
+    "name": "omitted",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "duplicate",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events"
+        ],
+        "op": "append",
+        "value": {
+          "id": "mf-budget-2027",
+          "date": "2026-11-06",
+          "dateKind": "published",
+          "kind": "data",
+          "title": "Проектът за бюджет 2027 и АСБП 2027–2029 са публикувани от МФ",
+          "text": "Налични са проектът за държавния бюджет за 2027 г. и средносрочната рамка за 2027–2029 г.: ведомствени бюджети, общини и предложени граници на дълга. Проектът не е приет закон.",
+          "href": "#/byudzhet-2027",
+          "status": "real",
+          "source": [
+            "budget2027"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "reordered",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events"
+        ],
+        "op": "reverse"
+      }
+    ]
+  },
+  {
+    "name": "event_kind",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "kind"
+        ],
+        "op": "set",
+        "value": "law"
+      }
+    ]
+  },
+  {
+    "name": "event_source",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "source"
+        ],
+        "op": "set",
+        "value": [
+          "nap"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "event_status",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "status"
+        ],
+        "op": "set",
+        "value": "mock"
+      }
+    ]
+  },
+  {
+    "name": "event_date",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "date"
+        ],
+        "op": "set",
+        "value": "2026-11-07"
+      }
+    ]
+  },
+  {
+    "name": "event_href",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "href"
+        ],
+        "op": "set",
+        "value": "#/missing"
+      }
+    ]
+  },
+  {
+    "name": "event_title",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "title"
+        ],
+        "op": "set",
+        "value": "Друг текст"
+      }
+    ]
+  },
+  {
+    "name": "event_id",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "id"
+        ],
+        "op": "set",
+        "value": "different"
+      }
+    ]
+  },
+  {
+    "name": "event_extra",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "unknown"
+        ],
+        "op": "set",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "amount",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          4,
+          "text"
+        ],
+        "op": "set",
+        "value": "1 млн. €."
+      }
+    ]
+  },
+  {
+    "name": "latest",
+    "ops": [
+      {
+        "file": "execution.json",
+        "path": [
+          "latest",
+          "month"
+        ],
+        "op": "set",
+        "value": 8
+      }
+    ]
+  },
+  {
+    "name": "cumulative",
+    "ops": [
+      {
+        "file": "execution.json",
+        "path": [
+          "data",
+          "2026",
+          "kfp",
+          "rev",
+          8
+        ],
+        "op": "set",
+        "value": "1"
+      }
+    ]
+  },
+  {
+    "name": "denominator",
+    "ops": [
+      {
+        "file": "execution.json",
+        "path": [
+          "plan2026",
+          "basis"
+        ],
+        "op": "set",
+        "value": "changed"
+      }
+    ]
+  },
+  {
+    "name": "pending",
+    "ops": [
+      {
+        "file": "core.json",
+        "path": [
+          "pending",
+          "P04",
+          "reason"
+        ],
+        "op": "set",
+        "value": "Промяна."
+      }
+    ]
+  },
+  {
+    "name": "highlight",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "revenueMln"
+        ],
+        "op": "set",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "sentence",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "sentences",
+          0
+        ],
+        "op": "set",
+        "value": "Приходите са 1 млн. €."
+      }
+    ]
+  },
+  {
+    "name": "typography",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "title"
+        ],
+        "op": "set",
+        "value": " Двойно  пространство."
+      }
+    ]
+  },
+  {
+    "name": "missing_events",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "null_events",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "false_highlights",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "empty_kinds",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "kinds"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "null_month",
+    "ops": [
+      {
+        "file": "execution.json",
+        "path": [
+          "data",
+          "2026",
+          "months"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "float_month",
+    "ops": [
+      {
+        "file": "execution.json",
+        "path": [
+          "data",
+          "2026",
+          "months"
+        ],
+        "op": "set",
+        "value": 9.5
+      }
+    ]
+  },
+  {
+    "name": "missing_source",
+    "ops": [
+      {
+        "file": "core.json",
+        "path": [
+          "sources"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "null_sentence",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "sentences",
+          0
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "xml_malformed",
+    "ops": [
+      {
+        "op": "text",
+        "file": "feed.xml",
+        "old": "</rss>",
+        "new": "</notrss>"
+      }
+    ]
+  },
+  {
+    "name": "xml_channel_link",
+    "ops": [
+      {
+        "op": "text",
+        "file": "feed.xml",
+        "old": "https://budget-na-svetlo.example/",
+        "new": "https://other.example/"
+      }
+    ]
+  },
+  {
+    "name": "xml_namespace",
+    "ops": [
+      {
+        "op": "text",
+        "file": "feed.xml",
+        "old": "http://www.w3.org/2005/Atom",
+        "new": "http://wrong.example/Atom"
+      }
+    ]
+  },
+  {
+    "name": "xml_guid",
+    "ops": [
+      {
+        "op": "text",
+        "file": "feed.xml",
+        "old": "isPermaLink=\"false\"",
+        "new": "isPermaLink=\"true\""
+      }
+    ]
+  },
+  {
+    "name": "xml_date",
+    "ops": [
+      {
+        "op": "text",
+        "file": "feed.xml",
+        "old": "Fri, 06 Nov 2026 12:00:00 +0000",
+        "new": "Fri, 06 Nov 2026 13:00:00 +0000"
+      }
+    ]
+  },
+  {
+    "name": "xml_entity",
+    "ops": [
+      {
+        "op": "text",
+        "file": "feed.xml",
+        "old": "&amp;",
+        "new": "&bogus;"
+      }
+    ]
+  },
+  {
+    "name": "xml_encoding",
+    "ops": [
+      {
+        "op": "text",
+        "file": "feed.xml",
+        "old": "encoding=\"UTF-8\"",
+        "new": "encoding=\"bogus\""
+      }
+    ]
+  },
+  {
+    "name": "null_meta",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "meta"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "array_meta",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "meta"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "null_kind",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "kind"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "source_empty",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "source"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "source_false",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "source"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "null_highlight_value",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "highlights",
+          "revenueMln"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "empty_expected",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "expected"
+        ],
+        "op": "set",
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "map_sentences",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "sentences"
+        ],
+        "op": "set",
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "date_invalid",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "date"
+        ],
+        "op": "set",
+        "value": "2026-02-30"
+      }
+    ]
+  },
+  {
+    "name": "date_future",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "date"
+        ],
+        "op": "set",
+        "value": "2027-01-01"
+      }
+    ]
+  },
+  {
+    "name": "bad_unit",
+    "ops": [
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          4,
+          "text"
+        ],
+        "op": "set",
+        "value": "От началото на годината приходите са 33,90 млрд. €, разходите — 37,57 млрд. €, дефицитът е 3,67 млрд. €. Приходите са с 11,0% повече от същия период на 2025 г. Това е 68,3% от годишния план за приходите. Програма по ЗДБРБ 2026, МФ, приложение 1."
+      }
+    ]
+  },
+  {
+    "name": "owner_publication",
+    "ops": [
+      {
+        "file": "budget2027.json",
+        "path": [
+          "publication"
+        ],
+        "op": "set",
+        "value": "2026-11-05"
+      }
+    ]
+  },
+  {
+    "name": "owner_rate",
+    "ops": [
+      {
+        "file": "rates.json",
+        "path": [
+          "changes",
+          0,
+          "from"
+        ],
+        "op": "set",
+        "value": 123
+      }
+    ]
+  },
+  {
+    "name": "owner_population",
+    "ops": [
+      {
+        "file": "core.json",
+        "path": [
+          "population",
+          "persons"
+        ],
+        "op": "set",
+        "value": 123
+      }
+    ]
+  },
+  {
+    "name": "coherent_pending_bad_typography",
+    "ops": [
+      {
+        "file": "core.json",
+        "path": [
+          "pending",
+          "P04",
+          "reason"
+        ],
+        "op": "set",
+        "value": " Липсва."
+      },
+      {
+        "file": "feed.json",
+        "path": [
+          "expected",
+          0,
+          "note"
+        ],
+        "op": "set",
+        "value": " Липсва."
+      }
+    ]
+  },
+  {
+    "name": "coherent_publication_future",
+    "ops": [
+      {
+        "file": "budget2027.json",
+        "path": [
+          "publication"
+        ],
+        "op": "set",
+        "value": "2027-01-01"
+      },
+      {
+        "file": "feed.json",
+        "path": [
+          "events",
+          0,
+          "date"
+        ],
+        "op": "set",
+        "value": "2027-01-01"
+      }
+    ]
+  },
+  {
+    "name": "xml_title",
+    "ops": [
+      {
+        "op": "text",
+        "file": "feed.xml",
+        "old": "Бюджет на светло: какво е ново",
+        "new": "Друго заглавие"
+      }
+    ]
+  },
+  {
+    "name": "xml_language",
+    "ops": [
+      {
+        "op": "text",
+        "file": "feed.xml",
+        "old": "<language>bg</language>",
+        "new": "<language>en</language>"
+      }
+    ]
+  },
+  {
+    "name": "xml_description",
+    "ops": [
+      {
+        "op": "text",
+        "file": "feed.xml",
+        "old": "Налични са проектът",
+        "new": "Изменени са проектът"
+      }
+    ]
+  },
+  {
+    "name": "xml_missing_item",
+    "ops": [
+      {
+        "op": "text",
+        "file": "feed.xml",
+        "old": "<item>",
+        "new": "<itemX>"
+      }
+    ]
+  },
+  {
+    "name": "xml_entity_amp",
+    "ops": [
+      {
+        "op": "text",
+        "file": "feed.xml",
+        "old": "&amp;",
+        "new": "&lt;"
+      }
+    ]
+  }
+]
