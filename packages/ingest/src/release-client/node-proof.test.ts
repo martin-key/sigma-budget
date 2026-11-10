@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 import { createHash } from 'node:crypto';
-import { REQUIRED_VALIDATION_GROUPS } from '../release-build/types.js';
+import { REQUIRED_VALIDATION_GROUPS, type ValidationGroup } from '../release-build/types.js';
 import { verifyNodeProof } from './node-proof.js';
 import type { ReleaseManifest } from './types.js';
 const canonical = (v: any): any =>
@@ -27,7 +27,7 @@ function fixture() {
     },
     outputs: [],
   } as unknown as ReleaseManifest;
-  const groups = [...REQUIRED_VALIDATION_GROUPS, 'REGISTRY'].map((group) => ({
+  const groups: ValidationGroup[] = [...REQUIRED_VALIDATION_GROUPS, 'REGISTRY'].map((group) => ({
     group,
     status: 'OK',
     checks: 1,

@@ -63,9 +63,10 @@ export function verifyNodeProof(
   if (generated !== undefined) {
     if (!Array.isArray(generated) || !generated.length) fail();
     const paths = new Set<string>();
-    for (const f of generated as unknown[]) {
+    for (const item of generated as unknown[]) {
+      if (!record(item)) return fail();
+      const f = item;
       if (
-        !record(f) ||
         typeof f.path !== 'string' ||
         !/^data\/(?:originals|cache|inputs)\//.test(f.path) ||
         f.path.split('/').some((p) => !p || p === '.' || p === '..') ||
