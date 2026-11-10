@@ -39,7 +39,7 @@ export function readExecutionLaw(pdf: {bytes:Uint8Array;sha256:string}):Executio
       const cells=heads.map((h,c)=>g.filter(t=>heads.reduce((best,x,k)=>Math.abs(t.x-x.x)<Math.abs(t.x-heads[best]!.x)?k:best,0)===c).map(t=>t.text).join(' '));
       assert(cells.some(Boolean),'Annex 1 row has no physical numeric evidence');
       const printed=cells.map(t=>t||null), values=printed.map(t=>t===null?null:Number(t.replace(/[\s%]/gu,'').replace('−','-').replace(',','.')));assert(values.every(v=>v===null||Number.isFinite(v)),'Annex 1 numeric token');
-      rows.push({label:selected.filter(s=>s.x0<=390&&lo<=s.y&&s.y<hi).sort((a,b)=>a.y-b.y||a.x-b.x).map(s=>s.text).join(' '),page:page.number,printed,values,units:['млн. €','млн. €','млн. €','млн. €','% от закона']});
+      rows.push({label:selected.filter(s=>s.x0<=390&&lo<=s.y&&s.y<hi).sort((a,b)=>a.y-b.y||a.x-b.x).map(s=>s.text).join(' '),page:page.number,printed,values,units:cells.map((t,c)=>c===4&&t.endsWith('%')?'% от закона':'млн. €')});
     }
   }
   return {columns:[['програма','млн. €','КФП'],['отчет','млн. €','КФП'],['отчет','млн. €','национален бюджет'],['отчет','млн. €','ЕС'],[undefined,'% от закона','КФП']].map(([vintage,unit,scope])=>({year:2026,...(vintage?{vintage}:{}),unit:unit!,scope:scope!})),rows};

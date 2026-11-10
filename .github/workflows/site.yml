@@ -822,6 +822,13 @@ jobs:
           fail-on-cache-miss: true
       - name: Actual Node readers, complete rules, double build and local recorded-code replay
         run: node scripts/node-import-acceptance.mjs "$RUNNER_TEMP/registered-node-inputs" "$RUNNER_TEMP/node-acceptance" 2026-11-10
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Provision the existing locked browser test tool (outside import runtime)
+        run: |
+          python -m pip install --require-hashes -r tests/requirements-dev.lock
+          python -m playwright install --with-deps chromium
       - name: Package the fresh Node candidate and exercise its Worker and browser identity
         run: node scripts/node-candidate-site-acceptance.mjs "$RUNNER_TEMP/node-acceptance/candidate" "$RUNNER_TEMP/node-site"
       - name: Protected checkout state
