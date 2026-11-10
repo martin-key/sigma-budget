@@ -1,0 +1,1072 @@
+{
+  "published-debt-baseline": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "published-munic-baseline": {
+    "name": "MUNIC",
+    "n": 4940,
+    "problems": [],
+    "warnings": [],
+    "facts": [
+      "265 municipalities in 28 oblasts, transfers 4 887 464,0 thousand euro (+ 40 500,0 other targeted), population 6 445 481, 22068 boundary points, 3 manual name matches"
+    ]
+  },
+  "published-sebra-baseline": {
+    "name": "SEBRA",
+    "n": 55,
+    "problems": [],
+    "warnings": [],
+    "facts": [
+      "3 days (2026-08-27 .. 2026-08-31), 68 payments / 830 688,13 euro in all, latest day 28 / 171 854,85 euro"
+    ]
+  },
+  "candidate-debt-baseline": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "candidate-munic-baseline": {
+    "name": "MUNIC",
+    "n": 4940,
+    "problems": [],
+    "warnings": [],
+    "facts": [
+      "265 municipalities in 28 oblasts, transfers 4 887 464,0 thousand euro (+ 40 500,0 other targeted), population 6 445 481, 22068 boundary points, 3 manual name matches"
+    ]
+  },
+  "candidate-sebra-baseline": {
+    "name": "SEBRA",
+    "n": 55,
+    "problems": [],
+    "warnings": [],
+    "facts": [
+      "3 days (2026-08-27 .. 2026-08-31), 68 payments / 830 688,13 euro in all, latest day 28 / 171 854,85 euro"
+    ]
+  },
+  "debt-schema-extra": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "debt keys ['check', 'compare', 'defaultScope', 'financing', 'guaranteed', 'interest', 'latest', 'limits', 'maastricht', 'meta', 'newDebt', 'notes', 'quarterly', 'scopes', 'structure', 'unknown', 'zdd']"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-source-identity": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "meta id/status/source/pending/mock"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-vintage": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "zdd.vintage ['actual', 'actual', 'actual', 'forecast', 'forecast']",
+      "zdd.columns ['2024 Отчет', '2025 Отчет', '2026 Проект', '2027 Прогноза', '2028 Прогноза']",
+      "latest.zdd.next must equal the 2026 column of table VI-1"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-columns": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "zdd.columns ['2024 Проект', '2025 Отчет', '2026 Проект', '2027 Прогноза', '2028 Прогноза']"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-null-money": {
+    "crash": "TypeError",
+    "message": "unsupported operand type(s) for *: 'float' and 'NoneType'"
+  },
+  "debt-money": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "zdd 2026: total = external + domestic: 37701.8 vs 37691.8 (tolerance 0.16000000000000003)",
+      "latest.zdd.next must equal the 2026 column of table VI-1",
+      "the 2026 state debt of table VI-1 must stay under the legal cap"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 701,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-pct-gdp": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "zdd 2024: external + domestic percent: 23.1 vs 24.1 (tolerance 0.16000000000000003)",
+      "zdd 2024: printed total percent of GDP against value / GDP: 24.1 vs 23.124603883658246 (tolerance 0.051)",
+      "check.zddPrintedPctMaxDev: 0.05 vs 0.9753961163417557 (tolerance 0.0051)"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-gdp-denominator": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "zdd.gdpMln [105767.2, 116018.3, 125246.7, 134592.2, 143253.9] must equal outlook.gdp.mlnPrecise [104767.2, 116018.3, 125246.7, 134592.2, 143253.9]",
+      "zdd 2024: printed total percent of GDP against value / GDP: 23.1 vs 22.905967067294966 (tolerance 0.051)",
+      "zdd 2024: printed external percent of GDP against value / GDP: 17.3 vs 17.136219924513462 (tolerance 0.051)",
+      "check.zddPrintedPctMaxDev: 0.05 vs 0.19403293270503497 (tolerance 0.0051)"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-asbp-source": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "zdd table / source / asOf"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-scopes": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "scopes.zdd"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-latest": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "latest.zdd must equal the 2025 column of table VI-1"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-next": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "latest.zdd.next must equal the 2026 column of table VI-1"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-annual-year": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "scopes.maastricht",
+      "maastricht.years 2014..2025"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-annual-null": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "maastricht: a non-numeric value"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-threshold": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "maastricht threshold / dataset / source"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-unknown-gdp-vintage": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "latest.maastricht must equal the last year of the annual series",
+      "maastricht 2024: percent against the GDP: 23.7 vs 23.84038134072496 (tolerance 0.051)",
+      "maastricht 2025: percent against the GDP: 29.9 vs 29.992682188930537 (tolerance 0.051)"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-quarter-gap": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "quarterly.eurostat: quarters must run 2024-Q1..2026-Q2 without a gap",
+      "Eurostat quarterly debt differs from the BNB general-government series by 3029.120 (> 0.05)",
+      "check.eurostatQuarterlyVsBnbGgMaxDev: 0.04 vs 3029.119999999999 (tolerance 0.0051)"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 3029.120, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-bnb-gg-money": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "Eurostat quarterly debt differs from the BNB general-government series by 10.020 (> 0.05)",
+      "check.eurostatQuarterlyVsBnbGgMaxDev: 0.04 vs 10.020000000000437 (tolerance 0.0051)"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 10.020, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-quarter-flag": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "quarterly.eurostat.flags: only the newest quarters are provisional"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-quarter-dataset": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "quarterly dataset / indicators"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-comparison-source": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "compare.cg must equal the BNB central-government fourth quarter"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-compare-note": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "compare.note must carry the generic verification wording"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-structure-group-omission": {
+    "crash": "KeyError",
+    "message": "'maturity'"
+  },
+  "debt-structure-money": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "structure maturity: shares sum to 110.10% at worst (> 100 +/- 0.1)",
+      "check.structureGroupMaxDevFrom100.maturity: 0.1 vs 10.099999999999994 (tolerance 0.0051)"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-structure-unit": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "structure table / source / asOf / unit"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-maturity": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "avgMaturity.printed ['1 г.', '8 г. и 8 м.', '9 г. и 1 м.', '9 г. и 5 м.', '10 г. и 3 м.'] must equal the months [99, 104, 109, 113, 123]"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-interest": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "interest 2024: total = external + domestic: 497.4 vs 487.40000000000003 (tolerance 0.16000000000000003)"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-guaranteed": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "guaranteed 2024: printed percent of GDP: 1.8 vs 0.8294580746645897 (tolerance 0.051)"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-guaranteed-sector": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "guaranteed 2024: the sector shares: 100.9 vs 100.0 (tolerance 0.31000000000000005)"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-uses": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "newDebt.uses: four statements"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-newdebt-parts": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "newDebt.y2025: total = parts: 9637.3 vs 9647.3 (tolerance 0.21000000000000002)"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-repayments": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "newDebt.y2025.repaymentsBln"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-issuance": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "newDebt.issued2026: total = months: 1410.0 vs 1420.0 (tolerance 0.31000000000000005)"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-issuance-month": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "newDebt.issued2026.months must be the consecutive months of the year"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-printed-limit-unit": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "limits.debtCap: printed '37,7 млрд. лв.' must equal 37700.0 million"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-safe-inclusion": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "limits.newDebt.includesMln (SAFE)"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-cap": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "limits.debtCap: printed '37,7 млрд. евро' must equal 1 million",
+      "the 2026 state debt of table VI-1 must stay under the legal cap",
+      "newDebt.limitEnd2026Bln must equal the cap of art. 66: 37700.0 vs 1 (tolerance 0.01)"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 1 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-plan-kind": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "newDebt.plan kinds"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-refinanced": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "newDebt.plan values"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-financing": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "financing.rows must be rows of execution.json with a label each"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-financing-date": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "financing.ref / asOf must equal the execution data"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-notes": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "notes ids ['projection', 'quarterly', 'maturities']"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-stored-check": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [
+      "check.zddPrintedPctMaxDev: 1 vs 0.04780351313077702 (tolerance 0.0051)"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-stored-group-omission": {
+    "name": "DEBT",
+    "n": 175,
+    "problems": [
+      "check block keys / limitsMatchMotives"
+    ],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "debt-within-printed-total-tolerance": {
+    "name": "DEBT",
+    "n": 176,
+    "problems": [],
+    "warnings": [],
+    "facts": [
+      "table VI-1 5 years (2026 plan 37 691,8 of the 37 700 cap), Maastricht 11 years + 10 quarters, GG vs BNB max dev 0.040, structure 5 groups, 5 legal limits"
+    ]
+  },
+  "municip-unit": {
+    "name": "MUNIC",
+    "n": 4940,
+    "problems": [
+      "meta id / status / source / unit"
+    ],
+    "warnings": [],
+    "facts": [
+      "265 municipalities in 28 oblasts, transfers 4 887 464,0 thousand euro (+ 40 500,0 other targeted), population 6 445 481, 22068 boundary points, 3 manual name matches"
+    ]
+  },
+  "municip-year": {
+    "name": "MUNIC",
+    "n": 4940,
+    "problems": [
+      "year / populationYear / columns"
+    ],
+    "warnings": [],
+    "facts": [
+      "265 municipalities in 28 oblasts, transfers 4 887 464,0 thousand euro (+ 40 500,0 other targeted), population 6 445 481, 22068 boundary points, 3 manual name matches"
+    ]
+  },
+  "municip-population-year": {
+    "name": "MUNIC",
+    "n": 4940,
+    "problems": [
+      "year / populationYear / columns"
+    ],
+    "warnings": [],
+    "facts": [
+      "265 municipalities in 28 oblasts, transfers 4 887 464,0 thousand euro (+ 40 500,0 other targeted), population 6 445 481, 22068 boundary points, 3 manual name matches"
+    ]
+  },
+  "municip-part-total": {
+    "name": "MUNIC",
+    "n": 4940,
+    "problems": [
+      "kinds ids / partOfTotal flags"
+    ],
+    "warnings": [],
+    "facts": [
+      "265 municipalities in 28 oblasts, transfers 4 887 464,0 thousand euro (+ 40 500,0 other targeted), population 6 445 481, 22068 boundary points, 3 manual name matches"
+    ]
+  },
+  "municip-note": {
+    "name": "MUNIC",
+    "n": 4940,
+    "problems": [
+      "note texts"
+    ],
+    "warnings": [],
+    "facts": [
+      "265 municipalities in 28 oblasts, transfers 4 887 464,0 thousand euro (+ 40 500,0 other targeted), population 6 445 481, 22068 boundary points, 3 manual name matches"
+    ]
+  },
+  "municip-swap": {
+    "name": "MUNIC",
+    "n": 4940,
+    "problems": [
+      "popFix: used = gisco, swapped",
+      "popFix: the rural municipality is the larger one with fewer people",
+      "DOB15 Добрич-селска: population 17232 must equal popFix.used"
+    ],
+    "warnings": [],
+    "facts": [
+      "265 municipalities in 28 oblasts, transfers 4 887 464,0 thousand euro (+ 40 500,0 other targeted), population 6 445 481, 22068 boundary points, 3 manual name matches"
+    ]
+  },
+  "municip-rural-area": {
+    "name": "MUNIC",
+    "n": 4940,
+    "problems": [
+      "popFix: the rural municipality is the larger one with fewer people"
+    ],
+    "warnings": [],
+    "facts": [
+      "265 municipalities in 28 oblasts, transfers 4 887 464,0 thousand euro (+ 40 500,0 other targeted), population 6 445 481, 22068 boundary points, 3 manual name matches"
+    ]
+  },
+  "municip-population": {
+    "name": "MUNIC",
+    "n": 4940,
+    "problems": [
+      "BGS01 Айтос: perCapita.total: 796.22 vs 796.1911246395387 (tolerance 0.0051)",
+      "BGS01 Айтос: perCapita.delegated: 673.71 vs 673.6783082345402 (tolerance 0.0051)",
+      "totals.populationSum 6445481, Σ items 6445482 (expected 6445481)"
+    ],
+    "warnings": [],
+    "facts": [
+      "265 municipalities in 28 oblasts, transfers 4 887 464,0 thousand euro (+ 40 500,0 other targeted), population 6 445 482, 22068 boundary points, 3 manual name matches"
+    ]
+  },
+  "municip-null-transfer": {
+    "name": "MUNIC",
+    "n": 4931,
+    "problems": [
+      "BGS01 Айтос: transfers keys / values",
+      "totals.transfersKhil = Σ items: 4887464.0 vs 4867584.699999998 (tolerance 0.5)",
+      "totals.otherTargetedKhil = Σ items: 40500.0 vs 40395.29999999998 (tolerance 0.5)",
+      "totals.allKhil = Σ items: 4927964.0 vs 4907980.000000002 (tolerance 0.5)",
+      "check.columnSums [4887464.0, 4351706.0, 255658.0, 25100.0, 255000.0, 40500.0] vs [4867584.7, 4334885.6, 253699.8, 25008.2, 253991.1, 40395.3]"
+    ],
+    "warnings": [],
+    "facts": [
+      "265 municipalities in 28 oblasts, transfers 4 887 464,0 thousand euro (+ 40 500,0 other targeted), population 6 445 481, 22068 boundary points, 3 manual name matches"
+    ]
+  },
+  "municip-money": {
+    "name": "MUNIC",
+    "n": 4940,
+    "problems": [
+      "BGS01 Айтос: total 19880.3 differs from its four kinds by 1.00",
+      "BGS01 Айтос: all = total + otherTargeted: 19984.0 vs 19985.0 (tolerance 0.15000000000000002)",
+      "BGS01 Айтос: perCapita.total: 796.22 vs 796.2630672487684 (tolerance 0.0051)",
+      "oblast BGS: transfers = Σ municipalities: 298356.1 vs 298357.1 (tolerance 0.05)",
+      "totals.transfersKhil = Σ items: 4887464.0 vs 4887464.999999997 (tolerance 0.5)",
+      "check.columnSums [4887464.0, 4351706.0, 255658.0, 25100.0, 255000.0, 40500.0] vs [4887465.0, 4351706.0, 255658.0, 25100.0, 255000.0, 40500.0]",
+      "check.rowSumMaxDev: 0.0 vs 0.999999999996362 (tolerance 0.0051)"
+    ],
+    "warnings": [],
+    "facts": [
+      "265 municipalities in 28 oblasts, transfers 4 887 464,0 thousand euro (+ 40 500,0 other targeted), population 6 445 481, 22068 boundary points, 3 manual name matches"
+    ]
+  },
+  "municip-all": {
+    "name": "MUNIC",
+    "n": 4940,
+    "problems": [
+      "BGS01 Айтос: all = total + otherTargeted: 19985.0 vs 19984.0 (tolerance 0.15000000000000002)",
+      "totals.allKhil = Σ items: 4927964.0 vs 4927965.000000002 (tolerance 0.5)"
+    ],
+    "warnings": [],
+    "facts": [
+      "265 municipalities in 28 oblasts, transfers 4 887 464,0 thousand euro (+ 40 500,0 other targeted), population 6 445 481, 22068 boundary points, 3 manual name matches"
+    ]
+  },
+  "municip-percapita": {
+    "name": "MUNIC",
+    "n": 4940,
+    "problems": [
+      "BGS01 Айтос: perCapita.capital: 41.41 vs 40.40934032923459 (tolerance 0.0051)"
+    ],
+    "warnings": [],
+    "facts": [
+      "265 municipalities in 28 oblasts, transfers 4 887 464,0 thousand euro (+ 40 500,0 other targeted), population 6 445 481, 22068 boundary points, 3 manual name matches"
+    ]
+  },
+  "municip-region-id": {
+    "name": "MUNIC",
+    "n": 4940,
+    "problems": [
+      "BGS01 Айтос: regionId XYZ",
+      "regions: 28 oblasts, each with municipalities",
+      "oblast BGS: municipality count / name",
+      "oblast BGS: transfers = Σ municipalities: 298356.1 vs 278476.8 (tolerance 0.05)",
+      "oblast BGS: other targeted = Σ municipalities: 4099.1 vs 3994.4 (tolerance 0.05)",
+      "oblast BGS: municipality population 359479 is far from the oblast figure 388919"
+    ],
+    "warnings": [],
+    "facts": [
+      "265 municipalities in 28 oblasts, transfers 4 887 464,0 thousand euro (+ 40 500,0 other targeted), population 6 445 481, 22068 boundary points, 3 manual name matches"
+    ]
+  },
+  "municip-duplicate-id": {
+    "name": "MUNIC",
+    "n": 4940,
+    "problems": [
+      "items: 265 unique ids of the form XXX00",
+      "geo: 265 unique features with the ids of municipalities.json",
+      "geo BGS01: properties {'id': 'BGS01', 'name': 'Айтос'}"
+    ],
+    "warnings": [],
+    "facts": [
+      "265 municipalities in 28 oblasts, transfers 4 887 464,0 thousand euro (+ 40 500,0 other targeted), population 6 445 481, 22068 boundary points, 3 manual name matches"
+    ]
+  },
+  "municip-manual-law-name": {
+    "name": "MUNIC",
+    "n": 4940,
+    "problems": [
+      "BGS01 Айтос: keys ['id', 'lawName', 'match', 'name', 'perCapita', 'population', 'region', 'regionId', 'transfers']",
+      "BGS01 Айтос: match exact / lawName"
+    ],
+    "warnings": [],
+    "facts": [
+      "265 municipalities in 28 oblasts, transfers 4 887 464,0 thousand euro (+ 40 500,0 other targeted), population 6 445 481, 22068 boundary points, 3 manual name matches"
+    ]
+  },
+  "municip-oblast-count": {
+    "name": "MUNIC",
+    "n": 4940,
+    "problems": [
+      "oblast BLG: municipality count / name"
+    ],
+    "warnings": [],
+    "facts": [
+      "265 municipalities in 28 oblasts, transfers 4 887 464,0 thousand euro (+ 40 500,0 other targeted), population 6 445 481, 22068 boundary points, 3 manual name matches"
+    ]
+  },
+  "municip-oblast-sum": {
+    "name": "MUNIC",
+    "n": 4940,
+    "problems": [
+      "oblast BLG: transfers = Σ municipalities: 250210.6 vs 250209.6 (tolerance 0.05)",
+      "Σ oblast transfers = national: 4887465.0 vs 4887464.0 (tolerance 0.5)"
+    ],
+    "warnings": [],
+    "facts": [
+      "265 municipalities in 28 oblasts, transfers 4 887 464,0 thousand euro (+ 40 500,0 other targeted), population 6 445 481, 22068 boundary points, 3 manual name matches"
+    ]
+  },
+  "municip-nuts": {
+    "name": "MUNIC",
+    "n": 4940,
+    "problems": [
+      "oblast BLG: population2025 / nuts3"
+    ],
+    "warnings": [],
+    "facts": [
+      "265 municipalities in 28 oblasts, transfers 4 887 464,0 thousand euro (+ 40 500,0 other targeted), population 6 445 481, 22068 boundary points, 3 manual name matches"
+    ]
+  },
+  "municip-population-total": {
+    "name": "MUNIC",
+    "n": 4940,
+    "problems": [
+      "totals.populationSum 6445482, Σ items 6445481 (expected 6445481)"
+    ],
+    "warnings": [],
+    "facts": [
+      "265 municipalities in 28 oblasts, transfers 4 887 464,0 thousand euro (+ 40 500,0 other targeted), population 6 445 481, 22068 boundary points, 3 manual name matches"
+    ]
+  },
+  "municip-column-sums": {
+    "name": "MUNIC",
+    "n": 4940,
+    "problems": [
+      "check.columnSums [4887465.0, 4351706.0, 255658.0, 25100.0, 255000.0, 40500.0] vs [4887464.0, 4351706.0, 255658.0, 25100.0, 255000.0, 40500.0]"
+    ],
+    "warnings": [],
+    "facts": [
+      "265 municipalities in 28 oblasts, transfers 4 887 464,0 thousand euro (+ 40 500,0 other targeted), population 6 445 481, 22068 boundary points, 3 manual name matches"
+    ]
+  },
+  "municip-flags": {
+    "name": "MUNIC",
+    "n": 4940,
+    "problems": [
+      "check flags"
+    ],
+    "warnings": [],
+    "facts": [
+      "265 municipalities in 28 oblasts, transfers 4 887 464,0 thousand euro (+ 40 500,0 other targeted), population 6 445 481, 22068 boundary points, 3 manual name matches"
+    ]
+  },
+  "municip-boundary-identity": {
+    "name": "MUNIC",
+    "n": 4940,
+    "problems": [
+      "geo: 265 unique features with the ids of municipalities.json",
+      "geo XYZ00: properties {'id': 'XYZ00', 'name': 'Айтос'}"
+    ],
+    "warnings": [],
+    "facts": [
+      "265 municipalities in 28 oblasts, transfers 4 887 464,0 thousand euro (+ 40 500,0 other targeted), population 6 445 481, 22068 boundary points, 3 manual name matches"
+    ]
+  },
+  "municip-boundary-coordinate": {
+    "name": "MUNIC",
+    "n": 4940,
+    "problems": [
+      "geo BGS01: coordinates outside Bulgaria: [[100, 42.712]]"
+    ],
+    "warnings": [],
+    "facts": [
+      "265 municipalities in 28 oblasts, transfers 4 887 464,0 thousand euro (+ 40 500,0 other targeted), population 6 445 481, 22068 boundary points, 3 manual name matches"
+    ]
+  },
+  "municip-boundary-source": {
+    "name": "MUNIC",
+    "n": 4940,
+    "problems": [
+      "geo meta / type"
+    ],
+    "warnings": [],
+    "facts": [
+      "265 municipalities in 28 oblasts, transfers 4 887 464,0 thousand euro (+ 40 500,0 other targeted), population 6 445 481, 22068 boundary points, 3 manual name matches"
+    ]
+  },
+  "sebra-unit": {
+    "name": "SEBRA",
+    "n": 55,
+    "problems": [
+      "meta id / status / source / unit"
+    ],
+    "warnings": [],
+    "facts": [
+      "3 days (2026-08-27 .. 2026-08-31), 68 payments / 830 688,13 euro in all, latest day 28 / 171 854,85 euro"
+    ]
+  },
+  "sebra-day-order": {
+    "name": "SEBRA",
+    "n": 55,
+    "problems": [
+      "days: three ISO dates in order",
+      "day 2026-09-01: label '27 август 2026 г.'",
+      "publication.files: one parsed file per day"
+    ],
+    "warnings": [],
+    "facts": [
+      "3 days (2026-09-01 .. 2026-08-31), 68 payments / 830 688,13 euro in all, latest day 28 / 171 854,85 euro"
+    ]
+  },
+  "sebra-count": {
+    "name": "SEBRA",
+    "n": 55,
+    "problems": [
+      "day 2026-08-27: counts add up",
+      "overall.count 68"
+    ],
+    "warnings": [],
+    "facts": [
+      "3 days (2026-08-27 .. 2026-08-31), 68 payments / 830 688,13 euro in all, latest day 28 / 171 854,85 euro"
+    ]
+  },
+  "sebra-money": {
+    "name": "SEBRA",
+    "n": 55,
+    "problems": [
+      "day 2026-08-27: eur = Σ categories: 5938.72 vs 5937.72 (tolerance 0.011)",
+      "day 2026-08-27: eur = Σ organisations: 5938.72 vs 5937.72 (tolerance 0.011)",
+      "overall.eur = Σ days: 830688.13 vs 830689.13 (tolerance 0.011)"
+    ],
+    "warnings": [],
+    "facts": [
+      "3 days (2026-08-27 .. 2026-08-31), 68 payments / 830 688,13 euro in all, latest day 28 / 171 854,85 euro"
+    ]
+  },
+  "sebra-category-money": {
+    "name": "SEBRA",
+    "n": 55,
+    "problems": [
+      "day 2026-08-27: eur = Σ categories: 5937.72 vs 5938.72 (tolerance 0.011)",
+      "overall.byCode must be the Σ of the days"
+    ],
+    "warnings": [],
+    "facts": [
+      "3 days (2026-08-27 .. 2026-08-31), 68 payments / 830 688,13 euro in all, latest day 28 / 171 854,85 euro"
+    ]
+  },
+  "sebra-organisation-money": {
+    "name": "SEBRA",
+    "n": 55,
+    "problems": [
+      "day 2026-08-27: eur = Σ organisations: 5937.72 vs 5938.72 (tolerance 0.011)",
+      "day 2026-08-27 ИАИЕУ: eur by category: 5132.8 vs 5131.8 (tolerance 0.011)"
+    ],
+    "warnings": [],
+    "facts": [
+      "3 days (2026-08-27 .. 2026-08-31), 68 payments / 830 688,13 euro in all, latest day 28 / 171 854,85 euro"
+    ]
+  },
+  "sebra-organisation-count": {
+    "name": "SEBRA",
+    "n": 55,
+    "problems": [
+      "day 2026-08-27: counts add up",
+      "day 2026-08-27 ИАИЕУ: counts by category"
+    ],
+    "warnings": [],
+    "facts": [
+      "3 days (2026-08-27 .. 2026-08-31), 68 payments / 830 688,13 euro in all, latest day 28 / 171 854,85 euro"
+    ]
+  },
+  "sebra-category-code": {
+    "name": "SEBRA",
+    "n": 55,
+    "problems": [
+      "day 2026-08-27: category codes",
+      "overall.byCode must be the Σ of the days"
+    ],
+    "warnings": [],
+    "facts": [
+      "3 days (2026-08-27 .. 2026-08-31), 68 payments / 830 688,13 euro in all, latest day 28 / 171 854,85 euro"
+    ]
+  },
+  "sebra-headline": {
+    "name": "SEBRA",
+    "n": 55,
+    "problems": [
+      "total / byCode / byOrganisation must equal the latest day"
+    ],
+    "warnings": [],
+    "facts": [
+      "3 days (2026-08-27 .. 2026-08-31), 68 payments / 830 688,13 euro in all, latest day 28 / 171 854,85 euro"
+    ]
+  },
+  "sebra-overall": {
+    "name": "SEBRA",
+    "n": 55,
+    "problems": [
+      "overall.eur = Σ days: 830689.13 vs 830688.13 (tolerance 0.011)"
+    ],
+    "warnings": [],
+    "facts": [
+      "3 days (2026-08-27 .. 2026-08-31), 68 payments / 830 689,13 euro in all, latest day 28 / 171 854,85 euro"
+    ]
+  },
+  "sebra-overall-category": {
+    "name": "SEBRA",
+    "n": 55,
+    "problems": [
+      "overall.byCode must be the Σ of the days",
+      "overall.byCode counts"
+    ],
+    "warnings": [],
+    "facts": [
+      "3 days (2026-08-27 .. 2026-08-31), 68 payments / 830 688,13 euro in all, latest day 28 / 171 854,85 euro"
+    ]
+  },
+  "sebra-not-month": {
+    "name": "SEBRA",
+    "n": 55,
+    "problems": [
+      "overallLabel must say it is not the whole month"
+    ],
+    "warnings": [],
+    "facts": [
+      "3 days (2026-08-27 .. 2026-08-31), 68 payments / 830 688,13 euro in all, latest day 28 / 171 854,85 euro"
+    ]
+  },
+  "sebra-file-size": {
+    "name": "SEBRA",
+    "n": 55,
+    "problems": [
+      "file 2026-08-27: size / format"
+    ],
+    "warnings": [],
+    "facts": [
+      "3 days (2026-08-27 .. 2026-08-31), 68 payments / 830 688,13 euro in all, latest day 28 / 171 854,85 euro"
+    ]
+  },
+  "sebra-file-format": {
+    "name": "SEBRA",
+    "n": 55,
+    "problems": [
+      "file 2026-08-27: size / format"
+    ],
+    "warnings": [],
+    "facts": [
+      "3 days (2026-08-27 .. 2026-08-31), 68 payments / 830 688,13 euro in all, latest day 28 / 171 854,85 euro"
+    ]
+  },
+  "sebra-unparsed": {
+    "name": "SEBRA",
+    "n": 55,
+    "problems": [
+      "publication.files: one parsed file per day"
+    ],
+    "warnings": [],
+    "facts": [
+      "3 days (2026-08-27 .. 2026-08-31), 68 payments / 830 688,13 euro in all, latest day 28 / 171 854,85 euro"
+    ]
+  },
+  "sebra-listing-date": {
+    "name": "SEBRA",
+    "n": 55,
+    "problems": [
+      "file 2026-08-27: listedOn 2026-11-11"
+    ],
+    "warnings": [],
+    "facts": [
+      "3 days (2026-08-27 .. 2026-08-31), 68 payments / 830 688,13 euro in all, latest day 28 / 171 854,85 euro"
+    ]
+  },
+  "sebra-page": {
+    "name": "SEBRA",
+    "n": 55,
+    "problems": [
+      "publication page / dates"
+    ],
+    "warnings": [],
+    "facts": [
+      "3 days (2026-08-27 .. 2026-08-31), 68 payments / 830 688,13 euro in all, latest day 28 / 171 854,85 euro"
+    ]
+  },
+  "sebra-check": {
+    "name": "SEBRA",
+    "n": 55,
+    "problems": [
+      "check block {'daysParsed': 2, 'daysListed': 3, 'categoriesAddUp': True, 'organisationsAddUp': True, 'fileSizesMatchListing': True}"
+    ],
+    "warnings": [],
+    "facts": [
+      "3 days (2026-08-27 .. 2026-08-31), 68 payments / 830 688,13 euro in all, latest day 28 / 171 854,85 euro"
+    ]
+  },
+  "sebra-notes": {
+    "name": "SEBRA",
+    "n": 55,
+    "problems": [
+      "notes: four statements"
+    ],
+    "warnings": [],
+    "facts": [
+      "3 days (2026-08-27 .. 2026-08-31), 68 payments / 830 688,13 euro in all, latest day 28 / 171 854,85 euro"
+    ]
+  },
+  "sebra-ministry": {
+    "name": "SEBRA",
+    "n": 55,
+    "problems": [
+      "ministry / publisher texts"
+    ],
+    "warnings": [],
+    "facts": [
+      "3 days (2026-08-27 .. 2026-08-31), 68 payments / 830 688,13 euro in all, latest day 28 / 171 854,85 euro"
+    ]
+  }
+}
