@@ -1,3 +1,4 @@
+import { viewUnit } from '../../../client/publication-query.js';
 import { narrativeModel } from './narrative';
 import { metadata as lawMetadata, question as lawQuestion } from '../../routes/zakon-content';
 import { lede as feedLede } from '../../routes/novo-content';
@@ -61,7 +62,7 @@ export function textMetadata(model: TextScreenModel) {
             data: model.content,
             core: model.core,
             query: model.query,
-            unit: 'eur',
+            unit: viewUnit(model.query.unit) || 'eur',
             origin: model.release.origin,
             href,
           })
@@ -70,7 +71,7 @@ export function textMetadata(model: TextScreenModel) {
               data: model.content,
               core: model.core,
               query: model.query,
-              unit: 'eur',
+              unit: viewUnit(model.query.unit) || 'eur',
               origin: model.release.origin,
               href,
             }),

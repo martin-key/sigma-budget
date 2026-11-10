@@ -1,0 +1,1671 @@
+[
+  {
+    "name": "published-debt-baseline",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "PASS",
+    "ops": []
+  },
+  {
+    "name": "published-munic-baseline",
+    "group": "MUNIC",
+    "baseline": "published",
+    "expected": "PASS",
+    "ops": []
+  },
+  {
+    "name": "published-sebra-baseline",
+    "group": "SEBRA",
+    "baseline": "published",
+    "expected": "PASS",
+    "ops": []
+  },
+  {
+    "name": "candidate-debt-baseline",
+    "group": "DEBT",
+    "baseline": "candidate",
+    "expected": "PASS",
+    "ops": []
+  },
+  {
+    "name": "candidate-munic-baseline",
+    "group": "MUNIC",
+    "baseline": "candidate",
+    "expected": "PASS",
+    "ops": []
+  },
+  {
+    "name": "candidate-sebra-baseline",
+    "group": "SEBRA",
+    "baseline": "candidate",
+    "expected": "PASS",
+    "ops": []
+  },
+  {
+    "name": "debt-schema-extra",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "unknown"
+        ],
+        "op": "set",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "debt-source-identity",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "meta",
+          "source"
+        ],
+        "op": "set",
+        "value": [
+          "asbp",
+          "bnb"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "debt-vintage",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "zdd",
+          "vintage",
+          "2"
+        ],
+        "op": "set",
+        "value": "actual"
+      }
+    ]
+  },
+  {
+    "name": "debt-columns",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "zdd",
+          "columns",
+          "0"
+        ],
+        "op": "set",
+        "value": "2024 Проект"
+      }
+    ]
+  },
+  {
+    "name": "debt-null-money",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "zdd",
+          "totalMln",
+          "0"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "debt-money",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "zdd",
+          "totalMln",
+          "2"
+        ],
+        "op": "add",
+        "value": 10
+      }
+    ]
+  },
+  {
+    "name": "debt-pct-gdp",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "zdd",
+          "pctGdp",
+          "0"
+        ],
+        "op": "add",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "debt-gdp-denominator",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "zdd",
+          "gdpMln",
+          "0"
+        ],
+        "op": "add",
+        "value": 1000
+      }
+    ]
+  },
+  {
+    "name": "debt-asbp-source",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "zdd",
+          "source"
+        ],
+        "op": "set",
+        "value": [
+          "bnb"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "debt-scopes",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "scopes",
+          "0",
+          "source"
+        ],
+        "op": "set",
+        "value": [
+          "eurostat"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "debt-latest",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "latest",
+          "zdd",
+          "mln"
+        ],
+        "op": "add",
+        "value": 10
+      }
+    ]
+  },
+  {
+    "name": "debt-next",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "latest",
+          "zdd",
+          "next",
+          "year"
+        ],
+        "op": "set",
+        "value": 2027
+      }
+    ]
+  },
+  {
+    "name": "debt-annual-year",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "maastricht",
+          "years",
+          "0"
+        ],
+        "op": "set",
+        "value": 2014
+      }
+    ]
+  },
+  {
+    "name": "debt-annual-null",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "maastricht",
+          "eu27",
+          "mln",
+          "0"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "debt-threshold",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "maastricht",
+          "thresholdPctGdp"
+        ],
+        "op": "set",
+        "value": 61
+      }
+    ]
+  },
+  {
+    "name": "debt-unknown-gdp-vintage",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "maastricht",
+          "asOf"
+        ],
+        "op": "set",
+        "value": "2026-10-22"
+      }
+    ]
+  },
+  {
+    "name": "debt-quarter-gap",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "quarterly",
+          "eurostat",
+          "quarters",
+          "1"
+        ],
+        "op": "set",
+        "value": "2024-Q3"
+      }
+    ]
+  },
+  {
+    "name": "debt-bnb-gg-money",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "quarterly",
+          "bnbGg",
+          "mln",
+          "35"
+        ],
+        "op": "add",
+        "value": 10
+      }
+    ]
+  },
+  {
+    "name": "debt-quarter-flag",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "quarterly",
+          "eurostat",
+          "flags",
+          "0"
+        ],
+        "op": "set",
+        "value": "p"
+      }
+    ]
+  },
+  {
+    "name": "debt-quarter-dataset",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "quarterly",
+          "eurostat",
+          "dataset"
+        ],
+        "op": "set",
+        "value": "gov_10dd_edpt1"
+      }
+    ]
+  },
+  {
+    "name": "debt-comparison-source",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "compare",
+          "rows",
+          "1",
+          "source"
+        ],
+        "op": "set",
+        "value": [
+          "eurostat"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "debt-compare-note",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "compare",
+          "note"
+        ],
+        "op": "set",
+        "value": ""
+      }
+    ]
+  },
+  {
+    "name": "debt-structure-group-omission",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "structure",
+          "groups",
+          "0"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "debt-structure-money",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "structure",
+          "groups",
+          "0",
+          "rows",
+          "0",
+          "values",
+          "0"
+        ],
+        "op": "add",
+        "value": 10
+      }
+    ]
+  },
+  {
+    "name": "debt-structure-unit",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "structure",
+          "unit"
+        ],
+        "op": "set",
+        "value": "млн. €"
+      }
+    ]
+  },
+  {
+    "name": "debt-maturity",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "structure",
+          "avgMaturity",
+          "printed",
+          "0"
+        ],
+        "op": "set",
+        "value": "1 г."
+      }
+    ]
+  },
+  {
+    "name": "debt-interest",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "interest",
+          "totalMln",
+          "0"
+        ],
+        "op": "add",
+        "value": 10
+      }
+    ]
+  },
+  {
+    "name": "debt-guaranteed",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "guaranteed",
+          "pctGdpPrinted",
+          "0"
+        ],
+        "op": "add",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "debt-guaranteed-sector",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "guaranteed",
+          "sectors",
+          "0",
+          "values",
+          "0"
+        ],
+        "op": "add",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "debt-uses",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "newDebt",
+          "uses",
+          "0"
+        ],
+        "op": "set",
+        "value": ""
+      }
+    ]
+  },
+  {
+    "name": "debt-newdebt-parts",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "newDebt",
+          "y2025",
+          "parts",
+          "0",
+          "mln"
+        ],
+        "op": "add",
+        "value": 10
+      }
+    ]
+  },
+  {
+    "name": "debt-repayments",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "newDebt",
+          "y2025",
+          "repaymentsBln"
+        ],
+        "op": "set",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "debt-issuance",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "newDebt",
+          "issued2026",
+          "months",
+          "0",
+          "mln"
+        ],
+        "op": "add",
+        "value": 10
+      }
+    ]
+  },
+  {
+    "name": "debt-issuance-month",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "newDebt",
+          "issued2026",
+          "months",
+          "0",
+          "month"
+        ],
+        "op": "set",
+        "value": "юни"
+      }
+    ]
+  },
+  {
+    "name": "debt-printed-limit-unit",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "limits",
+          "items",
+          "0",
+          "printed"
+        ],
+        "op": "set",
+        "value": "37,7 млрд. лв."
+      }
+    ]
+  },
+  {
+    "name": "debt-safe-inclusion",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "limits",
+          "items",
+          "1",
+          "includesMln"
+        ],
+        "op": "set",
+        "value": 3261.8
+      }
+    ]
+  },
+  {
+    "name": "debt-cap",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "limits",
+          "items",
+          "0",
+          "mln"
+        ],
+        "op": "set",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "debt-plan-kind",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "newDebt",
+          "plan",
+          "0",
+          "kind"
+        ],
+        "op": "set",
+        "value": "plan"
+      }
+    ]
+  },
+  {
+    "name": "debt-refinanced",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "newDebt",
+          "plan",
+          "1",
+          "refinancedBln"
+        ],
+        "op": "set",
+        "value": 999
+      }
+    ]
+  },
+  {
+    "name": "debt-financing",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "financing",
+          "rows",
+          "0"
+        ],
+        "op": "set",
+        "value": "unknown"
+      }
+    ]
+  },
+  {
+    "name": "debt-financing-date",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "financing",
+          "asOf"
+        ],
+        "op": "set",
+        "value": "2026-01-01"
+      }
+    ]
+  },
+  {
+    "name": "debt-notes",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "notes",
+          "0",
+          "text"
+        ],
+        "op": "set",
+        "value": ""
+      }
+    ]
+  },
+  {
+    "name": "debt-stored-check",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "check",
+          "zddPrintedPctMaxDev"
+        ],
+        "op": "set",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "debt-stored-group-omission",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "check",
+          "structureGroupMaxDevFrom100",
+          "currency"
+        ],
+        "op": "delete"
+      }
+    ]
+  },
+  {
+    "name": "debt-within-printed-total-tolerance",
+    "group": "DEBT",
+    "baseline": "published",
+    "expected": "PASS",
+    "ops": [
+      {
+        "file": "debt.json",
+        "path": [
+          "zdd",
+          "externalMln",
+          "0"
+        ],
+        "op": "add",
+        "value": 0.1
+      }
+    ]
+  },
+  {
+    "name": "municip-unit",
+    "group": "MUNIC",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "municipalities.json",
+        "path": [
+          "meta",
+          "unit"
+        ],
+        "op": "set",
+        "value": "€"
+      }
+    ]
+  },
+  {
+    "name": "municip-year",
+    "group": "MUNIC",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "municipalities.json",
+        "path": [
+          "year"
+        ],
+        "op": "set",
+        "value": 2027
+      }
+    ]
+  },
+  {
+    "name": "municip-population-year",
+    "group": "MUNIC",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "municipalities.json",
+        "path": [
+          "populationYear"
+        ],
+        "op": "set",
+        "value": 2025
+      }
+    ]
+  },
+  {
+    "name": "municip-part-total",
+    "group": "MUNIC",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "municipalities.json",
+        "path": [
+          "kinds",
+          "1",
+          "partOfTotal"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "municip-note",
+    "group": "MUNIC",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "municipalities.json",
+        "path": [
+          "note"
+        ],
+        "op": "set",
+        "value": ""
+      }
+    ]
+  },
+  {
+    "name": "municip-swap",
+    "group": "MUNIC",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "municipalities.json",
+        "path": [
+          "popFix",
+          "used",
+          "DOB15"
+        ],
+        "op": "set",
+        "value": 70411
+      }
+    ]
+  },
+  {
+    "name": "municip-rural-area",
+    "group": "MUNIC",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "municipalities.json",
+        "path": [
+          "popFix",
+          "areaKm2",
+          "DOB15"
+        ],
+        "op": "set",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "municip-population",
+    "group": "MUNIC",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "municipalities.json",
+        "path": [
+          "items",
+          "0",
+          "population"
+        ],
+        "op": "add",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "municip-null-transfer",
+    "group": "MUNIC",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "municipalities.json",
+        "path": [
+          "items",
+          "0",
+          "transfers",
+          "delegated"
+        ],
+        "op": "set",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "municip-money",
+    "group": "MUNIC",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "municipalities.json",
+        "path": [
+          "items",
+          "0",
+          "transfers",
+          "total"
+        ],
+        "op": "add",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "municip-all",
+    "group": "MUNIC",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "municipalities.json",
+        "path": [
+          "items",
+          "0",
+          "transfers",
+          "all"
+        ],
+        "op": "add",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "municip-percapita",
+    "group": "MUNIC",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "municipalities.json",
+        "path": [
+          "items",
+          "0",
+          "perCapita",
+          "capital"
+        ],
+        "op": "add",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "municip-region-id",
+    "group": "MUNIC",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "municipalities.json",
+        "path": [
+          "items",
+          "0",
+          "regionId"
+        ],
+        "op": "set",
+        "value": "XYZ"
+      }
+    ]
+  },
+  {
+    "name": "municip-duplicate-id",
+    "group": "MUNIC",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "municipalities.json",
+        "path": [
+          "items",
+          "0",
+          "id"
+        ],
+        "op": "set",
+        "value": "BGS04"
+      }
+    ]
+  },
+  {
+    "name": "municip-manual-law-name",
+    "group": "MUNIC",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "municipalities.json",
+        "path": [
+          "items",
+          "0",
+          "lawName"
+        ],
+        "op": "set",
+        "value": "wrong"
+      }
+    ]
+  },
+  {
+    "name": "municip-oblast-count",
+    "group": "MUNIC",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "municipalities.json",
+        "path": [
+          "regions",
+          "0",
+          "municipalities"
+        ],
+        "op": "add",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "municip-oblast-sum",
+    "group": "MUNIC",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "municipalities.json",
+        "path": [
+          "regions",
+          "0",
+          "transfersKhil"
+        ],
+        "op": "add",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "municip-nuts",
+    "group": "MUNIC",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "municipalities.json",
+        "path": [
+          "regions",
+          "0",
+          "nuts3"
+        ],
+        "op": "set",
+        "value": "BG9999"
+      }
+    ]
+  },
+  {
+    "name": "municip-population-total",
+    "group": "MUNIC",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "municipalities.json",
+        "path": [
+          "totals",
+          "populationSum"
+        ],
+        "op": "add",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "municip-column-sums",
+    "group": "MUNIC",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "municipalities.json",
+        "path": [
+          "check",
+          "columnSums",
+          "0"
+        ],
+        "op": "add",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "municip-flags",
+    "group": "MUNIC",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "municipalities.json",
+        "path": [
+          "check",
+          "populationFixApplied"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "municip-boundary-identity",
+    "group": "MUNIC",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "geo/obshtini.json",
+        "path": [
+          "features",
+          "0",
+          "properties",
+          "id"
+        ],
+        "op": "set",
+        "value": "XYZ00"
+      }
+    ]
+  },
+  {
+    "name": "municip-boundary-coordinate",
+    "group": "MUNIC",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "geo/obshtini.json",
+        "path": [
+          "features",
+          "0",
+          "geometry",
+          "coordinates",
+          "0",
+          "0",
+          "0"
+        ],
+        "op": "set",
+        "value": 100
+      }
+    ]
+  },
+  {
+    "name": "municip-boundary-source",
+    "group": "MUNIC",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "geo/obshtini.json",
+        "path": [
+          "meta",
+          "source"
+        ],
+        "op": "set",
+        "value": [
+          "eurostat"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "sebra-unit",
+    "group": "SEBRA",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "sebra.json",
+        "path": [
+          "meta",
+          "unit"
+        ],
+        "op": "set",
+        "value": "хил. €"
+      }
+    ]
+  },
+  {
+    "name": "sebra-day-order",
+    "group": "SEBRA",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "sebra.json",
+        "path": [
+          "days",
+          "0",
+          "date"
+        ],
+        "op": "set",
+        "value": "2026-09-01"
+      }
+    ]
+  },
+  {
+    "name": "sebra-count",
+    "group": "SEBRA",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "sebra.json",
+        "path": [
+          "days",
+          "0",
+          "count"
+        ],
+        "op": "add",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "sebra-money",
+    "group": "SEBRA",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "sebra.json",
+        "path": [
+          "days",
+          "0",
+          "eur"
+        ],
+        "op": "add",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "sebra-category-money",
+    "group": "SEBRA",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "sebra.json",
+        "path": [
+          "days",
+          "0",
+          "byCode",
+          "0",
+          "eur"
+        ],
+        "op": "add",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "sebra-organisation-money",
+    "group": "SEBRA",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "sebra.json",
+        "path": [
+          "days",
+          "0",
+          "byOrganisation",
+          "0",
+          "eur"
+        ],
+        "op": "add",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "sebra-organisation-count",
+    "group": "SEBRA",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "sebra.json",
+        "path": [
+          "days",
+          "0",
+          "byOrganisation",
+          "0",
+          "count"
+        ],
+        "op": "add",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "sebra-category-code",
+    "group": "SEBRA",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "sebra.json",
+        "path": [
+          "days",
+          "0",
+          "byCode",
+          "0",
+          "code"
+        ],
+        "op": "set",
+        "value": "99"
+      }
+    ]
+  },
+  {
+    "name": "sebra-headline",
+    "group": "SEBRA",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "sebra.json",
+        "path": [
+          "total",
+          "eur"
+        ],
+        "op": "add",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "sebra-overall",
+    "group": "SEBRA",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "sebra.json",
+        "path": [
+          "overall",
+          "eur"
+        ],
+        "op": "add",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "sebra-overall-category",
+    "group": "SEBRA",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "sebra.json",
+        "path": [
+          "overall",
+          "byCode",
+          "0",
+          "count"
+        ],
+        "op": "add",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "sebra-not-month",
+    "group": "SEBRA",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "sebra.json",
+        "path": [
+          "overallLabel"
+        ],
+        "op": "set",
+        "value": "Общо месец"
+      }
+    ]
+  },
+  {
+    "name": "sebra-file-size",
+    "group": "SEBRA",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "sebra.json",
+        "path": [
+          "publication",
+          "files",
+          "0",
+          "bytes"
+        ],
+        "op": "add",
+        "value": 100
+      }
+    ]
+  },
+  {
+    "name": "sebra-file-format",
+    "group": "SEBRA",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "sebra.json",
+        "path": [
+          "publication",
+          "files",
+          "0",
+          "format"
+        ],
+        "op": "set",
+        "value": "xls"
+      }
+    ]
+  },
+  {
+    "name": "sebra-unparsed",
+    "group": "SEBRA",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "sebra.json",
+        "path": [
+          "publication",
+          "files",
+          "0",
+          "parsed"
+        ],
+        "op": "set",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "sebra-listing-date",
+    "group": "SEBRA",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "sebra.json",
+        "path": [
+          "publication",
+          "files",
+          "0",
+          "listedOn"
+        ],
+        "op": "set",
+        "value": "2026-11-11"
+      }
+    ]
+  },
+  {
+    "name": "sebra-page",
+    "group": "SEBRA",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "sebra.json",
+        "path": [
+          "publication",
+          "page"
+        ],
+        "op": "set",
+        "value": "http://example.org"
+      }
+    ]
+  },
+  {
+    "name": "sebra-check",
+    "group": "SEBRA",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "sebra.json",
+        "path": [
+          "check",
+          "daysParsed"
+        ],
+        "op": "set",
+        "value": 2
+      }
+    ]
+  },
+  {
+    "name": "sebra-notes",
+    "group": "SEBRA",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "sebra.json",
+        "path": [
+          "notes",
+          "0"
+        ],
+        "op": "set",
+        "value": ""
+      }
+    ]
+  },
+  {
+    "name": "sebra-ministry",
+    "group": "SEBRA",
+    "baseline": "published",
+    "expected": "FAIL",
+    "ops": [
+      {
+        "file": "sebra.json",
+        "path": [
+          "ministryCode"
+        ],
+        "op": "set",
+        "value": ""
+      }
+    ]
+  }
+]

@@ -49,6 +49,20 @@ export function pythonNumberAt(holder: object, key: string, value: number): Pyth
   return { value, kind: float || !Number.isInteger(value) ? 'float' : 'int' };
 }
 
+/** Clone JSON projections without losing the int/float kinds of untouched fields. */
+export function clonePythonNumbers<T>(value: T): T {
+  const copy = structuredClone(value);
+  function transfer(source: unknown, target: unknown): void {
+    if (!source || !target || typeof source !== 'object' || typeof target !== 'object') return;
+    const tokens = floatTokens.get(source);
+    if (tokens) floatTokens.set(target, new Map(tokens));
+    for (const key of Object.keys(source))
+      transfer((source as Record<string, unknown>)[key], (target as Record<string, unknown>)[key]);
+  }
+  transfer(value, copy);
+  return copy;
+}
+
 /** CPython 3.12 sum over mixed JSON ints/floats (64-bit Linux).
  * The initial integer sum is exact; the first float starts float accumulation.
  * Later ints bypass Neumaier compensation, unlike later floats.

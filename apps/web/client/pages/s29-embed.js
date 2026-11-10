@@ -108,7 +108,7 @@ export async function render(ctx) {
   // the title is the page heading; `label` still names the figure for assistive tech. A host that declares status 'mock' gets the hatch and the badge too.
   const spec = { ...e.chart, title: '', label: e.chart.title, ...(e.status === 'mock' ? { mock: true } : {}) };
   const mock = isMockSpec(e.chart) || e.status === 'mock';
-  const link = absolute(host ? routeHref(host.id, params, { per: ctx.period.key }) : '#/');
+  const link = absolute(host ? routeHref(host.id, params, { per: ctx.period.key, unit: ctx.store.get('unit') }) : '#/');
   return {
     title: e.chart.title || 'Графика',
     body: html`<div class="s29-embed">

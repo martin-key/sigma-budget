@@ -1,3 +1,4 @@
+import { Buffer } from 'node:buffer';
 import { gzip } from 'pako';
 import { pythonPrintable } from './unicode15.js';
 
@@ -145,7 +146,34 @@ export function fmt(value: unknown, digits = 1): string {
   );
 }
 
-/** Python's gzip size contract uses standard zlib, independent of Node's zlib-ng. */
+const gzipSizes = new Map<string, number>();
+const gzipCacheBytes = 16 * 1024 * 1024;
+const gzipCacheEntries = 256;
+let retainedGzipBytes = 0;
+
+/** Python's gzip size contract uses standard zlib, independent of Node's zlib-ng.
+ * Reuse exact byte content; snapshots prevent stale entries for mutable views.
+ */
 export function gzipSize(raw: Uint8Array): number {
-  return gzip(raw, { level: 9 }).length;
+  if (raw.byteLength > gzipCacheBytes) return gzip(raw, { level: 9 }).length;
+  const snapshot = Buffer.from(raw),
+    key = snapshot.toString('latin1'),
+    known = gzipSizes.get(key);
+  if (known !== undefined) {
+    gzipSizes.delete(key);
+    gzipSizes.set(key, known);
+    return known;
+  }
+  const size = gzip(snapshot, { level: 9 }).length;
+  while (
+    gzipSizes.size &&
+    (retainedGzipBytes + key.length > gzipCacheBytes || gzipSizes.size >= gzipCacheEntries)
+  ) {
+    const oldest = gzipSizes.keys().next().value!;
+    gzipSizes.delete(oldest);
+    retainedGzipBytes -= oldest.length;
+  }
+  gzipSizes.set(key, size);
+  retainedGzipBytes += key.length;
+  return size;
 }

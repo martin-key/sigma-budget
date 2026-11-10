@@ -14,6 +14,19 @@ export function pythonKeys(value: object): string[] {
   ];
 }
 
+/** Preserve source key positions across the execution projection's deep copy. */
+export function transferPythonKeyOrder(source: unknown, target: unknown): void {
+  if (!source || !target || typeof source !== 'object' || typeof target !== 'object') return;
+  const order = keyOrders.get(source);
+  if (order) keyOrders.set(target, order);
+  for (const key of Object.keys(source))
+    if (Object.hasOwn(target, key))
+      transferPythonKeyOrder(
+        (source as Record<string, unknown>)[key],
+        (target as Record<string, unknown>)[key],
+      );
+}
+
 /** Add validation-only key-order metadata without replacing raw numeric tokens. */
 export function parseOrderedPythonJson(text: string): unknown {
   const result = parsePythonJson<unknown>(text);
