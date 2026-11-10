@@ -1217,15 +1217,19 @@ export function catalog(ctx: Context): Check {
     );
     const name = opt(f, 'name', undefined, kind(f, fs, __rowIndex5));
     c.ok(hasRequired, `files ${pstr(name, kind(name, f, 'name'))}: keys`);
-    const sha = get(f, 'sha256', kind(f, fs, __rowIndex5)),
-      bytes = get(f, 'bytes', kind(f, fs, __rowIndex5));
+    const sha = get(f, 'sha256', kind(f, fs, __rowIndex5));
     if (typeof sha !== 'string')
       error('TypeError', `expected string or bytes-like object, got '${kind(sha, f, 'sha256')}'`);
     c.ok(
       /^[0-9a-f]{64}\n?$/.test(sha) &&
-        ((Number.isInteger(bytes) && pythonNumberAt(f, 'bytes', bytes).kind === 'int') ||
-          typeof bytes === 'boolean') &&
-        number(bytes) > 0,
+        (() => {
+          const bytes = get(f, 'bytes', kind(f, fs, __rowIndex5));
+          return (
+            ((Number.isInteger(bytes) && pythonNumberAt(f, 'bytes', bytes).kind === 'int') ||
+              typeof bytes === 'boolean') &&
+            number(bytes) > 0
+          );
+        })(),
       `files ${pstr(get(f, 'name', kind(f, fs, __rowIndex5)), kind(get(f, 'name', kind(f, fs, __rowIndex5)), f, 'name'))}: sha256/bytes`,
     );
     c.ok(

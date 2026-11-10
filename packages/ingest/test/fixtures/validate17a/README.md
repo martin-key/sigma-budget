@@ -58,3 +58,10 @@ without replacing the original corpus. Dictionary keys retain source order,
 including integer-like year keys, across parsing and the execution deep copy;
 later equal keys overwrite values at their original position. Reversed-year
 and first-error controls cover this independently of the frozen golden output.
+
+`short-circuit/generate_oracle.py --check` adds 24 complete donor outcomes for
+SHA and byte-field evaluation. Invalid SHA text skips the byte lookup; invalid
+SHA types retain their own first error, and a valid SHA still requires bytes.
+Missing-field combinations, the final-LF control and byte type/value controls
+are compared directly and through the compiled CLI. All earlier captures stay
+unchanged.
