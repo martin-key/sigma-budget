@@ -1,10 +1,11 @@
 // Data table (plan 6.6): caption, scoped headers, keyboard-scrollable wrapper, optional sorting, hatched mock rows, CSV export hook.
 //   dataTable({id, caption, columns:[{key,label,align,fmt,sort,unit,d}], rows:[{…, _mock:true, _href}], total, sortable, sortBy, dir, query, dense, note, empty, captionVisible})
 //   - columns[0] is the row header (<th scope="row">); `fmt(value,row)` may return a string or html``; numbers default to Bulgarian format
-//   - rows are plain objects; a row with `_mock:true` is hatched and read as „примерни данни“; `_href` links the first cell
+//   - rows are plain objects; a row with `_mock:true` is hatched and read as „примерни данни“; `_href` (URL or function of table state) links the first cell
 //   - a null/undefined value prints an em dash (never a made-up number); an unknown number prints "—", never NaN
 //   - sortable:true adds header buttons (aria-sort). With query:true the choice is written to ?sort=&dir= (pass ctx.query.sort/dir as sortBy/dir)
 // The table registers itself with share.attach(), so a block's „Изтегли CSV“ finds it without extra code.
+// updateRows(id, rows) updates a live-filtered body and its export while preserving sorting and header focus.
 import { scoped } from '../env.js';
 import { html, raw, esc, SafeHtml } from '../html.js';
 import { num, DASH } from '../format.js';
@@ -38,12 +39,23 @@ const sorted = s => {
 };
 
 function rowsHtml(s) {
+  if (!s.rows.length) return html`<tr><td colspan="${s.columns.length}" class="t-empty">${s.empty || 'Няма редове за показване.'}</td></tr>`;
   return html`${sorted(s).map(r => html`<tr${r._id ? html` id="${r._id}" tabindex="-1"` : ''}${r._mock ? raw(' data-mock="true"') : ''}>${s.columns.map((c, i) => {
     const al = s.aligns[i] === 'end' ? ' class="t-end"' : '';
-    const inner = i === 0 && r._href ? html`<a href="${r._href}">${cell(c, r)}</a>` : cell(c, r);
+    const href = i === 0 && (typeof r._href === 'function' ? r._href(s) : r._href);
+    const inner = href ? html`<a href="${href}">${cell(c, r)}</a>` : cell(c, r);
     const mock = i === 0 && r._mock ? html`<span class="sr-only"> (примерни данни)</span>` : '';
     return i === 0 ? html`<th scope="row"${raw(al)}>${inner}${mock}</th>` : html`<td${raw(al)}>${inner}</td>`;
   })}</tr>`)}`;
+}
+
+/** Update a live-filtered table without replacing its controls, sorting or CSV attachment. */
+export function updateRows(id, rows) {
+  const s = specs.get(id);
+  if (!s) return;
+  s.rows = rows;
+  const tbody = document.getElementById(id)?.querySelector('tbody');
+  if (tbody) tbody.innerHTML = rowsHtml(s).s;
 }
 
 /** the table as plain values: used by the CSV export and by figure twins */
@@ -75,10 +87,9 @@ export function dataTable(o) {
       : html`<th scope="col" class="${al.trim()}">${lab}</th>`;
   });
   const foot = o.total ? html`<tfoot><tr><th scope="row">${o.total.label || 'Общо'}</th>${s.columns.slice(1).map((c, i) => html`<td${raw(s.aligns[i + 1] === 'end' ? ' class="t-end"' : '')}>${o.total.values && o.total.values[c.key] != null ? cell(c, o.total.values) : DASH}</td>`)}</tr></tfoot>` : '';
-  const empty = !rows.length ? html`<tbody><tr><td colspan="${s.columns.length}" class="t-empty">${o.empty || 'Няма редове за показване.'}</td></tr></tbody>` : null;
   return html`<div class="table-wrap${o.dense ? ' dense' : ''}" id="${o.id}-wrap" tabindex="0" role="region" aria-labelledby="${cap}" data-ui="table" data-attach="${o.id}"${o.status === 'mock' ? raw(' data-mock-table="true"') : ''}>
     <table class="data" id="${o.id}"><caption id="${cap}" class="${o.captionVisible ? 'cap-visible' : 'sr-only'}">${o.caption}</caption>
-    <thead><tr>${head}</tr></thead>${empty || html`<tbody>${rowsHtml(s)}</tbody>`}${foot}</table>
+    <thead><tr>${head}</tr></thead><tbody>${rowsHtml(s)}</tbody>${foot}</table>
     ${o.note ? html`<p class="table-note small muted">${o.note}</p>` : ''}</div>`;
 }
 

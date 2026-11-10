@@ -1,5 +1,5 @@
 import { isFramework } from '../budget-2027.js';
-import { institutionView, mountBillSearch } from './bill-views.js';
+import { institutionView, mountBillSearch, billListHref } from './bill-views.js';
 // S11 · Ведомство · #/vedomstvo/<код>[/<програма>] · next S15, S10 · period 2026.law only
 // Data, only through `needs`:
 //   ministries         D08+D09 REAL  the budget of the spender by the 2026 law (хил. €), the law's policy list, the bill-vs-law flags and where
@@ -312,7 +312,7 @@ export function crumbs(ctx) {
 }
 
 export function next(ctx) {
-  if (isFramework(ctx)) return ['S10'];
+  if (isFramework(ctx)) return [{ title: 'Към списъка с ведомства', href: billListHref(ctx) }];
   const M = modelOf(ctx);
   if (!M.node) return ['S15', 'S10'];
   return [{ kicker: 'Следва', title: plainName(M.m), text: 'Всички политики и програми на ведомството.', href: ctx.href('vedomstvo', { code: M.code }) }, 'S10'];

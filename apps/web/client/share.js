@@ -16,7 +16,7 @@ import { here, parts as addrParts, absolute } from './loc.js';
 import { icon } from './icons.js';
 import { data } from './data.js';
 import { date, csvCell } from './format.js';
-import { SCOPES } from './store.js';
+import { SCOPES, store } from './store.js';
 import { statusLabel } from './ui/status.js';
 import { srcShort } from './ui/source.js';
 import { popover, sheet } from './ui/sheet.js';
@@ -94,6 +94,7 @@ export function linkFor(spec, { to = true } = {}) {
   const own = val(spec?.link);
   if (own && typeof own === 'object') for (const [k, v] of Object.entries(own)) { if (v == null || v === '') q.delete(k); else if (!PERSONAL.has(k)) q.set(k, String(v)); }
   if (q.has('per')) q.set('per', resolvePeriod(q.get('per')).resolved);
+  q.set('unit', store.get('unit'));
   if (to && spec?.id) q.set('to', spec.id); else q.delete('to');
   return absolute(path + (q.toString() ? '?' + q : ''));
 }
@@ -151,16 +152,16 @@ export function csvFor(spec) {
 }
 /** address of the embed view (S29): /embed/<routeKey>.<chartId>[?per=…&<spec.embedParams>] (internal form, js/loc.js)
  *  embedParams = the host screen's own address parameters ({code:'1000'} for #/vedomstvo/1000): S29 hands them back to the screen as its params.
- *  Keys are plain names (never per/demo), values primitives. */
+ *  Keys are plain names (never per/demo/unit), values primitives. */
 export function embedHash(spec) {
   const e = spec.embed, pre = spec.route || 'embed';
   const key = e === true ? `${pre}.${spec.chart || spec.id}` : typeof e === 'string' && e ? (e.includes('.') ? e : `${pre}.${e}`) : '';
   if (!key) return '';
-  const q = new URLSearchParams();
+  const q = new URLSearchParams({ unit: store.get('unit') });
   const per = new URLSearchParams(addrParts(here()).query).get('per');
   if (per) q.set('per', resolvePeriod(per).resolved);
   for (const [k, v] of Object.entries(spec.embedParams || {})) {
-    if (/^[A-Za-z][\w-]*$/.test(k) && k !== 'per' && k !== 'demo' && v != null && v !== '' && typeof v !== 'object') q.set(k, String(v));
+    if (/^[A-Za-z][\w-]*$/.test(k) && k !== 'per' && k !== 'demo' && k !== 'unit' && v != null && v !== '' && typeof v !== 'object') q.set(k, String(v));
   }
   const qs = q.toString();
   return `/embed/${key}${qs ? '?' + qs : ''}`;

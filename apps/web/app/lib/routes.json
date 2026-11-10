@@ -177,7 +177,7 @@
       "budget",
       "landmark",
       {
-        "query": ["tab", "vid", "podredba", "izgled", "ved", "pod", "nivo", "q", "pq", "variant"],
+        "query": ["tab", "vid", "podredba", "izgled", "ved", "pod", "nivo", "q", "pq", "variant", "sort", "dir"],
         "short": "Кой харчи",
         "step": 5,
         "next": ["S15"],
@@ -201,7 +201,7 @@
         "samples": ["#/vedomstvo/1300"],
         "desc": "Бюджет, политики и програми на едно ведомство. Проект 2027 и АСБП 2027–2029; историческият закон за 2026 г. е отделен.",
         "periods": ["2026.law", "2027.draft", "2028.forecast", "2029.forecast"],
-        "query": ["variant"]
+        "query": ["variant", "q", "sort", "dir"]
       }
     ],
     [
@@ -405,6 +405,7 @@
         "next": ["S20"],
         "parent": "S20",
         "nav": false,
+        "query": ["q", "oblast", "sort", "dir"],
         "samples": ["#/obshtina/BLG03"],
         "desc": "Годишни трансфери към една община. Проект 2027 и АСБП 2027–2029; историческият закон за 2026 г. е отделен.",
         "periods": ["2026.law", "2027.draft", "2028.forecast", "2029.forecast"]
