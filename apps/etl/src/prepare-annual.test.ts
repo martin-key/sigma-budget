@@ -1,5 +1,5 @@
-import { mkdtemp, rm, readFile, mkdir, cp } from 'node:fs/promises';
-import { resolve, join } from 'node:path';
+import { mkdtemp, rm, readFile, readdir, mkdir, cp } from 'node:fs/promises';
+import { resolve, join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { expect, it } from 'vitest';
 import { prepareAnnualCli } from './prepare-annual.js';
@@ -45,4 +45,40 @@ it('rejects missing, duplicate and unknown CLI flags', async () => {
   await expect(prepareAnnualCli([])).rejects.toThrow(/Required/);
   await expect(prepareAnnualCli(['--out', 'one', '--out', 'two'])).rejects.toThrow(/Invalid/);
   await expect(prepareAnnualCli(['--fixture-root', 'x'])).rejects.toThrow(/Invalid/);
+});
+it.each(
+  ['--pins', '--source-registry'].flatMap((flag) =>
+    [
+      'data/inputs/budget_forecast_2027.json',
+      'data/inputs/budget_bill_2027.json',
+      'tmp/budget-2027-extractions.json',
+    ].map((destination) => ({ flag, destination })),
+  ),
+)('protects $flag at output $destination before any write', async ({ flag, destination }) => {
+  const out = await mkdtemp(join(tmpdir(), 'sigma-annual-cli-input-'));
+  try {
+    const target = join(out, destination);
+    await mkdir(dirname(target), { recursive: true });
+    await cp(join(root, flag === '--pins' ? 'data/originals.sha256' : 'data/sources.yaml'), target);
+    const before = await readFile(target);
+    const entries = (await readdir(out, { recursive: true })).sort();
+    const args = [
+      '--source-root',
+      root,
+      '--source-registry',
+      join(root, 'data/sources.yaml'),
+      '--pins',
+      join(root, 'data/originals.sha256'),
+      '--out',
+      out,
+      '--build-date',
+      '2026-11-10',
+    ];
+    args[args.indexOf(flag) + 1] = target;
+    await expect(prepareAnnualCli(args)).rejects.toThrow(/overlaps registry or pins input/);
+    expect(await readFile(target)).toEqual(before);
+    expect((await readdir(out, { recursive: true })).sort()).toEqual(entries);
+  } finally {
+    await rm(out, { recursive: true, force: true });
+  }
 });

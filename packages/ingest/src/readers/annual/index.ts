@@ -15,6 +15,8 @@ export { prepareAnnual, readAnnualRegistration } from './prepare.js';
 export type { AnnualPreparationOptions, AnnualPreparationReceipt } from './prepare.js';
 export interface AnnualRegistration {
   id: 'budget2027';
+  /** Files read to construct this registration, protected by filesystem preparation. */
+  inputPaths?: { registry: string; pins: string };
   archive: string;
   archiveSha256: string;
   acquisition: string;

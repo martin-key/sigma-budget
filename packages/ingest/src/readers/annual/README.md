@@ -11,7 +11,9 @@ Import from `@sigma-budget/ingest/readers/annual`:
 
 - `readAnnualRegistration(registryPath, pinsPath)` reads the existing `sources`
   registry and `originals.sha256`. Archive, acquisition and member pins remain
-  independent of the source's acquisition self-description.
+  independent of the source's acquisition self-description. It retains the resolved
+  registry/pins input paths for overwrite protection during filesystem preparation;
+  these local paths are not included in the serialized annual outputs.
 - `extractAnnual2027({ registration, archive, acquisition, buildDate, limits? })`
   accepts registered metadata and actual byte arrays. It verifies the archive,
   acquisition record, role/member identity, member hashes and lengths before PDF
@@ -57,7 +59,9 @@ node apps/etl/dist/prepare-annual.js \
 The command prints the receipt as JSON, returns 1 on failure, and requires every
 path/date flag. The example date is not hard-coded. Output cannot overlap the
 source root/originals, checkout data/release, fixtures or registries. Symlinks and
-hardlinked input/intermediate/report files are rejected. Newly created files use
+hardlinked input/intermediate/report files are rejected. The registry and pins
+files are checked against both intermediate destinations and the receipt path
+before PDF decoding or any write. Newly created files use
 exclusive creation; existing intermediate bytes remain unchanged on successful
 verification and failures. Caller ownership must exclude concurrent writers.
 

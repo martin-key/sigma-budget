@@ -136,6 +136,7 @@ export async function readAnnualRegistration(
   assert(pins[archive] && pins[acquisition], 'Annual original pins missing');
   return {
     id: 'budget2027',
+    inputPaths: { registry: resolve(registryPath), pins: resolve(pinsPath) },
     archive,
     archiveSha256: pins[archive]!,
     acquisition,
@@ -257,8 +258,17 @@ export async function prepareAnnual(
     forecast: 'data/inputs/budget_forecast_2027.json',
     bill: 'data/inputs/budget_bill_2027.json',
   } as const;
-  for (const path of Object.values(paths)) await safePath(resolve(out, path));
-  await safePath(resolve(out, 'tmp/budget-2027-extractions.json'));
+  const reportPath = resolve(out, 'tmp/budget-2027-extractions.json');
+  const destinations = [...Object.values(paths).map((path) => resolve(out, path)), reportPath];
+  for (const file of Object.values(r.inputPaths ?? {})) {
+    const input = resolve(file);
+    await safePath(input);
+    assert(
+      destinations.every((path) => !inside(path, input) && !inside(input, path)),
+      'Annual output overlaps registry or pins input',
+    );
+  }
+  for (const path of destinations) await safePath(path);
   const archive = await read(archivePath, 32 * 1024 * 1024),
     acquisition = await read(acquisitionPath, 1024 * 1024);
   const result = extractAnnual2027({
@@ -295,7 +305,6 @@ export async function prepareAnnual(
       bytes: bytes ?? Buffer.from(serializeAnnual(result[role])),
     });
   }
-  const reportPath = resolve(out, 'tmp/budget-2027-extractions.json');
   await safePath(reportPath);
   const receipt: AnnualPreparationReceipt = {
     ...result.evidence,
