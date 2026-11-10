@@ -50,7 +50,7 @@ export function verifyNodeProof(
     manifest.processing.executor.runtime !== 'node-export/1'
   )
     return;
-  const fail = () => {
+  const fail = (): never => {
     throw new ReleaseError(
       2,
       'Node package requires complete executed validation and its bound receipt',
