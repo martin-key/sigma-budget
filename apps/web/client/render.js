@@ -226,7 +226,7 @@ export async function build(route, params, query, o = {}) {
   if (o.stale?.()) throw aborted();
   const parts = out && typeof out === 'object' && !(out instanceof SafeHtml) && !Array.isArray(out) ? out : { body: out };
   const title = parts.title ?? safeCall(mod.title || (() => route.title), ctx, route.title);
-  const pageCrumbs = mod.crumbs ? safeCall(mod.crumbs, ctx, null) : null;
+  const pageCrumbs = parts.crumbs ?? (mod.crumbs ? safeCall(mod.crumbs, ctx, null) : null);
   return {
     ...base, view: 'ready', mod, ctx, title,
     eyebrow: parts.eyebrow ?? eyebrowFor(route), accent: parts.accent,
