@@ -15,9 +15,14 @@ function type(value: unknown, holder?: object, key?: string): string {
   const names: Record<string, string> = { boolean: 'bool', string: 'str', object: 'dict' };
   return names[typeof value] ?? typeof value;
 }
-function mapping(value: any, method: 'items' | 'values' | 'get'): Record<string, any> {
+function mapping(
+  value: any,
+  method: 'items' | 'values' | 'get',
+  holder?: object,
+  field?: string,
+): Record<string, any> {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) {
-    const error = new Error(`'${type(value)}' object has no attribute '${method}'`);
+    const error = new Error(`'${type(value, holder, field)}' object has no attribute '${method}'`);
     error.name = 'AttributeError';
     throw error;
   }
@@ -25,7 +30,8 @@ function mapping(value: any, method: 'items' | 'values' | 'get'): Record<string,
 }
 export const executionItems = (value: any): [string, any][] =>
   Object.entries(mapping(value, 'items'));
-export const executionValues = (value: any): any[] => Object.values(mapping(value, 'values'));
+export const executionValues = (value: any, holder?: object, field?: string): any[] =>
+  Object.values(mapping(value, 'values', holder, field));
 export const executionGet = (value: any, key: string): any => {
   const dict = mapping(value, 'get');
   return Object.hasOwn(dict, key) ? dict[key] : null;

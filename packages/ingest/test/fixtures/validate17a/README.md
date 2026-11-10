@@ -41,3 +41,12 @@ diagnostics and the later screen-list join. Owner/key metadata follows actual
 reads, including aliases and lazy owner getters. The file-count check performs
 length before iteration; string join preserves its own error after membership
 short-circuits. Earlier observations and tolerances remain immutable.
+
+`iterators/generate_oracle.py --check` adds 103 full donor outcomes for numeric
+types at iterator and callback reads, both set operands and primary-source row
+membership. Execution projection preserves the source type when reading a data
+or monthly block and retains the original values-operation failure order.
+Required source keys are tested before optional name lookup. Four paired boolean
+and numeric cases preserve Python equality within sets.
+Every case is compared directly and through the compiled CLI; previous captures
+remain unchanged.

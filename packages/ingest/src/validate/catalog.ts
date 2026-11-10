@@ -161,10 +161,10 @@ function uniq(values: any[]): any[] {
   }
   return result;
 }
-const sameSet = (a: any, b: any, sourceType = kind(a)) => {
+const sameSet = (a: any, b: any, sourceType = kind(a), otherType = kind(b)) => {
   const aa = uniq(iterable(a, sourceType)),
-    bb = uniq(iterable(b));
-  return aa.length === bb.length && aa.every((x) => bb.includes(x));
+    bb = uniq(iterable(b, otherType));
+  return aa.length === bb.length && aa.every((x) => bb.some((other) => equal(x, other)));
 };
 function floatRepr(value: number): string {
   if (Number.isNaN(value)) return 'nan';
@@ -182,7 +182,7 @@ function pyRepr(value: any, sourceType = kind(value)): string {
   if (typeof value === 'string') return catalogIntegerRepr(value);
   if (typeof value === 'number' && sourceType === 'float') return floatRepr(value);
   if (Array.isArray(value))
-    return `[${value.map((item, index) => pyRepr(item, kind(item, value, index))).join(', ')}]`;
+    return `[${value.map((item, index, __rowValues11) => pyRepr(item, kind(item, value, index))).join(', ')}]`;
   if (value && typeof value === 'object')
     return `{${Object.entries(value)
       .map(([key, item]) => `${pyRepr(key)}: ${pyRepr(item, kind(item, value, key))}`)
@@ -191,9 +191,9 @@ function pyRepr(value: any, sourceType = kind(value)): string {
 }
 const pstr = (v: any, sourceType = kind(v)): string =>
   typeof v === 'string' ? v : pyRepr(v, sourceType);
-function starts(v: any, x: string): boolean {
+function starts(v: any, x: string, sourceType = kind(v)): boolean {
   if (typeof v !== 'string')
-    error('AttributeError', `'${kind(v)}' object has no attribute 'startswith'`);
+    error('AttributeError', `'${sourceType}' object has no attribute 'startswith'`);
   return v.startsWith(x);
 }
 function contains(v: any, needle: any, sourceType = kind(v)): boolean {
@@ -222,13 +222,13 @@ function joinStrings(value: any, separator: string): string {
       );
   return values.join(separator);
 }
-function pySlice(v: any, start: number): any {
+function pySlice(v: any, start: number, sourceType = kind(v)): any {
   if (typeof v === 'string' || Array.isArray(v)) return v.slice(start);
-  return error('TypeError', `'${kind(v)}' object is not subscriptable`);
+  return error('TypeError', `'${sourceType}' object is not subscriptable`);
 }
-function pyMethod(v: any, method: string): string {
+function pyMethod(v: any, method: string, sourceType = kind(v)): string {
   if (typeof v !== 'string')
-    return error('AttributeError', `'${kind(v)}' object has no attribute '${method}'`);
+    return error('AttributeError', `'${sourceType}' object has no attribute '${method}'`);
   return v;
 }
 function strField(v: any): boolean {
@@ -411,22 +411,28 @@ export function core(ctx: Context): Check {
   );
   for (const [key, s] of entries(src, kind(src, core, 'sources'))) {
     c.ok(
-      ['title', 'publisher', 'kind', 'access'].every((x) => strField(opt(s, x))),
+      ['title', 'publisher', 'kind', 'access'].every((x) =>
+        strField(opt(s, x, undefined, kind(s, src, key))),
+      ),
       `source ${key}: title/publisher/kind/access`,
     );
     c.ok(
-      ['xls', 'pdf', 'html', 'doc', 'api', 'generator'].includes(opt(s, 'kind')) &&
-        ['open', 'browser-only', 'none'].includes(opt(s, 'access')),
-      `source ${key}: kind ${pyRepr(opt(s, 'kind'))} / access ${pyRepr(opt(s, 'access'))}`,
+      ['xls', 'pdf', 'html', 'doc', 'api', 'generator'].includes(
+        opt(s, 'kind', undefined, kind(s, src, key)),
+      ) &&
+        ['open', 'browser-only', 'none'].includes(opt(s, 'access', undefined, kind(s, src, key))),
+      `source ${key}: kind ${pyRepr(opt(s, 'kind', undefined, kind(s, src, key)), kind(opt(s, 'kind'), s, 'kind'))} / access ${pyRepr(opt(s, 'access', undefined, kind(s, src, key)), kind(opt(s, 'access'), s, 'access'))}`,
     );
-    if (pyTruth(opt(s, 'url')))
+    if (pyTruth(opt(s, 'url', undefined, kind(s, src, key))))
       c.ok(
-        starts(get(s, 'url'), 'https://'),
-        `source ${key}: url ${pyRepr(get(s, 'url'), kind(get(s, 'url'), s, 'url'))}`,
+        starts(get(s, 'url', kind(s, src, key)), 'https://', kind(get(s, 'url'), s, 'url')),
+        `source ${key}: url ${pyRepr(get(s, 'url', kind(s, src, key)), kind(get(s, 'url', kind(s, src, key)), s, 'url'))}`,
       );
     c.ok(
-      iterable(s).every((x) => ['title', 'publisher', 'url', 'kind', 'access', 'note'].includes(x)),
-      `source ${key}: keys ${pyRepr(iterable(s).sort())}`,
+      iterable(s, kind(s, src, key)).every((x) =>
+        ['title', 'publisher', 'url', 'kind', 'access', 'note'].includes(x),
+      ),
+      `source ${key}: keys ${pyRepr(iterable(s, kind(s, src, key)).sort())}`,
     );
   }
   const routes = ctx.routes(),
@@ -440,35 +446,47 @@ export function core(ctx: Context): Check {
   );
   for (const [key, p] of entries(pending, kind(pending, core, 'pending'))) {
     c.ok(
-      get(p, 'status') === 'pending' &&
-        equal(get(p, 'id'), key) &&
-        ['title', 'reason', 'expected'].every((x) => strField(opt(p, x))),
+      get(p, 'status', kind(p, pending, key)) === 'pending' &&
+        equal(get(p, 'id', kind(p, pending, key)), key) &&
+        ['title', 'reason', 'expected'].every((x) =>
+          strField(opt(p, x, undefined, kind(p, pending, key))),
+        ),
       `pending ${key}: shape`,
     );
     c.ok(
-      pyTruth(get(p, 'source')) &&
-        iterable(get(p, 'source'), kind(get(p, 'source'), p, 'source')).every((x) =>
-          contains(src, x, kind(src, core, 'sources')),
-        ),
+      pyTruth(get(p, 'source', kind(p, pending, key))) &&
+        iterable(
+          get(p, 'source', kind(p, pending, key)),
+          kind(get(p, 'source', kind(p, pending, key)), p, 'source'),
+        ).every((x) => contains(src, x, kind(src, core, 'sources'))),
       `pending ${key}: source keys`,
     );
     c.ok(
-      pyTruth(get(p, 'screens')) &&
-        iterable(get(p, 'screens'), kind(get(p, 'screens'), p, 'screens')).every((x) =>
-          hasRoute(routes.ids, x),
-        ),
-      `pending ${key}: screens ${pstr(get(p, 'screens'), kind(get(p, 'screens'), p, 'screens'))}`,
+      pyTruth(get(p, 'screens', kind(p, pending, key))) &&
+        iterable(
+          get(p, 'screens', kind(p, pending, key)),
+          kind(get(p, 'screens', kind(p, pending, key)), p, 'screens'),
+        ).every((x) => hasRoute(routes.ids, x)),
+      `pending ${key}: screens ${pstr(get(p, 'screens', kind(p, pending, key)), kind(get(p, 'screens', kind(p, pending, key)), p, 'screens'))}`,
     );
   }
   const p04 = opt(pending, 'P04', {}, kind(pending, core, 'pending')),
     nas = get(nxt, 'asOf', kind(nxt, get(ex, 'pendingMonths'), 0)),
     ny = nas.slice(0, 4),
-    reason = opt(p04, 'reason', ''),
-    title = opt(p04, 'title', '');
+    reason = opt(p04, 'reason', '', kind(p04, pending, 'P04')),
+    title = opt(p04, 'title', '', kind(p04, pending, 'P04'));
   c.ok(
-    starts(title, `Отчетът към ${nas.split('-').reverse().join('.')} г.`) &&
-      contains(reason, `за ${monthName(nxt, 'month')} ${ny} г. още не е добавен`) &&
-      pyMethod(reason, 'endswith').endsWith(
+    starts(
+      title,
+      `Отчетът към ${nas.split('-').reverse().join('.')} г.`,
+      kind(title, p04, 'title'),
+    ) &&
+      contains(
+        reason,
+        `за ${monthName(nxt, 'month')} ${ny} г. още не е добавен`,
+        kind(reason, p04, 'reason'),
+      ) &&
+      pyMethod(reason, 'endswith', kind(reason, p04, 'reason')).endsWith(
         `е за ${monthName(latest(), 'month')} ${get(latest(), 'asOf', kind(latest(), ex, 'latest')).slice(0, 4)} г.`,
       ),
     `pending P04 must name the pending report ${nas} and the latest ${get(latest(), 'asOf', kind(latest(), ex, 'latest'))}`,
@@ -477,7 +495,12 @@ export function core(ctx: Context): Check {
     mfiles = ctx.jsonFiles().filter((f) => f.startsWith('ministries/')),
     data = get(ex, 'data');
   const reports = entries(data, kind(data, ex, 'data')).reduce(
-    (sum, [, v]) => sum + len(get(v, 'files'), kind(get(v, 'files'), v, 'files')),
+    (sum, [dataKey, v]) =>
+      sum +
+      len(
+        get(v, 'files', kind(v, data, dataKey)),
+        kind(get(v, 'files', kind(v, data, dataKey)), v, 'files'),
+      ),
     0,
   );
   const want = {
@@ -588,7 +611,7 @@ export function core(ctx: Context): Check {
       );
     const href = get(q, 'href', kind(q, k, key));
     c.ok(
-      starts(href, '#/') && routes.match(href) !== null,
+      starts(href, '#/', kind(href, q, 'href')) && routes.match(href) !== null,
       `kpis.${key}: href ${pyRepr(href, kind(href, q, 'href'))} matches no route`,
     );
   }
@@ -611,7 +634,7 @@ export function core(ctx: Context): Check {
             get(
               get(get(o, 'kfp'), key, kind(get(o, 'kfp'), o, 'kfp')),
               'mln',
-              kind(get(get(o, 'kfp'), key), get(o, 'kfp'), key),
+              kind(get(get(o, 'kfp'), key, kind(get(o, 'kfp'), o, 'kfp')), get(o, 'kfp'), key),
             ),
             get(get(o, 'kfp'), key, kind(get(o, 'kfp'), o, 'kfp')),
             'mln',
@@ -719,33 +742,46 @@ export function core(ctx: Context): Check {
       it = ef[i];
     c.ok(
       equal(
-        [get(a, 'id'), get(a, 'name'), get(a, 'short'), get(a, 'mln')],
         [
-          get(it, 'id'),
-          get(it, 'name'),
-          get(it, 'short'),
-          get(get(it, 'mln'), 1, kind(get(it, 'mln'), it, 'mln')),
+          get(a, 'id', kind(a, cf, i)),
+          get(a, 'name', kind(a, cf, i)),
+          get(a, 'short', kind(a, cf, i)),
+          get(a, 'mln', kind(a, cf, i)),
+        ],
+        [
+          get(it, 'id', kind(it, ef, i)),
+          get(it, 'name', kind(it, ef, i)),
+          get(it, 'short', kind(it, ef, i)),
+          get(get(it, 'mln', kind(it, ef, i)), 1, kind(get(it, 'mln', kind(it, ef, i)), it, 'mln')),
         ],
       ),
-      `core.functions ${get(it, 'id')}: id/name/short/mln`,
+      `core.functions ${get(it, 'id', kind(it, ef, i))}: id/name/short/mln`,
     );
     c.near(
-      get(a, 'pctGdp'),
-      get(get(it, 'pctGdp'), 1, kind(get(it, 'pctGdp'), it, 'pctGdp')),
+      get(a, 'pctGdp', kind(a, cf, i)),
+      get(
+        get(it, 'pctGdp', kind(it, ef, i)),
+        1,
+        kind(get(it, 'pctGdp', kind(it, ef, i)), it, 'pctGdp'),
+      ),
       0.0011,
-      `core.functions ${get(it, 'id')} pctGdp`,
+      `core.functions ${get(it, 'id', kind(it, ef, i))} pctGdp`,
     );
     c.near(
-      get(a, 'share'),
-      get(get(it, 'share'), 1, kind(get(it, 'share'), it, 'share')),
+      get(a, 'share', kind(a, cf, i)),
+      get(
+        get(it, 'share', kind(it, ef, i)),
+        1,
+        kind(get(it, 'share', kind(it, ef, i)), it, 'share'),
+      ),
       0.0011,
-      `core.functions ${get(it, 'id')} share`,
+      `core.functions ${get(it, 'id', kind(it, ef, i))} share`,
     );
     c.near(
-      get(a, 'yoyPct'),
-      get(it, 'yoy2026Pct'),
+      get(a, 'yoyPct', kind(a, cf, i)),
+      get(it, 'yoy2026Pct', kind(it, ef, i)),
       0.051,
-      `core.functions ${get(it, 'id')} yoyPct`,
+      `core.functions ${get(it, 'id', kind(it, ef, i))} yoyPct`,
     );
   }
   const cgValue = get(core, 'revenueGroups'),
@@ -759,15 +795,20 @@ export function core(ctx: Context): Check {
       gr = rg[i];
     c.ok(
       equal(
-        [get(a, 'id'), get(a, 'name'), get(a, 'mln'), get(a, 'share')],
         [
-          get(gr, 'id'),
-          get(gr, 'name'),
-          get(get(gr, 'mln'), 2, kind(get(gr, 'mln'), gr, 'mln')),
-          get(gr, 'share2026'),
+          get(a, 'id', kind(a, cg, i)),
+          get(a, 'name', kind(a, cg, i)),
+          get(a, 'mln', kind(a, cg, i)),
+          get(a, 'share', kind(a, cg, i)),
+        ],
+        [
+          get(gr, 'id', kind(gr, rg, i)),
+          get(gr, 'name', kind(gr, rg, i)),
+          get(get(gr, 'mln', kind(gr, rg, i)), 2, kind(get(gr, 'mln', kind(gr, rg, i)), gr, 'mln')),
+          get(gr, 'share2026', kind(gr, rg, i)),
         ],
       ),
-      `core.revenueGroups ${get(gr, 'id')}`,
+      `core.revenueGroups ${get(gr, 'id', kind(gr, rg, i))}`,
     );
   }
   c.fact(
@@ -792,7 +833,9 @@ function schema(obj: any): any[] {
                 : v !== null && typeof v === 'object'
                   ? 'object'
                   : 'null';
-      return type === 'array' || type === 'object' ? { key, type, length: len(v) } : { key, type };
+      return type === 'array' || type === 'object'
+        ? { key, type, length: len(v, kind(v, obj, key)) }
+        : { key, type };
     });
 }
 function pageNeeds(ctx: Context): Record<string, string[]> {
@@ -829,24 +872,34 @@ export function catalog(ctx: Context): Check {
     'catalog meta',
   );
   const groups = iterable(get(cat, 'groups'), kind(get(cat, 'groups'), cat, 'groups')),
-    gids = groups.map((x) => get(x, 'id'));
+    gids = groups.map((x, __rowIndex20, __rowValues21) =>
+      get(x, 'id', kind(x, __rowValues21, __rowIndex20)),
+    );
   c.ok(
     gids.length === uniq(gids).length &&
-      groups.every((x) => typeof get(x, 'label') === 'string' && pyTruth(get(x, 'label'))),
+      groups.every(
+        (x, __rowIndex22, __rowValues23) =>
+          typeof get(x, 'label', kind(x, __rowValues23, __rowIndex22)) === 'string' &&
+          pyTruth(get(x, 'label', kind(x, __rowValues23, __rowIndex22))),
+      ),
     'groups',
   );
   const dss = iterable(get(cat, 'datasets'), kind(get(cat, 'datasets'), cat, 'datasets')),
-    slugs = dss.map((d) => get(d, 'slug'));
+    slugs = dss.map((d, __rowIndex24, __rowValues25) =>
+      get(d, 'slug', kind(d, __rowValues25, __rowIndex24)),
+    );
   c.ok(slugs.length === uniq(slugs).length, 'dataset slugs must be unique');
-  const ids = dss.map((d) => get(d, 'id')),
+  const ids = dss.map((d, __rowIndex26, __rowValues27) =>
+      get(d, 'id', kind(d, __rowValues27, __rowIndex26)),
+    ),
     dup = uniq(ids.filter((i) => ids.filter((x) => equal(x, i)).length > 1)).sort();
   c.ok(equal(dup, ['D09', 'feed']), `ids may repeat only for D09 and feed: ${pyRepr(dup)}`);
   const listed = new Set<string>();
   let real = 0,
     mock = 0,
     pend = 0;
-  for (const d of dss) {
-    const sl = get(d, 'slug'),
+  for (const [__rowIndex0, d] of dss.entries()) {
+    const sl = get(d, 'slug', kind(d, dss, __rowIndex0)),
       need = [
         'id',
         'slug',
@@ -863,13 +916,13 @@ export function catalog(ctx: Context): Check {
     const missing = need.filter((x) => !Object.hasOwn(d, x));
     c.ok(!missing.length, `${sl}: missing keys ${pyRepr(missing)}`);
     if (missing.length) continue;
-    const status = get(d, 'status'),
-      source = get(d, 'source'),
-      screens = get(d, 'screens');
+    const status = get(d, 'status', kind(d, dss, __rowIndex0)),
+      source = get(d, 'source', kind(d, dss, __rowIndex0)),
+      screens = get(d, 'screens', kind(d, dss, __rowIndex0));
     c.ok(
       ['real', 'mock', 'pending'].includes(status) &&
-        gids.includes(get(d, 'group')) &&
-        equal(get(d, 'mock'), status === 'mock'),
+        gids.includes(get(d, 'group', kind(d, dss, __rowIndex0))) &&
+        equal(get(d, 'mock', kind(d, dss, __rowIndex0)), status === 'mock'),
       `${sl}: status/group/mock`,
     );
     c.ok(
@@ -886,7 +939,7 @@ export function catalog(ctx: Context): Check {
       `${sl}: screens ${pstr(screens, kind(screens, d, 'screens'))}`,
     );
     c.ok(
-      ['title', 'description'].every((x) => strField(get(d, x))),
+      ['title', 'description'].every((x) => strField(get(d, x, kind(d, dss, __rowIndex0)))),
       `${sl}: title/description`,
     );
     real += Number(status === 'real');
@@ -897,45 +950,54 @@ export function catalog(ctx: Context): Check {
         ['file', 'bytes', 'gzipBytes', 'schema'].every((x) => !Object.hasOwn(d, x)),
         `${sl}: a pending dataset has no file`,
       );
-      const id = get(d, 'id'),
+      const id = get(d, 'id', kind(d, dss, __rowIndex0)),
         pending = get(core, 'pending');
       c.ok(
         equal(sl, id.toLowerCase()) &&
-          equal(get(d, 'contains'), [id]) &&
+          equal(get(d, 'contains', kind(d, dss, __rowIndex0)), [id]) &&
           contains(pending, id, kind(pending, core, 'pending')),
         `${sl}: pending id`,
       );
       const p = get(pending, id, kind(pending, core, 'pending'));
       c.ok(
-        equal(get(d, 'title'), get(p, 'title', kind(p, pending, id))) &&
+        equal(get(d, 'title', kind(d, dss, __rowIndex0)), get(p, 'title', kind(p, pending, id))) &&
           equal(screens, get(p, 'screens', kind(p, pending, id))) &&
-          equal(get(d, 'expected'), get(p, 'expected', kind(p, pending, id))) &&
+          equal(
+            get(d, 'expected', kind(d, dss, __rowIndex0)),
+            get(p, 'expected', kind(p, pending, id)),
+          ) &&
           equal(source, get(p, 'source', kind(p, pending, id))),
         `${sl}: must equal core.pending.${id}`,
       );
       continue;
     }
-    const asOf = opt(d, 'asOf');
+    const asOf = opt(d, 'asOf', undefined, kind(d, dss, __rowIndex0));
     c.ok(
       typeof asOf === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(asOf) && asOf <= ctx.buildDate,
-      `${sl}: asOf ${pyRepr(asOf)}`,
+      `${sl}: asOf ${pyRepr(asOf, kind(asOf, d, 'asOf'))}`,
     );
-    const format = get(d, 'format'),
-      media = get(d, 'mediaType');
+    const format = get(d, 'format', kind(d, dss, __rowIndex0)),
+      media = get(d, 'mediaType', kind(d, dss, __rowIndex0));
     if (format !== null && typeof format === 'object')
       error('TypeError', "unhashable type: '" + kind(format) + "'");
     c.ok(
       equal(contains(formats, format) ? formats[format] : null, media),
       `${sl}: format/mediaType ${pstr(format, kind(format, d, 'format'))} / ${pstr(media, kind(media, d, 'mediaType'))}`,
     );
-    if (pyTruth(opt(d, 'fileTemplate'))) {
-      const parts = iterable(get(d, 'parts'), kind(get(d, 'parts'), d, 'parts')),
-        template = get(d, 'fileTemplate');
+    if (pyTruth(opt(d, 'fileTemplate', undefined, kind(d, dss, __rowIndex0)))) {
+      const parts = iterable(
+          get(d, 'parts', kind(d, dss, __rowIndex0)),
+          kind(get(d, 'parts', kind(d, dss, __rowIndex0)), d, 'parts'),
+        ),
+        template = get(d, 'fileTemplate', kind(d, dss, __rowIndex0));
       c.ok(
-        get(d, 'file') === null && template === 'data/ministries/<код>.json',
+        get(d, 'file', kind(d, dss, __rowIndex0)) === null &&
+          template === 'data/ministries/<код>.json',
         `${sl}: fileTemplate`,
       );
-      const codes = parts.map((pp) => get(pp, 'code')),
+      const codes = parts.map((pp, __rowIndex32, __rowValues33) =>
+          get(pp, 'code', kind(pp, __rowValues33, __rowIndex32)),
+        ),
         expected = get(
           get(core, 'counts'),
           'programBudgets',
@@ -946,7 +1008,7 @@ export function catalog(ctx: Context): Check {
         `${sl}: ${parts.length} parts, expected ${pstr(expected, kind(expected, get(core, 'counts'), 'programBudgets'))}`,
       );
       const minids = iterable(get(mins, 'items'), kind(get(mins, 'items'), mins, 'items')).map(
-        (m) => get(m, 'id'),
+        (m, __rowIndex34, __rowValues35) => get(m, 'id', kind(m, __rowValues35, __rowIndex34)),
       );
       c.ok(
         codes.every((cc) => minids.includes(cc)),
@@ -954,10 +1016,12 @@ export function catalog(ctx: Context): Check {
       );
       let total = 0,
         gz = 0;
-      for (const pp of parts) {
-        const file = get(pp, 'file'),
-          code = get(pp, 'code'),
-          rel = pyMethod(file, 'removeprefix').startsWith('data/') ? file.slice(5) : file;
+      for (const [__rowIndex1, pp] of parts.entries()) {
+        const file = get(pp, 'file', kind(pp, parts, __rowIndex1)),
+          code = get(pp, 'code', kind(pp, parts, __rowIndex1)),
+          rel = pyMethod(file, 'removeprefix', kind(file, pp, 'file')).startsWith('data/')
+            ? file.slice(5)
+            : file;
         if (
           !c.ok(
             ctx.exists(rel) && file === `data/ministries/${code}.json`,
@@ -970,22 +1034,24 @@ export function catalog(ctx: Context): Check {
           size = raw.length,
           gzip = gzipSize(raw);
         c.ok(
-          equal(get(pp, 'bytes'), size) && equal(get(pp, 'gzipBytes'), gzip),
-          `${sl}: part ${code} bytes ${pstr(get(pp, 'bytes'), kind(get(pp, 'bytes'), pp, 'bytes'))}/${pstr(get(pp, 'gzipBytes'), kind(get(pp, 'gzipBytes'), pp, 'gzipBytes'))} vs ${size}/${gzip}`,
+          equal(get(pp, 'bytes', kind(pp, parts, __rowIndex1)), size) &&
+            equal(get(pp, 'gzipBytes', kind(pp, parts, __rowIndex1)), gzip),
+          `${sl}: part ${code} bytes ${pstr(get(pp, 'bytes', kind(pp, parts, __rowIndex1)), kind(get(pp, 'bytes', kind(pp, parts, __rowIndex1)), pp, 'bytes'))}/${pstr(get(pp, 'gzipBytes', kind(pp, parts, __rowIndex1)), kind(get(pp, 'gzipBytes', kind(pp, parts, __rowIndex1)), pp, 'gzipBytes'))} vs ${size}/${gzip}`,
         );
         total += size;
         gz += gzip;
       }
       c.ok(
-        equal(get(d, 'bytes'), total) && equal(get(d, 'gzipBytes'), gz),
-        `${sl}: bytes/gzipBytes ${pstr(get(d, 'bytes'), kind(get(d, 'bytes'), d, 'bytes'))}/${pstr(get(d, 'gzipBytes'), kind(get(d, 'gzipBytes'), d, 'gzipBytes'))} must be the sums of the parts ${total}/${gz}`,
+        equal(get(d, 'bytes', kind(d, dss, __rowIndex0)), total) &&
+          equal(get(d, 'gzipBytes', kind(d, dss, __rowIndex0)), gz),
+        `${sl}: bytes/gzipBytes ${pstr(get(d, 'bytes', kind(d, dss, __rowIndex0)), kind(get(d, 'bytes', kind(d, dss, __rowIndex0)), d, 'bytes'))}/${pstr(get(d, 'gzipBytes', kind(d, dss, __rowIndex0)), kind(get(d, 'gzipBytes', kind(d, dss, __rowIndex0)), d, 'gzipBytes'))} must be the sums of the parts ${total}/${gz}`,
       );
       continue;
     }
-    const file = get(d, 'file'),
-      rel = pySlice(file, 5);
+    const file = get(d, 'file', kind(d, dss, __rowIndex0)),
+      rel = pySlice(file, 5, kind(file, d, 'file'));
     c.ok(
-      starts(file, 'data/') && ctx.exists(rel),
+      starts(file, 'data/', kind(file, d, 'file')) && ctx.exists(rel),
       `${sl}: file ${pstr(file, kind(file, d, 'file'))} does not exist`,
     );
     if (!ctx.exists(rel)) continue;
@@ -993,53 +1059,87 @@ export function catalog(ctx: Context): Check {
     const raw = ctx.bytes(rel),
       size = raw.length,
       gzip = gzipSize(raw);
-    if (get(d, 'id') === 'D25')
+    if (get(d, 'id', kind(d, dss, __rowIndex0)) === 'D25')
       c.ok(
         !Object.hasOwn(d, 'bytes') && !Object.hasOwn(d, 'gzipBytes'),
         `${sl}: the catalog must not state its own size`,
       );
     else
       c.ok(
-        equal(get(d, 'bytes'), size) && equal(get(d, 'gzipBytes'), gzip),
-        `${sl}: bytes/gzipBytes ${pstr(opt(d, 'bytes'))}/${pstr(opt(d, 'gzipBytes'))} vs the file ${size}/${gzip} (rebuild the catalog)`,
+        equal(get(d, 'bytes', kind(d, dss, __rowIndex0)), size) &&
+          equal(get(d, 'gzipBytes', kind(d, dss, __rowIndex0)), gzip),
+        `${sl}: bytes/gzipBytes ${pstr(opt(d, 'bytes', undefined, kind(d, dss, __rowIndex0)), kind(opt(d, 'bytes'), d, 'bytes'))}/${pstr(opt(d, 'gzipBytes', undefined, kind(d, dss, __rowIndex0)), kind(opt(d, 'gzipBytes'), d, 'gzipBytes'))} vs the file ${size}/${gzip} (rebuild the catalog)`,
       );
     if (['JSON', 'GeoJSON'].includes(format)) {
       const doc = ctx.get(rel),
         m = opt(doc, 'meta', {});
       c.ok(
-        equal(status, opt(m, 'status')) &&
-          equal(get(d, 'mock'), pyTruth(opt(m, 'mock', false))) &&
-          sameSet(source, opt(m, 'source', []), kind(source, d, 'source')),
+        equal(status, opt(m, 'status', undefined, kind(m, doc, 'meta'))) &&
+          equal(
+            get(d, 'mock', kind(d, dss, __rowIndex0)),
+            pyTruth(opt(m, 'mock', false, kind(m, doc, 'meta'))),
+          ) &&
+          sameSet(
+            source,
+            opt(m, 'source', [], kind(m, doc, 'meta')),
+            kind(source, d, 'source'),
+            kind(opt(m, 'source', []), m, 'source'),
+          ),
         `${sl}: status/mock/source vs meta`,
       );
       for (const kk of ['asOf', 'unit'])
         if (Object.hasOwn(d, kk))
           c.ok(
-            equal(get(d, kk), opt(m, kk)),
-            `${sl}: ${kk} ${pyRepr(get(d, kk), kind(get(d, kk), d, kk))} vs meta ${pyRepr(opt(m, kk))}`,
+            equal(
+              get(d, kk, kind(d, dss, __rowIndex0)),
+              opt(m, kk, undefined, kind(m, doc, 'meta')),
+            ),
+            `${sl}: ${kk} ${pyRepr(get(d, kk, kind(d, dss, __rowIndex0)), kind(get(d, kk, kind(d, dss, __rowIndex0)), d, kk))} vs meta ${pyRepr(opt(m, kk, undefined, kind(m, doc, 'meta')), kind(opt(m, kk), m, kk))}`,
           );
-      const mid = pyMethod(opt(m, 'id', ''), 'split').split('+');
+      const mid = pyMethod(
+        opt(m, 'id', '', kind(m, doc, 'meta')),
+        'split',
+        kind(opt(m, 'id', ''), m, 'id'),
+      ).split('+');
       if (mid.every((x: string) => /^[DMP]\d\d$/.test(x)))
         c.ok(
-          sameSet(get(d, 'contains'), mid, kind(get(d, 'contains'), d, 'contains')),
-          `${sl}: contains ${pstr(get(d, 'contains'), kind(get(d, 'contains'), d, 'contains'))} vs meta.id ${pstr(opt(m, 'id'))}`,
+          sameSet(
+            get(d, 'contains', kind(d, dss, __rowIndex0)),
+            mid,
+            kind(get(d, 'contains', kind(d, dss, __rowIndex0)), d, 'contains'),
+            kind(mid),
+          ),
+          `${sl}: contains ${pstr(get(d, 'contains', kind(d, dss, __rowIndex0)), kind(get(d, 'contains', kind(d, dss, __rowIndex0)), d, 'contains'))} vs meta.id ${pstr(opt(m, 'id', undefined, kind(m, doc, 'meta')), kind(opt(m, 'id'), m, 'id'))}`,
         );
       else
         c.ok(
-          equal(get(d, 'contains'), get(d, 'id') === 'core' ? ['D18'] : []) &&
-            equal(opt(m, 'id'), sl),
-          `${sl}: contains ${pstr(get(d, 'contains'), kind(get(d, 'contains'), d, 'contains'))} vs meta.id ${pstr(opt(m, 'id'))}`,
+          equal(
+            get(d, 'contains', kind(d, dss, __rowIndex0)),
+            get(d, 'id', kind(d, dss, __rowIndex0)) === 'core' ? ['D18'] : [],
+          ) && equal(opt(m, 'id', undefined, kind(m, doc, 'meta')), sl),
+          `${sl}: contains ${pstr(get(d, 'contains', kind(d, dss, __rowIndex0)), kind(get(d, 'contains', kind(d, dss, __rowIndex0)), d, 'contains'))} vs meta.id ${pstr(opt(m, 'id', undefined, kind(m, doc, 'meta')), kind(opt(m, 'id'), m, 'id'))}`,
         );
       c.ok(
-        sameSet(opt(d, 'pending', []), opt(m, 'pending', [])),
-        `${sl}: pending ${pstr(opt(d, 'pending'))} vs meta.pending ${pstr(opt(m, 'pending'))}`,
+        sameSet(
+          opt(d, 'pending', [], kind(d, dss, __rowIndex0)),
+          opt(m, 'pending', [], kind(m, doc, 'meta')),
+          kind(opt(d, 'pending', []), d, 'pending'),
+          kind(opt(m, 'pending', []), m, 'pending'),
+        ),
+        `${sl}: pending ${pstr(opt(d, 'pending', undefined, kind(d, dss, __rowIndex0)), kind(opt(d, 'pending'), d, 'pending'))} vs meta.pending ${pstr(opt(m, 'pending', undefined, kind(m, doc, 'meta')), kind(opt(m, 'pending'), m, 'pending'))}`,
       );
       c.ok(
-        equal(opt(d, 'schema'), schema(doc)),
+        equal(opt(d, 'schema', undefined, kind(d, dss, __rowIndex0)), schema(doc)),
         `${sl}: schema differs from the top-level keys of the file`,
       );
     }
-    c.ok(equal(get(d, 'eager'), get(d, 'id') === 'core'), `${sl}: only core.json is eager`);
+    c.ok(
+      equal(
+        get(d, 'eager', kind(d, dss, __rowIndex0)),
+        get(d, 'id', kind(d, dss, __rowIndex0)) === 'core',
+      ),
+      `${sl}: only core.json is eager`,
+    );
   }
   const disk = ctx.dataFiles(),
     notListed = disk.filter((x) => !listed.has(x)),
@@ -1068,30 +1168,38 @@ export function catalog(ctx: Context): Check {
   );
   for (const section of ['traps', 'methodology']) {
     const rows = iterable(get(cat, section), kind(get(cat, section), cat, section));
-    c.ok(uniq(rows.map((x) => get(x, 'id'))).length === rows.length, `${section}: ids`);
-    for (const x of rows)
+    c.ok(
+      uniq(
+        rows.map((x, __rowIndex36, __rowValues37) =>
+          get(x, 'id', kind(x, __rowValues37, __rowIndex36)),
+        ),
+      ).length === rows.length,
+      `${section}: ids`,
+    );
+    for (const [__rowIndex4, x] of rows.entries())
       c.ok(
-        ['id', 'title', 'text'].every((kk) => strField(opt(x, kk))),
-        `${section} ${pstr(opt(x, 'id'))}: title/text`,
+        ['id', 'title', 'text'].every((kk) =>
+          strField(opt(x, kk, undefined, kind(x, rows, __rowIndex4))),
+        ),
+        `${section} ${pstr(opt(x, 'id', undefined, kind(x, rows, __rowIndex4)), kind(opt(x, 'id'), x, 'id'))}: title/text`,
       );
   }
   c.ok(
     iterable(get(cat, 'traps'), kind(get(cat, 'traps'), cat, 'traps')).some(
-      (x) => get(x, 'id') === 'two-versions',
+      (x, __rowIndex40, __rowValues41) =>
+        get(x, 'id', kind(x, __rowValues41, __rowIndex40)) === 'two-versions',
     ),
     'the two-versions trap must be listed',
   );
   const fs = iterable(rawFiles, kind(rawFiles, cat, 'files'));
-  for (const f of fs) {
-    const name = opt(f, 'name');
-    c.ok(
-      ['name', 'title', 'sha256', 'bytes', 'source', 'role', 'usedBy'].every((x) =>
-        Object.hasOwn(f, x),
-      ),
-      `files ${pstr(name)}: keys`,
+  for (const [__rowIndex5, f] of fs.entries()) {
+    const hasRequired = ['name', 'title', 'sha256', 'bytes', 'source', 'role', 'usedBy'].every(
+      (x) => contains(f, x, kind(f, fs, __rowIndex5)),
     );
-    const sha = get(f, 'sha256'),
-      bytes = get(f, 'bytes');
+    const name = opt(f, 'name', undefined, kind(f, fs, __rowIndex5));
+    c.ok(hasRequired, `files ${pstr(name, kind(name, f, 'name'))}: keys`);
+    const sha = get(f, 'sha256', kind(f, fs, __rowIndex5)),
+      bytes = get(f, 'bytes', kind(f, fs, __rowIndex5));
     if (typeof sha !== 'string')
       error('TypeError', `expected string or bytes-like object, got '${kind(sha)}'`);
     c.ok(
@@ -1099,60 +1207,88 @@ export function catalog(ctx: Context): Check {
         ((Number.isInteger(bytes) && pythonNumberAt(f, 'bytes', bytes).kind === 'int') ||
           typeof bytes === 'boolean') &&
         number(bytes) > 0,
-      `files ${pstr(get(f, 'name'), kind(get(f, 'name'), f, 'name'))}: sha256/bytes`,
+      `files ${pstr(get(f, 'name', kind(f, fs, __rowIndex5)), kind(get(f, 'name', kind(f, fs, __rowIndex5)), f, 'name'))}: sha256/bytes`,
     );
     c.ok(
-      pyTruth(get(f, 'source')) &&
-        iterable(get(f, 'source'), kind(get(f, 'source'), f, 'source')).every((x) =>
+      pyTruth(get(f, 'source', kind(f, fs, __rowIndex5))) &&
+        iterable(
+          get(f, 'source', kind(f, fs, __rowIndex5)),
+          kind(get(f, 'source', kind(f, fs, __rowIndex5)), f, 'source'),
+        ).every((x) =>
           contains(get(core, 'sources'), x, kind(get(core, 'sources'), core, 'sources')),
         ),
-      `files ${pstr(get(f, 'name'), kind(get(f, 'name'), f, 'name'))}: source keys`,
+      `files ${pstr(get(f, 'name', kind(f, fs, __rowIndex5)), kind(get(f, 'name', kind(f, fs, __rowIndex5)), f, 'name'))}: source keys`,
     );
     c.ok(
-      pyTruth(get(f, 'usedBy')) &&
-        iterable(get(f, 'usedBy'), kind(get(f, 'usedBy'), f, 'usedBy')).every((x) =>
-          slugs.includes(x),
-        ),
-      `files ${pstr(get(f, 'name'), kind(get(f, 'name'), f, 'name'))}: usedBy ${pstr(get(f, 'usedBy'), kind(get(f, 'usedBy'), f, 'usedBy'))} are not dataset slugs`,
+      pyTruth(get(f, 'usedBy', kind(f, fs, __rowIndex5))) &&
+        iterable(
+          get(f, 'usedBy', kind(f, fs, __rowIndex5)),
+          kind(get(f, 'usedBy', kind(f, fs, __rowIndex5)), f, 'usedBy'),
+        ).every((x) => slugs.includes(x)),
+      `files ${pstr(get(f, 'name', kind(f, fs, __rowIndex5)), kind(get(f, 'name', kind(f, fs, __rowIndex5)), f, 'name'))}: usedBy ${pstr(get(f, 'usedBy', kind(f, fs, __rowIndex5)), kind(get(f, 'usedBy', kind(f, fs, __rowIndex5)), f, 'usedBy'))} are not dataset slugs`,
     );
     c.ok(
-      ['url', 'page', 'note'].filter((x) => pyTruth(opt(f, x))).length >= 1,
-      `files ${pstr(get(f, 'name'), kind(get(f, 'name'), f, 'name'))}: needs url, page or note`,
+      ['url', 'page', 'note'].filter((x) => pyTruth(opt(f, x, undefined, kind(f, fs, __rowIndex5))))
+        .length >= 1,
+      `files ${pstr(get(f, 'name', kind(f, fs, __rowIndex5)), kind(get(f, 'name', kind(f, fs, __rowIndex5)), f, 'name'))}: needs url, page or note`,
     );
     for (const kk of ['url', 'page'])
-      if (pyTruth(opt(f, kk)))
+      if (pyTruth(opt(f, kk, undefined, kind(f, fs, __rowIndex5))))
         c.ok(
-          starts(get(f, kk), 'https://'),
-          `files ${pstr(get(f, 'name'), kind(get(f, 'name'), f, 'name'))}: ${kk} ${pyRepr(get(f, kk), kind(get(f, kk), f, kk))}`,
+          starts(get(f, kk, kind(f, fs, __rowIndex5)), 'https://', kind(get(f, kk), f, kk)),
+          `files ${pstr(get(f, 'name', kind(f, fs, __rowIndex5)), kind(get(f, 'name', kind(f, fs, __rowIndex5)), f, 'name'))}: ${kk} ${pyRepr(get(f, kk, kind(f, fs, __rowIndex5)), kind(get(f, kk, kind(f, fs, __rowIndex5)), f, kk))}`,
         );
-    const blob = entries(f)
+    const blob = entries(f, kind(f, fs, __rowIndex5))
       .map(([, v]) => pstr(v))
       .join(' ')
       .toLowerCase();
     c.ok(
       !blob.includes('private channel') && !internal.some((x) => blob.includes(x)),
-      `files ${pstr(get(f, 'name'), kind(get(f, 'name'), f, 'name'))}: internal or private wording`,
+      `files ${pstr(get(f, 'name', kind(f, fs, __rowIndex5)), kind(get(f, 'name', kind(f, fs, __rowIndex5)), f, 'name'))}: internal or private wording`,
     );
   }
   c.ok(
-    uniq(fs.map((f) => get(f, 'name'))).length === fs.length &&
-      uniq(fs.map((f) => get(f, 'sha256'))).length === fs.length,
+    uniq(
+      fs.map((f, __rowIndex48, __rowValues49) =>
+        get(f, 'name', kind(f, __rowValues49, __rowIndex48)),
+      ),
+    ).length === fs.length &&
+      uniq(
+        fs.map((f, __rowIndex50, __rowValues51) =>
+          get(f, 'sha256', kind(f, __rowValues51, __rowIndex50)),
+        ),
+      ).length === fs.length,
     'files: names and checksums must be unique',
   );
   const kfpFiles = entries(
       get(ctx.get('execution.json'), 'data'),
       kind(get(ctx.get('execution.json'), 'data'), ctx.get('execution.json'), 'data'),
     ).flatMap(([, y]) => iterable(get(y, 'files'), kind(get(y, 'files'), y, 'files'))),
-    got = new Map(fs.map((f) => [get(f, 'name'), get(f, 'sha256')]));
+    got = new Map(
+      fs.map((f, __rowIndex52, __rowValues53) => [
+        get(f, 'name', kind(f, __rowValues53, __rowIndex52)),
+        get(f, 'sha256', kind(f, __rowValues53, __rowIndex52)),
+      ]),
+    );
   c.ok(
-    kfpFiles.every((x) => equal(got.get(get(x, 'file')) ?? null, get(x, 'sha256'))),
+    kfpFiles.every((x, __rowIndex54, __rowValues55) =>
+      equal(
+        got.get(get(x, 'file', kind(x, __rowValues55, __rowIndex54))) ?? null,
+        get(x, 'sha256', kind(x, __rowValues55, __rowIndex54)),
+      ),
+    ),
     'the 19 KFP reports of execution.json must be listed with the same checksums',
   );
   const needs = pageNeeds(ctx),
     fileDs = new Map<string, any>();
-  for (const d of dss) {
-    if (pyTruth(opt(d, 'file'))) fileDs.set(get(d, 'file'), d);
-    for (const pp of iterable(opt(d, 'parts', []))) fileDs.set(get(pp, 'file'), d);
+  for (const [__rowIndex7, d] of dss.entries()) {
+    if (pyTruth(opt(d, 'file', undefined, kind(d, dss, __rowIndex7))))
+      fileDs.set(get(d, 'file', kind(d, dss, __rowIndex7)), d);
+    for (const [__rowIndex8, pp] of iterable(
+      opt(d, 'parts', [], kind(d, dss, __rowIndex7)),
+      kind(opt(d, 'parts', []), d, 'parts'),
+    ).entries())
+      fileDs.set(get(pp, 'file', kind(pp, iterable(opt(d, 'parts', [])), __rowIndex8)), d);
   }
   let warn = 0;
   for (const rid of Object.keys(needs).sort())
@@ -1177,15 +1313,22 @@ export function catalog(ctx: Context): Check {
       }
     }
   const pages = new Set(Object.keys(needs).filter((rid) => needs[rid]!.length > 0));
-  for (const d of dss) {
-    if (get(d, 'id') === 'core' || get(d, 'status') === 'pending') continue;
-    for (const rid of iterable(get(d, 'screens'), kind(get(d, 'screens'), d, 'screens')))
+  for (const [__rowIndex10, d] of dss.entries()) {
+    if (
+      get(d, 'id', kind(d, dss, __rowIndex10)) === 'core' ||
+      get(d, 'status', kind(d, dss, __rowIndex10)) === 'pending'
+    )
+      continue;
+    for (const rid of iterable(
+      get(d, 'screens', kind(d, dss, __rowIndex10)),
+      kind(get(d, 'screens', kind(d, dss, __rowIndex10)), d, 'screens'),
+    ))
       if (
         pages.has(rid) &&
         !needs[rid]!.some((nm) => fileDs.get(`data/${nm.replace(/\?+$/, '')}.json`) === d)
       ) {
         c.warn(
-          `catalog lists ${rid} for ${get(d, 'slug')} but that page's needs do not include it`,
+          `catalog lists ${rid} for ${get(d, 'slug', kind(d, dss, __rowIndex10))} but that page's needs do not include it`,
         );
         warn++;
       }

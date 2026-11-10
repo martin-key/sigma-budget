@@ -151,14 +151,17 @@ export interface ExecutionProjection {
 type Dict = Record<string, any>;
 function mapMoney(doc: Dict, fn: (v: any, places: number) => unknown): Dict {
   const out = clonePythonNumbers(doc);
-  for (const name of ['data', 'monthly'] as const)
-    for (const block of executionValues(executionRequired(out, name)) as Dict[])
+  for (const name of ['data', 'monthly'] as const) {
+    const blocks = executionRequired(out, name),
+      values = executionValues(blocks, out, name),
+      keys = Object.keys(blocks);
+    for (const [index, block] of values.entries())
       for (const col of cols)
-        for (const [id, arr] of executionItems(executionRequired(block, col)) as [
-          string,
-          unknown[],
-        ][])
+        for (const [id, arr] of executionItems(
+          executionRequired(block, col, blocks, keys[index]),
+        ) as [string, unknown[]][])
           block[col][id] = executionIterable(arr).map((v) => fn(v, 3));
+  }
   for (const col of cols) {
     for (const [id, value] of executionItems(
       executionRequired(executionRequired(out, 'plan2026'), col),
