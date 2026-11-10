@@ -11,7 +11,7 @@ export function nodeProofReceipt(manifest:ReleaseManifest,releaseId:string,valid
   return {schema:'node-release-build/1',release_id:releaseId,built:parameters.build_date+'T00:00:00Z',env:'node-offline',commit:manifest.processing.code.commit,executor:manifest.processing.executor,snapshot:manifest.processing.snapshot,validation_sha256:sha(validationBytes),outputs_sha256:sha(bytes(manifest.outputs))};
 }
 export function verifyNodeProof(manifest:ReleaseManifest,manifestBytes:Uint8Array,receipt:unknown,validationBytes:Uint8Array):void{
-  if(!record(manifest.processing.executor)||manifest.processing.executor.runtime!=='node-export/1')return;
+  if(!record(manifest.processing?.executor)||manifest.processing.executor.runtime!=='node-export/1')return;
   const fail=()=>{throw new ReleaseError(2,'Node package requires complete executed validation and its bound receipt');};
   const v=JSON.parse(new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(validationBytes));
   if(!record(v)||v.completeValidation!==true||v.passed!==true||v.historicalReconstruction!=='unverified'||!Array.isArray(v.groups))fail();

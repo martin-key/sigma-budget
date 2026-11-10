@@ -17,9 +17,11 @@ registerHooks({resolve(id,ctx,next){check(id);return next(id,ctx);}});
 const builtin=process.getBuiltinModule;process.getBuiltinModule=id=>{check(id);return builtin(id);};
 globalThis.fetch=()=>{throw Error('Production builds are offline');};globalThis.WebSocket=undefined;globalThis.EventSource=undefined;
 const request=JSON.parse(await readFile(process.argv[2],'utf8'));
-const {executeRelease}=await import(pathToFileURL(request.entry).href);
-const result=await executeRelease(Object.freeze(request.context));
-await writeFile(request.result,JSON.stringify(result)+'\\n',{flag:'wx'});
+try {
+ const {executeRelease}=await import(pathToFileURL(request.entry).href);
+ const result=await executeRelease(Object.freeze(request.context));
+ await writeFile(request.result,JSON.stringify(result)+'\\n',{flag:'wx'});
+} catch(error) {process.stderr.write(String(error?.stack??error)+'\\n');process.exitCode=1;}
 `;
 /** Trusted installed compiler/dependencies must have exactly the processing commit's lock. */
 export async function productionExecutor(dependenciesRoot:string):Promise<ReleaseExecutor>{
