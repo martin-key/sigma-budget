@@ -113,7 +113,7 @@ sources:
   - path: data/originals/dv/zdb2026_dv69_idMat245041.html
     url: https://dv.parliament.bg/DVWeb/showMaterialDV.jsp?idMat=245041
     title: Закон за държавния бюджет на РБ за 2026 г., ДВ бр. 69 от 31.07.2026
-    acquired: '2026-11-08'
+    acquired: '2026-11-10'
 - id: zbdoo
   title: Закон за бюджета на държавното обществено осигуряване за 2026 г.
   publisher: Народно събрание; Държавен вестник, бр. 68 от 28.07.2026 г.
@@ -129,7 +129,7 @@ sources:
   - path: data/originals/dv/zbdoo2026_dv68_idMat244982.html
     url: https://dv.parliament.bg/DVWeb/showMaterialDV.jsp?idMat=244982
     title: Закон за бюджета на ДОО за 2026 г., ДВ бр. 68 от 28.07.2026
-    acquired: '2026-11-08'
+    acquired: '2026-11-10'
 - id: zbnzok
   title: Закон за бюджета на Националната здравноосигурителна каса за 2026 г.
   publisher: Народно събрание; Държавен вестник, бр. 68 от 28.07.2026 г.
@@ -145,7 +145,7 @@ sources:
   - path: data/originals/dv/zbnzok2026_dv68_idMat244981.html
     url: https://dv.parliament.bg/DVWeb/showMaterialDV.jsp?idMat=244981
     title: Закон за бюджета на НЗОК за 2026 г., ДВ бр. 68 от 28.07.2026
-    acquired: '2026-11-08'
+    acquired: '2026-11-10'
 - id: nap
   title: 'НАП: размер на осигурителните вноски за 2026 г. и разпределението им (изх. ВК-30-10237 от 12.08.2026 г.)'
   publisher: Национална агенция за приходите
@@ -422,7 +422,7 @@ sources:
   - path: data/originals/excise-law/dv-69-2026-budget.html
     title: dv-69-2026-budget.html
     url: https://dv.parliament.bg/DVWeb/showMaterialDV.jsp?idMat=245041
-    acquired: '2026-11-07'
+    acquired: '2026-11-10'
 - id: customs-excise-law
   title: 'Агенция „Митници“: ЗАДС, консолидация до ДВ, бр. 54 от 2025 г.'
   publisher: Агенция „Митници“
@@ -464,8 +464,10 @@ intermediates:
   - network
   reproducible: false
   note: Acquisition manifest retained from the audit, extended by fresh DV/SEBRA downloads and observed minfin 403 probes on 2026-11-08.
-    Historical missing manifest is not reconstructed.
-  acquired: '2026-11-08'
+    Historical missing manifest is not reconstructed. Re-pinned on 2026-11-10 to the retained local copy (the 2026-11-08 bytes are not
+    available), with its СЕБРА page entry set to the pinned page (sha256, bytes and retrieval time of release 7883978e); every entry
+    catalog.py reads is the same, and data/release is byte-identical.
+  acquired: '2026-11-10'
 - path: data/originals/asbp/asbp_tables.json
   producer: python -m budget_pipeline.extract.asbp_tables
   inputs:
