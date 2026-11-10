@@ -84,7 +84,13 @@ export function validateRegistry(root: string, options: RegistryOptions = {}): R
   const pointer = 'data/release/releases/current.json';
   const read = (p: string) => {
     if (options.lifecycleMetadata && p === pointer) return '{}';
-    return readFileSync(safePath(p.startsWith('data/release/') && options.outputRoot ? options.outputRoot : root, p.startsWith('data/release/') && options.outputRoot ? 'data/' + p.slice(13) : p), 'utf8');
+    return readFileSync(
+      safePath(
+        p.startsWith('data/release/') && options.outputRoot ? options.outputRoot : root,
+        p.startsWith('data/release/') && options.outputRoot ? 'data/' + p.slice(13) : p,
+      ),
+      'utf8',
+    );
   };
   let sreg: any, dreg: any;
   const pins: Record<string, string> = Object.create(null);
@@ -214,7 +220,12 @@ export function validateRegistry(root: string, options: RegistryOptions = {}): R
       cfiles.map((f: string) => `data/release/${f.startsWith('data/') ? f.slice(5) : f}`),
     ];
   }
-  const data = [...files(options.outputRoot ?? root, options.outputRoot ? 'data' : 'data/release').map((f) => `data/release/${f}`), ...(options.lifecycleMetadata ? [pointer] : [])],
+  const data = [
+      ...files(options.outputRoot ?? root, options.outputRoot ? 'data' : 'data/release').map(
+        (f) => `data/release/${f}`,
+      ),
+      ...(options.lifecycleMetadata ? [pointer] : []),
+    ],
     owner: Record<string, string[]> = Object.fromEntries(data.map((f) => [f, []]));
   const dids = ds.map((d) => d.id),
     allKnown = new Set([...known, ...dids]);

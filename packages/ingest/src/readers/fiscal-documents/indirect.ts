@@ -233,13 +233,15 @@ function verbatimDocxCells(bytes: Uint8Array): string[][][] {
 }
 // Bounded shared transport only. Every call authenticates all original bytes first;
 // expected selection/arithmetic remains in the independent reader below.
-let lastDocumentTransport: {key:string;document:IndirectDocumentEvidence}|undefined;
+let lastDocumentTransport: { key: string; document: IndirectDocumentEvidence } | undefined;
 export function extractIndirectDocuments(
   originals: Pick<IndirectOriginals, 'nsi' | 'customs' | 'bill'>,
 ): IndirectDocumentEvidence {
-  const nsiBytes=authenticate(originals.nsi,paths.nsi),customsBytes=authenticate(originals.customs,paths.customs),billBytes=authenticate(originals.bill,paths.bill);
-  const key=[originals.nsi.sha256,originals.customs.sha256,originals.bill.sha256].join('|');
-  if(lastDocumentTransport?.key===key)return structuredClone(lastDocumentTransport.document);
+  const nsiBytes = authenticate(originals.nsi, paths.nsi),
+    customsBytes = authenticate(originals.customs, paths.customs),
+    billBytes = authenticate(originals.bill, paths.bill);
+  const key = [originals.nsi.sha256, originals.customs.sha256, originals.bill.sha256].join('|');
+  if (lastDocumentTransport?.key === key) return structuredClone(lastDocumentTransport.document);
   const nsiPdf = readPdf(nsiBytes, {
       maxPages: 1000,
       maxChars: 8_000_000,
@@ -252,7 +254,7 @@ export function extractIndirectDocuments(
       { path: originals[k].path, sha256: originals[k].sha256 },
     ]),
   ) as IndirectDocumentEvidence['sources'];
-  const document:IndirectDocumentEvidence = {
+  const document: IndirectDocumentEvidence = {
     nsiPages: nsiPdf.pages.map((p) => p.text),
     customsPages: customsPdf.pages.map((p) => p.text),
     docxTables: expandedDocxTables(docx, verbatimDocxCells(originals.bill.bytes)),
@@ -261,7 +263,7 @@ export function extractIndirectDocuments(
     customs: customsFromPdf(customsPdf),
     sources,
   };
-  lastDocumentTransport={key,document:structuredClone(document)};
+  lastDocumentTransport = { key, document: structuredClone(document) };
   return document;
 }
 /** Transport text parts as HTMLParser.handle_data would, including real inline text.

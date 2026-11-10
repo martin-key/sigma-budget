@@ -297,6 +297,50 @@ describe('recorded Node build lifecycle (synthetic numeric executor)', () => {
       'Missing declared input: data/originals/deep.txt',
     );
   });
+  it('allows only explicitly bound reproducible intermediates and requires their completed scratch evidence', async () => {
+    const f = await fixture(),
+      path = 'data/cache/intermediate.json';
+    await rm(join(f.input, path));
+    await expect(prepareInputs(f.repo, f.input, [path])).rejects.toThrow(/Missing declared input/);
+    f.source.intermediates[0]!.reproducible = true;
+    await put(join(f.repo, 'data/sources.yaml'), JSON.stringify(f.source));
+    const pending = await prepareInputs(f.repo, f.input, [path]);
+    expect(pending.missingIntermediates).toEqual([
+      {
+        path,
+        declaration: path,
+        datasets: ['catalog', 'core'],
+        legacyPin: sha256('{"old":true}\n'),
+      },
+    ]);
+    await rm(join(f.input, 'data/originals/deep.txt'));
+    await expect(prepareInputs(f.repo, f.input, [path, 'data/originals/deep.txt'])).rejects.toThrow(
+      'Missing declared input: data/originals/deep.txt',
+    );
+    await put(join(f.input, 'data/originals/deep.txt'), 'transitive raw\n');
+    await exec('git', ['-C', f.repo, 'add', '.']);
+    await exec('git', [
+      '-C',
+      f.repo,
+      '-c',
+      'user.name=Test',
+      '-c',
+      'user.email=t@example.invalid',
+      'commit',
+      '-qm',
+      'test: explicit generator binding',
+    ]);
+    await expect(
+      buildRelease({
+        ...f.options,
+        commit: 'HEAD',
+        executor: { ...f.executor, generatedIntermediates: [path] },
+      }),
+    ).rejects.toThrow(/complete the declared intermediate closure/);
+    await expect(readFile(join(f.options.outputRoot, 'receipt.json'))).rejects.toMatchObject({
+      code: 'ENOENT',
+    });
+  });
   it.each(['FAIL', 'SKIP', 'absent', 'crash', 'empty', 'incomplete'])(
     'never installs a PASS package on %s validation',
     async (mode) => {

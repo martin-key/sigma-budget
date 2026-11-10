@@ -127,7 +127,13 @@ const provenanceRules = {
  * decoder, never from execution-provenance.json or the execution producer. */
 export interface ExecutionLawTable {
   columns: { scope: string; unit: string; vintage?: string; year: number }[];
-  rows: { label: string; page: number; units: string[]; printed: (string | null)[]; values: (number | null)[] }[];
+  rows: {
+    label: string;
+    page: number;
+    units: string[];
+    printed: (string | null)[];
+    values: (number | null)[];
+  }[];
 }
 export type ExecutionLawReader = (
   pdf: OriginalBytes & { archive: string; archiveSha256: string; member: string },
@@ -148,7 +154,16 @@ function moneyOk(c: Check, v: unknown, places: number, where: string): void {
 /** Independently resolve the pinned Annex 1 law locators. This does not call
  * law_plan(), a TS builder, or use released provenance as expected evidence. */
 function physicalLaw(table: ExecutionLawTable) {
-  return {columns: table.columns, rows: table.rows.map(({label,page,units,printed,values})=>({label,page,units,printed,values}))};
+  return {
+    columns: table.columns,
+    rows: table.rows.map(({ label, page, units, printed, values }) => ({
+      label,
+      page,
+      units,
+      printed,
+      values,
+    })),
+  };
 }
 function expectedPlan(ctx: Context, c: Check, reader?: ExecutionLawReader): Doc {
   const pins = originalPins(ctx),

@@ -17,6 +17,7 @@ import {
   safeRelative,
   sha256,
 } from './files.js';
+import type { MissingIntermediate } from './types.js';
 
 const LIMIT = 32 * 1024 * 1024;
 const HEX = /^[a-f0-9]{64}$/;
@@ -204,6 +205,7 @@ export interface PreparedInputs {
   selectedFiles: Map<string, string>;
   snapshot: { sha256: string; acquisitionSha256?: string; acquisitionReceipt?: string };
   registries: Record<string, string>;
+  missingIntermediates: MissingIntermediate[];
 }
 export const mime = (path: string): string =>
   ({
@@ -225,6 +227,7 @@ export const mime = (path: string): string =>
 export async function prepareInputs(
   exportRoot: string,
   inputRoot: string,
+  generators: readonly string[] = [],
 ): Promise<PreparedInputs> {
   await safeDirectory(inputRoot);
   const sourceBytes = await readSafeBytes(join(exportRoot, 'data/sources.yaml'), LIMIT);
@@ -248,6 +251,25 @@ export async function prepareInputs(
     committedInputs = new Map<string, ReleaseFile>();
   const selectedFiles = new Map<string, string>();
   const missing: string[] = [];
+  const missingIntermediates: MissingIntermediate[] = [];
+  function generated(path: string, pattern: string, declaration: InputDeclaration): boolean {
+    if (
+      declaration.kind !== 'intermediate' ||
+      declaration.entry.reproducible !== true ||
+      !generators.includes(pattern) ||
+      /[?*\[]/.test(path)
+    )
+      return false;
+    safeRelative(path);
+    if (!missingIntermediates.some((i) => i.path === path))
+      missingIntermediates.push({
+        path,
+        declaration: pattern,
+        datasets: declaration.datasets,
+        ...(pins.get(path) ? { legacyPin: pins.get(path) } : {}),
+      });
+    return true;
+  }
   for (const [declarations, paths, factsMap, fromSnapshot] of [
     [closure.external, [...new Set([...available, ...pins.keys()].filter(external))], inputs, true],
     [closure.committed, committed, committedInputs, false],
@@ -255,12 +277,15 @@ export async function prepareInputs(
     for (const [pattern, declaration] of declarations) {
       const hits = paths.filter((p) => matchesGlob(p, pattern)).sort();
       if (!hits.length) {
-        missing.push(pattern);
+        if (!generated(pattern, pattern, declaration)) missing.push(pattern);
         continue;
       }
       for (const path of hits) {
         safeRelative(path);
-        if (fromSnapshot && !available.has(path)) fail('Missing declared input: ' + path, 3);
+        if (fromSnapshot && !available.has(path)) {
+          if (generated(path, pattern, declaration)) continue;
+          fail('Missing declared input: ' + path, 3);
+        }
         const row = fromSnapshot ? selection.rows.get(path) : undefined;
         if (row && row.status !== 'ok') fail('Required acquisition did not succeed: ' + path, 3);
         const selected = row?.file ?? path;
@@ -336,6 +361,9 @@ export async function prepareInputs(
       'data/datasets.yaml': sha256(datasetBytes),
       'data/originals.sha256': sha256(pinBytes),
     },
+    missingIntermediates: missingIntermediates.sort((a, b) =>
+      a.path < b.path ? -1 : a.path > b.path ? 1 : 0,
+    ),
   };
 }
 export async function stageInputs(prepared: PreparedInputs, exportRoot: string): Promise<void> {

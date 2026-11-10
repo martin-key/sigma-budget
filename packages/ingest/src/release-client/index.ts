@@ -4,4 +4,4 @@ export * from './package.js';
 export * from './transport.js';
 export * from './client.js';
 
-export {verifyNodeProof,nodeProofReceipt} from './node-proof.js';
+export { verifyNodeProof, nodeProofReceipt } from './node-proof.js';

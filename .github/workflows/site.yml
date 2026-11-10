@@ -91,7 +91,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
-      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/tmp/pw-browsers   # the checks look there first (redirects and others set it as their default)
+      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/tmp/pw-browsers # the checks look there first (redirects and others set it as their default)
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

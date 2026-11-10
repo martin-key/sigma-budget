@@ -42,15 +42,18 @@ const inside = (a: string, b: string) => {
  * any ancestor without requesting read permission for unrelated parent trees.
  * Missing descendants are created individually, with the same no-link checks. */
 export async function safePath(path: string, createDirs = false): Promise<void> {
-  const absolute = resolve(path), missing: string[] = [];
+  const absolute = resolve(path),
+    missing: string[] = [];
   let current = absolute;
   for (;;) {
     try {
       const entry = await lstat(current);
-      assert(!entry.isSymbolicLink() &&
-        (current === absolute ? entry.isFile() || entry.isDirectory() : entry.isDirectory()),
-        'Unsafe path: ' + current);
-      assert(await realpath(current) === current, 'Symlink path: ' + current);
+      assert(
+        !entry.isSymbolicLink() &&
+          (current === absolute ? entry.isFile() || entry.isDirectory() : entry.isDirectory()),
+        'Unsafe path: ' + current,
+      );
+      assert((await realpath(current)) === current, 'Symlink path: ' + current);
       if (entry.isFile()) assert(entry.nlink === 1, 'Hardlinked file: ' + current);
       break;
     } catch (error) {
@@ -61,12 +64,15 @@ export async function safePath(path: string, createDirs = false): Promise<void> 
       current = parent;
     }
   }
-  if (createDirs) for (const directory of missing.reverse()) {
-    await mkdir(directory);
-    const entry = await lstat(directory);
-    assert(entry.isDirectory() && !entry.isSymbolicLink() && await realpath(directory) === directory,
-      'Unsafe created directory');
-  }
+  if (createDirs)
+    for (const directory of missing.reverse()) {
+      await mkdir(directory);
+      const entry = await lstat(directory);
+      assert(
+        entry.isDirectory() && !entry.isSymbolicLink() && (await realpath(directory)) === directory,
+        'Unsafe created directory',
+      );
+    }
 }
 
 async function read(path: string, maxBytes: number): Promise<Buffer> {

@@ -219,6 +219,21 @@ async function makeManifest(
       registries: prepared.registries,
       snapshot: prepared.snapshot,
       committed_inputs: prepared.committedInputs,
+      ...(result.generatedIntermediates?.length
+        ? {
+            generated_intermediates: result.generatedIntermediates.map((f) => ({
+              ...f,
+              declaration: prepared.missingIntermediates.find((i) => i.path === f.path)!
+                .declaration,
+              legacy_pin_sha256: prepared.missingIntermediates.find((i) => i.path === f.path)!
+                .legacyPin,
+              origin: 'recorded-code-generation',
+              originalPinVerified:
+                f.sha256 ===
+                prepared.missingIntermediates.find((i) => i.path === f.path)!.legacyPin,
+            })),
+          }
+        : {}),
       ...(result.extractions ? { extractions: result.extractions } : {}),
     },
     inputs: prepared.inputs,
@@ -289,6 +304,9 @@ export async function buildRelease(options: BuildReleaseOptions): Promise<BuildR
       identity: { ...adapter.identity },
       bridgeSha256: adapter.bridgeSha256,
       dependenciesRoot: adapter.dependenciesRoot,
+      generatedIntermediates: adapter.generatedIntermediates
+        ? [...adapter.generatedIntermediates]
+        : undefined,
       execute: adapter.execute.bind(adapter),
     },
   };
@@ -339,7 +357,11 @@ export async function buildRelease(options: BuildReleaseOptions): Promise<BuildR
       fail(
         'Locked local dependencies differ from recorded commit; no network install is permitted',
       );
-    const prepared = await prepareInputs(source, inputRoot);
+    const prepared = await prepareInputs(
+      source,
+      inputRoot,
+      options.executor.generatedIntermediates,
+    );
     // Reuse the accepted protocol parser before any producer sees an invalid path/size.
     parseManifest(
       jsonBytes({
@@ -378,8 +400,41 @@ export async function buildRelease(options: BuildReleaseOptions): Promise<BuildR
         commit: exported.commit,
         buildDate: options.buildDate,
         inputs: structuredClone(prepared.inputs),
+        ...(prepared.missingIntermediates.length
+          ? { missingIntermediates: structuredClone(prepared.missingIntermediates) }
+          : {}),
       }),
     );
+    const generated = result.generatedIntermediates ?? [];
+    if (
+      generated.length !== prepared.missingIntermediates.length ||
+      new Set(generated.map((f) => f.path)).size !== generated.length
+    )
+      fail('Recorded executor did not complete the declared intermediate closure');
+    if (generated.length) {
+      const view = join(scratch, 'prepared-inputs');
+      await verifyExport(view, exported);
+      await verifyStagedInputs(prepared, view);
+      const allowed = new Set([
+        ...Object.keys(exported.files),
+        ...prepared.inputs.map((f) => f.path),
+        ...prepared.missingIntermediates.map((f) => f.path),
+      ]);
+      for (const path of await listFiles(view))
+        if (!allowed.has(path)) fail('Unexpected generated input: ' + path);
+      for (const f of generated) {
+        const declaration = prepared.missingIntermediates.find((i) => i.path === f.path);
+        if (
+          !declaration ||
+          f.kind !== 'generated-intermediate' ||
+          jsonBytes(f.datasets).compare(jsonBytes(declaration.datasets)) !== 0
+        )
+          fail('Invalid generated intermediate binding');
+        const actual = await fileFacts(join(view, safeRelative(f.path)), f.bytes);
+        if (actual.sha256 !== f.sha256)
+          fail('Generated intermediate differs from recorded evidence: ' + f.path);
+      }
+    }
     await verifyOwnedExport(source, exported, prepared);
     // Reject metadata forged by an executor before lifecycle writes its report.
     for (const path of await listFiles(candidate))

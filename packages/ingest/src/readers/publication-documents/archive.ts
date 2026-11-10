@@ -149,7 +149,12 @@ export async function readProgrammeSevenZip(
   const worker = new Worker(new URL('./archive-worker.js', import.meta.url), {
     // V8 heap/prototype flags are not accepted in Worker execArgv. The worker
     // has its own finite resourceLimits below; permission flags are retained.
-    execArgv: process.execArgv.filter((a) => !['--input-type','--disable-proto','--max-old-space-size'].some(flag => a.startsWith(flag))),
+    execArgv: process.execArgv.filter(
+      (a) =>
+        !['--input-type', '--disable-proto', '--max-old-space-size'].some((flag) =>
+          a.startsWith(flag),
+        ),
+    ),
     workerData: { bytes, wasmModule: options.wasmModule },
     resourceLimits: { maxOldGenerationSizeMb: 256, maxYoungGenerationSizeMb: 32 },
   });

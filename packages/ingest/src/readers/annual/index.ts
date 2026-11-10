@@ -11,7 +11,7 @@ import { extractBill, type Data } from './bill.js';
 export { extractForecast, forecastNumber } from './forecast.js';
 export { extractBill, billNumber } from './bill.js';
 export { serializeAnnual } from './json.js';
-export { prepareAnnual, readAnnualRegistration } from './prepare.js';
+export { prepareAnnual, readAnnualRegistration, safePath } from './prepare.js';
 export type { AnnualPreparationOptions, AnnualPreparationReceipt } from './prepare.js';
 export interface AnnualRegistration {
   id: 'budget2027';

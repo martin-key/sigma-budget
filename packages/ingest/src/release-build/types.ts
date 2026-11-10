@@ -42,6 +42,14 @@ export interface ExecutorResult {
   datasets: { id: string; action: 'built' | 'preserved-input' }[];
   /** Optional actual extraction evidence; never substitutes for validation groups. */
   extractions?: unknown[];
+  /** Fresh intermediates in scratch/prepared-inputs, never replacements for pinned originals. */
+  generatedIntermediates?: ReleaseFile[];
+}
+export interface MissingIntermediate {
+  path: string;
+  declaration: string;
+  datasets: string[];
+  legacyPin?: string;
 }
 export interface ExecutionContext {
   /** No .git or pre-existing release outputs; external bytes are private copies. */
@@ -52,6 +60,10 @@ export interface ExecutionContext {
   commit: string;
   buildDate: string;
   inputs: readonly ReleaseFile[];
+  missingIntermediates?: readonly MissingIntermediate[];
+  /** Owned scratch view, used only after generating the explicitly declared missing intermediates. */
+  preparedInputRoot?: string;
+  generatedIntermediates?: readonly ReleaseFile[];
 }
 export interface ExecutorIdentity {
   runtime: 'node-export/1';
@@ -68,6 +80,8 @@ export interface ReleaseExecutor {
   bridgeSha256?: string;
   /** Optional trusted offline compiler/dependency installation; its lock must equal the export. */
   dependenciesRoot?: string;
+  /** Finite registered intermediate patterns this recorded executor can generate. Raw sources never qualify. */
+  generatedIntermediates?: readonly string[];
   execute(context: Readonly<ExecutionContext>): Promise<ExecutorResult>;
 }
 export interface BuildReleaseOptions {

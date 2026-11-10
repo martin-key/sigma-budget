@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import {productionCli,PRODUCTION_USAGE} from './production-cli.js';
+import { productionCli, PRODUCTION_USAGE } from './production-cli.js';
 import { wave13aBuildCli, wave13aScope } from './wave13a-build.js';
 import { wave13bBuildCli, wave13bScope } from './wave13b-build.js';
 import { wave13bLiveDiagnostic } from './wave13b-live.js';
@@ -23,41 +23,63 @@ const USAGE = [
 ].join('\n');
 
 try {
-  const argv=process.argv.slice(2);
-  if(argv[0]==='--json'){argv.shift();argv.push('--json');}
+  const argv = process.argv.slice(2);
+  if (argv[0] === '--json') {
+    argv.shift();
+    argv.push('--json');
+  }
   const [command, ...args] = argv;
   const scopeIndex = args.findIndex((value, index) => index % 2 === 0 && value === '--scope');
   const scope = scopeIndex < 0 ? undefined : args[scopeIndex + 1];
   if (command === 'build')
     process.exitCode =
       scope === undefined
-        ? await productionCli([command,...args])
+        ? await productionCli([command, ...args])
         : scope === wave13bScope
-        ? await wave13bBuildCli(args)
-        : scope === wave13aScope
-          ? await wave13aBuildCli(args)
-          : scope === 'catalog'
-            ? await catalogBuildCli(args)
-            : scope === 'core,feed,feed-rss,search-index'
-              ? await aggregationBuildCli(args)
-              : scope === 'debt,municipalities,geo-obshtini,sebra'
-                ? await debtLocalBuildCli(args)
-                : scope === 'dbp2027,gva-sectors'
-                  ? await dbpGvaBuildCli(args)
-                  : scope === 'outlook,revenue,expenditure,measures'
-                    ? await fiscalBuildCli(args)
-                    : scope === 'glossary,guide'
-                      ? await editorialBuildCli(args)
-                      : scope === 'components,rates'
-                        ? await componentsRatesBuildCli(args)
-                        : scope === 'ministries,ministries-programs,programs'
-                          ? await programmesBuildCli(args)
-                          : await lawBuildCli(args);
-  else if (['validate','reproduce','collect','refetch','import-source','status','source-status','drift','upload','publish','rollback','preflight','prepare','--help','-h'].includes(command??'')) process.exitCode=await productionCli([command!,...args]);
+          ? await wave13bBuildCli(args)
+          : scope === wave13aScope
+            ? await wave13aBuildCli(args)
+            : scope === 'catalog'
+              ? await catalogBuildCli(args)
+              : scope === 'core,feed,feed-rss,search-index'
+                ? await aggregationBuildCli(args)
+                : scope === 'debt,municipalities,geo-obshtini,sebra'
+                  ? await debtLocalBuildCli(args)
+                  : scope === 'dbp2027,gva-sectors'
+                    ? await dbpGvaBuildCli(args)
+                    : scope === 'outlook,revenue,expenditure,measures'
+                      ? await fiscalBuildCli(args)
+                      : scope === 'glossary,guide'
+                        ? await editorialBuildCli(args)
+                        : scope === 'components,rates'
+                          ? await componentsRatesBuildCli(args)
+                          : scope === 'ministries,ministries-programs,programs'
+                            ? await programmesBuildCli(args)
+                            : await lawBuildCli(args);
+  else if (
+    [
+      'validate',
+      'reproduce',
+      'collect',
+      'refetch',
+      'import-source',
+      'status',
+      'source-status',
+      'drift',
+      'upload',
+      'publish',
+      'rollback',
+      'preflight',
+      'prepare',
+      '--help',
+      '-h',
+    ].includes(command ?? '')
+  )
+    process.exitCode = await productionCli([command!, ...args]);
   else if (command === 'parity') process.exitCode = await parityCli(args);
   else if (command === 'freshness') process.exitCode = await freshnessCli(args);
   else if (command === 'wave13b-live') process.exitCode = await wave13bLiveDiagnostic(args);
-  else throw new Error(PRODUCTION_USAGE+'\n'+USAGE);
+  else throw new Error(PRODUCTION_USAGE + '\n' + USAGE);
 } catch (e) {
   console.error(String(e));
   process.exitCode = 1;

@@ -132,6 +132,7 @@ export class Context {
     readonly buildDate = '2026-11-08',
     readonly dataDir = 'data/release',
     readonly outputRoot = root,
+    readonly generatedInputs: readonly { path: string; sha256: string; bytes: number }[] = [],
   ) {
     realpathSync(root);
     realpathSync(outputRoot);
