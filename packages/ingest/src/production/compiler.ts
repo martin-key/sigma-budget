@@ -3,7 +3,7 @@ import { createRequire } from 'node:module';
 import { readFile, writeFile, cp, mkdir } from 'node:fs/promises';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { dirname, join, resolve, relative, isAbsolute } from 'node:path';
+import { dirname, join, resolve, relative, isAbsolute, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import type { ReleaseExecutor, ExecutorResult } from '../release-build/types.js';
@@ -85,6 +85,7 @@ export async function productionExecutor(dependenciesRoot: string): Promise<Rele
           {
             name: 'exported-workspace-only',
             setup(build) {
+              const installed = new Map<string, string>();
               build.onResolve({ filter: /^@sigma-budget\// }, (args) => {
                 const match = /^@sigma-budget\/(dataset-schema|ingest)(?:\/(.+))?$/.exec(args.path);
                 if (!match) throw new Error('Unresolved workspace alias ' + args.path);
@@ -96,6 +97,39 @@ export async function productionExecutor(dependenciesRoot: string): Promise<Rele
                     'src',
                     match[2] ? match[2] + '/index.ts' : 'index.ts',
                   ),
+                };
+              });
+              // esbuild's CJS module labels otherwise contain paths relative to the
+              // random export depth. A stable namespace gives actual installed bytes
+              // a logical identity, including their locked pnpm package/version path.
+              build.onResolve({ filter: /.*/ }, async (args) => {
+                if (args.pluginData?.lockedResolution) return;
+                const found = await build.resolve(args.path, {
+                  kind: args.kind,
+                  resolveDir: args.resolveDir,
+                  pluginData: { lockedResolution: true },
+                });
+                if (found.errors.length) return { errors: found.errors };
+                if (found.external) return { path: found.path, external: true };
+                const rel = relative(root, found.path);
+                if (rel && !rel.startsWith('..') && !isAbsolute(rel)) return { path: found.path };
+                const dependency = relative(dependenciesRoot, found.path);
+                if (
+                  dependency.startsWith('..') ||
+                  isAbsolute(dependency) ||
+                  !dependency.includes('node_modules/')
+                )
+                  throw new Error('Dependency escapes locked local installation: ' + args.path);
+                installed.set(dependency, found.path);
+                return { path: dependency, namespace: 'locked-dependency' };
+              });
+              build.onLoad({ filter: /.*/, namespace: 'locked-dependency' }, async (args) => {
+                const path = installed.get(args.path);
+                if (!path) throw new Error('Unresolved logical dependency');
+                return {
+                  contents: await readFile(path),
+                  resolveDir: dirname(path),
+                  loader: extname(path) === '.json' ? 'json' : 'js',
                 };
               });
             },
@@ -117,6 +151,7 @@ export async function productionExecutor(dependenciesRoot: string): Promise<Rele
           outfile: join(scratch, out!),
         });
         for (const file of Object.keys(result.metafile!.inputs)) {
+          if (file.startsWith('locked-dependency:')) continue;
           const path = resolve(root, file),
             rel = relative(root, path);
           const fromExport = rel !== '' && !rel.startsWith('..') && !isAbsolute(rel);

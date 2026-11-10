@@ -43,6 +43,31 @@ const common = {
   executor,
   maxObjectBytes: 67108864,
 };
+// Exercise owned generation first, before spending time on repeated normal builds.
+const generationInputs = join(out, 'generation-inputs'),
+  generationExport = join(out, 'generation-export');
+await exportCommit(root, commit, generationExport);
+const closure = await prepareInputs(generationExport, inputs);
+await mkdir(generationInputs);
+await stageInputs(closure, generationInputs);
+await rm(generationExport, { recursive: true, force: true });
+const regenerable = [
+  'data/originals/asbp/asbp_tables.json',
+  'data/originals/dv/dv_laws_2026.json',
+  'data/cache/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json',
+  'data/cache/research/dbp-2027/dbp2027_figures.json',
+  'data/cache/law_bill.json',
+  ...closure.inputs
+    .filter((f) => f.path.startsWith('data/originals/program_budgets/'))
+    .map((f) => f.path),
+];
+for (const path of regenerable) await rm(join(generationInputs, path));
+const regenerated = await buildRelease({
+  ...common,
+  inputRoot: generationInputs,
+  outputRoot: join(out, 'regenerated'),
+});
+await rm(generationInputs, { recursive: true, force: true });
 const first = await buildRelease({ ...common, outputRoot: join(out, 'candidate') });
 const second = await buildRelease({ ...common, outputRoot: join(out, 'second') });
 assert.equal(
@@ -165,25 +190,6 @@ try {
   assert.equal(graph.states.find((s) => s.id === 'publication-layers').status, 'skipped');
   assert(!graph.outputs.has('publication-layers'));
   controls.push('failed stage: no publication/PASS package');
-  const regenerable = [
-    'data/originals/asbp/asbp_tables.json',
-    'data/originals/dv/dv_laws_2026.json',
-    'data/cache/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json',
-    'data/cache/research/dbp-2027/dbp2027_figures.json',
-    'data/cache/law_bill.json',
-    ...first.manifest.inputs
-      .filter((f) => f.path.startsWith('data/originals/program_budgets/'))
-      .map((f) => f.path),
-  ];
-  for (const path of regenerable) await rm(join(snapshot, path));
-  // Restore the deliberately missing raw. Generation never authorizes its absence.
-  const nap = 'data/originals/nap/nap_prilozhenie_1_VK-30-10237_12.08.2026.pdf';
-  await cp(join(source, nap), join(snapshot, nap));
-  const regenerated = await buildRelease({
-    ...common,
-    inputRoot: snapshot,
-    outputRoot: join(out, 'regenerated'),
-  });
   const generated = regenerated.manifest.processing.generated_intermediates;
   assert.equal(generated.length, regenerable.length);
   assert(
