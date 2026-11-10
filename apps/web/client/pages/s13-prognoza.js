@@ -1,4 +1,5 @@
 import { stateDebt } from '../budget-2027.js';
+import { tablesOf, forecastTable } from '../budget-2027-tables.js';
 import { periodIndex, previousPeriodIndex } from '../annual.js';
 import { selectPeriod } from '../periods.js';
 import { annualGap } from '../ui/annual.js';
@@ -20,7 +21,7 @@ import { pendingState } from '../ui/states.js';
 import { yIndex, change, chartUnit } from '../view.js';
 import { num, pct, money, date, DASH, NBSP } from '../format.js';
 
-export const needs = ['core', 'outlook', 'budget2027?'];
+export const needs = ['core', 'outlook', 'budget2027?', 'budget2027-tables?'];
 export const styles = ['s13-prognoza'];
 
 /* ---------------------------------------------------------------- words and small helpers */
@@ -351,6 +352,52 @@ function debtBlock(ctx, f, d) {
   });
 }
 
+/* ---------------------------------------------------------------- further АСБП 2027–2029 tables (budget2027-tables.json, D37) */
+// Each number is a link to the PDF page it comes from (the shared budget2027 provenance index). The tables are printed as they are:
+// no sums, no shares and no conversions are made here. A release without the file shows none of these blocks.
+const ASBP = [
+  {
+    id: 's13-defence', tables: ['III_2'], title: 'Разходи за отбрана',
+    scope: { key: 'defence-nato', label: 'Отбрана по НАТО', gl: null },
+    sub: 'Таблица III-2 на АСБП 2027–2029: разходите за отбрана по класификацията на НАТО и бюджетите, от които идват. 2026 г. е приетият закон.',
+    captions: ['Разходи за отбрана, млн. евро'], status: 'Закон, проект и прогноза'
+  },
+  {
+    id: 's13-eu-cap', tables: ['V_1', 'V_2'], title: 'Земеделие и рибарство: средства от ЕС и съфинансиране',
+    scope: { key: 'eu-cofinancing', label: 'ЕС и съфинансиране', gl: null },
+    sub: 'Таблици V-1 и V-2 на АСБП 2027–2029: разходите и плащанията за селскостопанската и за рибарската политика.',
+    captions: ['Селскостопанска политика, млн. евро', 'Рибарска политика, млн. евро'], status: 'Проект и прогноза'
+  },
+  {
+    id: 's13-kfp-parts', tables: ['II_2', 'II_3'], title: 'Национален бюджет и сметки за средства от ЕС',
+    scope: 'kfp', disclose: true,
+    sub: 'Таблици II-2 и II-3 на АСБП 2027–2029: двете части на КФП. 2025 г. е отчет.',
+    captions: ['КФП – национален бюджет', 'КФП – сметки за средства от ЕС'], status: 'Отчет, оценка и прогноза'
+  },
+  {
+    id: 's13-tax-expenditures', tables: ['annex10'], title: 'Данъчни разходи',
+    scope: { key: 'tax-expenditures', label: 'Данъчни облекчения', gl: null },
+    sub: 'Приложение 10 към мотивите: приходите, от които държавата се отказва чрез облекчения по ДДС, акцизи, корпоративния данък и ДДФЛ. 2025 г. е отчет, 2027 г. е оценка.',
+    captions: ['Данъчни разходи, хил. евро'], status: 'Отчет и проект',
+    d: (r) => (r.unit === '% от БВП' ? 2 : 0)
+  }
+];
+function asbpBlocks(ctx) {
+  const t = tablesOf(ctx);
+  if (!t?.forecast) return '';
+  return ASBP.filter(b => b.tables.every(id => t.forecast[id])).map(b => {
+    const tables = b.tables.map((id, i) => dataTable({ id: `${b.id}-${id}`, caption: b.captions[i], dense: true, ...forecastTable(t, id, { d: b.d }) }));
+    const body = b.disclose
+      ? html`<div class="stack">${tables.map((table, i) => disclosure({ id: `${b.id}-${b.tables[i]}-d`, title: b.captions[i], body: table }))}</div>`
+      : html`<div class="stack">${tables}</div>`;
+    return block({
+      id: b.id, title: b.title, sub: b.sub, scope: b.scope, status: 'forecast', statusLabel: b.status,
+      source: ['budget2027'], asOf: t.publication, share: { text: b.sub },
+      body: html`${body}<p class="small muted">Всяко число е връзка към страницата на PDF документа, от която е взето. Празните печатни клетки са с тире.</p>`
+    });
+  });
+}
+
 /* ---------------------------------------------------------------- macro frame */
 const macroKind = (f, i) => (f.o.macroVintage?.[i] === 'actual' ? 'отчет' : 'прогноза');
 function macroBlock(ctx, f) {
@@ -449,6 +496,7 @@ export function render(ctx) {
       ${chartBlock(f, def, { id: 's13-b-deficit', title: def.title, sub: allDeficit(f) ? 'Колко повече се харчи, отколкото се събира, по години.' : 'Разликата между приходите и разходите по години.' })}
       ${chartBlock(f, int, { id: 's13-b-interest', title: 'Лихви по дълга', sub: 'Колко се плаща за лихви по дълга по години.' })}
       ${debtBlock(ctx, f, d)}
+      ${asbpBlocks(ctx)}
       ${macroBlock(ctx, f)}
       ${notesBlock(f)}`
   };

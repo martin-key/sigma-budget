@@ -23,7 +23,7 @@ import { unitSwitch, bindUnitSwitch } from '../ui/unit-switch.js';
 // the four budgets whose programmes are still pending (P03) have no file: used only to spare a direct load a 404 before the index is cached
 const NO_FILE = ['0100', '1800', '2300', '7400'];
 export const needs = ctx => {
-  if (isFramework(ctx)) return ['core', 'budget2027?'];
+  if (isFramework(ctx)) return ['core', 'budget2027?', 'budget2027-tables?'];
   const code = String(ctx?.params?.code ?? '');
   const list = ['core', 'ministries'];
   if (/^\d{4}$/.test(code)) {

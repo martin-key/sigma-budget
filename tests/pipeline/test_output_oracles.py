@@ -11,7 +11,7 @@ from unittest.mock import patch
 import fitz
 
 from budget_pipeline.build import annual_periods
-from budget_pipeline.build.budget_2027 import budget
+from budget_pipeline.build.budget_2027 import budget, tables
 from budget_pipeline.build.data_io import ROOT
 from budget_pipeline.validate.annual_oracles import check_output_oracles, load_oracles, printed_decimal
 from budget_pipeline.validate.budget_2027 import g_budget_2027
@@ -39,6 +39,7 @@ def memory_build():
     lineage = annual_periods.Lineage()
     data = {name + ".json": {"byPeriod": records} for name, records in annual_periods.annual(lineage).items()}
     data["budget2027.json"] = budget(lineage)
+    data["budget2027-tables.json"] = tables(lineage)
     data["budget2027-provenance.json"] = {"documents": lineage.documents, "entries": lineage.entries}
     return Memory(data)
 

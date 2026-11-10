@@ -22,6 +22,13 @@ import {
 } from '../budget-2027.js';
 import { periodByKey } from '../periods.js';
 import { dataHref } from '../data.js';
+import {
+  tablesOf,
+  forecastTable,
+  ceilingOf,
+  ceilingRows,
+  captionedTables,
+} from '../budget-2027-tables.js';
 
 const labels = { bill: 'Основен проект', billMc: 'Вариант на Министерския съвет' };
 const variantOf = (ctx) => (ctx.query.variant === 'billMc' ? 'billMc' : 'bill');
@@ -40,14 +47,44 @@ const publication = (doc) =>
     </p>`;
 const namedScope = (key, label, long = label, note) => ({ key, label, long, note, gl: null });
 function scopeFor(ctx, id) {
-  if (ctx.route.id === 'S17') return id === 's17-limits-2027'
-    ? namedScope('budget-and-debt-limits', 'Държавен бюджет и дълг', 'Предложени граници за фискалния резерв и държавния дълг по законопроекта')
-    : 'zdd';
-  if (['S20', 'S21'].includes(ctx.route.id)) return namedScope('municipal-transfers', 'Трансфери към общините', 'Трансфери от държавния бюджет към общинските бюджети');
-  if (ctx.route.id === 'S12') return namedScope('fiscal-measures', 'Фискални мерки', `${id === 's12-II_7' ? 'Приходни' : 'Разходни'} мерки по АСБП 2027–2029`);
-  if (id === 's34-projects') return namedScope('investment-projects', 'Инвестиционни проекти', 'Инвестиционни проекти по законопроекта за държавния бюджет');
-  if (ctx.route.id === 'S34' || ctx.params?.code === 'art1') return namedScope('state-budget', 'Държавен бюджет', 'Държавен бюджет по законопроекта за ЗДБРБ');
-  return namedScope('institution-budgets', 'Бюджети на ведомствата', 'Бюджети на ведомствата по законопроекта за ЗДБРБ, не е целият бюджет', 'не е целият бюджет');
+  if (ctx.route.id === 'S17')
+    return id === 's17-limits-2027'
+      ? namedScope(
+          'budget-and-debt-limits',
+          'Държавен бюджет и дълг',
+          'Предложени граници за фискалния резерв и държавния дълг по законопроекта',
+        )
+      : 'zdd';
+  if (['S20', 'S21'].includes(ctx.route.id))
+    return namedScope(
+      'municipal-transfers',
+      'Трансфери към общините',
+      'Трансфери от държавния бюджет към общинските бюджети',
+    );
+  if (ctx.route.id === 'S12')
+    return namedScope(
+      'fiscal-measures',
+      'Фискални мерки',
+      `${id === 's12-II_7' ? 'Приходни' : 'Разходни'} мерки по АСБП 2027–2029`,
+    );
+  if (id === 's34-projects')
+    return namedScope(
+      'investment-projects',
+      'Инвестиционни проекти',
+      'Инвестиционни проекти по законопроекта за държавния бюджет',
+    );
+  if (ctx.route.id === 'S34' || ctx.params?.code === 'art1')
+    return namedScope(
+      'state-budget',
+      'Държавен бюджет',
+      'Държавен бюджет по законопроекта за ЗДБРБ',
+    );
+  return namedScope(
+    'institution-budgets',
+    'Бюджети на ведомствата',
+    'Бюджети на ведомствата по законопроекта за ЗДБРБ, не е целият бюджет',
+    'не е целият бюджет',
+  );
 }
 const base = (ctx, id, title, body, extra = {}) =>
   block({
@@ -133,11 +170,247 @@ const variantControl = (ctx) =>
     }),
   });
 
+/* ---------------------------------------------------------------- budget2027-tables.json (ceilings and printed tables) */
+const tablesSource = ['budget2027'];
+const tablesNote = html`<p class="small muted">
+  Всяко число е връзка към страницата на PDF документа, от която е взето. Празните печатни клетки са
+  с тире.
+</p>`;
+/** a block of budget2027-tables.json: the same frame as the bill blocks, its own id and caption */
+const tableBlock = (ctx, id, title, table, extra = {}) =>
+  base(
+    ctx,
+    id,
+    title,
+    html`${dataTable({
+      id: id + '-table',
+      caption: extra.caption || title,
+      ...table,
+      dense: true,
+    })}${tablesNote}`,
+    {
+      source: tablesSource,
+      share: { period: ctx.period.key, unit: extra.unit || 'хил. €' },
+      ...extra,
+    },
+  );
+/** the bill's own words as the title: „(4) Определя …, както следва:“ -> „Ал. 4. Определя …“ */
+const captionTitle = (c) =>
+  String(c.text || '')
+    .replace(/^\((\d+)\)\s*/, 'Ал. $1. ')
+    .replace(/^Чл\.\s*\d+\.\s*(?:\(1\)\s*)?/, '')
+    .replace(/,?\s*както следва:?\s*$/, '');
+/** the printed rows of one table, linked to their origin, as rows of the existing value/provenance table */
+const printedRows = (rows) =>
+  rows.map((r) => cellRow(`${r.no === 'unprinted' ? '' : r.no} ${r.label}`.trim(), r.cell));
+const periodColumn = (doc, table, period) =>
+  (doc?.forecastColumns?.[table] || [])
+    .map((c, index) => ({ ...c, index }))
+    .filter((c) => c.period === period);
+
+/** Annexes 6–8 of the motives for one period: transfers to БНТ/БНР/БТА/БАН/universities, EU accounts, other entities */
+function annexDisclosures(ctx, t) {
+  const period = ctx.period.key,
+    year = periodByKey(period).year;
+  const parts = [
+    [
+      'annex6',
+      'Трансфери към БНТ, БНР, БТА, БАН и държавните висши училища',
+      'Приложение 6 към мотивите',
+    ],
+    [
+      'annex7',
+      'Сметки за средствата от Европейския съюз',
+      'Приложение 7 към мотивите: разходи, трансфери (нето) и общо',
+    ],
+    [
+      'annex8',
+      'Други лица и структури, включени в КФП',
+      'Приложение 8 към мотивите: разходи, трансфери (нето) и общо',
+    ],
+  ];
+  return parts
+    .filter(([table]) => t.forecast?.[table])
+    .map(([table, title, caption]) =>
+      disclosure({
+        id: `s10-${table}-${year}`,
+        title: `${title}, ${year} г.`,
+        meta: caption,
+        body: html`${dataTable({
+          id: `s10-${table}-${year}-table`,
+          caption: `${caption}, ${periodByKey(period).label}, хил. €`,
+          dense: true,
+          ...forecastTable(t, table, { columns: periodColumn(t, table, period) }),
+        })}${tablesNote}`,
+      }),
+    );
+}
+
+/** S10 for 2027: the tables of arts. 49 (БНР, БНТ, БТА) and 50 (liabilities to suppliers) of the bill */
+function articleTableBlocks(ctx, t) {
+  const titles = {
+    49: 'Взаимоотношения на БНР, БНТ и БТА с централния бюджет',
+    50: 'Максимални задължения към доставчици към 31.12.2027 г.',
+  };
+  return Object.entries(t.articleTables || {}).map(([article, a]) =>
+    disclosure({
+      id: `s10-art${article}-2027`,
+      title: titles[article] || `Чл. ${article}`,
+      meta: `Чл. ${article} на законопроекта, стр. ${a.page}`,
+      body: html`<p class="small">${a.caption}</p>
+        ${dataTable({
+          id: `s10-art${article}-2027-table`,
+          caption: `Чл. ${article} на законопроекта, хил. евро`,
+          columns: cellColumns(),
+          rows: printedRows(a.rows),
+          dense: true,
+        })}${tablesNote}`,
+    }),
+  );
+}
+
+/** S10 for 2028/2029: the ceilings of Annexes 4 and 5; S11: one institution's ceiling for 2027–2029 */
+function ceilingsView(ctx, doc, t, items) {
+  const period = periodByKey(ctx.period.key),
+    specific = ctx.route.id === 'S11';
+  const byArticle = Object.fromEntries(items.map((i) => [String(i.article), i]));
+  if (specific) {
+    const selected = items.find((i) => i.code === ctx.params.code);
+    if (!selected && ctx.params.code !== 'art1') ctx.notFound();
+    const ceiling = selected ? ceilingOf(t, selected.article) : null;
+    if (!ceiling || ctx.params.program)
+      return {
+        title: selected?.name || 'Държавен бюджет',
+        body: gap(
+          ctx.params.program
+            ? 'Няма пълен програмен архив за 2027–2029'
+            : 'Няма таван за този бюджет',
+          'Таваните по ведомства за 2027–2029 г. са в приложения 4 и 5 към мотивите. Държавният бюджет по чл. 1 няма такъв ред.',
+        ),
+      };
+    return {
+      title: selected.name,
+      lede: `Таванът на разходите за ${period.year} г. по средносрочната прогноза (АСБП 2027–2029). Не е приет бюджет. Сумите са в хил. евро.`,
+      body: html`${base(
+          ctx,
+          's11-ceiling-' + period.year,
+          `Таван на разходите за ${period.year} г.`,
+          kpiGrid([
+            kpi({
+              label: ceiling.label,
+              value: cellValue(ceiling.cells[ctx.period.key]),
+              unit: 'хил. €',
+              d: 1,
+            }),
+          ]),
+          {
+            source: tablesSource,
+            sub: ceiling.recommended
+              ? 'Препоръчителен таван на МФ (Приложение 5 към мотивите). Бюджетът на съдебната власт се предлага отделно и може да е различен.'
+              : 'Приложение 4 към мотивите: таван на разходите на бюджетната организация.',
+          },
+        )}
+        ${ceilingBlock(ctx, ceiling)}
+        <p>
+          <a href="${ctx.href('S11', { code: selected.code }, keep(ctx, { per: '2027.draft' }))}"
+            >Бюджетът по чл. ${selected.article} от законопроекта за 2027 г.</a
+          >
+        </p>
+        ${publication(doc)}`,
+    };
+  }
+  const rows = ceilingRows(t, ctx.period.key).map((r) => {
+    const item = r.article ? byArticle[r.article] : null;
+    return {
+      name: r.label,
+      article: item ? item.article : null,
+      ceiling: cellValue(r.cell),
+      provenance: r.cell?.provenance || '',
+      origin: provenanceUrl(r.cell),
+      kind: r.part ? 'в т.ч.' : r.table === 'annex5' ? 'препоръчителен (Прил. 5)' : 'Прил. 4',
+      ...(item ? { _href: ctx.href('S11', { code: item.code }, keep(ctx)) } : {}),
+    };
+  });
+  const budgets = ceilingRows(t, ctx.period.key).filter((r) => r.article);
+  const total = strictSum(budgets.map((r) => r.cell));
+  return {
+    lede: `Таваните на разходите по ведомства и други бюджетни организации за ${period.year} г. по средносрочната прогноза (АСБП 2027–2029). Не са приет бюджет.`,
+    answer: `${budgets.length} бюджета по законопроекта имат таван за ${period.year} г. Сбор на таваните им: ${money(total == null ? null : total / 1000)}.`,
+    body: html`${base(
+        ctx,
+        's10-ceilings-totals',
+        `Тавани на разходите за ${period.year} г.`,
+        kpiGrid([
+          kpi({ label: 'Бюджети по законопроекта', value: budgets.length }),
+          kpi({ label: 'Сбор на таваните им', value: total, unit: 'хил. €', d: 1 }),
+        ]),
+        {
+          source: tablesSource,
+          sub: 'Сборът е изчислен от отпечатаните тавани на 47-те бюджета по чл. 2–48 (приложения 4 и 5). За съдебната власт е препоръчителният таван на МФ. Без НОИ, фондовете и НЗОК, които имат свои закони.',
+        },
+      )}
+      ${base(
+        ctx,
+        's10-ceilings-list',
+        'Всички бюджетни организации',
+        dataTable({
+          id: 's10-ceilings-table',
+          caption: `Приложения 4 и 5 към мотивите · ${period.label}`,
+          columns: [
+            { key: 'name', label: 'Бюджетна организация' },
+            { key: 'article', label: 'Член на законопроекта' },
+            { key: 'kind', label: 'Ред' },
+            { key: 'ceiling', label: 'Таван', unit: 'хил. €', num: true, d: 1 },
+            originCol,
+            { key: 'origin', label: 'Връзка към произхода' },
+          ],
+          rows,
+          sortable: true,
+        }),
+        { source: tablesSource },
+      )}
+      ${annexDisclosures(ctx, t)}
+      <p>
+        <a href="${ctx.href('S10', {}, keep(ctx, { per: '2027.draft' }))}"
+          >Бюджетите по членове от законопроекта за 2027 г.</a
+        >
+      </p>
+      ${gap(
+        'Няма бюджети по членове за 2028–2029',
+        'Законопроектът е за 2027 г. За следващите години прогнозата дава само тавани на разходите.',
+      )}${publication(doc)}`,
+  };
+}
+
+/** one institution's ceiling for 2027, 2028 and 2029 (Annex 4 or 5), one row per period */
+function ceilingBlock(ctx, ceiling) {
+  return base(
+    ctx,
+    's11-ceilings-2027-2029',
+    'Тавани на разходите за 2027–2029 г.',
+    dataTable({
+      id: 's11-ceilings-table',
+      caption: `${ceiling.recommended ? 'Приложение 5' : 'Приложение 4'} към мотивите, хил. евро`,
+      columns: [{ key: 'period', label: 'Период' }, ...cellColumns()],
+      rows: FRAMEWORK.map((key) => cellRow(ceiling.label, ceiling.cells[key], frameworkRow(key))),
+    }),
+    {
+      source: tablesSource,
+      ...frameworkStatus,
+      share: { period: '2027.draft / 2028.forecast / 2029.forecast', unit: 'хил. €' },
+      sub: 'Таванът за 2027 г. е разходът по законопроекта; 2028 и 2029 г. са прогноза.',
+    },
+  );
+}
+
 export function institutionView(ctx) {
   if (unavailable(ctx)) return unavailable(ctx);
   const doc = ctx.data.budget2027,
     variant = variantOf(ctx),
-    items = institutions(doc, variant);
+    items = institutions(doc, variant),
+    t = tablesOf(ctx);
+  if (ctx.period.key !== '2027.draft' && t?.ceilingArticles)
+    return ceilingsView(ctx, doc, t, institutions(doc));
   if (ctx.period.key !== '2027.draft')
     return {
       body: gap(
@@ -186,6 +459,24 @@ export function institutionView(ctx) {
         'Ангажименти и нови задължения',
         rowsTable('s11-bill-commitments', billRows(b.commitmentRows, variant)),
       )}
+      ${captionedTables(t, variant, selected.article).map((c, i) =>
+        tableBlock(
+          ctx,
+          `s11-printed-${i + 1}-2027`,
+          captionTitle(c),
+          {
+            columns: cellColumns(),
+            rows: printedRows(c.rows),
+          },
+          {
+            caption: `Чл. ${selected.article}, стр. ${c.page} на законопроекта, хил. евро`,
+            sub: `${labels[variant]}. Редовете са отпечатани в законопроекта; последният е отпечатаният сбор.`,
+          },
+        ),
+      )}
+      ${variant === 'bill' && ceilingOf(t, selected.article)
+        ? ceilingBlock(ctx, ceilingOf(t, selected.article))
+        : ''}
       ${gap(
         'Програмите за 2027–2029 не са налични в пълен архив',
         'Показани са разпределенията, отпечатани в законопроекта. Пълните програмни бюджети за новия период липсват.',
@@ -280,6 +571,15 @@ export function institutionView(ctx) {
       <p>
         <a href="${ctx.href('S11', { code: 'art1' }, keep(ctx))}">Държавният бюджет по чл. 1</a>
       </p>
+      ${t?.ceilingArticles
+        ? html`<p>
+            Тавани на разходите по ведомства от прогнозата:
+            <a href="${ctx.href('S10', {}, keep(ctx, { per: '2028.forecast' }))}">2028 г.</a> ·
+            <a href="${ctx.href('S10', {}, keep(ctx, { per: '2029.forecast' }))}">2029 г.</a>
+          </p>`
+        : ''}
+      ${variant === 'bill' && t ? articleTableBlocks(ctx, t) : ''}
+      ${variant === 'bill' && t ? annexDisclosures(ctx, t) : ''}
       ${gap('Няма пълен програмен архив за 2027–2029', doc.gaps.programmes)}${publication(doc)}`,
   };
 }
@@ -556,7 +856,11 @@ export function debtView(ctx) {
               columns: [...cellColumns(''), { key: 'unit', label: 'Единица' }],
               rows: debtRows,
             }),
-            { status: 'forecast', statusLabel: 'Прогноза на МФ', share: { period: ctx.period.key, unit: 'По редове' } },
+            {
+              status: 'forecast',
+              statusLabel: 'Прогноза на МФ',
+              share: { period: ctx.period.key, unit: 'По редове' },
+            },
           )}${base(ctx, 's17-b-zdd', 'Държавен дълг 2027–2029', chart(spec), {
             status: 'forecast',
             statusLabel: 'Прогноза на МФ',
@@ -716,7 +1020,11 @@ export function measuresView(ctx) {
   const body = ['II_7', 'II_8'].map((table, i) => {
     const rows = doc.forecast[table].flatMap((r, rowIndex) =>
       FRAMEWORK.map((key, k) =>
-        cellRow(r.label, r.cells[k], { ...frameworkRow(key), gap: r.gaps[k] || '', _id: `s12-${table}-${rowIndex}-${k}` }),
+        cellRow(r.label, r.cells[k], {
+          ...frameworkRow(key),
+          gap: r.gaps[k] || '',
+          _id: `s12-${table}-${rowIndex}-${k}`,
+        }),
       ),
     );
     return base(

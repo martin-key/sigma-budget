@@ -38,7 +38,7 @@ ACCEPTED = (
     ("FEED", r"^event sebra-2026-09-23 is missing$", "the single СЕБРА event of the feed was removed with the daily set"),
     ("FEED", r"^events: %d, the datasets explain %d$" % (FEED_HAVE, FEED_WANT), "the single СЕБРА event of the feed was removed with the daily set"),
     ("FEED", r"^kinds \[.*\] must be exactly the kinds used by the events$", "the donor derives the 'sebra' kind from sebra.json; V5 feed has no such event"),
-    ("CATALOG", r"^files on disk but not in the catalog: \['dbp2027\.json', 'sebra\.json'\]; in the catalog but not on disk: \[\]$", GONE_SEBRA + "; Screen S34: dbp2027.json is not listed in catalog.json (S24 would change)"),
+    ("CATALOG", r"^files on disk but not in the catalog: \['sebra\.json'\]; in the catalog but not on disk: \[\]$", GONE_SEBRA),
     ("CATALOG", r"^counts \{'datasets': \d+, 'files': \d+, .*'files': \d+, ", GONE_SEBRA + " (the catalog counts the listed files, the folder holds one more: sebra.json)"),
 )
 

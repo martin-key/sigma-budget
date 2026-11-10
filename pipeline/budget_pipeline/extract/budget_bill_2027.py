@@ -183,7 +183,8 @@ def records(stream):
             if h:
                 article = int(h[1])
                 current = {'article': article, 'name': L.ws(h[2]) if h[2] else 'Държавен бюджет',
-                           'pages': [], 'rows': [], 'policiesRows': [], 'bodiesRows': [], 'commitmentRows': [], 'extraRows': [], 'amountParagraphs': []}
+                           'pages': [], 'rows': [], 'policiesRows': [], 'bodiesRows': [], 'commitmentRows': [], 'extraRows': [], 'amountParagraphs': [],
+                           'sectionCaptions': []}
                 arts.setdefault(str(article), []).append(current)
                 mode = 'main'
             if current:
@@ -194,10 +195,15 @@ def records(stream):
                     current['policiesKind'] = 'policies' if 'политики' in val else 'areas'
                 elif 'Определя бюджетните разходи на органите' in val:
                     mode = 'bodies'
+                    # The printed paragraph is the caption of the rows that follow it.
+                    current['sectionCaptions'].append({'section': 'bodiesRows', 'page': page, 'text': val,
+                                                       'start': len(current['bodiesRows'])})
                 elif 'Утвърждава максималните размери на ангажиментите' in val:
                     mode = 'commit'
                 elif not h and re.match(r'^\(\d+\)', val) and article != 1:
                     mode = 'extra'
+                    current['sectionCaptions'].append({'section': 'extraRows', 'page': page, 'text': val,
+                                                       'start': len(current['extraRows'])})
                 if page not in current['pages']:
                     current['pages'].append(page)
             else:
@@ -230,6 +236,16 @@ def records(stream):
                         b[out].append(item)
             cm = b['commitmentRows']
             b['commitments'] = {'entered': cm[0]['value'], 'new': cm[1]['value']} if len(cm) == 2 else None
+            # Keep a caption only when a printed table follows it: the end of a
+            # caption's rows is the start of the next caption of that section.
+            kept = []
+            captions = b['sectionCaptions']
+            for i, c in enumerate(captions):
+                following = [x['start'] for x in captions[i+1:] if x['section'] == c['section']]
+                end = following[0] if following else len(b[c['section']])
+                if end > c['start']:
+                    kept.append(dict(c, end=end))
+            b['sectionCaptions'] = kept
     return arts, misc
 
 
@@ -319,6 +335,11 @@ def validate(arts, checks):
                              [r['value'] for r in extra if r['no'].rstrip('.').isdigit()], totals[0]['value'])
             if b['bodies']:
                 checks.equal(label + ' judiciary bodies', [p['khil'] for p in b['bodies']], b['bodiesTotal'])
+            for key in ('bodiesRows', 'extraRows'):
+                spans = [(c['start'], c['end']) for c in b['sectionCaptions'] if c['section'] == key]
+                covered = bool(spans) and spans[0][0] == 0 and spans[-1][1] == len(b[key]) and \
+                    all(x[1] == y[0] for x, y in zip(spans, spans[1:]))
+                require(not b[key] or covered, f'{label}: {key} rows without a printed caption')
             sign = -1 if a == '1' else 1
             checks.equal(label + ' balance', [(h.get('rev') or 0), -h['exp'], sign*h.get('transfers', 0), -h.get('eucontrib', 0)], h['balance'])
             checks.equal(label + ' financing', [h['balance'], h['financing']], 0)

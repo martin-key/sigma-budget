@@ -13,6 +13,9 @@ PERIODS = {
     "2028.forecast": ("forecast", "forecast", "прогноза"),
     "2029.forecast": ("forecast", "forecast", "прогноза"),
 }
+# Report columns printed beside the forecast in a few АСБП tables. They are not
+# annual periods of outlook/revenue/expenditure, only cells of budget2027.json.
+SOURCE_VINTAGES = {"2025.report": "отчет"}
 PUBLICATION = "2026-11-06"
 ANNUAL_FILES = ("outlook", "revenue", "expenditure")
 DOCUMENT_NAMES = {"F": "forecast", "B": "bill"}
@@ -71,7 +74,9 @@ FUNCTION_ROWS = (  # III-1: the nine main printed function rows.
     24,  # Икономически дейности и услуги.
     31,  # Разходи, некласифицирани в другите функции.
 )
-HEADERLESS_TABLES = ("II_7", "II_8", "annex9")  # Measures and municipal ceilings have years but no vintage header.
+# Measures, ceilings by budget organisation, EU accounts and agricultural/fishery
+# policy tables print years but no vintage header.
+HEADERLESS_TABLES = ("II_7", "II_8", "annex9", "annex4", "annex5", "annex6", "annex7", "annex8", "V_1", "V_2")
 
 
 def pointer(obj, path):
@@ -133,7 +138,9 @@ class Lineage:
         column = source_table["columns"][column_index]
         if column["year"] != int(period[:4]):
             raise ValueError(f"Wrong year in {table} column {column_index}: {period}")
-        expected_vintage = "прогноза" if table == MACRO_TABLE else PERIODS[period][2]
+        expected_vintage = (
+            "прогноза" if table == MACRO_TABLE else PERIODS[period][2] if period in PERIODS else SOURCE_VINTAGES[period]
+        )
         headerless = table in HEADERLESS_TABLES and "vintage" not in column
         if not headerless and column.get("vintage") != expected_vintage:
             raise ValueError(f"Wrong vintage in {table} column {column_index}: {period}")

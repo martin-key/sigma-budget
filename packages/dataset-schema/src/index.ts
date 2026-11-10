@@ -44,6 +44,7 @@ const fuelTaxGuard = shape({ legalEvidence: shape({ source: literal("customs-exc
 const cigaretteTaxGuard = shape({ validFrom: string, specificPer1000: number, adValoremPct: number, minimumPer1000: number, unit: literal("EUR/1000 sticks"), source: literal("excise-law"), basis: string, quote: string });
 export const datasetGuards = {
   "budget2027.json": shape({ meta: metaGuard, schema: string, publication: string, defaultVariant: string, budgets: record, municipal: record, projects: array, forecast: record, gaps: record }),
+  "budget2027-tables.json": shape({ meta: metaGuard, schema: literal("budget2027-tables/1"), publication: string, budgets: record, articleTables: record, forecast: record, forecastColumns: record, ceilingArticles: record }),
   "budget2027-provenance.json": budgetProvenanceGuard,
   "catalog.json": shape({
     meta: metaGuard,

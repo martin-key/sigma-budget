@@ -136,7 +136,7 @@ it('localizes declared canonical decimals without losing precision or weakening 
   ).toEqual(['Приходи', '33898,5', '49615,3', '68,32']);
 });
 afterEach(() => provideScope(() => null));
-async function page(address: string, absent = false) {
+async function page(address: string, absent = false, missing: string[] = []) {
   const url = new URL(address, 'https://budget.test');
   const r = resolve(address);
   const scope = {
@@ -145,7 +145,8 @@ async function page(address: string, absent = false) {
     state: requestState(r.query.per),
     data: new Map(),
     maps: {} as Record<string, Map<string, any>>,
-    load: async (name: string) => (name === 'budget2027' && absent ? undefined : release(name)),
+    load: async (name: string) =>
+      (name === 'budget2027' && absent) || missing.includes(name) ? undefined : release(name),
   };
   provideScope(() => scope);
   const vm = await build(r.route, r.params, r.query);
@@ -537,4 +538,71 @@ it('preserves municipal region-code URLs while reading only the 2027 allocations
   const original = bill.municipal.art52.rows.filter((r: any) => r.region === 'ОБЛАСТ БЛАГОЕВГРАД');
   expect(rows).toHaveLength(original.length);
   expect(rows.every((r: any) => r.region === 'ОБЛАСТ БЛАГОЕВГРАД')).toBe(true);
+});
+
+// budget2027-tables.json: the expected numbers come from the pinned extractions, never from the adapter.
+const codeOf = (article: number) => institutions(doc).find((i) => i.article === article)!.code;
+const annex = (table: string) => forecast.tables[table].rows;
+
+it.each([
+  ['2028.forecast', 1],
+  ['2029.forecast', 2],
+])('lists the Annex 4 and 5 ceilings by organisation for %s', async (period, column) => {
+  const { scope, html } = await page('/vedomstva?per=' + period);
+  expect(html).toContain('id="s10-ceilings-list"');
+  expect(html).not.toContain('Няма индивидуални бюджети за този период');
+  const rows = tableData(scope.maps.table.get('s10-ceilings-table')).rows;
+  expect(rows).toHaveLength(annex('annex4').length + annex('annex5').length);
+  const defence = rows.find((r: any) => r[0] === annex('annex4')[6].label);
+  expect(defence?.[3]).toBe(annex('annex4')[6].values[column]);
+  expect(html).toContain(`/vedomstvo/${codeOf(11)}?per=${period}`);
+});
+
+it('shows one institution ceiling for a forecast year and its 2027–2029 row', async () => {
+  const { scope, html } = await page(`/vedomstvo/${codeOf(11)}?per=2029.forecast`);
+  expect(html).toContain('id="s11-ceiling-2029"');
+  const rows = tableData(scope.maps.table.get('s11-ceilings-table')).rows;
+  expect(rows.map((r: any) => r[2])).toEqual(annex('annex4')[6].values);
+});
+
+it('adds the judiciary bodies and the recommended judiciary ceiling to article 2', async () => {
+  const { scope, html } = await page(`/vedomstvo/${codeOf(2)}`);
+  expect(html).toContain('id="s11-printed-1-2027"');
+  const bodies = tableData(scope.maps.table.get('s11-printed-1-2027-table')).rows;
+  expect(bodies.map((r: any) => r[1])).toEqual(bill.bill['2'].bodiesRows.map((r: any) => r.value));
+  const ceilings = tableData(scope.maps.table.get('s11-ceilings-table')).rows;
+  expect(ceilings.map((r: any) => r[2])).toEqual(annex('annex5')[1].values);
+});
+
+it('adds arts. 49 and 50 and Annexes 6–8 to the 2027 institution list', async () => {
+  const { scope, html } = await page('/vedomstva');
+  for (const id of [
+    's10-art49-2027',
+    's10-art50-2027',
+    's10-annex6-2027',
+    's10-annex7-2027',
+    's10-annex8-2027',
+  ])
+    expect(html).toContain(`id="${id}"`);
+  const art50 = tableData(scope.maps.table.get('s10-art50-2027-table')).rows;
+  expect(art50.at(-1)?.[1]).toBe(bill.otherTables['50'].at(-1).value);
+  expect(html).toContain('/vedomstva?per=2028.forecast');
+});
+
+it('adds the defence, EU co-financing, КФП parts and tax expenditure tables to the forecast', async () => {
+  const { scope, html } = await page('/prognoza');
+  for (const id of ['s13-defence', 's13-eu-cap', 's13-kfp-parts', 's13-tax-expenditures'])
+    expect(html).toContain(`id="${id}"`);
+  const defence = tableData(scope.maps.table.get('s13-defence-III_2')).rows;
+  expect(defence[0].slice(2)).toEqual(annex('III_2')[0].values);
+  const tax = tableData(scope.maps.table.get('s13-tax-expenditures-annex10')).rows;
+  expect(tax.map((r: any) => r.slice(2))).toEqual(annex('annex10').map((r: any) => r.values));
+});
+
+it('keeps the previous forecast-year notice for a release without the tables file', async () => {
+  const { html } = await page('/vedomstva?per=2028.forecast', false, ['budget2027-tables']);
+  expect(html).toContain('Няма индивидуални бюджети за този период');
+  expect((await page('/prognoza', false, ['budget2027-tables'])).html).not.toContain(
+    'id="s13-defence"',
+  );
 });
