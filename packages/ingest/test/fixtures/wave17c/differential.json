@@ -1,0 +1,2099 @@
+{
+  "cases": [
+    {
+      "name": "baseline",
+      "ops": [],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "wrong bill amount",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "items",
+            292,
+            3
+          ],
+          "value": "1 млн. €"
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 292 'Министерството на външните работи – МВнР': amounts in млн. € are [1.0], expected [146.0855]"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "wrong bill publication",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "items",
+            292,
+            4
+          ],
+          "value": "Прогноза 2027"
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "current bill budgets: missing or extra search rows"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11305
+      }
+    },
+    {
+      "name": "wrong current measure amount",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "items",
+            610,
+            3
+          ],
+          "value": "1 млн. €"
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 610 'Въвеждане в ЗКПО на еднократен данък от 33% върху свръхпечалбата за определени сектори за финансовата 2027 г., използвайки като данъчна основа средната годишна данъчна печалба на предприятията за периода 2020-2025 г.': amounts in млн. € are [1.0], expected [800.0]"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "typography repr and unicode word boundary",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "items",
+            0,
+            1
+          ],
+          "value": "Бюджет  None"
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 0 'Бюджет\\xa0 None' title: double space or line break: 'Бюджет\\xa0 None'",
+          "row 0 'Бюджет\\xa0 None' title: placeholder or ASCII quote: 'Бюджет\\xa0 None'"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "newline title",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "items",
+            0,
+            1
+          ],
+          "value": "Бюджет\nнов ред"
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 0 'Бюджет\\nнов ред' title: double space or line break: 'Бюджет\\nнов ред'"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "blank cell changed to zero",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "items",
+            612,
+            3
+          ],
+          "value": "0 млн. €"
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 612 'Въвеждане в ЗКПО на еднократен данък от 33% върху свръхпечалбата за определени сектори за финансовата 2027 г., използвайки като данъчна основа средната годишна данъчна печалба на предприятията за периода 2020-2025 г.': missing printed measure cell must remain blank"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "wrong current measure publication",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "items",
+            610,
+            4
+          ],
+          "value": "Проект 2028"
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 610 'Въвеждане в ЗКПО на еднократен данък от 33% върху свръхпечалбата за определени сектори за финансовата 2027 г., използвайки като данъчна основа средната годишна данъчна печалба на предприятията за периода 2020-2025 г.': current measure publication"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "wrong current measure anchor",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "items",
+            610,
+            6
+          ],
+          "value": "#/merki?per=2027.draft&to=s12-II_7-0-0-bad"
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 610 'Въвеждане в ЗКПО на еднократен данък от 33% върху свръхпечалбата за определени сектори за финансовата 2027 г., използвайки като данъчна основа средната годишна данъчна печалба на предприятията за периода 2020-2025 г.': unexpected current measure destination",
+          "current measures: missing or extra search rows"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11304
+      }
+    },
+    {
+      "name": "duplicate current measure",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "items",
+            610
+          ],
+          "value": [
+            0,
+            "Максимален нов държавен дълг 2027",
+            "Предложена граница, чл. 68, не прогноза и не приет закон",
+            "8,60 млрд. €",
+            "Проект 2027",
+            "real",
+            "#/dalg?per=2027.draft",
+            ""
+          ]
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 610 'Максимален нов държавен дълг 2027': duplicate row",
+          "measures: 165 rows, the datasets hold 166",
+          "current measures: missing or extra search rows"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (27 indicators + 319 institutions + 265 municipalities + 165 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11303
+      }
+    },
+    {
+      "name": "missing municipality id",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "items",
+            339,
+            6
+          ],
+          "value": "#/obshtina/no-such-id"
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 339 'Банско': obshtina id 'no-such-id' is not in its dataset"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "missing programme code",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "items",
+            21,
+            6
+          ],
+          "value": "#/vedomstvo/0200/0200.01.01/bad?per=2027.draft"
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 21 'Подпомагане и осигуряване на дейността на президента и вицепрезидента на Република България при изпълнение на конституционните и законовите им правомощия': href '#/vedomstvo/0200/0200.01.01/bad?per=2027.draft' opens no screen"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "bad route",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "items",
+            0,
+            6
+          ],
+          "value": "#/not-a-screen"
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 0 'Капиталови разходи на КФП': href '#/not-a-screen' opens no screen"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "dataset status",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "items",
+            845,
+            5
+          ],
+          "value": "pending"
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "datasets: outlook has no row or a different status"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "mock outside datasets",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "items",
+            0,
+            5
+          ],
+          "value": "mock"
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 0 'Капиталови разходи на КФП': a mock row outside the datasets group",
+          "mock rows: 1, expected none"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 1 mock"
+        ],
+        "n": 11310
+      }
+    },
+    {
+      "name": "duplicate row",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "items",
+            1
+          ],
+          "value": [
+            0,
+            "Капиталови разходи на КФП",
+            "Инвестиции от бюджета, 2026",
+            "9,41 млрд. €",
+            "2026",
+            "real",
+            "#/izpalnenie?pera=exp",
+            "инвестиции капиталови разходи строителство"
+          ]
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 1 'Капиталови разходи на КФП': duplicate row"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "missing row",
+      "ops": [
+        {
+          "op": "delete",
+          "file": "search-index.json",
+          "path": [
+            "items",
+            339
+          ]
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "municipalities: 264 rows, the datasets hold 265"
+        ],
+        "warnings": [],
+        "facts": [
+          "870 rows (26 indicators + 319 institutions + 264 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11297
+      }
+    },
+    {
+      "name": "extra row field",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "items",
+            0
+          ],
+          "value": [
+            0,
+            "Капиталови разходи на КФП",
+            "Инвестиции от бюджета, 2026",
+            "9,41 млрд. €",
+            "2026",
+            "real",
+            "#/izpalnenie?pera=exp",
+            "инвестиции капиталови разходи строителство",
+            "x"
+          ]
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 0 'Капиталови разходи на КФП': shape"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (25 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11299
+      }
+    },
+    {
+      "name": "dropped row field",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "items",
+            0
+          ],
+          "value": [
+            0,
+            "Капиталови разходи на КФП",
+            "Инвестиции от бюджета, 2026",
+            "9,41 млрд. €",
+            "2026",
+            "real",
+            "#/izpalnenie?pera=exp"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "IndexError: list index out of range"
+      }
+    },
+    {
+      "name": "row as dictionary",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "items",
+            0
+          ],
+          "value": {
+            "g": 0
+          }
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 0"
+      }
+    },
+    {
+      "name": "null title",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "items",
+            0,
+            1
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 0 None: shape"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (25 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11299
+      }
+    },
+    {
+      "name": "float title",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "items",
+            0,
+            1
+          ],
+          "value": 1.0
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 0 1.0: shape"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (25 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11299
+      }
+    },
+    {
+      "name": "bool index",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "items",
+            0,
+            0
+          ],
+          "value": true
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "institutions: 320 rows, the datasets hold 319"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (25 indicators + 320 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "float index",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "items",
+            0,
+            0
+          ],
+          "value": 0.0
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: list indices must be integers or slices, not float"
+      }
+    },
+    {
+      "name": "string index",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "items",
+            0,
+            0
+          ],
+          "value": "0"
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: list indices must be integers or slices, not str"
+      }
+    },
+    {
+      "name": "catalog status",
+      "ops": [
+        {
+          "op": "set",
+          "file": "catalog.json",
+          "path": [
+            "datasets",
+            0,
+            "status"
+          ],
+          "value": "pending"
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "datasets: 26 rows, the catalog has 25 real datasets",
+          "datasets: outlook is pending and must have no search row"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "bill source amount",
+      "ops": [
+        {
+          "op": "set",
+          "file": "budget2027.json",
+          "path": [
+            "budgets",
+            "bill",
+            "10",
+            "rows",
+            6,
+            "cell",
+            "value"
+          ],
+          "value": 999999.0
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 292 'Министерството на външните работи – МВнР': amounts in млн. € are [146.1], expected [999.999]"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "bill source amount null",
+      "ops": [
+        {
+          "op": "set",
+          "file": "budget2027.json",
+          "path": [
+            "budgets",
+            "bill",
+            "10",
+            "rows",
+            6,
+            "cell",
+            "value"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: unsupported operand type(s) for /: 'NoneType' and 'int'"
+      }
+    },
+    {
+      "name": "bill source amount string",
+      "ops": [
+        {
+          "op": "set",
+          "file": "budget2027.json",
+          "path": [
+            "budgets",
+            "bill",
+            "10",
+            "rows",
+            6,
+            "cell",
+            "value"
+          ],
+          "value": "1"
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: unsupported operand type(s) for /: 'str' and 'int'"
+      }
+    },
+    {
+      "name": "current measure source amount null",
+      "ops": [
+        {
+          "op": "set",
+          "file": "budget2027.json",
+          "path": [
+            "forecast",
+            "II_7",
+            0,
+            "cells",
+            "0",
+            "value"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 610 'Въвеждане в ЗКПО на еднократен данък от 33% върху свръхпечалбата за определени сектори за финансовата 2027 г., използвайки като данъчна основа средната годишна данъчна печалба на предприятията за периода 2020-2025 г.': amounts in млн. € are [800.0], expected [None]"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "current measure source amount absent",
+      "ops": [
+        {
+          "op": "delete",
+          "file": "budget2027.json",
+          "path": [
+            "forecast",
+            "II_7",
+            0,
+            "cells",
+            "0",
+            "value"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'value'"
+      }
+    },
+    {
+      "name": "bill article removed",
+      "ops": [
+        {
+          "op": "delete",
+          "file": "budget2027.json",
+          "path": [
+            "budgets",
+            "bill",
+            "10"
+          ]
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 292 'Министерството на външните работи – МВнР': current bill budget or period missing",
+          "institutions: 319 rows, the datasets hold 318"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11306
+      }
+    },
+    {
+      "name": "billMc ignored by donor",
+      "ops": [
+        {
+          "op": "set",
+          "file": "budget2027.json",
+          "path": [
+            "budgets",
+            "billMc"
+          ],
+          "value": {}
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "duplicate municipality source id",
+      "ops": [
+        {
+          "op": "set",
+          "file": "municipalities.json",
+          "path": [
+            "items",
+            0,
+            "id"
+          ],
+          "value": "BGS04"
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 353 'Айтос': obshtina id 'BGS01' is not in its dataset"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "duplicate measure source id",
+      "ops": [
+        {
+          "op": "set",
+          "file": "measures.json",
+          "path": [
+            "items",
+            0,
+            "id"
+          ],
+          "value": "kr2"
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 724 'Максимален осигурителен доход 2 300 €': merki id 'kr1' is not in its dataset"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "missing measure source id",
+      "ops": [
+        {
+          "op": "set",
+          "file": "measures.json",
+          "path": [
+            "items",
+            0,
+            "id"
+          ],
+          "value": "absent-measure"
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 724 'Максимален осигурителен доход 2 300 €': merki id 'kr1' is not in its dataset"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "missing term source id",
+      "ops": [
+        {
+          "op": "set",
+          "file": "glossary.json",
+          "path": [
+            "terms",
+            0,
+            "slug"
+          ],
+          "value": "absent-term"
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 776 'Бюджет': rechnik id 'byudzhet' is not in its dataset"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "missing programme source code",
+      "ops": [
+        {
+          "op": "set",
+          "file": "programs.json",
+          "path": [
+            "items",
+            0,
+            1
+          ],
+          "value": "no-code"
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "duplicate programme source code",
+      "ops": [
+        {
+          "op": "set",
+          "file": "programs.json",
+          "path": [
+            "items",
+            0,
+            1
+          ],
+          "value": "0200.01.01"
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "numeric municipality source id",
+      "ops": [
+        {
+          "op": "set",
+          "file": "municipalities.json",
+          "path": [
+            "items",
+            0,
+            "id"
+          ],
+          "value": 123
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 353 'Айтос': obshtina id 'BGS01' is not in its dataset"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "boolean measure source id",
+      "ops": [
+        {
+          "op": "set",
+          "file": "measures.json",
+          "path": [
+            "items",
+            0,
+            "id"
+          ],
+          "value": true
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 724 'Максимален осигурителен доход 2 300 €': merki id 'kr1' is not in its dataset"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "current measure missing",
+      "ops": [
+        {
+          "op": "delete",
+          "file": "search-index.json",
+          "path": [
+            "items",
+            610
+          ]
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "measures: 165 rows, the datasets hold 166",
+          "current measures: missing or extra search rows"
+        ],
+        "warnings": [],
+        "facts": [
+          "870 rows (26 indicators + 319 institutions + 265 municipalities + 165 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11292
+      }
+    },
+    {
+      "name": "extra current measure",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "items",
+            0
+          ],
+          "value": [
+            3,
+            "Въвеждане в ЗКПО на еднократен данък от 33% върху свръхпечалбата за определени сектори за финансовата 2027 г., използвайки като данъчна основа средната годишна данъчна печалба на предприятията за периода 2020-2025 г.",
+            "Приходна мярка · Таблица II-7",
+            "800,0 млн. €",
+            "Проект 2027",
+            "real",
+            "#/merki?per=2027.draft&to=s12-II_7-0-0",
+            ""
+          ]
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 610 'Въвеждане в ЗКПО на еднократен данък от 33% върху свръхпечалбата за определени сектори за финансовата 2027 г., използвайки като данъчна основа средната годишна данъчна печалба на предприятията за периода 2020-2025 г.': duplicate row",
+          "measures: 167 rows, the datasets hold 166"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (25 indicators + 319 institutions + 265 municipalities + 167 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11315
+      }
+    },
+    {
+      "name": "out of range index",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "items",
+            0,
+            0
+          ],
+          "value": 6
+        }
+      ],
+      "expected": {
+        "crash": "IndexError: list index out of range"
+      }
+    },
+    {
+      "name": "negative index",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "items",
+            0,
+            0
+          ],
+          "value": -1
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 0 'Капиталови разходи на КФП': shape"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (25 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11299
+      }
+    },
+    {
+      "name": "null index",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "items",
+            0,
+            0
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: list indices must be integers or slices, not NoneType"
+      }
+    },
+    {
+      "name": "decimal digits in value",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "items",
+            0,
+            3
+          ],
+          "value": "١٢%"
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "GDP suffix without number",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "items",
+            0,
+            3
+          ],
+          "value": "дял от БВП"
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "boolean version equality",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "version"
+          ],
+          "value": true
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "boolean duplicate index equality",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "items",
+            1
+          ],
+          "value": [
+            false,
+            "Капиталови разходи на КФП",
+            "Инвестиции от бюджета, 2026",
+            "9,41 млрд. €",
+            "2026",
+            "real",
+            "#/izpalnenie?pera=exp",
+            "инвестиции капиталови разходи строителство"
+          ]
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 1 'Капиталови разходи на КФП': duplicate row"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "exponent float index",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "items",
+            0,
+            0
+          ],
+          "value": 1.0
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: list indices must be integers or slices, not float"
+      }
+    },
+    {
+      "name": "null groups",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "groups"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "groups/fields differ from the contract of searchlib.js"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "null items",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "items"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: 'NoneType' object is not iterable"
+      }
+    },
+    {
+      "name": "items dictionary",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "items"
+          ],
+          "value": {
+            "x": 1
+          }
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: list indices must be integers or slices, not str"
+      }
+    },
+    {
+      "name": "fields null",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "fields"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "groups/fields differ from the contract of searchlib.js"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "source municipalities dictionary",
+      "ops": [
+        {
+          "op": "set",
+          "file": "municipalities.json",
+          "path": [
+            "items"
+          ],
+          "value": {}
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 339 'Банско': obshtina id 'BLG01' is not in its dataset",
+          "row 340 'Белица': obshtina id 'BLG02' is not in its dataset",
+          "row 341 'Благоевград': obshtina id 'BLG03' is not in its dataset",
+          "row 342 'Гоце Делчев': obshtina id 'BLG11' is not in its dataset",
+          "row 343 'Гърмен': obshtina id 'BLG13' is not in its dataset",
+          "row 344 'Кресна': obshtina id 'BLG28' is not in its dataset",
+          "row 345 'Петрич': obshtina id 'BLG33' is not in its dataset",
+          "row 346 'Разлог': obshtina id 'BLG37' is not in its dataset",
+          "row 347 'Сандански': obshtina id 'BLG40' is not in its dataset",
+          "row 348 'Сатовча': obshtina id 'BLG42' is not in its dataset",
+          "row 349 'Симитли': obshtina id 'BLG44' is not in its dataset",
+          "row 350 'Струмяни': obshtina id 'BLG49' is not in its dataset",
+          "row 351 'Хаджидимово': obshtina id 'BLG52' is not in its dataset",
+          "row 352 'Якоруда': obshtina id 'BLG53' is not in its dataset",
+          "row 353 'Айтос': obshtina id 'BGS01' is not in its dataset",
+          "row 354 'Бургас': obshtina id 'BGS04' is not in its dataset",
+          "row 355 'Камено': obshtina id 'BGS08' is not in its dataset",
+          "row 356 'Карнобат': obshtina id 'BGS09' is not in its dataset",
+          "row 357 'Малко Търново': obshtina id 'BGS12' is not in its dataset",
+          "row 358 'Несебър': obshtina id 'BGS15' is not in its dataset",
+          "row 359 'Поморие': obshtina id 'BGS17' is not in its dataset",
+          "row 360 'Приморско': obshtina id 'BGS27' is not in its dataset",
+          "row 361 'Руен': obshtina id 'BGS18' is not in its dataset",
+          "row 362 'Созопол': obshtina id 'BGS21' is not in its dataset",
+          "row 363 'Средец': obshtina id 'BGS06' is not in its dataset",
+          "row 364 'Сунгурларе': obshtina id 'BGS23' is not in its dataset",
+          "row 365 'Царево': obshtina id 'BGS13' is not in its dataset",
+          "row 366 'Аврен': obshtina id 'VAR01' is not in its dataset",
+          "row 367 'Аксаково': obshtina id 'VAR02' is not in its dataset",
+          "row 368 'Белослав': obshtina id 'VAR04' is not in its dataset",
+          "row 369 'Бяла': obshtina id 'VAR05' is not in its dataset",
+          "row 370 'Варна': obshtina id 'VAR06' is not in its dataset",
+          "row 371 'Ветрино': obshtina id 'VAR08' is not in its dataset",
+          "row 372 'Вълчи дол': obshtina id 'VAR09' is not in its dataset",
+          "row 373 'Девня': obshtina id 'VAR14' is not in its dataset",
+          "row 374 'Долни чифлик': obshtina id 'VAR13' is not in its dataset",
+          "row 375 'Дългопол': obshtina id 'VAR16' is not in its dataset",
+          "row 376 'Провадия': obshtina id 'VAR24' is not in its dataset",
+          "row 377 'Суворово': obshtina id 'VAR26' is not in its dataset",
+          "row 378 'Велико Търново': obshtina id 'VTR04' is not in its dataset",
+          "row 379 'Горна Оряховица': obshtina id 'VTR06' is not in its dataset",
+          "row 380 'Елена': obshtina id 'VTR13' is not in its dataset",
+          "row 381 'Златарица': obshtina id 'VTR14' is not in its dataset",
+          "row 382 'Лясковец': obshtina id 'VTR20' is not in its dataset",
+          "row 383 'Павликени': obshtina id 'VTR22' is not in its dataset",
+          "row 384 'Полски Тръмбеш': obshtina id 'VTR26' is not in its dataset",
+          "row 385 'Свищов': obshtina id 'VTR28' is not in its dataset",
+          "row 386 'Стражица': obshtina id 'VTR31' is not in its dataset",
+          "row 387 'Сухиндол': obshtina id 'VTR32' is not in its dataset",
+          "row 388 'Белоградчик': obshtina id 'VID01' is not in its dataset",
+          "row 389 'Бойница': obshtina id 'VID03' is not in its dataset",
+          "row 390 'Брегово': obshtina id 'VID06' is not in its dataset",
+          "row 391 'Видин': obshtina id 'VID09' is not in its dataset",
+          "row 392 'Грамада': obshtina id 'VID15' is not in its dataset",
+          "row 393 'Димово': obshtina id 'VID16' is not in its dataset",
+          "row 394 'Кула': obshtina id 'VID22' is not in its dataset",
+          "row 395 'Макреш': obshtina id 'VID25' is not in its dataset",
+          "row 396 'Ново село': obshtina id 'VID30' is not in its dataset",
+          "row 397 'Ружинци': obshtina id 'VID33' is not in its dataset",
+          "row 398 'Чупрене': obshtina id 'VID37' is not in its dataset",
+          "row 399 'Борован': obshtina id 'VRC05' is not in its dataset",
+          "row 400 'Бяла Слатина': obshtina id 'VRC08' is not in its dataset",
+          "row 401 'Враца': obshtina id 'VRC10' is not in its dataset",
+          "row 402 'Козлодуй': obshtina id 'VRC20' is not in its dataset",
+          "row 403 'Криводол': obshtina id 'VRC21' is not in its dataset",
+          "row 404 'Мездра': obshtina id 'VRC27' is not in its dataset",
+          "row 405 'Мизия': obshtina id 'VRC28' is not in its dataset",
+          "row 406 'Оряхово': obshtina id 'VRC31' is not in its dataset",
+          "row 407 'Роман': obshtina id 'VRC32' is not in its dataset",
+          "row 408 'Хайредин': obshtina id 'VRC35' is not in its dataset",
+          "row 409 'Габрово': obshtina id 'GAB05' is not in its dataset",
+          "row 410 'Дряново': obshtina id 'GAB12' is not in its dataset",
+          "row 411 'Севлиево': obshtina id 'GAB29' is not in its dataset",
+          "row 412 'Трявна': obshtina id 'GAB35' is not in its dataset",
+          "row 413 'Балчик': obshtina id 'DOB03' is not in its dataset",
+          "row 414 'Генерал Тошево': obshtina id 'DOB12' is not in its dataset",
+          "row 415 'Добрич': obshtina id 'DOB28' is not in its dataset",
+          "row 416 'Добрич-селска': obshtina id 'DOB15' is not in its dataset",
+          "row 417 'Каварна': obshtina id 'DOB17' is not in its dataset",
+          "row 418 'Крушари': obshtina id 'DOB20' is not in its dataset",
+          "row 419 'Тервел': obshtina id 'DOB27' is not in its dataset",
+          "row 420 'Шабла': obshtina id 'DOB29' is not in its dataset",
+          "row 421 'Ардино': obshtina id 'KRZ02' is not in its dataset",
+          "row 422 'Джебел': obshtina id 'KRZ08' is not in its dataset",
+          "row 423 'Кирково': obshtina id 'KRZ14' is not in its dataset",
+          "row 424 'Крумовград': obshtina id 'KRZ15' is not in its dataset",
+          "row 425 'Кърджали': obshtina id 'KRZ16' is not in its dataset",
+          "row 426 'Момчилград': obshtina id 'KRZ21' is not in its dataset",
+          "row 427 'Черноочене': obshtina id 'KRZ35' is not in its dataset",
+          "row 428 'Бобов дол': obshtina id 'KNL04' is not in its dataset",
+          "row 429 'Бобошево': obshtina id 'KNL05' is not in its dataset",
+          "row 430 'Дупница': obshtina id 'KNL48' is not in its dataset",
+          "row 431 'Кочериново': obshtina id 'KNL27' is not in its dataset",
+          "row 432 'Кюстендил': obshtina id 'KNL29' is not in its dataset",
+          "row 433 'Невестино': obshtina id 'KNL31' is not in its dataset",
+          "row 434 'Рила': obshtina id 'KNL38' is not in its dataset",
+          "row 435 'Сапарева баня': obshtina id 'KNL41' is not in its dataset",
+          "row 436 'Трекляно': obshtina id 'KNL50' is not in its dataset",
+          "row 437 'Априлци': obshtina id 'LOV02' is not in its dataset",
+          "row 438 'Летница': obshtina id 'LOV17' is not in its dataset",
+          "row 439 'Ловеч': obshtina id 'LOV18' is not in its dataset",
+          "row 440 'Луковит': obshtina id 'LOV19' is not in its dataset",
+          "row 441 'Тетевен': obshtina id 'LOV33' is not in its dataset",
+          "row 442 'Троян': obshtina id 'LOV34' is not in its dataset",
+          "row 443 'Угърчин': obshtina id 'LOV36' is not in its dataset",
+          "row 444 'Ябланица': obshtina id 'LOV38' is not in its dataset",
+          "row 445 'Берковица': obshtina id 'MON02' is not in its dataset",
+          "row 446 'Бойчиновци': obshtina id 'MON04' is not in its dataset",
+          "row 447 'Брусарци': obshtina id 'MON07' is not in its dataset",
+          "row 448 'Вълчедръм': obshtina id 'MON11' is not in its dataset",
+          "row 449 'Вършец': obshtina id 'MON12' is not in its dataset",
+          "row 450 'Георги Дамяново': obshtina id 'MON14' is not in its dataset",
+          "row 451 'Лом': obshtina id 'MON24' is not in its dataset",
+          "row 452 'Медковец': obshtina id 'MON26' is not in its dataset",
+          "row 453 'Монтана': obshtina id 'MON29' is not in its dataset",
+          "row 454 'Чипровци': obshtina id 'MON36' is not in its dataset",
+          "row 455 'Якимово': obshtina id 'MON38' is not in its dataset",
+          "row 456 'Батак': obshtina id 'PAZ03' is not in its dataset",
+          "row 457 'Белово': obshtina id 'PAZ04' is not in its dataset",
+          "row 458 'Брацигово': obshtina id 'PAZ06' is not in its dataset",
+          "row 459 'Велинград': obshtina id 'PAZ08' is not in its dataset",
+          "row 460 'Лесичово': obshtina id 'PAZ14' is not in its dataset",
+          "row 461 'Пазарджик': obshtina id 'PAZ19' is not in its dataset",
+          "row 462 'Панагюрище': obshtina id 'PAZ20' is not in its dataset",
+          "row 463 'Пещера': obshtina id 'PAZ21' is not in its dataset",
+          "row 464 'Ракитово': obshtina id 'PAZ24' is not in its dataset",
+          "row 465 'Септември': obshtina id 'PAZ29' is not in its dataset",
+          "row 466 'Стрелча': obshtina id 'PAZ32' is not in its dataset",
+          "row 467 'Сърница': obshtina id 'PAZ39' is not in its dataset",
+          "row 468 'Брезник': obshtina id 'PER08' is not in its dataset",
+          "row 469 'Земен': obshtina id 'PER19' is not in its dataset",
+          "row 470 'Ковачевци': obshtina id 'PER22' is not in its dataset",
+          "row 471 'Перник': obshtina id 'PER32' is not in its dataset",
+          "row 472 'Радомир': obshtina id 'PER36' is not in its dataset",
+          "row 473 'Трън': obshtina id 'PER51' is not in its dataset",
+          "row 474 'Белене': obshtina id 'PVN03' is not in its dataset",
+          "row 475 'Гулянци': obshtina id 'PVN08' is not in its dataset",
+          "row 476 'Долна Митрополия': obshtina id 'PVN10' is not in its dataset",
+          "row 477 'Долни Дъбник': obshtina id 'PVN11' is not in its dataset",
+          "row 478 'Искър': obshtina id 'PVN23' is not in its dataset",
+          "row 479 'Левски': obshtina id 'PVN16' is not in its dataset",
+          "row 480 'Никопол': obshtina id 'PVN21' is not in its dataset",
+          "row 481 'Плевен': obshtina id 'PVN24' is not in its dataset",
+          "row 482 'Пордим': obshtina id 'PVN27' is not in its dataset",
+          "row 483 'Червен бряг': obshtina id 'PVN37' is not in its dataset",
+          "row 484 'Кнежа': obshtina id 'PVN39' is not in its dataset",
+          "row 485 'Асеновград': obshtina id 'PDV01' is not in its dataset",
+          "row 486 'Брезово': obshtina id 'PDV07' is not in its dataset",
+          "row 487 'Калояново': obshtina id 'PDV12' is not in its dataset",
+          "row 488 'Карлово': obshtina id 'PDV13' is not in its dataset",
+          "row 489 'Кричим': obshtina id 'PDV39' is not in its dataset",
+          "row 490 'Лъки': obshtina id 'PDV15' is not in its dataset",
+          "row 491 'Марица': obshtina id 'PDV17' is not in its dataset",
+          "row 492 'Перущица': obshtina id 'PDV40' is not in its dataset",
+          "row 493 'Пловдив': obshtina id 'PDV22' is not in its dataset",
+          "row 494 'Първомай': obshtina id 'PDV23' is not in its dataset",
+          "row 495 'Раковски': obshtina id 'PDV25' is not in its dataset",
+          "row 496 'Родопи': obshtina id 'PDV26' is not in its dataset",
+          "row 497 'Садово': obshtina id 'PDV28' is not in its dataset",
+          "row 498 'Стамболийски': obshtina id 'PDV41' is not in its dataset",
+          "row 499 'Съединение': obshtina id 'PDV33' is not in its dataset",
+          "row 500 'Хисаря': obshtina id 'PDV37' is not in its dataset",
+          "row 501 'Куклен': obshtina id 'PDV42' is not in its dataset",
+          "row 502 'Сопот': obshtina id 'PDV43' is not in its dataset",
+          "row 503 'Завет': obshtina id 'RAZ11' is not in its dataset",
+          "row 504 'Исперих': obshtina id 'RAZ14' is not in its dataset",
+          "row 505 'Кубрат': obshtina id 'RAZ16' is not in its dataset",
+          "row 506 'Лозница': obshtina id 'RAZ17' is not in its dataset",
+          "row 507 'Разград': obshtina id 'RAZ26' is not in its dataset",
+          "row 508 'Самуил': obshtina id 'RAZ29' is not in its dataset",
+          "row 509 'Цар Калоян': obshtina id 'RAZ36' is not in its dataset",
+          "row 510 'Борово': obshtina id 'RSE03' is not in its dataset",
+          "row 511 'Бяла': obshtina id 'RSE04' is not in its dataset",
+          "row 512 'Ветово': obshtina id 'RSE05' is not in its dataset",
+          "row 513 'Две могили': obshtina id 'RSE08' is not in its dataset",
+          "row 514 'Иваново': obshtina id 'RSE13' is not in its dataset",
+          "row 515 'Русе': obshtina id 'RSE27' is not in its dataset",
+          "row 516 'Сливо поле': obshtina id 'RSE33' is not in its dataset",
+          "row 517 'Ценово': obshtina id 'RSE37' is not in its dataset",
+          "row 518 'Алфатар': obshtina id 'SLS01' is not in its dataset",
+          "row 519 'Главиница': obshtina id 'SLS07' is not in its dataset",
+          "row 520 'Дулово': obshtina id 'SLS10' is not in its dataset",
+          "row 521 'Кайнарджа': obshtina id 'SLS15' is not in its dataset",
+          "row 522 'Силистра': obshtina id 'SLS31' is not in its dataset",
+          "row 523 'Ситово': obshtina id 'SLS32' is not in its dataset",
+          "row 524 'Тутракан': obshtina id 'SLS34' is not in its dataset",
+          "row 525 'Котел': obshtina id 'SLV11' is not in its dataset",
+          "row 526 'Нова Загора': obshtina id 'SLV16' is not in its dataset",
+          "row 527 'Сливен': obshtina id 'SLV20' is not in its dataset",
+          "row 528 'Твърдица': obshtina id 'SLV24' is not in its dataset",
+          "row 529 'Баните': obshtina id 'SML02' is not in its dataset",
+          "row 530 'Борино': obshtina id 'SML05' is not in its dataset",
+          "row 531 'Девин': obshtina id 'SML09' is not in its dataset",
+          "row 532 'Доспат': obshtina id 'SML10' is not in its dataset",
+          "row 533 'Златоград': obshtina id 'SML11' is not in its dataset",
+          "row 534 'Мадан': obshtina id 'SML16' is not in its dataset",
+          "row 535 'Неделино': obshtina id 'SML18' is not in its dataset",
+          "row 536 'Рудозем': obshtina id 'SML27' is not in its dataset",
+          "row 537 'Смолян': obshtina id 'SML31' is not in its dataset",
+          "row 538 'Чепеларе': obshtina id 'SML38' is not in its dataset",
+          "row 539 'Столична': obshtina id 'SOF46' is not in its dataset",
+          "row 540 'Антон': obshtina id 'SFO54' is not in its dataset",
+          "row 541 'Божурище': obshtina id 'SFO06' is not in its dataset",
+          "row 542 'Ботевград': obshtina id 'SFO07' is not in its dataset",
+          "row 543 'Годеч': obshtina id 'SFO09' is not in its dataset",
+          "row 544 'Горна Малина': obshtina id 'SFO10' is not in its dataset",
+          "row 545 'Долна баня': obshtina id 'SFO59' is not in its dataset",
+          "row 546 'Драгоман': obshtina id 'SFO16' is not in its dataset",
+          "row 547 'Елин Пелин': obshtina id 'SFO17' is not in its dataset",
+          "row 548 'Етрополе': obshtina id 'SFO18' is not in its dataset",
+          "row 549 'Златица': obshtina id 'SFO47' is not in its dataset",
+          "row 550 'Ихтиман': obshtina id 'SFO20' is not in its dataset",
+          "row 551 'Копривщица': obshtina id 'SFO24' is not in its dataset",
+          "row 552 'Костенец': obshtina id 'SFO25' is not in its dataset",
+          "row 553 'Костинброд': obshtina id 'SFO26' is not in its dataset",
+          "row 554 'Мирково': obshtina id 'SFO56' is not in its dataset",
+          "row 555 'Пирдоп': obshtina id 'SFO55' is not in its dataset",
+          "row 556 'Правец': obshtina id 'SFO34' is not in its dataset",
+          "row 557 'Самоков': obshtina id 'SFO39' is not in its dataset",
+          "row 558 'Своге': obshtina id 'SFO43' is not in its dataset",
+          "row 559 'Сливница': obshtina id 'SFO45' is not in its dataset",
+          "row 560 'Чавдар': obshtina id 'SFO57' is not in its dataset",
+          "row 561 'Челопеч': obshtina id 'SFO58' is not in its dataset",
+          "row 562 'Братя Даскалови': obshtina id 'SZR04' is not in its dataset",
+          "row 563 'Гурково': obshtina id 'SZR37' is not in its dataset",
+          "row 564 'Гълъбово': obshtina id 'SZR07' is not in its dataset",
+          "row 565 'Казанлък': obshtina id 'SZR12' is not in its dataset",
+          "row 566 'Мъглиж': obshtina id 'SZR22' is not in its dataset",
+          "row 567 'Николаево': obshtina id 'SZR38' is not in its dataset",
+          "row 568 'Опан': obshtina id 'SZR23' is not in its dataset",
+          "row 569 'Павел баня': obshtina id 'SZR24' is not in its dataset",
+          "row 570 'Раднево': obshtina id 'SZR27' is not in its dataset",
+          "row 571 'Стара Загора': obshtina id 'SZR31' is not in its dataset",
+          "row 572 'Чирпан': obshtina id 'SZR36' is not in its dataset",
+          "row 573 'Антоново': obshtina id 'TGV02' is not in its dataset",
+          "row 574 'Омуртаг': obshtina id 'TGV22' is not in its dataset",
+          "row 575 'Опака': obshtina id 'TGV23' is not in its dataset",
+          "row 576 'Попово': obshtina id 'TGV24' is not in its dataset",
+          "row 577 'Търговище': obshtina id 'TGV35' is not in its dataset",
+          "row 578 'Димитровград': obshtina id 'HKV09' is not in its dataset",
+          "row 579 'Ивайловград': obshtina id 'HKV11' is not in its dataset",
+          "row 580 'Любимец': obshtina id 'HKV17' is not in its dataset",
+          "row 581 'Маджарово': obshtina id 'HKV18' is not in its dataset",
+          "row 582 'Минерални бани': obshtina id 'HKV19' is not in its dataset",
+          "row 583 'Свиленград': obshtina id 'HKV28' is not in its dataset",
+          "row 584 'Симеоновград': obshtina id 'HKV29' is not in its dataset",
+          "row 585 'Стамболово': obshtina id 'HKV30' is not in its dataset",
+          "row 586 'Тополовград': obshtina id 'HKV32' is not in its dataset",
+          "row 587 'Харманли': obshtina id 'HKV33' is not in its dataset",
+          "row 588 'Хасково': obshtina id 'HKV34' is not in its dataset",
+          "row 589 'Велики Преслав': obshtina id 'SHU23' is not in its dataset",
+          "row 590 'Венец': obshtina id 'SHU07' is not in its dataset",
+          "row 591 'Върбица': obshtina id 'SHU10' is not in its dataset",
+          "row 592 'Каолиново': obshtina id 'SHU18' is not in its dataset",
+          "row 593 'Каспичан': obshtina id 'SHU19' is not in its dataset",
+          "row 594 'Никола Козлево': obshtina id 'SHU21' is not in its dataset",
+          "row 595 'Нови пазар': obshtina id 'SHU22' is not in its dataset",
+          "row 596 'Смядово': obshtina id 'SHU25' is not in its dataset",
+          "row 597 'Хитрино': obshtina id 'SHU11' is not in its dataset",
+          "row 598 'Шумен': obshtina id 'SHU30' is not in its dataset",
+          "row 599 'Болярово': obshtina id 'JAM03' is not in its dataset",
+          "row 600 'Елхово': obshtina id 'JAM07' is not in its dataset",
+          "row 601 'Стралджа': obshtina id 'JAM22' is not in its dataset",
+          "row 602 'Тунджа': obshtina id 'JAM25' is not in its dataset",
+          "row 603 'Ямбол': obshtina id 'JAM26' is not in its dataset",
+          "municipalities: 265 rows, the datasets hold 0"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "source municipality id null",
+      "ops": [
+        {
+          "op": "set",
+          "file": "municipalities.json",
+          "path": [
+            "items",
+            0,
+            "id"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "row 353 'Айтос': obshtina id 'BGS01' is not in its dataset"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    },
+    {
+      "name": "source programme fields missing",
+      "ops": [
+        {
+          "op": "delete",
+          "file": "programs.json",
+          "path": [
+            "fields"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'fields'"
+      }
+    },
+    {
+      "name": "source bill mapping null",
+      "ops": [
+        {
+          "op": "set",
+          "file": "budget2027.json",
+          "path": [
+            "budgets",
+            "bill"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'NoneType' object has no attribute 'items'"
+      }
+    },
+    {
+      "name": "source bill invalid article",
+      "ops": [
+        {
+          "op": "set",
+          "file": "budget2027.json",
+          "path": [
+            "budgets",
+            "bill"
+          ],
+          "value": {
+            "2.0": {
+              "name": "Министерството на външните работи",
+              "rows": [
+                {
+                  "no": "I.",
+                  "label": "ПРИХОДИ, ПОМОЩИ И ДАРЕНИЯ",
+                  "section": "I",
+                  "cell": {
+                    "value": 29161.0,
+                    "unit": "хил. €",
+                    "provenance": "df9c89321d2ee5dcde55a4d1"
+                  }
+                },
+                {
+                  "no": "1.",
+                  "label": "Неданъчни приходи",
+                  "section": "I",
+                  "cell": {
+                    "value": 29161.0,
+                    "unit": "хил. €",
+                    "provenance": "fc3c610b6ec8cd86d46c9aeb"
+                  }
+                },
+                {
+                  "no": "1.1.",
+                  "label": "Държавни такси",
+                  "section": "I",
+                  "cell": {
+                    "value": 23007.0,
+                    "unit": "хил. €",
+                    "provenance": "1884bed2789b37f5712587e4"
+                  }
+                },
+                {
+                  "no": "1.2.",
+                  "label": "Приходи и доходи от собственост",
+                  "section": "I",
+                  "cell": {
+                    "value": 4011.7,
+                    "unit": "хил. €",
+                    "provenance": "9b1344c01b8b552f7c46d5a3"
+                  }
+                },
+                {
+                  "no": "1.3.",
+                  "label": "Глоби, санкции и наказателни лихви",
+                  "section": "I",
+                  "cell": {
+                    "value": 127.8,
+                    "unit": "хил. €",
+                    "provenance": "0de5eaa9121707d2a95e354d"
+                  }
+                },
+                {
+                  "no": "1.4.",
+                  "label": "Други приходи",
+                  "section": "I",
+                  "cell": {
+                    "value": 2014.5,
+                    "unit": "хил. €",
+                    "provenance": "fe427833e157c04ceb9a67d0"
+                  }
+                },
+                {
+                  "no": "II.",
+                  "label": "РАЗХОДИ",
+                  "section": "II",
+                  "cell": {
+                    "value": 146085.5,
+                    "unit": "хил. €",
+                    "provenance": "1e787965ccccabf5ae1ee61a"
+                  }
+                },
+                {
+                  "no": "1.",
+                  "label": "Текущи разходи",
+                  "section": "II",
+                  "cell": {
+                    "value": 137081.5,
+                    "unit": "хил. €",
+                    "provenance": "aed531217002a9b689b1d154"
+                  }
+                },
+                {
+                  "no": "1.1.",
+                  "label": "Персонал",
+                  "section": "II",
+                  "cell": {
+                    "value": 34632.7,
+                    "unit": "хил. €",
+                    "provenance": "eb639679fe6a9f4007c6e437"
+                  }
+                },
+                {
+                  "no": "1.2.",
+                  "label": "Субсидии и други текущи трансфери",
+                  "section": "II",
+                  "cell": {
+                    "value": 25.0,
+                    "unit": "хил. €",
+                    "provenance": "760dcebb1593296ac27fd86e"
+                  }
+                },
+                {
+                  "no": "1.2.1.",
+                  "label": "Субсидии и други текущи трансфери за юридически лица с нестопанска цел",
+                  "section": "II",
+                  "cell": {
+                    "value": 25.0,
+                    "unit": "хил. €",
+                    "provenance": "794354c72eb65822904b85cd"
+                  }
+                },
+                {
+                  "no": "2.",
+                  "label": "Капиталови разходи",
+                  "section": "II",
+                  "cell": {
+                    "value": 5529.5,
+                    "unit": "хил. €",
+                    "provenance": "ee8fb4bba68b4205523e20b6"
+                  }
+                },
+                {
+                  "no": "2.1.",
+                  "label": "Придобиване на дълготрайни активи и основен ремонт",
+                  "section": "II",
+                  "cell": {
+                    "value": 5529.5,
+                    "unit": "хил. €",
+                    "provenance": "7a40d3cfa50a485d6e5cc996"
+                  }
+                },
+                {
+                  "no": "3.",
+                  "label": "Предоставени текущи и капиталови трансфери за чужбина",
+                  "section": "II",
+                  "cell": {
+                    "value": 3474.5,
+                    "unit": "хил. €",
+                    "provenance": "67ebbb3249ed4dedaf43ad62"
+                  }
+                },
+                {
+                  "no": "III.",
+                  "label": "БЮДЖЕТНИ ВЗАИМООТНОШЕНИЯ (ТРАНСФЕРИ) - (+/-)",
+                  "section": "III",
+                  "cell": {
+                    "value": 116924.5,
+                    "unit": "хил. €",
+                    "provenance": "4baa361c68477ec78d92f6e4"
+                  }
+                },
+                {
+                  "no": "1.",
+                  "label": "Бюджетно взаимоотношение с централния бюджет (+/-)",
+                  "section": "III",
+                  "cell": {
+                    "value": 125797.7,
+                    "unit": "хил. €",
+                    "provenance": "1ec62ce95c0554d4c71faf0b"
+                  }
+                },
+                {
+                  "no": "2.",
+                  "label": "Трансфери между бюджети и сметки за средствата от Европейския съюз (+/-)",
+                  "section": "III",
+                  "cell": {
+                    "value": -8873.2,
+                    "unit": "хил. €",
+                    "provenance": "2f1079a1ccdb1da860af34b2"
+                  }
+                },
+                {
+                  "no": "2.1.",
+                  "label": "Предоставени трансфери (-)",
+                  "section": "III",
+                  "cell": {
+                    "value": -8873.2,
+                    "unit": "хил. €",
+                    "provenance": "4e07b1f908112f2412a3d479"
+                  }
+                },
+                {
+                  "no": "IV.",
+                  "label": "БЮДЖЕТНО САЛДО (І-ІІ+ІІІ)",
+                  "section": "IV",
+                  "cell": {
+                    "value": 0.0,
+                    "unit": "хил. €",
+                    "provenance": "7a72076f426d9d75aac31fc4"
+                  }
+                },
+                {
+                  "no": "V.",
+                  "label": "ОПЕРАЦИИ В ЧАСТТА НА ФИНАНСИРАНЕТО - НЕТО",
+                  "section": "V",
+                  "cell": {
+                    "value": 0.0,
+                    "unit": "хил. €",
+                    "provenance": "d1b0c6d1e99d99b7ae817dda"
+                  }
+                }
+              ],
+              "policiesRows": [
+                {
+                  "no": "1.",
+                  "label": "Политика в областта на активната двустранна и многостранна дипломация",
+                  "section": "unprinted",
+                  "cell": {
+                    "value": 144260.6,
+                    "unit": "хил. €",
+                    "provenance": "edb39a6f6f10b2868a647b07"
+                  }
+                },
+                {
+                  "no": "2.",
+                  "label": "Политика в областта на публичната дипломация и публичните дейности в подкрепа на целите на външната политика",
+                  "section": "unprinted",
+                  "cell": {
+                    "value": 984.5,
+                    "unit": "хил. €",
+                    "provenance": "5258152029d28fc9f61dfea5"
+                  }
+                },
+                {
+                  "no": "3.",
+                  "label": "Политика в областта на подкрепата за българските общности и лицата с българско самосъзнание зад граница",
+                  "section": "unprinted",
+                  "cell": {
+                    "value": 840.4,
+                    "unit": "хил. €",
+                    "provenance": "d47c08d50288364a4748386b"
+                  }
+                },
+                {
+                  "no": "unprinted",
+                  "label": "Всичко:",
+                  "section": "unprinted",
+                  "cell": {
+                    "value": 146085.5,
+                    "unit": "хил. €",
+                    "provenance": "edf1864bf61bd4e7d3a78cfa"
+                  }
+                }
+              ],
+              "commitmentRows": [
+                {
+                  "no": "1.",
+                  "label": "Максимален размер на ангажиментите за разходи, които могат да бъдат поети през 2027 г.",
+                  "section": "unprinted",
+                  "cell": {
+                    "value": 110927.7,
+                    "unit": "хил. €",
+                    "provenance": "0abc4b2ab6b9babf46af5be9"
+                  }
+                },
+                {
+                  "no": "2.",
+                  "label": "Максимален размер на новите задължения за разходи, които могат да бъдат натрупани през 2027 г.",
+                  "section": "unprinted",
+                  "cell": {
+                    "value": 110927.7,
+                    "unit": "хил. €",
+                    "provenance": "afc9c0f81a1af6509189622a"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "expected": {
+        "crash": "ValueError: invalid literal for int() with base 10: '2.0'"
+      }
+    },
+    {
+      "name": "forecast table null",
+      "ops": [
+        {
+          "op": "set",
+          "file": "budget2027.json",
+          "path": [
+            "forecast",
+            "II_7"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: 'NoneType' object is not iterable"
+      }
+    },
+    {
+      "name": "measure cells null",
+      "ops": [
+        {
+          "op": "set",
+          "file": "budget2027.json",
+          "path": [
+            "forecast",
+            "II_7",
+            0,
+            "cells"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "crash": "AttributeError: 'NoneType' object has no attribute 'get'"
+      }
+    },
+    {
+      "name": "source catalogue null",
+      "ops": [
+        {
+          "op": "set",
+          "file": "catalog.json",
+          "path": [
+            "datasets"
+          ],
+          "value": null
+        }
+      ],
+      "expected": {
+        "crash": "TypeError: 'NoneType' object is not iterable"
+      }
+    },
+    {
+      "name": "missing fields key",
+      "ops": [
+        {
+          "op": "delete",
+          "file": "search-index.json",
+          "path": [
+            "fields"
+          ]
+        }
+      ],
+      "expected": {
+        "crash": "KeyError: 'fields'"
+      }
+    },
+    {
+      "name": "groups wrong type",
+      "ops": [
+        {
+          "op": "set",
+          "file": "search-index.json",
+          "path": [
+            "groups"
+          ],
+          "value": {}
+        }
+      ],
+      "expected": {
+        "name": "SEARCH",
+        "problems": [
+          "groups/fields differ from the contract of searchlib.js"
+        ],
+        "warnings": [],
+        "facts": [
+          "871 rows (26 indicators + 319 institutions + 265 municipalities + 166 measures + 69 terms + 26 datasets), 0 mock"
+        ],
+        "n": 11309
+      }
+    }
+  ]
+}

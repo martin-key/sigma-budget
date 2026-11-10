@@ -1,16 +1,16 @@
 # Издание на данните и командата `budget`
 
 Изданието е проверим пакет от данните на сайта (раздели 6.3, 6.4, 7 и 8 на [спецификацията](approach-specification.md)). Прави го командата
-`budget` (`pipeline/budget_pipeline/cli.py`, обвивка `./budget` в корена на хранилището). Етап B сглобява, проверява и пресъздава изданието. Етап C го качва в R2,
+`budget` (`apps/etl/src/production-cli.ts`, обвивка `./budget` в корена на хранилището). За исторически Python манифести се използва `./budget-python`; точният Node договор е в [production-typescript-import.md](production-typescript-import.md). Етап B сглобява, проверява и пресъздава изданието. Етап C го качва в R2,
 записва го в регистъра в D1 и го прави текущо през операторския API (раздел „Публикуване“).
 
 ## Какво има в изданието
 
 ```text
-work/candidate/
+/outside/new/candidate/
   manifest.json     каноничен JSON: подредени ключове, без интервали, един краен нов ред
   data/             всеки файл на data/release (без releases/)
-  validation.json   резултатът от pipeline/budget_pipeline/validate/datasets.py, без времената
+  validation.json   всички 26 предметни групи + REGISTRY и допълнителните source проверки, без времената
   receipt.json      кога и как е сглобено; не е в манифеста
 ```
 
@@ -22,7 +22,7 @@ work/candidate/
 | Блок | Съдържание |
 |---|---|
 | `manifest_schema`, `data_schema`, `provenance_format` | Версиите на формата на манифеста, на договорите на данните (`execution/2`) и на индекса на произхода. |
-| `processing` | Точният commit, комитите на таговете `mock-v2` и `mock-v4` (текстовете на v5), SHA-256 на `pipeline/Dockerfile` и на `pipeline/requirements.lock`, командата, датата на сглобяване и SHA-256 на двата регистъра. |
+| `processing` | Точният commit/export, Node runtime, lock/compiler/executor хешовете, датата, регистрите и автентикираният snapshot. Историческите Python манифести запазват собствените Docker/lock метаданни. |
 | `inputs` | Всеки файл, който сглобяването чете и не е в git: път, източник (`data/sources.yaml`), начин на придобиване, адрес на файла или на страницата, период, кога е получен, MIME, байтове и SHA-256. Междинните файлове казват производителя си и дали той ги възпроизвежда. |
 | `outputs` | Всеки файл на изданието: път, набор (`data/datasets.yaml`), MIME, байтове и SHA-256, включително `validation.json`. |
 | `coverage` | Всеки набор със статуса, периода и обхвата си, дали това издание го сглобява наново, ограниченията му, предстоящите набори с причината и входовете, които липсват. |
@@ -31,19 +31,19 @@ work/candidate/
 ## Командите
 
 ```bash
-./budget build --build-date 2026-11-05                 # издание на HEAD в work/candidate
-./budget build --build-date 2026-11-05 --site          # и го слага в data/release (данните, манифеста и указателя)
-./budget validate --release work/candidate             # манифестът, байтовете и SHA-256 на всеки файл, проверките на данните
-./budget reproduce --manifest work/candidate/manifest.json
+./budget build --inputs /path/to/inputs --out /outside/new/candidate --build-date 2026-11-10
+./budget build --inputs /path/to/inputs --out /outside/new/site-candidate --build-date 2026-11-10 --site
+./budget validate --release /outside/new/candidate --inputs /path/to/inputs # манифестът, байтовете и SHA-256 на всеки файл, проверките на данните
+./budget reproduce --manifest /outside/new/candidate/manifest.json --originals /path/to/inputs
 ./budget reproduce --current https://sigma-budget.my-data.bg --originals /път/до/оригиналите
-./budget refetch --manifest work/candidate/manifest.json --out work/refetch
+./budget refetch --manifest /outside/new/candidate/manifest.json --out work/refetch
 ./budget collect --out work/acquisition                # сваля всичко, което регистърът може да свали; snapshot.json ги описва
-./budget import-source --source kfp --file ~/Downloads/2026-EU\ funds_1026_BG_WEB.xls
+./budget import-source --source kfp --file ~/Downloads/2026-EU\ funds_1026_BG_WEB.xls --out /outside/new/acquired
 ```
 
 - **`build`** изнася един commit с `git archive`, без `.git` и без промените, които не са в него. Входовете (`data/originals`,
-  `data/cache`, `data/cache/research`) се монтират само за четене в образа на `pipeline/Dockerfile`. Всеки вход се сверява с пина си
-  (`data/originals.sha256` или `sha256` в регистъра); разлика спира сглобяването. Без docker върви в `tmp/venv-data` (`--env local`).
+  `data/cache`, `data/cache/research`) се автентикират и копират само за четене в отделен Node export/scratch. Всеки вход се сверява с пина си
+  (`data/originals.sha256` или `sha256` в регистъра); разлика спира сглобяването. Новото сглобяване не изпълнява Python или Docker. Историческият Python replay запазва старата фиксирана среда.
 - **`validate`** отказва издание, в което файл липсва, не е в манифеста или има други байтове.
 - **`reproduce`** първо проверява, че оригиналите от манифеста са налице и със същия SHA-256. После сглобява commit-а на манифеста и
   сравнява всеки изход. С `--current` разрешава указателя на сайта веднъж и проверява точно това издание. Изтегля и публикуваните файлове
@@ -85,8 +85,8 @@ work/candidate/
 
 ```bash
 ./budget status --environment staging
-./budget publish --release work/candidate --environment staging          # проверка, качване, публикуване, прочитане обратно
-./budget upload --release work/candidate --environment staging           # само кандидат: не става текущ
+./budget publish --release /outside/new/candidate --originals /path/to/inputs --environment staging --dry-run # преглед на publish плана
+./budget upload --release /outside/new/candidate --originals /path/to/inputs --environment staging --dry-run # преглед на upload плана
 ./budget rollback --release-id <по-ранно издание> --environment staging
 ```
 
@@ -110,7 +110,7 @@ token в `CF_ACCESS_CLIENT_ID` и `CF_ACCESS_CLIENT_SECRET`. Токените н
 
 **Проверката** `python -m tests.release.release_check` пуска Worker-а с локални D1 и R2 и минава сценариите от раздел 11 със синтетични
 издания: 9 (достъп), 3 (повредено качване), 4 (прекъсване), 5 (двама оператори), връщане и публичния API. CI я пуска при всеки PR.
-С `--real work/candidate` публикува и истинското издание и го пресъздава с `budget reproduce --current` от оригиналите, които сваля от
+С `--real /outside/new/candidate` публикува и истинското издание и го пресъздава с `budget reproduce --current` от оригиналите, които сваля от
 самото издание.
 
 **Среди.** Създаването на среда е отделно от deploy-а на кода и иска Cloudflare акаунта (раздел 12):

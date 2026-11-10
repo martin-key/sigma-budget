@@ -81,11 +81,29 @@ export function inputs(ctx: Context): Check {
     `Input directories have files not in the manifest: ${extra.slice(0, 5).join(', ')}`,
   );
   const changed = Object.keys(expected)
-    .filter((p) => p in actual && expected[p] !== actual[p])
+    .filter(
+      (p) =>
+        p in actual &&
+        (ctx.generatedInputs.find((i) => i.path === p)?.sha256 ?? expected[p]) !== actual[p],
+    )
     .sort();
   c.ok(!changed.length, `pinned input files changed: ${changed.slice(0, 5).join(', ')}`);
+  if (ctx.generatedInputs.length) {
+    for (const f of ctx.generatedInputs) {
+      const bytes = readFileSync(safePath(ctx.root, f.path));
+      c.ok(
+        bytes.length === f.bytes && createHash('sha256').update(bytes).digest('hex') === f.sha256,
+        'generated intermediate hash: ' + f.path,
+      );
+    }
+    c.warn(
+      `${ctx.generatedInputs.length} declared intermediates generated from actual raw sources in owned scratch; historical raw reconstruction remains unverified`,
+    );
+  }
   c.fact(
-    `${Object.keys(expected).length} files${missing.length || extra.length || changed.length ? '' : ', all sha256 equal'}`,
+    ctx.generatedInputs.length
+      ? `${Object.keys(expected).length} pinned declarations; generated intermediates are separately authenticated`
+      : `${Object.keys(expected).length} files${missing.length || extra.length || changed.length ? '' : ', all sha256 equal'}`,
   );
   return c;
 }

@@ -1,0 +1,359 @@
+{
+  "baseline": {
+    "COMPONENTS": {
+      "n": 270,
+      "problems": [],
+      "warnings": [],
+      "facts": [
+        "COMPONENTS: 7 notes; transfers provided 16 904 770,2 thousand EUR, of which 15 746 142,5 to the five named recipients"
+      ]
+    },
+    "RATES": {
+      "n": 891,
+      "problems": [],
+      "warnings": [],
+      "facts": [
+        "RATES: employment 13.78 / 18.92 per cent (employee / employer incl. TZPB), self-employed 27.8 per cent, 774 annex cells (30 empty), 87 TZPB activities (7 changed)"
+      ]
+    },
+    "INDIRECT": {
+      "n": 124,
+      "problems": [],
+      "warnings": [],
+      "facts": [
+        "raw evidence unavailable: comparing against the pinned independent extraction",
+        "VAT: standard and reduced rates independently verified; без ДДС / 0 % is a calculation category by definition",
+        "M06: 52 ids, 16 date/phrase records, 14 legal records; D26: 2 fuels, 3 cigarette periods"
+      ]
+    },
+    "CONTRACT": {
+      "n": 3837,
+      "problems": [],
+      "warnings": [],
+      "facts": [
+        "3733 money values as decimal strings; 33 originals; 32 rows with a cell, 1 computed; 13 plan items with a locator"
+      ]
+    }
+  },
+  "component-money": {
+    "COMPONENTS": {
+      "n": 270,
+      "problems": [
+        "state: revenue = tax + non-tax + grants: 1 vs 28460847.1 (tolerance 0.21000000000000002)",
+        "state: balance = revenue - expenditure - net transfers - EU contribution: -7319804.0 vs -35780650.10000001 (tolerance 0.26)",
+        "state.revKhil vs law.json art. 1 line I I: 1 vs 28460847.1 (tolerance 0.011)",
+        "state.revKhil vs law.json art1.headline.rev.law: 1 vs 28460847.1 (tolerance 0.011)"
+      ],
+      "warnings": [],
+      "facts": [
+        "COMPONENTS: 7 notes; transfers provided 16 904 770,2 thousand EUR, of which 15 746 142,5 to the five named recipients"
+      ]
+    }
+  },
+  "component-unit": {
+    "COMPONENTS": {
+      "n": 270,
+      "problems": [
+        "transfers: unit / source"
+      ],
+      "warnings": [],
+      "facts": [
+        "COMPONENTS: 7 notes; transfers provided 16 904 770,2 thousand EUR, of which 15 746 142,5 to the five named recipients"
+      ]
+    }
+  },
+  "component-cross-file": {
+    "COMPONENTS": {
+      "n": 270,
+      "problems": [
+        "municipalities: main subsidy 2026 vs municipalities.json column sum: 4887464.0 vs 1 (tolerance 0.011)"
+      ],
+      "warnings": [],
+      "facts": [
+        "COMPONENTS: 7 notes; transfers provided 16 904 770,2 thousand EUR, of which 15 746 142,5 to the five named recipients"
+      ]
+    }
+  },
+  "component-pending-number": {
+    "COMPONENTS": {
+      "n": 270,
+      "problems": [
+        "core.pending.P02 equals components.monthlyByBudget",
+        "monthlyByBudget: pending P02 keys ['status', 'id', 'title', 'reason', 'expected', 'source', 'screens', 'hidden']",
+        "monthlyByBudget: no numbers while pending"
+      ],
+      "warnings": [],
+      "facts": [
+        "COMPONENTS: 7 notes; transfers provided 16 904 770,2 thousand EUR, of which 15 746 142,5 to the five named recipients"
+      ]
+    }
+  },
+  "rate-share": {
+    "RATES": {
+      "n": 891,
+      "problems": [
+        "scenario employment: employee total = sum of the three funds: 13.78 vs 5.4 (tolerance 0.0051)",
+        "management-contract: split equals employment",
+        "employment: employee DOO share from the ASBP rows: 0 vs 8.38 (tolerance 0.0051)"
+      ],
+      "warnings": [],
+      "facts": [
+        "RATES: employment 13.78 / 18.92 per cent (employee / employer incl. TZPB), self-employed 27.8 per cent, 774 annex cells (30 empty), 87 TZPB activities (7 changed)"
+      ]
+    }
+  },
+  "rate-null-cell": {
+    "RATES": {
+      "n": 890,
+      "problems": [
+        "minInsurableIncome: an empty cell is empty in both periods",
+        "minInsurableIncome: 774 cells, 31 empty, 743 filled",
+        "changes: min-income-by-activity counts"
+      ],
+      "warnings": [],
+      "facts": [
+        "RATES: employment 13.78 / 18.92 per cent (employee / employer incl. TZPB), self-employed 27.8 per cent, 774 annex cells (31 empty), 87 TZPB activities (7 changed)"
+      ]
+    }
+  },
+  "rate-unit": {
+    "RATES": {
+      "n": 891,
+      "problems": [
+        "meta id / status / source / unit / pending"
+      ],
+      "warnings": [],
+      "facts": [
+        "RATES: employment 13.78 / 18.92 per cent (employee / employer incl. TZPB), self-employed 27.8 per cent, 774 annex cells (30 empty), 87 TZPB activities (7 changed)"
+      ]
+    }
+  },
+  "rate-coverage": {
+    "RATES": {
+      "n": 891,
+      "problems": [
+        "napCategories: categories 1 and 10 are modelled, the other 17 are not"
+      ],
+      "warnings": [],
+      "facts": [
+        "RATES: employment 13.78 / 18.92 per cent (employee / employer incl. TZPB), self-employed 27.8 per cent, 774 annex cells (30 empty), 87 TZPB activities (7 changed)"
+      ]
+    }
+  },
+  "rate-stored-verdict": {
+    "RATES": {
+      "n": 891,
+      "problems": [
+        "checks: every stored verdict is true"
+      ],
+      "warnings": [],
+      "facts": [
+        "RATES: employment 13.78 / 18.92 per cent (employee / employer incl. TZPB), self-employed 27.8 per cent, 774 annex cells (30 empty), 87 TZPB activities (7 changed)"
+      ]
+    }
+  },
+  "rate-assumption": {
+    "RATES": {
+      "n": 891,
+      "problems": [
+        "ASBP row 20.2 (before 1960) adds up to row 11.1: 19.799999999999997 vs 19.7 (tolerance 0.011)",
+        "ASBP row 20.2 (after 1959) adds up to row 11.1: 14.8 vs 14.7 (tolerance 0.011)",
+        "self-employed: DOO share = row 11.1 (born after 1959): 14.8 vs 14.7 (tolerance 0.0051)",
+        "with-sickness-maternity: DOO share = pension + sickness fund (row 11.3): 18.3 vs 18.2 (tolerance 0.0051)",
+        "with-sickness-maternity: total: 31.3 vs 31.2 (tolerance 0.0051)"
+      ],
+      "warnings": [],
+      "facts": [
+        "RATES: employment 13.78 / 18.92 per cent (employee / employer incl. TZPB), self-employed 27.8 per cent, 774 annex cells (30 empty), 87 TZPB activities (7 changed)"
+      ]
+    }
+  },
+  "indirect-money": {
+    "INDIRECT": {
+      "n": 124,
+      "problems": [
+        "petrol: independently extracted excisePerLitre: 1 vs 0.36302 (tolerance 1e-10)"
+      ],
+      "warnings": [],
+      "facts": [
+        "raw evidence unavailable: comparing against the pinned independent extraction",
+        "VAT: standard and reduced rates independently verified; без ДДС / 0 % is a calculation category by definition",
+        "M06: 52 ids, 16 date/phrase records, 14 legal records; D26: 2 fuels, 3 cigarette periods"
+      ]
+    }
+  },
+  "indirect-unit": {
+    "INDIRECT": {
+      "n": 124,
+      "problems": [
+        "petrol: units"
+      ],
+      "warnings": [],
+      "facts": [
+        "raw evidence unavailable: comparing against the pinned independent extraction",
+        "VAT: standard and reduced rates independently verified; без ДДС / 0 % is a calculation category by definition",
+        "M06: 52 ids, 16 date/phrase records, 14 legal records; D26: 2 fuels, 3 cigarette periods"
+      ]
+    }
+  },
+  "indirect-date": {
+    "INDIRECT": {
+      "n": 124,
+      "problems": [
+        "cigarette contiguous period end 0"
+      ],
+      "warnings": [],
+      "facts": [
+        "raw evidence unavailable: comparing against the pinned independent extraction",
+        "VAT: standard and reduced rates independently verified; без ДДС / 0 % is a calculation category by definition",
+        "M06: 52 ids, 16 date/phrase records, 14 legal records; D26: 2 fuels, 3 cigarette periods"
+      ]
+    }
+  },
+  "indirect-schema": {
+    "INDIRECT": {
+      "n": 124,
+      "problems": [
+        "D26 top-level contract"
+      ],
+      "warnings": [],
+      "facts": [
+        "raw evidence unavailable: comparing against the pinned independent extraction",
+        "VAT: standard and reduced rates independently verified; без ДДС / 0 % is a calculation category by definition",
+        "M06: 52 ids, 16 date/phrase records, 14 legal records; D26: 2 fuels, 3 cigarette periods"
+      ]
+    }
+  },
+  "indirect-source": {
+    "INDIRECT": {
+      "n": 124,
+      "problems": [
+        "D26 provenance"
+      ],
+      "warnings": [],
+      "facts": [
+        "raw evidence unavailable: comparing against the pinned independent extraction",
+        "VAT: standard and reduced rates independently verified; без ДДС / 0 % is a calculation category by definition",
+        "M06: 52 ids, 16 date/phrase records, 14 legal records; D26: 2 fuels, 3 cigarette periods"
+      ]
+    }
+  },
+  "measure-evidence": {
+    "INDIRECT": {
+      "n": 124,
+      "problems": [
+        "kr1: since source evidence"
+      ],
+      "warnings": [],
+      "facts": [
+        "raw evidence unavailable: comparing against the pinned independent extraction",
+        "VAT: standard and reduced rates independently verified; без ДДС / 0 % is a calculation category by definition",
+        "M06: 52 ids, 16 date/phrase records, 14 legal records; D26: 2 fuels, 3 cigarette periods"
+      ]
+    }
+  },
+  "contract-binary-money": {
+    "CONTRACT": {
+      "n": 3837,
+      "problems": [
+        "data.2026.kfp.rev[0]: 1 is not a decimal string with 3 places"
+      ],
+      "warnings": [],
+      "facts": [
+        "3733 money values as decimal strings; 33 originals; 32 rows with a cell, 1 computed; 13 plan items with a locator"
+      ]
+    }
+  },
+  "contract-negative-zero": {
+    "CONTRACT": {
+      "n": 3837,
+      "problems": [
+        "monthly.2026.kfp.rev[0]: '-0.000' is not a decimal string with 3 places"
+      ],
+      "warnings": [],
+      "facts": [
+        "3733 money values as decimal strings; 33 originals; 32 rows with a cell, 1 computed; 13 plan items with a locator"
+      ]
+    }
+  },
+  "contract-money-precision": {
+    "CONTRACT": {
+      "n": 3837,
+      "problems": [
+        "plan2026.kfp.rev: '49615.30' is not a decimal string with 1 places"
+      ],
+      "warnings": [],
+      "facts": [
+        "3733 money values as decimal strings; 33 originals; 32 rows with a cell, 1 computed; 13 plan items with a locator"
+      ]
+    }
+  },
+  "contract-null-is-valid": {
+    "CONTRACT": {
+      "n": 3836,
+      "problems": [],
+      "warnings": [],
+      "facts": [
+        "3733 money values as decimal strings; 33 originals; 32 rows with a cell, 1 computed; 13 plan items with a locator"
+      ]
+    }
+  },
+  "contract-schema": {
+    "CONTRACT": {
+      "n": 1,
+      "problems": [
+        "execution.json: contract.schema is 1, expected 2"
+      ],
+      "warnings": [],
+      "facts": []
+    }
+  },
+  "contract-provenance-hash": {
+    "CONTRACT": {
+      "n": 3837,
+      "problems": [
+        "execution-provenance.json: original 2026-01 must be 2026-EU_funds_0126_BG_WEB.xls with the sha256 of execution.json"
+      ],
+      "warnings": [],
+      "facts": [
+        "3733 money values as decimal strings; 33 originals; 32 rows with a cell, 1 computed; 13 plan items with a locator"
+      ]
+    }
+  },
+  "contract-plan-cell": {
+    "CONTRACT": {
+      "n": 3837,
+      "problems": [
+        "plan provenance must match pinned annex1 law cells and operations"
+      ],
+      "warnings": [],
+      "facts": [
+        "3733 money values as decimal strings; 33 originals; 32 rows with a cell, 1 computed; 13 plan items with a locator"
+      ]
+    }
+  },
+  "contract-omitted-cell": {
+    "CONTRACT": {
+      "n": 3837,
+      "problems": [
+        "execution-provenance.json: every row has a cell row or a rule, not both"
+      ],
+      "warnings": [],
+      "facts": [
+        "3733 money values as decimal strings; 33 originals; 31 rows with a cell, 1 computed; 13 plan items with a locator"
+      ]
+    }
+  },
+  "contract-computed-dependency": {
+    "CONTRACT": {
+      "n": 3837,
+      "problems": [
+        "execution-provenance.json: computed exp.total is made from rows with cells"
+      ],
+      "warnings": [],
+      "facts": [
+        "3733 money values as decimal strings; 33 originals; 32 rows with a cell, 1 computed; 13 plan items with a locator"
+      ]
+    }
+  }
+}

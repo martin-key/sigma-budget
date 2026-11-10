@@ -1,0 +1,568 @@
+[
+  {
+    "name": "population-0",
+    "file": "core.json",
+    "expected": {
+      "crash": "TypeError: %d format: a real number is required, not str"
+    }
+  },
+  {
+    "name": "population-1",
+    "file": "core.json",
+    "expected": {
+      "crash": "TypeError: %d format: a real number is required, not list"
+    }
+  },
+  {
+    "name": "population-2",
+    "file": "core.json",
+    "expected": {
+      "crash": "TypeError: %d format: a real number is required, not dict"
+    }
+  },
+  {
+    "name": "population-3",
+    "file": "core.json",
+    "expected": {
+      "crash": "TypeError: %d format: a real number is required, not NoneType"
+    }
+  },
+  {
+    "name": "population-4",
+    "file": "core.json",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [
+          "event eurostat-tps00001-2026-09-30: title is 'Евростат: населението на 1 януари 2026 г.', the dataset says 'Евростат: населението на 1 януари 1 г.'"
+        ],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  },
+  {
+    "name": "population-5",
+    "file": "core.json",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [
+          "event eurostat-tps00001-2026-09-30: title is 'Евростат: населението на 1 януари 2026 г.', the dataset says 'Евростат: населението на 1 януари 0 г.'"
+        ],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  },
+  {
+    "name": "population-6",
+    "file": "core.json",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  },
+  {
+    "name": "population-7",
+    "file": "core.json",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  },
+  {
+    "name": "population-8",
+    "file": "core.json",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  },
+  {
+    "name": "population-9",
+    "file": "core.json",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [
+          "event eurostat-tps00001-2026-09-30: title is 'Евростат: населението на 1 януари 2026 г.', the dataset says 'Евростат: населението на 1 януари 0 г.'"
+        ],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  },
+  {
+    "name": "population-10",
+    "file": "core.json",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [
+          "event eurostat-tps00001-2026-09-30: title is 'Евростат: населението на 1 януари 2026 г.', the dataset says 'Евростат: населението на 1 януари 100000000000000000000 г.'"
+        ],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  },
+  {
+    "name": "population-11",
+    "file": "core.json",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [
+          "event eurostat-tps00001-2026-09-30: title is 'Евростат: населението на 1 януари 2026 г.', the dataset says 'Евростат: населението на 1 януари 123456789012345678901234567890 г.'"
+        ],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  },
+  {
+    "name": "maastricht-0",
+    "file": "debt.json",
+    "expected": {
+      "crash": "TypeError: %d format: a real number is required, not str"
+    }
+  },
+  {
+    "name": "maastricht-1",
+    "file": "debt.json",
+    "expected": {
+      "crash": "TypeError: %d format: a real number is required, not list"
+    }
+  },
+  {
+    "name": "maastricht-2",
+    "file": "debt.json",
+    "expected": {
+      "crash": "TypeError: %d format: a real number is required, not dict"
+    }
+  },
+  {
+    "name": "maastricht-3",
+    "file": "debt.json",
+    "expected": {
+      "crash": "TypeError: %d format: a real number is required, not NoneType"
+    }
+  },
+  {
+    "name": "maastricht-4",
+    "file": "debt.json",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [
+          "event eurostat-gov_10dd_edpt1-2026-10-21: href is '#/dalg?obhvat=maastricht&per=2025.report&to=s17-b-maastricht', the dataset says '#/dalg?obhvat=maastricht&per=1.report&to=s17-b-maastricht'",
+          "event eurostat-gov_10dd_edpt1-2026-10-21: title is 'Евростат: дългът на държавното управление за 2025 г.', the dataset says 'Евростат: дългът на държавното управление за 1 г.'",
+          "event eurostat-gov_10q_ggdebt-2026-10-21: href is '#/dalg?obhvat=maastricht&per=2025.report&to=s17-b-quarterly', the dataset says '#/dalg?obhvat=maastricht&per=1.report&to=s17-b-quarterly'"
+        ],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  },
+  {
+    "name": "maastricht-5",
+    "file": "debt.json",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [
+          "event eurostat-gov_10dd_edpt1-2026-10-21: href is '#/dalg?obhvat=maastricht&per=2025.report&to=s17-b-maastricht', the dataset says '#/dalg?obhvat=maastricht&per=0.report&to=s17-b-maastricht'",
+          "event eurostat-gov_10dd_edpt1-2026-10-21: title is 'Евростат: дългът на държавното управление за 2025 г.', the dataset says 'Евростат: дългът на държавното управление за 0 г.'",
+          "event eurostat-gov_10q_ggdebt-2026-10-21: href is '#/dalg?obhvat=maastricht&per=2025.report&to=s17-b-quarterly', the dataset says '#/dalg?obhvat=maastricht&per=0.report&to=s17-b-quarterly'"
+        ],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  },
+  {
+    "name": "maastricht-6",
+    "file": "debt.json",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [
+          "event eurostat-gov_10dd_edpt1-2026-10-21: href is '#/dalg?obhvat=maastricht&per=2025.report&to=s17-b-maastricht', the dataset says '#/dalg?obhvat=maastricht&per=2026.report&to=s17-b-maastricht'",
+          "event eurostat-gov_10dd_edpt1-2026-10-21: title is 'Евростат: дългът на държавното управление за 2025 г.', the dataset says 'Евростат: дългът на държавното управление за 2026 г.'",
+          "event eurostat-gov_10q_ggdebt-2026-10-21: href is '#/dalg?obhvat=maastricht&per=2025.report&to=s17-b-quarterly', the dataset says '#/dalg?obhvat=maastricht&per=2026.report&to=s17-b-quarterly'"
+        ],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  },
+  {
+    "name": "maastricht-7",
+    "file": "debt.json",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [
+          "event eurostat-gov_10dd_edpt1-2026-10-21: href is '#/dalg?obhvat=maastricht&per=2025.report&to=s17-b-maastricht', the dataset says '#/dalg?obhvat=maastricht&per=2026.report&to=s17-b-maastricht'",
+          "event eurostat-gov_10dd_edpt1-2026-10-21: title is 'Евростат: дългът на държавното управление за 2025 г.', the dataset says 'Евростат: дългът на държавното управление за 2026 г.'",
+          "event eurostat-gov_10q_ggdebt-2026-10-21: href is '#/dalg?obhvat=maastricht&per=2025.report&to=s17-b-quarterly', the dataset says '#/dalg?obhvat=maastricht&per=2026.report&to=s17-b-quarterly'"
+        ],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  },
+  {
+    "name": "maastricht-8",
+    "file": "debt.json",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [
+          "event eurostat-gov_10dd_edpt1-2026-10-21: href is '#/dalg?obhvat=maastricht&per=2025.report&to=s17-b-maastricht', the dataset says '#/dalg?obhvat=maastricht&per=2026.report&to=s17-b-maastricht'",
+          "event eurostat-gov_10dd_edpt1-2026-10-21: title is 'Евростат: дългът на държавното управление за 2025 г.', the dataset says 'Евростат: дългът на държавното управление за 2026 г.'",
+          "event eurostat-gov_10q_ggdebt-2026-10-21: href is '#/dalg?obhvat=maastricht&per=2025.report&to=s17-b-quarterly', the dataset says '#/dalg?obhvat=maastricht&per=2026.report&to=s17-b-quarterly'"
+        ],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  },
+  {
+    "name": "maastricht-9",
+    "file": "debt.json",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [
+          "event eurostat-gov_10dd_edpt1-2026-10-21: href is '#/dalg?obhvat=maastricht&per=2025.report&to=s17-b-maastricht', the dataset says '#/dalg?obhvat=maastricht&per=0.report&to=s17-b-maastricht'",
+          "event eurostat-gov_10dd_edpt1-2026-10-21: title is 'Евростат: дългът на държавното управление за 2025 г.', the dataset says 'Евростат: дългът на държавното управление за 0 г.'",
+          "event eurostat-gov_10q_ggdebt-2026-10-21: href is '#/dalg?obhvat=maastricht&per=2025.report&to=s17-b-quarterly', the dataset says '#/dalg?obhvat=maastricht&per=0.report&to=s17-b-quarterly'"
+        ],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  },
+  {
+    "name": "maastricht-10",
+    "file": "debt.json",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [
+          "event eurostat-gov_10dd_edpt1-2026-10-21: href is '#/dalg?obhvat=maastricht&per=2025.report&to=s17-b-maastricht', the dataset says '#/dalg?obhvat=maastricht&per=100000000000000000000.report&to=s17-b-maastricht'",
+          "event eurostat-gov_10dd_edpt1-2026-10-21: title is 'Евростат: дългът на държавното управление за 2025 г.', the dataset says 'Евростат: дългът на държавното управление за 100000000000000000000 г.'",
+          "event eurostat-gov_10q_ggdebt-2026-10-21: href is '#/dalg?obhvat=maastricht&per=2025.report&to=s17-b-quarterly', the dataset says '#/dalg?obhvat=maastricht&per=100000000000000000000.report&to=s17-b-quarterly'"
+        ],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  },
+  {
+    "name": "maastricht-11",
+    "file": "debt.json",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [
+          "event eurostat-gov_10dd_edpt1-2026-10-21: href is '#/dalg?obhvat=maastricht&per=2025.report&to=s17-b-maastricht', the dataset says '#/dalg?obhvat=maastricht&per=123456789012345678901234567890.report&to=s17-b-maastricht'",
+          "event eurostat-gov_10dd_edpt1-2026-10-21: title is 'Евростат: дългът на държавното управление за 2025 г.', the dataset says 'Евростат: дългът на държавното управление за 123456789012345678901234567890 г.'",
+          "event eurostat-gov_10q_ggdebt-2026-10-21: href is '#/dalg?obhvat=maastricht&per=2025.report&to=s17-b-quarterly', the dataset says '#/dalg?obhvat=maastricht&per=123456789012345678901234567890.report&to=s17-b-quarterly'"
+        ],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  },
+  {
+    "name": "cofog-0",
+    "file": "expenditure.json",
+    "expected": {
+      "crash": "TypeError: %d format: a real number is required, not str"
+    }
+  },
+  {
+    "name": "cofog-1",
+    "file": "expenditure.json",
+    "expected": {
+      "crash": "TypeError: %d format: a real number is required, not list"
+    }
+  },
+  {
+    "name": "cofog-2",
+    "file": "expenditure.json",
+    "expected": {
+      "crash": "TypeError: %d format: a real number is required, not dict"
+    }
+  },
+  {
+    "name": "cofog-3",
+    "file": "expenditure.json",
+    "expected": {
+      "crash": "TypeError: %d format: a real number is required, not NoneType"
+    }
+  },
+  {
+    "name": "cofog-4",
+    "file": "expenditure.json",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [
+          "event eurostat-gov_10a_exp-2026-09-16: href is '#/razhodi?per=2024.report', the dataset says '#/razhodi?per=1.report'",
+          "event eurostat-gov_10a_exp-2026-09-16: title is 'Евростат: разходите по функции (COFOG) са допълнени до 2024 г.', the dataset says 'Евростат: разходите по функции (COFOG) са допълнени до 1 г.'",
+          "event eurostat-gov_10a_exp-2026-09-16: text lacks /1 г\\./"
+        ],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  },
+  {
+    "name": "cofog-5",
+    "file": "expenditure.json",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [
+          "event eurostat-gov_10a_exp-2026-09-16: href is '#/razhodi?per=2024.report', the dataset says '#/razhodi?per=0.report'",
+          "event eurostat-gov_10a_exp-2026-09-16: title is 'Евростат: разходите по функции (COFOG) са допълнени до 2024 г.', the dataset says 'Евростат: разходите по функции (COFOG) са допълнени до 0 г.'",
+          "event eurostat-gov_10a_exp-2026-09-16: text lacks /0 г\\./"
+        ],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  },
+  {
+    "name": "cofog-6",
+    "file": "expenditure.json",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [
+          "event eurostat-gov_10a_exp-2026-09-16: href is '#/razhodi?per=2024.report', the dataset says '#/razhodi?per=2026.report'",
+          "event eurostat-gov_10a_exp-2026-09-16: title is 'Евростат: разходите по функции (COFOG) са допълнени до 2024 г.', the dataset says 'Евростат: разходите по функции (COFOG) са допълнени до 2026 г.'",
+          "event eurostat-gov_10a_exp-2026-09-16: text lacks /2026 г\\./"
+        ],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  },
+  {
+    "name": "cofog-7",
+    "file": "expenditure.json",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [
+          "event eurostat-gov_10a_exp-2026-09-16: href is '#/razhodi?per=2024.report', the dataset says '#/razhodi?per=2026.report'",
+          "event eurostat-gov_10a_exp-2026-09-16: title is 'Евростат: разходите по функции (COFOG) са допълнени до 2024 г.', the dataset says 'Евростат: разходите по функции (COFOG) са допълнени до 2026 г.'",
+          "event eurostat-gov_10a_exp-2026-09-16: text lacks /2026 г\\./"
+        ],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  },
+  {
+    "name": "cofog-8",
+    "file": "expenditure.json",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [
+          "event eurostat-gov_10a_exp-2026-09-16: href is '#/razhodi?per=2024.report', the dataset says '#/razhodi?per=2026.report'",
+          "event eurostat-gov_10a_exp-2026-09-16: title is 'Евростат: разходите по функции (COFOG) са допълнени до 2024 г.', the dataset says 'Евростат: разходите по функции (COFOG) са допълнени до 2026 г.'",
+          "event eurostat-gov_10a_exp-2026-09-16: text lacks /2026 г\\./"
+        ],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  },
+  {
+    "name": "cofog-9",
+    "file": "expenditure.json",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [
+          "event eurostat-gov_10a_exp-2026-09-16: href is '#/razhodi?per=2024.report', the dataset says '#/razhodi?per=0.report'",
+          "event eurostat-gov_10a_exp-2026-09-16: title is 'Евростат: разходите по функции (COFOG) са допълнени до 2024 г.', the dataset says 'Евростат: разходите по функции (COFOG) са допълнени до 0 г.'",
+          "event eurostat-gov_10a_exp-2026-09-16: text lacks /0 г\\./"
+        ],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  },
+  {
+    "name": "cofog-10",
+    "file": "expenditure.json",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [
+          "event eurostat-gov_10a_exp-2026-09-16: href is '#/razhodi?per=2024.report', the dataset says '#/razhodi?per=100000000000000000000.report'",
+          "event eurostat-gov_10a_exp-2026-09-16: title is 'Евростат: разходите по функции (COFOG) са допълнени до 2024 г.', the dataset says 'Евростат: разходите по функции (COFOG) са допълнени до 100000000000000000000 г.'",
+          "event eurostat-gov_10a_exp-2026-09-16: text lacks /100000000000000000000 г\\./"
+        ],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  },
+  {
+    "name": "cofog-11",
+    "file": "expenditure.json",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [
+          "event eurostat-gov_10a_exp-2026-09-16: href is '#/razhodi?per=2024.report', the dataset says '#/razhodi?per=123456789012345678901234567890.report'",
+          "event eurostat-gov_10a_exp-2026-09-16: title is 'Евростат: разходите по функции (COFOG) са допълнени до 2024 г.', the dataset says 'Евростат: разходите по функции (COFOG) са допълнени до 123456789012345678901234567890 г.'",
+          "event eurostat-gov_10a_exp-2026-09-16: text lacks /123456789012345678901234567890 г\\./"
+        ],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  }
+]

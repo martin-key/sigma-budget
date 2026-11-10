@@ -7,3 +7,4 @@
 apps/web/app/routes/__fixtures__/**
 data/**
 tmp/**
+packages/ingest/src/production/historical/**

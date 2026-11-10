@@ -131,18 +131,30 @@ export class Context {
     readonly root: string,
     readonly buildDate = '2026-11-08',
     readonly dataDir = 'data/release',
+    readonly outputRoot = root,
+    readonly generatedInputs: readonly { path: string; sha256: string; bytes: number }[] = [],
   ) {
     realpathSync(root);
-    safePath(root, dataDir);
+    realpathSync(outputRoot);
+    safePath(outputRoot, dataDir);
+  }
+  sourceExists(rel: string): boolean {
+    return existsSync(safePath(this.root, `data/originals/${rel}`));
+  }
+  sourceBytes(rel: string): Buffer {
+    return readFileSync(safePath(this.root, `data/originals/${rel}`));
+  }
+  dataDirectory(rel: string): string[] {
+    return readdirSync(safePath(this.outputRoot, `${this.dataDir}/${rel}`)).sort();
   }
   dataFiles(): string[] {
-    return files(this.root, this.dataDir, true);
+    return files(this.outputRoot, this.dataDir, true);
   }
   jsonFiles(): string[] {
     return this.dataFiles().filter((f) => f.endsWith('.json'));
   }
   bytes(rel: string): Buffer {
-    return readFileSync(safePath(this.root, `${this.dataDir}/${rel}`));
+    return readFileSync(safePath(this.outputRoot, `${this.dataDir}/${rel}`));
   }
   text(rel: string): string {
     if (!this.textCache.has(rel))
@@ -162,7 +174,7 @@ export class Context {
     return this.jsonCache.get(rel);
   }
   exists(rel: string): boolean {
-    return existsSync(safePath(this.root, `${this.dataDir}/${rel}`));
+    return existsSync(safePath(this.outputRoot, `${this.dataDir}/${rel}`));
   }
   proto(rel: string): unknown {
     const name = rel.startsWith('src/') ? rel.slice(4) : rel;

@@ -58,8 +58,8 @@ jobs:
           pnpm exec budget-ts freshness
       - name: Check the source and dataset registries
         run: python -m budget_pipeline.validate.registry check
-      - name: Check the published release (data/release against its manifest)
-        run: ./budget validate --site
+      - name: Check the unchanged historical Python publication against its manifest
+        run: ./budget-python validate --site
       - name: Validate the data
         run: python -m budget_pipeline.validate.datasets
       - name: Check frozen 2027 budget extractions
@@ -91,7 +91,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
-      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/tmp/pw-browsers   # the checks look there first (redirects and others set it as their default)
+      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/tmp/pw-browsers # the checks look there first (redirects and others set it as their default)
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -167,7 +167,7 @@ jobs:
       - run: docker run --rm -v "$PWD":/repo:ro sigma-budget-data python -m budget_pipeline.environment
 
   deploy:
-    needs: [build, check, release, common-parity]
+    needs: [build, check, release, common-parity, node-import]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -238,6 +238,57 @@ jobs:
         with:
           name: validation-wave14-parity
           path: tmp/ts-migration/candidates/14/report.json
+          if-no-files-found: error
+      - name: Release remains unchanged
+        if: always()
+        run: git diff --exit-code -- data/release
+
+  validation-wave15:
+    # Frozen 810 donor corpus; no source refresh or live-release comparison.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: pipeline/requirements.lock
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: |
+          python -m pip install --require-hashes -r pipeline/requirements.lock
+          pnpm install --frozen-lockfile
+          pnpm --filter @sigma-budget/ingest... build
+          pnpm --filter @sigma-budget/ingest typecheck
+      - name: Verify frozen donor oracles
+        run: |
+          python packages/ingest/test/fixtures/validate14/generate_oracle.py --check
+          python packages/ingest/test/fixtures/validate14/generate_groups_oracle.py --check
+          python packages/ingest/test/fixtures/validate15/generate_oracle.py --check
+          python packages/ingest/test/fixtures/validate15/generate_unicode.py --check
+          python packages/ingest/test/fixtures/validate15/compound/generate_oracle.py --check
+          python packages/ingest/test/fixtures/validate15/native/generate_oracle.py --check
+          python packages/ingest/test/fixtures/validate15/iterable/generate_oracle.py --check
+      - name: Fiscal and legal validation parity
+        env:
+          WAVE15_PARITY_REPORT: tmp/ts-migration/candidates/15/report.json
+          WAVE15_COMPOUND_REPORT: tmp/ts-migration/candidates/15/compound-report.json
+          WAVE15_NATIVE_REPORT: tmp/ts-migration/candidates/15/native-report.json
+          WAVE15_ITERABLE_REPORT: tmp/ts-migration/candidates/15/iterable-report.json
+        run: pnpm --filter @sigma-budget/ingest exec vitest run src/validate/wave15-parity.test.ts src/validate/wave15-sum.test.ts src/validate/wave15-unicode.test.ts src/validate/wave15-compound.test.ts src/validate/wave15-native.test.ts src/validate/wave15-iterable.test.ts src/validate/ordered-json.test.ts src/validate/cli15.test.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: validation-wave15-parity
+          path: |
+            tmp/ts-migration/candidates/15/report.json
+            tmp/ts-migration/candidates/15/compound-report.json
+            tmp/ts-migration/candidates/15/native-report.json
+            tmp/ts-migration/candidates/15/iterable-report.json
           if-no-files-found: error
       - name: Release remains unchanged
         if: always()
@@ -657,3 +708,164 @@ jobs:
       - name: Release remains unchanged
         if: always()
         run: test -z "$(git status --porcelain -- data/release)"
+
+  validation-wave17b:
+    # Frozen FEED evidence; production validation remains Python.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: python -m pip install --require-hashes -r pipeline/requirements.lock
+      - name: Verify frozen donor and independent mutations
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          mkdir -p tmp/wave17b-git-export
+          git archive HEAD packages/ingest/test/fixtures/validate17b | tar -x -C tmp/wave17b-git-export
+          python tmp/wave17b-git-export/packages/ingest/test/fixtures/validate17b/generate.py --check
+          python tmp/wave17b-git-export/packages/ingest/test/fixtures/validate17b/generate-extra.py --verify-extra
+          python tmp/wave17b-git-export/packages/ingest/test/fixtures/validate17b/population/generate.py --check
+          python tmp/wave17b-git-export/packages/ingest/test/fixtures/validate17b/years/generate.py --check
+      - name: FEED differential and compiled CLI safety
+        run: |
+          pnpm --filter @sigma-budget/ingest... build
+          pnpm --filter @sigma-budget/ingest exec vitest run src/validate/feed-text.test.ts src/validate/feed.test.ts src/validate/feed-population.test.ts src/validate/feed-years.test.ts src/validate/feed-cli.test.ts
+          node packages/ingest/dist/validate/feed-cli.js --root packages/ingest/test/fixtures/validate17b/corpus --only FEED --report tmp/ts-migration/candidates/17b/report.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: validation-wave17b
+          path: tmp/ts-migration/candidates/17b/report.json
+          if-no-files-found: error
+      - name: Release remains unchanged
+        if: always()
+        run: test -z "$(git status --porcelain -- data/release)"
+
+  validation-wave17c:
+    # SEARCH only: frozen Python source and inputs, independent search reference and safe CLI.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: pipeline/requirements.lock
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: |
+          python -m pip install --require-hashes -r pipeline/requirements.lock
+          pnpm install --frozen-lockfile
+          pnpm --filter @sigma-budget/ingest... build
+      - name: Verify donor provenance and regenerate from a Git-only export
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          python packages/ingest/test/fixtures/wave17c/check_provenance.py
+          mkdir -p tmp/wave17c-git-export
+          git archive HEAD packages/ingest/test/fixtures/wave17c packages/ingest/src/validate/search-unicode-data.ts | tar -x -C tmp/wave17c-git-export
+          python tmp/wave17c-git-export/packages/ingest/test/fixtures/wave17c/generate_unicode.py --check
+          python tmp/wave17c-git-export/packages/ingest/test/fixtures/wave17c/generate.py --check
+          python tmp/wave17c-git-export/packages/ingest/test/fixtures/wave17c/reference.py --check
+          python tmp/wave17c-git-export/packages/ingest/test/fixtures/wave17c/wrapper.py --check
+          python tmp/wave17c-git-export/packages/ingest/test/fixtures/wave17c/sources/generate.py --check
+          python tmp/wave17c-git-export/packages/ingest/test/fixtures/wave17c/routes/generate.py --check
+      - name: Independent SEARCH, mutation and compiled CLI checks
+        run: |
+          pnpm --filter @sigma-budget/ingest exec vitest run src/validate/search-reference.test.ts src/validate/search.test.ts src/validate/search-sources.test.ts src/validate/search-routes.test.ts src/validate/search-cli.test.ts
+          node packages/ingest/dist/validate/search-cli.js --root packages/ingest/test/fixtures/wave17c/corpus --only SEARCH --raw --report tmp/ts-migration/candidates/17c/report.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: validation-wave17c
+          path: tmp/ts-migration/candidates/17c/report.json
+          if-no-files-found: error
+      - name: Release remains unchanged
+        if: always()
+        run: test -z "$(git status --porcelain -- data/release)"
+
+  node-inputs:
+    # Draft assets need push access. This job runs no checkout or project code;
+    # the token is exposed only to the fixed download, then all bytes are pinned.
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Download only the approved repository-owned CI archive
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api --hostname github.com repos/midt-bg/sigma-budget/releases/assets/733218674 -H 'Accept: application/octet-stream' > "$RUNNER_TEMP/registered-node-inputs.tar.gz"
+          printf '%s  %s\n' '8617be55dad2d9605ac1c83876685d68650ecd3b709b4066ea8b018dd416090e' "$RUNNER_TEMP/registered-node-inputs.tar.gz" | sha256sum --check
+          test "$(stat -c '%s' "$RUNNER_TEMP/registered-node-inputs.tar.gz")" = 151787132
+      - uses: actions/upload-artifact@v4
+        with:
+          name: registered-node-input-archive
+          path: ${{ runner.temp }}/registered-node-inputs.tar.gz
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error
+
+  node-import:
+    # Required actual-source acceptance. A missing restored snapshot fails; no core acceptance skip.
+    needs: [node-inputs]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @sigma-budget/etl... build
+      - uses: actions/download-artifact@v4
+        with:
+          name: registered-node-input-archive
+          path: ${{ runner.temp }}/registered-node-input-archive
+      - name: Authenticate the reviewed archive and every registered input
+        run: node scripts/restore-node-input-cache.mjs "$RUNNER_TEMP/registered-node-input-archive/registered-node-inputs.tar.gz" "$RUNNER_TEMP/registered-node-inputs"
+      - name: Actual Node readers, complete rules, double build and local recorded-code replay
+        run: node scripts/node-import-acceptance.mjs "$RUNNER_TEMP/registered-node-inputs" "$RUNNER_TEMP/node-acceptance" 2026-11-10
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Provision the existing locked browser test tool (outside import runtime)
+        run: |
+          python -m pip install --require-hashes -r tests/requirements-dev.lock
+          python -m playwright install --with-deps chromium
+      - name: Package the fresh Node candidate and exercise its Worker and browser identity
+        run: node scripts/node-candidate-site-acceptance.mjs "$RUNNER_TEMP/node-acceptance/candidate" "$RUNNER_TEMP/node-site"
+      - name: Protected checkout state
+        if: always()
+        run: test -z "$(git status --porcelain -- data packages/ingest/test/fixtures tests/pipeline/fixtures)"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: node-import-acceptance
+          path: |
+            ${{ runner.temp }}/node-acceptance/acceptance.json
+            ${{ runner.temp }}/node-acceptance/candidate/manifest.json
+            ${{ runner.temp }}/node-acceptance/candidate/validation.json
+            ${{ runner.temp }}/node-acceptance/candidate/receipt.json
+            ${{ runner.temp }}/node-site/site-acceptance.json
+          if-no-files-found: error

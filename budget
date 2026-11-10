@@ -1,11 +1,20 @@
 #!/bin/sh
-# Python 3.12+, using the pinned pipeline environment when available.
+# Production Node CLI. Historical Python packages use ./budget-python explicitly.
+set -eu
 root=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-export PYTHONPATH="$root/pipeline${PYTHONPATH:+:$PYTHONPATH}"
-for py in "$root/tmp/venv-data/bin/python" "$root/tmp/venv/bin/python" python3; do
-  if command -v "$py" >/dev/null 2>&1 && "$py" -c "import sys, yaml; assert sys.version_info >= (3, 12)" 2>/dev/null; then
-    exec "$py" -m budget_pipeline.cli "$@"
-  fi
-done
-echo "budget: needs Python 3.12+ with the hash-locked dependencies" >&2
-exit 2
+if ! command -v node >/dev/null 2>&1 || ! node -e 'process.exit(Number(process.versions.node.split(".")[0]) >= 24 ? 0 : 1)' 2>/dev/null; then
+  echo "budget: needs Node 24+" >&2
+  exit 2
+fi
+if ! command -v pnpm >/dev/null 2>&1; then
+  echo "budget: needs pnpm 10.33.0; install the locked workspace dependencies first" >&2
+  exit 2
+fi
+cd "$root"
+# Turbo rebuilds changed source and reuses cached workspace build outputs;
+# the launcher never installs dependencies or falls back to a Python producer.
+if ! pnpm exec turbo run build --filter=@sigma-budget/etl... >&2; then
+  echo "budget: build failed; run pnpm install --frozen-lockfile and resolve the build error" >&2
+  exit 2
+fi
+exec node "$root/apps/etl/dist/cli.js" "$@"

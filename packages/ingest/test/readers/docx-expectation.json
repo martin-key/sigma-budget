@@ -1,0 +1,24 @@
+{
+  "input": {
+    "path": "data/originals/parliament/52-602-01-19.docx",
+    "sha256": "378042f3c6f05aad760099f3b5ccceaf597fd287b28242fe89b99d2a981fc174"
+  },
+  "donor": {
+    "path": "pipeline/budget_pipeline/extract/budget_law_parser.py",
+    "sha256": "f5c57b32da38e7e28fbbec6350c368173c195cf1b86d67a2368cc2b99651d746"
+  },
+  "blocks": {
+    "count": 2604,
+    "sha256": "c02759616a310a6d88fac8069e56f37b8b75af51230a58bbfbc4a1e165fc2c47"
+  },
+  "physicalTables": {
+    "count": 45,
+    "rows": 3683,
+    "sha256": "53ce1228ec8d315a6c9315073053369fe324671d41a6640e4a3e3a5439f06f99"
+  },
+  "memberSha256": "f8e596ffc2b7fb54d508997e1f7af44b449bf39339134e712ec5e566323a68e1",
+  "limits": [
+    "Test expectation only; not a production raw input or runtime capture.",
+    "The donor is the pinned stdlib Python legal reader, not a TS-derived oracle."
+  ]
+}

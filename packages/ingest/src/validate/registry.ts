@@ -53,8 +53,10 @@ export function script(entry: string): string {
   return `pipeline/${module.replaceAll('.', '/')}.py`;
 }
 class Report {
+  constructor(private readonly observer?: () => void) {}
   errors: string[] = [];
   ok(cond: unknown, msg: string): boolean {
+    this.observer?.();
     if (!cond) this.errors.push(msg);
     return !!cond;
   }
@@ -72,9 +74,24 @@ export interface RegistryResult {
 }
 export interface RegistryOptions {
   trackedPaths?: string[];
+  /** Owned candidate data, separate from authenticated source/code. */
+  outputRoot?: string;
+  /** Lifecycle owns this one metadata route after manifest hashing. */
+  lifecycleMetadata?: boolean;
+  onCheck?: () => void;
 }
 export function validateRegistry(root: string, options: RegistryOptions = {}): RegistryResult {
-  const read = (p: string) => readFileSync(safePath(root, p), 'utf8');
+  const pointer = 'data/release/releases/current.json';
+  const read = (p: string) => {
+    if (options.lifecycleMetadata && p === pointer) return '{}';
+    return readFileSync(
+      safePath(
+        p.startsWith('data/release/') && options.outputRoot ? options.outputRoot : root,
+        p.startsWith('data/release/') && options.outputRoot ? 'data/' + p.slice(13) : p,
+      ),
+      'utf8',
+    );
+  };
   let sreg: any, dreg: any;
   const pins: Record<string, string> = Object.create(null);
   try {
@@ -114,7 +131,7 @@ export function validateRegistry(root: string, options: RegistryOptions = {}): R
     rejectInputInventory(root);
     throw error;
   }
-  const r = new Report(),
+  const r = new Report(options.onCheck),
     sources = sreg.sources as any[],
     inter = (sreg.intermediates || []) as any[],
     ds = dreg.datasets as any[];
@@ -203,7 +220,12 @@ export function validateRegistry(root: string, options: RegistryOptions = {}): R
       cfiles.map((f: string) => `data/release/${f.startsWith('data/') ? f.slice(5) : f}`),
     ];
   }
-  const data = files(root, 'data/release').map((f) => `data/release/${f}`),
+  const data = [
+      ...files(options.outputRoot ?? root, options.outputRoot ? 'data' : 'data/release').map(
+        (f) => `data/release/${f}`,
+      ),
+      ...(options.lifecycleMetadata ? [pointer] : []),
+    ],
     owner: Record<string, string[]> = Object.fromEntries(data.map((f) => [f, []]));
   const dids = ds.map((d) => d.id),
     allKnown = new Set([...known, ...dids]);

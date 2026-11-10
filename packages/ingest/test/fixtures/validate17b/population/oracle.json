@@ -1,0 +1,230 @@
+[
+  {
+    "name": "population-0",
+    "expected": {
+      "crash": "TypeError: unsupported format string passed to list.__format__"
+    }
+  },
+  {
+    "name": "population-1",
+    "expected": {
+      "crash": "TypeError: unsupported format string passed to dict.__format__"
+    }
+  },
+  {
+    "name": "population-2",
+    "expected": {
+      "crash": "TypeError: unsupported format string passed to NoneType.__format__"
+    }
+  },
+  {
+    "name": "population-3",
+    "expected": {
+      "crash": "ValueError: Cannot specify ',' with 's'."
+    }
+  },
+  {
+    "name": "population-4",
+    "expected": {
+      "crash": "ValueError: Cannot specify ',' with 's'."
+    }
+  },
+  {
+    "name": "population-5",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [
+          "event eurostat-tps00001-2026-09-30: text lacks /1 души/"
+        ],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  },
+  {
+    "name": "population-6",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [
+          "event eurostat-tps00001-2026-09-30: text lacks /0 души/"
+        ],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  },
+  {
+    "name": "population-7",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [
+          "event eurostat-tps00001-2026-09-30: text lacks /0 души/"
+        ],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  },
+  {
+    "name": "population-8",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [
+          "event eurostat-tps00001-2026-09-30: text lacks /0.0 души/"
+        ],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  },
+  {
+    "name": "population-9",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [
+          "event eurostat-tps00001-2026-09-30: text lacks /1.0 души/"
+        ],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  },
+  {
+    "name": "population-10",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [
+          "event eurostat-tps00001-2026-09-30: text lacks /-0.0 души/"
+        ],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  },
+  {
+    "name": "population-11",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [
+          "event eurostat-tps00001-2026-09-30: text lacks /1 234 567.5 души/"
+        ],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  },
+  {
+    "name": "population-12",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [
+          "event eurostat-tps00001-2026-09-30: text lacks /1 234 567.123456 души/"
+        ],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  },
+  {
+    "name": "population-13",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [
+          "event eurostat-tps00001-2026-09-30: text lacks /1e-05 души/"
+        ],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  },
+  {
+    "name": "population-14",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [
+          "event eurostat-tps00001-2026-09-30: text lacks /1e+16 души/"
+        ],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  },
+  {
+    "name": "population-15",
+    "expected": {
+      "check": {
+        "name": "FEED",
+        "n": 1291,
+        "problems": [
+          "event eurostat-tps00001-2026-09-30: text lacks /123 456 789 012 345 678 901 234 567 890 души/"
+        ],
+        "warnings": [],
+        "facts": [
+          "feed.xml uses the placeholder address https://budget-na-svetlo.example/",
+          "27 events, 6 kinds, the newest on 2026-11-06; 2 announced"
+        ]
+      },
+      "exceptions": []
+    }
+  }
+]

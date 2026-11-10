@@ -1,0 +1,1273 @@
+[
+  {
+    "name": "review-000",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "areas"
+        ],
+        "value": [
+          0.0
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review-001",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "areas"
+        ],
+        "value": [
+          1.0
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review-002",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "areas"
+        ],
+        "value": [
+          false
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review-003",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "areas"
+        ],
+        "value": [
+          true
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review-004",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "areas"
+        ],
+        "value": [
+          null
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review-005",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "areas"
+        ],
+        "value": [
+          ""
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review-006",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "areas"
+        ],
+        "value": [
+          []
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review-007",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "areas"
+        ],
+        "value": [
+          {}
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review-008",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "bodies"
+        ],
+        "value": [
+          0.0
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review-009",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "bodies"
+        ],
+        "value": [
+          1.0
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review-010",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "bodies"
+        ],
+        "value": [
+          false
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review-011",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "bodies"
+        ],
+        "value": [
+          true
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review-012",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "bodies"
+        ],
+        "value": [
+          null
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review-013",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "bodies"
+        ],
+        "value": [
+          ""
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review-014",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "bodies"
+        ],
+        "value": [
+          []
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review-015",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "bodies"
+        ],
+        "value": [
+          {}
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review-016",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "commitments"
+        ],
+        "value": [
+          0.0
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review-017",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "commitments"
+        ],
+        "value": [
+          1.0
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review-018",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "commitments"
+        ],
+        "value": [
+          false
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review-019",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "commitments"
+        ],
+        "value": [
+          true
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review-020",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "commitments"
+        ],
+        "value": [
+          null
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review-021",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "commitments"
+        ],
+        "value": [
+          ""
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review-022",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "commitments"
+        ],
+        "value": [
+          []
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review-023",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "commitments"
+        ],
+        "value": [
+          {}
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review-024",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "headline",
+          "rev"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "review-025",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "headline",
+          "rev"
+        ],
+        "value": 0.0
+      }
+    ]
+  },
+  {
+    "name": "review-026",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "headline",
+          "rev"
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "review-027",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "headline",
+          "rev"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "review-028",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "headline",
+          "rev"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "review-029",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "headline",
+          "rev"
+        ],
+        "value": "x"
+      }
+    ]
+  },
+  {
+    "name": "review-030",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "headline",
+          "exp"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "review-031",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "headline",
+          "exp"
+        ],
+        "value": 0.0
+      }
+    ]
+  },
+  {
+    "name": "review-032",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "headline",
+          "exp"
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "review-033",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "headline",
+          "exp"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "review-034",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "headline",
+          "exp"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "review-035",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "headline",
+          "exp"
+        ],
+        "value": "x"
+      }
+    ]
+  },
+  {
+    "name": "review-036",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "sec"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "review-037",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "sec"
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "review-038",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "sec"
+        ],
+        "value": 0.0
+      }
+    ]
+  },
+  {
+    "name": "review-039",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "sec"
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "review-040",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "sec"
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "review-041",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "sec"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "review-042",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "sec"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "review-043",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "sec"
+        ],
+        "value": [
+          "I"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review-044",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "no"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "review-045",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "no"
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "review-046",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "no"
+        ],
+        "value": 0.0
+      }
+    ]
+  },
+  {
+    "name": "review-047",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "no"
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "review-048",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "no"
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "review-049",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "no"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "review-050",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "no"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "review-051",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "no"
+        ],
+        "value": [
+          "I"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review-052",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "lines",
+          0,
+          "sec"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "review-053",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "lines",
+          0,
+          "sec"
+        ],
+        "value": 0.0
+      }
+    ]
+  },
+  {
+    "name": "review-054",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "lines",
+          0,
+          "sec"
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "review-055",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "lines",
+          0,
+          "sec"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "review-056",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "lines",
+          0,
+          "sec"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "review-057",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "lines",
+          0,
+          "sec"
+        ],
+        "value": [
+          "I"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review-058",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "lines",
+          0,
+          "no"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "review-059",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "lines",
+          0,
+          "no"
+        ],
+        "value": 0.0
+      }
+    ]
+  },
+  {
+    "name": "review-060",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "lines",
+          0,
+          "no"
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "review-061",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "lines",
+          0,
+          "no"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "review-062",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "lines",
+          0,
+          "no"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "review-063",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "lines",
+          0,
+          "no"
+        ],
+        "value": [
+          "I"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review-064",
+    "group": "MEASURES",
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "related"
+        ],
+        "value": [
+          0.0
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review-065",
+    "group": "MEASURES",
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "related"
+        ],
+        "value": [
+          1.0
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review-066",
+    "group": "MEASURES",
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "related"
+        ],
+        "value": [
+          false
+        ]
+      }
+    ]
+  },
+  {
+    "name": "review-067",
+    "group": "MEASURES",
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "related"
+        ],
+        "value": [
+          true
+        ]
+      }
+    ]
+  },
+  {
+    "name": "missing-art1-no",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "no"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "missing-art1-sec",
+    "group": "LAW",
+    "ops": [
+      {
+        "op": "delete",
+        "file": "law.json",
+        "path": [
+          "art1",
+          "lines",
+          0,
+          "sec"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "baseline-annex3",
+    "group": "ANNEX3",
+    "ops": []
+  },
+  {
+    "name": "baseline-revenue",
+    "group": "REVENUE",
+    "ops": []
+  },
+  {
+    "name": "baseline-expenditure",
+    "group": "EXPENDITURE",
+    "ops": []
+  },
+  {
+    "name": "baseline-measures",
+    "group": "MEASURES",
+    "ops": []
+  },
+  {
+    "name": "baseline-law",
+    "group": "LAW",
+    "ops": []
+  },
+  {
+    "name": "baseline-budgets",
+    "group": "BUDGETS",
+    "ops": []
+  },
+  {
+    "name": "baseline-programs",
+    "group": "PROGRAMS",
+    "ops": []
+  }
+]

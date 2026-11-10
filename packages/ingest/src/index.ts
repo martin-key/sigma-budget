@@ -76,3 +76,7 @@ export * from './validate/kfp.js';
 export * from './validate/kfp-capture.js';
 export * from './validate/kfp-input.js';
 export * from './validate/kfp-runner.js';
+export * from './validate/feed.js';
+export * from './validate/feed-runner.js';
+export * from './validate/search.js';
+export * from './validate/search-runner.js';

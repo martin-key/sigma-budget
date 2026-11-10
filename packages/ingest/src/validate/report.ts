@@ -3,8 +3,8 @@ import { lstatSync, mkdirSync, renameSync, rmSync, writeFileSync } from 'node:fs
 import { dirname, resolve, sep } from 'node:path';
 import { safePath } from './context.js';
 
-/** Reports share the same confinement and link protection in the CLI and CI harness. */
-export function writeValidationReport(root: string, report: string, text: string): void {
+/** Validate the destination without creating directories or processing inputs. */
+export function preflightValidationReport(root: string, report: string): string {
   if (!report.startsWith('tmp/ts-migration/') || !report.endsWith('.json'))
     throw new Error('report must be a JSON path under tmp/ts-migration/');
   const path = safePath(root, report);
@@ -21,12 +21,18 @@ export function writeValidationReport(root: string, report: string, text: string
     }
   };
   checkTarget();
+  return path;
+}
+
+/** Reports share the same confinement and link protection in the CLI and CI harness. */
+export function writeValidationReport(root: string, report: string, text: string): void {
+  const path = preflightValidationReport(root, report);
   mkdirSync(dirname(path), { recursive: true });
-  checkTarget();
+  preflightValidationReport(root, report);
   const temporary = resolve(dirname(path), `.validation-${randomUUID()}.tmp`);
   try {
     writeFileSync(temporary, text, { flag: 'wx' });
-    checkTarget();
+    preflightValidationReport(root, report);
     renameSync(temporary, path);
   } finally {
     rmSync(temporary, { force: true });

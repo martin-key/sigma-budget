@@ -25,7 +25,8 @@
     "typescript": "6.0.3",
     "vite": "8.3.4",
     "vitest": "4.1.11",
-    "wrangler": "4.156.0"
+    "wrangler": "4.156.0",
+    "@sigma-budget/ingest": "workspace:*"
   },
   "type": "module",
   "dependencies": {
