@@ -22,9 +22,9 @@
 
 ```bash
 ./budget build --inputs /path/to/inputs --out /outside/new/candidate --build-date 2026-11-10
-./budget validate --release /outside/new/candidate                  # байтовете, манифестът, проверките на данните
+./budget validate --release /outside/new/candidate --inputs /path/to/inputs # байтовете, манифестът, проверките на данните
 ./budget status --environment staging                       # кое е текущо сега
-./budget publish --release /outside/new/candidate --environment staging --dry-run
+./budget publish --release /outside/new/candidate --originals /path/to/inputs --environment staging --dry-run
 ```
 
 `publish --dry-run` проверява плана; действителното изпълнение изисква изрично `--yes` за избраната среда. После качва липсващите обекти в R2 (всеки се чете обратно и се

@@ -33,8 +33,8 @@
 ```bash
 ./budget build --inputs /path/to/inputs --out /outside/new/candidate --build-date 2026-11-10
 ./budget build --inputs /path/to/inputs --out /outside/new/site-candidate --build-date 2026-11-10 --site
-./budget validate --release /outside/new/candidate             # манифестът, байтовете и SHA-256 на всеки файл, проверките на данните
-./budget reproduce --manifest /outside/new/candidate/manifest.json
+./budget validate --release /outside/new/candidate --inputs /path/to/inputs # манифестът, байтовете и SHA-256 на всеки файл, проверките на данните
+./budget reproduce --manifest /outside/new/candidate/manifest.json --originals /path/to/inputs
 ./budget reproduce --current https://sigma-budget.my-data.bg --originals /път/до/оригиналите
 ./budget refetch --manifest /outside/new/candidate/manifest.json --out work/refetch
 ./budget collect --out work/acquisition                # сваля всичко, което регистърът може да свали; snapshot.json ги описва
@@ -85,8 +85,8 @@
 
 ```bash
 ./budget status --environment staging
-./budget publish --release /outside/new/candidate --environment staging          # проверка, качване, публикуване, прочитане обратно
-./budget upload --release /outside/new/candidate --environment staging           # само кандидат: не става текущ
+./budget publish --release /outside/new/candidate --originals /path/to/inputs --environment staging --dry-run # преглед на publish плана
+./budget upload --release /outside/new/candidate --originals /path/to/inputs --environment staging --dry-run # преглед на upload плана
 ./budget rollback --release-id <по-ранно издание> --environment staging
 ```
 
