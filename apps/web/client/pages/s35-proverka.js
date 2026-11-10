@@ -56,7 +56,7 @@ function coverageBlock(m) {
     ${m.coverage?.latest ? html`<p>Последните данни: ${typeof m.coverage.latest === 'string' ? m.coverage.latest : Object.entries(m.coverage.latest).map(([k, v]) => `${k}: ${v}`).join(', ')}.</p>` : ''}
     ${dataTable({ id: 's35-sets', caption: `Наборите в изданието (${sets.length})`, captionVisible: true, dense: true,
       columns: [{ key: 'name', label: 'Набор', fmt: v => code(v) }, { key: 'status', label: 'Статус', fmt: statusCell },
-        { key: 'period', label: 'Период' }, { key: 'unit', label: 'Единица' }, { key: 'rebuilt', label: 'Сглобен от оригиналите' }], rows })}
+        { key: 'period', label: 'Период' }, { key: 'unit', label: 'Единица' }, { key: 'rebuilt', label: 'Пресглобен в това издание' }], rows })}
     ${missing.length ? html`<p>Входове, които липсват на това сглобяване (наборите им са пренесени, без да се сглобят):</p>
       <ul class="s35-list">${missing.map(x => html`<li>${code(x.path)}: ${(x.datasets || []).join(', ')}</li>`)}</ul>` : ''}
     ${limited.length ? disclosure({ id: 's35-limits', title: `Известни ограничения (${limited.length} набора, бележките на манифеста на английски)`,
@@ -66,13 +66,17 @@ function coverageBlock(m) {
 function filesBlock(rid, m) {
   const link = p => html`<a href="/data/releases/${rid}/${p.split('/').map(encodeURIComponent).join('/')}" download="${fileName(p)}">${fileName(p)}</a>`;
   const ins = m.inputs || [], outs = m.outputs || [];
+  const sources = ins.filter(i => i.kind === 'source').length, intermediates = ins.filter(i => i.kind === 'intermediate').length;
+  const other = ins.length - sources - intermediates;
+  const inputKind = v => v === 'source' ? 'източников' : v === 'intermediate' ? 'междинен' : String(v || 'непосочен');
   const cols = first => [{ key: 'path', label: first, fmt: v => link(v) }, { key: 'mime', label: 'Формат' },
     { key: 'bytes', label: 'Размер', align: 'end', fmt: v => sizeLabel(v) }, { key: 'sha256', label: 'SHA-256', fmt: v => sha(v) }];
-  return block('s35-files', 'Оригинали и файлове', html`
+  return block('s35-files', 'Входни и изходни файлове', html`
     <p>Всеки файл се сваля от самото издание. Сайтът пази байтовете му непроменени, а SHA-256 до него показва дали копието ти е същото.</p>
-    ${disclosure({ id: 's35-inputs', title: `Оригиналите (${ins.length})`, body: html`
-      <p>Отчетите, законите и таблиците, от които са сглобени данните, с източника и начина на получаване в <a href="/data/releases/${rid}/manifest.json">манифеста</a>. HTML и XML оригиналите се свалят, а не се отварят като страница на сайта.</p>
-      ${dataTable({ id: 's35-in', caption: 'Оригиналите на изданието', dense: true, columns: cols('Файл'), rows: ins.map(i => ({ path: i.path, mime: i.mime, bytes: i.bytes, sha256: i.sha256 })) })}` })}
+    ${disclosure({ id: 's35-inputs', title: `Входни файлове (${ins.length})`, body: html`
+      <p>Източниковите и запазените междинни файлове са описани с начина на получаване в <a href="/data/releases/${rid}/manifest.json">манифеста</a>. HTML и XML файловете се свалят, а не се отварят като страница на сайта.</p>
+      <p>Манифестът посочва източникови (${num(sources)}) и междинни (${num(intermediates)}) файлове${other ? `, както и ${num(other)} с друг или непосочен тип` : ''}. Междинните файлове са запазени резултати от предходна обработка. Пресглобяването с тях не доказва възстановяване от първоначалните източници.</p>
+      ${dataTable({ id: 's35-in', caption: 'Входните файлове на изданието', dense: true, columns: [cols('Файл')[0], { key: 'kind', label: 'Тип', fmt: inputKind }, ...cols('Файл').slice(1)], rows: ins.map(i => ({ path: i.path, kind: i.kind, mime: i.mime, bytes: i.bytes, sha256: i.sha256 })) })}` })}
     ${disclosure({ id: 's35-outputs', title: `Файловете с данни (${outs.length})`, body: dataTable({ id: 's35-out', caption: 'Файловете на изданието', dense: true,
       columns: cols('Файл'), rows: outs.map(o => ({ path: o.path, mime: o.mime, bytes: o.bytes, sha256: o.sha256 })) }) })}`);
 }
@@ -97,10 +101,10 @@ function checksBlock(v) {
       columns: [{ key: 'group', label: 'Група', fmt: x => code(x) }, { key: 'status', label: 'Резултат' }, { key: 'summary', label: 'Обобщение', fmt: x => html`<span lang="en">${x || ''}</span>` }],
       rows: groups.map(g => ({ group: g.group, status: g.status === 'OK' ? 'наред' : g.status, summary: g.summary })) })
       : html`<p class="muted">Резултатите от проверките не са в изданието.</p>`}
-    <p>Всеки може да сглоби изданието отново от оригиналите и да сравни всеки файл байт по байт. Нужни са само кодът и Docker:</p>
+    <p>Изданието може да се пресъздаде от входните му файлове, включително запазените междинни данни, и всеки изходен файл да се сравни байт по байт. Нужни са кодът и Docker:</p>
     <pre class="s35-cmd"><code>git clone ${REPO}.git && cd sigma-budget
 ./budget reproduce --current ${origin}</code></pre>
-    <p>Командата чете манифеста на текущото издание, сваля оригиналите му оттук и сглобява commit-а му в закования образ. Изходът е <code lang="en">reproduced byte for byte</code> или списък с разликите. Подробности: ${ext(`${REPO}/blob/main/docs/release.md`, 'docs/release.md')}.</p>`);
+    <p>Командата чете манифеста на текущото издание, сваля входните му файлове оттук и сглобява commit-а му в закования образ. Изходът е <code lang="en">reproduced byte for byte</code> или списък с разликите. Подробности: ${ext(`${REPO}/blob/main/docs/release.md`, 'docs/release.md')}.</p>`);
 }
 
 function provenanceBlock() {
@@ -134,8 +138,8 @@ export function render(ctx) {
   const journalFailed = (ctx.failed || []).includes('release/journal');
   const ins = (m.inputs || []).length, outs = (m.outputs || []).length;
   return {
-    lede: `Откъде са данните на тази страница: изданието ${short(rid)} с ${num(ins)} оригинала и ${num(outs)} файла, всеки с SHA-256, кодът, който ги сглобява, проверките и как всеки може да го пресъздаде.`,
-    answer: `Данните са от издание ${short(rid)}: ${num(ins)} оригинала и ${num(outs)} файла с данни, сглобени от commit ${short(m.processing?.code?.commit)} и проверими байт по байт.`,
+    lede: `Откъде са данните на тази страница: изданието ${short(rid)} с ${num(ins)} входни файла и ${num(outs)} файла, всеки с SHA-256, кодът, който ги сглобява, проверките и как всеки може да го пресъздаде.`,
+    answer: `Данните са от издание ${short(rid)}: ${num(ins)} входни файла и ${num(outs)} файла с данни, сглобени от commit ${short(m.processing?.code?.commit)} и проверими байт по байт.`,
     body: html`${releaseBlock(rid, m, journal, journalFailed)}${coverageBlock(m)}${filesBlock(rid, m)}${codeBlock(m)}${checksBlock(ctx.data['release/validation'])}${provenanceBlock()}${historyBlock(rid, journal, journalFailed)}`
   };
 }
