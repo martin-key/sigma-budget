@@ -492,6 +492,102 @@ describe('controlled manual imports and review', () => {
     expect(result.snapshot.collected[0]!.replaces).toEqual([{ path: p, sha256: 'a'.repeat(64) }]);
     await f.assertBaseline();
   });
+  it.each(['absent SHA file', 'empty SHA file', 'matching SHA file'])(
+    'authenticates registry-pinned corrections and restores with %s',
+    async (mode) => {
+      const path = 'data/originals/kfp_2031/2031-EU_funds_0131_BG_WEB.xls';
+      const previous = sha256(xls),
+        revised = Buffer.concat([xls, Buffer.from('revision')]);
+      const f = await fixture(
+        [{ id: 'kfp', acquisition: 'import', format: 'xls', files: [{ path, sha256: previous }] }],
+        mode === 'matching SHA file' ? new Map([[path, previous]]) : new Map(),
+      );
+      const client = await SourceClient.open({
+        ...f.options,
+        ...(mode === 'absent SHA file' ? { pinsPath: undefined } : {}),
+      });
+      const input = join(f.root, 'download.xls');
+      await writeFile(input, revised);
+      const options = { source: 'kfp', file: input, snapshotRoot: f.out, decodeKfp: () => grid };
+      await expect(client.importSource(options)).rejects.toThrow(/--replace/);
+      await expect(client.importSource({ ...options, dryRun: true })).rejects.toThrow(/--replace/);
+      const correction = await client.importSource({ ...options, replace: true });
+      expect(correction.snapshot.collected[0]).toMatchObject({
+        expected: previous,
+        drift: 'changed',
+        sha256: sha256(revised),
+        replaces: [{ path, sha256: previous }],
+        proposedPins: [{ path, sha256: sha256(revised) }],
+      });
+      expect(await client.readSnapshot(join(f.out, 'snapshot.json'))).toEqual(correction.snapshot);
+      await writeFile(input, xls);
+      const restoredRoot = join(f.root, 'restored');
+      const restored = await client.importSource({
+        source: 'kfp',
+        file: input,
+        snapshotRoot: restoredRoot,
+      });
+      expect(restored.snapshot.collected[0]).toMatchObject({ expected: previous, drift: 'same' });
+      expect(restored.snapshot.collected[0]).not.toHaveProperty('replaces');
+      expect(restored.snapshot.collected[0]).not.toHaveProperty('proposedPins');
+      expect(
+        await inspectDrift(client, { snapshotPath: join(restoredRoot, 'snapshot.json') }),
+      ).toMatchObject({ code: 0, report: { pending: 0 } });
+      expect(await readFile(join(restoredRoot, path))).toEqual(xls);
+      await f.assertBaseline();
+    },
+  );
+  it('retains a registry-pinned prior month version with a different filename suffix', async () => {
+    const path = 'data/originals/kfp_2031/2031-EU_funds_0131_BG_WEB_2.xls';
+    const f = await fixture(
+      [
+        {
+          id: 'kfp',
+          acquisition: 'import',
+          format: 'xls',
+          files: [{ path, sha256: sha256(xls) }, { path: 'data/originals/kfp_2031/*.xls' }],
+        },
+      ],
+      new Map(),
+    );
+    const input = join(f.root, 'download.xls');
+    await writeFile(input, Buffer.concat([xls, Buffer.from('new version')]));
+    const client = await SourceClient.open(f.options);
+    const options = { source: 'kfp', file: input, snapshotRoot: f.out, decodeKfp: () => grid };
+    await expect(client.importSource(options)).rejects.toThrow(/--replace/);
+    const corrected = await client.importSource({ ...options, replace: true });
+    expect(corrected.snapshot.collected[0]!.replaces).toEqual([{ path, sha256: sha256(xls) }]);
+    await f.assertBaseline();
+  });
+  it('restores a non-KFP registry-only pin without pending drift', async () => {
+    const f = await fixture(
+      [
+        {
+          id: 'example',
+          acquisition: 'manual',
+          format: 'json',
+          files: [{ path, sha256: sha256(original) }],
+        },
+      ],
+      new Map(),
+    );
+    const input = join(f.root, 'download.json');
+    await writeFile(input, original);
+    const client = await SourceClient.open({ ...f.options, pinsPath: undefined });
+    const restored = await client.importSource({
+      source: 'example',
+      file: input,
+      snapshotRoot: f.out,
+    });
+    expect(restored.snapshot.collected[0]).toMatchObject({
+      expected: sha256(original),
+      drift: 'same',
+    });
+    expect(
+      await inspectDrift(client, { snapshotPath: join(f.out, 'snapshot.json') }),
+    ).toMatchObject({ code: 0, report: { pending: 0 } });
+    await f.assertBaseline();
+  });
   it('dry-run validates without creating any destination', async () => {
     const f = await kfpFixture();
     const input = join(f.root, 'report.xls');

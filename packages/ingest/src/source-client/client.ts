@@ -642,15 +642,19 @@ export class SourceClient {
     }
     const bytes = await readBounded(options.file, this.options.maxBytes),
       digest = sha256(bytes);
-    const known = [
+    const registered = this.files([source.id]);
+    // Both supported pin sources describe historical versions, including when
+    // their bytes are absent. Use the same inventory for restore and correction.
+    const expectedPins = new Map([
       ...this.pins,
-      ...this.files([source.id])
+      ...registered
         .filter((f) => f.expected && !/[*?\[\]{}]/.test(f.path))
         .map((f): [string, string] => [f.path, f.expected!]),
-    ]
+    ]);
+    const known = [...expectedPins]
       .filter(([, hash]) => hash === digest)
       .map(([path]) => path)
-      .filter((p) => this.files([source.id]).some((f) => matchesGlob(p, f.path)));
+      .filter((p) => registered.some((f) => matchesGlob(p, f.path)));
     let path: string,
       checks: Record<string, unknown>,
       proposedPins: { path: string; sha256: string }[] | undefined;
@@ -665,7 +669,7 @@ export class SourceClient {
       const period = validateKfpGrid(await options.decodeKfp(bytes));
       const suffix = /_BG_WEB(_\d+)?\.xls$/i.exec(basename(options.file))?.[1] ?? '';
       path = `data/originals/kfp_${period.year}/${period.year}-EU_funds_${String(period.month).padStart(2, '0')}${String(period.year).slice(-2)}_BG_WEB${suffix}.xls`;
-      if (!this.files([source.id]).some((f) => matchesGlob(path, f.path)))
+      if (!registered.some((f) => matchesGlob(path, f.path)))
         throw new Error('KFP period is outside the registered file patterns');
       checks = { ...period, sheet: 'стартова', size: [54, 4], numericalValidation: 'not-run' };
       proposedPins = [{ path, sha256: digest }];
@@ -676,7 +680,7 @@ export class SourceClient {
       const replaces: { path: string; sha256: string }[] = [];
       if (proposedPins) {
         const key = kfpMonth(path);
-        const versions = [...this.pins].map(([path, sha256]) => ({ path, sha256 }));
+        const versions = [...expectedPins].map(([path, sha256]) => ({ path, sha256 }));
         for (const tree of [this.sourceRoot, root])
           for (const rel of await listFiles(join(tree, 'data/originals'))) {
             const p = 'data/originals/' + rel;
@@ -699,7 +703,7 @@ export class SourceClient {
             'A different KFP version is present or pinned; --replace is required to record a correction candidate',
           );
       }
-      const expected = this.pins.get(path);
+      const expected = expectedPins.get(path);
       const row: AcquisitionRow = {
         source: source.id,
         path,
