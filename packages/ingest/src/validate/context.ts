@@ -131,9 +131,11 @@ export class Context {
     readonly root: string,
     readonly buildDate = '2026-11-08',
     readonly dataDir = 'data/release',
+    readonly outputRoot = root,
   ) {
     realpathSync(root);
-    safePath(root, dataDir);
+    realpathSync(outputRoot);
+    safePath(outputRoot, dataDir);
   }
   sourceExists(rel: string): boolean {
     return existsSync(safePath(this.root, `data/originals/${rel}`));
@@ -142,10 +144,10 @@ export class Context {
     return readFileSync(safePath(this.root, `data/originals/${rel}`));
   }
   dataDirectory(rel: string): string[] {
-    return readdirSync(safePath(this.root, `${this.dataDir}/${rel}`)).sort();
+    return readdirSync(safePath(this.outputRoot, `${this.dataDir}/${rel}`)).sort();
   }
   dataFiles(): string[] {
-    return files(this.root, this.dataDir, true);
+    return files(this.outputRoot, this.dataDir, true);
   }
   jsonFiles(): string[] {
     return this.dataFiles().filter((f) => f.endsWith('.json'));

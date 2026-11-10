@@ -102,6 +102,12 @@ importers:
 
   packages/ingest:
     dependencies:
+      esbuild:
+        specifier: 0.28.2
+        version: 0.28.2
+      7z-wasm:
+        specifier: 1.2.0
+        version: 1.2.0
       '@sigma-budget/dataset-schema':
         specifier: workspace:*
         version: link:../dataset-schema
@@ -134,6 +140,15 @@ importers:
   packages/test-support: {}
 
 packages:
+
+  7z-wasm@1.2.0:
+    resolution: {integrity: sha512-AZjtWXFleAe5nQ27JYISs70cICjO0zZr4LU45I9pXKcrhG0qiEWgq3Vjwr9JHHihFLuqgc7uSHYVn/z3vXCjdw==}
+    engines: {node: ">=8.0.0"}
+    hasBin: true
+
+  readline-sync@1.4.10:
+    resolution: {integrity: sha512-gNva8/6UAe8QYepIQH/jQ2qn91Qj0B9sYjMBBs3QOB8F2CXcKgLxQaJRP76sWVRQt+QU+8fAkCbCvjjMFu7Ycw==}
+    engines: {node: ">= 0.8.0"}
 
   '@acemir/cssom@0.9.32':
     resolution: {integrity: sha512-OijrAUu7rrJhSIoHNg6LMPS5e344nwUHA+1EFYYjrh64D+GmytUsfBQjci45TjT+rd5Spsp8B5xsZDT+TgyXXQ==}
@@ -2101,6 +2116,12 @@ packages:
     resolution: {integrity: sha512-rLfVLB4FgQneDr0dv1oddCVZmKjcJ6yX6mS4pU82Mq/Dt9a3cLZQ62pDBL4AUO+uVrCvtWz3ZFUL2HFAFJ/BXQ==}
 
 snapshots:
+
+  7z-wasm@1.2.0:
+    dependencies:
+      readline-sync: 1.4.10
+
+  readline-sync@1.4.10: {}
 
   '@acemir/cssom@0.9.32': {}
 

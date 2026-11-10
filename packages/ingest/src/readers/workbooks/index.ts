@@ -1,12 +1,12 @@
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
-import { createRequire } from 'node:module';
+import SheetJSEngine from 'xlsx';
 import type * as SheetJS from 'xlsx';
 import { zipMember } from '../../build/annual-lineage.js';
 import { ooxmlCells } from './ooxml.js';
 
 // The CommonJS distribution includes legacy BIFF code pages. This is a Node-only entry point.
-const engine = createRequire(import.meta.url)('xlsx') as typeof SheetJS;
+const engine = SheetJSEngine as typeof SheetJS;
 export const WORKBOOK_ENGINE = 'sheetjs/0.20.3' as const;
 export type WorkbookFormat = 'xls' | 'xlsx';
 export interface PinnedFile {

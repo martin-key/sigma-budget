@@ -59,11 +59,8 @@ export interface Wave13bInput {
     execution: unknown;
     executionProvenance: unknown;
     gva: unknown;
-    releasesCurrent: unknown;
-    bytes: Record<
-      'execution.json' | 'execution-provenance.json' | 'gva-sectors.json' | 'releases/current.json',
-      Uint8Array
-    >;
+    releasesCurrent?: unknown;
+    bytes: Record<'execution.json' | 'execution-provenance.json' | 'gva-sectors.json', Uint8Array> & Partial<Record<'releases/current.json',Uint8Array>>;
   };
   core: Omit<
     CoreInput,
@@ -416,7 +413,7 @@ export function wave13bStages(input: Wave13bInput): GraphStage[] {
           'execution.json': frozen.execution,
           'execution-provenance.json': frozen.executionProvenance,
           'gva-sectors.json': frozen.gva,
-          'releases/current.json': frozen.releasesCurrent,
+          ...(frozen.releasesCurrent === undefined ? {} : {'releases/current.json': frozen.releasesCurrent}),
         };
         const streams = new Map<string, Uint8Array>(
           Object.entries(objects).map(([name, object]) => [name, jsonBytes(object)]),

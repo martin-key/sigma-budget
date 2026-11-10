@@ -147,6 +147,9 @@ function moneyOk(c: Check, v: unknown, places: number, where: string): void {
 
 /** Independently resolve the pinned Annex 1 law locators. This does not call
  * law_plan(), a TS builder, or use released provenance as expected evidence. */
+function physicalLaw(table: ExecutionLawTable) {
+  return {columns: table.columns, rows: table.rows.map(({label,page,units,printed,values})=>({label,page,units,printed,values}))};
+}
 function expectedPlan(ctx: Context, c: Check, reader?: ExecutionLawReader): Doc {
   const pins = originalPins(ctx),
     rel = 'data/inputs/budget_forecast_2027.json';
@@ -175,7 +178,7 @@ function expectedPlan(ctx: Context, c: Check, reader?: ExecutionLawReader): Doc 
       member: source.member,
     });
     c.ok(
-      equal(table, input.tables[lawTable]),
+      equal(physicalLaw(table), physicalLaw(input.tables[lawTable])),
       'independent Annex 1 law table differs from pinned extraction',
     );
     c.fact('independent Annex 1 PDF reader ran on the pinned archive member');

@@ -12,7 +12,11 @@
     "./readers/snapshots": "./dist/readers/snapshots/index.js",
     "./readers/pdf": "./dist/readers/pdf/index.js",
     "./readers/annual": "./dist/readers/annual/index.js",
-    "./release-client": "./dist/release-client/index.js"
+    "./release-client": "./dist/release-client/index.js",
+    "./readers/fiscal-documents": "./dist/readers/fiscal-documents/index.js",
+    "./readers/publication-documents": "./dist/readers/publication-documents/index.js",
+    "./release-build": "./dist/release-build/index.js",
+    "./production": "./dist/production/index.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
@@ -27,7 +31,9 @@
     "yaml": "2.9.1",
     "htmlparser2": "10.1.0",
     "mupdf": "1.26.4",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
+    "7z-wasm": "1.2.0",
+    "esbuild": "0.28.2"
   },
   "devDependencies": {
     "@types/pako": "2.0.4"
