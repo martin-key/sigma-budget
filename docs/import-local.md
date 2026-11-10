@@ -24,7 +24,7 @@ BUDGET_CANDIDATE="$PWD/tmp/candidate" pnpm --filter @sigma-budget/web... build
 tmp/venv-data/bin/python -m budget_pipeline.sources.prepare_inputs --budget-2027-only
 ```
 
-Тази пряка команда генерира само липсващите извлечения в текущата работна директория. За изолиран candidate се използва `budget build`, без предварителна ръчна последователност от readers.
+Тази пряка команда генерира само липсващите извлечения в текущото работно копие. За изолиран candidate се използва `budget build`, без предварителна ръчна последователност от readers. `budget validate` взима build датата от манифеста на избраното издание.
 
 ## Избор за сайта
 

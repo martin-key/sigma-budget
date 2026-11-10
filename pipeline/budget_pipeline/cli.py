@@ -477,6 +477,11 @@ def cmd_validate(a):
         release = Path(a.release).resolve()
         rid, m, probs = check_release_dir(release)
     env = dict(os.environ, BUDGET_DATA_DIR=str(ROOT / "data/release" if a.site else release / "data"))
+    # Validators rebuild expected metadata using the release's date. The shell's
+    # BUILD_DATE (or today's code default) must not relabel an older candidate.
+    build_date = m.get("processing", {}).get("parameters", {}).get("build_date")
+    if build_date:
+        env["BUILD_DATE"] = build_date
     r = subprocess.run([sys.executable, "-m", "budget_pipeline.validate.datasets"], capture_output=True, env=env)
     report = validation_report((r.stdout + r.stderr).decode("utf-8", "replace"))
     if r.returncode:

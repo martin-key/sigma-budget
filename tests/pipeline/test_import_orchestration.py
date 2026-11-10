@@ -10,6 +10,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from budget_pipeline import cli
@@ -17,6 +18,16 @@ from budget_pipeline.sources import prepare_inputs as prepare
 
 
 class ImportGateTests(unittest.TestCase):
+    def test_validate_uses_the_candidate_build_date(self):
+        manifest = {'processing': {'parameters': {'build_date': '2026-11-10'}}}
+        result = subprocess.CompletedProcess([], 0, b'RESULT OK: 1 checks, 0 problems, 0 warnings, 0 s', b'')
+        with patch.object(cli, 'check_release_dir', return_value=('a'*64, manifest, [])), \
+                patch.dict(os.environ, {'BUILD_DATE': '1999-01-01'}), \
+                patch.object(cli.subprocess, 'run', return_value=result) as run:
+            code, _ = cli.cmd_validate(SimpleNamespace(site=False, release='/unused-candidate'))
+        self.assertEqual(code, cli.EXIT_OK)
+        self.assertEqual(run.call_args.kwargs['env']['BUILD_DATE'], '2026-11-10')
+
     def test_missing_is_generated_existing_is_checked_and_evidenced(self):
         with tempfile.TemporaryDirectory() as td, patch.object(prepare, 'ROOT', Path(td)), \
                 patch.object(prepare, 'verify_budget_2027_sources'):
