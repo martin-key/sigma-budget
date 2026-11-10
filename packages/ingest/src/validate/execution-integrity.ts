@@ -126,8 +126,8 @@ const provenanceRules = {
 /** Physical PDF table evidence. All page/printed/label/unit facts come from the
  * decoder, never from execution-provenance.json or the execution producer. */
 export interface ExecutionLawTable {
-  columns: { scope: string; unit: string; vintage: string; year: number }[];
-  rows: { label: string; page: number; units: string[]; printed: string[]; values: number[] }[];
+  columns: { scope: string; unit: string; vintage?: string; year: number }[];
+  rows: { label: string; page: number; units: string[]; printed: (string | null)[]; values: (number | null)[] }[];
 }
 export type ExecutionLawReader = (
   pdf: OriginalBytes & { archive: string; archiveSha256: string; member: string },

@@ -36,8 +36,9 @@ export function productionSourceGroups(context:Readonly<ExecutionContext>,prepar
   municipal.push(assertion('gisco-geometry',[GIS],'geo/obshtini.json',`/features/${i}/properties/id`,item.id));
   const manual:Record<string,string>={'DOB15':'Добричка','KNL04':'Бобовдол','SOF46':'СТОЛИЧНА ОБЩИНА'};
   const name=manual[item.id]??item.name,candidates=lawRows.filter(r=>normalize(r.name)===normalize(name));
-  const regionCandidates=candidates.filter(r=>normalize(r.region.replace(/^ОБЛАСТ /u,''))===normalize((input.municipalities.proto.municipalities.find(p=>normalize(p.name)===normalize(name))?.region??'').replace(/^ОБЛАСТ /u,'')));
-  const row=candidates.length===1?candidates[0]:regionCandidates.length===1?regionCandidates[0]:candidates.find(r=>item.id==='DOB28'?r.region==='ОБЛАСТ ДОБРИЧ':item.id==='SOF46');
+  const regionNames:Record<string,string>={BLG:'БЛАГОЕВГРАД',BGS:'БУРГАС',VAR:'ВАРНА',VTR:'ВЕЛИКО ТЪРНОВО',VID:'ВИДИН',VRC:'ВРАЦА',GAB:'ГАБРОВО',DOB:'ДОБРИЧ',KRZ:'КЪРДЖАЛИ',KNL:'КЮСТЕНДИЛ',LOV:'ЛОВЕЧ',MON:'МОНТАНА',PAZ:'ПАЗАРДЖИК',PER:'ПЕРНИК',PVN:'ПЛЕВЕН',PDV:'ПЛОВДИВ',RAZ:'РАЗГРАД',RSE:'РУСЕ',SLS:'СИЛИСТРА',SLV:'СЛИВЕН',SML:'СМОЛЯН',SOF:'СОФИЯ (СТОЛИЦА)',SFO:'СОФИЙСКА',SZR:'СТАРА ЗАГОРА',TGV:'ТЪРГОВИЩЕ',HKV:'ХАСКОВО',SHU:'ШУМЕН',JAM:'ЯМБОЛ'};
+  const regionCandidates=candidates.filter(r=>r.region==='ОБЛАСТ '+regionNames[item.id.slice(0,3)]);
+  const row=regionCandidates.length===1?regionCandidates[0]:undefined;
   if(!row)throw new Error('Independent municipal source match absent/ambiguous: '+item.id);
   input.municipalities.art.cols.forEach((key,c)=>municipal.push(assertion('adopted-law-transfers',[LAW],'municipalities.json',`/items/${i}/transfers/${key}`,row.values[c]??0)));
  }

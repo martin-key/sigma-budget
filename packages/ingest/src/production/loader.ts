@@ -128,7 +128,8 @@ export async function loadProduction(context: Readonly<ExecutionContext>, progra
   const execution=executionNumbers(executionResult.execution);
   const kfp:KfpEvidence={rawPresent:true,reports:{},filesByYear:{}};
   for(const r of reports){const book=readWorkbook({...r,format:'xls'}),sheet=sheetByName(book,'стартова'),filename=r.path.split('/').at(-1)!;
-    kfp.reports[filename]={filename,rawSha256:r.sha256,sheet:sheet.name,dims:[sheet.rows,sheet.columns],cells:workbookGrid(sheet).map(row=>row.map(c=>({type:c.type==='number'?2:c.type==='text'?1:c.type==='boolean'?4:c.type==='error'?5:0,value:c.value??''})))};
+    const reportYear=r.path.match(/kfp_(\d{4})/)![1]!;
+    kfp.reports[reportYear+'/'+filename]={filename,rawSha256:r.sha256,sheet:sheet.name,dims:[sheet.rows,sheet.columns],cells:workbookGrid(sheet).map(row=>row.map(c=>({type:c.type==='number'?2:c.type==='text'?1:c.type==='boolean'?4:c.type==='error'?5:0,value:c.value??''})))};
     const year=r.path.match(/kfp_(\d{4})/)![1]!;(kfp.filesByYear[year]??=[]).push(filename);
   }
   for(const list of Object.values(kfp.filesByYear))list.sort();

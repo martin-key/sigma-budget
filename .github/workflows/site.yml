@@ -167,7 +167,7 @@ jobs:
       - run: docker run --rm -v "$PWD":/repo:ro sigma-budget-data python -m budget_pipeline.environment
 
   deploy:
-    needs: [build, check, release, common-parity]
+    needs: [build, check, release, common-parity, node-import]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -798,3 +798,43 @@ jobs:
       - name: Release remains unchanged
         if: always()
         run: test -z "$(git status --porcelain -- data/release)"
+
+  node-import:
+    # Required actual-source acceptance. A missing restored snapshot fails; no core acceptance skip.
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @sigma-budget/etl... build
+      - name: Restore the authenticated acquired input snapshot
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/registered-node-inputs
+          key: registered-node-inputs-v1-${{ hashFiles('data/sources.yaml', 'data/datasets.yaml', 'data/originals.sha256') }}
+          fail-on-cache-miss: true
+      - name: Actual Node readers, complete rules, double build and local recorded-code replay
+        run: node scripts/node-import-acceptance.mjs "$RUNNER_TEMP/registered-node-inputs" "$RUNNER_TEMP/node-acceptance" 2026-11-10
+      - name: Package the fresh Node candidate and exercise its Worker and browser identity
+        run: node scripts/node-candidate-site-acceptance.mjs "$RUNNER_TEMP/node-acceptance/candidate" "$RUNNER_TEMP/node-site"
+      - name: Protected checkout state
+        if: always()
+        run: test -z "$(git status --porcelain -- data packages/ingest/test/fixtures tests/pipeline/fixtures)"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: node-import-acceptance
+          path: |
+            ${{ runner.temp }}/node-acceptance/acceptance.json
+            ${{ runner.temp }}/node-acceptance/candidate/manifest.json
+            ${{ runner.temp }}/node-acceptance/candidate/validation.json
+            ${{ runner.temp }}/node-acceptance/candidate/receipt.json
+            ${{ runner.temp }}/node-site/site-acceptance.json
+          if-no-files-found: error

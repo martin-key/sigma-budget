@@ -1,3 +1,4 @@
+import {applyWave17aExceptions} from '../validate/wave17a.js';
 import {productionSourceGroups} from './source-validation.js';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -36,12 +37,12 @@ export function readExecutionLaw(pdf: {bytes:Uint8Array;sha256:string}):Executio
     for(let i=0;i<groups.length;i++){
       const g=groups[i]!,lo=i?(groups[i-1]![0]!.y+g[0]!.y)/2:top,hi=i+1<groups.length?(g[0]!.y+groups[i+1]![0]!.y)/2:bottom;
       const cells=heads.map((h,c)=>g.filter(t=>heads.reduce((best,x,k)=>Math.abs(t.x-x.x)<Math.abs(t.x-heads[best]!.x)?k:best,0)===c).map(t=>t.text).join(' '));
-      assert(cells.every(Boolean),'Annex 1 blank/duplicate numeric column');
-      const values=cells.map(t=>Number(t.replace(/[\s%]/gu,'').replace('−','-').replace(',','.')));assert(values.every(Number.isFinite),'Annex 1 numeric token');
-      rows.push({label:selected.filter(s=>s.x0<=390&&lo<=s.y&&s.y<hi).sort((a,b)=>a.y-b.y||a.x-b.x).map(s=>s.text).join(' '),page:page.number,printed:cells,values,units:Array(5).fill('млн. €')});
+      assert(cells.some(Boolean),'Annex 1 row has no physical numeric evidence');
+      const printed=cells.map(t=>t||null), values=printed.map(t=>t===null?null:Number(t.replace(/[\s%]/gu,'').replace('−','-').replace(',','.')));assert(values.every(v=>v===null||Number.isFinite(v)),'Annex 1 numeric token');
+      rows.push({label:selected.filter(s=>s.x0<=390&&lo<=s.y&&s.y<hi).sort((a,b)=>a.y-b.y||a.x-b.x).map(s=>s.text).join(' '),page:page.number,printed,values,units:['млн. €','млн. €','млн. €','млн. €','% от закона']});
     }
   }
-  return {columns:[['програма','млн. €','КФП'],['отчет','млн. €','КФП'],['отчет','млн. €','национален бюджет'],['отчет','млн. €','ЕС'],['отчет','% от закона','КФП']].map(([vintage,unit,scope])=>({year:2026,vintage:vintage!,unit:unit!,scope:scope!})),rows};
+  return {columns:[['програма','млн. €','КФП'],['отчет','млн. €','КФП'],['отчет','млн. €','национален бюджет'],['отчет','млн. €','ЕС'],[undefined,'% от закона','КФП']].map(([vintage,unit,scope])=>({year:2026,...(vintage?{vintage}:{}),unit:unit!,scope:scope!})),rows};
 }
 export function validateProduction(context:Readonly<ExecutionContext>,prepared:PreparedProduction):{completeValidation:true;groups:ValidationGroup[]}{
   const ctx=new Context(context.exportRoot,context.buildDate,'data',context.candidateRoot);
@@ -60,7 +61,7 @@ export function validateProduction(context:Readonly<ExecutionContext>,prepared:P
   ];
   const wanted=[...REQUIRED_VALIDATION_GROUPS,'REGISTRY',...debtLocalSafetyGroups.map(g=>g.name),...sourceGroups.map(g=>g.name)];
   const result=runGroups(groups,ctx,wanted);
-  for(const c of result.groups)applyExceptions(c,true);
+  for(const c of result.groups){applyExceptions(c,true);applyWave17aExceptions(c,true);}
   const output=result.groups.map(c=>({group:c.name,status:c.problems.length?'FAIL' as const:c.warnings.length?'WARN' as const:'OK' as const,checks:c.n,summary:c.facts.join('; '),problems:c.problems,warnings:c.warnings}));
   const missing=wanted.filter(name=>!output.some(g=>g.group===name));
   if(missing.length||output.some(g=>g.problems.length||g.checks===0))throw new Error('Production validation failed: '+JSON.stringify({missing,groups:output.filter(g=>g.problems.length||g.checks===0)}));
