@@ -1,0 +1,79 @@
+{
+  "donorCommit": "3424bc998c726d6d511d4284295c54c50c42d099",
+  "published": {
+    "commit": "3424bc998c726d6d511d4284295c54c50c42d099",
+    "buildDate": "2026-11-08",
+    "source": "data/release copied byte-for-byte"
+  },
+  "candidate": {
+    "commit": "b81203662a904c3dd6583d8277e92ae7f6e8fcd8",
+    "buildDate": "2026-11-10",
+    "manifestSha256": "f6e78e74fba37602840310934821f4a6d95872a0d19af2512ba4763fefe5ca0b",
+    "source": "/tmp/pr40-independent-acceptance1/candidate/data copied byte-for-byte"
+  },
+  "pins": {
+    "candidate/debt.json": "e896b9570736da838f8e94680e9a5638f983493d7ffce8c939ad0a3894d364ec",
+    "candidate/execution.json": "5487c700f20c138286bfb70d76e3f15f4e9973ace32fb8ed1148ea52548a1303",
+    "candidate/geo/obshtini.json": "e63bc5a4c20a09e9e78407d900afd165f539d2c2d9139078085bcbf2472beca5",
+    "candidate/municipalities.json": "bf7cd41c5113910634b788144fc2463cdc6324a33eef278ab9c62996a62e560e",
+    "candidate/outlook.json": "9f72f949c8fdda96417f227fc6e499b030c2522fae82524199177884484b0481",
+    "candidate/sebra.json": "13905ca0817c6b75ec9a03fc14265fe749361edc7a300dafb38196f831b38407",
+    "donor/budget_pipeline/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "donor/budget_pipeline/validate/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "donor/budget_pipeline/validate/checks.py": "25d7d0e984c5214efb2786f0f72f50cd6666b5f4565802fbb998d1cd52cc0567",
+    "donor/budget_pipeline/validate/debt.py": "6c2924d0b94dbdb85122c923c48f2248c162b94aad411bc997b6150da161dacc",
+    "donor/budget_pipeline/validate/local_finance.py": "d03a74108cc213221800510dea2e3a3cbb8bf717403f4363f32d2291e6aa65a0",
+    "published/debt.json": "27949804f6fc0b388118fdd4dbf81bc550f3a78732b9296496a1cbf075ab5f64",
+    "published/execution.json": "e9c75d84bb575c3a0287c0a7a56828b473bd53498336ce6d45cfbc6333533200",
+    "published/geo/obshtini.json": "f019409cf581b5fe5fbe36bce62142b1c64b42d3d51317ee77d4d5ee9722e90a",
+    "published/municipalities.json": "435e2490408f848a2a4a80ebd82684e4bdab220aef57f090eccdd987c14cae46",
+    "published/outlook.json": "739f52dd3970505e39e819edb412ed4c189f3a15ca70d2124e32ff6c01aea5b5",
+    "published/sebra.json": "72590501d820063981f5e360b871fe592477be02e9429705f332ab3eee176c8b",
+    "cases.json": "d5c06e1c44b2c2cc203e6569b081feb796e69e7d33e300b401af0dfccc347226",
+    "oracle.json": "94e360590ef0d1228b6a84831c45111d7eb5cbb990566f0063cfcbd78c6bbca3",
+    "generate_oracle.py": "4fae928a3aa5b502bc763620494c027fe091eabf2b56f4c9d84a376dd7626685"
+  },
+  "availableOriginals": [
+    {
+      "path": "packages/ingest/test/fixtures/debt-local/inputs/data/originals/bnb_sdmx/ggd.xml",
+      "sha256": "447b174a28e8b7ef2ab8ead01fb2e38607bc6d948fd0e6899e01a75153f84fa8",
+      "bytes": 42862,
+      "level": "available original bytes; inventoried only, not parsed by these rules"
+    },
+    {
+      "path": "packages/ingest/test/fixtures/debt-local/inputs/data/originals/bnb_sdmx/cgd.xml",
+      "sha256": "c3305fdfec374961891e9d1ef6aa8f6d4ab358bd11a69baba802ffc23c898644",
+      "bytes": 44416,
+      "level": "available original bytes; inventoried only, not parsed by these rules"
+    },
+    {
+      "path": "packages/ingest/test/fixtures/debt-local/inputs/data/originals/sebra/midt_sebra_31.08.2026.xlsx",
+      "sha256": "2fd48d3af2bc2cd77bf3175a748ea8f7c7bb44fdfcee810063891a1a13e4614f",
+      "bytes": 12173,
+      "level": "available original bytes; inventoried only, not parsed by these rules"
+    },
+    {
+      "path": "packages/ingest/test/fixtures/debt-local/inputs/data/originals/sebra/midt_sebra_2026_page.html",
+      "sha256": "d51a8eff26110c6a0b07250c33a2320763e0d23d3a041243b94d5d704b3aa259",
+      "bytes": 75828,
+      "level": "available original bytes; inventoried only, not parsed by these rules"
+    },
+    {
+      "path": "packages/ingest/test/fixtures/debt-local/inputs/data/cache/sebra_28.08.2026.xlsx",
+      "sha256": "3d3f09e4db49e75040001c4f262cb8a8f055031624a16988377962bffb10af11",
+      "bytes": 12434,
+      "level": "available original bytes; inventoried only, not parsed by these rules"
+    },
+    {
+      "path": "packages/ingest/test/fixtures/debt-local/inputs/data/cache/sebra_27.08.2026.xlsx",
+      "sha256": "4a27f0714b8f5812825a9e6181f01dfe91526af8774294a090adb9365774b936",
+      "bytes": 12180,
+      "level": "available original bytes; inventoried only, not parsed by these rules"
+    }
+  ],
+  "limitations": [
+    "Copied published/candidate snapshots are not newly acquired original sources.",
+    "Historical GISCO response, debt_stock/debt_gdp original responses, law/PDF extraction bindings are not supplied by this rules port.",
+    "Runtime TS does not spawn Python. Frozen Python is a test oracle only."
+  ]
+}
