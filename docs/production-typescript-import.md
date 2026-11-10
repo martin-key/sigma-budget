@@ -1,14 +1,14 @@
 # Registered TypeScript production import
 
-`budget-ts build` now assembles the registered current sources, executes the existing `wave13bStages` graph, runs all 26 domain groups plus REGISTRY, and packages the actual outputs through the release-build lifecycle. Python remains the `./budget` default until parent-owned whole-integration acceptance. The existing scoped fixture commands remain reproducibility tests; the production dispatcher never calls their assemblers or expected outputs.
+`budget-ts build` now assembles the registered current sources, executes the existing `wave13bStages` graph, runs all 26 domain groups plus REGISTRY, and packages the actual outputs through the release-build lifecycle. `./budget` is the normal Node dispatcher, keeping compiled workspace tools current through Turbo. `./budget-python` preserves the historical Python launcher byte for byte. The existing scoped fixture commands remain reproducibility tests; the production dispatcher never calls their assemblers or expected outputs.
 
 ```sh
 pnpm install --frozen-lockfile
 pnpm --filter @sigma-budget/etl... build
-pnpm exec budget-ts build --commit HEAD --inputs /acquired-snapshot \
+./budget build --commit HEAD --inputs /acquired-snapshot \
   --out /owned/new-candidate --build-date 2026-11-10
-pnpm exec budget-ts validate --release /owned/new-candidate --inputs /acquired-snapshot
-pnpm exec budget-ts reproduce --manifest /owned/new-candidate/manifest.json \
+./budget validate --release /owned/new-candidate --inputs /acquired-snapshot
+./budget reproduce --manifest /owned/new-candidate/manifest.json \
   --originals /acquired-snapshot --out /owned/new-replay
 BUDGET_CANDIDATE=/owned/new-candidate pnpm --filter @sigma-budget/web... build
 ```
@@ -68,4 +68,4 @@ The first script requires actual inputs, two builds and local reproduction with 
 
 The required `node-inputs` job downloads the approved repository-owned draft release asset. Draft access requires `contents: write`, restricted to that small job: it has no checkout, dependency installation or project-code execution, and the token is passed only to a fixed GitHub download command. It checks the literal archive digest and size before passing an Actions artifact to `node-import`. The importer retains the workflow default `contents: read`, receives no token, and `scripts/restore-node-input-cache.mjs` makes a private copy authenticated against `scripts/registered-node-inputs.json`, then verifies every registered input and the snapshot identity before installation. A missing archive, changed byte, registry mismatch or invalid input fails the job. No live fiscal fetch, acceptance skip or fixture fallback exists. The draft remains unpublished CI storage. `scripts/prepare-node-input-cache.mjs` prepares a replacement snapshot for review; the fixed bootstrap digest must change with its descriptor. Existing frozen proofs (including the same 17/max-two proof pool), data-image, release/restore jobs, triggers and deployment guards remain; deployment additionally waits for this acceptance. Source drift invokes the normal Node source command.
 
-Independent component acceptances are inherited evidence. Whole-integration acceptance, final CI readiness, default cutover and any merge remain parent-owned. No live source refresh, Cloudflare authentication, provisioning, upload, publish, rollback, deployment or recovery is part of local acceptance.
+Independent component acceptances are inherited evidence. Whole-integration acceptance, final CI readiness and any merge remain parent-owned. No live source refresh, Cloudflare authentication, provisioning, upload, publish, rollback, deployment or recovery is part of local acceptance.

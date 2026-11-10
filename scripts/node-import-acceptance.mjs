@@ -43,6 +43,14 @@ const common = {
   executor,
   maxObjectBytes: 67108864,
 };
+// Exercise the normal entry without an available historical Python producer.
+const cliOptions = {
+  cwd: root,
+  encoding: 'utf8',
+  timeout: 300000,
+  maxBuffer: 1024 * 1024,
+  env: { ...process.env, PYTHON312: join(out, 'no-python-producer') },
+};
 // Exercise owned generation first, before spending time on repeated normal builds.
 const generationInputs = join(out, 'generation-inputs'),
   generationExport = join(out, 'generation-export');
@@ -68,7 +76,19 @@ const regenerated = await buildRelease({
   outputRoot: join(out, 'regenerated'),
 });
 await rm(generationInputs, { recursive: true, force: true });
-const first = await buildRelease({ ...common, outputRoot: join(out, 'candidate') });
+const firstRoot = join(out, 'candidate');
+const cliBuild = JSON.parse(
+  execFileSync(
+    join(root, 'budget'),
+    ['build', '--commit', commit, '--inputs', inputs, '--out', firstRoot, '--build-date', date],
+    cliOptions,
+  ),
+);
+const first = {
+  outputRoot: firstRoot,
+  releaseId: cliBuild.release_id,
+  manifest: JSON.parse(await readFile(join(firstRoot, 'manifest.json'), 'utf8')),
+};
 const second = await buildRelease({ ...common, outputRoot: join(out, 'second') });
 assert.equal(
   second.releaseId,
@@ -87,6 +107,37 @@ const replay = await reproduceRelease({
   outputRoot: join(out, 'replay'),
 });
 assert.equal(replay.releaseId, first.releaseId);
+const cliValidation = JSON.parse(
+  execFileSync(
+    join(root, 'budget'),
+    ['validate', '--release', first.outputRoot, '--inputs', inputs],
+    cliOptions,
+  ),
+);
+assert.equal(cliValidation.release_id, first.releaseId);
+const cliReplayRoot = join(out, 'cli-replay');
+const cliReplay = JSON.parse(
+  execFileSync(
+    join(root, 'budget'),
+    [
+      'reproduce',
+      '--manifest',
+      join(first.outputRoot, 'manifest.json'),
+      '--originals',
+      inputs,
+      '--out',
+      cliReplayRoot,
+    ],
+    cliOptions,
+  ),
+);
+assert.equal(cliReplay.release_id, first.releaseId);
+for (const p of await listFiles(first.outputRoot))
+  assert.deepEqual(
+    await readFile(join(first.outputRoot, p)),
+    await readFile(join(cliReplayRoot, p)),
+    'default CLI replay: ' + p,
+  );
 await checkReleaseDirectory({
   releaseRoot: first.outputRoot,
   inputRoot: inputs,
@@ -268,6 +319,7 @@ const report = {
   inputs: first.manifest.inputs.length,
   doubleBuild: 'all package bytes identical',
   reproduce: 'all package bytes and ID identical',
+  defaultCli: 'validate and reproduce pass; all package bytes identical; Python unavailable',
   controls,
   historicalReconstruction: 'unverified',
 };

@@ -30,7 +30,7 @@ python3 -m apps.web.scripts.serve
 
 Зависимостите на Node се инсталират в корена с един `pnpm-lock.yaml` (pnpm workspace). Сглобеният сайт е в `apps/web/build/`. Клиентът се публикува под `/js/`, а данните от `data/release/` под `/data/`; публичните адреси са запазени. SSR чете текущото издание от D1/R2; без регистър използва включеното в сглобяването издание.
 
-Нужни са Node 24 и pnpm 10.33.0. `pnpm test` пуска тестовете на TypeScript пакетите. Сравнението `budget-ts parity` и фикстурите са описани в [ръководството за разработка](docs/dev-guide.md); `./budget` още изпълнява Python.
+Нужни са Node 24 и pnpm 10.33.0. `pnpm test` пуска тестовете на TypeScript пакетите. Сравнението `budget-ts parity` и фикстурите са описани в [ръководството за разработка](docs/dev-guide.md); `./budget` изпълнява пълния Node импорт. `./budget-python` е отделната команда за исторически Python издания и референтни проверки.
 
 ## Среда и проверки
 
@@ -45,7 +45,7 @@ uv pip install --python tmp/venv-data/bin/python --no-deps -e pipeline
 
 pnpm typecheck
 python -m budget_pipeline.validate.registry check
-./budget validate --site
+./budget-python validate --site # историческата публикувана снимка е неизменна
 python -m budget_pipeline.validate.datasets
 tmp/venv/bin/python -m tests.release.compat_check
 tmp/venv/bin/python -m apps.web.scripts.query_check
@@ -58,9 +58,9 @@ PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers tmp/venv/bin/python -m tests.e2e.s
 
 ## Данни и издания
 
-`./budget` е входната команда за придобиване, сглобяване, проверка и възпроизвеждане на данните. Референтната среда е `docker build -t sigma-budget-data pipeline` (Python 3.12, зависимости с хешове). Оригиналите са в `data/originals/`; файловете на МФ остават в git, останалите се придобиват според [източниците](docs/data-sources.md). Ръчно поддържаните и замразените входове са в `data/inputs/`, а междинните резултати в игнорирания `data/cache/`.
+`./budget` е входната команда за придобиване, сглобяване, проверка и възпроизвеждане на данните. Производствената среда е Node 24 с `pnpm-lock.yaml`. Python 3.12 и образът `docker build -t sigma-budget-data pipeline` остават за историческо възпроизвеждане и референтните тестове. Оригиналите са в `data/originals/`; файловете на МФ остават в git, останалите се придобиват според [източниците](docs/data-sources.md). Ръчно поддържаните и замразените входове са в `data/inputs/`, а междинните резултати в игнорирания `data/cache/`.
 
-`./budget build --build-date ГГГГ-ММ-ДД --site` сглобява издание от commit и записва данните и манифеста в `data/release/`. `./budget reproduce` го възпроизвежда и сравнява байтовете. Слоят за терминология чете замразените замени от `data/inputs/wording.json`, без историческите тагове; редът на строителите е запазен. Подробности: [издания](docs/release.md), [придобиване](docs/data-acquisition.md), [операторско ръководство](docs/operator-guide.md).
+`./budget build --inputs /път/до/входовете --out /външна/нова/директория --build-date ГГГГ-ММ-ДД --site` сглобява издание от commit и записва данните и манифеста в `data/release/`. `./budget reproduce` го възпроизвежда и сравнява байтовете. Слоят за терминология чете замразените замени от `data/inputs/wording.json`, без историческите тагове; редът на строителите е запазен. Подробности: [издания](docs/release.md), [придобиване](docs/data-acquisition.md), [операторско ръководство](docs/operator-guide.md).
 
 За изолиран build без запис в `data/release/` използвай [offline импорт и локален candidate сайт](docs/import-local.md). Двата readers за бюджет 2027 се проверяват автоматично при build; `BUDGET_CANDIDATE` избира валидирания пакет за assets и SSR.
 

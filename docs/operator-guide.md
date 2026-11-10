@@ -11,7 +11,7 @@
 | Какво | Как |
 |---|---|
 | Оператор | Имейлът ти е в `OPERATORS`, таен ключ на Worker-а на средата (`pnpm exec wrangler secret put OPERATORS --env <среда> -c apps/web/wrangler.jsonc`). Имейлите не са в хранилището. |
-| Вход | `cloudflared access login https://<адрес на средата>/admin/operations`. Отваря браузъра; влизаш с метода на Zero Trust организацията (One-time PIN или Cloudflare). Командата `budget` после сама взима токена. |
+| Вход | `cloudflared access login https://<адрес на средата>/admin/operations`. Отваря браузъра; влизаш с метода на Zero Trust организацията (One-time PIN или Cloudflare). Node командата получава токена изрично чрез защитеното process обкръжение `BUDGET_ACCESS_TOKEN`; не търси потребителски auth профили. |
 | Автоматизация | Access service token: Client ID в `SERVICE_TOKENS` на средата, двойката в `CF_ACCESS_CLIENT_ID` и `CF_ACCESS_CLIENT_SECRET`. |
 | Средите | `pipeline/environments.json`, а своите (собствен акаунт) в `pipeline/environments.local.json`, който не е в git. Средата се казва винаги изрично. |
 
@@ -21,13 +21,13 @@
 ## 2. Публикуване на ново издание
 
 ```bash
-./budget build --build-date 2026-11-05                      # изданието в work/candidate (release.md)
-./budget validate --release work/candidate                  # байтовете, манифестът, проверките на данните
+./budget build --inputs /path/to/inputs --out /outside/new/candidate --build-date 2026-11-10
+./budget validate --release /outside/new/candidate                  # байтовете, манифестът, проверките на данните
 ./budget status --environment staging                       # кое е текущо сега
-./budget publish --release work/candidate --environment staging
+./budget publish --release /outside/new/candidate --environment staging --dry-run
 ```
 
-`publish` показва средата, текущото издание с ревизията и новото, и пита. После качва липсващите обекти в R2 (всеки се чете обратно и се
+`publish --dry-run` проверява плана; действителното изпълнение изисква изрично `--yes` за избраната среда. После качва липсващите обекти в R2 (всеки се чете обратно и се
 проверява SHA-256), записва кандидата и го прави текущ с една заявка към регистъра. Накрая чете обратно указателя, манифеста и един файл.
 Сайтът показва новото издание до 10 секунди след това, без ново сглобяване.
 

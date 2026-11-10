@@ -58,8 +58,8 @@ jobs:
           pnpm exec budget-ts freshness
       - name: Check the source and dataset registries
         run: python -m budget_pipeline.validate.registry check
-      - name: Check the published release (data/release against its manifest)
-        run: ./budget validate --site
+      - name: Check the unchanged historical Python publication against its manifest
+        run: ./budget-python validate --site
       - name: Validate the data
         run: python -m budget_pipeline.validate.datasets
       - name: Check frozen 2027 budget extractions

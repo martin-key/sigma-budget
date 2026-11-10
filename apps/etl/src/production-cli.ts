@@ -26,7 +26,7 @@ import { sourceOperatorCli, type SourceOperatorDependencies } from './source-ope
 import { releaseOperatorCli, type OperatorCliDependencies } from './release-operator.js';
 import { locateManifest, materializeRemote, getBytes } from './manifest-location.js';
 
-export const PRODUCTION_USAGE = `Usage: budget-ts <command> [options]
+export const PRODUCTION_USAGE = `Usage: budget <command> [options] (alias: budget-ts)
   build --commit COMMIT --inputs SNAPSHOT --out NEW_DIRECTORY --build-date YYYY-MM-DD [--site]
   validate --release CANDIDATE | --site [--inputs SNAPSHOT]
   reproduce --manifest FILE_OR_URL | --current SITE [--originals SNAPSHOT] [--out NEW_DIRECTORY] [--skip-published]
@@ -38,7 +38,7 @@ export const PRODUCTION_USAGE = `Usage: budget-ts <command> [options]
   prepare --inputs SNAPSHOT --out NEW_DIRECTORY --build-date YYYY-MM-DD [--programme-source archive|extracted]
   freshness (existing options)
   --root defaults to the repository; --json emits machine-readable results.
-New production builds are offline Node and require an explicit date. Python remains ./budget's default.
+New production builds are offline Node and require an explicit date. ./budget and budget-ts use this Node dispatcher; historical packages use ./budget-python.
 Historical manifests: budget-ts reproduce --manifest FILE --historical-python --env local|docker
 No restore subcommand: use the existing documented restore procedure/protocol.`;
 export interface ProductionCliDependencies {
@@ -306,7 +306,7 @@ export async function productionCli(
       if (command !== 'reproduce' || !m.has('--historical-python'))
         throw new ReleaseError(
           2,
-          'Historical manifest: use ./budget or explicit --historical-python replay',
+          'Historical manifest: use ./budget-python or explicit --historical-python replay',
         );
       const python =
         process.env.PYTHON312 ??
