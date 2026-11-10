@@ -114,7 +114,7 @@ it('returns exactly four typed groups and rejects an omitted required group', ()
     ['COMPONENTS', 270],
     ['RATES', 891],
     ['INDIRECT', 124],
-    ['CONTRACT', 4016],
+    ['CONTRACT', 4134],
   ]);
   expect(result).not.toHaveProperty('completeValidation');
 });
@@ -128,6 +128,161 @@ it('reads raw decimal strings even after the Context numeric projection is cache
   expect(executionIntegrity(ctx).problems).toEqual(
     expect.arrayContaining([expect.stringContaining('data.2026.kfp.rev[0]')]),
   );
+});
+
+describe('independent execution inventory and physical row coverage', () => {
+  const mutations: [string, (execution: any, provenance: any) => void][] = [
+    [
+      'missing report dates',
+      (ex) => {
+        delete ex.data['2024'].asOf;
+      },
+    ],
+    [
+      'wrong original currency',
+      (ex) => {
+        ex.data['2024'].currency = 'EUR';
+      },
+    ],
+    [
+      'coordinated historical-year deletion',
+      (ex, p) => {
+        delete ex.data['2024'];
+        delete ex.monthly['2024'];
+        for (const key of Object.keys(p.originals))
+          if (key.startsWith('2024-')) delete p.originals[key];
+      },
+    ],
+    [
+      'coordinated deletion of all reports',
+      (ex, p) => {
+        ex.data = {};
+        ex.monthly = {};
+        p.originals = {};
+      },
+    ],
+    [
+      'coordinated latest report deletion',
+      (ex, p) => {
+        const block = ex.data['2026'];
+        block.months--;
+        block.files.pop();
+        block.asOf.pop();
+        for (const col of ['kfp', 'nat', 'eu']) {
+          for (const arr of Object.values(block[col]) as unknown[][]) arr.pop();
+          for (const arr of Object.values(ex.monthly['2026'][col]) as unknown[][]) arr.pop();
+        }
+        delete p.originals['2026-09'];
+        ex.latest.month = 8;
+        ex.latest.asOf = '2026-08-31';
+      },
+    ],
+    [
+      'missing latest revenue',
+      (ex) => {
+        delete ex.latest.kfp.rev;
+      },
+    ],
+    [
+      'missing latest cumulative field',
+      (ex) => {
+        delete ex.latest.kfp.rev.cum;
+      },
+    ],
+    [
+      'missing latest prior-year field',
+      (ex) => {
+        delete ex.latest.kfp.rev.prevYearCum;
+      },
+    ],
+    [
+      'missing latest available plan',
+      (ex) => {
+        delete ex.latest.kfp.rev.plan;
+      },
+    ],
+    [
+      'missing pace year',
+      (ex) => {
+        delete ex.pace['2024'];
+      },
+    ],
+    [
+      'missing pace row',
+      (ex) => {
+        delete ex.pace['2024'].rev;
+      },
+    ],
+    [
+      'missing pace month',
+      (ex) => {
+        ex.pace['2024'].rev.pop();
+      },
+    ],
+    [
+      'missing all reconciliation records',
+      (ex) => {
+        ex.reconcile = {};
+      },
+    ],
+    [
+      'missing reconciliation year',
+      (ex) => {
+        delete ex.reconcile.dec2024VsAnnex3;
+      },
+    ],
+    [
+      'missing reconciliation row',
+      (ex) => {
+        delete ex.reconcile.dec2024VsAnnex3.rev;
+      },
+    ],
+    [
+      'missing reconciliation field',
+      (ex) => {
+        delete ex.reconcile.dec2024VsAnnex3.rev.diff;
+      },
+    ],
+    [
+      'coordinated revenue row change',
+      (ex, p) => {
+        ex.rows.find((r: any) => r.id === 'rev').row = p.rows.rev = 12;
+      },
+    ],
+    [
+      'coordinated social-expense row change',
+      (ex, p) => {
+        ex.rows.find((r: any) => r.id === 'exp.social').row = p.rows['exp.social'] = 24;
+      },
+    ],
+    [
+      'coordinated row removal',
+      (ex, p) => {
+        ex.rows = ex.rows.filter((r: any) => r.id !== 'fin.priv.shares');
+        delete p.rows['fin.priv.shares'];
+        for (const block of Object.values(ex.data) as any[])
+          for (const col of ['kfp', 'nat', 'eu']) delete block[col]['fin.priv.shares'];
+      },
+    ],
+    [
+      'omitted computed-row identity',
+      (ex) => {
+        delete ex.rows.find((r: any) => r.id === 'exp.total').computed;
+      },
+    ],
+  ];
+  it.each(mutations)('rejects %s across the complete four-group run', (_, mutate) => {
+    const ex = load(join(data, 'execution.json')),
+      p = load(join(data, 'execution-provenance.json'));
+    mutate(ex, p);
+    writeFileSync(join(data, 'execution.json'), JSON.stringify(ex));
+    writeFileSync(join(data, 'execution-provenance.json'), JSON.stringify(p));
+    const result = runGroups(independentRuleGroups(), context(), [...INDEPENDENT_RULE_NAMES]);
+    expect(result.problems).toBeGreaterThan(0);
+    const contract = result.groups.find((group) => group.name === 'CONTRACT')!;
+    expect(contract.problems.length).toBeGreaterThan(0);
+    expect(contract.problems.some((problem) => problem.startsWith('group crashed:'))).toBe(false);
+  });
 });
 
 it.each([

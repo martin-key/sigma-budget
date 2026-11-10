@@ -10,6 +10,96 @@ import type { Group } from './runner.js';
 
 const cols = ['kfp', 'nat', 'eu'];
 const blocks = ['data', 'monthly', 'plan2026', 'latest', 'pace', 'reconcile'];
+// Independent worksheet contract, transcribed from the KFP form's physical rows.
+// Never derive these locators from either of the two producer documents.
+const reportRows: Record<string, number> = {
+  rev: 11,
+  'rev.tax': 12,
+  'rev.nontax': 13,
+  'rev.grants': 14,
+  exp: 16,
+  'exp.personnel': 17,
+  'exp.maint': 19,
+  'exp.interest': 20,
+  'exp.interest.ext': 21,
+  'exp.interest.dom': 22,
+  'exp.social': 23,
+  'exp.subsidies': 24,
+  'exp.abroad': 25,
+  'exp.capex': 26,
+  'exp.reserve': 27,
+  transfers: 28,
+  'transfers.cb': 29,
+  'transfers.other': 30,
+  'transfers.revshare': 31,
+  eucontrib: 32,
+  balance: 33,
+  fin: 35,
+  'fin.ext': 36,
+  'fin.ext.markets': 37,
+  'fin.ext.repay': 38,
+  'fin.ext.securities': 39,
+  'fin.ext.deposits': 40,
+  'fin.dom': 41,
+  'fin.dom.advances': 45,
+  'fin.dom.refunds': 46,
+  'fin.priv': 48,
+  'fin.priv.shares': 49,
+};
+const headlineRows = ['rev', 'exp.total', 'balance'];
+const latestRows = [
+  'rev',
+  'rev.tax',
+  'rev.nontax',
+  'rev.grants',
+  'exp.total',
+  'exp',
+  'exp.personnel',
+  'exp.maint',
+  'exp.interest',
+  'exp.social',
+  'exp.subsidies',
+  'exp.abroad',
+  'exp.capex',
+  'exp.reserve',
+  'eucontrib',
+  'balance',
+  'fin',
+  'fin.ext.markets',
+];
+const paceRows = [
+  'rev',
+  'rev.tax',
+  'rev.nontax',
+  'rev.grants',
+  'exp.total',
+  'exp',
+  'exp.personnel',
+  'exp.maint',
+  'exp.interest',
+  'exp.social',
+  'exp.subsidies',
+  'exp.capex',
+  'eucontrib',
+];
+const reconcileRows = [
+  'rev',
+  'rev.tax',
+  'rev.nontax',
+  'rev.grants',
+  'exp',
+  'exp.personnel',
+  'exp.maint',
+  'exp.interest',
+  'exp.social',
+  'exp.subsidies',
+  'exp.abroad',
+  'exp.capex',
+  'exp.reserve',
+  'eucontrib',
+  'exp.total',
+  'balance',
+];
 const lawRows: Record<string, number> = {
   rev: 0,
   'rev.tax': 1,
@@ -342,13 +432,79 @@ export function executionIntegrity(ctx: Context, reader?: ExecutionLawReader): C
 /** Additional omission/provenance checks close false-PASS gaps in the donor.
  * Numeric agreement with XLS cells remains the independent KFP group's job. */
 function integrityCoverage(ctx: Context, c: Check, ex: Doc, p: Doc, files: Doc): void {
-  const rids = ex.rows.map((r: Doc) => r.id);
+  let pins: Map<string, string>;
+  try {
+    pins = originalPins(ctx);
+  } catch (error) {
+    c.fail(
+      'cannot verify execution original pins: ' +
+        (error instanceof Error ? error.message : String(error)),
+    );
+    return;
+  }
+  // The committed acquisition inventory survives coordinated deletion of the
+  // data, monthly and provenance blocks, including when XLS bytes are absent.
+  const reports = new Map<string, { year: string; month: number; file: string; sha256: string }>();
+  for (const [path, digest] of pins) {
+    if (!path.startsWith('data/originals/kfp_')) continue;
+    const match = /^data\/originals\/kfp_([0-9]{4})\/([^/]+\.xls)$/.exec(path),
+      date = match && /EU[ _]funds_([0-9]{2})([0-9]{2})_/.exec(match[2]!);
+    if (!match || !date || date[2] !== match[1]!.slice(2) || +date[1]! < 1 || +date[1]! > 12) {
+      c.fail('invalid pinned KFP report path: ' + path);
+      continue;
+    }
+    const key = `${match[1]}-${date[1]}`;
+    c.ok(!reports.has(key), 'one pinned KFP original per month: ' + key);
+    reports.set(key, { year: match[1]!, month: +date[1]!, file: match[2]!, sha256: digest });
+  }
+  const reportKeys = [...reports.keys()].sort(),
+    years = [...new Set(reportKeys.map((key) => key.slice(0, 4)))],
+    expectedRows = [...keys(reportRows), 'exp.total'],
+    rids = ex.rows.map((r: Doc) => r.id);
+  c.ok(reportKeys.length > 0, 'pinned KFP report inventory is nonempty');
+  c.ok(sameSet(keys(ex.data), years), 'data covers every year in the pinned KFP inventory');
+  c.ok(sameSet(keys(ex.monthly), years), 'monthly covers every year in the pinned KFP inventory');
+  c.ok(sameSet(keys(p.originals ?? {}), reportKeys), 'provenance covers every pinned KFP report');
+  c.ok(sameSet(keys(files), reportKeys), 'execution files cover every pinned KFP report');
   c.ok(
-    rids.length > 0 && new Set(rids).size === rids.length,
-    'execution rows are nonempty and unique',
+    sameSet(rids, expectedRows) && new Set(rids).size === rids.length,
+    'execution rows cover the independent worksheet contract exactly once',
   );
+  c.ok(equal(p.rows, reportRows), 'provenance rows match the independent physical worksheet rows');
   c.ok(ex.meta.unit === CONTRACT.money.unit, 'execution money unit is the canonical EUR unit');
   c.ok(sameSet(keys(ex.data), keys(ex.monthly)), 'data and monthly cover the same years');
+  for (const year of years) {
+    const required = reportKeys.filter((key) => reports.get(key)!.year === year);
+    c.ok(
+      equal(
+        required.map((key) => reports.get(key)!.month),
+        required.map((_, i) => i + 1),
+      ) &&
+        (year === years.at(-1) || required.length === 12),
+      `${year}: pinned reports cover January through the latest month`,
+    );
+    c.ok(ex.data[year]?.months === required.length, `${year}: month count matches pinned reports`);
+    c.ok(
+      ex.data[year]?.currency === (Number(year) < 2026 ? 'BGN' : 'EUR') &&
+        equal(
+          ex.data[year]?.asOf,
+          required.map(
+            (key) => `${key}-${new Date(Date.UTC(+year, reports.get(key)!.month, 0)).getUTCDate()}`,
+          ),
+        ),
+      `${year}: original currency and dates cover the pinned reports`,
+    );
+    c.ok(
+      equal(
+        ex.data[year]?.files?.map((f: Doc) => [f.month, f.file, f.sha256]),
+        required.map((key) => {
+          const report = reports.get(key)!;
+          return [report.month, report.file, report.sha256];
+        }),
+      ),
+      `${year}: report declarations match the independent pinned inventory`,
+    );
+  }
   for (const [year, block] of Object.entries(ex.data) as [string, Doc][]) {
     c.ok(
       Number.isInteger(block.months) && block.months > 0 && block.months <= 12,
@@ -365,7 +521,7 @@ function integrityCoverage(ctx: Context, c: Check, ex: Doc, p: Doc, files: Doc):
       for (const col of cols) {
         const moneyRows = ex[name][year]?.[col] ?? {};
         c.ok(
-          sameSet(keys(moneyRows), name === 'monthly' ? ['rev', 'exp.total', 'balance'] : rids),
+          sameSet(keys(moneyRows), name === 'monthly' ? headlineRows : expectedRows),
           `${name}.${year}.${col}: every execution row is present`,
         );
         c.ok(
@@ -375,7 +531,7 @@ function integrityCoverage(ctx: Context, c: Check, ex: Doc, p: Doc, files: Doc):
       }
   }
   for (const r of ex.rows) {
-    if (r.computed)
+    if (r.id === 'exp.total')
       c.ok(
         p.computed?.[r.id]?.rule ===
           'exp + eucontrib of the same report, added on the original numbers, then converted' &&
@@ -383,23 +539,65 @@ function integrityCoverage(ctx: Context, c: Check, ex: Doc, p: Doc, files: Doc):
           r.computed === 'exp+eucontrib',
         `${r.id}: complete computed-cell rule`,
       );
-    else c.ok(p.rows?.[r.id] === r.row, `${r.id}: provenance cell row matches execution row`);
+    else
+      c.ok(
+        !r.computed && r.row === reportRows[r.id] && p.rows?.[r.id] === reportRows[r.id],
+        `${r.id}: both cell row declarations match the independent worksheet row`,
+      );
+  }
+  const latestKey = reportKeys.at(-1),
+    latestReport = latestKey && reports.get(latestKey);
+  c.ok(
+    !!latestReport &&
+      ex.latest.month === latestReport.month &&
+      ex.latest.asOf ===
+        `${latestKey}-${new Date(Date.UTC(+latestReport.year, latestReport.month, 0)).getUTCDate()}`,
+    'latest identifies the newest pinned KFP report',
+  );
+  for (const col of cols) {
+    const required = col === 'kfp' ? latestRows : headlineRows;
+    c.ok(sameSet(keys(ex.latest[col]), required), `latest.${col}: every required row is present`);
+    for (const rid of required) {
+      const row = ex.latest[col][rid];
+      c.ok(
+        !!row &&
+          Object.hasOwn(row, 'cum') &&
+          Object.hasOwn(row, 'prevYearCum') &&
+          (ex.plan2026[col][rid] == null || Object.hasOwn(row, 'plan')),
+        `latest.${col}.${rid}: cumulative, prior-year and available plan fields are present`,
+      );
+    }
+  }
+  const paceYears = years.filter(
+    (year) => reportKeys.filter((key) => key.startsWith(year + '-')).length === 12,
+  );
+  c.ok(sameSet(keys(ex.pace), paceYears), 'pace covers every complete pinned report year');
+  for (const year of paceYears) {
+    const required = paceRows.filter((rid) => Number(ex.data[year]?.kfp?.[rid]?.[11]) > 0);
+    c.ok(
+      sameSet(keys(ex.pace[year] ?? {}), required),
+      `pace.${year}: every eligible row is present`,
+    );
+    c.ok(
+      values(ex.pace[year] ?? {}).every((arr) => Array.isArray(arr) && arr.length === 12),
+      `pace.${year}: every row covers all twelve months`,
+    );
+  }
+  for (const year of ['2024', '2025']) {
+    const key = `dec${year}VsAnnex3`,
+      rec = ex.reconcile[key] ?? {};
+    c.ok(sameSet(keys(rec), reconcileRows), `${key}: every reconciliation row is present`);
+    for (const rid of reconcileRows)
+      c.ok(
+        sameSet(keys(rec[rid] ?? {}), ['kfp', 'annex3', 'diff']),
+        `${key}.${rid}: every reconciliation field is present`,
+      );
   }
   c.ok(
     equal(p.columns, { kfp: 'B', nat: 'C', eu: 'D' }) && p.sheet === 'стартова',
     'provenance worksheet and column locators',
   );
   c.ok(equal(p.rules, provenanceRules), 'every derived block has its canonical provenance rule');
-  let pins: Map<string, string>;
-  try {
-    pins = originalPins(ctx);
-  } catch (error) {
-    c.fail(
-      'cannot verify execution original pins: ' +
-        (error instanceof Error ? error.message : String(error)),
-    );
-    return;
-  }
   const unavailable: string[] = [];
   for (const [key, f] of Object.entries(files) as [string, Doc][]) {
     const year = key.slice(0, 4),

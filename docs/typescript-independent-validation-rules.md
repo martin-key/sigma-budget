@@ -10,11 +10,11 @@ Individual exports are `components(ctx)`, `rates(ctx, napReader?)`, `componentsR
 
 The reader callbacks are synchronous to match `Group<Context>.run`. Preparation may decode/cache asynchronously first, but a binding must authenticate and resolve the particular supplied bytes. It must not return production-builder results as independent evidence.
 
-| Binding | Input supplied by validator | Required independent result |
-| --- | --- | --- |
-| `nap?: NapRowsReader` | NAP PDF bytes, original relative path and verified SHA-256 | `Record<string, NapRow>`; numbered rows including `1.1.`, `1.2.`, `5.1.2.`, `5.2.2.`, `10.1.2.`, `10.2.2.` and categories `1.` through `19.`. Each has physical `page`, `label`, and 15 printed `cells`. |
-| `indirect?: IndirectEvidenceReader` | Six separately hashed original byte buffers, keyed by `INDIRECT_SOURCE_PATHS` | `IndirectEvidence`, with all sources, VAT, two fuels, every cigarette period and the NSI price/year-column evidence. It must match the separately pinned independent extraction. |
-| `executionLaw?: ExecutionLawReader` | Verified forecast ZIP member PDF bytes plus archive/member identities and hashes | `ExecutionLawTable`: physical Annex 1 columns and rows, including `label`, `page`, `units`, `printed`, `values`. It must match the pinned forecast extraction table. |
+| Binding                             | Input supplied by validator                                                      | Required independent result                                                                                                                                                                              |
+| ----------------------------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `nap?: NapRowsReader`               | NAP PDF bytes, original relative path and verified SHA-256                       | `Record<string, NapRow>`; numbered rows including `1.1.`, `1.2.`, `5.1.2.`, `5.2.2.`, `10.1.2.`, `10.2.2.` and categories `1.` through `19.`. Each has physical `page`, `label`, and 15 printed `cells`. |
+| `indirect?: IndirectEvidenceReader` | Six separately hashed original byte buffers, keyed by `INDIRECT_SOURCE_PATHS`    | `IndirectEvidence`, with all sources, VAT, two fuels, every cigarette period and the NSI price/year-column evidence. It must match the separately pinned independent extraction.                         |
+| `executionLaw?: ExecutionLawReader` | Verified forecast ZIP member PDF bytes plus archive/member identities and hashes | `ExecutionLawTable`: physical Annex 1 columns and rows, including `label`, `page`, `units`, `printed`, `values`. It must match the pinned forecast extraction table.                                     |
 
 No runtime rule invokes Python or the corresponding production builder. The sole build-layer import in CONTRACT is the existing ZIP member byte decoder, not an expected-result builder. The established `CONTRACT` constants are reused; `execution-contract.ts` is unchanged.
 
@@ -30,6 +30,8 @@ CONTRACT parses `ctx.bytes('execution.json')` directly through strict JSON befor
 
 The adopted-law plan uses **Annex 1**, with sparse national/EU denominators and explicit coverage reasons. The existing reconciliation rules refer to **Annex 3** report vintages. No historical source or missing denominator is reconstructed. Additional CONTRACT checks reject omitted years/rows/cells/report files, wrong worksheet/column/row locators, changed computed/derived rules, coordinated original hash changes, wrong original currencies/dates, and corrupt available XLS bytes. The monthly output deliberately has only `rev`, `exp.total`, and `balance`; cumulative data covers all execution rows.
 
+Required report coverage comes from the committed original-file pins, independently of both execution outputs. Every pinned KFP year, month, filename and hash must occur in the cumulative data and provenance; monthly data must cover the same independently required years. A complete year cannot disappear by deleting it from both documents. Physical worksheet rows are checked against a separate 32-row validator mapping, so coordinated changes to the two output declarations fail. The newest pinned report also determines the required latest date/month; fixed row sets and derivation rules require the latest fields, complete-year pace rows and both historical Annex 3 reconciliation blocks. These are coverage and locator checks, not numerical re-reading of XLS cells.
+
 Without the law PDF reader, CONTRACT records that it authenticated archive/member bytes and checked the pinned extraction, but did **not** re-extract the PDF. Missing XLS originals are explicitly listed. Comparing reported money to decoded XLS cells belongs to the independent KFP group; these CONTRACT checks do not replace it. The aggregate must retain these boundaries and await real bindings plus all required groups before claiming complete source validation.
 
 ## Frozen proof and reproducibility
@@ -38,15 +40,15 @@ New fixture family: `packages/ingest/test/fixtures/independent-rules/`. Older fi
 
 The nine frozen Python donor/dependency files retain their exact bytes. Python **3.12.14** generated `oracle.json` for the baseline and 25 finite mutations. Regeneration uses `generate-oracle.py --repo <read-only-repository>` in the existing Python 3.12 data environment, with `PYTHONDONTWRITEBYTECODE=1`; all mutable inputs are copied into its own temporary root. The baseline's raw donor problems are empty, so accepted and raw outcomes coincide for these four groups; no new accepted exceptions are added.
 
-| Group | Frozen Python baseline checks | TypeScript baseline checks |
-| --- | ---: | ---: |
-| COMPONENTS | 270 | 270 |
-| RATES | 891 | 891 |
-| INDIRECT | 124 | 124 |
-| CONTRACT | 3837 | 4016 |
-| Total | 5122 | 5301 |
+| Group      | Frozen Python baseline checks | TypeScript baseline checks |
+| ---------- | ----------------------------: | -------------------------: |
+| COMPONENTS |                           270 |                        270 |
+| RATES      |                           891 |                        891 |
+| INDIRECT   |                           124 |                        124 |
+| CONTRACT   |                          3837 |                       4134 |
+| Total      |                          5122 |                       5419 |
 
-The 179 additional CONTRACT checks cover omissions, canonical provenance and actual source pins/bytes. Null values are deliberately not counted as individual decimal-format assertions, matching the donor; the money-position fact counts them. Test assertions compare donor counts and diagnostics, allowing only Python's `1.0`/`1` and `None`/`null` rendering differences.
+The 297 additional baseline CONTRACT checks cover omissions, canonical provenance, independent report/row inventory and actual source pins/bytes. The number is an observation of this baseline, not a runtime minimum: coverage is determined from the independent inventory and worksheet contract. Null values are deliberately not counted as individual decimal-format assertions, matching the donor; the money-position fact counts them. Test assertions compare donor counts and diagnostics, allowing only Python's `1.0`/`1` and `None`/`null` rendering differences.
 
 The NAP fixture includes a copy of the already pinned PDF (`b0a02141c14d4358f656711edcf0a7ae52b5f02a50c465f31ba97b542219e3f4`) and a fresh Python/PyMuPDF physical-table capture of 95 rows. `capture-nap.py <pdf>` verifies its pin and reproduces the capture hash. Runtime tests inject that capture as a clearly identified **test double**; this is not a delivered TypeScript PDF decoder.
 
