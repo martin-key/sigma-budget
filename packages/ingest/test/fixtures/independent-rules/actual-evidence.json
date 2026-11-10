@@ -1,0 +1,41 @@
+{
+  "python": "3.12.14",
+  "indirectOriginals": {
+    "prices": {
+      "path": "data/originals/ec-oil/weekly-prices-2026-11-02.xlsx",
+      "sha256": "946947ad4cab9daa786578ac9b2c077d922c0f661671eb5cdb4004bd51763ebb"
+    },
+    "duties": {
+      "path": "data/originals/ec-oil/duties-and-taxes-2026-11-07.xlsx",
+      "sha256": "3719f74988d59184896b91a108400ec62f2ac09f03e88b0c969b121b966618b6"
+    },
+    "gazette": {
+      "path": "data/originals/excise-law/dv-69-2026-budget.html",
+      "sha256": "b08fb0a5ee9c1c32579b8851c69fcfb34988e0efebde32dbb3e897698e0f2b51"
+    },
+    "customs": {
+      "path": "data/originals/excise-law/excise-law-dv54-2025.pdf",
+      "sha256": "cdc69fed256f73e91b7f0dba8d8340f5e5a9fe12c93f075227a2c84b389a6f8f"
+    },
+    "nsi": {
+      "path": "data/originals/nsi-pack/statistical-yearbook-2025.pdf",
+      "sha256": "b4d93c6439621a40bdf721635b0d4022d0d6bec640cb2d5a4ddcc86cb0564fa9"
+    },
+    "bill": {
+      "path": "data/originals/parliament/52-602-01-19.docx",
+      "sha256": "378042f3c6f05aad760099f3b5ccceaf597fd287b28242fe89b99d2a981fc174"
+    }
+  },
+  "actualPythonExtractionMatchesPinnedIndependentEvidence": true,
+  "fuels": 2,
+  "cigarettePeriods": 3,
+  "nsiYearHeaders": [
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "limitation": "The frozen donor independently re-read available source bytes in Python. This is not a TypeScript source decoder or a newly acquired original."
+}

@@ -1,0 +1,472 @@
+[
+  {
+    "name": "baseline",
+    "groups": [
+      "COMPONENTS",
+      "RATES",
+      "INDIRECT",
+      "CONTRACT"
+    ],
+    "ops": []
+  },
+  {
+    "name": "component-money",
+    "groups": [
+      "COMPONENTS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "components.json",
+        "path": [
+          "budgets",
+          "state",
+          "revKhil"
+        ],
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "component-unit",
+    "groups": [
+      "COMPONENTS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "components.json",
+        "path": [
+          "transfers",
+          "unit"
+        ],
+        "value": "млн. €"
+      }
+    ]
+  },
+  {
+    "name": "component-cross-file",
+    "groups": [
+      "COMPONENTS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "municipalities.json",
+        "path": [
+          "check",
+          "columnSums",
+          0
+        ],
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "component-pending-number",
+    "groups": [
+      "COMPONENTS"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "components.json",
+        "path": [
+          "monthlyByBudget",
+          "hidden"
+        ],
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "rate-share",
+    "groups": [
+      "RATES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "rates.json",
+        "path": [
+          "scenarios",
+          0,
+          "split",
+          "employee",
+          "doo"
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "rate-null-cell",
+    "groups": [
+      "RATES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "rates.json",
+        "path": [
+          "minInsurableIncome",
+          "rows",
+          0,
+          "until",
+          0
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "rate-unit",
+    "groups": [
+      "RATES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "rates.json",
+        "path": [
+          "meta",
+          "unit"
+        ],
+        "value": "EUR"
+      }
+    ]
+  },
+  {
+    "name": "rate-coverage",
+    "groups": [
+      "RATES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "rates.json",
+        "path": [
+          "napCategories",
+          0,
+          "modelledBy"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "rate-stored-verdict",
+    "groups": [
+      "RATES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "rates.json",
+        "path": [
+          "checks",
+          "napRowsAddUp"
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "rate-assumption",
+    "groups": [
+      "RATES"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "rates.json",
+        "path": [
+          "assumptions",
+          2,
+          "years",
+          "2026"
+        ],
+        "value": "19,7 за родените преди 1 януари 1960 г.; 14,7 за родените след 31 декември 1959 г."
+      }
+    ]
+  },
+  {
+    "name": "indirect-money",
+    "groups": [
+      "INDIRECT"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "indirect-tax-parameters.json",
+        "path": [
+          "fuels",
+          "petrol",
+          "excisePerLitre"
+        ],
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "indirect-unit",
+    "groups": [
+      "INDIRECT"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "indirect-tax-parameters.json",
+        "path": [
+          "fuels",
+          "petrol",
+          "unit"
+        ],
+        "value": "BGN/l"
+      }
+    ]
+  },
+  {
+    "name": "indirect-date",
+    "groups": [
+      "INDIRECT"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "indirect-tax-parameters.json",
+        "path": [
+          "cigarettes",
+          0,
+          "validTo"
+        ],
+        "value": "2027-03-01"
+      }
+    ]
+  },
+  {
+    "name": "indirect-schema",
+    "groups": [
+      "INDIRECT"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "indirect-tax-parameters.json",
+        "path": [
+          "extra"
+        ],
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "indirect-source",
+    "groups": [
+      "INDIRECT"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "indirect-tax-parameters.json",
+        "path": [
+          "meta",
+          "source"
+        ],
+        "value": [
+          "ec-oil"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "measure-evidence",
+    "groups": [
+      "INDIRECT"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "measures.json",
+        "path": [
+          "items",
+          0,
+          "excerptEvidence",
+          "since",
+          "page"
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "contract-binary-money",
+    "groups": [
+      "CONTRACT"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "execution.json",
+        "path": [
+          "data",
+          "2026",
+          "kfp",
+          "rev",
+          0
+        ],
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "contract-negative-zero",
+    "groups": [
+      "CONTRACT"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "execution.json",
+        "path": [
+          "monthly",
+          "2026",
+          "kfp",
+          "rev",
+          0
+        ],
+        "value": "-0.000"
+      }
+    ]
+  },
+  {
+    "name": "contract-money-precision",
+    "groups": [
+      "CONTRACT"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "execution.json",
+        "path": [
+          "plan2026",
+          "kfp",
+          "rev"
+        ],
+        "value": "49615.30"
+      }
+    ]
+  },
+  {
+    "name": "contract-null-is-valid",
+    "groups": [
+      "CONTRACT"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "execution.json",
+        "path": [
+          "data",
+          "2026",
+          "kfp",
+          "rev",
+          0
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "contract-schema",
+    "groups": [
+      "CONTRACT"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "execution.json",
+        "path": [
+          "contract",
+          "schema"
+        ],
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "contract-provenance-hash",
+    "groups": [
+      "CONTRACT"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "execution-provenance.json",
+        "path": [
+          "originals",
+          "2026-01",
+          "sha256"
+        ],
+        "value": "0000000000000000000000000000000000000000000000000000000000000000"
+      }
+    ]
+  },
+  {
+    "name": "contract-plan-cell",
+    "groups": [
+      "CONTRACT"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "execution-provenance.json",
+        "path": [
+          "plan2026",
+          "kfp",
+          "rows",
+          "rev",
+          "page"
+        ],
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "contract-omitted-cell",
+    "groups": [
+      "CONTRACT"
+    ],
+    "ops": [
+      {
+        "op": "delete",
+        "file": "execution-provenance.json",
+        "path": [
+          "rows",
+          "rev"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "contract-computed-dependency",
+    "groups": [
+      "CONTRACT"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "execution-provenance.json",
+        "path": [
+          "computed",
+          "exp.total",
+          "from"
+        ],
+        "value": [
+          "absent"
+        ]
+      }
+    ]
+  }
+]
