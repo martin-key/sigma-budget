@@ -1,8 +1,7 @@
 /** Restore only the reviewed CI archive, then authenticate every registered input. */
 import { strict as assert } from 'node:assert';
 import { execFile } from 'node:child_process';
-import { createHash } from 'node:crypto';
-import { mkdir, mkdtemp, readFile, rename, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rename, rm } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { promisify } from 'node:util';
 import {
@@ -10,10 +9,15 @@ import {
   prepareInputs,
   preflightDestination,
 } from '../packages/ingest/dist/release-build/index.js';
+import { copyAuthenticated } from '../packages/ingest/dist/release-build/files.js';
 
 const root = resolve(new URL('..', import.meta.url).pathname);
-assert(process.argv.length === 3, 'Usage: node scripts/restore-node-input-cache.mjs NEW_OUTPUT');
-const out = await preflightDestination(resolve(process.argv[2]), [root]);
+assert(
+  process.argv.length === 4,
+  'Usage: node scripts/restore-node-input-cache.mjs APPROVED_ARCHIVE NEW_OUTPUT',
+);
+const source = resolve(process.argv[2]);
+const out = await preflightDestination(resolve(process.argv[3]), [root, source]);
 const spec = JSON.parse(await readFile(join(root, 'scripts/registered-node-inputs.json'), 'utf8'));
 assert.equal(spec.schema, 'registered-ci-input-archive/1');
 assert.equal(spec.repository, 'midt-bg/sigma-budget');
@@ -24,28 +28,10 @@ assert(Number.isSafeInteger(spec.inputs) && spec.inputs > 0);
 
 const work = await mkdtemp(join(dirname(out), '.registered-inputs-'));
 try {
-  // The draft asset is repository-owned CI storage, not a public fiscal endpoint.
-  // gh uses the existing read-only workflow token; no credential enters the archive.
-  const { stdout } = await promisify(execFile)(
-    'gh',
-    [
-      'api',
-      '--hostname',
-      'github.com',
-      `repos/${spec.repository}/releases/assets/${spec.assetId}`,
-      '-H',
-      'Accept: application/octet-stream',
-    ],
-    { encoding: 'buffer', maxBuffer: spec.bytes + 65536, timeout: 300000 },
-  );
-  assert.equal(stdout.length, spec.bytes, 'CI input archive byte count differs');
-  assert.equal(
-    createHash('sha256').update(stdout).digest('hex'),
-    spec.sha256,
-    'CI input archive SHA-256 differs',
-  );
   const archive = join(work, 'approved.tar.gz');
-  await writeFile(archive, stdout, { flag: 'wx', mode: 0o600 });
+  // Make a private, byte/hash-authenticated copy before extracting. This process
+  // has no token and never requests network access.
+  await copyAuthenticated(source, archive, { bytes: spec.bytes, sha256: spec.sha256 });
   const staged = join(work, 'inputs');
   await mkdir(staged);
   // The exact archive digest above authenticates the reviewed regular-file inventory.

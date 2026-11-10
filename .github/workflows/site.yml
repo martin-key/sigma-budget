@@ -799,8 +799,32 @@ jobs:
         if: always()
         run: test -z "$(git status --porcelain -- data/release)"
 
+  node-inputs:
+    # Draft assets need push access. This job runs no checkout or project code;
+    # the token is exposed only to the fixed download, then all bytes are pinned.
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Download only the approved repository-owned CI archive
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api --hostname github.com repos/midt-bg/sigma-budget/releases/assets/733218674 -H 'Accept: application/octet-stream' > "$RUNNER_TEMP/registered-node-inputs.tar.gz"
+          printf '%s  %s\n' '8617be55dad2d9605ac1c83876685d68650ecd3b709b4066ea8b018dd416090e' "$RUNNER_TEMP/registered-node-inputs.tar.gz" | sha256sum --check
+          test "$(stat -c '%s' "$RUNNER_TEMP/registered-node-inputs.tar.gz")" = 151787132
+      - uses: actions/upload-artifact@v4
+        with:
+          name: registered-node-input-archive
+          path: ${{ runner.temp }}/registered-node-inputs.tar.gz
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error
+
   node-import:
     # Required actual-source acceptance. A missing restored snapshot fails; no core acceptance skip.
+    needs: [node-inputs]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -814,22 +838,12 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @sigma-budget/etl... build
-      - name: Restore the authenticated acquired input snapshot
-        id: registered-input-cache
-        uses: actions/cache/restore@v4
+      - uses: actions/download-artifact@v4
         with:
-          path: ${{ runner.temp }}/registered-node-inputs
-          key: registered-node-inputs-v2-${{ hashFiles('data/sources.yaml', 'data/datasets.yaml', 'data/originals.sha256', 'scripts/registered-node-inputs.json') }}
-      - name: Authenticate the reviewed archive when the cache is absent
-        if: steps.registered-input-cache.outputs.cache-hit != 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: node scripts/restore-node-input-cache.mjs "$RUNNER_TEMP/registered-node-inputs"
-      - uses: actions/cache/save@v4
-        if: steps.registered-input-cache.outputs.cache-hit != 'true'
-        with:
-          path: ${{ runner.temp }}/registered-node-inputs
-          key: ${{ steps.registered-input-cache.outputs.cache-primary-key }}
+          name: registered-node-input-archive
+          path: ${{ runner.temp }}/registered-node-input-archive
+      - name: Authenticate the reviewed archive and every registered input
+        run: node scripts/restore-node-input-cache.mjs "$RUNNER_TEMP/registered-node-input-archive/registered-node-inputs.tar.gz" "$RUNNER_TEMP/registered-node-inputs"
       - name: Actual Node readers, complete rules, double build and local recorded-code replay
         run: node scripts/node-import-acceptance.mjs "$RUNNER_TEMP/registered-node-inputs" "$RUNNER_TEMP/node-acceptance" 2026-11-10
       - uses: actions/setup-python@v5
