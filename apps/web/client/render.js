@@ -83,7 +83,8 @@ function makeCtx(route, params, query, o) {
     const target = byId[id] || byKey[id];
     const variant = ['S10', 'S11'].includes(route.id) && ['S10', 'S11'].includes(target?.id) && ['bill', 'billMc'].includes(query.variant) ? { variant: query.variant } : {};
     const primary = ['S01', 'S04'].includes(route.id) && (target?.periods === 'all' || target?.periods?.includes?.(DEFAULT_PERIOD)) ? { per: DEFAULT_PERIOD } : {};
-    return periodHref(selectedPeriod.key, id, params, { ...primary, ...variant, ...q });
+    const display = store.get('unit') === 'pct' || query.unit === 'eur' ? { unit: store.get('unit') } : {};
+    return periodHref(selectedPeriod.key, id, params, { ...primary, ...variant, ...display, ...q });
   };
   return {
     route, params, query, data: {}, missing: [], failed: [], period: selectedPeriod, store,

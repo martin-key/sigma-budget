@@ -55,6 +55,7 @@ export function go(addr, o = {}) {
   if (query.per != null) target = internal(canonHash(segs, { ...query, per: resolvePeriod(query.per).resolved }));
   const per = store.get('period');
   if (!query.per && per !== DEFAULT_PERIOD && (resolved.route.periods === 'all' || resolved.route.periods?.includes?.(per))) target += (target.includes('?') ? '&' : '?') + 'per=' + per;
+  if (query.unit == null && store.get('unit') === 'pct') target += (target.includes('?') ? '&' : '?') + 'unit=pct';
   target = toHref(target);
   if (target === hereHref()) { window.scrollTo(0, 0); $view()?.querySelector('h1')?.focus({ preventScroll: true }); return; }
   saveScroll();
@@ -207,7 +208,12 @@ async function render(kind) {
   curK = k;
 
   applying = true;
-  try { store.set('periodRequested', query.per ?? null); store.set('periodNotice', ''); store.set('period', periodResolution.resolved); } finally { applying = false; }
+  try {
+    store.set('periodRequested', query.per ?? null);
+    store.set('periodNotice', '');
+    store.set('period', periodResolution.resolved);
+    if (query.unit != null) store.set('unit', query.unit);
+  } finally { applying = false; }
 
   // the first render over a page the server drew (app/, apps/web/workers/app.ts; data-prerendered names its address): its HTML is already the screen, so no skeleton in between and no rise-in or count-up of what is already shown
   // (dropStalePrerender has taken the mark off an HTML that is the screen of another address)
@@ -324,6 +330,7 @@ function onStore(key) {
     const per = store.get('period');
     setQuery({ per: per === DEFAULT_PERIOD ? null : per }, { rerender: false });
   }
+  if (key === 'unit') setQuery({ unit: store.get('unit') }, { rerender: false });
   clearTimeout(onStore.t);
   onStore.t = setTimeout(() => {
     render('rerender');

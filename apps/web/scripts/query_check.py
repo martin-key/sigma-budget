@@ -59,8 +59,8 @@ def main():
     import json, subprocess
     metadata = json.loads(subprocess.check_output(['node', '--input-type=module', '-e', "import {ROUTES} from './apps/web/app/lib/routes.ts'; import {SCREEN_QUERY} from './apps/web/app/lib/query-params.ts'; console.log(JSON.stringify({routes:ROUTES,every:SCREEN_QUERY}));"], cwd=ROOT))
     # Raw per selects a visible notice, so it must survive query filtering even for aliases/unknowns.
-    if metadata['every'] != ['per', 'demo']:
-        print('FAIL shared query must retain raw per and demo')
+    if metadata['every'] != ['per', 'demo', 'unit']:
+        print('FAIL shared query must retain raw per, demo and display unit')
         return 1
     every = set(metadata['every'])
     bad, n = [], 0
