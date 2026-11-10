@@ -6,7 +6,12 @@
   "exports": {
     ".": "./dist/index.js",
     "./readers/workbooks": "./dist/readers/workbooks/index.js",
-    "./readers/execution": "./dist/readers/execution/index.js"
+    "./readers/execution": "./dist/readers/execution/index.js",
+    "./readers/documents": "./dist/readers/documents/index.js",
+    "./readers/snapshots": "./dist/readers/snapshots/index.js",
+    "./readers/pdf": "./dist/readers/pdf/index.js",
+    "./readers/annual": "./dist/readers/annual/index.js",
+    "./release-client": "./dist/release-client/index.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
@@ -15,7 +20,9 @@
   },
   "dependencies": {
     "@sigma-budget/dataset-schema": "workspace:*",
+    "htmlparser2": "10.1.0",
     "jsts": "2.12.1",
+    "mupdf": "1.26.4",
     "pako": "2.1.0",
     "saxes": "6.0.0",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
