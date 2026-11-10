@@ -147,7 +147,9 @@ export async function readProgrammeSevenZip(
   const timeout = options.timeoutMs ?? ARCHIVE_LIMITS.timeoutMs;
   assert(Number.isSafeInteger(timeout) && timeout > 0 && timeout <= 60_000, 'Invalid 7z timeout');
   const worker = new Worker(new URL('./archive-worker.js', import.meta.url), {
-    execArgv: process.execArgv.filter((a) => !a.startsWith('--input-type')),
+    // V8 heap/prototype flags are not accepted in Worker execArgv. The worker
+    // has its own finite resourceLimits below; permission flags are retained.
+    execArgv: process.execArgv.filter((a) => !['--input-type','--disable-proto','--max-old-space-size'].some(flag => a.startsWith(flag))),
     workerData: { bytes, wasmModule: options.wasmModule },
     resourceLimits: { maxOldGenerationSizeMb: 256, maxYoungGenerationSizeMb: 32 },
   });
