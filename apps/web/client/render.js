@@ -83,7 +83,8 @@ function makeCtx(route, params, query, o) {
     const target = byId[id] || byKey[id];
     const variant = ['S10', 'S11'].includes(route.id) && ['S10', 'S11'].includes(target?.id) && ['bill', 'billMc'].includes(query.variant) ? { variant: query.variant } : {};
     const primary = ['S01', 'S04'].includes(route.id) && (target?.periods === 'all' || target?.periods?.includes?.(DEFAULT_PERIOD)) ? { per: DEFAULT_PERIOD } : {};
-    return periodHref(selectedPeriod.key, id, params, { ...primary, ...variant, ...q });
+    const display = store.get('unit') === 'pct' || query.unit === 'eur' ? { unit: store.get('unit') } : {};
+    return periodHref(selectedPeriod.key, id, params, { ...primary, ...variant, ...display, ...q });
   };
   return {
     route, params, query, data: {}, missing: [], failed: [], period: selectedPeriod, store,
@@ -226,7 +227,7 @@ export async function build(route, params, query, o = {}) {
   if (o.stale?.()) throw aborted();
   const parts = out && typeof out === 'object' && !(out instanceof SafeHtml) && !Array.isArray(out) ? out : { body: out };
   const title = parts.title ?? safeCall(mod.title || (() => route.title), ctx, route.title);
-  const pageCrumbs = mod.crumbs ? safeCall(mod.crumbs, ctx, null) : null;
+  const pageCrumbs = parts.crumbs ?? (mod.crumbs ? safeCall(mod.crumbs, ctx, null) : null);
   return {
     ...base, view: 'ready', mod, ctx, title,
     eyebrow: parts.eyebrow ?? eyebrowFor(route), accent: parts.accent,

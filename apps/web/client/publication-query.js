@@ -11,7 +11,10 @@ const HISTORICAL_DEBT_TARGETS = [
   's17-t-interest', 's17-t-issued', 's17-t-limits', 's17-t-newdebt',
 ];
 
-/** Resolve legacy publication choices before screen identity, SSR, caching and sharing.
+/** A shareable display unit; URL values override the browser's saved preference. */
+export const viewUnit = value => value === 'eur' || value === 'pct' ? value : null;
+
+/** Resolve publication and display choices before screen identity, SSR, caching and sharing.
  * @param {string | undefined} routeId
  * @param {Record<string, string>} params
  * @param {Record<string, string>} query
@@ -19,6 +22,7 @@ const HISTORICAL_DEBT_TARGETS = [
  */
 export function publicationQuery(routeId, params = {}, query = {}) {
   const result = { ...query };
+  if (result.unit != null && !viewUnit(result.unit)) delete result.unit;
   // These introductions always describe the current bill, rather than the session's historical period.
   if (routeId === 'S01' || routeId === 'S04') delete result.per;
   if (routeId === 'S34' && !result.dokument && isBudgetPlan(result)) result.dokument = 'plan';
