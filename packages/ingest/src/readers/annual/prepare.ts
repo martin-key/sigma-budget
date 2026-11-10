@@ -38,33 +38,37 @@ const inside = (a: string, b: string) => {
   const r = relative(a, b);
   return !r || (!isAbsolute(r) && r !== '..' && !r.startsWith('..' + sep));
 };
+/** Check the nearest existing ancestor with realpath: this detects a symlink at
+ * any ancestor without requesting read permission for unrelated parent trees.
+ * Missing descendants are created individually, with the same no-link checks. */
 export async function safePath(path: string, createDirs = false): Promise<void> {
-  const absolute = resolve(path);
-  let current = resolve(sep);
-  for (const part of absolute.split(sep).filter(Boolean)) {
-    current = resolve(current, part);
+  const absolute = resolve(path), missing: string[] = [];
+  let current = absolute;
+  for (;;) {
     try {
-      const s = await lstat(current);
-      assert(
-        !s.isSymbolicLink() &&
-          (current === absolute ? s.isFile() || s.isDirectory() : s.isDirectory()),
-        'Unsafe path: ' + current,
-      );
-      assert((await realpath(current)) === current, 'Symlink path: ' + current);
-      if (s.isFile()) assert(s.nlink === 1, 'Hardlinked file: ' + current);
-    } catch (e) {
-      if ((e as NodeJS.ErrnoException).code !== 'ENOENT') throw e;
-      if (createDirs) {
-        await mkdir(current);
-        const s = await lstat(current);
-        assert(
-          s.isDirectory() && !s.isSymbolicLink() && (await realpath(current)) === current,
-          'Unsafe created directory',
-        );
-      }
+      const entry = await lstat(current);
+      assert(!entry.isSymbolicLink() &&
+        (current === absolute ? entry.isFile() || entry.isDirectory() : entry.isDirectory()),
+        'Unsafe path: ' + current);
+      assert(await realpath(current) === current, 'Symlink path: ' + current);
+      if (entry.isFile()) assert(entry.nlink === 1, 'Hardlinked file: ' + current);
+      break;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+      missing.push(current);
+      const parent = dirname(current);
+      assert(parent !== current, 'Missing filesystem root');
+      current = parent;
     }
   }
+  if (createDirs) for (const directory of missing.reverse()) {
+    await mkdir(directory);
+    const entry = await lstat(directory);
+    assert(entry.isDirectory() && !entry.isSymbolicLink() && await realpath(directory) === directory,
+      'Unsafe created directory');
+  }
 }
+
 async function read(path: string, maxBytes: number): Promise<Buffer> {
   await safePath(path);
   const f = await open(path, constants.O_RDONLY | constants.O_NOFOLLOW);
