@@ -1,5 +1,7 @@
-import { verifyNodeProof } from '@sigma-budget/ingest/release-client';
-// Local build input only. A Python candidate keeps its manifest/validation next
+// Vite loads this before workspace builds; use the shared verifier's source so
+// a clean checkout does not require ingest's generated dist to read its config.
+import { verifyNodeProof } from '../../../packages/ingest/src/release-client/node-proof';
+// Local build input only. A validated candidate keeps its manifest/validation next
 // to data/; packaging it must not publish into the checkout's data/release.
 import { createHash } from 'node:crypto';
 import {
@@ -36,8 +38,8 @@ function files(root: string, prefix = ''): string[] {
 }
 
 /** Verify all packaged bytes, including the successful production validation
- * report. This verifies a candidate receipt; numerical validation is Python's
- * budget build/validate, not a second implementation in the Vite config. */
+ * report. This verifies a candidate receipt; numerical validation runs in the
+ * recorded producer's build/validate, not a second implementation in Vite. */
 export function readCandidate(directory: string): Candidate {
   try {
     const root = resolve(directory);
