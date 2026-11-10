@@ -153,7 +153,7 @@ export class Context {
     return this.dataFiles().filter((f) => f.endsWith('.json'));
   }
   bytes(rel: string): Buffer {
-    return readFileSync(safePath(this.root, `${this.dataDir}/${rel}`));
+    return readFileSync(safePath(this.outputRoot, `${this.dataDir}/${rel}`));
   }
   text(rel: string): string {
     if (!this.textCache.has(rel))
@@ -173,7 +173,7 @@ export class Context {
     return this.jsonCache.get(rel);
   }
   exists(rel: string): boolean {
-    return existsSync(safePath(this.root, `${this.dataDir}/${rel}`));
+    return existsSync(safePath(this.outputRoot, `${this.dataDir}/${rel}`));
   }
   proto(rel: string): unknown {
     const name = rel.startsWith('src/') ? rel.slice(4) : rel;

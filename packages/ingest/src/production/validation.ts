@@ -1,3 +1,4 @@
+import {productionSourceGroups} from './source-validation.js';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { Context } from '../validate/context.js';
@@ -45,7 +46,8 @@ export function readExecutionLaw(pdf: {bytes:Uint8Array;sha256:string}):Executio
 export function validateProduction(context:Readonly<ExecutionContext>,prepared:PreparedProduction):{completeValidation:true;groups:ValidationGroup[]}{
   const ctx=new Context(context.exportRoot,context.buildDate,'data',context.candidateRoot);
   const expected=prepared.independentIndirect;
-  const groups:Group<Context>[]=[...foundationGroups,...wave15Groups,
+  const sourceGroups=productionSourceGroups(context,prepared);
+  const groups:Group<Context>[]=[...sourceGroups,...foundationGroups,...wave15Groups,
     {name:'CORE',description:'core source and derived contract',run:core},
     {name:'CATALOG',description:'actual owner inventory and gzip/schema facts',run:catalog},
     {name:'BUDGET2027',description:'physical annual PDF gates and publication rules',run(c){const check=budget2027(c);for(const role of ['forecast','bill'] as const)check.ok(prepared.annual[role].tables!==undefined,'physical '+role+' PDF was decoded and freshness verified');return check;}},
@@ -56,7 +58,7 @@ export function validateProduction(context:Readonly<ExecutionContext>,prepared:P
     ...independentRuleGroups({nap:readNapRows,indirect(originals){for(const [role,o] of Object.entries(originals)){if(o.sha256!==prepared.originals[role]?.sha256||sha256(o.bytes)!==o.sha256)throw new Error('Independent indirect original changed: '+role);}return expected;},executionLaw:readExecutionLaw}),
     {name:'REGISTRY',description:'registered closure, owners, sources, pinned inputs and exported code',run(){const c=new Check('REGISTRY');const paths=context.inputs.map(f=>f.path);c.ok(paths.length>0&&new Set(paths).size===paths.length,'authenticated declared input closure');const exported=readFileSync(join(context.scratchRoot,'exported-paths.json'),'utf8');const registry=validateRegistry(context.exportRoot,{trackedPaths:JSON.parse(exported),outputRoot:context.candidateRoot,lifecycleMetadata:true,onCheck:()=>c.n++});for(const p of registry.errors)c.fail(p);c.fact('Registry inspected recorded export inventory; lifecycle owns releases/current.json after package hashing');return c;}},
   ];
-  const wanted=[...REQUIRED_VALIDATION_GROUPS,'REGISTRY',...debtLocalSafetyGroups.map(g=>g.name)];
+  const wanted=[...REQUIRED_VALIDATION_GROUPS,'REGISTRY',...debtLocalSafetyGroups.map(g=>g.name),...sourceGroups.map(g=>g.name)];
   const result=runGroups(groups,ctx,wanted);
   for(const c of result.groups)applyExceptions(c,true);
   const output=result.groups.map(c=>({group:c.name,status:c.problems.length?'FAIL' as const:c.warnings.length?'WARN' as const:'OK' as const,checks:c.n,summary:c.facts.join('; '),problems:c.problems,warnings:c.warnings}));
