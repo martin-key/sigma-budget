@@ -3,7 +3,11 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "exports": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./readers/workbooks": "./dist/readers/workbooks/index.js",
+    "./readers/execution": "./dist/readers/execution/index.js"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc",
@@ -13,6 +17,8 @@
     "@sigma-budget/dataset-schema": "workspace:*",
     "jsts": "2.12.1",
     "pako": "2.1.0",
+    "saxes": "6.0.0",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "yaml": "2.9.1"
   },
   "devDependencies": {
