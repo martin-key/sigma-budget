@@ -135,6 +135,15 @@ export class Context {
     realpathSync(root);
     safePath(root, dataDir);
   }
+  sourceExists(rel: string): boolean {
+    return existsSync(safePath(this.root, `data/originals/${rel}`));
+  }
+  sourceBytes(rel: string): Buffer {
+    return readFileSync(safePath(this.root, `data/originals/${rel}`));
+  }
+  dataDirectory(rel: string): string[] {
+    return readdirSync(safePath(this.root, `${this.dataDir}/${rel}`)).sort();
+  }
   dataFiles(): string[] {
     return files(this.root, this.dataDir, true);
   }

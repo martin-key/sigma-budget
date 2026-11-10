@@ -1,0 +1,467 @@
+[
+  {
+    "name": "skipped-mapping",
+    "group": "PROGRAMS",
+    "full": true,
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries/0200.json",
+        "path": [
+          "skipped"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "skipped-string",
+    "group": "PROGRAMS",
+    "full": true,
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries/0200.json",
+        "path": [
+          "skipped"
+        ],
+        "value": ""
+      }
+    ]
+  },
+  {
+    "name": "skipped-list",
+    "group": "PROGRAMS",
+    "full": true,
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries/0200.json",
+        "path": [
+          "skipped"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "bill-source-mapping",
+    "group": "LAW",
+    "full": true,
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "source"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "bill-source-list",
+    "group": "LAW",
+    "full": true,
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "source"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "ministry-source-mapping",
+    "group": "BUDGETS",
+    "full": true,
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "meta",
+          "source"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "ministry-source-list",
+    "group": "BUDGETS",
+    "full": true,
+    "ops": [
+      {
+        "op": "set",
+        "file": "ministries.json",
+        "path": [
+          "meta",
+          "source"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "exceptions-mapping",
+    "group": "LAW",
+    "full": true,
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "inForce",
+          "exceptions"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "exceptions-list",
+    "group": "LAW",
+    "full": true,
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "bills",
+          0,
+          "inForce",
+          "exceptions"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "changed-lines-mapping",
+    "group": "LAW",
+    "full": true,
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "lines"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "changed-lines-list",
+    "group": "LAW",
+    "full": true,
+    "ops": [
+      {
+        "op": "set",
+        "file": "law.json",
+        "path": [
+          "changes",
+          0,
+          "lines"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "revenue-rowIds-mapping",
+    "group": "REVENUE",
+    "full": true,
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          0,
+          "rowIds"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "revenue-rowIds-list",
+    "group": "REVENUE",
+    "full": true,
+    "ops": [
+      {
+        "op": "set",
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          0,
+          "rowIds"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "function-versions-mapping",
+    "group": "EXPENDITURE",
+    "full": true,
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "versions"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "function-versions-list",
+    "group": "EXPENDITURE",
+    "full": true,
+    "ops": [
+      {
+        "op": "set",
+        "file": "expenditure.json",
+        "path": [
+          "functions",
+          "versions"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "macro-row-float",
+    "group": "ANNEX3",
+    "full": true,
+    "ops": [
+      {
+        "op": "rawSet",
+        "file": "outlook.json",
+        "path": [
+          "macroRows",
+          0
+        ],
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "macro-row-exponent",
+    "group": "ANNEX3",
+    "full": true,
+    "ops": [
+      {
+        "op": "rawSet",
+        "file": "outlook.json",
+        "path": [
+          "macroRows",
+          0
+        ],
+        "token": "0e0"
+      }
+    ]
+  },
+  {
+    "name": "macro-group-float",
+    "group": "ANNEX3",
+    "full": true,
+    "ops": [
+      {
+        "op": "rawSet",
+        "file": "outlook.json",
+        "path": [
+          "macroGroups",
+          0
+        ],
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "macro-group-exponent",
+    "group": "ANNEX3",
+    "full": true,
+    "ops": [
+      {
+        "op": "rawSet",
+        "file": "outlook.json",
+        "path": [
+          "macroGroups",
+          0
+        ],
+        "token": "0e0"
+      }
+    ]
+  },
+  {
+    "name": "version-float",
+    "group": "ANNEX3",
+    "full": true,
+    "ops": [
+      {
+        "op": "rawSet",
+        "file": "outlook.json",
+        "path": [
+          "versions",
+          0
+        ],
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "version-exponent",
+    "group": "ANNEX3",
+    "full": true,
+    "ops": [
+      {
+        "op": "rawSet",
+        "file": "outlook.json",
+        "path": [
+          "versions",
+          0
+        ],
+        "token": "0e0"
+      }
+    ]
+  },
+  {
+    "name": "revenue-group-float",
+    "group": "REVENUE",
+    "full": true,
+    "ops": [
+      {
+        "op": "rawSet",
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          0
+        ],
+        "token": "0.0"
+      }
+    ]
+  },
+  {
+    "name": "revenue-group-exponent",
+    "group": "REVENUE",
+    "full": true,
+    "ops": [
+      {
+        "op": "rawSet",
+        "file": "revenue.json",
+        "path": [
+          "groups",
+          0
+        ],
+        "token": "0e0"
+      }
+    ]
+  },
+  {
+    "name": "years-string",
+    "group": "ANNEX3",
+    "full": true,
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "years"
+        ],
+        "value": ""
+      }
+    ]
+  },
+  {
+    "name": "years-mapping",
+    "group": "ANNEX3",
+    "full": true,
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "years"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "years-false",
+    "group": "ANNEX3",
+    "full": true,
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "years"
+        ],
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "vintage-string",
+    "group": "ANNEX3",
+    "full": true,
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "vintage"
+        ],
+        "value": ""
+      }
+    ]
+  },
+  {
+    "name": "vintage-mapping",
+    "group": "ANNEX3",
+    "full": true,
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "vintage"
+        ],
+        "value": {}
+      }
+    ]
+  },
+  {
+    "name": "vintage-false",
+    "group": "ANNEX3",
+    "full": true,
+    "ops": [
+      {
+        "op": "set",
+        "file": "outlook.json",
+        "path": [
+          "vintage"
+        ],
+        "value": false
+      }
+    ]
+  }
+]

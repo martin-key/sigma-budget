@@ -243,6 +243,57 @@ jobs:
         if: always()
         run: git diff --exit-code -- data/release
 
+  validation-wave15:
+    # Frozen 810 donor corpus; no source refresh or live-release comparison.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: pipeline/requirements.lock
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: |
+          python -m pip install --require-hashes -r pipeline/requirements.lock
+          pnpm install --frozen-lockfile
+          pnpm --filter @sigma-budget/ingest... build
+          pnpm --filter @sigma-budget/ingest typecheck
+      - name: Verify frozen donor oracles
+        run: |
+          python packages/ingest/test/fixtures/validate14/generate_oracle.py --check
+          python packages/ingest/test/fixtures/validate14/generate_groups_oracle.py --check
+          python packages/ingest/test/fixtures/validate15/generate_oracle.py --check
+          python packages/ingest/test/fixtures/validate15/generate_unicode.py --check
+          python packages/ingest/test/fixtures/validate15/compound/generate_oracle.py --check
+          python packages/ingest/test/fixtures/validate15/native/generate_oracle.py --check
+          python packages/ingest/test/fixtures/validate15/iterable/generate_oracle.py --check
+      - name: Fiscal and legal validation parity
+        env:
+          WAVE15_PARITY_REPORT: tmp/ts-migration/candidates/15/report.json
+          WAVE15_COMPOUND_REPORT: tmp/ts-migration/candidates/15/compound-report.json
+          WAVE15_NATIVE_REPORT: tmp/ts-migration/candidates/15/native-report.json
+          WAVE15_ITERABLE_REPORT: tmp/ts-migration/candidates/15/iterable-report.json
+        run: pnpm --filter @sigma-budget/ingest exec vitest run src/validate/wave15-parity.test.ts src/validate/wave15-sum.test.ts src/validate/wave15-unicode.test.ts src/validate/wave15-compound.test.ts src/validate/wave15-native.test.ts src/validate/wave15-iterable.test.ts src/validate/ordered-json.test.ts src/validate/cli15.test.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: validation-wave15-parity
+          path: |
+            tmp/ts-migration/candidates/15/report.json
+            tmp/ts-migration/candidates/15/compound-report.json
+            tmp/ts-migration/candidates/15/native-report.json
+            tmp/ts-migration/candidates/15/iterable-report.json
+          if-no-files-found: error
+      - name: Release remains unchanged
+        if: always()
+        run: git diff --exit-code -- data/release
+
   validation-wave17a:
     # Offline donor evidence; production Python validation remains authoritative.
     runs-on: ubuntu-latest
