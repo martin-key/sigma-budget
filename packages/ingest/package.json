@@ -3,7 +3,11 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "exports": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./readers/pdf": "./dist/readers/pdf/index.js",
+    "./readers/annual": "./dist/readers/annual/index.js"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc",
@@ -12,6 +16,7 @@
   "dependencies": {
     "@sigma-budget/dataset-schema": "workspace:*",
     "jsts": "2.12.1",
+    "mupdf": "1.26.4",
     "pako": "2.1.0",
     "yaml": "2.9.1"
   },
