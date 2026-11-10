@@ -1,3 +1,4 @@
+import { verifyNodeProof } from '@sigma-budget/ingest/release-client';
 // Local build input only. A Python candidate keeps its manifest/validation next
 // to data/; packaging it must not publish into the checkout's data/release.
 import { createHash } from 'node:crypto';
@@ -69,7 +70,9 @@ export function readCandidate(directory: string): Candidate {
       if (!listed.has(path)) fail(`required output is not in manifest: ${path}`);
     for (const path of files(join(root, 'data')))
       if (!listed.has(`data/${path}`)) fail(`unlisted candidate data: data/${path}`);
-    const validation = JSON.parse(readFileSync(join(root, 'validation.json'), 'utf8'));
+    const validationBytes = readFileSync(join(root, 'validation.json'));
+    const validation = JSON.parse(validationBytes.toString('utf8'));
+    verifyNodeProof(doc, manifest, receipt, validationBytes);
     if (
       validation.passed !== true ||
       !Array.isArray(validation.groups) ||
@@ -108,6 +111,7 @@ export function copyCandidate(candidate: Candidate, destination: string) {
   mkdirSync(metadata, { recursive: true });
   writeFileSync(join(metadata, 'manifest.json'), candidate.manifest);
   cpSync(join(candidate.root, 'validation.json'), join(metadata, 'validation.json'));
+  cpSync(join(candidate.root, 'receipt.json'), join(metadata, 'receipt.json'));
   writeFileSync(
     join(target, 'releases/current.json'),
     JSON.stringify({

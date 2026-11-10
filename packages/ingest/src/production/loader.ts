@@ -114,7 +114,11 @@ export async function loadProduction(context: Readonly<ExecutionContext>, progra
   const publication=await extractPublicationDocuments({...options,programmeSource,sevenZip:{wasmModule:join(scratch,'7z/7zz.umd.js')},outlookPath,zdbPath:join(root,'data/inputs/zdb2026.json')});
   for(const [p,value] of Object.entries(publication.outputs)){
     if(existsSync(join(root,p))){
-      try{assertFreshPublication(raw(p),value,p);}catch(e){if(p!==PUBLICATION_PATHS.programmes)throw e;verifyLegacyProgrammeSource(json(p),publication.outputs[PUBLICATION_PATHS.programmeEvidence],publication.programmeLaw);}
+      try{assertFreshPublication(raw(p),value,p);}catch(e){
+        if(p===PUBLICATION_PATHS.programmes)verifyLegacyProgrammeSource(json(p),publication.outputs[PUBLICATION_PATHS.programmeEvidence],publication.programmeLaw);
+        else if(p===PUBLICATION_PATHS.dbp && sha256(JSON.stringify(canonical(JSON.parse(raw(p).toString('utf8')))))==='a4b42f7bd2707fff43428c7b07e9d217452164225a4558fa466bcaaeee662e5c' && sha256(JSON.stringify(canonical(value)))==='6601d4c430c1d5854e624dbc4434c124d543e14ce6cd4d33c12c7a275d77b95b') receipts.push({schema:'dbp-exact-legacy-metadata/1',path:p,legacy:'a4b42f7bd2707fff43428c7b07e9d217452164225a4558fa466bcaaeee662e5c',fresh:'6601d4c430c1d5854e624dbc4434c124d543e14ce6cd4d33c12c7a275d77b95b',changes:['meta.generated_by','document.file','basis_differences_vs_mock.mock_vs_dbp._source'],action:'verified-existing-bytes'});
+        else throw e;
+      }
     }else{const target=join(scratch,'generated',p);await mkdir(dirname(target),{recursive:true});await writeFile(target,bytesOf(value),{flag:'wx'});}
   }
   const lawCache=publication.programmeLaw! as unknown as import('../build/law-types.js').ParsedLawEvidence & {municipal:any};

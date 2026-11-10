@@ -1,3 +1,4 @@
+import { verifyNodeProof } from './node-proof.js';
 import { join, resolve } from 'node:path';
 import { fileFacts, listFiles, readSafeBytes, safeDirectory, sha256 } from './files.js';
 import {
@@ -202,6 +203,7 @@ export async function preflightRelease(options: PackageOptions): Promise<Release
     )
   )
     throw new ReleaseError(2, 'Package validation did not pass');
+  verifyNodeProof(manifest, manifestBytes, receipt, await readSafeBytes(join(root,'validation.json'),maxObjectBytes));
   return { root, originals, releaseId, manifestBytes, manifest, objects, maxObjectBytes };
 }
 export const fileUrlPath = (file: ReleaseFile) =>
