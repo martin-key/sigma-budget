@@ -259,6 +259,12 @@ def build_release(commit, inputs_dir, out, build_date, env, log=print):
     commit = git("rev-parse", commit)
     inputs_dir = inputs_dir.resolve()
     out = out.resolve()
+    # --site is the explicit checkout-write operation. A candidate output must
+    # never erase source inputs or the checkout's published/committed data.
+    protected = (ROOT.resolve() / "data", inputs_dir / "data")
+    if out == ROOT.resolve() or out in ROOT.resolve().parents or any(
+            out == p or p in out.parents or out in p.parents for p in protected):
+        raise Fail(EXIT_INVALID, "candidate --out must be separate from checkout data and input data; use tmp/candidate")
     if out.exists():
         shutil.rmtree(out)
     out.mkdir(parents=True)
@@ -361,11 +367,16 @@ def make_manifest(src, commit, inputs, missing, out, build_date):
         if d["status"] == "pending":
             e["reason"] = d.get("reason")
         coverage.append(e)
+    # Older commits remain reproducible. New rebuilds always emit this gate's
+    # evidence, including the generated intermediate hashes and raw PDF pins.
+    evidence = src / "tmp/budget-2027-extractions.json"
+    extractions = {"extractions": json.loads(evidence.read_text(encoding="utf-8"))} if evidence.is_file() else {}
     return {
         "manifest_schema": MANIFEST_SCHEMA,
         "data_schema": {"execution": exe["meta"]["schema"], "execution-provenance": prov["schema"], "other": "docs/data-spec.md"},
         "provenance_format": prov["schema"],
         "processing": {
+            **extractions,
             "code": {"repository": "https://github.com/midt-bg/sigma-budget", "commit": commit},
             "environment": {"dockerfile": "pipeline/Dockerfile", "dockerfile_sha256": sha256_file(src / "pipeline" / "Dockerfile"),
                             "lock": "pipeline/requirements.lock", "lock_sha256": sha256_file(src / "pipeline" / "requirements.lock")},

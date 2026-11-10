@@ -24,6 +24,9 @@ def main(argv):
     env = dict(os.environ)
     if args.build_date:
         env["BUILD_DATE"] = args.build_date
+    # Both PDF readers run on every candidate build, before any dataset builder.
+    # Existing extractions must match the pinned originals byte for byte.
+    run(["-m", "budget_pipeline.sources.prepare_inputs", "--budget-2027-only"], env)
     for name in ("measure-labels", "tax-assumptions"):
         (ROOT / "data/release/mock" / (name + ".json")).unlink(missing_ok=True)
     run(["-m", "budget_pipeline.extract.legacy_inputs", "municipal", "--check"], env)
