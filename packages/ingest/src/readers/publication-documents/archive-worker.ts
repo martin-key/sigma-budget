@@ -2,6 +2,7 @@
 import { parentPort, workerData } from 'node:worker_threads';
 import { createRequire } from 'node:module';
 import { readFile } from 'node:fs/promises';
+import { constants as fsConstants } from 'node:fs';
 import { dirname, join, isAbsolute } from 'node:path';
 import { ARCHIVE_LIMITS, archivePath } from './archive.js';
 import { assert } from '../pdf/index.js';
@@ -15,7 +16,14 @@ async function main() {
   const factory = createRequire(import.meta.url)(workerData.wasmModule);
   let log: string[] = [];
   let length = 0;
-  const module = await factory({
+  // Emscripten 1.2.0 initializes NODEFS flags even though only MEMFS is mounted.
+  // Its deprecated binding('constants') is unavailable under Node permissions.
+  // Supply only the equivalent public read-only constants; other bindings remain denied.
+  const originalBinding = (process as any).binding;
+  (process as any).binding = (name: string) => name === 'constants'
+    ? {fs: Object.freeze({...fsConstants})} : originalBinding(name);
+  let module: any;
+  try { module = await factory({
     noInitialRun: true,
     print: (s: string) => {
       s = String(s ?? '');
@@ -28,7 +36,7 @@ async function main() {
       assert(length <= 2 * 1024 * 1024, '7z error limit');
     },
     stdin: () => null,
-  });
+  }); } finally { (process as any).binding = originalBinding; }
   module.FS.writeFile('/archive.7z', new Uint8Array(workerData.bytes));
   const run = (args: string[]) => {
     try {
