@@ -42,7 +42,7 @@ export async function productionCli(argv:string[],deps:ProductionCliDependencies
   const get=(key:string,fallback?:string)=>m.get(key)??fallback;
   const required=(key:string)=>{const v=get(key);if(!v)throw new ReleaseError(2,'Required option '+key);return v;};
   const allowed=(keys:string[])=>{for(const k of m.keys())if(!['--root','--json',...keys].includes(k))throw new ReleaseError(2,'Unknown option '+k);};
-  const pass=(omit:string[]=[])=>args.filter((v,i)=>v!=='--json'&&v!=='--root'&&args[i-1]!=='--root'&&!omit.includes(v)&&!omit.includes(args[i-1]??''));
+  const pass=(omit:string[]=[])=>{const result:string[]=[];for(let i=0;i<args.length;i++){const key=args[i]!;if(['--root','--json',...omit].includes(key)){if(!boolean.has(key))i++;}else{result.push(key);if(!boolean.has(key))result.push(args[++i]!);}}return result;};
   const inputs=resolve(get('--inputs',get('--originals',root))!);
   const freshTemp=async()=>temporary??=await mkdtemp(join(tmpdir(),'budget-node-command-'));
   if(['collect','import-source','source-status','drift'].includes(command!)){
