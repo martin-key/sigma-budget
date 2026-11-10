@@ -228,10 +228,11 @@ jobs:
         run: |
           python packages/ingest/test/fixtures/validate14/generate_oracle.py --check
           python packages/ingest/test/fixtures/validate14/generate_groups_oracle.py --check
+          python packages/ingest/test/fixtures/validate17a/gzip-cache/generate_oracle.py --check
       - name: Scoped validation and corrupted corpus parity
         env:
           WAVE14_PARITY_REPORT: tmp/ts-migration/candidates/14/report.json
-        run: pnpm --filter @sigma-budget/ingest exec vitest run src/validate
+        run: pnpm --filter @sigma-budget/ingest exec vitest run src/validate/execution-contract.test.ts src/validate/groups.test.ts src/validate/helpers.test.ts src/validate/gzip-cache.test.ts src/validate/safety.test.ts src/validate/registry-report.test.ts src/validate/json-error.test.ts src/validate/route-catalogue.test.ts
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -261,27 +262,48 @@ jobs:
         env:
           PYTHONDONTWRITEBYTECODE: '1'
         run: |
-          python packages/ingest/test/fixtures/validate17a/generate_oracle.py --check
-          python packages/ingest/test/fixtures/validate17a/generate_oracle.py --extra --check
-          python packages/ingest/test/fixtures/validate17a/review/generate_oracle.py --check
-          python packages/ingest/test/fixtures/validate17a/key-whitespace/generate_oracle.py --check
-          python packages/ingest/test/fixtures/validate17a/integer/generate_oracle.py --check
-          python packages/ingest/test/fixtures/validate17a/integer-limit/generate_oracle.py --check
-          python packages/ingest/test/fixtures/validate17a/reader/generate_oracle.py --check
-          python packages/ingest/test/fixtures/validate17a/boundaries/generate_oracle.py --check
-          python packages/ingest/test/fixtures/validate17a/containers/generate_oracle.py --check
-          python packages/ingest/test/fixtures/validate17a/iterators/generate_oracle.py --check
-          python packages/ingest/test/fixtures/validate17a/catalog-semantics/generate_oracle.py --check
-          python packages/ingest/test/fixtures/validate17a/short-circuit/generate_oracle.py --check
-          python packages/ingest/test/fixtures/validate17a/membership/generate_oracle.py --check
-          python packages/ingest/test/fixtures/validate17a/year-keys/generate_oracle.py --check
-          python packages/ingest/test/fixtures/validate17a/source-strings/generate_oracle.py --check
-          python packages/ingest/test/fixtures/validate17a/wrapper/generate.py --check
+          python - <<'PY'
+          from concurrent.futures import ThreadPoolExecutor
+          import subprocess
+          import sys
+
+          proofs = [
+              ["packages/ingest/test/fixtures/validate17a/generate_oracle.py", "--check"],
+              ["packages/ingest/test/fixtures/validate17a/generate_oracle.py", "--extra", "--check"],
+              ["packages/ingest/test/fixtures/validate17a/review/generate_oracle.py", "--check"],
+              ["packages/ingest/test/fixtures/validate17a/key-whitespace/generate_oracle.py", "--check"],
+              ["packages/ingest/test/fixtures/validate17a/integer/generate_oracle.py", "--check"],
+              ["packages/ingest/test/fixtures/validate17a/integer-limit/generate_oracle.py", "--check"],
+              ["packages/ingest/test/fixtures/validate17a/reader/generate_oracle.py", "--check"],
+              ["packages/ingest/test/fixtures/validate17a/boundaries/generate_oracle.py", "--check"],
+              ["packages/ingest/test/fixtures/validate17a/containers/generate_oracle.py", "--check"],
+              ["packages/ingest/test/fixtures/validate17a/iterators/generate_oracle.py", "--check"],
+              ["packages/ingest/test/fixtures/validate17a/catalog-semantics/generate_oracle.py", "--check"],
+              ["packages/ingest/test/fixtures/validate17a/short-circuit/generate_oracle.py", "--check"],
+              ["packages/ingest/test/fixtures/validate17a/membership/generate_oracle.py", "--check"],
+              ["packages/ingest/test/fixtures/validate17a/year-keys/generate_oracle.py", "--check"],
+              ["packages/ingest/test/fixtures/validate17a/source-strings/generate_oracle.py", "--check"],
+              ["packages/ingest/test/fixtures/validate17a/gzip-cache/generate_oracle.py", "--check"],
+              ["packages/ingest/test/fixtures/validate17a/wrapper/generate.py", "--check"],
+          ]
+          assert len(proofs) == 17 and len({tuple(args) for args in proofs}) == 17
+          assert all(args[-1] == '--check' for args in proofs)
+
+          def verify(args):
+              print('VERIFY', *args, flush=True)
+              result = subprocess.run([sys.executable, *args], check=False)
+              print('PASS' if result.returncode == 0 else 'FAIL', *args, flush=True)
+              return result.returncode
+
+          with ThreadPoolExecutor(max_workers=2) as pool:
+              exits = list(pool.map(verify, proofs))
+          raise SystemExit(1 if any(exits) else 0)
+          PY
       - run: pnpm --filter @sigma-budget/ingest... build
       - name: Scoped differential and CLI safety tests
         env:
           WAVE17A_PARITY_REPORT: tmp/ts-migration/candidates/17a/report.json
-        run: pnpm --filter @sigma-budget/ingest exec vitest run src/validate/catalog.test.ts src/validate/catalog-integer.test.ts src/validate/catalog-order.test.ts src/validate/route-catalogue.test.ts src/validate/cli17a.test.ts src/validate/json-error.test.ts src/validate/registry-report.test.ts
+        run: pnpm --filter @sigma-budget/ingest exec vitest run src/validate/catalog.test.ts src/validate/catalog-integer.test.ts src/validate/catalog-order.test.ts src/validate/route-catalogue.test.ts src/validate/cli17a.test.ts src/validate/json-error.test.ts src/validate/registry-report.test.ts src/validate/gzip-cache.test.ts
       - uses: actions/upload-artifact@v4
         if: always()
         with:

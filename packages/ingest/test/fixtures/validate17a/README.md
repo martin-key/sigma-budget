@@ -88,3 +88,15 @@ Source scalar/container types retain Python string representations. Prefixes
 count Unicode codepoints and preserve floating tokens in list representations;
 method lookup, dictionary slice errors and short-circuit order match Python
 3.12. The earlier 31 year-key scenarios and all previous evidence are unchanged.
+
+`gzip-cache/generate_oracle.py --check` captures 309 unchanged Python gzip
+sizes and input hashes. Its six API tests cover repeated and mutated buffers,
+offset views, binary inputs with identical decoded text, many distinct values,
+and inputs at and above the 16 MiB cache budget. Compression still uses Pako
+level 9; the bounded cache keys exact byte snapshots rather than paths, buffer
+identity or decoded UTF-8. Earlier source and validator observations are unchanged.
+
+CI checks the same 17 oracle commands with at most two read-only Python
+processes on the existing runner. Every command retains `--check`, and any
+nonzero exit fails the lane before the TypeScript tests begin. Job deadlines
+and the test worker count are unchanged.
