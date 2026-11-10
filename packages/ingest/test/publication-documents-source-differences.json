@@ -1,0 +1,1606 @@
+{
+  "comparison": "complete programme source JSON vs fresh Python 3.12",
+  "differences": [
+    {
+      "path": "/budgets/1000/problems",
+      "op": "length",
+      "actual": 20,
+      "expected": 28
+    },
+    {
+      "path": "/budgets/1000/problems/18",
+      "op": "change",
+      "actual": "с. 32 Прогноза 2027 total: числата не дават сборовете на таблицата ([])",
+      "expected": "с. 32 Прогноза 2027 1000.02.00: числата не дават сборовете на таблицата ([])"
+    },
+    {
+      "path": "/budgets/1000/problems/19",
+      "op": "change",
+      "actual": "с. 33 Прогноза 2028 total: числата не дават сборовете на таблицата ([])",
+      "expected": "с. 32 Прогноза 2027 1000.02.01: числата не дават сборовете на таблицата ([])"
+    },
+    {
+      "path": "/budgets/1000/programs/1000.01.00/by_year/Прогноза 2027",
+      "op": "add",
+      "actual": {
+        "cons_total": 48368.7,
+        "cons_prb": 43911.6,
+        "cons_other": 4457.1,
+        "dept_total": 27376.4,
+        "dept_prb": 22919.3,
+        "dept_other": 4457.1,
+        "adm_total": 20992.3,
+        "adm_prb": 20992.3,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1000/programs/1000.01.00/by_year/Прогноза 2028",
+      "op": "add",
+      "actual": {
+        "cons_total": 46532.7,
+        "cons_prb": 42280.5,
+        "cons_other": 4252.2,
+        "dept_total": 27171.5,
+        "dept_prb": 22919.3,
+        "dept_other": 4252.2,
+        "adm_total": 19361.2,
+        "adm_prb": 19361.2,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1000/programs/1000.01.01/by_year/Прогноза 2027",
+      "op": "add",
+      "actual": {
+        "cons_total": 10604.7,
+        "cons_prb": 10543.1,
+        "cons_other": 61.6,
+        "dept_total": 8912.7,
+        "dept_prb": 8851.1,
+        "dept_other": 61.6,
+        "adm_total": 1692,
+        "adm_prb": 1692,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1000/programs/1000.01.01/by_year/Прогноза 2028",
+      "op": "add",
+      "actual": {
+        "cons_total": 10671.6,
+        "cons_prb": 10610,
+        "cons_other": 61.6,
+        "dept_total": 8912.7,
+        "dept_prb": 8851.1,
+        "dept_other": 61.6,
+        "adm_total": 1758.9,
+        "adm_prb": 1758.9,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1000/programs/1000.01.02/by_year/Прогноза 2027",
+      "op": "add",
+      "actual": {
+        "cons_total": 37764,
+        "cons_prb": 33368.5,
+        "cons_other": 4395.5,
+        "dept_total": 18463.7,
+        "dept_prb": 14068.2,
+        "dept_other": 4395.5,
+        "adm_total": 19300.3,
+        "adm_prb": 19300.3,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1000/programs/1000.01.02/by_year/Прогноза 2028",
+      "op": "add",
+      "actual": {
+        "cons_total": 35861.1,
+        "cons_prb": 31670.5,
+        "cons_other": 4190.6,
+        "dept_total": 18258.8,
+        "dept_prb": 14068.2,
+        "dept_other": 4190.6,
+        "adm_total": 17602.3,
+        "adm_prb": 17602.3,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1000/programs/1000.02.00/by_year/Прогноза 2027",
+      "op": "add",
+      "actual": {
+        "cons_total": 278686.2,
+        "cons_prb": 278535.9,
+        "cons_other": 150.3,
+        "dept_total": 276749,
+        "dept_prb": 276598.7,
+        "dept_other": 150.3,
+        "adm_total": 1937.2,
+        "adm_prb": 1937.2,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1000/programs/1000.02.00/by_year/Прогноза 2028",
+      "op": "add",
+      "actual": {
+        "cons_total": 278671.8,
+        "cons_prb": 278535.9,
+        "cons_other": 135.9,
+        "dept_total": 276734.6,
+        "dept_prb": 276598.7,
+        "dept_other": 135.9,
+        "adm_total": 1937.2,
+        "adm_prb": 1937.2,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1000/programs/1000.02.01/by_year/Прогноза 2027",
+      "op": "add",
+      "actual": {
+        "cons_total": 278686.2,
+        "cons_prb": 278535.9,
+        "cons_other": 150.3,
+        "dept_total": 276749,
+        "dept_prb": 276598.7,
+        "dept_other": 150.3,
+        "adm_total": 1937.2,
+        "adm_prb": 1937.2,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1000/programs/1000.02.01/by_year/Прогноза 2028",
+      "op": "add",
+      "actual": {
+        "cons_total": 278671.8,
+        "cons_prb": 278535.9,
+        "cons_other": 135.9,
+        "dept_total": 276734.6,
+        "dept_prb": 276598.7,
+        "dept_other": 135.9,
+        "adm_total": 1937.2,
+        "adm_prb": 1937.2,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1000/programs/1000.03.00/by_year/Прогноза 2027",
+      "op": "add",
+      "actual": {
+        "cons_total": 39389.4,
+        "cons_prb": 39389.4,
+        "cons_other": 0,
+        "dept_total": 39389.4,
+        "dept_prb": 39389.4,
+        "dept_other": 0,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1000/programs/1000.03.00/by_year/Прогноза 2028",
+      "op": "add",
+      "actual": {
+        "cons_total": 39389.4,
+        "cons_prb": 39389.4,
+        "cons_other": 0,
+        "dept_total": 39389.4,
+        "dept_prb": 39389.4,
+        "dept_other": 0,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1000/programs/1000.03.01/by_year/Прогноза 2027",
+      "op": "add",
+      "actual": {
+        "cons_total": 1098.4,
+        "cons_prb": 1098.4,
+        "cons_other": 0,
+        "dept_total": 1098.4,
+        "dept_prb": 1098.4,
+        "dept_other": 0,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1000/programs/1000.03.01/by_year/Прогноза 2028",
+      "op": "add",
+      "actual": {
+        "cons_total": 1098.4,
+        "cons_prb": 1098.4,
+        "cons_other": 0,
+        "dept_total": 1098.4,
+        "dept_prb": 1098.4,
+        "dept_other": 0,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1000/programs/1000.03.02/by_year/Прогноза 2027",
+      "op": "add",
+      "actual": {
+        "cons_total": 38291,
+        "cons_prb": 38291,
+        "cons_other": 0,
+        "dept_total": 38291,
+        "dept_prb": 38291,
+        "dept_other": 0,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1000/programs/1000.03.02/by_year/Прогноза 2028",
+      "op": "add",
+      "actual": {
+        "cons_total": 38291,
+        "cons_prb": 38291,
+        "cons_other": 0,
+        "dept_total": 38291,
+        "dept_prb": 38291,
+        "dept_other": 0,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1000/programs/1000.04.00/by_year/Прогноза 2027",
+      "op": "add",
+      "actual": {
+        "cons_total": 3438.6,
+        "cons_prb": 3438.6,
+        "cons_other": 0,
+        "dept_total": 1386.1,
+        "dept_prb": 1386.1,
+        "dept_other": 0,
+        "adm_total": 2052.5,
+        "adm_prb": 2052.5,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1000/programs/1000.04.00/by_year/Прогноза 2028",
+      "op": "add",
+      "actual": {
+        "cons_total": 3438.6,
+        "cons_prb": 3438.6,
+        "cons_other": 0,
+        "dept_total": 1386.1,
+        "dept_prb": 1386.1,
+        "dept_other": 0,
+        "adm_total": 2052.5,
+        "adm_prb": 2052.5,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1000/programs/1000.04.01/by_year/Прогноза 2027",
+      "op": "add",
+      "actual": {
+        "cons_total": 3438.6,
+        "cons_prb": 3438.6,
+        "cons_other": 0,
+        "dept_total": 1386.1,
+        "dept_prb": 1386.1,
+        "dept_other": 0,
+        "adm_total": 2052.5,
+        "adm_prb": 2052.5,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1000/programs/1000.04.01/by_year/Прогноза 2028",
+      "op": "add",
+      "actual": {
+        "cons_total": 3438.6,
+        "cons_prb": 3438.6,
+        "cons_other": 0,
+        "dept_total": 1386.1,
+        "dept_prb": 1386.1,
+        "dept_other": 0,
+        "adm_total": 2052.5,
+        "adm_prb": 2052.5,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1000/programs/total/by_year/Прогноза 2027",
+      "op": "add",
+      "actual": {
+        "cons_total": 388616.7,
+        "cons_prb": 383948.6,
+        "cons_other": 4668.1,
+        "dept_total": 363480.3,
+        "dept_prb": 358872.9,
+        "dept_other": 4607.4,
+        "adm_total": 25136.4,
+        "adm_prb": 25075.7,
+        "adm_other": 60.7
+      }
+    },
+    {
+      "path": "/budgets/1000/programs/total/by_year/Прогноза 2028",
+      "op": "add",
+      "actual": {
+        "cons_total": 387688.8,
+        "cons_prb": 383240.8,
+        "cons_other": 4448,
+        "dept_total": 364184.3,
+        "dept_prb": 359796.2,
+        "dept_other": 4388.1,
+        "adm_total": 23504.5,
+        "adm_prb": 23444.6,
+        "adm_other": 59.9
+      }
+    },
+    {
+      "path": "/budgets/1000/years_complete",
+      "op": "length",
+      "actual": 5,
+      "expected": 3
+    },
+    {
+      "path": "/budgets/1100/check/policies_sum_to_total_2026",
+      "op": "add",
+      "actual": true
+    },
+    {
+      "path": "/budgets/1100/check/programs_sum_to_policy_2026",
+      "op": "add",
+      "actual": true
+    },
+    {
+      "path": "/budgets/1100/check/consistent",
+      "op": "change",
+      "actual": true,
+      "expected": false
+    },
+    {
+      "path": "/budgets/1100/check/policy_amounts_found_in_law",
+      "op": "change",
+      "actual": 3,
+      "expected": 2
+    },
+    {
+      "path": "/budgets/1100/problems",
+      "op": "length",
+      "actual": 3,
+      "expected": 7
+    },
+    {
+      "path": "/budgets/1100/problems/0",
+      "op": "change",
+      "actual": "с. 14 Прогноза 2027 1100.00.00: числата не дават сборовете на таблицата ([119351.2, 113677.5, 5673.7, 99113.0, 93289.3, 5823.7, 20388.2, 20388.2, 0.0])",
+      "expected": "с. 11 Отчет 2024 1100.01.12: числата не дават сборовете на таблицата ([65868.1, 65868.1, 65318.5, 549.6, 549.6])"
+    },
+    {
+      "path": "/budgets/1100/problems/1",
+      "op": "change",
+      "actual": "с. 14 Прогноза 2027 1100.01.00: числата не дават сборовете на таблицата ([117615.0, 111941.3, 5673.7, 97378.5, 91554.8, 5823.7, 20386.5, 20386.5, 0.0])",
+      "expected": "с. 12 Закон 2025 1100.01.12: числата не дават сборовете на таблицата ([66395.3, 66395.3, 0.0, 66139.7, 0.0, 255.6, 255.6])"
+    },
+    {
+      "path": "/budgets/1100/problems/2",
+      "op": "change",
+      "actual": "с. 14 Прогноза 2027 1100.01.03: числата не дават сборовете на таблицата ([12711.7, 12711.7, 0.0, 1047.9, 897.9, 150.0, 11813.8, 11813.8, 0.0])",
+      "expected": "с. 13 Проект 2026 1100.01.12: числата не дават сборовете на таблицата ([65760.7, 65760.7, 0.0, 65505.1, 0.0, 255.6, 255.6])"
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.00/name",
+      "op": "change",
+      "actual": "Политика в областта на активната двустранна и многостранна дипломация",
+      "expected": "Политика в областта на активната двустранна и многостранна дипломация 1100.01.01 1100.01.02 1100.01.03 1100.01.04 1100.01.05 1100.01.06 1100.01.07 1100.01.08 1100.01.09 1100.01.10 Бюджетна програма \"Принос за формиране на политики на НАТО, обща външна политика и политика на сигурност на ЕС и участие на България в ОССЕ\" Бюджетна програма \"Европейска политика. Регионално и двустранно сътрудничество с държавите от ЮИЕ. Двустранни отношения с държавите-членки на ЕС, ЕИП, ЕАСТ и с Обединеното Кралство\" Бюджетна програма \"Многостранно сътрудничество и глобални политики\" Бюджетна програма \"Двустранни отношения с държави извън ЕС и ЕИП\" Бюджетна програма \"Консулска дипломация и управление на кризи\" Бюджетна програма \"Международно сътрудничество за развитие и хуманитарна помощ\" Бюджетна програма \"Изграждане на позитивен образ на България зад граница и подкрепа за български общности, организации и инициатив на българиет в чужбина\" Бюджетна програма \"Осигуряване на прозрачност и общественна подкрепа за външната политика\" Бюджетна програма \"Обучение и професионална квалификация на служителите в дипломатическата служба\" Бюджетна програма \"Ефективно функциониране на външнополитическата дейност\" 5 236,4 246,3 12 711,7 107,4 8 209,8 3 499,5 0,0 56,2 12,8 235,2 5 236,4 246,3 12 711,7 107,4 196,8 3 499,5 0,0 56,2 12,8 235,2 598,2 96,1 315,0 78,2 196,8 0,0 0,0 56,2 12,8 235,2 0,0 8 013,0 4 638,2 150,2 12 396,7 29,2 0,0 3 499,5 0,0 0,0 0,0 0,0 4 638,2 150,2 12 396,7 29,2 0,0 3 499,5 0,0 0,0 0,0 0,0"
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.01/by_year/Закон 2025",
+      "op": "add",
+      "actual": {
+        "cons_total": 5236.4,
+        "cons_prb": 5236.4,
+        "cons_other": 0,
+        "dept_total": 598.2,
+        "dept_prb": 598.2,
+        "dept_other": 0,
+        "adm_total": 4638.2,
+        "adm_prb": 4638.2,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.01/by_year/Отчет 2024",
+      "op": "add",
+      "actual": {
+        "cons_total": 9350.2,
+        "cons_prb": 9350.2,
+        "cons_other": 0,
+        "dept_total": 125.3,
+        "dept_prb": 125.3,
+        "dept_other": 0,
+        "adm_total": 9224.9,
+        "adm_prb": 9224.9,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.01/by_year/Прогноза 2027",
+      "op": "add",
+      "actual": {
+        "cons_total": 5236.4,
+        "cons_prb": 5236.4,
+        "cons_other": 0,
+        "dept_total": 598.2,
+        "dept_prb": 598.2,
+        "dept_other": 0,
+        "adm_total": 4638.2,
+        "adm_prb": 4638.2,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.01/by_year/Прогноза 2028",
+      "op": "add",
+      "actual": {
+        "cons_total": 5236.4,
+        "cons_prb": 5236.4,
+        "cons_other": 0,
+        "dept_total": 598.2,
+        "dept_prb": 598.2,
+        "dept_other": 0,
+        "adm_total": 4638.2,
+        "adm_prb": 4638.2,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.01/by_year/Проект 2026",
+      "op": "add",
+      "actual": {
+        "cons_total": 28432.7,
+        "cons_prb": 28432.7,
+        "cons_other": 0,
+        "dept_total": 598.2,
+        "dept_prb": 598.2,
+        "dept_other": 0,
+        "adm_total": 27834.5,
+        "adm_prb": 27834.5,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.02/by_year/Закон 2025",
+      "op": "add",
+      "actual": {
+        "cons_total": 246.3,
+        "cons_prb": 246.3,
+        "cons_other": 0,
+        "dept_total": 96.1,
+        "dept_prb": 96.1,
+        "dept_other": 0,
+        "adm_total": 150.2,
+        "adm_prb": 150.2,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.02/by_year/Отчет 2024",
+      "op": "add",
+      "actual": {
+        "cons_total": 366.7,
+        "cons_prb": 366.7,
+        "cons_other": 0,
+        "dept_total": 51.7,
+        "dept_prb": 51.7,
+        "dept_other": 0,
+        "adm_total": 315,
+        "adm_prb": 315,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.02/by_year/Прогноза 2027",
+      "op": "add",
+      "actual": {
+        "cons_total": 246.3,
+        "cons_prb": 246.3,
+        "cons_other": 0,
+        "dept_total": 96.1,
+        "dept_prb": 96.1,
+        "dept_other": 0,
+        "adm_total": 150.2,
+        "adm_prb": 150.2,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.02/by_year/Прогноза 2028",
+      "op": "add",
+      "actual": {
+        "cons_total": 246.3,
+        "cons_prb": 246.3,
+        "cons_other": 0,
+        "dept_total": 96.1,
+        "dept_prb": 96.1,
+        "dept_other": 0,
+        "adm_total": 150.2,
+        "adm_prb": 150.2,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.02/by_year/Проект 2026",
+      "op": "add",
+      "actual": {
+        "cons_total": 246.3,
+        "cons_prb": 246.3,
+        "cons_other": 0,
+        "dept_total": 96.1,
+        "dept_prb": 96.1,
+        "dept_other": 0,
+        "adm_total": 150.2,
+        "adm_prb": 150.2,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.03/by_year/Закон 2025",
+      "op": "add",
+      "actual": {
+        "cons_total": 12711.7,
+        "cons_prb": 12711.7,
+        "cons_other": 0,
+        "dept_total": 315,
+        "dept_prb": 315,
+        "dept_other": 0,
+        "adm_total": 12396.7,
+        "adm_prb": 12396.7,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.03/by_year/Отчет 2024",
+      "op": "add",
+      "actual": {
+        "cons_total": 7193.1,
+        "cons_prb": 7193.1,
+        "cons_other": 0,
+        "dept_total": 138.8,
+        "dept_prb": 138.8,
+        "dept_other": 0,
+        "adm_total": 7054.3,
+        "adm_prb": 7054.3,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.03/by_year/Прогноза 2028",
+      "op": "add",
+      "actual": {
+        "cons_total": 12711.7,
+        "cons_prb": 12711.7,
+        "cons_other": 0,
+        "dept_total": 897.9,
+        "dept_prb": 897.9,
+        "dept_other": 0,
+        "adm_total": 11813.8,
+        "adm_prb": 11813.8,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.03/by_year/Проект 2026",
+      "op": "add",
+      "actual": {
+        "cons_total": 12711.7,
+        "cons_prb": 12711.7,
+        "cons_other": 0,
+        "dept_total": 897.9,
+        "dept_prb": 897.9,
+        "dept_other": 0,
+        "adm_total": 11813.8,
+        "adm_prb": 11813.8,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.04/by_year/Закон 2025",
+      "op": "add",
+      "actual": {
+        "cons_total": 107.4,
+        "cons_prb": 107.4,
+        "cons_other": 0,
+        "dept_total": 78.2,
+        "dept_prb": 78.2,
+        "dept_other": 0,
+        "adm_total": 29.2,
+        "adm_prb": 29.2,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.04/by_year/Отчет 2024",
+      "op": "add",
+      "actual": {
+        "cons_total": 63.8,
+        "cons_prb": 63.8,
+        "cons_other": 0,
+        "dept_total": 25.1,
+        "dept_prb": 25.1,
+        "dept_other": 0,
+        "adm_total": 38.7,
+        "adm_prb": 38.7,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.04/by_year/Прогноза 2027",
+      "op": "add",
+      "actual": {
+        "cons_total": 107.4,
+        "cons_prb": 107.4,
+        "cons_other": 0,
+        "dept_total": 78.2,
+        "dept_prb": 78.2,
+        "dept_other": 0,
+        "adm_total": 29.2,
+        "adm_prb": 29.2,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.04/by_year/Прогноза 2028",
+      "op": "add",
+      "actual": {
+        "cons_total": 107.4,
+        "cons_prb": 107.4,
+        "cons_other": 0,
+        "dept_total": 78.2,
+        "dept_prb": 78.2,
+        "dept_other": 0,
+        "adm_total": 29.2,
+        "adm_prb": 29.2,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.04/by_year/Проект 2026",
+      "op": "add",
+      "actual": {
+        "cons_total": 107.4,
+        "cons_prb": 107.4,
+        "cons_other": 0,
+        "dept_total": 78.2,
+        "dept_prb": 78.2,
+        "dept_other": 0,
+        "adm_total": 29.2,
+        "adm_prb": 29.2,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.05/by_year/Закон 2025",
+      "op": "add",
+      "actual": {
+        "cons_total": 8209.8,
+        "cons_prb": 196.8,
+        "cons_other": 8013,
+        "dept_total": 8209.8,
+        "dept_prb": 196.8,
+        "dept_other": 8013,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.05/by_year/Отчет 2024",
+      "op": "add",
+      "actual": {
+        "cons_total": 3335.8,
+        "cons_prb": 229.9,
+        "cons_other": 3105.9,
+        "dept_total": 3335.8,
+        "dept_prb": 229.9,
+        "dept_other": 3105.9,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.05/by_year/Прогноза 2027",
+      "op": "add",
+      "actual": {
+        "cons_total": 5870.5,
+        "cons_prb": 196.8,
+        "cons_other": 5673.7,
+        "dept_total": 5870.5,
+        "dept_prb": 196.8,
+        "dept_other": 5673.7,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.05/by_year/Прогноза 2028",
+      "op": "add",
+      "actual": {
+        "cons_total": 790.9,
+        "cons_prb": 196.8,
+        "cons_other": 594.1,
+        "dept_total": 790.9,
+        "dept_prb": 196.8,
+        "dept_other": 594.1,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.05/by_year/Проект 2026",
+      "op": "add",
+      "actual": {
+        "cons_total": 5476.2,
+        "cons_prb": 196.8,
+        "cons_other": 5279.4,
+        "dept_total": 5476.2,
+        "dept_prb": 196.8,
+        "dept_other": 5279.4,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.06/by_year/Закон 2025",
+      "op": "add",
+      "actual": {
+        "cons_total": 3499.5,
+        "cons_prb": 3499.5,
+        "cons_other": 0,
+        "dept_total": 0,
+        "dept_prb": 0,
+        "dept_other": 0,
+        "adm_total": 3499.5,
+        "adm_prb": 3499.5,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.06/by_year/Отчет 2024",
+      "op": "add",
+      "actual": {
+        "cons_total": 2248.2,
+        "cons_prb": 2248.2,
+        "cons_other": 0,
+        "dept_total": 0,
+        "dept_prb": 0,
+        "dept_other": 0,
+        "adm_total": 2248.2,
+        "adm_prb": 2248.2,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.06/by_year/Прогноза 2027",
+      "op": "add",
+      "actual": {
+        "cons_total": 3499.5,
+        "cons_prb": 3499.5,
+        "cons_other": 0,
+        "dept_total": 0,
+        "dept_prb": 0,
+        "dept_other": 0,
+        "adm_total": 3499.5,
+        "adm_prb": 3499.5,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.06/by_year/Прогноза 2028",
+      "op": "add",
+      "actual": {
+        "cons_total": 3499.5,
+        "cons_prb": 3499.5,
+        "cons_other": 0,
+        "dept_total": 0,
+        "dept_prb": 0,
+        "dept_other": 0,
+        "adm_total": 3499.5,
+        "adm_prb": 3499.5,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.06/by_year/Проект 2026",
+      "op": "add",
+      "actual": {
+        "cons_total": 3499.5,
+        "cons_prb": 3499.5,
+        "cons_other": 0,
+        "dept_total": 0,
+        "dept_prb": 0,
+        "dept_other": 0,
+        "adm_total": 3499.5,
+        "adm_prb": 3499.5,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.07/by_year/Закон 2025",
+      "op": "add",
+      "actual": {
+        "cons_total": 0,
+        "cons_prb": 0,
+        "cons_other": 0,
+        "dept_total": 0,
+        "dept_prb": 0,
+        "dept_other": 0,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.07/by_year/Отчет 2024",
+      "op": "add",
+      "actual": {
+        "cons_total": 1498.4,
+        "cons_prb": 1498.4,
+        "cons_other": 0,
+        "dept_total": 339.3,
+        "dept_prb": 339.3,
+        "dept_other": 0,
+        "adm_total": 1159.1,
+        "adm_prb": 1159.1,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.07/by_year/Прогноза 2027",
+      "op": "add",
+      "actual": {
+        "cons_total": 0,
+        "cons_prb": 0,
+        "cons_other": 0,
+        "dept_total": 0,
+        "dept_prb": 0,
+        "dept_other": 0,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.07/by_year/Прогноза 2028",
+      "op": "add",
+      "actual": {
+        "cons_total": 0,
+        "cons_prb": 0,
+        "cons_other": 0,
+        "dept_total": 0,
+        "dept_prb": 0,
+        "dept_other": 0,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.07/by_year/Проект 2026",
+      "op": "add",
+      "actual": {
+        "cons_total": 1750,
+        "cons_prb": 1750,
+        "cons_other": 0,
+        "dept_total": 0,
+        "dept_prb": 0,
+        "dept_other": 0,
+        "adm_total": 1750,
+        "adm_prb": 1750,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.08/by_year/Закон 2025",
+      "op": "add",
+      "actual": {
+        "cons_total": 56.2,
+        "cons_prb": 56.2,
+        "cons_other": 0,
+        "dept_total": 56.2,
+        "dept_prb": 56.2,
+        "dept_other": 0,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.08/by_year/Отчет 2024",
+      "op": "add",
+      "actual": {
+        "cons_total": 273.6,
+        "cons_prb": 273.6,
+        "cons_other": 0,
+        "dept_total": 4.3,
+        "dept_prb": 4.3,
+        "dept_other": 0,
+        "adm_total": 269.3,
+        "adm_prb": 269.3,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.08/by_year/Прогноза 2027",
+      "op": "add",
+      "actual": {
+        "cons_total": 56.2,
+        "cons_prb": 56.2,
+        "cons_other": 0,
+        "dept_total": 56.2,
+        "dept_prb": 56.2,
+        "dept_other": 0,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.08/by_year/Прогноза 2028",
+      "op": "add",
+      "actual": {
+        "cons_total": 56.2,
+        "cons_prb": 56.2,
+        "cons_other": 0,
+        "dept_total": 56.2,
+        "dept_prb": 56.2,
+        "dept_other": 0,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.08/by_year/Проект 2026",
+      "op": "add",
+      "actual": {
+        "cons_total": 56.2,
+        "cons_prb": 56.2,
+        "cons_other": 0,
+        "dept_total": 56.2,
+        "dept_prb": 56.2,
+        "dept_other": 0,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.09/by_year/Закон 2025",
+      "op": "add",
+      "actual": {
+        "cons_total": 12.8,
+        "cons_prb": 12.8,
+        "cons_other": 0,
+        "dept_total": 12.8,
+        "dept_prb": 12.8,
+        "dept_other": 0,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.09/by_year/Отчет 2024",
+      "op": "add",
+      "actual": {
+        "cons_total": 23.8,
+        "cons_prb": 23.8,
+        "cons_other": 0,
+        "dept_total": 23.8,
+        "dept_prb": 23.8,
+        "dept_other": 0,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.09/by_year/Прогноза 2027",
+      "op": "add",
+      "actual": {
+        "cons_total": 12.8,
+        "cons_prb": 12.8,
+        "cons_other": 0,
+        "dept_total": 12.8,
+        "dept_prb": 12.8,
+        "dept_other": 0,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.09/by_year/Прогноза 2028",
+      "op": "add",
+      "actual": {
+        "cons_total": 12.8,
+        "cons_prb": 12.8,
+        "cons_other": 0,
+        "dept_total": 12.8,
+        "dept_prb": 12.8,
+        "dept_other": 0,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.09/by_year/Проект 2026",
+      "op": "add",
+      "actual": {
+        "cons_total": 12.8,
+        "cons_prb": 12.8,
+        "cons_other": 0,
+        "dept_total": 12.8,
+        "dept_prb": 12.8,
+        "dept_other": 0,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.10/by_year/Закон 2025",
+      "op": "add",
+      "actual": {
+        "cons_total": 235.2,
+        "cons_prb": 235.2,
+        "cons_other": 0,
+        "dept_total": 235.2,
+        "dept_prb": 235.2,
+        "dept_other": 0,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.10/by_year/Отчет 2024",
+      "op": "add",
+      "actual": {
+        "cons_total": 214.4,
+        "cons_prb": 214.4,
+        "cons_other": 0,
+        "dept_total": 214.4,
+        "dept_prb": 214.4,
+        "dept_other": 0,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.12/by_year/Закон 2025",
+      "op": "add",
+      "actual": {
+        "cons_total": 66395.3,
+        "cons_prb": 66395.3,
+        "cons_other": 0,
+        "dept_total": 66139.7,
+        "dept_prb": 66139.7,
+        "dept_other": 0,
+        "adm_total": 255.6,
+        "adm_prb": 255.6,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.12/by_year/Отчет 2024",
+      "op": "add",
+      "actual": {
+        "cons_total": 65868.1,
+        "cons_prb": 65868.1,
+        "cons_other": 0,
+        "dept_total": 65318.5,
+        "dept_prb": 65318.5,
+        "dept_other": 0,
+        "adm_total": 549.6,
+        "adm_prb": 549.6,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.12/by_year/Прогноза 2027",
+      "op": "add",
+      "actual": {
+        "cons_total": 64381.5,
+        "cons_prb": 64381.5,
+        "cons_other": 0,
+        "dept_total": 64125.9,
+        "dept_prb": 64125.9,
+        "dept_other": 0,
+        "adm_total": 255.6,
+        "adm_prb": 255.6,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.12/by_year/Прогноза 2028",
+      "op": "add",
+      "actual": {
+        "cons_total": 65527,
+        "cons_prb": 65527,
+        "cons_other": 0,
+        "dept_total": 65271.4,
+        "dept_prb": 65271.4,
+        "dept_other": 0,
+        "adm_total": 255.6,
+        "adm_prb": 255.6,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.01.12/by_year/Проект 2026",
+      "op": "add",
+      "actual": {
+        "cons_total": 65760.7,
+        "cons_prb": 65760.7,
+        "cons_other": 0,
+        "dept_total": 65505.1,
+        "dept_prb": 65505.1,
+        "dept_other": 0,
+        "adm_total": 255.6,
+        "adm_prb": 255.6,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.02.00/name",
+      "op": "change",
+      "actual": "Политика в областта на публичната дипломация и публичните дейности в подкрепа на целите на външната политика",
+      "expected": "Политика в областта на публичната дипломация и публичните дейности в подкрепа на целите на външната политика 1100.02.01 1100.02.02 1100.03.00 Бюджетна програма \"Публична дипломация\" Бюджетна програма \"Културна дипломация\" Политика в областта на подкрепата за българските общности и лицата с българско самосъзнание зад граница 615,3 312,0 795,0 615,3 312,0 0,0 0,0 615,3 310,3 615,3 310,3 0,0 0,0 0,0 1,7 0,0 1,7"
+    },
+    {
+      "path": "/budgets/1100/programs/1100.02.01/by_year/Закон 2025",
+      "op": "add",
+      "actual": {
+        "cons_total": 581.1,
+        "cons_prb": 581.1,
+        "cons_other": 0,
+        "dept_total": 581.1,
+        "dept_prb": 581.1,
+        "dept_other": 0,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.02.01/by_year/Отчет 2024",
+      "op": "add",
+      "actual": {
+        "cons_total": 686.2,
+        "cons_prb": 686.2,
+        "cons_other": 0,
+        "dept_total": 590.7,
+        "dept_prb": 590.7,
+        "dept_other": 0,
+        "adm_total": 95.5,
+        "adm_prb": 95.5,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.02.01/by_year/Прогноза 2027",
+      "op": "add",
+      "actual": {
+        "cons_total": 618.3,
+        "cons_prb": 618.3,
+        "cons_other": 0,
+        "dept_total": 618.3,
+        "dept_prb": 618.3,
+        "dept_other": 0,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.02.01/by_year/Прогноза 2028",
+      "op": "add",
+      "actual": {
+        "cons_total": 618.3,
+        "cons_prb": 618.3,
+        "cons_other": 0,
+        "dept_total": 618.3,
+        "dept_prb": 618.3,
+        "dept_other": 0,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.02.01/by_year/Проект 2026",
+      "op": "add",
+      "actual": {
+        "cons_total": 615.3,
+        "cons_prb": 615.3,
+        "cons_other": 0,
+        "dept_total": 615.3,
+        "dept_prb": 615.3,
+        "dept_other": 0,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.02.02/by_year/Закон 2025",
+      "op": "add",
+      "actual": {
+        "cons_total": 316.6,
+        "cons_prb": 316.6,
+        "cons_other": 0,
+        "dept_total": 314.9,
+        "dept_prb": 314.9,
+        "dept_other": 0,
+        "adm_total": 1.7,
+        "adm_prb": 1.7,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.02.02/by_year/Отчет 2024",
+      "op": "add",
+      "actual": {
+        "cons_total": 272.7,
+        "cons_prb": 272.7,
+        "cons_other": 0,
+        "dept_total": 271.1,
+        "dept_prb": 271.1,
+        "dept_other": 0,
+        "adm_total": 1.6,
+        "adm_prb": 1.6,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.02.02/by_year/Прогноза 2027",
+      "op": "add",
+      "actual": {
+        "cons_total": 312,
+        "cons_prb": 312,
+        "cons_other": 0,
+        "dept_total": 310.3,
+        "dept_prb": 310.3,
+        "dept_other": 0,
+        "adm_total": 1.7,
+        "adm_prb": 1.7,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.02.02/by_year/Прогноза 2028",
+      "op": "add",
+      "actual": {
+        "cons_total": 312,
+        "cons_prb": 312,
+        "cons_other": 0,
+        "dept_total": 310.3,
+        "dept_prb": 310.3,
+        "dept_other": 0,
+        "adm_total": 1.7,
+        "adm_prb": 1.7,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.02.02/by_year/Проект 2026",
+      "op": "add",
+      "actual": {
+        "cons_total": 312,
+        "cons_prb": 312,
+        "cons_other": 0,
+        "dept_total": 310.3,
+        "dept_prb": 310.3,
+        "dept_other": 0,
+        "adm_total": 1.7,
+        "adm_prb": 1.7,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.03.00/by_year/Закон 2025",
+      "op": "add",
+      "actual": {
+        "cons_total": 766.8,
+        "cons_prb": 766.8,
+        "cons_other": 0,
+        "dept_total": 766.8,
+        "dept_prb": 766.8,
+        "dept_other": 0,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.03.00/by_year/Отчет 2024",
+      "op": "add",
+      "actual": {
+        "cons_total": 724.8,
+        "cons_prb": 724.8,
+        "cons_other": 0,
+        "dept_total": 659.5,
+        "dept_prb": 659.5,
+        "dept_other": 0,
+        "adm_total": 65.3,
+        "adm_prb": 65.3,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.03.00/by_year/Прогноза 2027",
+      "op": "add",
+      "actual": {
+        "cons_total": 805.9,
+        "cons_prb": 805.9,
+        "cons_other": 0,
+        "dept_total": 805.9,
+        "dept_prb": 805.9,
+        "dept_other": 0,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.03.00/by_year/Прогноза 2028",
+      "op": "add",
+      "actual": {
+        "cons_total": 794.7,
+        "cons_prb": 794.7,
+        "cons_other": 0,
+        "dept_total": 794.7,
+        "dept_prb": 794.7,
+        "dept_other": 0,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.03.00/by_year/Проект 2026",
+      "op": "add",
+      "actual": {
+        "cons_total": 795,
+        "cons_prb": 795,
+        "cons_other": 0,
+        "dept_total": 795,
+        "dept_prb": 795,
+        "dept_other": 0,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.03.01/by_year/Закон 2025",
+      "op": "add",
+      "actual": {
+        "cons_total": 766.8,
+        "cons_prb": 766.8,
+        "cons_other": 0,
+        "dept_total": 766.8,
+        "dept_prb": 766.8,
+        "dept_other": 0,
+        "adm_total": 0,
+        "adm_prb": 0,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/programs/1100.03.01/by_year/Отчет 2024",
+      "op": "add",
+      "actual": {
+        "cons_total": 724.8,
+        "cons_prb": 724.8,
+        "cons_other": 0,
+        "dept_total": 659.5,
+        "dept_prb": 659.5,
+        "dept_other": 0,
+        "adm_total": 65.3,
+        "adm_prb": 65.3,
+        "adm_other": 0
+      }
+    },
+    {
+      "path": "/budgets/1100/years_complete",
+      "op": "length",
+      "actual": 5,
+      "expected": 1
+    },
+    {
+      "path": "/validated",
+      "op": "length",
+      "actual": 29,
+      "expected": 28
+    },
+    {
+      "path": "/validated/3",
+      "op": "change",
+      "actual": "1100",
+      "expected": "1200"
+    },
+    {
+      "path": "/validated/4",
+      "op": "change",
+      "actual": "1200",
+      "expected": "1500"
+    },
+    {
+      "path": "/validated/5",
+      "op": "change",
+      "actual": "1500",
+      "expected": "1600"
+    },
+    {
+      "path": "/validated/6",
+      "op": "change",
+      "actual": "1600",
+      "expected": "1700"
+    },
+    {
+      "path": "/validated/7",
+      "op": "change",
+      "actual": "1700",
+      "expected": "1900"
+    },
+    {
+      "path": "/validated/8",
+      "op": "change",
+      "actual": "1900",
+      "expected": "2100"
+    },
+    {
+      "path": "/validated/9",
+      "op": "change",
+      "actual": "2100",
+      "expected": "2200"
+    },
+    {
+      "path": "/validated/10",
+      "op": "change",
+      "actual": "2200",
+      "expected": "3300"
+    },
+    {
+      "path": "/validated/11",
+      "op": "change",
+      "actual": "3300",
+      "expected": "3400"
+    },
+    {
+      "path": "/validated/12",
+      "op": "change",
+      "actual": "3400",
+      "expected": "3700"
+    },
+    {
+      "path": "/validated/13",
+      "op": "change",
+      "actual": "3700",
+      "expected": "3800"
+    },
+    {
+      "path": "/validated/14",
+      "op": "change",
+      "actual": "3800",
+      "expected": "4000"
+    },
+    {
+      "path": "/validated/15",
+      "op": "change",
+      "actual": "4000",
+      "expected": "4100"
+    },
+    {
+      "path": "/validated/16",
+      "op": "change",
+      "actual": "4100",
+      "expected": "4200"
+    },
+    {
+      "path": "/validated/17",
+      "op": "change",
+      "actual": "4200",
+      "expected": "4300"
+    },
+    {
+      "path": "/validated/18",
+      "op": "change",
+      "actual": "4300",
+      "expected": "4500"
+    },
+    {
+      "path": "/validated/19",
+      "op": "change",
+      "actual": "4500",
+      "expected": "4600"
+    },
+    {
+      "path": "/validated/20",
+      "op": "change",
+      "actual": "4600",
+      "expected": "4700"
+    },
+    {
+      "path": "/validated/21",
+      "op": "change",
+      "actual": "4700",
+      "expected": "4800"
+    },
+    {
+      "path": "/validated/22",
+      "op": "change",
+      "actual": "4800",
+      "expected": "5300"
+    },
+    {
+      "path": "/validated/23",
+      "op": "change",
+      "actual": "5300",
+      "expected": "7100"
+    },
+    {
+      "path": "/validated/24",
+      "op": "change",
+      "actual": "7100",
+      "expected": "8200"
+    },
+    {
+      "path": "/validated/25",
+      "op": "change",
+      "actual": "8200",
+      "expected": "8400"
+    },
+    {
+      "path": "/validated/26",
+      "op": "change",
+      "actual": "8400",
+      "expected": "8500"
+    },
+    {
+      "path": "/validated/27",
+      "op": "change",
+      "actual": "8500",
+      "expected": "8600"
+    }
+  ],
+  "allowedDocuments": [
+    "1000",
+    "1100"
+  ],
+  "validatedAddition": "1100",
+  "publication": "complete 44 existing-builder outputs equal",
+  "unverified": []
+}

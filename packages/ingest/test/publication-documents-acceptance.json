@@ -1,0 +1,895 @@
+{
+  "outcome": "pass",
+  "actual": {
+    "law": "complete JSON equals fresh Python 3.12 and current intermediate",
+    "dbp": {
+      "reported": 304,
+      "derived": 14,
+      "checks": 25,
+      "comparison": "complete JSON equals fresh Python 3.12"
+    },
+    "programmePdfs": {
+      "count": 46,
+      "comparison": "complete cells/conflicts/names/labels equal fresh Python 3.12"
+    },
+    "programmeSource": "physical-grid extraction differs from Python find_tables only in recovered 1000/1100 source rows; complete existing-builder publication is identical",
+    "archive": "46 nested ZIP/7z PDFs equal registered PDF pins",
+    "preparation": "absent generation + existing-byte verification + stale fail before writes"
+  },
+  "inherited": [
+    "all 44 programme budget outputs",
+    "DBP full existing builder output"
+  ],
+  "negative": [
+    "corrupt PDF",
+    "wrong DBP hash",
+    "wrong physical column count",
+    "missing quote",
+    "corrupt 7z",
+    "missing original remains unverified; no output",
+    "registered source hash mismatch; no output",
+    "stale evidence",
+    "stale cache retained"
+  ],
+  "unverified": [],
+  "receipts": {
+    "actualInputs": [
+      {
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "source": "zdb",
+        "path": "data/originals/dv/zdb2026_dv69_idMat245041.html",
+        "sha256": "1f5e85a3e1ae95e55c4d331a5f0ab6e97efd1d64ede5ff529886df7e5e12e160",
+        "bytes": 5655187,
+        "readDate": "2026-11-10",
+        "url": "https://dv.parliament.bg/DVWeb/showMaterialDV.jsp?idMat=245041"
+      },
+      {
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "source": "bill",
+        "path": "data/originals/parliament/52-602-01-19.docx",
+        "sha256": "378042f3c6f05aad760099f3b5ccceaf597fd287b28242fe89b99d2a981fc174",
+        "bytes": 1936694,
+        "readDate": "2026-11-10",
+        "url": "https://www.parliament.bg/bills/52/52-602-01-19.docx"
+      },
+      {
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "source": "dbp2027",
+        "path": "data/originals/budget_2027/Draft_Budgetary_Plan_of_the_Republic_of_Bulgaria_for_2027.pdf",
+        "sha256": "8c91cdf4778f2864e1eeb167f14b08d1f68a076ea4ad27a8a4305175a73f1182",
+        "bytes": 1237582,
+        "readDate": "2026-11-10",
+        "url": "https://www.minfin.bg/upload/65334/Draft+Budgetary+Plan+of+the+Republic+of+Bulgaria+for+2027.pdf"
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/0100_Народно събрание.pdf",
+        "sha256": "bc103ceeeaadef1b9420ff91a90dea16e6afec75b8fd8b94cfa581b878137883",
+        "bytes": 1839489,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/0200_Администрация на президента.pdf",
+        "sha256": "4d32f2c01067ef9eadb21eddef040b5d03052969c088c69a1fd4f47ae7bdff57",
+        "bytes": 643704,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/0300_МС.pdf",
+        "sha256": "812a9b6bd7ce502eb2ebcdac69481e14847b22b63fdc334da97e690170ae8c9e",
+        "bytes": 2406866,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/0400_КС.pdf",
+        "sha256": "aa01dc16505223b3b81a9acfa8594115a4eb0940c9c638608310714fb3771ec3",
+        "bytes": 605264,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/0500_СП.pdf",
+        "sha256": "8eb84a6b48bb4c66028d01768a7ab147c279fb0aaf2d10929af42422c94e7620",
+        "bytes": 982302,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/0600_СВ.pdf",
+        "sha256": "0020ba7217682d2cf59cf20b8ecc43390684f3ec6bf0da4f3005b1ac6e7c41ba",
+        "bytes": 1509655,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/1000_МФ.pdf",
+        "sha256": "3a872ed2befe04c734add80d91838a7c8ace5cc2f4edb4404b84cb3fa510b228",
+        "bytes": 2539704,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/1100_МВнР.pdf",
+        "sha256": "4cba21136c3a438e6e910d09ebb57ba8e4a4ddd9fc969cecf327b32c12ba6545",
+        "bytes": 1880031,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/1200_МО.pdf",
+        "sha256": "34d12c4480332d494969aa9357d7638b75c9860e54f42016701c8af70bd5c6f8",
+        "bytes": 1227111,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/1300_МВР.pdf",
+        "sha256": "614f8711445a24d057ddaf3b6e1879fb3fef24737e563ba8974467efe6b7cc59",
+        "bytes": 1374688,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/1400_МП.pdf",
+        "sha256": "14b3c58a88b8689777ed1e891c3357dc561b9251f445690d9ef7af7aeea33741",
+        "bytes": 1522197,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/1500_МТСП.pdf",
+        "sha256": "c93d375d7ae5bb942e5c9c43c3de6506568c1202710bac08ff21f3ff05179177",
+        "bytes": 3199818,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/1600_МЗ.pdf",
+        "sha256": "e9651e4c2d6b5f95d14e353c5ae53224190d7d744da5c5cc78f655a638e96fd2",
+        "bytes": 2932317,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/1700-МОН.pdf",
+        "sha256": "70817e7494eb8aba1cbb094c4ca17f8fac62d2a2f68329ab58d3653fb2c051cf",
+        "bytes": 2234885,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/1800_МК.pdf",
+        "sha256": "504b3c85c8bac40f693b278782c1195ba38cc70e858cec7b493ae51ddaf137b2",
+        "bytes": 2773083,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/1900_МОСВ.pdf",
+        "sha256": "1b3644c4afe5482f2600d1f8321bfc5459453cf54a559dade324e6be82dbdeb6",
+        "bytes": 2238178,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/2000_МИИИ.pdf",
+        "sha256": "0b0fa9573ec0f831aa3ac335a404a1bb98542939488e40cbca53585532130833",
+        "bytes": 2425665,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/2100_МРРБ.pdf",
+        "sha256": "2b3395c274a2e017be983b53fad540f8e98c9e186c8b723ad827d3e692b9c910",
+        "bytes": 1834747,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/2200_МЗХ.pdf",
+        "sha256": "8c39b792c8e2d09371307df5cfd8b9ae16104e0a4ad603bb7adcc1bb13edcb24",
+        "bytes": 3079065,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/2300_МТС.pdf",
+        "sha256": "8bb6d5fc9e2076d6d6ee75032b2a8b1aa671edb6d9781e7022433a85ec1b241e",
+        "bytes": 3451966,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/2400_МЕ.pdf",
+        "sha256": "da8bc8f0521fb810d81b36403406b535ad6e3f0cd2dc5c5790bb21d9dcb4e003",
+        "bytes": 1805436,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/2500_ММС.pdf",
+        "sha256": "fe888e09762b6d25875126377c5cace3b7f2a9a274318eff0e43f8af99764d84",
+        "bytes": 1901425,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/3000_ДАНС.pdf",
+        "sha256": "7efb13177ec958aa989e21fb0f7fc2dd045c2b3bcf68ce7a5d5fe0382c6b71c9",
+        "bytes": 645807,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/3200_КРДОПБГДСРСБНА.pdf",
+        "sha256": "7c5e2482af49b67994329ec7d791812c19544541a34bca32650bb23698032512",
+        "bytes": 711941,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/3300_КЗД.pdf",
+        "sha256": "8be77ac58e80690b425c4971818063af0c08b34f9fa10cb367ff513e9e2af17c",
+        "bytes": 584549,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/3400_КЗЛД.pdf",
+        "sha256": "3e7ccac9d45e055c76bf9a444b8e63f6d91a662980bfe033b32db72617a8e5da",
+        "bytes": 614909,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/3700_КОНПИ.pdf",
+        "sha256": "c3968a6cc8debf7a114eca523e135ba8d12a13ba1df667df51f3e92118921aba",
+        "bytes": 1241152,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/3800_НСО.pdf",
+        "sha256": "1cfa7d2f296154df3dc857db09f60c4130b33deac8dae12d343409c96b4e5064",
+        "bytes": 645657,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/3900_ДАР.pdf",
+        "sha256": "b90f2313cfa5f133eb0690fcd1df7b3c9ea9bd9f727292112025a3116fcb2bfc",
+        "bytes": 583030,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/4000_ОМБУДСМАН.pdf",
+        "sha256": "49b0c36e8101485684a1f89acf4eff26807ac2dfe34e5fb93e2ba6a14e5ec1b9",
+        "bytes": 800653,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/4100_НСИ.pdf",
+        "sha256": "e1067fc47c99d87295de68123865112d63cad02938f439233493fabea6af2af1",
+        "bytes": 680387,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/4200_КЗК.pdf",
+        "sha256": "3db04765e6af32b47237c975af2ab392fd107178e7d65f1c8407a4a8e4adf1b7",
+        "bytes": 591169,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/4300_КРС.pdf",
+        "sha256": "b765e7bdd4a37569d0789f716157fc32bc15567e4cc1839e599bbcf4430977cb",
+        "bytes": 610366,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/4400_СЕМ.pdf",
+        "sha256": "796be48e3073052fafcf0ceafddeb87961b5386fb94e76bf222d7eba8d158ca3",
+        "bytes": 692288,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/4500_КЕВР.pdf",
+        "sha256": "710b49754ec797959c47a09eed9b853510f0054f6841853bd9a0a3c9823985f8",
+        "bytes": 644865,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/4600_АЯР.pdf",
+        "sha256": "7fee24c5ed50b49b6dfe79cda089d9a57f70f03a95d669c3b65c90a438a22889",
+        "bytes": 643303,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/4700_КФН.pdf",
+        "sha256": "05e0f8bfc512b71911c0dc6032bbca3b37853f673f9c6e73bf3adefd74532819",
+        "bytes": 1026953,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/4800_ДКСИ.pdf",
+        "sha256": "4978c557c972c32e1704d2ec32cde310657a15703af7d5d5e63d8964e2612089",
+        "bytes": 601499,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/5300_ДАДРВВЗ.pdf",
+        "sha256": "dc49558b6c22813f1273274f9f9d73f37b57e9791af724b841d5a51eb7206019",
+        "bytes": 667511,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/7100_МТ.pdf",
+        "sha256": "5090317df41e6364c64dc884552537d6886d5153a42d872f5a591cf095ca745e",
+        "bytes": 1588711,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/7400_МИДТ.pdf",
+        "sha256": "af582f8a5b5a14f07b1d0e3a14be1b89ce3193e4ac674c419c36d313e84a8a3b",
+        "bytes": 1518727,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/8200_ЦИК.pdf",
+        "sha256": "2c4a9dc23abf90d7e5233b401e5eb1b14b12aa852052dc3f1739656b4c2bf2b2",
+        "bytes": 626707,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/8300_КПНРО.pdf",
+        "sha256": "9d3392890156ff64573a9414bf7f461660fde6a2d5dbb2229386b25a0aa61da3",
+        "bytes": 643220,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/8400_ДФЗ.pdf",
+        "sha256": "932865effc9273f235d903d8e48f6ccf5c8cfc8e57ac7cc0345f49e6c2cd7b69",
+        "bytes": 1345956,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/8500_НБКСРС.pdf",
+        "sha256": "478ad0b1d4317843b71000c4b6f76e6f2d17b0c1cb9f900319adc94eec005241",
+        "bytes": 864495,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      },
+      {
+        "source": "prb",
+        "path": "data/originals/program_budgets/8600_ДАТО.pdf",
+        "sha256": "d6f21ac9838bf371e28106fa3a813758b0776eb15a52e1c598f991619238ca57",
+        "bytes": 512781,
+        "readDate": "2026-11-10",
+        "registry": {
+          "path": "/home/user/work/sigma-budget/data/sources.yaml",
+          "sha256": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a"
+        },
+        "pins": {
+          "path": "/home/user/work/sigma-budget/data/originals.sha256",
+          "sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97"
+        },
+        "url": null
+      }
+    ],
+    "auxiliaryInputs": [
+      {
+        "path": "/home/user/work/sigma-budget/data/release/outlook.json",
+        "bytes": 24145,
+        "sha256": "739f52dd3970505e39e819edb412ed4c189f3a15ca70d2124e32ff6c01aea5b5"
+      },
+      {
+        "path": "/home/user/work/sigma-budget/data/inputs/zdb2026.json",
+        "bytes": 23019,
+        "sha256": "32b25143f1fad03ffe709273dcb344ec83678cb858132dfa695754b2ed73b20b"
+      }
+    ],
+    "outputs": [
+      {
+        "path": "data/cache/law_bill.json",
+        "action": "generated",
+        "bytes": 345870,
+        "sha256": "327ed8c9a6eae10668773ca3e5c3f8267e6317f44608db9d07c1c1e1c56f803e"
+      },
+      {
+        "path": "data/cache/research/dbp-2027/dbp2027_figures.json",
+        "action": "generated",
+        "bytes": 158189,
+        "sha256": "4fe21f7db24d0da648db2afe67bf8405e6466a7829c6ca1a7dc02695f59a1e9a"
+      },
+      {
+        "path": "data/inputs/program_budgets_2026.json",
+        "action": "generated",
+        "bytes": 561675,
+        "sha256": "8bbb961e859ef177e38c02ee772309b7a36adc398704f9c8e0ec574ab6a6f478"
+      },
+      {
+        "path": "data/inputs/programme_pdf_evidence.json",
+        "action": "generated",
+        "bytes": 917596,
+        "sha256": "613868f3ab478aba85367ab27e1d1d65998d19b563ede00420a6128fdeb66b05"
+      }
+    ],
+    "archiveMemberCount": 46
+  },
+  "dependencies": {
+    "46": "567b66ccc7a10879bd696683b163b38afedfac42",
+    "44": "e573f6533a99c694d36e142ba0c3a58718c2adff",
+    "base": "beeb5f885cb82138bf7fa1a4f3922d2b222f541b"
+  },
+  "validation": {
+    "python": "3.12.14 (main, Sep  1 2026, 14:16:52) [Clang 22.1.3 ]",
+    "node": "24.18.0",
+    "pnpm": "10.33.0",
+    "testFiles": 6,
+    "testsPassed": 102,
+    "finalScopedSafetyTests": 7,
+    "ingestTypecheck": "pass",
+    "etlDependencyBuild": "pass",
+    "actualSourceAcceptance": "pass",
+    "sourceExtractionDifferences": 131,
+    "sourceDiffReport": "publication-documents-source-differences.json"
+  },
+  "protectedInvariants": [
+    "No writes to immutable source root or accepted candidate",
+    "No actual original/cache/registry/pin/release/fixture bytes changed",
+    "No live source acquisition, authentication, deployment or publication",
+    "No servers or user ports",
+    "No subagents or delegates",
+    "Python production default, graph/sharedContext/global CLI/root index/builders unchanged by this slice"
+  ],
+  "donorHashes": {
+    "pipeline/budget_pipeline/extract/program_budgets.py": "356760b7b3fa76a31bd35085eb0f1e15f7b0c39693fb3d747c275bd0b29b7f00",
+    "pipeline/budget_pipeline/extract/dbp2027.py": "86cb1ecf5541f2fa079018f611ce6815b91c3b4bd10339c5774f85b612cba699",
+    "pipeline/budget_pipeline/extract/bill.py": "98bc8ed3f94dcc3a71d28a0d3e8e00bdeaec761ad649f3aa6331f78d2cf03962",
+    "pipeline/budget_pipeline/extract/budget_law_parser.py": "f5c57b32da38e7e28fbbec6350c368173c195cf1b86d67a2368cc2b99651d746",
+    "pipeline/budget_pipeline/build/program_budget_pdf.py": "090db34f52118e28ebc153eb4031530b307bfa1920343e758db6185c222f9fca"
+  }
+}
