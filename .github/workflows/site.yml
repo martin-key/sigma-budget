@@ -273,6 +273,7 @@ jobs:
           python packages/ingest/test/fixtures/validate17a/iterators/generate_oracle.py --check
           python packages/ingest/test/fixtures/validate17a/catalog-semantics/generate_oracle.py --check
           python packages/ingest/test/fixtures/validate17a/short-circuit/generate_oracle.py --check
+          python packages/ingest/test/fixtures/validate17a/membership/generate_oracle.py --check
           python packages/ingest/test/fixtures/validate17a/wrapper/generate.py --check
       - run: pnpm --filter @sigma-budget/ingest... build
       - name: Scoped differential and CLI safety tests

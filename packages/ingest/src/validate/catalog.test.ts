@@ -32,6 +32,7 @@ const cases: any[] = [
     ...load('iterators/cases.json'),
     ...load('catalog-semantics/cases.json'),
     ...load('short-circuit/cases.json'),
+    ...load('membership/cases.json'),
   ],
   oracle = {
     ...load('oracle.json'),
@@ -46,6 +47,7 @@ const cases: any[] = [
     ...load('iterators/oracle.json'),
     ...load('catalog-semantics/oracle.json'),
     ...load('short-circuit/oracle.json'),
+    ...load('membership/oracle.json'),
   };
 function mutate(root: string, op: any) {
   const p = join(root, op.file);

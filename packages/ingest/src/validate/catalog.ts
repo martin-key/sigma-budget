@@ -135,10 +135,10 @@ function lenAt(holder: any, key: string | number): number {
   const value = get(holder, key);
   return len(value, kind(value, holder, key));
 }
-function hasRoute(routes: ReadonlySet<unknown>, value: unknown): boolean {
+function setContains(values: ReadonlySet<unknown>, value: unknown): boolean {
   if (value !== null && typeof value === 'object')
     error('TypeError', `unhashable type: '${kind(value)}'`);
-  return routes.has(value);
+  return [...values].some((other) => equal(other, value));
 }
 function equal(a: any, b: any): boolean {
   if (typeof a === 'boolean' && typeof b === 'number') return Number(a) === b;
@@ -170,7 +170,7 @@ function dictGet(map: Map<any, any>, key: any): any {
     error('TypeError', `unhashable type: '${kind(key)}'`);
   return [...map].find(([other]) => equal(other, key))?.[1] ?? null;
 }
-function uniq(values: any[]): any[] {
+function uniq(values: Iterable<any>): any[] {
   const result: any[] = [];
   for (const value of values) {
     if (value && typeof value === 'object') error('TypeError', `unhashable type: '${kind(value)}'`);
@@ -483,7 +483,7 @@ export function core(ctx: Context): Check {
         iterable(
           get(p, 'screens', kind(p, pending, key)),
           kind(get(p, 'screens', kind(p, pending, key)), p, 'screens'),
-        ).every((x) => hasRoute(routes.ids, x)),
+        ).every((x) => setContains(routes.ids, x)),
       `pending ${key}: screens ${pstr(get(p, 'screens', kind(p, pending, key)), kind(get(p, 'screens', kind(p, pending, key)), p, 'screens'))}`,
     );
   }
@@ -917,6 +917,7 @@ export function catalog(ctx: Context): Check {
     pend = 0;
   for (const [__rowIndex0, d] of dss.entries()) {
     const sl = get(d, 'slug', kind(d, dss, __rowIndex0)),
+      slText = pstr(sl, kind(sl, d, 'slug')),
       need = [
         'id',
         'slug',
@@ -931,33 +932,33 @@ export function catalog(ctx: Context): Check {
         'mock',
       ];
     const missing = need.filter((x) => !Object.hasOwn(d, x));
-    c.ok(!missing.length, `${sl}: missing keys ${pyRepr(missing)}`);
+    c.ok(!missing.length, `${slText}: missing keys ${pyRepr(missing)}`);
     if (missing.length) continue;
     const status = get(d, 'status', kind(d, dss, __rowIndex0)),
       source = get(d, 'source', kind(d, dss, __rowIndex0)),
       screens = get(d, 'screens', kind(d, dss, __rowIndex0));
     c.ok(
       ['real', 'mock', 'pending'].includes(status) &&
-        gids.includes(get(d, 'group', kind(d, dss, __rowIndex0))) &&
+        contains(gids, get(d, 'group', kind(d, dss, __rowIndex0))) &&
         equal(get(d, 'mock', kind(d, dss, __rowIndex0)), status === 'mock'),
-      `${sl}: status/group/mock`,
+      `${slText}: status/group/mock`,
     );
     c.ok(
       pyTruth(source) &&
         iterable(source, kind(source, d, 'source')).every((x) =>
           contains(get(core, 'sources'), x, kind(get(core, 'sources'), core, 'sources')),
         ),
-      `${sl}: source keys ${pstr(source, kind(source, d, 'source'))}`,
+      `${slText}: source keys ${pstr(source, kind(source, d, 'source'))}`,
     );
     c.ok(
-      iterable(screens, kind(screens, d, 'screens')).every((x) => hasRoute(routes, x)) &&
+      iterable(screens, kind(screens, d, 'screens')).every((x) => setContains(routes, x)) &&
         len(screens, kind(screens, d, 'screens')) ===
           uniq(iterable(screens, kind(screens, d, 'screens'))).length,
-      `${sl}: screens ${pstr(screens, kind(screens, d, 'screens'))}`,
+      `${slText}: screens ${pstr(screens, kind(screens, d, 'screens'))}`,
     );
     c.ok(
       ['title', 'description'].every((x) => strField(get(d, x, kind(d, dss, __rowIndex0)))),
-      `${sl}: title/description`,
+      `${slText}: title/description`,
     );
     real += Number(status === 'real');
     mock += Number(status === 'mock');
@@ -965,7 +966,7 @@ export function catalog(ctx: Context): Check {
     if (status === 'pending') {
       c.ok(
         ['file', 'bytes', 'gzipBytes', 'schema'].every((x) => !Object.hasOwn(d, x)),
-        `${sl}: a pending dataset has no file`,
+        `${slText}: a pending dataset has no file`,
       );
       const id = get(d, 'id', kind(d, dss, __rowIndex0)),
         pending = get(core, 'pending');
@@ -973,7 +974,7 @@ export function catalog(ctx: Context): Check {
         equal(sl, id.toLowerCase()) &&
           equal(get(d, 'contains', kind(d, dss, __rowIndex0)), [id]) &&
           contains(pending, id, kind(pending, core, 'pending')),
-        `${sl}: pending id`,
+        `${slText}: pending id`,
       );
       const p = get(pending, id, kind(pending, core, 'pending'));
       c.ok(
@@ -984,7 +985,7 @@ export function catalog(ctx: Context): Check {
             get(p, 'expected', kind(p, pending, id)),
           ) &&
           equal(source, get(p, 'source', kind(p, pending, id))),
-        `${sl}: must equal core.pending.${id}`,
+        `${slText}: must equal core.pending.${id}`,
       );
       continue;
     }
@@ -993,7 +994,7 @@ export function catalog(ctx: Context): Check {
       typeof asOf === 'string' &&
         /^\d{4}-\d{2}-\d{2}\n?$/.test(catalogDecimalText(asOf)) &&
         asOf <= ctx.buildDate,
-      `${sl}: asOf ${pyRepr(asOf, kind(asOf, d, 'asOf'))}`,
+      `${slText}: asOf ${pyRepr(asOf, kind(asOf, d, 'asOf'))}`,
     );
     const format = get(d, 'format', kind(d, dss, __rowIndex0)),
       media = get(d, 'mediaType', kind(d, dss, __rowIndex0));
@@ -1001,7 +1002,7 @@ export function catalog(ctx: Context): Check {
       error('TypeError', "unhashable type: '" + kind(format) + "'");
     c.ok(
       equal(contains(formats, format) ? formats[format] : null, media),
-      `${sl}: format/mediaType ${pstr(format, kind(format, d, 'format'))} / ${pstr(media, kind(media, d, 'mediaType'))}`,
+      `${slText}: format/mediaType ${pstr(format, kind(format, d, 'format'))} / ${pstr(media, kind(media, d, 'mediaType'))}`,
     );
     if (pyTruth(opt(d, 'fileTemplate', undefined, kind(d, dss, __rowIndex0)))) {
       const parts = iterable(
@@ -1012,39 +1013,39 @@ export function catalog(ctx: Context): Check {
       c.ok(
         get(d, 'file', kind(d, dss, __rowIndex0)) === null &&
           template === 'data/ministries/<код>.json',
-        `${sl}: fileTemplate`,
+        `${slText}: fileTemplate`,
       );
       const codes = parts.map((pp, __rowIndex32, __rowValues33) =>
           get(pp, 'code', kind(pp, __rowValues33, __rowIndex32)),
         ),
-        expected = get(
-          get(core, 'counts'),
-          'programBudgets',
-          kind(get(core, 'counts'), core, 'counts'),
-        );
+        expected = () =>
+          get(get(core, 'counts'), 'programBudgets', kind(get(core, 'counts'), core, 'counts'));
       c.ok(
-        parts.length === uniq(codes).length && uniq(codes).length === expected,
-        `${sl}: ${parts.length} parts, expected ${pstr(expected, kind(expected, get(core, 'counts'), 'programBudgets'))}`,
+        parts.length === uniq(codes).length && equal(uniq(codes).length, expected()),
+        `${slText}: ${parts.length} parts, expected ${pstr(expected(), kind(expected(), get(core, 'counts'), 'programBudgets'))}`,
       );
-      const minids = iterable(get(mins, 'items'), kind(get(mins, 'items'), mins, 'items')).map(
-        (m, __rowIndex34, __rowValues35) => get(m, 'id', kind(m, __rowValues35, __rowIndex34)),
-      );
+      const minids = function* () {
+        const items = iterable(get(mins, 'items'), kind(get(mins, 'items'), mins, 'items'));
+        for (const [index, item] of items.entries())
+          yield get(item, 'id', kind(item, items, index));
+      };
       c.ok(
-        codes.every((cc) => minids.includes(cc)),
-        `${sl}: part codes must be ministry ids`,
+        codes.every((cc) => contains(uniq(minids()), cc)),
+        `${slText}: part codes must be ministry ids`,
       );
       let total = 0,
         gz = 0;
       for (const [__rowIndex1, pp] of parts.entries()) {
         const file = get(pp, 'file', kind(pp, parts, __rowIndex1)),
           code = get(pp, 'code', kind(pp, parts, __rowIndex1)),
+          codeText = pstr(code, kind(code, pp, 'code')),
           rel = pyMethod(file, 'removeprefix', kind(file, pp, 'file')).startsWith('data/')
             ? file.slice(5)
             : file;
         if (
           !c.ok(
-            ctx.exists(rel) && file === `data/ministries/${code}.json`,
-            `${sl}: part file ${pstr(file, kind(file, pp, 'file'))}`,
+            ctx.exists(rel) && file === `data/ministries/${codeText}.json`,
+            `${slText}: part file ${pstr(file, kind(file, pp, 'file'))}`,
           )
         )
           continue;
@@ -1055,7 +1056,7 @@ export function catalog(ctx: Context): Check {
         c.ok(
           equal(get(pp, 'bytes', kind(pp, parts, __rowIndex1)), size) &&
             equal(get(pp, 'gzipBytes', kind(pp, parts, __rowIndex1)), gzip),
-          `${sl}: part ${code} bytes ${pstr(get(pp, 'bytes', kind(pp, parts, __rowIndex1)), kind(get(pp, 'bytes', kind(pp, parts, __rowIndex1)), pp, 'bytes'))}/${pstr(get(pp, 'gzipBytes', kind(pp, parts, __rowIndex1)), kind(get(pp, 'gzipBytes', kind(pp, parts, __rowIndex1)), pp, 'gzipBytes'))} vs ${size}/${gzip}`,
+          `${slText}: part ${codeText} bytes ${pstr(get(pp, 'bytes', kind(pp, parts, __rowIndex1)), kind(get(pp, 'bytes', kind(pp, parts, __rowIndex1)), pp, 'bytes'))}/${pstr(get(pp, 'gzipBytes', kind(pp, parts, __rowIndex1)), kind(get(pp, 'gzipBytes', kind(pp, parts, __rowIndex1)), pp, 'gzipBytes'))} vs ${size}/${gzip}`,
         );
         total += size;
         gz += gzip;
@@ -1063,7 +1064,7 @@ export function catalog(ctx: Context): Check {
       c.ok(
         equal(get(d, 'bytes', kind(d, dss, __rowIndex0)), total) &&
           equal(get(d, 'gzipBytes', kind(d, dss, __rowIndex0)), gz),
-        `${sl}: bytes/gzipBytes ${pstr(get(d, 'bytes', kind(d, dss, __rowIndex0)), kind(get(d, 'bytes', kind(d, dss, __rowIndex0)), d, 'bytes'))}/${pstr(get(d, 'gzipBytes', kind(d, dss, __rowIndex0)), kind(get(d, 'gzipBytes', kind(d, dss, __rowIndex0)), d, 'gzipBytes'))} must be the sums of the parts ${total}/${gz}`,
+        `${slText}: bytes/gzipBytes ${pstr(get(d, 'bytes', kind(d, dss, __rowIndex0)), kind(get(d, 'bytes', kind(d, dss, __rowIndex0)), d, 'bytes'))}/${pstr(get(d, 'gzipBytes', kind(d, dss, __rowIndex0)), kind(get(d, 'gzipBytes', kind(d, dss, __rowIndex0)), d, 'gzipBytes'))} must be the sums of the parts ${total}/${gz}`,
       );
       continue;
     }
@@ -1071,7 +1072,7 @@ export function catalog(ctx: Context): Check {
       rel = pySlice(file, 5, kind(file, d, 'file'));
     c.ok(
       starts(file, 'data/', kind(file, d, 'file')) && ctx.exists(rel),
-      `${sl}: file ${pstr(file, kind(file, d, 'file'))} does not exist`,
+      `${slText}: file ${pstr(file, kind(file, d, 'file'))} does not exist`,
     );
     if (!ctx.exists(rel)) continue;
     listed.add(rel);
@@ -1081,13 +1082,13 @@ export function catalog(ctx: Context): Check {
     if (get(d, 'id', kind(d, dss, __rowIndex0)) === 'D25')
       c.ok(
         !Object.hasOwn(d, 'bytes') && !Object.hasOwn(d, 'gzipBytes'),
-        `${sl}: the catalog must not state its own size`,
+        `${slText}: the catalog must not state its own size`,
       );
     else
       c.ok(
         equal(get(d, 'bytes', kind(d, dss, __rowIndex0)), size) &&
           equal(get(d, 'gzipBytes', kind(d, dss, __rowIndex0)), gzip),
-        `${sl}: bytes/gzipBytes ${pstr(opt(d, 'bytes', undefined, kind(d, dss, __rowIndex0)), kind(opt(d, 'bytes'), d, 'bytes'))}/${pstr(opt(d, 'gzipBytes', undefined, kind(d, dss, __rowIndex0)), kind(opt(d, 'gzipBytes'), d, 'gzipBytes'))} vs the file ${size}/${gzip} (rebuild the catalog)`,
+        `${slText}: bytes/gzipBytes ${pstr(opt(d, 'bytes', undefined, kind(d, dss, __rowIndex0)), kind(opt(d, 'bytes'), d, 'bytes'))}/${pstr(opt(d, 'gzipBytes', undefined, kind(d, dss, __rowIndex0)), kind(opt(d, 'gzipBytes'), d, 'gzipBytes'))} vs the file ${size}/${gzip} (rebuild the catalog)`,
       );
     if (['JSON', 'GeoJSON'].includes(format)) {
       const doc = ctx.get(rel),
@@ -1104,7 +1105,7 @@ export function catalog(ctx: Context): Check {
             kind(source, d, 'source'),
             kind(opt(m, 'source', []), m, 'source'),
           ),
-        `${sl}: status/mock/source vs meta`,
+        `${slText}: status/mock/source vs meta`,
       );
       for (const kk of ['asOf', 'unit'])
         if (Object.hasOwn(d, kk))
@@ -1113,7 +1114,7 @@ export function catalog(ctx: Context): Check {
               get(d, kk, kind(d, dss, __rowIndex0)),
               opt(m, kk, undefined, kind(m, doc, 'meta')),
             ),
-            `${sl}: ${kk} ${pyRepr(get(d, kk, kind(d, dss, __rowIndex0)), kind(get(d, kk, kind(d, dss, __rowIndex0)), d, kk))} vs meta ${pyRepr(opt(m, kk, undefined, kind(m, doc, 'meta')), kind(opt(m, kk), m, kk))}`,
+            `${slText}: ${kk} ${pyRepr(get(d, kk, kind(d, dss, __rowIndex0)), kind(get(d, kk, kind(d, dss, __rowIndex0)), d, kk))} vs meta ${pyRepr(opt(m, kk, undefined, kind(m, doc, 'meta')), kind(opt(m, kk), m, kk))}`,
           );
       const mid = pyMethod(
         opt(m, 'id', '', kind(m, doc, 'meta')),
@@ -1128,7 +1129,7 @@ export function catalog(ctx: Context): Check {
             kind(get(d, 'contains', kind(d, dss, __rowIndex0)), d, 'contains'),
             kind(mid),
           ),
-          `${sl}: contains ${pstr(get(d, 'contains', kind(d, dss, __rowIndex0)), kind(get(d, 'contains', kind(d, dss, __rowIndex0)), d, 'contains'))} vs meta.id ${pstr(opt(m, 'id', undefined, kind(m, doc, 'meta')), kind(opt(m, 'id'), m, 'id'))}`,
+          `${slText}: contains ${pstr(get(d, 'contains', kind(d, dss, __rowIndex0)), kind(get(d, 'contains', kind(d, dss, __rowIndex0)), d, 'contains'))} vs meta.id ${pstr(opt(m, 'id', undefined, kind(m, doc, 'meta')), kind(opt(m, 'id'), m, 'id'))}`,
         );
       else
         c.ok(
@@ -1136,7 +1137,7 @@ export function catalog(ctx: Context): Check {
             get(d, 'contains', kind(d, dss, __rowIndex0)),
             get(d, 'id', kind(d, dss, __rowIndex0)) === 'core' ? ['D18'] : [],
           ) && equal(opt(m, 'id', undefined, kind(m, doc, 'meta')), sl),
-          `${sl}: contains ${pstr(get(d, 'contains', kind(d, dss, __rowIndex0)), kind(get(d, 'contains', kind(d, dss, __rowIndex0)), d, 'contains'))} vs meta.id ${pstr(opt(m, 'id', undefined, kind(m, doc, 'meta')), kind(opt(m, 'id'), m, 'id'))}`,
+          `${slText}: contains ${pstr(get(d, 'contains', kind(d, dss, __rowIndex0)), kind(get(d, 'contains', kind(d, dss, __rowIndex0)), d, 'contains'))} vs meta.id ${pstr(opt(m, 'id', undefined, kind(m, doc, 'meta')), kind(opt(m, 'id'), m, 'id'))}`,
         );
       c.ok(
         sameSet(
@@ -1145,11 +1146,11 @@ export function catalog(ctx: Context): Check {
           kind(opt(d, 'pending', []), d, 'pending'),
           kind(opt(m, 'pending', []), m, 'pending'),
         ),
-        `${sl}: pending ${pstr(opt(d, 'pending', undefined, kind(d, dss, __rowIndex0)), kind(opt(d, 'pending'), d, 'pending'))} vs meta.pending ${pstr(opt(m, 'pending', undefined, kind(m, doc, 'meta')), kind(opt(m, 'pending'), m, 'pending'))}`,
+        `${slText}: pending ${pstr(opt(d, 'pending', undefined, kind(d, dss, __rowIndex0)), kind(opt(d, 'pending'), d, 'pending'))} vs meta.pending ${pstr(opt(m, 'pending', undefined, kind(m, doc, 'meta')), kind(opt(m, 'pending'), m, 'pending'))}`,
       );
       c.ok(
         equal(opt(d, 'schema', undefined, kind(d, dss, __rowIndex0)), schema(doc)),
-        `${sl}: schema differs from the top-level keys of the file`,
+        `${slText}: schema differs from the top-level keys of the file`,
       );
     }
     c.ok(
@@ -1157,7 +1158,7 @@ export function catalog(ctx: Context): Check {
         get(d, 'eager', kind(d, dss, __rowIndex0)),
         get(d, 'id', kind(d, dss, __rowIndex0)) === 'core',
       ),
-      `${sl}: only core.json is eager`,
+      `${slText}: only core.json is eager`,
     );
   }
   const disk = ctx.dataFiles(),
@@ -1247,7 +1248,7 @@ export function catalog(ctx: Context): Check {
         iterable(
           get(f, 'usedBy', kind(f, fs, __rowIndex5)),
           kind(get(f, 'usedBy', kind(f, fs, __rowIndex5)), f, 'usedBy'),
-        ).every((x) => slugs.includes(x)),
+        ).every((x) => contains(slugs, x)),
       `files ${pstr(get(f, 'name', kind(f, fs, __rowIndex5)), kind(get(f, 'name', kind(f, fs, __rowIndex5)), f, 'name'))}: usedBy ${pstr(get(f, 'usedBy', kind(f, fs, __rowIndex5)), kind(get(f, 'usedBy', kind(f, fs, __rowIndex5)), f, 'usedBy'))} are not dataset slugs`,
     );
     c.ok(
@@ -1339,7 +1340,7 @@ export function catalog(ctx: Context): Check {
         get(d, 'id') !== 'core'
       ) {
         c.warn(
-          `${rid} reads ${get(d, 'slug')} but the catalog lists screens ${joinStrings(get(d, 'screens'), ',')} for it`,
+          `${rid} reads ${pstr(get(d, 'slug'), kind(get(d, 'slug'), d, 'slug'))} but the catalog lists screens ${joinStrings(get(d, 'screens'), ',')} for it`,
         );
         warn++;
       }
@@ -1356,11 +1357,11 @@ export function catalog(ctx: Context): Check {
       kind(get(d, 'screens', kind(d, dss, __rowIndex10)), d, 'screens'),
     ))
       if (
-        pages.has(rid) &&
+        setContains(pages, rid) &&
         !needs[rid]!.some((nm) => fileDs.get(`data/${nm.replace(/\?+$/, '')}.json`) === d)
       ) {
         c.warn(
-          `catalog lists ${rid} for ${get(d, 'slug', kind(d, dss, __rowIndex10))} but that page's needs do not include it`,
+          `catalog lists ${pstr(rid)} for ${pstr(get(d, 'slug', kind(d, dss, __rowIndex10)), kind(get(d, 'slug'), d, 'slug'))} but that page's needs do not include it`,
         );
         warn++;
       }

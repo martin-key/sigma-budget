@@ -65,3 +65,11 @@ SHA types retain their own first error, and a valid SHA still requires bytes.
 Missing-field combinations, the final-LF control and byte type/value controls
 are compared directly and through the compiled CLI. All earlier captures stay
 unchanged.
+
+`membership/generate_oracle.py --check` adds 45 complete donor outcomes for
+boolean/numeric membership in groups, dataset slugs, ministry IDs and screen
+IDs. Coherent paired changes preserve Python equality without accepting
+unhashable ministry identifiers. Empty part lists defer ministry reads, and
+part-count checks preserve equality and the first failing operation. Source
+float kinds remain visible in labels and filenames. Every case is checked
+directly and through the compiled CLI; previous captures remain unchanged.
