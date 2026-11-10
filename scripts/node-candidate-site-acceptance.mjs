@@ -318,7 +318,7 @@ try {
   assert.equal(state.base, '/data/');
   assert(state.ready);
   const browserProof = await evaluate(
-    `(async()=>{const {data}=await import('/js/data.js');await data.load('releases/current');const raw=await (await fetch('/data/execution.json')).json();const share=await import('/js/share.js');let csv='';for(let i=0;i<40;i++){const spec=share.get('s15-b-grid');if(spec){csv=share.csvFor(spec);if(csv)break;}await new Promise(r=>setTimeout(r,100));}return {releaseId:data.get('releases/current')?.release_id,rawSchema:raw.contract.schema,rawRevenue:raw.data['2026'].kfp.rev[raw.latest.month-1],csv};})()`,
+    `(async()=>{const {data}=await import('/js/data.js');await data.load('releases/current');const raw=await (await fetch('/data/execution.json')).json();const share=await import('/js/share.js');let csv='',selection;for(let i=0;i<40;i++){const spec=share.get('s15-b-grid');if(spec){csv=share.csvFor(spec);selection=typeof spec.link==='function'?spec.link():spec.link;if(csv)break;}await new Promise(r=>setTimeout(r,100));}return {releaseId:data.get('releases/current')?.release_id,rawSchema:raw.contract.schema,rawRevenue:raw.data['2026'].kfp.rev[raw.latest.month-1],selection,csv};})()`,
   );
   assert.equal(browserProof.releaseId, rid);
   assert.equal(browserProof.rawSchema, 2);
@@ -328,8 +328,11 @@ try {
   assert(browserProof.csv.includes(rid));
   assert(browserProof.csv.includes('издание'));
   await writeFile(join(out, 'execution.csv'), browserProof.csv);
-  const month = Number(/mesec=(\d+)/.exec(browserProof.csv)?.[1]);
-  assert(month >= 1 && month <= 12, 'CSV records its selected month');
+  const month = browserProof.selection.mesec;
+  assert.equal(month, execution.latest.month, 'CSV block selects the actual latest source month');
+  assert.equal(browserProof.selection.g2, 2026);
+  assert.equal(browserProof.selection.obhvat, 'kfp');
+  assert.equal(browserProof.selection.rez, 'natrupano');
   const revenue = execution.data['2026'].kfp.rev[month - 1];
   const expectedCsv = String(Math.round((Number(revenue) / 1000) * 1000) / 1000).replace('.', ',');
   assert(
