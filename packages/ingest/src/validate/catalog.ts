@@ -208,6 +208,10 @@ function pyRepr(value: any, sourceType = kind(value)): string {
 }
 const pstr = (v: any, sourceType = kind(v)): string =>
   typeof v === 'string' ? v : pyRepr(v, sourceType);
+function strAt(holder: any, key: string | number, sourceType = kind(holder)): string {
+  const value = get(holder, key, sourceType);
+  return pstr(value, kind(value, holder, key));
+}
 function starts(v: any, x: string, sourceType = kind(v)): boolean {
   if (typeof v !== 'string')
     error('AttributeError', `'${sourceType}' object has no attribute 'startswith'`);
@@ -239,9 +243,23 @@ function joinStrings(value: any, separator: string): string {
       );
   return values.join(separator);
 }
-function pySlice(v: any, start: number, sourceType = kind(v)): any {
-  if (typeof v === 'string' || Array.isArray(v)) return v.slice(start);
+function pySlice(
+  v: any,
+  start: number | null,
+  sourceType = kind(v),
+  end: number | null = null,
+): any {
+  if (typeof v === 'string') return [...v].slice(start ?? 0, end ?? undefined).join('');
+  if (Array.isArray(v)) return v.slice(start ?? 0, end ?? undefined);
+  if (v && typeof v === 'object')
+    return error('KeyError', `slice(${start ?? 'None'}, ${end ?? 'None'}, None)`);
   return error('TypeError', `'${sourceType}' object is not subscriptable`);
+}
+function prefixText(v: any, end: number, sourceType = kind(v)): string {
+  const prefix = pySlice(v, null, sourceType, end);
+  return Array.isArray(prefix)
+    ? `[${prefix.map((value, index) => pyRepr(value, kind(value, v, index))).join(', ')}]`
+    : prefix;
 }
 function pyMethod(v: any, method: string, sourceType = kind(v)): string {
   if (typeof v !== 'string')
@@ -410,10 +428,10 @@ export function core(ctx: Context): Check {
   c.ok(
     equal(get(years, 'list', kind(years, core, 'years')), oy) &&
       equal(
-        iterable(oy, kind(oy, o, 'years')).map((y) =>
+        iterable(oy, kind(oy, o, 'years')).map((y, index, sourceYears) =>
           get(
             get(years, 'vintage', kind(years, core, 'years')),
-            String(y),
+            pstr(y, kind(y, sourceYears, index)),
             kind(get(years, 'vintage', kind(years, core, 'years')), years, 'vintage'),
           ),
         ),
@@ -489,24 +507,25 @@ export function core(ctx: Context): Check {
   }
   const p04 = opt(pending, 'P04', {}, kind(pending, core, 'pending')),
     nas = get(nxt, 'asOf', kind(nxt, get(ex, 'pendingMonths'), 0)),
-    ny = nas.slice(0, 4),
+    ny = pySlice(nas, null, kind(nas, nxt, 'asOf'), 4),
     reason = opt(p04, 'reason', '', kind(p04, pending, 'P04')),
     title = opt(p04, 'title', '', kind(p04, pending, 'P04'));
   c.ok(
-    starts(
-      title,
-      `Отчетът към ${nas.split('-').reverse().join('.')} г.`,
-      kind(title, p04, 'title'),
+    pyMethod(title, 'startswith', kind(title, p04, 'title')).startsWith(
+      `Отчетът към ${pyMethod(nas, 'split', kind(nas, nxt, 'asOf'))
+        .split('-')
+        .reverse()
+        .join('.')} г.`,
     ) &&
       contains(
         reason,
-        `за ${monthName(nxt, 'month')} ${ny} г. още не е добавен`,
+        `за ${monthName(nxt, 'month')} ${pstr(ny)} г. още не е добавен`,
         kind(reason, p04, 'reason'),
       ) &&
       pyMethod(reason, 'endswith', kind(reason, p04, 'reason')).endsWith(
-        `е за ${monthName(latest(), 'month')} ${get(latest(), 'asOf', kind(latest(), ex, 'latest')).slice(0, 4)} г.`,
+        `е за ${monthName(latest(), 'month')} ${prefixText(get(latest(), 'asOf', kind(latest(), ex, 'latest')), 4, kind(get(latest(), 'asOf'), latest(), 'asOf'))} г.`,
       ),
-    `pending P04 must name the pending report ${nas} and the latest ${get(latest(), 'asOf', kind(latest(), ex, 'latest'))}`,
+    `pending P04 must name the pending report ${pstr(nas, kind(nas, nxt, 'asOf'))} and the latest ${strAt(latest(), 'asOf', kind(latest(), ex, 'latest'))}`,
   );
   const n = get(core, 'counts'),
     mfiles = ctx.jsonFiles().filter((f) => f.startsWith('ministries/')),
@@ -772,7 +791,7 @@ export function core(ctx: Context): Check {
           get(get(it, 'mln', kind(it, ef, i)), 1, kind(get(it, 'mln', kind(it, ef, i)), it, 'mln')),
         ],
       ),
-      `core.functions ${get(it, 'id', kind(it, ef, i))}: id/name/short/mln`,
+      `core.functions ${strAt(it, 'id', kind(it, ef, i))}: id/name/short/mln`,
     );
     c.near(
       get(a, 'pctGdp', kind(a, cf, i)),
@@ -782,7 +801,7 @@ export function core(ctx: Context): Check {
         kind(get(it, 'pctGdp', kind(it, ef, i)), it, 'pctGdp'),
       ),
       0.0011,
-      `core.functions ${get(it, 'id', kind(it, ef, i))} pctGdp`,
+      `core.functions ${strAt(it, 'id', kind(it, ef, i))} pctGdp`,
     );
     c.near(
       get(a, 'share', kind(a, cf, i)),
@@ -792,13 +811,13 @@ export function core(ctx: Context): Check {
         kind(get(it, 'share', kind(it, ef, i)), it, 'share'),
       ),
       0.0011,
-      `core.functions ${get(it, 'id', kind(it, ef, i))} share`,
+      `core.functions ${strAt(it, 'id', kind(it, ef, i))} share`,
     );
     c.near(
       get(a, 'yoyPct', kind(a, cf, i)),
       get(it, 'yoy2026Pct', kind(it, ef, i)),
       0.051,
-      `core.functions ${get(it, 'id', kind(it, ef, i))} yoyPct`,
+      `core.functions ${strAt(it, 'id', kind(it, ef, i))} yoyPct`,
     );
   }
   const cgValue = get(core, 'revenueGroups'),
@@ -825,7 +844,7 @@ export function core(ctx: Context): Check {
           get(gr, 'share2026', kind(gr, rg, i)),
         ],
       ),
-      `core.revenueGroups ${get(gr, 'id', kind(gr, rg, i))}`,
+      `core.revenueGroups ${strAt(gr, 'id', kind(gr, rg, i))}`,
     );
   }
   c.fact(
@@ -971,7 +990,7 @@ export function catalog(ctx: Context): Check {
       const id = get(d, 'id', kind(d, dss, __rowIndex0)),
         pending = get(core, 'pending');
       c.ok(
-        equal(sl, id.toLowerCase()) &&
+        equal(sl, pyMethod(id, 'lower', kind(id, d, 'id')).toLowerCase()) &&
           equal(get(d, 'contains', kind(d, dss, __rowIndex0)), [id]) &&
           contains(pending, id, kind(pending, core, 'pending')),
         `${slText}: pending id`,

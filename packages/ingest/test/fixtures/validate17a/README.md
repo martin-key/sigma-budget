@@ -73,3 +73,18 @@ unhashable ministry identifiers. Empty part lists defer ministry reads, and
 part-count checks preserve equality and the first failing operation. Source
 float kinds remain visible in labels and filenames. Every case is checked
 directly and through the compiled CLI; previous captures remain unchanged.
+
+`year-keys/generate_oracle.py --check` adds 31 complete donor scenarios for
+vintage lookups, including float/exponent tokens at all five year positions,
+matching and missing keys, source containers, negative zero and short-circuit
+controls. The lookup preserves Python `str` and each source token kind. Three
+scenarios also freeze the unchanged production wrapper in default and strict
+modes; complete compiled CORE/CATALOG outcomes retain ordered groups, problems,
+warnings, facts, exceptions, totals and exit codes. Earlier evidence is unchanged.
+
+`source-strings/generate_oracle.py --check` adds 47 donor controls for function
+and revenue-group labels, pending IDs, date prefixes and source-file slices.
+Source scalar/container types retain Python string representations. Prefixes
+count Unicode codepoints and preserve floating tokens in list representations;
+method lookup, dictionary slice errors and short-circuit order match Python
+3.12. The earlier 31 year-key scenarios and all previous evidence are unchanged.

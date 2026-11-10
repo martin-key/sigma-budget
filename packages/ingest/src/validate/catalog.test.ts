@@ -33,6 +33,8 @@ const cases: any[] = [
     ...load('catalog-semantics/cases.json'),
     ...load('short-circuit/cases.json'),
     ...load('membership/cases.json'),
+    ...load('year-keys/cases.json'),
+    ...load('source-strings/cases.json'),
   ],
   oracle = {
     ...load('oracle.json'),
@@ -48,6 +50,8 @@ const cases: any[] = [
     ...load('catalog-semantics/oracle.json'),
     ...load('short-circuit/oracle.json'),
     ...load('membership/oracle.json'),
+    ...load('year-keys/oracle.json'),
+    ...load('source-strings/oracle.json'),
   };
 function mutate(root: string, op: any) {
   const p = join(root, op.file);
@@ -145,6 +149,44 @@ describe('CORE and CATALOG frozen Python differential', () => {
         item.status = 'PASS';
       } finally {
         evidence.push(item);
+        rmSync(root, { recursive: true, force: true });
+      }
+    });
+});
+
+describe('complete vintage-key CLI outcomes from the Python wrapper', () => {
+  const outcomes = load('year-keys/wrapper-oracle.json');
+  for (const test of cases.filter((item) => item.complete))
+    it(test.name, () => {
+      const root = mkdtempSync(join(tmpdir(), 'sigma-17a-years-'));
+      try {
+        cpSync(new URL('corpus/', base), root, { recursive: true });
+        cpSync(new URL('overlay/', base), root, { recursive: true });
+        for (const op of test.ops) mutate(root, op);
+        for (const accepted of [true, false]) {
+          const run = spawnSync(
+            process.execPath,
+            [
+              new URL('../../dist/validate/cli17a.js', import.meta.url).pathname,
+              '--root',
+              root,
+              '--only',
+              'CORE,CATALOG',
+              ...(accepted ? [] : ['--no-accepted']),
+            ],
+            { cwd: root, encoding: 'utf8' },
+          );
+          const output = JSON.parse(run.stdout);
+          expect({
+            raw: output.raw,
+            groups: output.groups,
+            exceptions: output.exceptions,
+            totals: output.totals,
+            status: output.status,
+            exit: run.status,
+          }).toEqual(outcomes[test.name][accepted ? 'default' : 'noAccepted']);
+        }
+      } finally {
         rmSync(root, { recursive: true, force: true });
       }
     });
