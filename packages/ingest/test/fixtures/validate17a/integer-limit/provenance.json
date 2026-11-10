@@ -1,0 +1,15 @@
+{
+  "python": "3.12",
+  "maxDigits": 4300,
+  "generatorSha256": "72cf797c96d466ab4bb5a893ad9ee97450586dc7f7a295e3f98a7f7195b9c5ae",
+  "inputs": {
+    "generate_oracle.py": "a834a8b2d739eb87e8918f08d8fd7e8c81fbcccf81a7a0609f9746cba3cee354",
+    "provenance.json": "04b585d13e68c4ad8eafbc56977ee0163539b70e4702e9695405909d88628fe1",
+    "integer/provenance.json": "82061ecba9b23de385d244253e9260c07dd0b5c01d86394ad86bbc9d3c5315dd"
+  },
+  "outputs": {
+    "cases.json": "27ca0e57e8ef77566647500d9a05bd182bb29630a6b99a0aac7537a2b3d5a17b",
+    "oracle.json": "e2579604f3e48a642aeaa1862044aed2aff43053d62e9dbbbfa8513eae000e82"
+  },
+  "cases": 14
+}

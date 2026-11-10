@@ -1,5 +1,7 @@
 import { pythonFloat } from '../build/context.js';
+import { clonePythonNumbers } from '../common/numbers.js';
 import { pyTruth } from './checks.js';
+import { pythonKeys, transferPythonKeyOrder } from './ordered-json.js';
 import {
   executionContains,
   executionGet,
@@ -149,15 +151,19 @@ export interface ExecutionProjection {
 
 type Dict = Record<string, any>;
 function mapMoney(doc: Dict, fn: (v: any, places: number) => unknown): Dict {
-  const out = structuredClone(doc);
-  for (const name of ['data', 'monthly'] as const)
-    for (const block of executionValues(executionRequired(out, name)) as Dict[])
+  const out = clonePythonNumbers(doc);
+  transferPythonKeyOrder(doc, out);
+  for (const name of ['data', 'monthly'] as const) {
+    const blocks = executionRequired(out, name),
+      values = executionValues(blocks, out, name),
+      keys = pythonKeys(blocks);
+    for (const [index, block] of values.entries())
       for (const col of cols)
-        for (const [id, arr] of executionItems(executionRequired(block, col)) as [
-          string,
-          unknown[],
-        ][])
+        for (const [id, arr] of executionItems(
+          executionRequired(block, col, blocks, keys[index]),
+        ) as [string, unknown[]][])
           block[col][id] = executionIterable(arr).map((v) => fn(v, 3));
+  }
   for (const col of cols) {
     for (const [id, value] of executionItems(
       executionRequired(executionRequired(out, 'plan2026'), col),

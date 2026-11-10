@@ -1,0 +1,633 @@
+[
+  {
+    "name": "baseline",
+    "groups": [
+      "CORE",
+      "CATALOG"
+    ],
+    "ops": []
+  },
+  {
+    "name": "kpi",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "kpis",
+          "revenue",
+          "planMln"
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "year",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "years",
+          "list",
+          0
+        ],
+        "value": 1900
+      }
+    ]
+  },
+  {
+    "name": "pending",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "pending",
+          "P04",
+          "reason"
+        ],
+        "value": "wrong"
+      }
+    ]
+  },
+  {
+    "name": "month",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "build",
+          "kfpMonths2026"
+        ],
+        "value": 2
+      }
+    ]
+  },
+  {
+    "name": "source",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "sources",
+          "asbp",
+          "kind"
+        ],
+        "value": "wrong"
+      }
+    ]
+  },
+  {
+    "name": "count",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "counts",
+          "programs"
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "population",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "population",
+          "persons"
+        ],
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "function",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "functions",
+          0,
+          "mln"
+        ],
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "revenue-group",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "revenueGroups",
+          0,
+          "name"
+        ],
+        "value": "wrong"
+      }
+    ]
+  },
+  {
+    "name": "route",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "kpis",
+          "revenue",
+          "href"
+        ],
+        "value": "#/wrong"
+      }
+    ]
+  },
+  {
+    "name": "null-kpi",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "kpis",
+          "revenue"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "missing-year",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "deleteKey",
+        "file": "data/release/core.json",
+        "path": [
+          "years",
+          "list"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "wrong-pending-type",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "pending",
+          "P04",
+          "screens"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "catalog-status",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "status"
+        ],
+        "value": "mock"
+      }
+    ]
+  },
+  {
+    "name": "catalog-source",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "source"
+        ],
+        "value": [
+          "missing"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "catalog-meta",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "meta",
+          "id"
+        ],
+        "value": "bad"
+      }
+    ]
+  },
+  {
+    "name": "catalog-schema",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "schema"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "catalog-media",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "mediaType"
+        ],
+        "value": "text/plain"
+      }
+    ]
+  },
+  {
+    "name": "catalog-bytes",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "bytes"
+        ],
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "catalog-gzip",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "gzipBytes"
+        ],
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "catalog-part",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          6,
+          "parts",
+          0,
+          "code"
+        ],
+        "value": "missing"
+      }
+    ]
+  },
+  {
+    "name": "catalog-duplicate",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "id"
+        ],
+        "value": "D31"
+      }
+    ]
+  },
+  {
+    "name": "catalog-private",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "files",
+          0,
+          "note"
+        ],
+        "value": "private channel"
+      }
+    ]
+  },
+  {
+    "name": "catalog-internal",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "files",
+          0,
+          "note"
+        ],
+        "value": "sources/private"
+      }
+    ]
+  },
+  {
+    "name": "catalog-null",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "screens"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "catalog-missing",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "deleteKey",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "status"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "removed-file",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "deleteFile",
+        "file": "data/release/outlook.json"
+      }
+    ]
+  },
+  {
+    "name": "extra-file",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "write",
+        "file": "data/release/extra.txt",
+        "value": "extra"
+      }
+    ]
+  },
+  {
+    "name": "raw-bytes",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "append",
+        "file": "data/release/outlook.json",
+        "value": " "
+      }
+    ]
+  },
+  {
+    "name": "invalid-json",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "write",
+        "file": "data/release/outlook.json",
+        "value": "{"
+      }
+    ]
+  },
+  {
+    "name": "page-needs",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "replace",
+        "file": "apps/web/client/pages/s01-nachalo.js",
+        "old": "export const needs = ['core', 'execution'];",
+        "value": "export const needs = ['core', 'missing'];"
+      }
+    ]
+  },
+  {
+    "name": "catalog-self-size",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          24,
+          "bytes"
+        ],
+        "value": 10
+      }
+    ]
+  },
+  {
+    "name": "catalog-pending-copy",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          29,
+          "title"
+        ],
+        "value": "wrong"
+      }
+    ]
+  },
+  {
+    "name": "catalog-part-duplicate",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          6,
+          "parts",
+          0,
+          "code"
+        ],
+        "value": "0300"
+      }
+    ]
+  },
+  {
+    "name": "catalog-part-missing",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          6,
+          "parts"
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "catalog-invalid-format",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "format"
+        ],
+        "value": "bad"
+      }
+    ]
+  }
+]

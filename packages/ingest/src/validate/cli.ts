@@ -44,9 +44,11 @@ export function main(argv: string[]): number {
           .map((s) => s.trim())
           .filter(Boolean)
       : [...PORTED_GROUPS];
-    const { value: result, paths: consultedInputs } = captureInputPaths(context.root, () =>
-      runWave14(context, names, accepted),
-    );
+    const {
+      value: result,
+      paths: consultedInputs,
+      rejectedPaths,
+    } = captureInputPaths(context.root, () => runWave14(context, names, accepted));
     const text =
       JSON.stringify(
         { ...result, inputMode: live ? 'live-diagnostic' : 'explicit-root' },
@@ -54,6 +56,7 @@ export function main(argv: string[]): number {
         2,
       ) + '\n';
     if (report) {
+      if (rejectedPaths.length) throw Error('cannot write a report after rejecting an input path');
       if (!report.startsWith('tmp/ts-migration/') || !report.endsWith('.json'))
         throw new Error('report must be a JSON path under tmp/ts-migration/');
       const path = safePath(process.cwd(), report);

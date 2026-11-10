@@ -94,8 +94,20 @@ def main():
         text = 'els => els.map(e => e.textContent.replace(/\\s+/g, " ").trim())'
         check('sorted law rows equal independent main fixture', page.locator(selector).evaluate_all(text) == expected.locator(selector).evaluate_all(text))
         check('sorting retains focus', page.evaluate("document.activeElement?.dataset.key") == 'law')
+        before_unit = page.locator('#view article.page').element_handle()
         page.locator('#s14-unit-pct').check()
-        page.wait_for_function("() => document.querySelector('#s14-nakratko .kpi-unit')?.textContent === 'от БВП' && document.querySelector('article')?.dataset.ready === '1'")
+        # The store updates React before the router remounts the page. The old
+        # ready article can already show pct while that rerender is still queued.
+        page.wait_for_function("""before => {
+          const view = document.getElementById('view');
+          const article = view?.querySelector('article.page');
+          return !!article && article !== before && article.dataset.ready === '1'
+            && view.getAttribute('aria-busy') !== 'true'
+            && article.querySelector('#s14-nakratko .kpi-unit')?.textContent === 'от БВП';
+        }""", arg=before_unit)
+        # mount() resolves on a frame; the router restores focus after that.
+        page.evaluate("() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))")
+        before_unit.dispose()
         expected.set_content((FIXTURES / 'S14-pct.browser.html').read_text())
         selector = '#s14-nakratko .kpi-value'
         check('GDP percentages equal independent main fixture', page.locator(selector).evaluate_all(text) == expected.locator(selector).evaluate_all(text))
