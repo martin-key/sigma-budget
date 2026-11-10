@@ -620,9 +620,10 @@ jobs:
           python tmp/wave17c-git-export/packages/ingest/test/fixtures/wave17c/reference.py --check
           python tmp/wave17c-git-export/packages/ingest/test/fixtures/wave17c/wrapper.py --check
           python tmp/wave17c-git-export/packages/ingest/test/fixtures/wave17c/sources/generate.py --check
+          python tmp/wave17c-git-export/packages/ingest/test/fixtures/wave17c/routes/generate.py --check
       - name: Independent SEARCH, mutation and compiled CLI checks
         run: |
-          pnpm --filter @sigma-budget/ingest exec vitest run src/validate/search-reference.test.ts src/validate/search.test.ts src/validate/search-sources.test.ts src/validate/search-cli.test.ts
+          pnpm --filter @sigma-budget/ingest exec vitest run src/validate/search-reference.test.ts src/validate/search.test.ts src/validate/search-sources.test.ts src/validate/search-routes.test.ts src/validate/search-cli.test.ts
           node packages/ingest/dist/validate/search-cli.js --root packages/ingest/test/fixtures/wave17c/corpus --only SEARCH --raw --report tmp/ts-migration/candidates/17c/report.json
       - uses: actions/upload-artifact@v4
         if: always()
