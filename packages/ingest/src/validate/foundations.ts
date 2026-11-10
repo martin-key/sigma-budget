@@ -89,10 +89,15 @@ export function inputs(ctx: Context): Check {
     .sort();
   c.ok(!changed.length, `pinned input files changed: ${changed.slice(0, 5).join(', ')}`);
   if (ctx.generatedInputs.length) {
-    for (const f of ctx.generatedInputs)
-      c.ok(actual[f.path] === f.sha256, 'generated intermediate hash: ' + f.path);
+    for (const f of ctx.generatedInputs) {
+      const bytes = readFileSync(safePath(ctx.root, f.path));
+      c.ok(
+        bytes.length === f.bytes && createHash('sha256').update(bytes).digest('hex') === f.sha256,
+        'generated intermediate hash: ' + f.path,
+      );
+    }
     c.warn(
-      `${ctx.generatedInputs.length} declared intermediates generated from actual raw sources in owned scratch; their historical original pins are unverified`,
+      `${ctx.generatedInputs.length} declared intermediates generated from actual raw sources in owned scratch; historical raw reconstruction remains unverified`,
     );
   }
   c.fact(

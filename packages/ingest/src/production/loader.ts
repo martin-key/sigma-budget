@@ -38,7 +38,7 @@ import {
   PUBLICATION_PATHS,
 } from '../readers/publication-documents/prepare.js';
 import { verifyLegacyProgrammeSource } from '../readers/publication-documents/legacy-programme.js';
-import { extractProgrammeArchive } from '../readers/publication-documents/archive.js';
+import { extractProgrammeArchive, programmeZip } from '../readers/publication-documents/archive.js';
 import { physicalLawSummary } from './intermediates.js';
 import { AnnualLineage } from '../build/annual-lineage.js';
 import { prepareExecution, executionAnnualFromPrepared } from '../readers/execution/index.js';
@@ -278,11 +278,16 @@ export async function loadProduction(
     const extracted = await extractProgrammeArchive(r.data, {
       wasmModule: join(scratch, '7z/7zz.umd.js'),
     });
+    const archiveEntries = programmeZip(r.data);
     for (const i of missingPdfs) {
       const pdf = extracted.pdfs.find((p) => 'data/originals/program_budgets/' + p.file === i.path);
-      if (!pdf || sha256(pdf.bytes) !== i.legacyPin)
+      const members = archiveEntries.filter(
+        (e) => !e.directory && e.name.split('/').at(-1) === i.path.split('/').at(-1),
+      );
+      const bytes = pdf?.bytes ?? (members.length === 1 ? members[0]!.read() : undefined);
+      if (!bytes || sha256(bytes) !== i.legacyPin)
         throw new Error('Archive member does not equal registered PDF pin: ' + i.path);
-      await generate(i.path, pdf.bytes);
+      await generate(i.path, bytes);
     }
     receipts.push({ schema: 'generated-programme-members/1', members: extracted.members });
   }

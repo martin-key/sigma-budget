@@ -21,7 +21,13 @@ export async function executeRelease(context: Readonly<ExecutionContext>): Promi
         path: i.path,
         bytes: b.length,
         sha256: createHash('sha256').update(b).digest('hex'),
-        mime: i.path.endsWith('.pdf') ? 'application/pdf' : 'application/json',
+        mime: i.path.endsWith('.pdf')
+          ? 'application/pdf'
+          : i.path.endsWith('.7z')
+            ? 'application/x-7z-compressed'
+            : i.path.endsWith('.zip')
+              ? 'application/zip'
+              : 'application/json',
         kind: 'generated-intermediate',
         datasets: i.datasets,
       };
