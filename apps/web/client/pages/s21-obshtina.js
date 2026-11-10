@@ -1,5 +1,5 @@
 import { isFramework } from '../budget-2027.js';
-import { municipalityView, mountBillSearch } from './bill-views.js';
+import { municipalityView, mountBillSearch, billListHref } from './bill-views.js';
 // S21 · Община · #/obshtina/:code · next S20 · period 2026.law only (D19 is the law; there is no table for the bill)
 // Data, only through `needs`:
 //   municipalities          D19, REAL   the main transfers of the 2026 state budget law to each municipality (хил. €), inhabitants, € per person
@@ -303,4 +303,10 @@ export function render(ctx) {
     lede: `Област ${md.region}. Колко пари държавата дава на общината през 2026 г., за какво са те и как сумата се сравнява с областта и с другите общини.`,
     body: html`${moneyBlock(md)}${compareBlock(md, ctx)}${kindsBlock(md)}${mapBlock(md, ctx)}${readBlock(md)}`
   };
+}
+
+export function next(ctx) {
+  return isFramework(ctx)
+    ? [{ title: 'Към списъка с общини', href: billListHref(ctx) }]
+    : ['S20'];
 }

@@ -1,0 +1,18 @@
+{
+  "python": "3.12",
+  "generatorSha256": "3ad9bdfcc40e9cb104443cf0d423afc0a0d67ac7e2b7ac7c03e707682d447768",
+  "inputs": {
+    "generate_oracle.py": "a834a8b2d739eb87e8918f08d8fd7e8c81fbcccf81a7a0609f9746cba3cee354",
+    "provenance.json": "04b585d13e68c4ad8eafbc56977ee0163539b70e4702e9695405909d88628fe1",
+    "review/provenance.json": "6b54c955ab87446c19d79cd98cd3e3ce14b1ffaeeb6e0bb8805d82c68e8d6c53",
+    "key-whitespace/provenance.json": "194a91c5a0c2ab9cc9fd607d7bbef273da6fce446be880cd1bcea0de43f948f1",
+    "integer/provenance.json": "82061ecba9b23de385d244253e9260c07dd0b5c01d86394ad86bbc9d3c5315dd",
+    "integer-limit/provenance.json": "aacf0cc71fb0629a75ac321426c2851c8a5f83e3d3aa8d122a7bcb8204fb0bce"
+  },
+  "outputs": {
+    "cases.json": "4f62a734dda59d556805550082bd26fb5c231ea2bc0e8b4410a28843b2fc97e1",
+    "oracle.json": "5fea2b202730c0acac657389295e137225d99c4f977631109223b3921c47421a",
+    "routes.json": "70df2cf6091a20e5382c1b56596511a3b96cb81d97c7a778ddd31b53aad8fb8d"
+  },
+  "cases": 46
+}

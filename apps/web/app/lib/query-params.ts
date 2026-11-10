@@ -1,7 +1,7 @@
 import type { WebRoute } from './routes';
 import { match } from '../../client/routes.js';
 import { publicationQuery } from '../../client/publication-query.js';
-export const SCREEN_QUERY = ['per', 'demo'];
+export const SCREEN_QUERY = ['per', 'demo', 'unit'];
 const keeps = (route: WebRoute, k: string) =>
   SCREEN_QUERY.includes(k) || (route.query || []).includes(k);
 /** the part of a parsed query that the server draws the screen of `route` from */

@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react';
 import { store, PERIODS } from '../../client/store.js';
+import { viewUnit } from '../../client/publication-query.js';
 import { byId } from '../lib/legacy';
 import { periodHref } from '../../client/routes.js';
 import { PageFrame } from '../components/PageFrame';
@@ -25,7 +26,7 @@ export function NarrativeContent({
         if (k === 'unit') f();
       }),
     () => store.get('unit') as 'eur' | 'pct',
-    () => 'eur' as const,
+    () => viewUnit(model.query.unit) || ('eur' as const),
   );
   const ctx: NarrativeContext = {
     data: model.content,
@@ -33,7 +34,11 @@ export function NarrativeContent({
     query: model.query,
     origin: model.release.origin,
     unit,
-    href: (id, params, query) => periodHref(model.period.key, id, params, query),
+    href: (id, params, query) =>
+      periodHref(model.period.key, id, params, {
+        ...(unit === 'pct' || model.query.unit === 'eur' ? { unit } : {}),
+        ...query,
+      }),
   };
   const parts =
     model.view === 'ready'

@@ -4,6 +4,7 @@ import { denominator, MONTHS } from './feed-events.js';
 import {
   contains,
   equal as same,
+  feedOwner,
   greaterZero,
   hashable,
   iterable,
@@ -35,7 +36,7 @@ const kindOrder = ['report', 'law', 'plenary', 'rates', 'eurostat', 'data'];
 const sortedKeys = (x: object) => Object.keys(x).sort();
 const idMonth = monthId;
 export function feedRest(c: Check, f: any, ctx: Context): void {
-  const core = ctx.get('core.json'),
+  const core = feedOwner(ctx, 'core.json'),
     ex = ctx.get('execution.json'),
     law = ctx.get('law.json'),
     basis = denominator(ex),

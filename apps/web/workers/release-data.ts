@@ -9,6 +9,11 @@ import { current, manifestOf, readObject } from './api/store.js';
 import { publicApi } from './api/api.js';
 import { parse, PendingError, LoadError } from '../client/data.js';
 
+declare const __BUDGET_CANDIDATE_RELEASE__: string | null;
+/** Build-time selection, never a public query parameter or remote pointer. */
+export const candidateReleaseId = (): string | null =>
+  typeof __BUDGET_CANDIDATE_RELEASE__ === 'undefined' ? null : __BUDGET_CANDIDATE_RELEASE__;
+
 export interface ReleaseData {
   /** the release the screen is drawn from */
   releaseId: string;
@@ -110,7 +115,12 @@ async function fromRegistry(env: Env, rid: string, origin: string): Promise<Rele
   };
 }
 
-function fromAssets(env: Env, origin: string, releaseId: string): ReleaseData {
+function fromAssets(
+  env: Env,
+  origin: string,
+  releaseId: string,
+  outputs?: Set<string>,
+): ReleaseData {
   return {
     releaseId,
     dataBase: '/data/',
@@ -123,11 +133,16 @@ function fromAssets(env: Env, origin: string, releaseId: string): ReleaseData {
         name
       ];
       const path = own ? `/data/releases/${releaseId}/${own}` : `/data/${name}.json`;
+      if (outputs && !outputs.has(own || `data/${name}.json`)) throw new PendingError(name);
       const res = await env.ASSETS.fetch(new Request(new URL(path, origin)));
+      if (outputs && !res.ok) throw new LoadError(name, `candidate asset ${path}: ${res.status}`);
       if (res.status === 404) throw new PendingError(name);
       if (!res.ok) throw new LoadError(name, res.status);
       const text = await res.text();
-      if (/^\s*</.test(text)) throw new PendingError(name);
+      if (/^\s*</.test(text)) {
+        if (outputs) throw new LoadError(name, `candidate asset ${path} is HTML`);
+        throw new PendingError(name);
+      }
       try {
         return parse(name, text);
       } catch (e) {
@@ -154,6 +169,24 @@ async function assetsReleaseId(env: Env, origin: string): Promise<string> {
 /** the release of this request: the current one in the registry, else (no registry, or no current release yet) the one built into the
  *  static assets. Throws RegistryError when the registry is there but cannot be read */
 export async function releaseData(env: Env, origin: string): Promise<ReleaseData> {
+  const selected = candidateReleaseId();
+  if (selected) {
+    const path = `/data/releases/${selected}/manifest.json`;
+    const res = await env.ASSETS.fetch(new Request(new URL(path, origin)));
+    if (!res.ok) throw new LoadError('release/manifest', `candidate manifest: ${res.status}`);
+    const bytes = await res.arrayBuffer();
+    const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
+    const sha = [...digest].map((b) => b.toString(16).padStart(2, '0')).join('');
+    if (sha !== selected)
+      throw new LoadError('release/manifest', 'candidate manifest SHA-256 differs');
+    const manifest = JSON.parse(decoder.decode(bytes)) as Manifest['json'];
+    return fromAssets(
+      env,
+      origin,
+      selected,
+      new Set([...manifest.outputs.map((o) => o.path), 'manifest.json']),
+    );
+  }
   const rid = await currentRelease(env);
   if (rid) return fromRegistry(env, rid, origin);
   return fromAssets(env, origin, await assetsReleaseId(env, origin));

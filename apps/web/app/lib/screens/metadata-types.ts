@@ -67,6 +67,7 @@ export interface Manifest {
   data_schema?: Record<string, string>;
 }
 export interface ReleaseFile {
+  kind?: string;
   path: string;
   mime: string;
   bytes: number;

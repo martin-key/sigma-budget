@@ -1,0 +1,13 @@
+{
+  "python": "3.12",
+  "generatorSha256": "e4ec82784e9b99ef65cbbdc5261cd37e5f213e1e0a9994330a54237166fa1b69",
+  "inputs": {
+    "generate_oracle.py": "a834a8b2d739eb87e8918f08d8fd7e8c81fbcccf81a7a0609f9746cba3cee354",
+    "provenance.json": "04b585d13e68c4ad8eafbc56977ee0163539b70e4702e9695405909d88628fe1",
+    "donor/budget_pipeline/validate/checks.py": "25d7d0e984c5214efb2786f0f72f50cd6666b5f4565802fbb998d1cd52cc0567"
+  },
+  "outputs": {
+    "oracle.json": "c1ec2ce911f31751d7a25cbca3e4ca62e8ddb4303368661f0f0cdd41f2f85d93"
+  },
+  "cases": 309
+}

@@ -1,4 +1,23 @@
 import { Check, isnum, pyRepr } from './checks.js';
+import type { Context } from './context.js';
+import { parseOrderedPythonJson } from './ordered-json.js';
+
+/** These owners format large integers from sourceToken, rather than rounded JS values.
+ * Keep Context's strict grammar/error handling; only its safe-integer guard differs.
+ */
+export function feedOwner(ctx: Context, rel: 'core.json' | 'debt.json' | 'expenditure.json'): any {
+  try {
+    return ctx.get(rel);
+  } catch (error) {
+    if (
+      !(error instanceof Error) ||
+      error.message !== 'JSON integer exceeds the safe numeric range'
+    )
+      throw error;
+    return parseOrderedPythonJson(ctx.text(rel), JSON.parse);
+  }
+}
+
 export function pyError(name: string, message: string): never {
   const e = new Error(message);
   e.name = name;

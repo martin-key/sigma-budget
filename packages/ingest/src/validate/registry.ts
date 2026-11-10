@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { parseYaml } from '../io/registry.js';
-import { files, safePath } from './context.js';
+import { files, protectDeclaredInput, rejectInputInventory, safePath } from './context.js';
 import { pyRepr as repr, pyTruth as truth } from './checks.js';
 
 const access = new Set(['auto', 'auto-bg', 'browser-only', 'supplied', 'reference', 'generated']);
@@ -75,12 +75,44 @@ export interface RegistryOptions {
 }
 export function validateRegistry(root: string, options: RegistryOptions = {}): RegistryResult {
   const read = (p: string) => readFileSync(safePath(root, p), 'utf8');
-  const sreg: any = parseYaml(read('data/sources.yaml')),
-    dreg: any = parseYaml(read('data/datasets.yaml'));
+  let sreg: any, dreg: any;
   const pins: Record<string, string> = Object.create(null);
-  for (const line of read('data/originals.sha256').split(/\r?\n/)) {
-    const idx = line.indexOf('  ');
-    if (idx >= 0 && line.slice(idx + 2)) pins[line.slice(idx + 2)] = line.slice(0, idx);
+  try {
+    sreg = parseYaml(read('data/sources.yaml'));
+    dreg = parseYaml(read('data/datasets.yaml'));
+    for (const line of read('data/originals.sha256').split(/\r?\n/)) {
+      const idx = line.indexOf('  ');
+      if (idx >= 0 && line.slice(idx + 2)) pins[line.slice(idx + 2)] = line.slice(0, idx);
+    }
+    // Collect the whole declared input closure before any producer/path check can throw.
+    for (const path of Object.keys(pins)) protectDeclaredInput(root, path);
+    const declaredRows = (value: unknown): Record<string, any>[] => {
+      if (value == null) return [];
+      if (!Array.isArray(value)) {
+        rejectInputInventory(root);
+        return [];
+      }
+      return value.filter((entry) => {
+        if (entry !== null && typeof entry === 'object' && !Array.isArray(entry)) return true;
+        rejectInputInventory(root);
+        return false;
+      });
+    };
+    for (const source of declaredRows(sreg.sources))
+      for (const entry of declaredRows(source.files)) protectDeclaredInput(root, entry.path, true);
+    for (const entry of declaredRows(sreg.intermediates)) {
+      protectDeclaredInput(root, entry?.path, true);
+      protectDeclaredInput(root, entry?.decision);
+    }
+    for (const entry of declaredRows(dreg.datasets)) {
+      protectDeclaredInput(root, entry?.schema);
+      if (Array.isArray(entry?.files))
+        for (const path of entry.files) protectDeclaredInput(root, path, true);
+      else if (entry.files != null) rejectInputInventory(root);
+    }
+  } catch (error) {
+    rejectInputInventory(root);
+    throw error;
   }
   const r = new Report(),
     sources = sreg.sources as any[],

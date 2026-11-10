@@ -1,0 +1,1238 @@
+[
+  {
+    "name": "key-baseline",
+    "groups": [
+      "CORE",
+      "CATALOG"
+    ],
+    "ops": []
+  },
+  {
+    "name": "source-0-nested",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "pending",
+          "P01",
+          "source"
+        ],
+        "value": [
+          [
+            "minfin"
+          ]
+        ]
+      }
+    ],
+    "compiled": true
+  },
+  {
+    "name": "source-0-mapping",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "pending",
+          "P01",
+          "source"
+        ],
+        "value": [
+          {}
+        ]
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "source-0-null",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "pending",
+          "P01",
+          "source"
+        ],
+        "value": [
+          null
+        ]
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "source-0-bool",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "pending",
+          "P01",
+          "source"
+        ],
+        "value": [
+          true
+        ]
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "source-0-integer",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "pending",
+          "P01",
+          "source"
+        ],
+        "value": [
+          1
+        ]
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "source-0-empty",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "pending",
+          "P01",
+          "source"
+        ],
+        "value": []
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "source-0-valid",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "pending",
+          "P01",
+          "source"
+        ],
+        "value": [
+          "minfin"
+        ]
+      }
+    ],
+    "compiled": true
+  },
+  {
+    "name": "source-0-unknown",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "pending",
+          "P01",
+          "source"
+        ],
+        "value": [
+          "__proto__"
+        ]
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "source-0-nested-after-valid",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "pending",
+          "P01",
+          "source"
+        ],
+        "value": [
+          "minfin",
+          [
+            "minfin"
+          ]
+        ]
+      }
+    ],
+    "compiled": true
+  },
+  {
+    "name": "source-0-mapping-container",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "pending",
+          "P01",
+          "source"
+        ],
+        "value": {
+          "minfin": 1
+        }
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "source-0-string-container",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "pending",
+          "P01",
+          "source"
+        ],
+        "value": "minfin"
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "source-1-nested",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "files",
+          0,
+          "source"
+        ],
+        "value": [
+          [
+            "zdb"
+          ]
+        ]
+      }
+    ],
+    "compiled": true
+  },
+  {
+    "name": "source-1-mapping",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "files",
+          0,
+          "source"
+        ],
+        "value": [
+          {}
+        ]
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "source-1-null",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "files",
+          0,
+          "source"
+        ],
+        "value": [
+          null
+        ]
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "source-1-bool",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "files",
+          0,
+          "source"
+        ],
+        "value": [
+          true
+        ]
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "source-1-integer",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "files",
+          0,
+          "source"
+        ],
+        "value": [
+          1
+        ]
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "source-1-empty",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "files",
+          0,
+          "source"
+        ],
+        "value": []
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "source-1-valid",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "files",
+          0,
+          "source"
+        ],
+        "value": [
+          "zdb"
+        ]
+      }
+    ],
+    "compiled": true
+  },
+  {
+    "name": "source-1-unknown",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "files",
+          0,
+          "source"
+        ],
+        "value": [
+          "__proto__"
+        ]
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "source-1-nested-after-valid",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "files",
+          0,
+          "source"
+        ],
+        "value": [
+          "zdb",
+          [
+            "zdb"
+          ]
+        ]
+      }
+    ],
+    "compiled": true
+  },
+  {
+    "name": "source-1-mapping-container",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "files",
+          0,
+          "source"
+        ],
+        "value": {
+          "zdb": 1
+        }
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "source-1-string-container",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "files",
+          0,
+          "source"
+        ],
+        "value": "zdb"
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "source-2-nested",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "source"
+        ],
+        "value": [
+          [
+            "asbp"
+          ]
+        ]
+      }
+    ],
+    "compiled": true
+  },
+  {
+    "name": "source-2-mapping",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "source"
+        ],
+        "value": [
+          {}
+        ]
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "source-2-null",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "source"
+        ],
+        "value": [
+          null
+        ]
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "source-2-bool",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "source"
+        ],
+        "value": [
+          true
+        ]
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "source-2-integer",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "source"
+        ],
+        "value": [
+          1
+        ]
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "source-2-empty",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "source"
+        ],
+        "value": []
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "source-2-valid",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "source"
+        ],
+        "value": [
+          "asbp"
+        ]
+      }
+    ],
+    "compiled": true
+  },
+  {
+    "name": "source-2-unknown",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "source"
+        ],
+        "value": [
+          "__proto__"
+        ]
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "source-2-nested-after-valid",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "source"
+        ],
+        "value": [
+          "asbp",
+          [
+            "asbp"
+          ]
+        ]
+      }
+    ],
+    "compiled": true
+  },
+  {
+    "name": "source-2-mapping-container",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "source"
+        ],
+        "value": {
+          "asbp": 1
+        }
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "source-2-string-container",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "source"
+        ],
+        "value": "asbp"
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "text-0-nextline",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "title"
+        ],
+        "value": ""
+      }
+    ],
+    "compiled": true
+  },
+  {
+    "name": "text-0-separator",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "title"
+        ],
+        "value": "\u001c"
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "text-0-bom",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "title"
+        ],
+        "value": "﻿"
+      }
+    ],
+    "compiled": true
+  },
+  {
+    "name": "text-0-zerowidth",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "title"
+        ],
+        "value": "​"
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "text-0-empty",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "title"
+        ],
+        "value": ""
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "text-0-space",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "title"
+        ],
+        "value": " "
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "text-0-text",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "title"
+        ],
+        "value": "value"
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "text-1-nextline",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "description"
+        ],
+        "value": ""
+      }
+    ],
+    "compiled": true
+  },
+  {
+    "name": "text-1-separator",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "description"
+        ],
+        "value": "\u001c"
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "text-1-bom",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "description"
+        ],
+        "value": "﻿"
+      }
+    ],
+    "compiled": true
+  },
+  {
+    "name": "text-1-zerowidth",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "description"
+        ],
+        "value": "​"
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "text-1-empty",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "description"
+        ],
+        "value": ""
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "text-1-space",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "description"
+        ],
+        "value": " "
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "text-1-text",
+    "groups": [
+      "CATALOG"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/catalog.json",
+        "path": [
+          "datasets",
+          0,
+          "description"
+        ],
+        "value": "value"
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "text-2-nextline",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "pending",
+          "P01",
+          "reason"
+        ],
+        "value": ""
+      }
+    ],
+    "compiled": true
+  },
+  {
+    "name": "text-2-separator",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "pending",
+          "P01",
+          "reason"
+        ],
+        "value": "\u001c"
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "text-2-bom",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "pending",
+          "P01",
+          "reason"
+        ],
+        "value": "﻿"
+      }
+    ],
+    "compiled": true
+  },
+  {
+    "name": "text-2-zerowidth",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "pending",
+          "P01",
+          "reason"
+        ],
+        "value": "​"
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "text-2-empty",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "pending",
+          "P01",
+          "reason"
+        ],
+        "value": ""
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "text-2-space",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "pending",
+          "P01",
+          "reason"
+        ],
+        "value": " "
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "text-2-text",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "pending",
+          "P01",
+          "reason"
+        ],
+        "value": "value"
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "text-3-nextline",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "sources",
+          "budget2027",
+          "title"
+        ],
+        "value": ""
+      }
+    ],
+    "compiled": true
+  },
+  {
+    "name": "text-3-separator",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "sources",
+          "budget2027",
+          "title"
+        ],
+        "value": "\u001c"
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "text-3-bom",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "sources",
+          "budget2027",
+          "title"
+        ],
+        "value": "﻿"
+      }
+    ],
+    "compiled": true
+  },
+  {
+    "name": "text-3-zerowidth",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "sources",
+          "budget2027",
+          "title"
+        ],
+        "value": "​"
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "text-3-empty",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "sources",
+          "budget2027",
+          "title"
+        ],
+        "value": ""
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "text-3-space",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "sources",
+          "budget2027",
+          "title"
+        ],
+        "value": " "
+      }
+    ],
+    "compiled": false
+  },
+  {
+    "name": "text-3-text",
+    "groups": [
+      "CORE"
+    ],
+    "ops": [
+      {
+        "op": "set",
+        "file": "data/release/core.json",
+        "path": [
+          "sources",
+          "budget2027",
+          "title"
+        ],
+        "value": "value"
+      }
+    ],
+    "compiled": false
+  }
+]

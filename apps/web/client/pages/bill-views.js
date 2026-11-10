@@ -2,7 +2,7 @@
 import { html } from '../html.js';
 import { num, money } from '../format.js';
 import { block } from '../ui/block.js';
-import { dataTable } from '../ui/table.js';
+import { dataTable, updateRows } from '../ui/table.js';
 import { chart } from '../ui/chart.js';
 import { kpi, kpiGrid } from '../ui/kpi.js';
 import { pendingState, errorState } from '../ui/states.js';
@@ -20,8 +20,9 @@ import {
   MUNICIPAL_COLUMNS,
   DELEGATED_COLUMNS,
 } from '../budget-2027.js';
-import { periodByKey } from '../periods.js';
+import { periodByKey, DEFAULT_PERIOD } from '../periods.js';
 import { dataHref } from '../data.js';
+import { norm, lat } from '../searchlib.js';
 
 const labels = { bill: 'Основен проект', billMc: 'Вариант на Министерския съвет' };
 const variantOf = (ctx) => (ctx.query.variant === 'billMc' ? 'billMc' : 'bill');
@@ -117,6 +118,53 @@ const unavailable = (ctx) =>
         }
       : null;
 const keep = (ctx, over = {}) => ({ ...ctx.query, per: ctx.period.key, ...over });
+const municipalScreen = (ctx) => ['S20', 'S21'].includes(ctx.route.id);
+const listQuery = (ctx, over = {}) => {
+  const keys = municipalScreen(ctx) ? ['q', 'oblast', 'sort', 'dir'] : ['q', 'variant', 'sort', 'dir'];
+  return { ...Object.fromEntries(keys.filter((k) => ctx.query[k]).map((k) => [k, ctx.query[k]])), per: ctx.period.key === DEFAULT_PERIOD ? null : ctx.period.key, ...over };
+};
+export const billListHref = (ctx) => ctx.href(municipalScreen(ctx) ? 'S20' : 'S10', {}, listQuery(ctx));
+const listCrumbs = (ctx, title) => [
+  { label: municipalScreen(ctx) ? 'Моята община' : 'Кой харчи?', href: billListHref(ctx) },
+  { label: title },
+];
+const cleanSearch = (q) => String(q || '').slice(0, 80).trim();
+const matches = (text, query) => {
+  const name = norm(text), latin = lat(name);
+  return norm(cleanSearch(query)).split(' ').filter(Boolean).every((word) =>
+    (/[a-z]/i.test(word) ? latin : name).includes(word));
+};
+function institutionRows(ctx, items = institutions(ctx.data.budget2027, variantOf(ctx))) {
+  return items.filter((i) => matches(`${i.name} ${i.code}`, ctx.query.q)).map((i) => ({
+    name: i.name, variant: labels[variantOf(ctx)], code: i.code, article: i.article,
+    revenue: cellValue(i.revenue), expenditure: cellValue(i.expenditure),
+    provenance: i.expenditure?.provenance || '', origin: provenanceUrl(i.expenditure),
+    _href: (s) => ctx.href('S11', { code: i.code }, listQuery(ctx, { sort: s.sortBy, dir: s.sortBy ? s.dir : null })),
+  }));
+}
+function municipalRegion(ctx, all) {
+  const requested = ctx.query.oblast || '';
+  const found = all.find((m) => m.region === requested || m.regionId === requested);
+  return found ? found.regionId || found.region : '';
+}
+function municipalityRows(ctx, all = municipalRows(ctx.data.budget2027, ctx.data.municipalities)) {
+  const region = municipalRegion(ctx, all);
+  return all.filter((m) => matches(`${m.displayName} ${m.name}`, ctx.query.q) &&
+    (!region || m.region === region || m.regionId === region)).map((m) => ({
+      name: m.displayName, region: m.region,
+      ...Object.fromEntries(m.cells.map((c, i) => ['v' + i, cellValue(c)])),
+      provenance: m.cells[0]?.provenance, origin: provenanceUrl(m.cells[0]),
+      _href: m.id ? (s) => ctx.href('S21', { code: m.id }, listQuery(ctx, { oblast: region || null, sort: s.sortBy, dir: s.sortBy ? s.dir : null })) : undefined,
+    }));
+}
+const resultCount = (ctx, n) => municipalScreen(ctx)
+  ? `Намерени общини: ${num(n)}.` : `Намерени ведомства: ${num(n)}.`;
+const searchHint = 'Списъкът се филтрира, докато пишеш. Може и с латински букви.';
+const searchField = (ctx, rows, label) => html`${field({
+  id: 'bill-q', label, hint: searchHint,
+  control: textInput({ id: 'bill-q', name: 'q', type: 'search', value: ctx.query.q || '', hint: searchHint, autocomplete: 'off' }),
+})}<p class="small" id="bill-count" role="status">${resultCount(ctx, rows.length)}</p>
+<p><button type="button" class="btn btn-sm" data-bill-clear${cleanSearch(ctx.query.q) ? '' : html` disabled`}>Изчисти търсенето</button></p>`;
 const variantControl = (ctx) =>
   field({
     id: 'bill-variant',
@@ -156,6 +204,7 @@ export function institutionView(ctx) {
   if (specific && (!b || ctx.params.program))
     return {
       title: selected.name,
+      crumbs: listCrumbs(ctx, selected.name),
       body: html`${variantControl(ctx)}${gap(
         ctx.params.program
           ? 'Няма пълен програмен архив за 2027–2029'
@@ -166,6 +215,7 @@ export function institutionView(ctx) {
   if (specific)
     return {
       title: selected.article === 1 ? 'Държавен бюджет по чл. 1 (проект 2027)' : b.name,
+      crumbs: listCrumbs(ctx, selected.article === 1 ? 'Държавен бюджет по чл. 1 (проект 2027)' : b.name),
       lede: `Чл. ${selected.article} от проекта за държавния бюджет за 2027 г. ${labels[variant]}. Всички суми са в хил. евро.`,
       body: html`${variantControl(ctx)}${base(
         ctx,
@@ -191,23 +241,7 @@ export function institutionView(ctx) {
         'Показани са разпределенията, отпечатани в законопроекта. Пълните програмни бюджети за новия период липсват.',
       )}${publication(doc)}`,
     };
-  const q = String(ctx.query.q || '')
-    .trim()
-    .toLocaleLowerCase('bg');
-  const filtered = items.filter(
-    (i) => !q || `${i.name} ${i.code}`.toLocaleLowerCase('bg').includes(q),
-  );
-  const rows = filtered.map((i) => ({
-    name: i.name,
-    variant: labels[variant],
-    code: i.code,
-    article: i.article,
-    revenue: cellValue(i.revenue),
-    expenditure: cellValue(i.expenditure),
-    provenance: i.expenditure?.provenance || '',
-    origin: provenanceUrl(i.expenditure),
-    _href: ctx.href('S11', { code: i.code }, keep(ctx)),
-  }));
+  const rows = institutionRows(ctx, items);
   const total = strictSum(items.map((i) => i.expenditure)),
     rev = strictSum(items.map((i) => i.revenue));
   const columns = [
@@ -262,16 +296,16 @@ export function institutionView(ctx) {
         ctx,
         's10-bill-list',
         'Всички ведомства',
-        html`${field({
-          id: 'bill-q',
-          label: 'Намери ведомство',
-          control: textInput({ id: 'bill-q', name: 'q', type: 'search', value: ctx.query.q || '' }),
-        })}${dataTable({
+        html`${searchField(ctx, rows, 'Намери ведомство')}${dataTable({
           id: 's10-bill-table',
           caption: `Проект 2027 · ${labels[variant]}`,
           columns,
           rows,
           sortable: true,
+          query: true,
+          sortBy: ctx.query.sort,
+          dir: ctx.query.dir,
+          empty: 'Няма ведомства за това търсене. Провери името или изчисти търсенето.',
         })}`,
       )}
       ${base(ctx, 's10-bill-shares', 'Най-големите бюджети', chart(spec), {
@@ -320,6 +354,7 @@ export function municipalityView(ctx) {
     if (!m) ctx.notFound();
     return {
       title: `Община ${m.displayName}${all.filter((x) => x.displayName === m.displayName).length > 1 ? ' · ' + m.region : ''}`,
+      crumbs: listCrumbs(ctx, `Община ${m.displayName}`),
       lede: 'Проект 2027: основните бюджетни взаимоотношения по чл. 52 и разбивката на делегираните дейности по чл. 53. Сумите са в хил. евро.',
       body: html`${municipalTable(
           ctx,
@@ -369,21 +404,8 @@ export function municipalityView(ctx) {
         doc.gaps.municipalForecast,
       )}${publication(doc)}`,
     };
-  const q = String(ctx.query.q || '').toLocaleLowerCase('bg'),
-    region = ctx.query.oblast || '';
-  const filtered = all.filter(
-    (m) =>
-      (!q || `${m.displayName} ${m.name}`.toLocaleLowerCase('bg').includes(q)) &&
-      (!region || m.region === region || m.regionId === region),
-  );
-  const rows = filtered.map((m) => ({
-    name: m.displayName,
-    region: m.region,
-    ...Object.fromEntries(m.cells.map((c, i) => ['v' + i, cellValue(c)])),
-    provenance: m.cells[0]?.provenance,
-    origin: provenanceUrl(m.cells[0]),
-    _href: m.id ? ctx.href('S21', { code: m.id }, { per: ctx.period.key }) : undefined,
-  }));
+  const region = municipalRegion(ctx, all);
+  const rows = municipalityRows(ctx, all);
   const columns = [
     { key: 'name', label: 'Община' },
     { key: 'region', label: 'Област' },
@@ -403,11 +425,9 @@ export function municipalityView(ctx) {
       ctx,
       's20-list-2027',
       'Всички общини',
-      html`${field({
-        id: 'bill-q',
-        label: 'Намери община',
-        control: textInput({ id: 'bill-q', name: 'q', type: 'search', value: ctx.query.q || '' }),
-      })}${field({
+      html`${searchField(ctx, rows, 'Намери община')}
+      ${ctx.query.oblast && !region ? html`<p class="small">Непозната област. Търсенето е във всички области.</p>` : ''}
+      ${field({
         id: 'bill-oblast',
         label: 'Област',
         control: selectInput({
@@ -431,6 +451,7 @@ export function municipalityView(ctx) {
         query: true,
         sortBy: ctx.query.sort,
         dir: ctx.query.dir,
+        empty: 'Няма общини за тези филтри. Промени областта или изчисти търсенето.',
       })}`,
     )}${forecastBlock}${publication(doc)}`,
   };
@@ -688,15 +709,41 @@ export function billOverview(ctx) {
 export function mountBillSearch(root, ctx) {
   const input = root.querySelector('#bill-q');
   if (!input) return;
-  const change = () => ctx.setQuery({ q: input.value });
-  input.addEventListener('change', change);
-  const key = (e) => {
-    if (e.key === 'Enter') change();
+  const clear = root.querySelector('[data-bill-clear]');
+  const count = root.querySelector('#bill-count');
+  const table = municipalScreen(ctx) ? 's20-bill-table' : 's10-bill-table';
+  let timer;
+  const change = () => {
+    clearTimeout(timer);
+    ctx.setQuery({ q: cleanSearch(input.value) || null }, { rerender: false });
+    const rows = municipalScreen(ctx) ? municipalityRows(ctx) : institutionRows(ctx);
+    updateRows(table, rows);
+    if (count) count.textContent = resultCount(ctx, rows.length);
+    if (clear) clear.disabled = !input.value;
   };
+  const typing = (e) => {
+    clearTimeout(timer);
+    if (clear) clear.disabled = !input.value;
+    if (!e.isComposing) timer = setTimeout(change, 140);
+  };
+  const key = (e) => {
+    if (e.isComposing) return;
+    if (e.key === 'Escape' && input.value) { e.preventDefault(); input.value = ''; change(); }
+    else if (e.key === 'Enter') { e.preventDefault(); change(); }
+  };
+  const reset = () => { input.value = ''; change(); input.focus(); };
+  input.addEventListener('input', typing);
+  input.addEventListener('compositionend', change);
+  input.addEventListener('change', change);
   input.addEventListener('keydown', key);
+  clear?.addEventListener('click', reset);
   return () => {
+    clearTimeout(timer);
+    input.removeEventListener('input', typing);
+    input.removeEventListener('compositionend', change);
     input.removeEventListener('change', change);
     input.removeEventListener('keydown', key);
+    clear?.removeEventListener('click', reset);
   };
 }
 

@@ -15,7 +15,7 @@ import { publicApi } from './api/api.js';
 import { provideScope } from '../client/env.js';
 import { requestState } from '../client/store.js';
 import { screenSearch } from '../app/lib/query-params';
-import { releaseData, noRegistry, type ReleaseData } from './release-data';
+import { releaseData, noRegistry, candidateReleaseId, type ReleaseData } from './release-data';
 import { inFlight, claim, withinCap } from './render-gate';
 import { CSP } from '../app/lib/security';
 
@@ -214,6 +214,13 @@ export default {
       return new Response('Method not allowed', { status: 405, headers: { Allow: 'GET, HEAD' } });
     }
     if (RELEASES.test(url.pathname)) {
+      // A local candidate build uses only its packaged release metadata, even
+      // when local registry bindings contain another release.
+      if (candidateReleaseId()) {
+        return url.pathname.startsWith('/data/releases/')
+          ? env.ASSETS.fetch(request)
+          : Response.json({ error: 'local candidate has no release registry' }, { status: 404 });
+      }
       // the registry's releases; a release that was published with the site (data/release/releases/) is one of the static files. An
       // environment without a registry (no D1 tables: a local check, a new environment) answers as one where the release is unknown
       let res: Response;

@@ -9,6 +9,9 @@ import { textModel } from '../lib/screens/text';
 import { renderScreen } from '../lib/screen.server';
 import { provideScope } from '../../client/env.js';
 import { requestState } from '../../client/store.js';
+import { PendingError } from '../../client/data.js';
+import { build, frameHtml } from '../../client/render.js';
+import { byId } from '../lib/legacy';
 import manifest from './__fixtures__/metadata-manifest.json';
 import inputs from './__fixtures__/metadata-inputs.json';
 const docs: Record<string, unknown> = inputs;
@@ -20,6 +23,8 @@ const release = {
   feedbackEmail: '',
 };
 const load = async <T,>(name: string): Promise<T> => {
+  // The static fixture has no registry; this optional resource is absent, not offline.
+  if (name === 'release/journal') throw new PendingError(name);
   if (!(name in docs)) throw new Error(name);
   return docs[name] as T;
 };
@@ -54,7 +59,7 @@ export function semantics(html: string) {
 }
 afterEach(() => provideScope(() => null));
 for (const c of manifest.cases) {
-  it(`${c.file} preserves frozen ordered text, headings, links, controls and metadata`, async () => {
+  it(`${c.file} preserves ordered semantics and frozen metadata with the provenance clarification`, async () => {
     const url = new URL(c.address, manifest.origin);
     const scope = { url, origin: url.origin, data: new Map(), state: requestState(null), load };
     provideScope(() => scope);
@@ -69,11 +74,41 @@ for (const c of manifest.cases) {
     const actual = renderToString(
       <MigratedScreen model={model} navigation={{ go() {}, announce() {} }} />,
     );
+    const frozen = fixture(c.file);
+    // Keep the historical capture intact. S35's intentional copy and input-kind column
+    // now follow the current legacy renderer; its links and controls still match the capture.
+    const clarified = c.screen === 'S35' && !c.query.demo;
+    const expected = clarified ? String(frameHtml(await build(byId.S35, {}, c.query))) : frozen;
     const a = semantics(actual),
-      b = semantics(fixture(c.file));
+      b = semantics(expected);
     expect({ ...a, text: undefined }).toEqual({ ...b, text: undefined });
     expect(a.text).toBe(b.text);
-    const { document } = parseHTML(fixture(c.file));
+    if (clarified) {
+      const old = semantics(frozen);
+      expect(a.links).toEqual(old.links);
+      expect(a.controls).toEqual(old.controls);
+      expect(a.headings).toEqual(
+        old.headings.map(([tag, id, title]) => [
+          tag,
+          id,
+          id === 's35-files' ? 'Входни и изходни файлове' : title,
+        ]),
+      );
+      const currentDoc = parseHTML(actual).document;
+      const oldDoc = parseHTML(frozen).document;
+      for (const id of ['s35-release', 's35-code', 's35-val', 's35-provenance', 's35-history'])
+        expect(
+          semantics(`<article>${currentDoc.getElementById(id)!.outerHTML}</article>`).text,
+        ).toBe(semantics(`<article>${oldDoc.getElementById(id)!.outerHTML}</article>`).text);
+    }
+    const { document } = parseHTML(
+      clarified
+        ? frozen.replaceAll(
+            `${inputs['release/manifest'].inputs.length} оригинала`,
+            `${inputs['release/manifest'].inputs.length} входни файла`,
+          )
+        : frozen,
+    );
     expect(result.doc.status).toBe(c.status);
     expect(result.doc.title).toBe(document.title);
     for (const tag of result.doc.tags)

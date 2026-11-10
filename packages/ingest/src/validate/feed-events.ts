@@ -3,6 +3,7 @@ import { amounts, cleanText, pythonDigitPattern } from './feed-text.js';
 import {
   contains,
   equal,
+  feedOwner,
   hashable,
   integerText,
   iterable,
@@ -128,13 +129,13 @@ function event(
   }
 }
 export function feedEvents(c: Check, f: any, ctx: Context): void {
-  const core = ctx.get('core.json'),
+  const core = feedOwner(ctx, 'core.json'),
     ex = ctx.get('execution.json'),
     law = ctx.get('law.json');
   const basis = denominator(ex),
     rates = ctx.get('rates.json'),
-    debt = ctx.get('debt.json'),
-    exp = ctx.get('expenditure.json'),
+    debt = feedOwner(ctx, 'debt.json'),
+    exp = feedOwner(ctx, 'expenditure.json'),
     seb = ctx.get('sebra.json');
   const rows: any[] = listLike(required(f, 'events'));
   const kinds: any[] = listLike(required(f, 'kinds')).map((k: any) => {
