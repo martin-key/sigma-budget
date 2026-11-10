@@ -1,0 +1,13 @@
+{
+  "python": "3.12",
+  "generatorSha256": "c335b1730bfc8b90e91a50c788cf57a200e766ebb0fb0e471676db47acec4219",
+  "inputs": {
+    "generate.py": "390f7e455bbdcc1de0fb964fde6e822ce5e8fc53fc0c95d70b43f9f05d2b253e",
+    "inventory.json": "b5dc99c53fa2750436e5d8a5958aba9dd9ff0750248b267c9a790bfbeeafdd6d",
+    "evidence.json": "759e35494bf09fddb954f5a71a377b2cb19ec32313b764d623fffc3f79c9867c",
+    "differential.json": "fd6540ed1d6b4c711964ed0c61c467d73e4acbabe5ea0e41082e729b85d0e468",
+    "sources/provenance.json": "2af90da08eb56ebb4fada693e0257f0c4901efaabb0a55534d1fb69304616bf1"
+  },
+  "oracleSha256": "e26f7f5ca6e64b2ccaefb7267541dc4a287cffdb93af0fcdf73d612419c0d0b3",
+  "cases": 11
+}

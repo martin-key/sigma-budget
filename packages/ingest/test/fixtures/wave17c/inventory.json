@@ -1,0 +1,154 @@
+{
+  "base": "e4168b09df77d3f48cb3be38c52b173d5887f7fe",
+  "buildDate": "2026-11-08",
+  "files": {
+    "apps/web/app/lib/routes.json": {
+      "bytes": 15472,
+      "sha256": "d41a55e3a68f3d92192df348518c4e98e0289ea604f67b045b9fbc4c3c003f7f"
+    },
+    "data/release/budget2027.json": {
+      "bytes": 777789,
+      "sha256": "14e268a9ab7e2112d7711c6ccc3e7268b5a8bcec3c263fc655c72e87fd13a9ee"
+    },
+    "data/release/catalog.json": {
+      "bytes": 65118,
+      "sha256": "bce49260597e2472288e05d5069e33bfece25a5bdcdd94fce39a2570722deb2e"
+    },
+    "data/release/execution.json": {
+      "bytes": 62506,
+      "sha256": "e9c75d84bb575c3a0287c0a7a56828b473bd53498336ce6d45cfbc6333533200"
+    },
+    "data/release/glossary.json": {
+      "bytes": 61915,
+      "sha256": "0d88665ab18f66da040adfe6ee525d5a7aacfcc72223df5ccfc7b4276c888a77"
+    },
+    "data/release/measures.json": {
+      "bytes": 89652,
+      "sha256": "2a3a34db733d6d943df5e76930e149cd63c4dd44979cf6fa314ee912a086500d"
+    },
+    "data/release/ministries.json": {
+      "bytes": 44731,
+      "sha256": "201d423a240af32cc59ff0c4e0ef05529a1b82b12b2f6d796daba2b1791e880a"
+    },
+    "data/release/municipalities.json": {
+      "bytes": 110011,
+      "sha256": "435e2490408f848a2a4a80ebd82684e4bdab220aef57f090eccdd987c14cae46"
+    },
+    "data/release/programs.json": {
+      "bytes": 53358,
+      "sha256": "a078127c8822db1a8de6602f9d3e4785bef6afc1530ce4e18b716784d79ee4b1"
+    },
+    "data/release/search-index.json": {
+      "bytes": 246292,
+      "sha256": "0942ddf2918ac0b8a9c8124964aefcddb3478a59d1be798a551431ec71e83efd"
+    },
+    "pipeline/budget_pipeline/__init__.py": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "pipeline/budget_pipeline/build/annual_periods.py": {
+      "bytes": 14283,
+      "sha256": "3a036c4d9e999897dc4737340da72772a27b8c1e40e3c5bff4f5b678d11a41cb"
+    },
+    "pipeline/budget_pipeline/build/budget_2027.py": {
+      "bytes": 11900,
+      "sha256": "dab10117524264be11f28be6d8325ca0b089f646d801751c0bd7974943d2850f"
+    },
+    "pipeline/budget_pipeline/build/data_io.py": {
+      "bytes": 7715,
+      "sha256": "b827a40fe5c979f2cf0d689766fedc355fddeb8c897460578d6aeb26364b9d68"
+    },
+    "pipeline/budget_pipeline/extract/__init__.py": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "pipeline/budget_pipeline/extract/indirect_tax_evidence.py": {
+      "bytes": 11548,
+      "sha256": "62650741265a8111f580cabd07fa25e71550e260559a870100afd26071984b28"
+    },
+    "pipeline/budget_pipeline/routes.py": {
+      "bytes": 1215,
+      "sha256": "9a3394ed319834cf97cc85afc6aadbb501957c76b579faafa3f83008a4455c3f"
+    },
+    "pipeline/budget_pipeline/validate/__init__.py": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "pipeline/budget_pipeline/validate/annual_oracles.py": {
+      "bytes": 3725,
+      "sha256": "6cce4ec2592eb084b35e57b2b8fe9641fafa5cd54d3256cbe2886b8cebac3fc9"
+    },
+    "pipeline/budget_pipeline/validate/base.py": {
+      "bytes": 4188,
+      "sha256": "8a4067e045e2b72eec24603f37b0d72ed37ee04b87f1713ebc6a4d3733791fe3"
+    },
+    "pipeline/budget_pipeline/validate/budget_2027.py": {
+      "bytes": 9743,
+      "sha256": "ed607b8498a9693c52c8398f4c70f7770b001aa7592c9bf079d7beca415453c2"
+    },
+    "pipeline/budget_pipeline/validate/budgets.py": {
+      "bytes": 21162,
+      "sha256": "afbabe24c96182801efc1df1c0b8d4dd6ad69ddbdcf615fe029e2901cf0c53ef"
+    },
+    "pipeline/budget_pipeline/validate/catalog.py": {
+      "bytes": 21349,
+      "sha256": "f656945429bec45296ec95519be2a187d14f4fabda5ff4a1ee91a9baa9dc53e6"
+    },
+    "pipeline/budget_pipeline/validate/checks.py": {
+      "bytes": 7976,
+      "sha256": "25d7d0e984c5214efb2786f0f72f50cd6666b5f4565802fbb998d1cd52cc0567"
+    },
+    "pipeline/budget_pipeline/validate/components.py": {
+      "bytes": 46943,
+      "sha256": "5bac6fde1850421a87310bd337c9849b936962f044d3dab22598e5005e3dc60e"
+    },
+    "pipeline/budget_pipeline/validate/datasets.py": {
+      "bytes": 4876,
+      "sha256": "02234d24a03c387690d03b714eb7d413d334726951bcfa0034bc0a6325778790"
+    },
+    "pipeline/budget_pipeline/validate/debt.py": {
+      "bytes": 18605,
+      "sha256": "6c2924d0b94dbdb85122c923c48f2248c162b94aad411bc997b6150da161dacc"
+    },
+    "pipeline/budget_pipeline/validate/execution.py": {
+      "bytes": 7847,
+      "sha256": "03b1686fd7f067a9f0e1cea7729b924d46461c72f4d4341b4b422638d40003c0"
+    },
+    "pipeline/budget_pipeline/validate/execution_contract.py": {
+      "bytes": 5867,
+      "sha256": "ffa32a7c6ee3a1ef661294049f77d8797a2e5dbc7fe4e160d7ebc5e7b5e70e5f"
+    },
+    "pipeline/budget_pipeline/validate/execution_reports.py": {
+      "bytes": 23146,
+      "sha256": "63c04bec1c3ada4a97962a2dcdb51709d60e4264a83e1d4865735b64f833948c"
+    },
+    "pipeline/budget_pipeline/validate/fiscal.py": {
+      "bytes": 23166,
+      "sha256": "b47769a9a99163adf1000c3fbd7c9892e3b7823809f17ec78a935563d643d5b5"
+    },
+    "pipeline/budget_pipeline/validate/foundations.py": {
+      "bytes": 16327,
+      "sha256": "c7b713c7c45798c528c0ba5e082b2127347a63ab6bed5bd50dd32ae7c59c452b"
+    },
+    "pipeline/budget_pipeline/validate/groups.py": {
+      "bytes": 511,
+      "sha256": "6e6f57cc6981e9fb787d300cd179b1f4c32d75c54bc6a5f1c7ac7477b84e2b51"
+    },
+    "pipeline/budget_pipeline/validate/indirect_taxes.py": {
+      "bytes": 7034,
+      "sha256": "038fedc70e8ffd575654c4a886ff8c9d675d3477bdef5e9764ec04d8cb074cea"
+    },
+    "pipeline/budget_pipeline/validate/law.py": {
+      "bytes": 21307,
+      "sha256": "de4dbeb83fa6b429b9dc97179f06d18057ebb60191617a1178e58e996b2a1d38"
+    },
+    "pipeline/budget_pipeline/validate/local_finance.py": {
+      "bytes": 14790,
+      "sha256": "d03a74108cc213221800510dea2e3a3cbb8bf717403f4363f32d2291e6aa65a0"
+    },
+    "pipeline/budget_pipeline/validate/search_feed.py": {
+      "bytes": 43655,
+      "sha256": "b473784911c4a709720a2d57b7b4556eecd993bffb09fbc78c4b023bac69773a"
+    }
+  }
+}

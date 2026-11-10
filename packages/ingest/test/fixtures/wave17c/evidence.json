@@ -1,0 +1,13 @@
+{
+  "inventory.json": "b5dc99c53fa2750436e5d8a5958aba9dd9ff0750248b267c9a790bfbeeafdd6d",
+  "generate.py": "390f7e455bbdcc1de0fb964fde6e822ce5e8fc53fc0c95d70b43f9f05d2b253e",
+  "generate_unicode.py": "3a23db095b2929b3902f27cd4dbfad8bb783335367461c2d532f92e80f2743b7",
+  "reference.py": "ebd8be2bea2a9607802ba9d78a31011e5b43b6621d590971a5c4ffd0ebe14cc1",
+  "wrapper.py": "f8815160d7b12a9cac416d9c318c84ebd804257ad4c20e22004eca0018f9d4a2",
+  "check_provenance.py": "afef415952e18aac7c47e31f23975526e8b50b67f538d39506cb2a719f306d59",
+  "differential.json": "fd6540ed1d6b4c711964ed0c61c467d73e4acbabe5ea0e41082e729b85d0e468",
+  "reference.json": "b779fcf071c8abd4583e956af92d9fec83f7b9c1a1862183fc3ddde3373858aa",
+  "wrapper.json": "76c0c92a0ee9fff97c5084c1282d697b587b246c7073cf439b7f68996e23205f",
+  "README.md": "4950a63f1853fa9b4a25a1dbd78d1a44eb6a78f05099816ae3144a53ce1fa2e4",
+  "../../../src/validate/search-unicode-data.ts": "7701da90decd4e44e860d32ada484a4d502c426899850bc7b58d014b05c764be"
+}
