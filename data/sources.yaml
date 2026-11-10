@@ -465,8 +465,8 @@ intermediates:
   reproducible: false
   note: Acquisition manifest retained from the audit, extended by fresh DV/SEBRA downloads and observed minfin 403 probes on 2026-11-08.
     Historical missing manifest is not reconstructed. Re-pinned on 2026-11-10 to the retained local copy (the 2026-11-08 bytes are not
-    available), with its СЕБРА page entry set to the pinned page (sha256, bytes and retrieval time of release 7883978e); every entry
-    catalog.py reads is the same, and data/release is byte-identical.
+    available); its СЕБРА page entry is the pinned page (sha256, bytes and retrieval time of release 7883978e) and its three ДВ entries
+    are the pages re-acquired on 2026-11-10, so the catalog lists the checksums of the pinned files.
   acquired: '2026-11-10'
 - path: data/originals/asbp/asbp_tables.json
   producer: python -m budget_pipeline.extract.asbp_tables
