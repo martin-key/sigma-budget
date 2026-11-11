@@ -1,6 +1,7 @@
 // The bindings and variables of the Worker (apps/web/wrangler.jsonc).
 interface Env {
   ASSETS: Fetcher;
+  RELEASE_RATE_LIMITER?: RateLimit;
   DB: D1Database;
   OBJECTS: R2Bucket;
   ENVIRONMENT: string;

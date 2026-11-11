@@ -1,0 +1,62 @@
+# High-confidence dangerous execution/deserialization sinks across the repository.
+# Audit-only rules for trusted local XML, controlled CLI URLs and constant SVG markup
+# are deliberately outside this blocking ruleset; see docs/release.md.
+rules:
+  - id: dynamic-javascript-execution
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: Avoid dynamic code execution; use a fixed parser or function.
+    pattern-either:
+      - pattern: "eval(...)"
+      - pattern: "new Function(...)"
+  - id: shell-command-execution
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: Use execFile/spawn with an argument array instead of a shell command.
+    patterns:
+      - pattern-either:
+          - pattern-inside: |
+              import * as $CP from 'node:child_process';
+              ...
+          - pattern-inside: |
+              import * as $CP from 'child_process';
+              ...
+          - pattern-inside: |
+              const $CP = require('node:child_process');
+              ...
+          - pattern-inside: |
+              const $CP = require('child_process');
+              ...
+      - pattern-either:
+          - pattern: $CP.exec(...)
+          - pattern: $CP.execSync(...)
+  - id: interpolated-database-query
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: Bind query values instead of interpolating SQL.
+    pattern-either:
+      - pattern: "$DB.prepare(`...${$VALUE}...`)"
+      - pattern: "$DB.prepare($A + $B)"
+  - id: disabled-jwt-verification
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: JWT signature verification must remain enabled.
+    pattern-either:
+      - pattern: "$JWT.verify(..., { ..., algorithms: ['none'], ... }, ...)"
+      - pattern: "$JWT.decode(..., { ..., verify: false, ... }, ...)"
+  - id: unsafe-python-deserialization
+    languages: [python]
+    severity: ERROR
+    message: Use safe structured data parsing instead of executable deserialization.
+    pattern-either:
+      - pattern: "pickle.loads(...)"
+      - pattern: "pickle.load(...)"
+      - pattern: "yaml.unsafe_load(...)"
+      - pattern: "yaml.load($VALUE)"
+  - id: python-shell-execution
+    languages: [python]
+    severity: ERROR
+    message: Pass an argument array with shell disabled.
+    pattern-either:
+      - pattern: "subprocess.$METHOD(..., shell=True, ...)"
+      - pattern: "os.system(...)"

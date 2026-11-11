@@ -56,6 +56,11 @@ async function currentRelease(env: Env): Promise<string | null> {
   return rid;
 }
 
+/** Consult the short-lived pointer before loading any registry manifest/object. */
+export async function usesRegistry(env: Env): Promise<boolean> {
+  return !candidateReleaseId() && !!(await currentRelease(env));
+}
+
 async function fromRegistry(env: Env, rid: string, origin: string): Promise<ReleaseData> {
   let m: Manifest | null;
   try {

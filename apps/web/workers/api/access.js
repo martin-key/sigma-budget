@@ -35,13 +35,21 @@ export async function operator(request, env) {
   if (!token) return { ok: false, status: 401, error: 'no Access token' };
   const parts = token.split('.');
   if (parts.length !== 3) return { ok: false, status: 401, error: 'malformed token' };
-  let head, claims;
-  try { head = json(b64url(parts[0])); claims = json(b64url(parts[1])); } catch { return { ok: false, status: 401, error: 'malformed token' }; }
+  let head, claims, signature;
+  try { head = json(b64url(parts[0])); claims = json(b64url(parts[1])); signature = b64url(parts[2]); } catch { return { ok: false, status: 401, error: 'malformed token' }; }
+  const record = value => value !== null && typeof value === 'object' && !Array.isArray(value);
+  if (!record(head) || !record(claims) || typeof head.kid !== 'string' || !head.kid ||
+      typeof claims.iss !== 'string' || !(typeof claims.aud === 'string' || (Array.isArray(claims.aud) && claims.aud.every(x => typeof x === 'string'))) ||
+      !Number.isFinite(claims.exp) || ['nbf', 'iat'].some(k => claims[k] !== undefined && !Number.isFinite(claims[k])) ||
+      ['email', 'common_name'].some(k => claims[k] !== undefined && typeof claims[k] !== 'string') ||
+      parts.some(p => !/^[A-Za-z0-9_-]+$/.test(p))) return { ok: false, status: 401, error: 'malformed token' };
   if (head.alg !== 'RS256') return { ok: false, status: 401, error: 'unexpected algorithm' };
   const jwk = (await keySet(env)).find(k => k.kid === head.kid);
   if (!jwk) return { ok: false, status: 401, error: 'unknown signing key' };
   const key = await crypto.subtle.importKey('jwk', jwk, { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['verify']);
-  const good = await crypto.subtle.verify('RSASSA-PKCS1-v1_5', key, b64url(parts[2]), new TextEncoder().encode(parts[0] + '.' + parts[1]));
+  let good;
+  try { good = await crypto.subtle.verify('RSASSA-PKCS1-v1_5', key, signature, new TextEncoder().encode(parts[0] + '.' + parts[1])); }
+  catch { return { ok: false, status: 401, error: 'malformed signature' }; }
   if (!good) return { ok: false, status: 401, error: 'bad signature' };
   const now = Math.floor(Date.now() / 1000);
   const aud = Array.isArray(claims.aud) ? claims.aud : [claims.aud];

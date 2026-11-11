@@ -334,22 +334,19 @@ def write_extras(out, pages, origin, lastmod, routes, noindex=False):
         full += [clean_text(i['text'], 6000), '']
     (out / 'llms-full.txt').write_text('\n'.join(full), encoding='utf-8')
 
+    # Use exactly the Worker/Vite policy; only cache directives are build-specific.
+    shared_headers = subprocess.check_output([
+        'node', '--input-type=module', '-e',
+        "import { staticResponseHeaders } from './apps/web/app/lib/security.ts'; "
+        "console.log(staticResponseHeaders(JSON.parse(process.argv[1])))",
+        json.dumps({'ENVIRONMENT': 'production', 'NOINDEX': '1' if noindex else ''}),
+    ], cwd=ROOT, text=True)
     (out / '_headers').write_text(
-        '# Cloudflare Workers Static Assets: headers of the static files (apps/web/wrangler.jsonc)\n'
-        '/*\n'
-        f'  Content-Security-Policy: {CSP}\n'
-        '  X-Frame-Options: SAMEORIGIN\n'
-        '  X-Content-Type-Options: nosniff\n'
-        '  Referrer-Policy: strict-origin-when-cross-origin\n'
-        '  Strict-Transport-Security: max-age=31536000\n'
-        '  Cross-Origin-Opener-Policy: same-origin\n'
-        '  Permissions-Policy: camera=(), microphone=(), geolocation=(), browsing-topics=()\n'
-        + ('  X-Robots-Tag: noindex\n' if noindex else '') +
+        shared_headers +
         '/vendor/*\n'
         '  Cache-Control: public, max-age=604800\n'
         '/data/*\n'
         '  Cache-Control: public, max-age=300, must-revalidate\n'
-        '  Access-Control-Allow-Origin: *\n'
         '/data/releases/current.json\n'                                    # the pointer to the current release (spec, section 9.2)
         '  ! Cache-Control\n'
         '  Cache-Control: no-store\n'

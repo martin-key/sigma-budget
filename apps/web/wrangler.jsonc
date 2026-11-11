@@ -5,7 +5,7 @@
 //   CLOUDFLARE_ENV=staging pnpm build && pnpm exec wrangler deploy     # staging; production is not deployed from here (stage E)
 // The Vite plugin (@cloudflare/vite-plugin) sets the assets directory to the client build and picks the environment from CLOUDFLARE_ENV.
 // html_handling "auto-trailing-slash", not_found_handling "none": a path without a file goes to the Worker (every screen, the release API,
-// /admin/*). run_worker_first: /data/* reaches the Worker first, so the stable addresses /data/<file> follow the current release of the
+// /admin/*). run_worker_first: every response crosses the shared header layer; the stable addresses /data/<file> follow the current release of the
 // registry and /data/releases/* is the release API (apps/web/workers/app.ts); what neither knows comes from the static files.
 // SITE_ORIGIN names the public address in canonical links (empty: the address of the request); NOINDEX "1" keeps an environment out of
 // search engines; SIGMA_URL is the address of the original СИГМА (docs/approach-specification.md, section 2.2); FEEDBACK_EMAIL is the
@@ -26,8 +26,9 @@
     "binding": "ASSETS",
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "none",
-    "run_worker_first": ["/data/*"]
+    "run_worker_first": true
   },
+  "ratelimits": [{ "name": "RELEASE_RATE_LIMITER", "namespace_id": "2001", "simple": { "limit": 120, "period": 60 } }],
   "observability": { "enabled": true },
   "d1_databases": [
     { "binding": "DB", "database_name": "sigma-budget-registry", "database_id": "00000000-0000-0000-0000-000000000000", "migrations_dir": "migrations" }
@@ -40,6 +41,7 @@
   "env": {
     "staging": {
       "name": "sigma-budget-staging",
+      "ratelimits": [{ "name": "RELEASE_RATE_LIMITER", "namespace_id": "2002", "simple": { "limit": 120, "period": 60 } }],
       // staging answers only on its own hostname: no workers.dev or preview address next to it, so /admin/* has the one door that
       // Cloudflare Access guards (docs/approach-specification.md, section 3.3). The hostname is the environment's:
       //   "routes": [{ "pattern": "<staging hostname>", "custom_domain": true }],

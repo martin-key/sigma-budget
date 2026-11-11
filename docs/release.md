@@ -177,3 +177,74 @@ Access приложението покрива само `/admin/*`: сайтът
   токен при всяко сваляне. Текстът на законите е същият. Разликата се отчита, не се крие.
 
 Всички команди тук се изпълняват от корена на хранилището. Конфигурацията за собствен акаунт е `apps/web/wrangler.local.jsonc`, до `apps/web/wrangler.jsonc`, така че относителните `main` и `migrations_dir` запазват значението си. За нея се използва `-c apps/web/wrangler.local.jsonc`, а при сглобяване - `WRANGLER_CONFIG=apps/web/wrangler.local.jsonc`. Vite разрешава тази променлива спрямо корена на хранилището. Deploy на сглобен сайт използва `-c apps/web/build/server/wrangler.json`.
+
+## Политика за публичното четене
+
+`/api/releases`, неговите подмаршрути и `/data/*` са публични за GET и HEAD.
+Всички отговори, включително грешките и статичните резервни файлове, изпращат
+`Access-Control-Allow-Origin: *`, `Access-Control-Allow-Methods: GET, HEAD` и
+`Cross-Origin-Resource-Policy: cross-origin`, без разрешение за credentials.
+Браузърните клиенти използват `credentials: 'omit'`. ETag, X-Release-Id и
+Retry-After са достъпни за JavaScript. Други методи получават 405; не се поддържа
+preflight за удостоверени или нестандартни заявки. `/admin/*` остава same-origin.
+Общият слой добавя security headers и noindex извън production; само `/embed/*`
+разрешава `frame-ancestors *`. Sandbox политиката на активните оригинали се запазва.
+
+Публичните release API/object заявки и четенето на текущи registry файлове се
+ограничават чрез Workers binding `RELEASE_RATE_LIMITER`: 120 заявки за 60 секунди
+на CF-Connecting-IP, общ брояч за маршрутите, с `unknown-client` при липса на IP.
+Ключът е само IP адресът, без version/hostname префикс. Една среда запазва
+общия бюджет през rolling/gradual deployments и през hostname aliases.
+Средите са изолирани чрез три стабилни namespaces: `2001` за production,
+`2002` за staging и `2003` за операторския dev deployment config (`sigma-budget-dev`).
+Top-level конфигурацията остава production; dev се публикува със собствен
+операторски config с `ENVIRONMENT: "dev"`, собствен `SITE_ORIGIN` и `NOINDEX: "1"`.
+Статичните bundled файлове, включително `/data/releases/<id>/*`, се разпознават
+преди limiter-а и не четат R2. Candidate builds също не използват registry лимита.
+429 връща `Retry-After: 60` и `Cache-Control: no-store`. При липсващ binding или
+грешка от него registry четенето получава 503 само ако `ENVIRONMENT` е точно
+`"production"`. При всяка друга стойност, включително `"dev"` и `"staging"`,
+limiter-ът предупреждава и допуска заявката (fail open). Работещ binding се
+прилага във всички среди и връща 429 при изчерпана квота.
+Ограничението е приблизително и се прилага отделно във всяка Cloudflare локация:
+https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/
+
+При следващо разрешено публикуване операторът трябва да провери, че и трите
+namespace IDs (`2001`, `2002`, `2003`) са неизползвани в акаунта. При конфликт
+трябва да се изберат три други отделни свободни положителни числови IDs и да се
+пренесат в custom/local конфигурациите. Top-level production носи binding с
+`2001`, а staging носи binding с `2002`. Отделният операторски dev config трябва
+да включва собствен binding:
+
+```jsonc
+"ratelimits": [{ "name": "RELEASE_RATE_LIMITER", "namespace_id": "2003", "simple": { "limit": 120, "period": 60 } }]
+```
+
+Не се използва version metadata binding. Production deploy процедурата и
+нейният избор на top-level конфигурацията са запазени.
+Не са необходими remote команди за тази промяна.
+
+CI блокира при всички advisory нива (`pnpm audit --audit-level=low`), при gitleaks
+находки и при Semgrep находки. Няма advisory изключения. Евентуално изключение
+изисква отделен преглед с advisory ID, основание, собственик, дата на преглед и
+срок; грешка на скенера също блокира проверката. Gitleaks проверява checkout-а
+преди инсталирането на зависимости и редактира намерените стойности в лога.
+Semgrep използва digest-pinned образ като СИГМА и преглеждани локални правила
+в `.semgrep/security.yml` за динамично изпълнение, shell команди, SQL интерполация,
+изключена JWT проверка и опасна десериализация в JavaScript/TypeScript/Python.
+Пробното изпълнение на широките audit packs даде 20 сигнала за доверени CLI URL-и,
+локални XML файлове и константни SVG икони; те не са потвърдени уязвимости в одита.
+Този фокусиран gate не заменя прегледа на тези контексти. Gitleaks запазва всички
+стандартни правила; точните публични стойности `2028.forecast` и `2029.forecast`
+са документирани false positives в `.gitleaks.toml`, без изключване на файлове. Допълнителните изключения обхващат само 11 точни, прегледани SHA-256
+стойности в пет конкретни frozen provenance/capture файла и точните имена на две
+липсващи полета от KeyError в един validation oracle. Dependabot предлага обновявания на SHA pins
+за GitHub Actions за преглед. За merge protection трябва да са required двата
+security job-а; staging deploy зависи от security workflow-а.
+
+
+Release acceptance helper-ът пази HTTP headers с case-insensitive lookup.
+Sandbox проверката изисква точно една самостоятелна `sandbox` директива без
+`allow-*` изключения във всяка policy. Дублирани sandbox директиви се отхвърлят,
+включително permissive-first комбинации; следваща директива не поправя първата. Проверяват се и
+attachment, no-transform и пълната CSP на SSR документа.

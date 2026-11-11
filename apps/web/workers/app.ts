@@ -1,6 +1,6 @@
 import { screenCacheKey } from '../app/lib/cache';
-// The Worker of the site (docs/adr/0002-react-router-ssr.md). The platform serves the static files of the client build first (css/, js/,
-// data/, vendor/, images); the Worker answers the rest:
+// The Worker of the site (docs/adr/0002-react-router-ssr.md). Every response crosses the security finalizer;
+// static files are fetched through ASSETS, while the Worker handles:
 //   /admin/*                            the operator API (apps/web/workers/api/admin.js), behind Cloudflare Access and checked again there
 //   anything but GET and HEAD           405: the public routes never write
 //   /api/releases*, /data/releases/*    the public, read-only release API (apps/web/workers/api/api.js)
@@ -15,9 +15,16 @@ import { publicApi } from './api/api.js';
 import { provideScope } from '../client/env.js';
 import { requestState } from '../client/store.js';
 import { screenSearch } from '../app/lib/query-params';
-import { releaseData, noRegistry, candidateReleaseId, type ReleaseData } from './release-data';
+import {
+  releaseData,
+  noRegistry,
+  candidateReleaseId,
+  usesRegistry,
+  type ReleaseData,
+} from './release-data';
 import { inFlight, claim, withinCap } from './render-gate';
-import { CSP } from '../app/lib/security';
+import { finalizeResponse } from '../app/lib/security';
+import { rateLimitReleaseRead } from './release-rate-limit';
 import { bundledFeed, withFeedOrigin } from './feed';
 
 declare module 'react-router' {
@@ -172,142 +179,161 @@ function documentHeaders(
 ): Response {
   const h = new Headers(res.headers);
   if (cached) h.set('X-Screen-Cache', cached);
-  h.set(
-    'Content-Security-Policy',
-    CSP + (embed ? '; frame-ancestors *' : "; frame-ancestors 'self'"),
-  );
-  if (!embed) h.set('X-Frame-Options', 'SAMEORIGIN');
-  h.set('X-Content-Type-Options', 'nosniff');
-  h.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-  h.set('Strict-Transport-Security', 'max-age=31536000');
-  h.set('Cross-Origin-Opener-Policy', 'same-origin');
-  h.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), browsing-topics=()');
   if (res.status >= 500 || degraded) {
     // an error or an incomplete screen is shown once and never kept; a 503 says when to come back (a crawler backs off on it)
     h.set('Cache-Control', 'no-store, no-transform');
     if (res.status === 503) h.set('Retry-After', '30');
   } else if (!h.has('Cache-Control') || res.status === 200 || res.status === 404)
     h.set('Cache-Control', 'public, max-age=0, must-revalidate, no-transform');
-  if (env.NOINDEX === '1' || embed) h.set('X-Robots-Tag', 'noindex');
   if (rid) h.set('X-Release-Id', rid);
   return new Response(res.body, { status: res.status, statusText: res.statusText, headers: h });
 }
 
+async function dispatch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+  const url = new URL(request.url);
+  if (url.pathname.startsWith('/admin/')) return adminApi(request, env, url);
+  if (request.method !== 'GET' && request.method !== 'HEAD') {
+    return new Response('Method not allowed', { status: 405, headers: { Allow: 'GET, HEAD' } });
+  }
+  if (RELEASES.test(url.pathname)) {
+    // A local candidate build uses only its packaged release metadata, even
+    // when local registry bindings contain another release.
+    if (candidateReleaseId()) {
+      return url.pathname.startsWith('/data/releases/')
+        ? env.ASSETS.fetch(request)
+        : Response.json({ error: 'local candidate has no release registry' }, { status: 404 });
+    }
+    // Packaged release resources are immutable build assets, not registry reads.
+    // Check the asset before charging the registry limiter (including 304/HEAD).
+    if (/^\/data\/releases\/[a-f0-9]{64}\/.+/.test(url.pathname)) {
+      const asset = await env.ASSETS.fetch(request);
+      if (asset.status === 200 || asset.status === 206 || asset.status === 304) return asset;
+    }
+    const limited = await rateLimitReleaseRead(request, env);
+    if (limited) return limited;
+    // the registry's releases; a release that was published with the site (data/release/releases/) is one of the static files. An
+    // environment without a registry (no D1 tables: a local check, a new environment) answers as one where the release is unknown
+    let res: Response;
+    try {
+      res = await publicApi(request, env, url);
+    } catch (e) {
+      if (!noRegistry(env, e)) {
+        console.error(e);
+        return unavailable();
+      }
+      res = Response.json(
+        { error: 'no release registry in this environment' },
+        { status: 404, headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
+    return res.status === 404 && url.pathname.startsWith('/data/releases/')
+      ? fallback(request, env, res)
+      : res;
+  }
+
+  // Route static assets through the finalizer too: runtime noindex applies to every response.
+  if (!DATA_FILE.test(url.pathname)) {
+    const asset = await env.ASSETS.fetch(request);
+    if (asset.status !== 404) return asset;
+  }
+
+  const origin = (env.SITE_ORIGIN || url.origin).replace(/\/+$/, '');
+  const sigmaUrl = env.SIGMA_URL || '';
+  let data: ReleaseData;
+  try {
+    if (DATA_FILE.test(url.pathname) && (await usesRegistry(env))) {
+      const limited = await rateLimitReleaseRead(request, env);
+      if (limited) return limited;
+    }
+    data = await releaseData(env, url.origin);
+  } catch (e) {
+    console.error(e);
+    return unavailable();
+  } // RegistryError: D1 or R2 cannot be read right now
+  if (DATA_FILE.test(url.pathname)) return dataFile(request, env, url, data, origin);
+  const release = {
+    id: data.releaseId,
+    dataBase: data.dataBase,
+    origin,
+    sigmaUrl,
+    feedbackEmail: env.FEEDBACK_EMAIL || '',
+  };
+  // the address the screen is drawn from: the query its screen reads, nothing else; null for a path that is not a screen (it is never kept)
+  const search = screenSearch(url.pathname, url.search);
+  const screenUrl = new URL(url);
+  if (search !== null) screenUrl.search = search;
+  const screenRequest = screenUrl.search === url.search ? request : new Request(screenUrl, request);
+  const scope: Scope = {
+    url: screenUrl,
+    origin,
+    releaseId: data.releaseId,
+    dataBase: data.dataBase,
+    sigmaUrl,
+    state: requestState(screenUrl.searchParams.get('per')),
+    data: new Map(),
+    load: data.load,
+  };
+  const embed = url.pathname.startsWith('/embed/');
+  const cache = request.method === 'GET' && search !== null ? edge() : undefined;
+  const key = cacheKey(data.releaseId, screenUrl);
+  const fromCache = async () => {
+    const hit = cache ? await cache.match(key) : undefined;
+    return hit ? encoded(request, documentHeaders(hit, env, embed, data.releaseId, 'HIT')) : null;
+  };
+  const hit = await fromCache();
+  if (hit) return hit;
+
+  // the same miss is already being drawn in this isolate: take its entry instead of drawing the screen again (apps/web/workers/render-gate.ts)
+  const pending = cache && inFlight(key.url);
+  if (pending) {
+    await pending;
+    const stored = await fromCache();
+    if (stored) return stored;
+  }
+  const settle = cache ? claim(key.url) : () => {};
+  let stored: Promise<unknown> = Promise.resolve();
+  try {
+    const res = await withinCap(() =>
+      scopes.run(scope, () => handler(screenRequest, { cloudflare: { env, ctx }, release })),
+    );
+    if (!res) return unavailable('Сайтът е претоварен. Опитайте отново след малко.');
+    const cacheable = !!cache && res.status === 200 && !scope.degraded;
+    if (cacheable) {
+      const copy = new Response(res.clone().body, { status: res.status, headers: res.headers });
+      copy.headers.set(
+        'Cache-Control',
+        `public, max-age=${['/proverka', '/novo'].includes(screenUrl.pathname) ? 60 : 86400}`,
+      );
+      stored = cache.put(key, copy).catch(() => {});
+      ctx.waitUntil(stored);
+    }
+    return encoded(
+      request,
+      documentHeaders(
+        res,
+        env,
+        embed,
+        data.releaseId,
+        cacheable ? 'MISS' : 'BYPASS',
+        !!scope.degraded,
+      ),
+    );
+  } finally {
+    void stored.then(settle, settle); // the waiting misses look the entry up once it is stored
+  }
+}
+
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-    const url = new URL(request.url);
-    if (url.pathname.startsWith('/admin/')) return adminApi(request, env, url);
-    if (request.method !== 'GET' && request.method !== 'HEAD') {
-      return new Response('Method not allowed', { status: 405, headers: { Allow: 'GET, HEAD' } });
-    }
-    if (RELEASES.test(url.pathname)) {
-      // A local candidate build uses only its packaged release metadata, even
-      // when local registry bindings contain another release.
-      if (candidateReleaseId()) {
-        return url.pathname.startsWith('/data/releases/')
-          ? env.ASSETS.fetch(request)
-          : Response.json({ error: 'local candidate has no release registry' }, { status: 404 });
-      }
-      // the registry's releases; a release that was published with the site (data/release/releases/) is one of the static files. An
-      // environment without a registry (no D1 tables: a local check, a new environment) answers as one where the release is unknown
-      let res: Response;
-      try {
-        res = await publicApi(request, env, url);
-      } catch (e) {
-        if (!noRegistry(env, e)) {
-          console.error(e);
-          return unavailable();
-        }
-        res = Response.json(
-          { error: 'no release registry in this environment' },
-          { status: 404, headers: { 'Cache-Control': 'no-store' } },
-        );
-      }
-      return res.status === 404 && url.pathname.startsWith('/data/releases/')
-        ? fallback(request, env, res)
-        : res;
-    }
-
-    const origin = (env.SITE_ORIGIN || url.origin).replace(/\/+$/, '');
-    const sigmaUrl = env.SIGMA_URL || '';
-    let data: ReleaseData;
+    let res: Response;
     try {
-      data = await releaseData(env, url.origin);
-    } catch (e) {
-      console.error(e);
-      return unavailable();
-    } // RegistryError: D1 or R2 cannot be read right now
-    if (DATA_FILE.test(url.pathname)) return dataFile(request, env, url, data, origin);
-    const release = {
-      id: data.releaseId,
-      dataBase: data.dataBase,
-      origin,
-      sigmaUrl,
-      feedbackEmail: env.FEEDBACK_EMAIL || '',
-    };
-    // the address the screen is drawn from: the query its screen reads, nothing else; null for a path that is not a screen (it is never kept)
-    const search = screenSearch(url.pathname, url.search);
-    const screenUrl = new URL(url);
-    if (search !== null) screenUrl.search = search;
-    const screenRequest =
-      screenUrl.search === url.search ? request : new Request(screenUrl, request);
-    const scope: Scope = {
-      url: screenUrl,
-      origin,
-      releaseId: data.releaseId,
-      dataBase: data.dataBase,
-      sigmaUrl,
-      state: requestState(screenUrl.searchParams.get('per')),
-      data: new Map(),
-      load: data.load,
-    };
-    const embed = url.pathname.startsWith('/embed/');
-    const cache = request.method === 'GET' && search !== null ? edge() : undefined;
-    const key = cacheKey(data.releaseId, screenUrl);
-    const fromCache = async () => {
-      const hit = cache ? await cache.match(key) : undefined;
-      return hit ? encoded(request, documentHeaders(hit, env, embed, data.releaseId, 'HIT')) : null;
-    };
-    const hit = await fromCache();
-    if (hit) return hit;
-
-    // the same miss is already being drawn in this isolate: take its entry instead of drawing the screen again (apps/web/workers/render-gate.ts)
-    const pending = cache && inFlight(key.url);
-    if (pending) {
-      await pending;
-      const stored = await fromCache();
-      if (stored) return stored;
-    }
-    const settle = cache ? claim(key.url) : () => {};
-    let stored: Promise<unknown> = Promise.resolve();
-    try {
-      const res = await withinCap(() =>
-        scopes.run(scope, () => handler(screenRequest, { cloudflare: { env, ctx }, release })),
+      res = await dispatch(request, env, ctx);
+    } catch {
+      res = Response.json(
+        { error: 'service unavailable' },
+        { status: 503, headers: { 'Cache-Control': 'no-store', 'Retry-After': '30' } },
       );
-      if (!res) return unavailable('Сайтът е претоварен. Опитайте отново след малко.');
-      const cacheable = !!cache && res.status === 200 && !scope.degraded;
-      if (cacheable) {
-        const copy = new Response(res.clone().body, { status: res.status, headers: res.headers });
-        copy.headers.set(
-          'Cache-Control',
-          `public, max-age=${['/proverka', '/novo'].includes(screenUrl.pathname) ? 60 : 86400}`,
-        );
-        stored = cache.put(key, copy).catch(() => {});
-        ctx.waitUntil(stored);
-      }
-      return encoded(
-        request,
-        documentHeaders(
-          res,
-          env,
-          embed,
-          data.releaseId,
-          cacheable ? 'MISS' : 'BYPASS',
-          !!scope.degraded,
-        ),
-      );
-    } finally {
-      void stored.then(settle, settle); // the waiting misses look the entry up once it is stored
     }
+    return finalizeResponse(request, res, env);
   },
 } satisfies ExportedHandler<Env>;

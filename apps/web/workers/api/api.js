@@ -158,11 +158,21 @@ async function provenance(env, rid, man, record) {
 }
 
 export async function publicApi(request, env, url) {
+  let parts;
+  try { parts = url.pathname.split('/').filter(Boolean).map(decodeURIComponent); }
+  catch { return json({ error: 'malformed path encoding' }, 400); }
+  const integer = (name, fallback, max) => {
+    const values = url.searchParams.getAll(name);
+    if (!values.length) return fallback;
+    const value = values[0];
+    const n = Number(value);
+    return values.length === 1 && /^\d+$/.test(value) && Number.isSafeInteger(n) && n >= 1 && n <= max ? n : null;
+  };
+  const limit = integer('limit', 20, 100);
+  const before = integer('before', Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER);
+  if (limit === null || before === null) return json({ error: 'limit must be an integer from 1 to 100; before must be a positive safe integer' }, 400);
   if (!env.DB || !env.OBJECTS) return json({ error: 'this environment has no release registry yet' }, 503);
-  const parts = url.pathname.split('/').filter(Boolean).map(decodeURIComponent);
   if (parts[0] === 'api' && parts.length === 2) {                                         // /api/releases
-    const limit = Math.min(Math.max(Number(url.searchParams.get('limit')) || 20, 1), 100);
-    const before = Number(url.searchParams.get('before')) || Number.MAX_SAFE_INTEGER;
     const rows = (await env.DB.prepare('SELECT revision, release_id, previous_release_id, kind, operator, at FROM journal WHERE revision < ?1 ORDER BY revision DESC LIMIT ?2')
       .bind(before, limit).all()).results;
     const items = await Promise.all(rows.map(async r => ({ revision: r.revision, release_id: r.release_id, previous_release_id: r.previous_release_id,

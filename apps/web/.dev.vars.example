@@ -1,0 +1,7 @@
+# Local-only Access configuration; copy to .dev.vars and supply local values.
+ACCESS_ISSUER=
+ACCESS_AUD=
+OPERATORS=
+SERVICE_TOKENS=
+ENVIRONMENT=local
+NOINDEX=1

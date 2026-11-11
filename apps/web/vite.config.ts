@@ -1,3 +1,5 @@
+import { staticResponseHeaders } from './app/lib/security';
+import { writeFileSync } from 'node:fs';
 import { build as bundle, type Plugin as EsbuildPlugin } from 'esbuild';
 import { cpSync, rmSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -72,6 +74,13 @@ function siteFiles(candidate: Candidate | null): Plugin {
         define: { 'process.env.NODE_ENV': '"production"' },
         plugins: [legacySingletonsPlugin()],
       });
+      writeFileSync(
+        resolve(options.dir, '_headers'),
+        staticResponseHeaders({
+          ENVIRONMENT: process.env.CLOUDFLARE_ENV || 'production',
+          NOINDEX: process.env.NOINDEX,
+        }),
+      );
       rmSync(resolve(options.dir, 'index.html'), { force: true });
       cpSync(resolve('public/index.html'), resolve(options.dir, 'app.html'));
     },

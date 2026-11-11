@@ -35,7 +35,12 @@ data/cache/
 Thumbs.db
 
 # Тайни
+.dev.vars
+.dev.vars.*
 .env
+.env.*
+!.env.example
+!.dev.vars.example
 .secrets
 
 # Собствените среди: адресите и id-тата на твоя Cloudflare акаунт (docs/release.md, „Среди“)

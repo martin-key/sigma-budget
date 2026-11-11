@@ -174,7 +174,9 @@ async function publish(request, env, who) {
 
 export async function adminApi(request, env, url) {
   if (!env.DB || !env.OBJECTS) return json({ error: 'this environment has no release registry yet' }, 503);
-  const who = await operator(request, env);
+  let who;
+  try { who = await operator(request, env); }
+  catch { return json({ error: 'Access verification unavailable' }, 503); }
   if (!who.ok) return json({ error: who.error }, who.status);
   const parts = url.pathname.split('/').filter(Boolean);                     // admin, ...
   const m = request.method;
