@@ -65,7 +65,7 @@ SNAPSHOT_JS = r"""
   doc.removeAttribute('class');
   doc.setAttribute('data-prerendered', location.pathname + location.search);   // the address this HTML is the screen of (js/router.js compares it)
   for (const el of doc.querySelectorAll('[_echarts_instance_]')) { el.replaceChildren(); el.removeAttribute('_echarts_instance_'); }   // a canvas has no content in HTML: the app draws it again
-  for (const el of doc.querySelectorAll('script[src]')) if (el.type !== 'module' && !el.hasAttribute('data-keep')) el.remove();   // vendor/echarts.min.js (1 MB), added by js/charts.js: in the file it would block the first paint; the app loads it again. js/theme-boot.js (data-keep) stays: it sets the theme before the first paint
+  for (const el of doc.querySelectorAll('script[src]')) if (el.type !== 'module' && !el.hasAttribute('data-keep')) el.remove();   // vendor/echarts.min.js (1 MB), added by js/charts.js: in the file it would block the first paint; the app loads it again.
   for (const el of doc.querySelectorAll('svg.map-svg')) el.replaceChildren();          // 265 municipality outlines are ~280 KB of HTML: the app draws the map again
   for (const el of doc.querySelectorAll('[data-hydrated]')) el.removeAttribute('data-hydrated');
   for (const el of doc.querySelectorAll('#toasts, #live')) el.replaceChildren();

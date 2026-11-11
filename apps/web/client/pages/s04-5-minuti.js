@@ -96,11 +96,11 @@ function bar(o) {
  *  links: [{href, title, text}]; stepNo: the guide step whose «На какво да внимаваш» belongs to the scene (0 = none) */
 function deeper(ctx, n, stepNo, links) {
   const note = (ctx.data.guide?.steps || []).find(x => x.n === stepNo)?.blocks?.find(b => b.role === 'note');
-  return html`<section class="s04-deep" aria-labelledby="s04-deep-${n}">
+  return html`<div class="s04-deep">
     <h3 class="s04-deep-h" id="s04-deep-${n}">Влез по-дълбоко</h3>
     <ul class="s04-deep-list">${links.map(l => html`<li><a class="s04-deep-a" href="${l.href}"><span class="s04-deep-t">${l.title}</span><span class="s04-deep-x">${l.text}</span><span class="s04-deep-ar" aria-hidden="true">→</span></a></li>`)}</ul>
     ${note ? html`<details class="s04-deep-note"><summary>На какво да внимаваш</summary><p>${note.text}</p></details>` : ''}
-  </section>`;
+  </div>`;
 }
 
 /** a scene = a block: steps strip, text column (glossary scan on), picture column, «Влез по-дълбоко», link to the next scene */

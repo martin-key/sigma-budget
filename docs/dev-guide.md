@@ -817,7 +817,7 @@ openTerm(anchorEl, 'dds')           // това, което вика общия�
 
 ### 10.1 Токени (`css/tokens.css`) — никога не вкарвай цветове или размери в кода
 
-Светлата тема е върху голия `:root`; тъмната е под `@media (prefers-color-scheme: dark)` за `:root:not([data-theme="light"])` и `:root[data-theme="dark"]` — **ти никога не пишеш правила за тъмен режим**: ползвай токените и двете теми работят.
+Сайтът използва само светлата тема. Сървърът задава `data-theme="light"`; системната тема и старите запазени предпочитания се игнорират. Тъмните CSS палитри са запазени, но не могат да бъдат избрани. Ползвай семантичните цветови токени.
 
 - Цветове: `--bg --surface --sunk --overlay --ink --muted --faint --line --line-strong --data --data-hover --data-soft --data-2 --data-3 --on-data --accent --accent-soft --accent-ink --on-accent --focus --rev --exp --series-1…8 --series-other --ok --warn --bad (+ -soft) --st-real|partial|pending|mock|forecast (+ -soft) --hatch --hatch-step`.
 - Разстояния `--sp-1…7` (4/8/12/16/24/32/48 px), радиуси `--r-1 --r-2 --r-3 --r-full`, шрифтове `--font-body --font-head --font-mono`, размери `--fs-xs --fs-s --fs-0…--fs-6`, `--lh-tight --lh-body`, сенки `--shadow-1 --shadow-2`, движение `--t-fast --t-med --ease`.

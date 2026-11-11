@@ -612,3 +612,28 @@ h4.block-title{font-size:var(--fs-1)}
 
 /* Full-size sorting targets in the 2027 source tables, including tablet widths. */
 #s10-bill-table .th-sort,#s20-bill-table .th-sort{min-width:44px;min-height:44px}
+
+/* Measures group the three yearly effects under one description on phones.
+   display:none also removes the alternative presentation from the accessibility tree. */
+.measure-cards{display:none}
+@media screen and (max-width:640px){
+  .measures-desktop{display:none}
+  .measure-cards{display:grid;gap:var(--sp-4)}
+  .measure-card{min-width:0;padding:var(--sp-4);border:1px solid var(--rule);border-left:2px solid var(--ink)}
+  .measure-card h3{margin-bottom:var(--sp-4);text-wrap:initial}
+  .measure-card dl{margin:0}
+  .measure-value{display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--sp-2) var(--sp-3);padding:var(--sp-2) 0;border-top:1px dotted var(--rule)}
+  .measure-value dt{color:var(--ink-mid);font-size:var(--fs-s)}
+  .measure-value dd{margin:0 0 0 auto;max-width:100%;text-align:right;font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+  .measure-value small{display:block;font-family:var(--font-sans)}
+  .measure-origin{margin-top:var(--sp-3);font-size:var(--fs-s);overflow-wrap:anywhere}
+  .measure-origin summary{cursor:pointer;color:var(--ink-mid)}
+  .measure-origin dl>div{margin-top:var(--sp-3)}
+  .measure-origin dd{margin:var(--sp-1) 0 0}
+}
+
+/* Tablet tables retain their columns; the edge fade signals horizontal scrolling. */
+@media screen and (min-width:641px) and (max-width:900px){
+  .measures-desktop .table-wrap{scrollbar-width:thin;background:linear-gradient(to right,var(--paper) 30%,transparent) left center / 24px 100% no-repeat local,linear-gradient(to left,var(--paper) 30%,transparent) right center / 24px 100% no-repeat local,linear-gradient(to left,var(--rule),transparent) right center / 16px 100% no-repeat scroll}
+  .measures-desktop th:nth-child(2){min-width:18rem}
+}

@@ -747,6 +747,17 @@ export function mountBillSearch(root, ctx) {
   };
 }
 
+// Separate phone presentation: the hidden desktop table still owns the unchanged CSV.
+function measureCards(measures) {
+  return html`<div class="measure-cards">${measures.map((r) => html`<div class="measure-card">
+    <h3>${r.label}</h3>
+    <dl>${FRAMEWORK.map((key, k) => html`<div class="measure-value"><dt>${periodByKey(key).label}, млн. €</dt><dd>${cellValue(r.cells[k]) == null ? '—' : num(cellValue(r.cells[k]), 1)}${r.gaps[k] ? html`<small class="muted">${r.gaps[k]}</small>` : ''}</dd></div>`)}</dl>
+    <details class="measure-origin"><summary>Произход на стойностите</summary>
+      <dl>${FRAMEWORK.map((key, k) => html`<div><dt>${periodByKey(key).label}</dt><dd>${r.cells[k]?.provenance ? html`<a href="${provenanceUrl(r.cells[k])}">${r.cells[k].provenance}</a><p>${provenanceUrl(r.cells[k])}</p>` : 'Няма публикувана клетка'}</dd></div>`)}</dl>
+    </details>
+  </div>`)}</div>`;
+}
+
 export function measuresView(ctx) {
   if (unavailable(ctx)) return unavailable(ctx);
   const doc = ctx.data.budget2027;
@@ -770,7 +781,7 @@ export function measuresView(ctx) {
       ctx,
       's12-' + table,
       i === 0 ? 'Приходни мерки 2027–2029' : 'Разходни мерки 2027–2029',
-      dataTable({
+      html`<div class="measures-desktop">${dataTable({
         id: 's12-' + table + '-table',
         caption: `Таблица ${table.replace('_', '-')}, АСБП 2027–2029`,
         columns: [
@@ -779,7 +790,7 @@ export function measuresView(ctx) {
           { key: 'gap', label: 'Липсваща стойност' },
         ],
         rows,
-      }),
+      })}</div>${measureCards(doc.forecast[table])}`,
       {
         sub: 'Показани са отпечатаните ефекти и общият ред. Празните клетки не са нула. Знаците и разликите между годините са запазени.',
         ...frameworkStatus,

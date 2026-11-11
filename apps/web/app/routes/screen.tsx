@@ -64,7 +64,7 @@ export default function Screen({ loaderData }: Route.ComponentProps) {
       ) : null}
       {doc.model ? (
         <footer className="footer" id="footer">
-          <Footer cur={route?.id} wide theme="" from={pathname.replace(/^\//, '')} />
+          <Footer cur={route?.id} wide from={pathname.replace(/^\//, '')} />
         </footer>
       ) : (
         <footer className="footer" id="footer" dangerouslySetInnerHTML={html(doc.footer)} />

@@ -1,11 +1,7 @@
 /* Design tokens, v4 trial: the visual language of СИГМА (sigma.midt.bg, MIT, © 2026 МИДТ; see THIRD-PARTY.txt).
    Flat warm paper, ink type, hairline rules instead of cards, ONE crimson accent, three type voices (serif headings, sans body,
    mono labels), 8-pt spacing, radius ≤ 3px, no soft shadows (only popovers lift).
-   Light and dark (docs/approach-specification.md, section 9.3; СИГМА itself has only the light one): the dark theme below follows the system
-   (prefers-color-scheme) unless the visitor chose a theme in the footer (html[data-theme], js/theme-boot.js before the first paint).
-   It changes only the palette and the few role values that are not palette references; every role keeps its meaning. Contrast on the
-   dark paper: ink 15.9, ink-mid 11.3, ink-soft 7.2, crimson 7.3, teal 9.3:1; the series alternate light and mid tones with ≥3.2:1 between
-   neighbours and ≥3.4:1 on the paper.
+   The server forces the light palette. The retained dark tokens are not selectable.
    Every colour is a hex value: ECharts (js/charts.js) reads these tokens and cannot parse oklch(). The oklch source values are in the comments.
    The v2/v3 token names are kept as aliases (pages and components use them); the СИГМА names are the source of truth. */
 
@@ -87,6 +83,7 @@
   --swatch-edge:rgb(0 0 0/.18);  /* the hairline round a legend swatch */
 }
 
+/* Currently not selectable: the server fixes data-theme="light". */
 /* ---- dark: the system's choice, or the visitor's (html[data-theme="dark"]); html[data-theme="light"] keeps the light one ---- */
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
@@ -134,3 +131,5 @@ html{font-size:100%}
 @media (max-width:880px){:root{--gutter:28px}}
 @media (max-width:599px){:root{--gutter:16px;--fs-0:1rem}}
 @media (prefers-reduced-motion:reduce){:root{--t-fast:0ms;--t-med:0ms;--dur-1:0ms;--dur-2:0ms;--dur-3:0ms;--dur-4:0ms;--stagger:0ms}}
+
+:root[data-theme="light"]{color-scheme:light}

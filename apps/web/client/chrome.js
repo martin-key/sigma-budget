@@ -83,15 +83,9 @@ export function tabbarHtml(route) {
   return html`${TABS.map(t => html`<a href="${navHref(t.to)}" data-route="${t.to}" data-tab="${t.id}"${tab && tab.id === t.id ? html` aria-current="page"` : ''}>${icon(t.icon, { size: 20 })}<span>${t.tab}</span></a>`)}`;
 }
 
-/* ------------------------------------------------------------------ theme (docs/approach-specification.md, section 9.3) */
-// '' follows the system (prefers-color-scheme), 'light' and 'dark' are the visitor's choice (localStorage bns.theme, read by js/theme-boot.js)
-export const THEME_KEY = 'bns.theme';
-export const THEMES = [['', 'системна'], ['light', 'светла'], ['dark', 'тъмна']];
-export const themePicker = now => html`<span class="theme-pick" role="group" aria-label="Тема на сайта">Тема:${THEMES.map(([v, label]) => html` <button type="button" class="link-btn" data-theme-pick="${v}" aria-pressed="${String(now === v)}">${label}</button>`)}</span>`;
-
 /* V6 footer: every screen of the menu, grouped (the ids are the real routes of js/routes.js; nav:false screens like S08/S11/S21 are children of listed ones).
    Phones: one collapsible group per heading (native <details>, keyboard-operable); wide screens: all groups open side by side (js/shell.js syncFooter).
-   o.wide opens every group, o.cur is the id of the current screen, o.theme the visitor's theme ('' = the system's), o.from the path the
+   o.wide opens every group, o.cur is the id of the current screen, o.from the path the
    feedback link names */
 export function footerHtml(o = {}) {
   const core = data.get('core');
@@ -111,7 +105,6 @@ export function footerHtml(o = {}) {
       <span>Лиценз на данните: предстои решение.</span>
       <span>${sigmaLink('sister-link')}</span>
       <button type="button" class="link-btn" data-action="legend">Легенда: какво означават белезите</button>
-      ${themePicker(o.theme || '')}
     </div>
     <p class="small muted">Работна група „Бюджет на светло“</p>
   </div>`;

@@ -21,7 +21,11 @@ export function Layout({ children }: { children: ReactNode }) {
   const first = doc ? doc.tags.filter((t) => t.tag === 'meta' && FIRST.has(t.attrs.name)) : [];
   const rest = doc ? doc.tags.filter((t) => !(t.tag === 'meta' && FIRST.has(t.attrs.name))) : [];
   return (
-    <html lang="bg" data-prerendered={doc && !doc.busy ? doc.prerendered : undefined}>
+    <html
+      lang="bg"
+      data-theme="light"
+      data-prerendered={doc && !doc.busy ? doc.prerendered : undefined}
+    >
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -35,9 +39,8 @@ export function Layout({ children }: { children: ReactNode }) {
         <meta name="sigma-url" content={doc?.release.sigmaUrl ?? ''} />
         <meta name="release-id" content={doc?.release.id ?? ''} />
         <meta name="data-base" content={doc?.release.dataBase ?? '/data/'} />
-        <meta name="color-scheme" content="light dark" />
+        <meta name="color-scheme" content="light" />
         <meta name="theme-color" content="#FDFAF4" />
-        <script src="/js/theme-boot.js" data-keep="" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />

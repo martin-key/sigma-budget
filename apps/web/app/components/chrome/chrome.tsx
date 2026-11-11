@@ -261,37 +261,11 @@ export function tabbarHtml(route?: WebRoute) {
   );
 }
 
-/* ------------------------------------------------------------------ theme (docs/approach-specification.md, section 9.3) */
-// '' follows the system (prefers-color-scheme), 'light' and 'dark' are the visitor's choice (localStorage bns.theme, read by js/theme-boot.js)
-export const THEME_KEY = 'bns.theme';
-export const THEMES = [
-  ['', 'системна'],
-  ['light', 'светла'],
-  ['dark', 'тъмна'],
-];
-export const themePicker = (now: string) => (
-  <>
-    <span className="theme-pick" role="group" aria-label="Тема на сайта">
-      Тема:
-      {THEMES.map(([v, label]) => (
-        <>
-          {' '}
-          <button type="button" className="link-btn" data-theme-pick={v} aria-pressed={now === v}>
-            {label}
-          </button>
-        </>
-      ))}
-    </span>
-  </>
-);
-
 /* V6 footer: every screen of the menu, grouped (the ids are the real routes of js/routes.js; nav:false screens like S08/S11/S21 are children of listed ones).
    Phones: one collapsible group per heading (native <details>, keyboard-operable); wide screens: all groups open side by side (js/shell.js syncFooter).
-   o.wide opens every group, o.cur is the id of the current screen, o.theme the visitor's theme ('' = the system's), o.from the path the
+   o.wide opens every group, o.cur is the id of the current screen, o.from the path the
    feedback link names */
-export function footerHtml(
-  o: { wide?: boolean; cur?: string; theme?: string; from?: string } = {},
-) {
+export function footerHtml(o: { wide?: boolean; cur?: string; from?: string } = {}) {
   const core = data.get('core');
   const b = core && core.build;
   const kfp =
@@ -363,7 +337,6 @@ export function footerHtml(
           <button type="button" className="link-btn" data-action="legend">
             Легенда: какво означават белезите
           </button>
-          {themePicker(o.theme || '')}
         </div>
         <p className="small muted">Работна група „Бюджет на светло“</p>
       </div>

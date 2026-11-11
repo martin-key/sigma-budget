@@ -6,7 +6,7 @@
 // mono-uppercase band with the three main sections «Начало · Изпълнение · Бюджет» (the current one underlined) and the current section's
 // screens on a second line; «Още» (data and methodology, glossary, learning path, project) opens as a dropdown there. The phone bar has
 // three tabs «Начало · Отчет · Бюджет»; everything else is under «Меню».
-// Light and dark (spec 9.3): the footer has the theme switch (system, light, dark; js/theme-boot.js applies it before the first paint). Built once at boot from the route table. It follows the store (period, user type, sources) and the router
+// The shell follows the store (period, user type, sources) and the router
 // (current item, period switch hidden on screens that do not depend on a period). Page workers never edit this file.
 import { store, safe } from './store.js';
 import { byId, href as routeHref } from './routes.js';
@@ -19,7 +19,7 @@ import { date } from './format.js';
 import { router } from './router.js';
 import { here, parts as addrParts, toHref, isAppLink } from './loc.js';
 import { yearOf, statusOf, TABS, NAV_GROUPS, sigmaLink, groupOf, groupItems, navName, navHref, bannerHtml, CTA, topbarHtml, tabbarHtml,
-  footerHtml, THEME_KEY, THEMES, rootOf } from './chrome.js';
+  footerHtml, rootOf } from './chrome.js';
 
 let reactChrome;
 const $ = id => document.getElementById(id);
@@ -82,26 +82,6 @@ function syncFooter() {
 function footClick(e) {
   const sm = e.target.closest && e.target.closest('details.foot-grp > summary');
   if (sm && window.matchMedia(WIDE).matches) e.preventDefault();
-  const t = e.target.closest && e.target.closest('[data-theme-pick]');
-  if (t) pickTheme(t.dataset.themePick);
-}
-
-/* ------------------------------------------------------------------ theme (docs/approach-specification.md, section 9.3) */
-// '' follows the system (prefers-color-scheme), 'light' and 'dark' are the visitor's choice (localStorage bns.theme, read by js/theme-boot.js)
-const DARK = '(prefers-color-scheme: dark)';
-const themeNow = () => { const t = safe.get('localStorage', THEME_KEY); return t === 'light' || t === 'dark' ? t : ''; };
-const isDark = () => (themeNow() ? themeNow() === 'dark' : !!window.matchMedia?.(DARK).matches);
-function applyTheme() {
-  const t = themeNow();
-  if (t) document.documentElement.setAttribute('data-theme', t); else document.documentElement.removeAttribute('data-theme');
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', isDark() ? '#14120F' : '#FDFAF4');
-  if (reactChrome) reactChrome(); else document.querySelectorAll('[data-theme-pick]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.themePick === t)));
-}
-function pickTheme(t) {
-  if (t) safe.set('localStorage', THEME_KEY, t); else safe.del('localStorage', THEME_KEY);
-  applyTheme();
-  router.rerender();                                           // the charts read the colours when they draw
-  router.announce(`Тема: ${THEMES.find(x => x[0] === t)[1]}.`);
 }
 
 /* ------------------------------------------------------------------ dynamic state */
@@ -180,8 +160,6 @@ export const shell = {
     shell.refreshFooter();
     $('footer')?.addEventListener('click', footClick);
     window.matchMedia(WIDE).addEventListener?.('change', syncFooter);
-    applyTheme();
-    window.matchMedia?.(DARK).addEventListener?.('change', () => { if (!themeNow()) { applyTheme(); router.rerender(); } });   // the system switched, the visitor follows it
     applySources();
 
     $('topbar').addEventListener('click', e => {
@@ -218,7 +196,7 @@ export const shell = {
     checkNews();
   },
   refreshFooter() {
-    if (reactChrome) { reactChrome(); return; } const f = $('footer'); if (f) { f.innerHTML = footerHtml({ wide: !!window.matchMedia?.(WIDE).matches, cur: router.current?.route?.id, theme: themeNow() }).toString(); syncFooter(); } },
+    if (reactChrome) { reactChrome(); return; } const f = $('footer'); if (f) { f.innerHTML = footerHtml({ wide: !!window.matchMedia?.(WIDE).matches, cur: router.current?.route?.id }).toString(); syncFooter(); } },
   dismissBanner() {
     store.dismissBanner();
     const b = $('mockbar');

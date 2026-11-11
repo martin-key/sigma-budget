@@ -10,7 +10,7 @@
 // mock figures get a hatched overlay, the „Примерни данни“ badge and data-mock-fig for exports. If the geometry cannot be read the figure is a short note (the page shows its list).
 // Keyboard: the map is ONE tab stop (roving tabindex); arrows jump to the nearest region in that direction, Home/End to the first/last (alphabetical), Enter opens, Space selects/opens.
 // Pointer: hover shows the card; click opens. Touch: the first tap selects and shows the card (with a link), the second opens. Events (bubble from the figure): map:select {id}.
-// Colours and strokes come from design tokens (css/charts.css, the map-* block); light/dark follow the tokens; forced-colors keeps the ramp and uses system colours for the outlines.
+// Colours and strokes come from design tokens (css/charts.css, the map-* block); the light palette follows the tokens; forced-colors keeps the ramp and uses system colours for the outlines.
 import { html, raw, esc } from '../html.js';
 import { num, DASH } from '../format.js';
 import { mockBadge } from './states.js';

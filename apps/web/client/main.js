@@ -27,7 +27,7 @@ async function boot() {
   const bridge = await import('./react-bridge.js');
   const refreshChrome = () => {
     const r = router.current?.route || router.routes.find(r=>r.id === document.querySelector('article.page')?.dataset.route);
-    bridge.refreshChrome({route:r,periods:r?.periods,wide:window.matchMedia('(min-width: 961px)').matches,cur:r?.id,theme:(document.documentElement.dataset.theme||''),from:location.pathname.replace(/^\//,'')});
+    bridge.refreshChrome({route:r,periods:r?.periods,wide:window.matchMedia('(min-width: 961px)').matches,cur:r?.id,from:location.pathname.replace(/^\//,'')});
   };
   shell.init(refreshChrome);
   initActions();

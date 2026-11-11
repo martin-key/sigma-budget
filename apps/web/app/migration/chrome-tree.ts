@@ -60,14 +60,13 @@ function identity(node: ReactElement<ChromeProps>): string {
     'data-action',
     'data-grp',
     'data-sec',
-    'data-theme-pick',
     'className',
   ]) {
     const value = node.props[attribute];
     if (value != null) return `${tag}[${attribute}=${String(value)}]`;
   }
   // Anonymous wrappers inherit their first element's identity. In particular,
-  // late core data must not move the footer's sister link or theme controls.
+  // late core data must not move the footer's sister link or legend control.
   const children = Array.isArray(node.props.children) ? node.props.children : [node.props.children];
   const child = children.find((item): item is ReactElement<ChromeProps> =>
     isValidElement<ChromeProps>(item),

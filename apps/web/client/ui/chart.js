@@ -238,7 +238,9 @@ export async function mount(fig, ctx) {
     if (!inst || view === 'table') return;
     const w = box.clientWidth;
     narrow = w < 480;
-    inst.setOption(buildOption(variant(spec, view), { width: w }), true);
+    const option = buildOption(variant(spec, view), { width: w });
+    if (window.matchMedia('print').matches) option.animation = false;
+    inst.setOption(option, true);
     shown = view;
     off.forEach(name => inst.dispatchAction({ type: 'legendUnSelect', name }));
   };
@@ -260,6 +262,12 @@ export async function mount(fig, ctx) {
     if ((box.clientWidth < 480) !== narrow || shown !== view) paint();
   });
   ro.observe(box);
+  // Print changes the available width; rebuild axes and labels for the paper size.
+  const printMedia = window.matchMedia('print');
+  const repaint = () => { if (inst) { inst.resize(); paint(); } };
+  printMedia.addEventListener('change', repaint);
+  window.addEventListener('beforeprint', repaint);
+  window.addEventListener('afterprint', repaint);
 
   const onClick = e => {
     const b = e.target.closest('.lg');
@@ -302,6 +310,9 @@ export async function mount(fig, ctx) {
   return () => {
     dead = true;
     ro.disconnect();
+    printMedia.removeEventListener('change', repaint);
+    window.removeEventListener('beforeprint', repaint);
+    window.removeEventListener('afterprint', repaint);
     fig.removeEventListener('click', onClick);
     fig.removeEventListener('change', onChange);
     try { inst?.dispose(); } catch { /* already gone */ }

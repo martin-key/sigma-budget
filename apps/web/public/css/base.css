@@ -73,8 +73,10 @@ mark{background:var(--crimson-tint);color:inherit;padding:0 .1em}
   .hatch,[data-mock="true"]{background-image:none;border:1px dashed CanvasText}
 }
 @media print{
+  :root[data-theme="light"]{color-scheme:light;--paper:#fff;--paper-warm:#fff;--paper-deep:#fff}
   body{background:#fff;color:#000}
-  .topbar,.sidenav,.tabbar,.mockbar,.share-row,.skip-link,.toasts,.next,.footer .links{display:none!important}
+  .topbar,.sidenav,.tabbar,.mockbar,.share-row,.skip-link,.toasts,.next,.foot-nav,.footer .link-btn,.block-tools,.seg,.tab-list,.fig-views,.unit-switch,.explorer{display:none!important}
+  .kpi-grid,.fig{break-inside:avoid}
   .shell{display:block}
   a{color:inherit}
 }

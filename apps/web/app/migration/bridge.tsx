@@ -76,7 +76,7 @@ export function refreshChrome(
     periods?: WebRoute['periods'];
     wide?: boolean;
     cur?: string;
-    theme?: string;
+
     from?: string;
   } = {},
 ) {

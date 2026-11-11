@@ -18,7 +18,7 @@ export function TopBar(props: { route?: WebRoute; periods?: WebRoute['periods'] 
 export function DesktopMenu({ route }: { route?: WebRoute }) {
   return navHtml(route);
 }
-export function Footer(props: { cur?: string; wide?: boolean; theme?: string; from?: string }) {
+export function Footer(props: { cur?: string; wide?: boolean; from?: string }) {
   return footerHtml(props);
 }
 export function BottomNav({ route }: { route?: WebRoute }) {

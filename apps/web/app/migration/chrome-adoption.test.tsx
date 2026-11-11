@@ -23,10 +23,9 @@ vi.mock('../lib/legacy', async (importOriginal) => ({
 import core from '../routes/__fixtures__/core.json';
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-const frozen = readFileSync(
-  new NodeURL('../routes/__fixtures__/S26.html', import.meta.url),
-  'utf8',
-).replace(/(<div[^>]*id="mockbar"[^>]*>)[\s\S]*?<\/div>/, '$1</div>'); // Historical fixture is unchanged; the retired banner now has no children.
+const frozen = readFileSync(new NodeURL('../routes/__fixtures__/S26.html', import.meta.url), 'utf8')
+  .replace(/<span class="theme-pick"[\s\S]*?<\/span>/, '')
+  .replace(/(<div[^>]*id="mockbar"[^>]*>)[\s\S]*?<\/div>/, '$1</div>'); // Historical fixture is unchanged; the retired banner now has no children.
 const hydrate = vi.mocked(client.hydrateRoot);
 beforeEach(() => {
   vi.resetModules();
@@ -64,7 +63,6 @@ for (const [id, focus] of [
       periods: byId.S26.periods,
       wide: true,
       cur: 'S26',
-      theme: '',
       from: 'za-proekta',
     };
     await act(async () => refreshChrome(options));
@@ -79,7 +77,6 @@ for (const [id, focus] of [
         periods: 'all',
         cur: 'S06',
         wide: false,
-        theme: 'dark',
       }),
     );
     expect(document.activeElement).toBe(focused);
@@ -96,7 +93,7 @@ for (const [id, focus] of [
   });
 }
 
-for (const selector of ['.sister-link', '[data-theme-pick=""]']) {
+for (const selector of ['.sister-link', '[data-action="legend"]']) {
   it(`footer retains ${selector} focus when core data is late and then arrives`, async () => {
     document.documentElement.innerHTML = frozen
       .replace(/^<!doctype html>\s*/i, '')
@@ -110,7 +107,6 @@ for (const selector of ['.sister-link', '[data-theme-pick=""]']) {
       periods: byId.S26.periods,
       wide: true,
       cur: 'S26',
-      theme: '',
       from: 'za-proekta',
     };
     for (const ready of [false, true]) {

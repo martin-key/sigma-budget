@@ -162,7 +162,6 @@ export async function renderScreen(url: URL, release: Rel): Promise<ScreenResult
               footerHtml({
                 wide: true,
                 cur: shown.id,
-                theme: '',
                 from: parts(r.want).path.replace(/^\//, ''),
               }),
             ),
