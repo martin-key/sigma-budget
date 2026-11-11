@@ -5,42 +5,73 @@
 // "За месеца" is the difference of two adjacent cumulative reports (January = the first value) — it is computed here from the reports,
 // never taken from a different series; "Натрупано" is the report itself. A month is never compared with a cumulative value.
 
-export const SCOPES = [['kfp', 'КФП'], ['nat', 'Национален бюджет'], ['eu', 'Средства от ЕС']];
+export const SCOPES = [
+  ['kfp', 'КФП'],
+  ['nat', 'Национален бюджет'],
+  ['eu', 'Средства от ЕС'],
+];
 export const SCOPE_NAME = { kfp: 'КФП', nat: 'национален бюджет', eu: 'средства от ЕС' };
 export const SCOPE_IN = { kfp: 'в КФП', nat: 'в националния бюджет', eu: 'по средствата от ЕС' };
-export const MODES = [{ value: 'natrupano', label: 'Натрупано' }, { value: 'mesec', label: 'За месеца' }];
+export const MODES = [
+  { value: 'natrupano', label: 'Натрупано' },
+  { value: 'mesec', label: 'За месеца' },
+];
 export const REV_ROWS = ['rev.tax', 'rev.nontax', 'rev.grants'];
-export const EXP_ROWS = ['exp.personnel', 'exp.maint', 'exp.interest', 'exp.social', 'exp.subsidies', 'exp.capex', 'exp.abroad', 'exp.reserve'];
-export const EARLIEST_REPORT = 2022;      // core.pending P05: the monthly reports from this year up to the first year in the file are still to come
+export const EXP_ROWS = [
+  'exp.personnel',
+  'exp.maint',
+  'exp.interest',
+  'exp.social',
+  'exp.subsidies',
+  'exp.capex',
+  'exp.abroad',
+  'exp.reserve',
+];
+export const EARLIEST_REPORT = 2022; // core.pending P05: the monthly reports from this year up to the first year in the file are still to come
 
-export const fin = v => typeof v === 'number' && Number.isFinite(v);
+export const fin = (v) => typeof v === 'number' && Number.isFinite(v);
 /** change in % from a to b, only on a positive base: a deficit or a zero gives null (no percent on a non-positive base) */
 export const pctChange = (a, b) => (fin(a) && fin(b) && a > 0 && b >= 0 ? (b / a - 1) * 100 : null);
-export const mlrd = v => (fin(v) ? v / 1000 : null);
+export const mlrd = (v) => (fin(v) ? v / 1000 : null);
 const isoLast = (y, m) => new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10);
 
 export function execModel(ex, q = {}) {
   const data = ex.data || {};
-  const years = Object.keys(data).map(Number).filter(fin).sort((a, b) => a - b);
+  const years = Object.keys(data)
+    .map(Number)
+    .filter(fin)
+    .sort((a, b) => a - b);
   const lastY = years[years.length - 1];
-  const yearOf = (v, def) => { const s = v == null ? '' : String(v).trim(); return s === '' ? def : /^\d{4}$/.test(s) ? Number(s) : s; };
+  const yearOf = (v, def) => {
+    const s = v == null ? '' : String(v).trim();
+    return s === '' ? def : /^\d{4}$/.test(s) ? Number(s) : s;
+  };
   const g2 = yearOf(q.g2, lastY);
-  const earlier = years.filter(y => typeof g2 === 'number' && y < g2);
-  const g1 = yearOf(q.g1, earlier.length ? earlier[earlier.length - 1] : (typeof g2 === 'number' && years.includes(g2 - 1) ? g2 - 1 : lastY));
-  const has = y => typeof y === 'number' && years.includes(y);
-  const nOf = y => (has(y) ? data[String(y)].months : 0);
-  const n1 = nOf(g1), n2 = nOf(g2);
+  const earlier = years.filter((y) => typeof g2 === 'number' && y < g2);
+  const g1 = yearOf(
+    q.g1,
+    earlier.length
+      ? earlier[earlier.length - 1]
+      : typeof g2 === 'number' && years.includes(g2 - 1)
+        ? g2 - 1
+        : lastY,
+  );
+  const has = (y) => typeof y === 'number' && years.includes(y);
+  const nOf = (y) => (has(y) ? data[String(y)].months : 0);
+  const n1 = nOf(g1),
+    n2 = nOf(g2);
   const maxM = Math.max(n1, n2) || 12;
-  const common = Math.min(n1, n2) || maxM;                  // the latest month both years have a report for
+  const common = Math.min(n1, n2) || maxM; // the latest month both years have a report for
   // The default month is the latest report of the newest year (it moves by itself when a month is added to the file). The earlier year is the previous year, which has
   // at least as many reports, so this is also `common`; a pair picked by hand keeps `common` (the latest month both years have).
   const defMonth = g2 === lastY && n2 >= 1 ? n2 : common;
   const want = Math.floor(Number(q.mesec));
   const month = fin(want) && want >= 1 ? Math.min(want, 12) : defMonth;
-  const scope = SCOPES.some(s => s[0] === q.obhvat) ? q.obhvat : 'kfp';
-  const mode = MODES.some(m => m.value === q.rez) ? q.rez : 'natrupano';
+  const scope = SCOPES.some((s) => s[0] === q.obhvat) ? q.obhvat : 'kfp';
+  const mode = MODES.some((m) => m.value === q.rez) ? q.rez : 'natrupano';
   const i = month - 1;
-  const cumArr = (y, row, sc = scope) => (has(y) && data[String(y)][sc] && data[String(y)][sc][row]) || null;
+  const cumArr = (y, row, sc = scope) =>
+    (has(y) && data[String(y)][sc] && data[String(y)][sc][row]) || null;
   const at = (arr, k) => (Array.isArray(arr) && k >= 0 && fin(arr[k]) ? arr[k] : null);
   const cum = (y, row, k = i, sc = scope) => at(cumArr(y, row, sc), k);
   /** the value of the month alone: this cumulative report minus the one before it (January = the first value) */
@@ -52,21 +83,59 @@ export function execModel(ex, q = {}) {
     const p = at(a, k - 1);
     return p == null ? null : c - p;
   };
-  const val = (y, row, k = i, sc = scope) => (mode === 'mesec' ? mon(y, row, k, sc) : cum(y, row, k, sc));
-  const asOfOf = (y, k = i) => { const b = has(y) ? data[String(y)] : null; return b && Array.isArray(b.asOf) && b.asOf.length ? b.asOf[Math.min(k, b.asOf.length - 1)] : null; };
-  const rowName = id => { const r = (ex.rows || []).find(x => x.id === id); return r ? r.short || r.label : id; };
-  const bad = [...new Set([g1, g2].filter(y => !has(y)))];
+  const val = (y, row, k = i, sc = scope) =>
+    mode === 'mesec' ? mon(y, row, k, sc) : cum(y, row, k, sc);
+  const asOfOf = (y, k = i) => {
+    const b = has(y) ? data[String(y)] : null;
+    return b && Array.isArray(b.asOf) && b.asOf.length
+      ? b.asOf[Math.min(k, b.asOf.length - 1)]
+      : null;
+  };
+  const rowName = (id) => {
+    const r = (ex.rows || []).find((x) => x.id === id);
+    return r ? r.short || r.label : id;
+  };
+  const bad = [...new Set([g1, g2].filter((y) => !has(y)))];
   const problem = bad.length ? 'year' : g1 === g2 ? 'same' : null;
-  const missing = [g1, g2].filter(y => has(y) && month > nOf(y));          // a year with no report for the chosen month yet
-  const pendingMonths = (ex.pendingMonths || []).map(p => p.month);
-  return { ex, years, lastY, g1, g2, n1, n2, maxM, common, defMonth, month, i, scope, mode, has, cum, mon, val, cumArr, at, asOfOf, rowName, bad, problem, missing, pendingMonths, isoLast };
+  const missing = [g1, g2].filter((y) => has(y) && month > nOf(y)); // a year with no report for the chosen month yet
+  const pendingMonths = (ex.pendingMonths || []).map((p) => p.month);
+  return {
+    ex,
+    years,
+    lastY,
+    g1,
+    g2,
+    n1,
+    n2,
+    maxM,
+    common,
+    defMonth,
+    month,
+    i,
+    scope,
+    mode,
+    has,
+    cum,
+    mon,
+    val,
+    cumArr,
+    at,
+    asOfOf,
+    rowName,
+    bad,
+    problem,
+    missing,
+    pendingMonths,
+    isoLast,
+  };
 }
 
 /** the headline rows of a model: revenue, expenditure (with the EU contribution), (transfers), balance — for both years, with the changes */
 export function headline(E) {
   const out = [];
   const mk = (id, name) => {
-    const a = E.val(E.g1, id), b = E.val(E.g2, id);
+    const a = E.val(E.g1, id),
+      b = E.val(E.g2, id);
     return { id, name, a, b, d: fin(a) && fin(b) ? b - a : null, p: pctChange(a, b) };
   };
   out.push(mk('rev', 'Приходи'));
@@ -77,18 +146,36 @@ export function headline(E) {
 }
 
 /** "дефицит" / "излишък" for a balance value */
-export const balanceWord = v => (!fin(v) ? '' : v < 0 ? 'дефицит' : v > 0 ? 'излишък' : 'нула');
+export const balanceWord = (v) => (!fin(v) ? '' : v < 0 ? 'дефицит' : v > 0 ? 'излишък' : 'нула');
 
 /** The denominator belongs to the selected release, independently of the UI's default period. */
-export const planBasis = ex => {
+export const planBasis = (ex) => {
   const adopted = ex.plan2026?.periodKey === '2026.law' && ex.plan2026?.basis === 'adopted-law';
   return adopted
-    ? { adopted, statusLabel: 'Отчет спрямо закон', source: ['kfp', 'budget2027'], citation: 'Програма по ЗДБРБ 2026, МФ, приложение 1', csvPlan: 'План по ЗДБРБ 2026, млн. €' }
-    : { adopted, statusLabel: 'Отчет спрямо проект', source: ['kfp', 'asbp'], citation: 'Проект за 2026 г., МФ, приложение 3', csvPlan: 'План за 2026 г., млрд. €' };
+    ? {
+        adopted,
+        statusLabel: 'Отчет спрямо закон',
+        source: ['kfp', 'budget2027'],
+        citation: 'Програма по ЗДБРБ 2026, МФ, приложение 1',
+        csvPlan: 'План по ЗДБРБ 2026, млн. €',
+      }
+    : {
+        adopted,
+        statusLabel: 'Отчет спрямо проект',
+        source: ['kfp', 'asbp'],
+        citation: 'Проект за 2026 г., МФ, приложение 3',
+        csvPlan: 'План за 2026 г., млрд. €',
+      };
 };
 
 /** Percent of the release's plan, only for positive denominators and comparable flow rows. */
 export const planPercent = (ex, scope, row) => {
   const value = ex.latest?.[scope]?.[row];
-  return value && !['balance', 'fin', 'transfers'].includes(row) && fin(value.plan) && value.plan > 0 && fin(value.pctPlan) ? value.pctPlan : null;
+  return value &&
+    !['balance', 'fin', 'transfers'].includes(row) &&
+    fin(value.plan) &&
+    value.plan > 0 &&
+    fin(value.pctPlan)
+    ? value.pctPlan
+    : null;
 };

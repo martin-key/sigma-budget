@@ -9,22 +9,35 @@ const root = process.env.BUDGET_PROVENANCE_TEST_ROOT
   ? pathToFileURL(process.env.BUDGET_PROVENANCE_TEST_ROOT + '/')
   : new URL('../../data/release/', import.meta.url);
 const pointer = JSON.parse(fs.readFileSync(new URL('releases/current.json', root)));
-const manifest = JSON.parse(fs.readFileSync(new URL(`releases/${pointer.release_id}/manifest.json`, root)));
+const manifest = JSON.parse(
+  fs.readFileSync(new URL(`releases/${pointer.release_id}/manifest.json`, root)),
+);
 const objects = new Map();
 for (const output of manifest.outputs) {
-  if (output.path.startsWith('data/')) objects.set(output.sha256, fs.readFileSync(new URL(output.path.slice(5), root)));
+  if (output.path.startsWith('data/'))
+    objects.set(output.sha256, fs.readFileSync(new URL(output.path.slice(5), root)));
 }
 const reads = new Map();
 let failOnce = null;
 const env = {
   DB: { prepare: () => ({ bind: () => ({ first: async () => ({ public: 1 }) }) }) },
-  OBJECTS: { get: async key => {
-    const hash = key.split('/').at(-1);
-    reads.set(hash, (reads.get(hash) || 0) + 1);
-    if (hash === failOnce) { failOnce = null; return null; }
-    const bytes = objects.get(hash);
-    return bytes ? { arrayBuffer: async () => bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) } : null;
-  } },
+  OBJECTS: {
+    get: async (key) => {
+      const hash = key.split('/').at(-1);
+      reads.set(hash, (reads.get(hash) || 0) + 1);
+      if (hash === failOnce) {
+        failOnce = null;
+        return null;
+      }
+      const bytes = objects.get(hash);
+      return bytes
+        ? {
+            arrayBuffer: async () =>
+              bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
+          }
+        : null;
+    },
+  },
 };
 async function request(candidate, id) {
   const bytes = Buffer.from(JSON.stringify(candidate));
@@ -35,7 +48,9 @@ async function request(candidate, id) {
   const body = JSON.parse(JSON.stringify(await response.json()).replaceAll(rid, 'RELEASE_ID'));
   return { status: response.status, body };
 }
-const fixtures = JSON.parse(fs.readFileSync(new URL('../pipeline/fixtures/budget_2027_api_responses.json', import.meta.url)));
+const fixtures = JSON.parse(
+  fs.readFileSync(new URL('../pipeline/fixtures/budget_2027_api_responses.json', import.meta.url)),
+);
 let checks = 0;
 for (const fixture of fixtures) {
   const response = await request(manifest, fixture.id);
@@ -47,14 +62,18 @@ const printed = fixtures[0].id;
 for (const mutation of ['output', 'original', 'index']) {
   const candidate = structuredClone(manifest);
   if (mutation === 'original') candidate.inputs = [];
-  else candidate.outputs = candidate.outputs.filter(output =>
-    mutation === 'index' ? output.dataset !== 'budget2027-provenance' : output.path !== 'data/outlook.json');
+  else
+    candidate.outputs = candidate.outputs.filter((output) =>
+      mutation === 'index'
+        ? output.dataset !== 'budget2027-provenance'
+        : output.path !== 'data/outlook.json',
+    );
   assert.equal((await request(candidate, printed)).status, 404);
   checks++;
 }
 assert.equal((await request(manifest, 'unknown')).status, 404);
 checks++;
-const indexOutput = manifest.outputs.find(output => output.dataset === 'budget2027-provenance');
+const indexOutput = manifest.outputs.find((output) => output.dataset === 'budget2027-provenance');
 for (const mutation of ['missing-document', 'unknown-reference']) {
   const index = JSON.parse(objects.get(indexOutput.sha256));
   const entry = index.entries[printed];
@@ -64,7 +83,7 @@ for (const mutation of ['missing-document', 'unknown-reference']) {
   const hash = await sha256(bytes);
   objects.set(hash, bytes);
   const candidate = structuredClone(manifest);
-  const output = candidate.outputs.find(output => output.dataset === 'budget2027-provenance');
+  const output = candidate.outputs.find((output) => output.dataset === 'budget2027-provenance');
   output.sha256 = hash;
   output.bytes = bytes.length;
   assert.equal((await request(candidate, printed)).status, 404);
@@ -94,15 +113,17 @@ for (const mutation of ['foreign-operand-document', 'missing-operand', 'cyclic-o
   const hash = await sha256(bytes);
   objects.set(hash, bytes);
   const candidate = structuredClone(manifest);
-  const output = candidate.outputs.find(output => output.dataset === 'budget2027-provenance');
+  const output = candidate.outputs.find((output) => output.dataset === 'budget2027-provenance');
   output.sha256 = hash;
   output.bytes = bytes.length;
   assert.equal((await request(candidate, derived)).status, 404);
   checks++;
 }
-console.log(`PASS ${checks} provenance membership/response checks; derived ${derived} without inputs returns 404`);
+console.log(
+  `PASS ${checks} provenance membership/response checks; derived ${derived} without inputs returns 404`,
+);
 
-const datasetOutput = manifest.outputs.find(output => output.path === 'data/outlook.json');
+const datasetOutput = manifest.outputs.find((output) => output.path === 'data/outlook.json');
 await request(manifest, printed);
 const beforeHit = [reads.get(indexOutput.sha256), reads.get(datasetOutput.sha256)];
 await request(manifest, printed);
@@ -115,11 +136,17 @@ for (let i = 0; i < 4; i++) {
   const hash = await sha256(bytes);
   objects.set(hash, bytes);
   const candidate = structuredClone(manifest);
-  Object.assign(candidate.outputs.find(output => output.dataset === 'budget2027-provenance'), { sha256: hash, bytes: bytes.length });
+  Object.assign(
+    candidate.outputs.find((output) => output.dataset === 'budget2027-provenance'),
+    { sha256: hash, bytes: bytes.length },
+  );
   assert.equal((await request(candidate, printed)).status, 200);
 }
 await request(manifest, printed);
-assert.ok(reads.get(indexOutput.sha256) > beforeHit[0], 'the bounded cache must evict old index objects');
+assert.ok(
+  reads.get(indexOutput.sha256) > beforeHit[0],
+  'the bounded cache must evict old index objects',
+);
 checks++;
 const retryIndex = JSON.parse(objects.get(indexOutput.sha256));
 retryIndex.testCacheVersion = 'retry';
@@ -127,7 +154,10 @@ const retryBytes = Buffer.from(JSON.stringify(retryIndex));
 const retryHash = await sha256(retryBytes);
 objects.set(retryHash, retryBytes);
 const retryManifest = structuredClone(manifest);
-Object.assign(retryManifest.outputs.find(output => output.dataset === 'budget2027-provenance'), { sha256: retryHash, bytes: retryBytes.length });
+Object.assign(
+  retryManifest.outputs.find((output) => output.dataset === 'budget2027-provenance'),
+  { sha256: retryHash, bytes: retryBytes.length },
+);
 failOnce = retryHash;
 await assert.rejects(request(retryManifest, printed), /JSON object missing/);
 assert.equal((await request(retryManifest, printed)).status, 200);
@@ -140,8 +170,13 @@ const concurrentBytes = Buffer.from(JSON.stringify(concurrentIndex));
 const concurrentHash = await sha256(concurrentBytes);
 objects.set(concurrentHash, concurrentBytes);
 const concurrentManifest = structuredClone(manifest);
-Object.assign(concurrentManifest.outputs.find(output => output.dataset === 'budget2027-provenance'), { sha256: concurrentHash, bytes: concurrentBytes.length });
-const responses = await Promise.all(Array.from({ length: 3 }, () => request(concurrentManifest, printed)));
-assert.ok(responses.every(response => response.status === 200));
+Object.assign(
+  concurrentManifest.outputs.find((output) => output.dataset === 'budget2027-provenance'),
+  { sha256: concurrentHash, bytes: concurrentBytes.length },
+);
+const responses = await Promise.all(
+  Array.from({ length: 3 }, () => request(concurrentManifest, printed)),
+);
+assert.ok(responses.every((response) => response.status === 200));
 assert.equal(reads.get(concurrentHash), 1, 'concurrent requests must share one verified JSON read');
 console.log(`PASS ${checks + 1} provenance checks including concurrent read coalescing`);

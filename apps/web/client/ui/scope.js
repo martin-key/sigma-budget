@@ -10,7 +10,7 @@ export function scopeChip(key, o = {}) {
   const long = s?.long || label;
   const gl = o.gl === undefined ? s?.gl : o.gl;
   const inner = html`<span class="sr-only">Обхват: </span>${label}${o.note ? html` <span class="scope-note">· ${o.note}</span>` : ''}`;
-  const kind = s?.variant ? html` data-scope="${s.variant}"` : '';           // a scope with its own look (esa) says so; the others render exactly as before
+  const kind = s?.variant ? html` data-scope="${s.variant}"` : ''; // a scope with its own look (esa) says so; the others render exactly as before
   return gl
     ? html`<a class="scope"${kind} href="#/rechnik/${gl}" data-gl="${gl}" title="${long}">${inner}</a>`
     : html`<span class="scope"${kind} title="${long}">${inner}</span>`;

@@ -99,13 +99,13 @@ python -m budget_pipeline.sources.originals import ~/Downloads/2026-EU\ funds_09
 
 Пусни с `tmp/venv-data/bin/python` само екстракторите, чийто вход е нов или чийто изход `status` отчита като липсващ:
 
-| Екстрактор | Кога |
-|---|---|
-| `pipeline/budget_pipeline/extract/dv_laws.py` | нов закон или изменение в Държавен вестник |
-| `pipeline/budget_pipeline/extract/program_budgets.py` | нов архив към законопроекта |
-| `pipeline/budget_pipeline/extract/asbp_tables.py` | нов PDF с мотивите и АСБП |
-| `pipeline/budget_pipeline/extract/asbp_pages.py` | нов PDF с мотивите или липсва `data/cache/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json` |
-| `pipeline/budget_pipeline/extract/bill.py` | нов законопроект или нов закон |
+| Екстрактор                                            | Кога                                                                                                 |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `pipeline/budget_pipeline/extract/dv_laws.py`         | нов закон или изменение в Държавен вестник                                                           |
+| `pipeline/budget_pipeline/extract/program_budgets.py` | нов архив към законопроекта                                                                          |
+| `pipeline/budget_pipeline/extract/asbp_tables.py`     | нов PDF с мотивите и АСБП                                                                            |
+| `pipeline/budget_pipeline/extract/asbp_pages.py`      | нов PDF с мотивите или липсва `data/cache/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json` |
+| `pipeline/budget_pipeline/extract/bill.py`            | нов законопроект или нов закон                                                                       |
 
 Новият месец по КФП не иска нито един от тях.
 

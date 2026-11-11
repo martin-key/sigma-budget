@@ -19,11 +19,13 @@ const root = resolve(import.meta.dirname, '../../test/fixtures');
 let result: ReturnType<typeof runWave13b>;
 let fixture: Awaited<ReturnType<typeof loadWave13bFixture>>;
 let reference: Awaited<ReturnType<typeof loadWave13bReference>>;
+// Frozen graph setup exceeded the 10s hook limit with V8 coverage.
+// Budget only this integration setup; all eight graph assertions remain.
 beforeAll(async () => {
   fixture = await loadWave13bFixture(root);
   reference = await loadWave13bReference(root);
   result = runWave13b(fixture);
-});
+}, 30_000);
 it('matches the independent Python source-glue result for a 64-term glossary', () => {
   const glossary = JSON.parse(Buffer.from(fixture.editorial.snapshots['glossary.json']).toString());
   glossary.terms = glossary.terms.slice(0, 64);

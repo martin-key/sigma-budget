@@ -2,54 +2,142 @@
    Tokens only, light only, every selector scoped to the screen. */
 
 /* the inside of a block: its parts one under the other, evenly spaced (the frame spaces the blocks, not what is inside them) */
-.page[data-route="S21"] .s21-stack { display: grid; gap: var(--sp-5); min-width: 0; }
-.page[data-route="S21"] .s21-stack > * { min-width: 0; margin: 0; }
-.page[data-route="S21"] .s21-stack > .callout { margin: 0; }
-@media (min-width: 600px) { .page[data-route="S21"] .s21-stack > .kpi-grid { margin-inline: -24px; } }
+.page[data-route='S21'] .s21-stack {
+  display: grid;
+  gap: var(--sp-5);
+  min-width: 0;
+}
+.page[data-route='S21'] .s21-stack > * {
+  min-width: 0;
+  margin: 0;
+}
+.page[data-route='S21'] .s21-stack > .callout {
+  margin: 0;
+}
+@media (min-width: 600px) {
+  .page[data-route='S21'] .s21-stack > .kpi-grid {
+    margin-inline: -24px;
+  }
+}
 
 /* block B: the sentences that say how much more or less the municipality gets than each group */
-.page[data-route="S21"] .s21-lead { margin: 0; font: 400 var(--fs-1)/1.3 var(--font-serif); letter-spacing: -.01em; }
-.page[data-route="S21"] .s21-diffs { margin: var(--sp-2) 0 0; padding-left: var(--sp-5); display: grid; gap: var(--sp-1); }
-.page[data-route="S21"] .s21-diffs li { padding-left: var(--sp-1); }
-.page[data-route="S21"] .s21-diffs li::marker { color: var(--ink-soft); font-family: var(--font-mono); }
-.page[data-route="S21"] .s21-links { gap: var(--sp-2) var(--sp-3); }
+.page[data-route='S21'] .s21-lead {
+  margin: 0;
+  font: 400 var(--fs-1)/1.3 var(--font-serif);
+  letter-spacing: -0.01em;
+}
+.page[data-route='S21'] .s21-diffs {
+  margin: var(--sp-2) 0 0;
+  padding-left: var(--sp-5);
+  display: grid;
+  gap: var(--sp-1);
+}
+.page[data-route='S21'] .s21-diffs li {
+  padding-left: var(--sp-1);
+}
+.page[data-route='S21'] .s21-diffs li::marker {
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+}
+.page[data-route='S21'] .s21-links {
+  gap: var(--sp-2) var(--sp-3);
+}
 
 /* block C: the kind of transfer in the first column carries its one-sentence explanation under it */
-.page[data-route="S21"] .s21-kind-text { display: block; max-width: 36ch; margin-top: 2px; font-weight: 400; font-size: var(--fs-xs); line-height: 1.4; color: var(--ink-mid); white-space: normal; }
+.page[data-route='S21'] .s21-kind-text {
+  display: block;
+  max-width: 36ch;
+  margin-top: 2px;
+  font-weight: 400;
+  font-size: var(--fs-xs);
+  line-height: 1.4;
+  color: var(--ink-mid);
+  white-space: normal;
+}
 /* six columns: the headers may take more than one line; on a phone the first three columns (kind, total, per resident) fit side by side, the three averages scroll */
-.page[data-route="S21"] #s21-vidove-tbl-wrap table.data thead th { white-space: normal; }
-.page[data-route="S21"] #s21-vidove-tbl-wrap table.data thead th:first-child { min-width: 9.5rem; }
-.page[data-route="S21"] #s21-vidove-tbl-wrap table.data thead th:nth-child(n+2) { min-width: 5rem; }
-.page[data-route="S21"] #s21-vidove-tbl-wrap table.data thead th:nth-child(n+4) { min-width: 7rem; }
-.page[data-route="S21"] .s21-scroll-hint { margin: 0; color: var(--ink-soft); font: 400 var(--fs-xs)/1.5 var(--font-mono); letter-spacing: .02em; }
-.page[data-route="S21"] .s21-notes { display: grid; gap: var(--sp-1); }
-.page[data-route="S21"] .s21-notes p { margin: 0; }
+.page[data-route='S21'] #s21-vidove-tbl-wrap table.data thead th {
+  white-space: normal;
+}
+.page[data-route='S21'] #s21-vidove-tbl-wrap table.data thead th:first-child {
+  min-width: 9.5rem;
+}
+.page[data-route='S21'] #s21-vidove-tbl-wrap table.data thead th:nth-child(n + 2) {
+  min-width: 5rem;
+}
+.page[data-route='S21'] #s21-vidove-tbl-wrap table.data thead th:nth-child(n + 4) {
+  min-width: 7rem;
+}
+.page[data-route='S21'] .s21-scroll-hint {
+  margin: 0;
+  color: var(--ink-soft);
+  font: 400 var(--fs-xs)/1.5 var(--font-mono);
+  letter-spacing: 0.02em;
+}
+.page[data-route='S21'] .s21-notes {
+  display: grid;
+  gap: var(--sp-1);
+}
+.page[data-route='S21'] .s21-notes p {
+  margin: 0;
+}
 
 /* block D: the latest quarter as two bars, then the table of the quarters */
-.page[data-route="S21"] .s21-h3 { margin: 0 0 var(--sp-2); font: 400 var(--fs-1)/1.25 var(--font-serif); letter-spacing: -.01em; }
-.page[data-route="S21"] .s21-h3 + p { margin: 0; }
-.page[data-route="S21"] .s21-bars { display: grid; gap: var(--sp-5); }
-.page[data-route="S21"] .s21-bars > * { min-width: 0; }
+.page[data-route='S21'] .s21-h3 {
+  margin: 0 0 var(--sp-2);
+  font: 400 var(--fs-1)/1.25 var(--font-serif);
+  letter-spacing: -0.01em;
+}
+.page[data-route='S21'] .s21-h3 + p {
+  margin: 0;
+}
+.page[data-route='S21'] .s21-bars {
+  display: grid;
+  gap: var(--sp-5);
+}
+.page[data-route='S21'] .s21-bars > * {
+  min-width: 0;
+}
 
-.page[data-route="S21"] .s21-read { max-width: 68ch; }
-.page[data-route="S21"] .s21-fix { max-width: 72ch; }
+.page[data-route='S21'] .s21-read {
+  max-width: 68ch;
+}
+.page[data-route='S21'] .s21-fix {
+  max-width: 72ch;
+}
 
 @media (min-width: 600px) {
-  .page[data-route="S21"] .s21-bars { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-7); }
-  .page[data-route="S21"] #s21-vidove-tbl-wrap table.data thead th:first-child { min-width: 13rem; }
-  .page[data-route="S21"] #s21-vidove-tbl-wrap table.data thead th:nth-child(n+2) { min-width: 6rem; }
-  .page[data-route="S21"] #s21-vidove-tbl-wrap table.data thead th:nth-child(n+4) { min-width: 8rem; }
+  .page[data-route='S21'] .s21-bars {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--sp-7);
+  }
+  .page[data-route='S21'] #s21-vidove-tbl-wrap table.data thead th:first-child {
+    min-width: 13rem;
+  }
+  .page[data-route='S21'] #s21-vidove-tbl-wrap table.data thead th:nth-child(n + 2) {
+    min-width: 6rem;
+  }
+  .page[data-route='S21'] #s21-vidove-tbl-wrap table.data thead th:nth-child(n + 4) {
+    min-width: 8rem;
+  }
 }
 @media (min-width: 900px) {
-  .page[data-route="S21"] .s21-kind-text { max-width: 44ch; }
+  .page[data-route='S21'] .s21-kind-text {
+    max-width: 44ch;
+  }
 }
 /* the table has room for all six columns on a wide screen: the hint about scrolling is for the narrow ones */
 @media (min-width: 1100px) {
-  .page[data-route="S21"] .s21-scroll-hint { display: none; }
+  .page[data-route='S21'] .s21-scroll-hint {
+    display: none;
+  }
 }
 @media (pointer: coarse) {
-  .page[data-route="S21"] .s21-links .btn { min-height: 44px; }
+  .page[data-route='S21'] .s21-links .btn {
+    min-height: 44px;
+  }
 }
 @media (forced-colors: active) {
-  .page[data-route="S21"] .s21-kind-text { color: CanvasText; }
+  .page[data-route='S21'] .s21-kind-text {
+    color: CanvasText;
+  }
 }

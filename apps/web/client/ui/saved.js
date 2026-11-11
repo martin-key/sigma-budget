@@ -15,7 +15,7 @@ export const KEY = 'bns.saved.v1';
 export const MAX = 20000;
 const SLOT = /^[a-z0-9-]{1,40}$/;
 /** a slot id is a string of that shape; RegExp.test would otherwise turn undefined into the text "undefined" and accept it */
-const okSlot = s => typeof s === 'string' && SLOT.test(s);
+const okSlot = (s) => typeof s === 'string' && SLOT.test(s);
 
 /** the whole store as a plain object; {} when missing, blocked or damaged */
 function read() {
@@ -24,7 +24,9 @@ function read() {
     if (!raw) return {};
     const all = JSON.parse(raw);
     return all && typeof all === 'object' && !Array.isArray(all) ? all : {};
-  } catch { return {}; }
+  } catch {
+    return {};
+  }
 }
 
 export function get(slot) {
@@ -33,9 +35,12 @@ export function get(slot) {
     const all = read();
     if (!Object.hasOwn(all, slot)) return null;
     const rec = all[slot];
-    if (!rec || typeof rec !== 'object' || typeof rec.at !== 'string' || !('data' in rec)) return null;
+    if (!rec || typeof rec !== 'object' || typeof rec.at !== 'string' || !('data' in rec))
+      return null;
     return { data: rec.data, at: rec.at };
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
 export function set(slot, data) {
@@ -46,7 +51,9 @@ export function set(slot, data) {
     const text = JSON.stringify(all);
     if (typeof text !== 'string' || text.length > MAX) return false;
     return safe.set('localStorage', KEY, text) === true && safe.get('localStorage', KEY) === text;
-  } catch { return false; }
+  } catch {
+    return false;
+  }
 }
 
 export function remove(slot) {
@@ -57,5 +64,7 @@ export function remove(slot) {
     delete all[slot];
     if (Object.keys(all).length) safe.set('localStorage', KEY, JSON.stringify(all));
     else safe.del('localStorage', KEY);
-  } catch { /* nothing to do */ }
+  } catch {
+    /* nothing to do */
+  }
 }

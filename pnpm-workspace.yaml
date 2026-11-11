@@ -1,6 +1,6 @@
 packages:
-  - "apps/*"
-  - "packages/*"
+  - 'apps/*'
+  - 'packages/*'
 overrides:
   undici: 7.30.1
 onlyBuiltDependencies:

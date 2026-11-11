@@ -6,6 +6,6 @@ import { html } from '../html.js';
 import { icon } from '../icons.js';
 
 export function seg(o) {
-  const id = v => `${o.name}-${v}`;
-  return html`<div class="seg${o.cls ? ' ' + o.cls : ''}" role="radiogroup" aria-label="${o.label}">${o.options.map(opt => html`<span class="seg-opt"><input type="radio" id="${id(opt.value)}" name="${o.name}" value="${opt.value}" data-fk="${id(opt.value)}"${opt.value === o.value ? html` checked` : ''}${o.query ? html` data-query="${o.query}"` : ''}${o.norender ? html` data-norender` : ''}><label for="${id(opt.value)}">${opt.icon ? icon(opt.icon, { size: 16 }) : ''}<span>${opt.label}</span></label></span>`)}</div>`;
+  const id = (v) => `${o.name}-${v}`;
+  return html`<div class="seg${o.cls ? ' ' + o.cls : ''}" role="radiogroup" aria-label="${o.label}">${o.options.map((opt) => html`<span class="seg-opt"><input type="radio" id="${id(opt.value)}" name="${o.name}" value="${opt.value}" data-fk="${id(opt.value)}"${opt.value === o.value ? html` checked` : ''}${o.query ? html` data-query="${o.query}"` : ''}${o.norender ? html` data-norender` : ''}><label for="${id(opt.value)}">${opt.icon ? icon(opt.icon, { size: 16 }) : ''}<span>${opt.label}</span></label></span>`)}</div>`;
 }

@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
-import { expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { gzipSize } from './checks.js';
 
 interface Evidence {
@@ -72,18 +72,35 @@ it('uses only the bytes of an offset view of a shared backing buffer', () => {
   expect(gzipSize(second)).toBe(b.gzip);
 });
 
-it('preserves sizes after many distinct inputs and cache-sized replacements', () => {
-  for (const test of oracle.filter((test) => test.group === 'distinct' || test.group === 'limit'))
-    expect(gzipSize(data(test))).toBe(test.gzip);
-  for (const name of ['invalid-uniform', 'invalid-varied']) {
-    const test = item(name);
-    expect(gzipSize(data(test))).toBe(test.gzip);
-  }
+// Preserve cache population/eviction order, but measure each 16 MiB compression
+// separately: the combined stress case took 5.14s with V8 coverage.
+describe('preserves sizes after many distinct inputs and cache-sized replacements', () => {
+  it('processes all 300 distinct inputs', () => {
+    for (const test of oracle.filter((test) => test.group === 'distinct'))
+      expect(gzipSize(data(test))).toBe(test.gzip);
+  });
+  for (const test of oracle.filter((test) => test.group === 'limit'))
+    it(`replaces the cache with ${test.name}`, () => {
+      expect(gzipSize(data(test))).toBe(test.gzip);
+    });
+  it('rechecks both original byte sequences after eviction', () => {
+    for (const name of ['invalid-uniform', 'invalid-varied']) {
+      const test = item(name);
+      expect(gzipSize(data(test))).toBe(test.gzip);
+    }
+  });
 });
 
-it('preserves the size of inputs larger than the cache budget', () => {
-  const test = item('over-limit'),
+describe('preserves the size of inputs larger than the cache budget', () => {
+  const test = item('over-limit');
+  let raw: Buffer;
+  beforeAll(() => {
     raw = data(test);
-  expect(gzipSize(raw)).toBe(test.gzip);
-  expect(gzipSize(raw)).toBe(test.gzip);
+  });
+  it('compresses the over-limit buffer', () => {
+    expect(gzipSize(raw)).toBe(test.gzip);
+  });
+  it('recompresses the same over-limit buffer', () => {
+    expect(gzipSize(raw)).toBe(test.gzip);
+  });
 });

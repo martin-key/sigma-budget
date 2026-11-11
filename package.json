@@ -8,7 +8,7 @@
     "dev": "turbo run dev",
     "test": "turbo run test --concurrency=1",
     "registry:local": "pnpm --filter @sigma-budget/web registry:local",
-    "format:check": "prettier --check \"apps/web/app/**/*.{ts,tsx}\" \"apps/web/*.ts\" \"apps/web/workers/**/*.ts\"",
+    "format:check": "prettier --check . --ignore-unknown",
     "editorial:compare-live": "pnpm --filter @sigma-budget/etl... build && pnpm exec budget-ts build --inputs packages/ingest/test/fixtures/editorial/inputs --routes apps/web/app/lib/routes.json --out tmp/ts-migration/candidates/08-live --scope glossary,guide --build-date 2026-11-08 && pnpm exec budget-ts parity --oracle data/release --candidate tmp/ts-migration/candidates/08-live/data --scope glossary,guide --policy packages/ingest/test/fixtures/editorial/policy.json --report tmp/ts-migration/candidates/08-live/diff.json",
     "fiscal:compare-live": "pnpm --filter @sigma-budget/etl... build && pnpm exec budget-ts build --inputs packages/ingest/test/fixtures/fiscal --out tmp/ts-migration/candidates/candidate03 --scope outlook,revenue,expenditure,measures --build-date 2026-11-08 && pnpm exec budget-ts parity --oracle data/release --candidate tmp/ts-migration/candidates/candidate03/data --scope outlook,revenue,expenditure,measures --policy packages/ingest/test/fixtures/fiscal/policy.json --report tmp/ts-migration/candidates/candidate03/live-diff.json",
     "components-rates:compare-live": "pnpm --filter @sigma-budget/etl... build && pnpm exec budget-ts build --inputs packages/ingest/test/fixtures/components-rates --out tmp/ts-migration/candidates/06 --scope components,rates --build-date 2026-11-08 && pnpm exec budget-ts parity --oracle data/release --candidate tmp/ts-migration/candidates/06/data --scope components,rates --policy packages/ingest/test/fixtures/components-rates/policy.json --report tmp/ts-migration/candidates/06/live-diff.json",
@@ -24,7 +24,9 @@
     "validate:wave18-live": "pnpm --filter @sigma-budget/ingest... build && node packages/ingest/dist/validate/kfp-cli.js --root . --captures packages/ingest/test/fixtures/wave18/captures.json --manifest packages/ingest/test/fixtures/wave18/manifest.json --only KFP --report tmp/ts-migration/candidates/18/report.json",
     "validate:wave15": "pnpm --filter @sigma-budget/ingest... build && node packages/ingest/dist/validate/cli15.js",
     "validate:wave15-live": "pnpm --filter @sigma-budget/ingest... build && node packages/ingest/dist/validate/cli15.js --live --report tmp/ts-migration/candidates/15/live.json",
-    "build:release": "python3 -m apps.web.scripts.build"
+    "build:release": "python3 -m apps.web.scripts.build",
+    "check:coverage": "node scripts/check-coverage.mjs",
+    "format": "prettier --write . --ignore-unknown"
   },
   "packageManager": "pnpm@10.33.0",
   "engines": {
@@ -38,7 +40,8 @@
     "turbo": "2.9.14",
     "typescript": "6.0.3",
     "vitest": "4.1.12",
-    "wrangler": "4.156.0"
+    "wrangler": "4.156.0",
+    "@vitest/coverage-v8": "4.1.12"
   },
   "dependencies": {
     "@sigma-budget/etl": "workspace:*"

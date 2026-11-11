@@ -25,8 +25,12 @@ const ASK = [
   ['S13', 'forecast', 'Накъде върви бюджетът?', 'Проектът за 2027 и прогнозата до 2029 г.'],
 ];
 
-export function title() { return 'Държавният бюджет на достъпен език'; }
-export function next() { return []; }          // nothing after the last card: the page ends with the questions
+export function title() {
+  return 'Държавният бюджет на достъпен език';
+}
+export function next() {
+  return [];
+} // nothing after the last card: the page ends with the questions
 
 /** Primary bill context; monthly execution keeps its actual year. */
 export function lede(ctx) {

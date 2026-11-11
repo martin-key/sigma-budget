@@ -2,67 +2,265 @@
    code on a warm well in mono, example data marked by the crimson hatch. Tokens only, light only, every selector scoped to the screen, classes prefixed s25-. */
 
 /* the blocks: a long reference page, each block set off by an ink rule */
-.page[data-route="S25"] .s25-block { display: grid; gap: var(--sp-4); align-content: start; padding-top: var(--sp-5); border-top: 1px solid var(--ink); }
-.page[data-route="S25"] .s25-block > h2 { margin: 0; }
-.page[data-route="S25"] .s25-block p { margin: 0; max-width: 68ch; }
-.page[data-route="S25"] .s25-block code { padding: 0 var(--sp-1); border-radius: 0; background: var(--paper-warm); color: var(--ink); overflow-wrap: anywhere; }
-.page[data-route="S25"] .s25-block .small.muted { margin: 0; }
-.page[data-route="S25"] .s25-h3 { margin: var(--sp-2) 0 0; font: 400 var(--fs-1)/1.25 var(--font-serif); letter-spacing: -.01em; }
-.page[data-route="S25"] .s25-steps,
-.page[data-route="S25"] .s25-list { display: grid; gap: var(--sp-1); max-width: 68ch; margin: 0; padding-left: 1.4em; }
-.page[data-route="S25"] .s25-block .s25-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); max-width: none; }
+.page[data-route='S25'] .s25-block {
+  display: grid;
+  gap: var(--sp-4);
+  align-content: start;
+  padding-top: var(--sp-5);
+  border-top: 1px solid var(--ink);
+}
+.page[data-route='S25'] .s25-block > h2 {
+  margin: 0;
+}
+.page[data-route='S25'] .s25-block p {
+  margin: 0;
+  max-width: 68ch;
+}
+.page[data-route='S25'] .s25-block code {
+  padding: 0 var(--sp-1);
+  border-radius: 0;
+  background: var(--paper-warm);
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.page[data-route='S25'] .s25-block .small.muted {
+  margin: 0;
+}
+.page[data-route='S25'] .s25-h3 {
+  margin: var(--sp-2) 0 0;
+  font: 400 var(--fs-1)/1.25 var(--font-serif);
+  letter-spacing: -0.01em;
+}
+.page[data-route='S25'] .s25-steps,
+.page[data-route='S25'] .s25-list {
+  display: grid;
+  gap: var(--sp-1);
+  max-width: 68ch;
+  margin: 0;
+  padding-left: 1.4em;
+}
+.page[data-route='S25'] .s25-block .s25-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+  max-width: none;
+}
 
 /* the facts: a long address must wrap, not widen the page */
-.page[data-route="S25"] .s25-facts dd { min-width: 0; overflow-wrap: anywhere; }
-.page[data-route="S25"] .s25-facts code { word-break: break-all; }
+.page[data-route='S25'] .s25-facts dd {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.page[data-route='S25'] .s25-facts code {
+  word-break: break-all;
+}
 
 /* the files: groups of hairline rows, each with its address and two links */
-.page[data-route="S25"] .s25-groups { display: grid; gap: var(--sp-7); }
-.page[data-route="S25"] .s25-group { display: grid; gap: 0; }
-.page[data-route="S25"] .s25-gh { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); margin: 0; padding-bottom: var(--sp-3); border-bottom: 1px solid var(--ink); font: 400 var(--fs-h3)/1.2 var(--font-serif); letter-spacing: var(--track-head); }
-.page[data-route="S25"] .s25-n { color: var(--ink-soft); font: 400 var(--fs-xs)/1.4 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; }
-.page[data-route="S25"] .s25-files { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
-.page[data-route="S25"] .s25-file,
-.page[data-route="S25"] .s25-set { position: relative; display: grid; gap: var(--sp-2); min-width: 0; padding: var(--sp-3) 0; border: 0; border-bottom: 1px solid var(--rule-soft); border-radius: 0; background: none; }
-.page[data-route="S25"] .s25-file-top,
-.page[data-route="S25"] .s25-set-top { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-1) var(--sp-3); min-width: 0; }
-.page[data-route="S25"] .s25-file-t { display: inline-block; min-height: 24px; font: 400 var(--fs-1)/1.25 var(--font-serif); letter-spacing: -.01em; color: var(--ink); text-decoration: none; overflow-wrap: anywhere; }
-.page[data-route="S25"] a.s25-file-t:hover { color: var(--crimson); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
-.page[data-route="S25"] .s25-block .s25-file-p { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-1) var(--sp-3); max-width: none; }
-.page[data-route="S25"] .s25-file-s { color: var(--ink-soft); font: 400 var(--fs-xs)/1.5 var(--font-mono); letter-spacing: .04em; }
-.page[data-route="S25"] .s25-block .s25-file-a { display: flex; flex-wrap: wrap; gap: var(--sp-2); max-width: none; }
+.page[data-route='S25'] .s25-groups {
+  display: grid;
+  gap: var(--sp-7);
+}
+.page[data-route='S25'] .s25-group {
+  display: grid;
+  gap: 0;
+}
+.page[data-route='S25'] .s25-gh {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  margin: 0;
+  padding-bottom: var(--sp-3);
+  border-bottom: 1px solid var(--ink);
+  font: 400 var(--fs-h3)/1.2 var(--font-serif);
+  letter-spacing: var(--track-head);
+}
+.page[data-route='S25'] .s25-n {
+  color: var(--ink-soft);
+  font: 400 var(--fs-xs)/1.4 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.page[data-route='S25'] .s25-files {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.page[data-route='S25'] .s25-file,
+.page[data-route='S25'] .s25-set {
+  position: relative;
+  display: grid;
+  gap: var(--sp-2);
+  min-width: 0;
+  padding: var(--sp-3) 0;
+  border: 0;
+  border-bottom: 1px solid var(--rule-soft);
+  border-radius: 0;
+  background: none;
+}
+.page[data-route='S25'] .s25-file-top,
+.page[data-route='S25'] .s25-set-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-1) var(--sp-3);
+  min-width: 0;
+}
+.page[data-route='S25'] .s25-file-t {
+  display: inline-block;
+  min-height: 24px;
+  font: 400 var(--fs-1)/1.25 var(--font-serif);
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.page[data-route='S25'] a.s25-file-t:hover {
+  color: var(--crimson);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.page[data-route='S25'] .s25-block .s25-file-p {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sp-1) var(--sp-3);
+  max-width: none;
+}
+.page[data-route='S25'] .s25-file-s {
+  color: var(--ink-soft);
+  font: 400 var(--fs-xs)/1.5 var(--font-mono);
+  letter-spacing: 0.04em;
+}
+.page[data-route='S25'] .s25-block .s25-file-a {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  max-width: none;
+}
 
 /* the set the how-to is about: a 4px ink rule on the left (СИГМА callout) */
-.page[data-route="S25"] .s25-set { padding: var(--sp-3) var(--sp-5); border: 0; border-left: 4px solid var(--ink); }
-.page[data-route="S25"] .s25-block .s25-set-t { font: 400 var(--fs-1)/1.25 var(--font-serif); letter-spacing: -.01em; overflow-wrap: anywhere; }
-.page[data-route="S25"] .s25-block .s25-set-d { color: var(--ink-mid); font-size: var(--fs-s); }
+.page[data-route='S25'] .s25-set {
+  padding: var(--sp-3) var(--sp-5);
+  border: 0;
+  border-left: 4px solid var(--ink);
+}
+.page[data-route='S25'] .s25-block .s25-set-t {
+  font: 400 var(--fs-1)/1.25 var(--font-serif);
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+.page[data-route='S25'] .s25-block .s25-set-d {
+  color: var(--ink-mid);
+  font-size: var(--fs-s);
+}
 
 /* example data: the crimson hatch says so, as a strip on the left edge */
-.page[data-route="S25"] .s25-file[data-st="mock"] { padding-left: calc(var(--sp-3) + 8px); }
-.page[data-route="S25"] .s25-set[data-st="mock"] { padding-left: calc(var(--sp-5) + 8px); }
-.page[data-route="S25"] .s25-file[data-st="mock"]::before { content: ""; position: absolute; inset: var(--sp-3) auto var(--sp-3) 0; width: 6px; background-image: repeating-linear-gradient(45deg, var(--crimson) 0 1.5px, transparent 1.5px 5px); border: 0; }
-.page[data-route="S25"] .s25-set[data-st="mock"]::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 6px; background-image: repeating-linear-gradient(45deg, var(--crimson) 0 1.5px, transparent 1.5px 5px); border: 0; }
+.page[data-route='S25'] .s25-file[data-st='mock'] {
+  padding-left: calc(var(--sp-3) + 8px);
+}
+.page[data-route='S25'] .s25-set[data-st='mock'] {
+  padding-left: calc(var(--sp-5) + 8px);
+}
+.page[data-route='S25'] .s25-file[data-st='mock']::before {
+  content: '';
+  position: absolute;
+  inset: var(--sp-3) auto var(--sp-3) 0;
+  width: 6px;
+  background-image: repeating-linear-gradient(45deg, var(--crimson) 0 1.5px, transparent 1.5px 5px);
+  border: 0;
+}
+.page[data-route='S25'] .s25-set[data-st='mock']::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 6px;
+  background-image: repeating-linear-gradient(45deg, var(--crimson) 0 1.5px, transparent 1.5px 5px);
+  border: 0;
+}
 @media (forced-colors: active) {
-  .page[data-route="S25"] .s25-file[data-st="mock"]::before,
-  .page[data-route="S25"] .s25-set[data-st="mock"]::before { width: 0; background-image: none; border-right: 4px dashed CanvasText; }
+  .page[data-route='S25'] .s25-file[data-st='mock']::before,
+  .page[data-route='S25'] .s25-set[data-st='mock']::before {
+    width: 0;
+    background-image: none;
+    border-right: 4px dashed CanvasText;
+  }
 }
 
 /* the code: every block scrolls inside itself, never the page; a warm well with an ink rule on top, mono ink text */
-.page[data-route="S25"] .s25-snips { display: grid; gap: var(--sp-5); }
-.page[data-route="S25"] .s25-snip { display: grid; gap: var(--sp-2); min-width: 0; }
-.page[data-route="S25"] .s25-snip-h { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-2) var(--sp-3); }
-.page[data-route="S25"] .s25-snip-t { color: var(--ink-mid); font: 500 var(--fs-xs)/1.4 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; }
-.page[data-route="S25"] .s25-pre { box-sizing: border-box; max-width: 100%; max-height: 26rem; margin: 0; padding: var(--sp-3) var(--sp-4); overflow: auto; border: 0; border-top: 1px solid var(--ink); border-radius: 0; background: var(--paper-warm); color: var(--ink); font: 400 .8125rem/1.55 var(--font-mono); tab-size: 4; }
-.page[data-route="S25"] .s25-block .s25-pre code { padding: 0; background: none; overflow-wrap: normal; white-space: pre; }
+.page[data-route='S25'] .s25-snips {
+  display: grid;
+  gap: var(--sp-5);
+}
+.page[data-route='S25'] .s25-snip {
+  display: grid;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+.page[data-route='S25'] .s25-snip-h {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2) var(--sp-3);
+}
+.page[data-route='S25'] .s25-snip-t {
+  color: var(--ink-mid);
+  font: 500 var(--fs-xs)/1.4 var(--font-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.page[data-route='S25'] .s25-pre {
+  box-sizing: border-box;
+  max-width: 100%;
+  max-height: 26rem;
+  margin: 0;
+  padding: var(--sp-3) var(--sp-4);
+  overflow: auto;
+  border: 0;
+  border-top: 1px solid var(--ink);
+  border-radius: 0;
+  background: var(--paper-warm);
+  color: var(--ink);
+  font: 400 0.8125rem/1.55 var(--font-mono);
+  tab-size: 4;
+}
+.page[data-route='S25'] .s25-block .s25-pre code {
+  padding: 0;
+  background: none;
+  overflow-wrap: normal;
+  white-space: pre;
+}
 
 /* the example addresses of the proposal: one line each, the table scrolls */
-.page[data-route="S25"] .s25-block table.data code { white-space: nowrap; }
+.page[data-route='S25'] .s25-block table.data code {
+  white-space: nowrap;
+}
 
 @media (min-width: 600px) {
-  .page[data-route="S25"] .s25-file { padding: var(--sp-4) 0; }
-  .page[data-route="S25"] .s25-file[data-st="mock"] { padding-left: calc(var(--sp-4) + 8px); }
-  .page[data-route="S25"] .s25-file { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "top act" "path act"; column-gap: var(--sp-4); align-items: center; }
-  .page[data-route="S25"] .s25-file-top { grid-area: top; }
-  .page[data-route="S25"] .s25-block .s25-file-p { grid-area: path; }
-  .page[data-route="S25"] .s25-block .s25-file-a { grid-area: act; }
+  .page[data-route='S25'] .s25-file {
+    padding: var(--sp-4) 0;
+  }
+  .page[data-route='S25'] .s25-file[data-st='mock'] {
+    padding-left: calc(var(--sp-4) + 8px);
+  }
+  .page[data-route='S25'] .s25-file {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 'top act' 'path act';
+    column-gap: var(--sp-4);
+    align-items: center;
+  }
+  .page[data-route='S25'] .s25-file-top {
+    grid-area: top;
+  }
+  .page[data-route='S25'] .s25-block .s25-file-p {
+    grid-area: path;
+  }
+  .page[data-route='S25'] .s25-block .s25-file-a {
+    grid-area: act;
+  }
 }

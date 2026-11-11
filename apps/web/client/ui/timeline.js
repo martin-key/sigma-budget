@@ -18,7 +18,8 @@ function when(d) {
   const s = String(d ?? '').trim();
   if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return html`<time datetime="${s}">${date(s)}</time>`;
   const m = /^(\d{4})-(\d{2})$/.exec(s);
-  if (m && +m[2] >= 1 && +m[2] <= 12) return html`<time datetime="${s}">${monthName(+m[2])}${NBSP}${m[1]}</time>`;
+  if (m && +m[2] >= 1 && +m[2] <= 12)
+    return html`<time datetime="${s}">${monthName(+m[2])}${NBSP}${m[1]}</time>`;
   if (/^\d{4}$/.test(s)) return html`<time datetime="${s}">${s}</time>`;
   return s ? html`${s}` : '';
 }
@@ -38,7 +39,7 @@ function entry(it) {
 }
 
 export function timeline(o = {}) {
-  const items = (o.items || []).filter(it => it && it.title != null && it.title !== '');
+  const items = (o.items || []).filter((it) => it && it.title != null && it.title !== '');
   if (!items.length) return html``;
   return html`<ol class="${cx('tl', o.cls)}"${o.label ? html` aria-label="${plain(o.label)}"` : ''}>${items.map(entry)}</ol>`;
 }

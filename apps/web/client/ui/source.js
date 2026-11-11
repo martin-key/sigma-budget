@@ -10,15 +10,43 @@ import { date } from '../format.js';
 import { popover } from './sheet.js';
 
 const SHORT = {
-  kfp: 'МФ · КФП', asbp: 'МФ · АСБП', bill: 'Законопроект', zdb: 'ЗДБРБ · ДВ', zbdoo: 'ЗБДОО · ДВ', zbnzok: 'ЗБНЗОК · ДВ', prb: 'Програмни бюджети',
-  parliament: 'Парламент', eurostat: 'Евростат', bnb: 'БНБ', nap: 'НАП', sebra: 'СЕБРА', gisco: 'GISCO', dataeuropa: 'data.europa.eu',
-  minfin: 'МФ', wg: 'Редакционно'
+  kfp: 'МФ · КФП',
+  asbp: 'МФ · АСБП',
+  bill: 'Законопроект',
+  zdb: 'ЗДБРБ · ДВ',
+  zbdoo: 'ЗБДОО · ДВ',
+  zbnzok: 'ЗБНЗОК · ДВ',
+  prb: 'Програмни бюджети',
+  parliament: 'Парламент',
+  eurostat: 'Евростат',
+  bnb: 'БНБ',
+  nap: 'НАП',
+  sebra: 'СЕБРА',
+  gisco: 'GISCO',
+  dataeuropa: 'data.europa.eu',
+  minfin: 'МФ',
+  wg: 'Редакционно',
 };
-const KIND = { xls: 'Таблица (xls)', pdf: 'Документ (PDF)', html: 'Уеб страница', api: 'API', doc: 'Документ (Word)', generator: 'Генериран набор' };
-const ACCESS = { open: 'Отворен достъп', 'browser-only': 'Достъпен само през браузър', none: 'Няма публичен достъп' };
-const list = k => (Array.isArray(k) ? k : String(k || '').split(',')).map(s => s.trim()).filter(Boolean);
+const KIND = {
+  xls: 'Таблица (xls)',
+  pdf: 'Документ (PDF)',
+  html: 'Уеб страница',
+  api: 'API',
+  doc: 'Документ (Word)',
+  generator: 'Генериран набор',
+};
+const ACCESS = {
+  open: 'Отворен достъп',
+  'browser-only': 'Достъпен само през браузър',
+  none: 'Няма публичен достъп',
+};
+const list = (k) =>
+  (Array.isArray(k) ? k : String(k || '').split(',')).map((s) => s.trim()).filter(Boolean);
 
-export const srcShort = key => { const s = data.source(key); return s.short || SHORT[key] || s.publisher || s.title || key; };
+export const srcShort = (key) => {
+  const s = data.source(key);
+  return s.short || SHORT[key] || s.publisher || s.title || key;
+};
 
 export function sourceBtn(keys, o = {}) {
   const ks = list(keys);
@@ -38,7 +66,7 @@ export function val(text, o = {}) {
 
 export function sourceCard(keys, o = {}) {
   const ks = list(keys);
-  const items = ks.map(k => {
+  const items = ks.map((k) => {
     const s = data.source(k);
     const known = !!(s.url || s.publisher || s.note);
     return html`<section class="src-item">
@@ -51,5 +79,9 @@ export function sourceCard(keys, o = {}) {
   return html`<div class="src-card">${o.asOf ? html`<p class="small"><strong>Данни към ${date(o.asOf)}</strong></p>` : ''}${items}<p class="small"><a href="#/danni">Данни и методика</a> · <a href="#/proverka">Данни и проверка</a>: изданието, оригиналите и SHA-256 им</p></div>`;
 }
 export function openSource(anchor, keys, o = {}) {
-  return popover.open(anchor, { title: 'Източник на данните', body: sourceCard(keys, o), label: 'Източник на данните' });
+  return popover.open(anchor, {
+    title: 'Източник на данните',
+    body: sourceCard(keys, o),
+    label: 'Източник на данните',
+  });
 }

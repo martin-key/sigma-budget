@@ -17,8 +17,8 @@ import {
   executionColumnsGuard,
   executionPlanGuard,
   type Infer,
-} from "./guards.js";
-export * from "./guards.js";
+} from './guards.js';
+export * from './guards.js';
 // Published filename inventory; nested domain contracts are added with their port.
 const ministryGuard = shape({
   meta: metaGuard,
@@ -40,12 +40,51 @@ const ministryGuard = shape({
   skippedTotal: number,
   doc: record,
 });
-const fuelTaxGuard = shape({ legalEvidence: shape({ source: literal("customs-excise-law"), quote: string, basis: string, note: string, originalBgnPer1000: number, conversionRate: number }), excisePerLitre: number, originalExcise: number, originalUnit: literal("EUR/1000 l"), unit: literal("EUR/l"), validFrom: string, source: literal("ec-oil"), basis: string, pricePerLitre: number, originalPrice: number, priceDate: string, priceSource: literal("ec-oil") });
-const cigaretteTaxGuard = shape({ validFrom: string, specificPer1000: number, adValoremPct: number, minimumPer1000: number, unit: literal("EUR/1000 sticks"), source: literal("excise-law"), basis: string, quote: string });
+const fuelTaxGuard = shape({
+  legalEvidence: shape({
+    source: literal('customs-excise-law'),
+    quote: string,
+    basis: string,
+    note: string,
+    originalBgnPer1000: number,
+    conversionRate: number,
+  }),
+  excisePerLitre: number,
+  originalExcise: number,
+  originalUnit: literal('EUR/1000 l'),
+  unit: literal('EUR/l'),
+  validFrom: string,
+  source: literal('ec-oil'),
+  basis: string,
+  pricePerLitre: number,
+  originalPrice: number,
+  priceDate: string,
+  priceSource: literal('ec-oil'),
+});
+const cigaretteTaxGuard = shape({
+  validFrom: string,
+  specificPer1000: number,
+  adValoremPct: number,
+  minimumPer1000: number,
+  unit: literal('EUR/1000 sticks'),
+  source: literal('excise-law'),
+  basis: string,
+  quote: string,
+});
 export const datasetGuards = {
-  "budget2027.json": shape({ meta: metaGuard, schema: string, publication: string, defaultVariant: string, budgets: record, municipal: record, projects: array, forecast: record, gaps: record }),
-  "budget2027-provenance.json": budgetProvenanceGuard,
-  "catalog.json": shape({
+  'budget2027.json': shape({
+    meta: metaGuard,
+    schema: string,
+    publication: string,
+    defaultVariant: string,
+    budgets: record,
+    municipal: record,
+    projects: array,
+    forecast: record,
+    gaps: record,
+  }),
+  'budget2027-provenance.json': budgetProvenanceGuard,
+  'catalog.json': shape({
     meta: metaGuard,
     groups: array,
     counts: record,
@@ -54,7 +93,7 @@ export const datasetGuards = {
     methodology: array,
     files: array,
   }),
-  "components.json": shape({
+  'components.json': shape({
     meta: metaGuard,
     budgets: record,
     transfers: record,
@@ -64,7 +103,7 @@ export const datasetGuards = {
     notes: array,
     pending: array,
   }),
-  "core.json": shape({
+  'core.json': shape({
     meta: metaGuard,
     build: record,
     years: record,
@@ -76,7 +115,7 @@ export const datasetGuards = {
     functions: array,
     revenueGroups: array,
   }),
-  "dbp2027.json": shape({
+  'dbp2027.json': shape({
     meta: metaGuard,
     doc: record,
     figures: record,
@@ -84,7 +123,7 @@ export const datasetGuards = {
     measures: record,
     missing: array,
   }),
-  "debt.json": shape({
+  'debt.json': shape({
     meta: metaGuard,
     defaultScope: string,
     scopes: array,
@@ -102,7 +141,7 @@ export const datasetGuards = {
     notes: array,
     check: record,
   }),
-  "execution-provenance.json": shape({
+  'execution-provenance.json': shape({
     meta: metaGuard,
     schema: string,
     dataset: string,
@@ -115,7 +154,7 @@ export const datasetGuards = {
     originals: record,
     plan2026: record,
   }),
-  "execution.json": shape({
+  'execution.json': shape({
     meta: metaGuard,
     contract: record,
     cols: array,
@@ -129,14 +168,14 @@ export const datasetGuards = {
     pendingMonths: array,
     reconcile: record,
   }),
-  "expenditure.json": shape({
+  'expenditure.json': shape({
     meta: metaGuard,
     functions: record,
     economic: record,
     cofog: record,
     perCapita: record,
   }),
-  "feed.json": shape({
+  'feed.json': shape({
     meta: metaGuard,
     kinds: array,
     dateKinds: record,
@@ -145,14 +184,14 @@ export const datasetGuards = {
     highlights: record,
     sentences: array,
   }),
-  "feed.xml": string,
-  "geo/obshtini.json": shape({
+  'feed.xml': string,
+  'geo/obshtini.json': shape({
     type: string,
     meta: metaGuard,
     idProperty: string,
     features: array,
   }),
-  "glossary.json": shape({
+  'glossary.json': shape({
     meta: metaGuard,
     title: string,
     subtitle: string,
@@ -165,7 +204,7 @@ export const datasetGuards = {
     sourcesIntro: string,
     sources: array,
   }),
-  "guide.json": shape({
+  'guide.json': shape({
     meta: metaGuard,
     title: string,
     lead: string,
@@ -173,7 +212,7 @@ export const datasetGuards = {
     checks: record,
     credit: string,
   }),
-  "gva-sectors.json": shape({
+  'gva-sectors.json': shape({
     meta: metaGuard,
     years: array,
     gva: array,
@@ -182,7 +221,7 @@ export const datasetGuards = {
     branches: array,
     parts: array,
   }),
-  "law.json": shape({
+  'law.json': shape({
     meta: metaGuard,
     note: string,
     versions: record,
@@ -201,7 +240,7 @@ export const datasetGuards = {
     next: record,
     pending: array,
   }),
-  "measures.json": shape({
+  'measures.json': shape({
     meta: metaGuard,
     document: record,
     tabs: array,
@@ -216,49 +255,49 @@ export const datasetGuards = {
     check: record,
     notes: array,
   }),
-  "ministries/0200.json": ministryGuard,
-  "ministries/0300.json": ministryGuard,
-  "ministries/0400.json": ministryGuard,
-  "ministries/0500.json": ministryGuard,
-  "ministries/0600.json": ministryGuard,
-  "ministries/1000.json": ministryGuard,
-  "ministries/1100.json": ministryGuard,
-  "ministries/1200.json": ministryGuard,
-  "ministries/1300.json": ministryGuard,
-  "ministries/1400.json": ministryGuard,
-  "ministries/1500.json": ministryGuard,
-  "ministries/1600.json": ministryGuard,
-  "ministries/1700.json": ministryGuard,
-  "ministries/1900.json": ministryGuard,
-  "ministries/2000.json": ministryGuard,
-  "ministries/2100.json": ministryGuard,
-  "ministries/2200.json": ministryGuard,
-  "ministries/2400.json": ministryGuard,
-  "ministries/2500.json": ministryGuard,
-  "ministries/3000.json": ministryGuard,
-  "ministries/3200.json": ministryGuard,
-  "ministries/3300.json": ministryGuard,
-  "ministries/3400.json": ministryGuard,
-  "ministries/3700.json": ministryGuard,
-  "ministries/3800.json": ministryGuard,
-  "ministries/3900.json": ministryGuard,
-  "ministries/4000.json": ministryGuard,
-  "ministries/4100.json": ministryGuard,
-  "ministries/4200.json": ministryGuard,
-  "ministries/4300.json": ministryGuard,
-  "ministries/4400.json": ministryGuard,
-  "ministries/4500.json": ministryGuard,
-  "ministries/4600.json": ministryGuard,
-  "ministries/4700.json": ministryGuard,
-  "ministries/4800.json": ministryGuard,
-  "ministries/5300.json": ministryGuard,
-  "ministries/7100.json": ministryGuard,
-  "ministries/8200.json": ministryGuard,
-  "ministries/8300.json": ministryGuard,
-  "ministries/8400.json": ministryGuard,
-  "ministries/8500.json": ministryGuard,
-  "ministries/8600.json": ministryGuard,
-  "ministries.json": shape({
+  'ministries/0200.json': ministryGuard,
+  'ministries/0300.json': ministryGuard,
+  'ministries/0400.json': ministryGuard,
+  'ministries/0500.json': ministryGuard,
+  'ministries/0600.json': ministryGuard,
+  'ministries/1000.json': ministryGuard,
+  'ministries/1100.json': ministryGuard,
+  'ministries/1200.json': ministryGuard,
+  'ministries/1300.json': ministryGuard,
+  'ministries/1400.json': ministryGuard,
+  'ministries/1500.json': ministryGuard,
+  'ministries/1600.json': ministryGuard,
+  'ministries/1700.json': ministryGuard,
+  'ministries/1900.json': ministryGuard,
+  'ministries/2000.json': ministryGuard,
+  'ministries/2100.json': ministryGuard,
+  'ministries/2200.json': ministryGuard,
+  'ministries/2400.json': ministryGuard,
+  'ministries/2500.json': ministryGuard,
+  'ministries/3000.json': ministryGuard,
+  'ministries/3200.json': ministryGuard,
+  'ministries/3300.json': ministryGuard,
+  'ministries/3400.json': ministryGuard,
+  'ministries/3700.json': ministryGuard,
+  'ministries/3800.json': ministryGuard,
+  'ministries/3900.json': ministryGuard,
+  'ministries/4000.json': ministryGuard,
+  'ministries/4100.json': ministryGuard,
+  'ministries/4200.json': ministryGuard,
+  'ministries/4300.json': ministryGuard,
+  'ministries/4400.json': ministryGuard,
+  'ministries/4500.json': ministryGuard,
+  'ministries/4600.json': ministryGuard,
+  'ministries/4700.json': ministryGuard,
+  'ministries/4800.json': ministryGuard,
+  'ministries/5300.json': ministryGuard,
+  'ministries/7100.json': ministryGuard,
+  'ministries/8200.json': ministryGuard,
+  'ministries/8300.json': ministryGuard,
+  'ministries/8400.json': ministryGuard,
+  'ministries/8500.json': ministryGuard,
+  'ministries/8600.json': ministryGuard,
+  'ministries.json': shape({
     meta: metaGuard,
     totals: record,
     kinds: record,
@@ -267,12 +306,40 @@ export const datasetGuards = {
     scopeNote: string,
     items: array,
   }),
-  "indirect-tax-parameters.json": shape({ meta: metaGuard,
-    vat: shape({ standardPct: number, standardSince: string, reducedPct: number, untaxed: shape({ kind: literal("definition"), label: string, basis: string, note: string }), source: array, basis: string, reducedQuote: string, unit: literal("%") }),
+  'indirect-tax-parameters.json': shape({
+    meta: metaGuard,
+    vat: shape({
+      standardPct: number,
+      standardSince: string,
+      reducedPct: number,
+      untaxed: shape({ kind: literal('definition'), label: string, basis: string, note: string }),
+      source: array,
+      basis: string,
+      reducedQuote: string,
+      unit: literal('%'),
+    }),
     fuels: shape({ petrol: fuelTaxGuard, diesel: fuelTaxGuard }),
     cigarettes: list(cigaretteTaxGuard),
-    references: shape({ pack: shape({ originalValue: number, originalUnit: literal("BGN/pack"), priceEur: number, conversionRate: number, period: string, yearHeaders: list(number), published: string, source: literal("nsi-pack"), page: number, printedPage: number, table: string, quote: string, unit: literal("EUR/pack"), note: string }) }) }),
-  "municipalities.json": shape({
+    references: shape({
+      pack: shape({
+        originalValue: number,
+        originalUnit: literal('BGN/pack'),
+        priceEur: number,
+        conversionRate: number,
+        period: string,
+        yearHeaders: list(number),
+        published: string,
+        source: literal('nsi-pack'),
+        page: number,
+        printedPage: number,
+        table: string,
+        quote: string,
+        unit: literal('EUR/pack'),
+        note: string,
+      }),
+    }),
+  }),
+  'municipalities.json': shape({
     meta: metaGuard,
     year: number,
     populationYear: number,
@@ -288,7 +355,7 @@ export const datasetGuards = {
     unmatched: array,
     check: record,
   }),
-  "outlook.json": shape({
+  'outlook.json': shape({
     meta: metaGuard,
     years: array,
     vintage: array,
@@ -301,14 +368,14 @@ export const datasetGuards = {
     versions: array,
     notes: array,
   }),
-  "programs.json": shape({
+  'programs.json': shape({
     meta: metaGuard,
     fields: array,
     sentinels: record,
     note: string,
     items: array,
   }),
-  "rates.json": shape({
+  'rates.json': shape({
     meta: metaGuard,
     scenarios: array,
     rules: record,
@@ -322,12 +389,12 @@ export const datasetGuards = {
     notes: array,
     checks: record,
   }),
-  "releases/current.json": releasePointerGuard,
-  "releases/d5ae4869b0e1dc9b0be1b39371aa1f2b3827379c3118ea8ef23d044092b88bcb/manifest.json":
+  'releases/current.json': releasePointerGuard,
+  'releases/d5ae4869b0e1dc9b0be1b39371aa1f2b3827379c3118ea8ef23d044092b88bcb/manifest.json':
     releaseManifestGuard,
-  "releases/d5ae4869b0e1dc9b0be1b39371aa1f2b3827379c3118ea8ef23d044092b88bcb/validation.json":
+  'releases/d5ae4869b0e1dc9b0be1b39371aa1f2b3827379c3118ea8ef23d044092b88bcb/validation.json':
     shape({ groups: array, passed: boolean, result: string, tool: string }),
-  "revenue.json": shape({
+  'revenue.json': shape({
     meta: metaGuard,
     years: array,
     vintage: array,
@@ -338,14 +405,14 @@ export const datasetGuards = {
     execution: record,
     notes: array,
   }),
-  "search-index.json": shape({
+  'search-index.json': shape({
     meta: metaGuard,
     version: number,
     groups: array,
     fields: array,
     items: array,
   }),
-  "sebra.json": shape({
+  'sebra.json': shape({
     meta: metaGuard,
     period: record,
     ministry: string,
@@ -367,21 +434,28 @@ export type DatasetName = keyof typeof datasetGuards;
 export type DatasetMap = {
   [K in DatasetName]: Infer<(typeof datasetGuards)[K]>;
 };
-export function isDataset<K extends DatasetName>(
-  name: K,
-  value: unknown,
-): value is DatasetMap[K] {
-  const guard = datasetGuards[name] ?? (
-    /^releases\/[a-f0-9]{64}\/manifest\.json$/.test(name) ? releaseManifestGuard :
-    /^releases\/[a-f0-9]{64}\/validation\.json$/.test(name) ? shape({ groups: array, passed: boolean, result: string, tool: string }) : undefined);
-  return !!guard && guard(value) && (!(name === "outlook.json" || name === "revenue.json" || name === "expenditure.json") || optionalPeriods(value));
+export function isDataset<K extends DatasetName>(name: K, value: unknown): value is DatasetMap[K] {
+  const guard =
+    datasetGuards[name] ??
+    (/^releases\/[a-f0-9]{64}\/manifest\.json$/.test(name)
+      ? releaseManifestGuard
+      : /^releases\/[a-f0-9]{64}\/validation\.json$/.test(name)
+        ? shape({ groups: array, passed: boolean, result: string, tool: string })
+        : undefined);
+  return (
+    !!guard &&
+    guard(value) &&
+    (!(name === 'outlook.json' || name === 'revenue.json' || name === 'expenditure.json') ||
+      optionalPeriods(value))
+  );
 }
-export type ReleasePointer = DatasetMap["releases/current.json"];
+export type ReleasePointer = DatasetMap['releases/current.json'];
 export type ReleaseManifest =
-  DatasetMap["releases/d5ae4869b0e1dc9b0be1b39371aa1f2b3827379c3118ea8ef23d044092b88bcb/manifest.json"];
+  DatasetMap['releases/d5ae4869b0e1dc9b0be1b39371aa1f2b3827379c3118ea8ef23d044092b88bcb/manifest.json'];
 
 export function isPublishedDataset(name: string, value: unknown): boolean {
   if (/^releases\/[a-f0-9]{64}\/manifest\.json$/.test(name)) return releaseManifestGuard(value);
-  if (/^releases\/[a-f0-9]{64}\/validation\.json$/.test(name)) return shape({ groups: array, passed: boolean, result: string, tool: string })(value);
+  if (/^releases\/[a-f0-9]{64}\/validation\.json$/.test(name))
+    return shape({ groups: array, passed: boolean, result: string, tool: string })(value);
   return Object.hasOwn(datasetGuards, name) && isDataset(name as DatasetName, value);
 }

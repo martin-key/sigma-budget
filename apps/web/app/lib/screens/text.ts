@@ -50,9 +50,9 @@ export async function textMetadata(model: TextScreenModel) {
     path = shown.length > 80 ? shown.slice(0, 79) + '…' : shown;
   const lede =
     model.screen === 'S30' && view === 'ready'
-      ? html`${path
-          ? html`Адресът <code class="s30-path">${toHref('/' + path)}</code>`
-          : 'Този адрес'}
+      ? html`${
+          path ? html`Адресът <code class="s30-path">${toHref('/' + path)}</code>` : 'Този адрес'
+        }
         не води до екран от сайта. Може да е изписан грешно или страницата да е преместена.`
       : route.desc;
   const narrative =

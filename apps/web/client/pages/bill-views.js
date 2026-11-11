@@ -41,14 +41,44 @@ const publication = (doc) =>
     </p>`;
 const namedScope = (key, label, long = label, note) => ({ key, label, long, note, gl: null });
 function scopeFor(ctx, id) {
-  if (ctx.route.id === 'S17') return id === 's17-limits-2027'
-    ? namedScope('budget-and-debt-limits', 'Държавен бюджет и дълг', 'Предложени граници за фискалния резерв и държавния дълг по законопроекта')
-    : 'zdd';
-  if (['S20', 'S21'].includes(ctx.route.id)) return namedScope('municipal-transfers', 'Трансфери към общините', 'Трансфери от държавния бюджет към общинските бюджети');
-  if (ctx.route.id === 'S12') return namedScope('fiscal-measures', 'Фискални мерки', `${id === 's12-II_7' ? 'Приходни' : 'Разходни'} мерки по АСБП 2027–2029`);
-  if (id === 's34-projects') return namedScope('investment-projects', 'Инвестиционни проекти', 'Инвестиционни проекти по законопроекта за държавния бюджет');
-  if (ctx.route.id === 'S34' || ctx.params?.code === 'art1') return namedScope('state-budget', 'Държавен бюджет', 'Държавен бюджет по законопроекта за ЗДБРБ');
-  return namedScope('institution-budgets', 'Бюджети на ведомствата', 'Бюджети на ведомствата по законопроекта за ЗДБРБ, не е целият бюджет', 'не е целият бюджет');
+  if (ctx.route.id === 'S17')
+    return id === 's17-limits-2027'
+      ? namedScope(
+          'budget-and-debt-limits',
+          'Държавен бюджет и дълг',
+          'Предложени граници за фискалния резерв и държавния дълг по законопроекта',
+        )
+      : 'zdd';
+  if (['S20', 'S21'].includes(ctx.route.id))
+    return namedScope(
+      'municipal-transfers',
+      'Трансфери към общините',
+      'Трансфери от държавния бюджет към общинските бюджети',
+    );
+  if (ctx.route.id === 'S12')
+    return namedScope(
+      'fiscal-measures',
+      'Фискални мерки',
+      `${id === 's12-II_7' ? 'Приходни' : 'Разходни'} мерки по АСБП 2027–2029`,
+    );
+  if (id === 's34-projects')
+    return namedScope(
+      'investment-projects',
+      'Инвестиционни проекти',
+      'Инвестиционни проекти по законопроекта за държавния бюджет',
+    );
+  if (ctx.route.id === 'S34' || ctx.params?.code === 'art1')
+    return namedScope(
+      'state-budget',
+      'Държавен бюджет',
+      'Държавен бюджет по законопроекта за ЗДБРБ',
+    );
+  return namedScope(
+    'institution-budgets',
+    'Бюджети на ведомствата',
+    'Бюджети на ведомствата по законопроекта за ЗДБРБ, не е целият бюджет',
+    'не е целият бюджет',
+  );
 }
 const base = (ctx, id, title, body, extra = {}) =>
   block({
@@ -120,27 +150,52 @@ const unavailable = (ctx) =>
 const keep = (ctx, over = {}) => ({ ...ctx.query, per: ctx.period.key, ...over });
 const municipalScreen = (ctx) => ['S20', 'S21'].includes(ctx.route.id);
 const listQuery = (ctx, over = {}) => {
-  const keys = municipalScreen(ctx) ? ['q', 'oblast', 'sort', 'dir'] : ['q', 'variant', 'sort', 'dir'];
-  return { ...Object.fromEntries(keys.filter((k) => ctx.query[k]).map((k) => [k, ctx.query[k]])), per: ctx.period.key === DEFAULT_PERIOD ? null : ctx.period.key, ...over };
+  const keys = municipalScreen(ctx)
+    ? ['q', 'oblast', 'sort', 'dir']
+    : ['q', 'variant', 'sort', 'dir'];
+  return {
+    ...Object.fromEntries(keys.filter((k) => ctx.query[k]).map((k) => [k, ctx.query[k]])),
+    per: ctx.period.key === DEFAULT_PERIOD ? null : ctx.period.key,
+    ...over,
+  };
 };
-export const billListHref = (ctx) => ctx.href(municipalScreen(ctx) ? 'S20' : 'S10', {}, listQuery(ctx));
+export const billListHref = (ctx) =>
+  ctx.href(municipalScreen(ctx) ? 'S20' : 'S10', {}, listQuery(ctx));
 const listCrumbs = (ctx, title) => [
   { label: municipalScreen(ctx) ? 'Моята община' : 'Кой харчи?', href: billListHref(ctx) },
   { label: title },
 ];
-const cleanSearch = (q) => String(q || '').slice(0, 80).trim();
+const cleanSearch = (q) =>
+  String(q || '')
+    .slice(0, 80)
+    .trim();
 const matches = (text, query) => {
-  const name = norm(text), latin = lat(name);
-  return norm(cleanSearch(query)).split(' ').filter(Boolean).every((word) =>
-    (/[a-z]/i.test(word) ? latin : name).includes(word));
+  const name = norm(text),
+    latin = lat(name);
+  return norm(cleanSearch(query))
+    .split(' ')
+    .filter(Boolean)
+    .every((word) => (/[a-z]/i.test(word) ? latin : name).includes(word));
 };
 function institutionRows(ctx, items = institutions(ctx.data.budget2027, variantOf(ctx))) {
-  return items.filter((i) => matches(`${i.name} ${i.code}`, ctx.query.q)).map((i) => ({
-    name: i.name, variant: labels[variantOf(ctx)], code: i.code, article: i.article,
-    revenue: cellValue(i.revenue), expenditure: cellValue(i.expenditure),
-    provenance: i.expenditure?.provenance || '', origin: provenanceUrl(i.expenditure),
-    _href: (s) => ctx.href('S11', { code: i.code }, listQuery(ctx, { sort: s.sortBy, dir: s.sortBy ? s.dir : null })),
-  }));
+  return items
+    .filter((i) => matches(`${i.name} ${i.code}`, ctx.query.q))
+    .map((i) => ({
+      name: i.name,
+      variant: labels[variantOf(ctx)],
+      code: i.code,
+      article: i.article,
+      revenue: cellValue(i.revenue),
+      expenditure: cellValue(i.expenditure),
+      provenance: i.expenditure?.provenance || '',
+      origin: provenanceUrl(i.expenditure),
+      _href: (s) =>
+        ctx.href(
+          'S11',
+          { code: i.code },
+          listQuery(ctx, { sort: s.sortBy, dir: s.sortBy ? s.dir : null }),
+        ),
+    }));
 }
 function municipalRegion(ctx, all) {
   const requested = ctx.query.oblast || '';
@@ -149,20 +204,47 @@ function municipalRegion(ctx, all) {
 }
 function municipalityRows(ctx, all = municipalRows(ctx.data.budget2027, ctx.data.municipalities)) {
   const region = municipalRegion(ctx, all);
-  return all.filter((m) => matches(`${m.displayName} ${m.name}`, ctx.query.q) &&
-    (!region || m.region === region || m.regionId === region)).map((m) => ({
-      name: m.displayName, region: m.region,
+  return all
+    .filter(
+      (m) =>
+        matches(`${m.displayName} ${m.name}`, ctx.query.q) &&
+        (!region || m.region === region || m.regionId === region),
+    )
+    .map((m) => ({
+      name: m.displayName,
+      region: m.region,
       ...Object.fromEntries(m.cells.map((c, i) => ['v' + i, cellValue(c)])),
-      provenance: m.cells[0]?.provenance, origin: provenanceUrl(m.cells[0]),
-      _href: m.id ? (s) => ctx.href('S21', { code: m.id }, listQuery(ctx, { oblast: region || null, sort: s.sortBy, dir: s.sortBy ? s.dir : null })) : undefined,
+      provenance: m.cells[0]?.provenance,
+      origin: provenanceUrl(m.cells[0]),
+      _href: m.id
+        ? (s) =>
+            ctx.href(
+              'S21',
+              { code: m.id },
+              listQuery(ctx, {
+                oblast: region || null,
+                sort: s.sortBy,
+                dir: s.sortBy ? s.dir : null,
+              }),
+            )
+        : undefined,
     }));
 }
-const resultCount = (ctx, n) => municipalScreen(ctx)
-  ? `Намерени общини: ${num(n)}.` : `Намерени ведомства: ${num(n)}.`;
+const resultCount = (ctx, n) =>
+  municipalScreen(ctx) ? `Намерени общини: ${num(n)}.` : `Намерени ведомства: ${num(n)}.`;
 const searchHint = 'Списъкът се филтрира, докато пишеш. Може и с латински букви.';
 const searchField = (ctx, rows, label) => html`${field({
-  id: 'bill-q', label, hint: searchHint,
-  control: textInput({ id: 'bill-q', name: 'q', type: 'search', value: ctx.query.q || '', hint: searchHint, autocomplete: 'off' }),
+  id: 'bill-q',
+  label,
+  hint: searchHint,
+  control: textInput({
+    id: 'bill-q',
+    name: 'q',
+    type: 'search',
+    value: ctx.query.q || '',
+    hint: searchHint,
+    autocomplete: 'off',
+  }),
 })}<p class="small" id="bill-count" role="status">${resultCount(ctx, rows.length)}</p>
 <p><button type="button" class="btn btn-sm" data-bill-clear${cleanSearch(ctx.query.q) ? '' : html` disabled`}>Изчисти търсенето</button></p>`;
 const variantControl = (ctx) =>
@@ -215,7 +297,10 @@ export function institutionView(ctx) {
   if (specific)
     return {
       title: selected.article === 1 ? 'Държавен бюджет по чл. 1 (проект 2027)' : b.name,
-      crumbs: listCrumbs(ctx, selected.article === 1 ? 'Държавен бюджет по чл. 1 (проект 2027)' : b.name),
+      crumbs: listCrumbs(
+        ctx,
+        selected.article === 1 ? 'Държавен бюджет по чл. 1 (проект 2027)' : b.name,
+      ),
       lede: `Чл. ${selected.article} от проекта за държавния бюджет за 2027 г. ${labels[variant]}. Всички суми са в хил. евро.`,
       body: html`${variantControl(ctx)}${base(
         ctx,
@@ -280,18 +365,18 @@ export function institutionView(ctx) {
     lede: 'Бюджетите на ведомствата по проекта за 2027 г. Основният проект и алтернативата на Министерския съвет се разглеждат отделно.',
     answer: `${labels[variant]}: ${items.length} публикувани бюджета на ведомства. Сбор на разходите: ${money(total == null ? null : total / 1000)}.`,
     body: html`${variantControl(ctx)}${base(
-        ctx,
-        's10-bill-totals',
-        'Бюджетите на ведомствата общо',
-        kpiGrid([
-          kpi({ label: 'Публикувани бюджети', value: items.length }),
-          kpi({ label: 'Разходи общо', value: total, unit: 'хил. €', d: 1 }),
-          kpi({ label: 'Собствени приходи', value: rev, unit: 'хил. €', d: 1 }),
-        ]),
-        {
-          sub: `${labels[variant]}. Сборът е изчислен от отпечатаните заглавни редове по членове 2–48; не е целият държавен бюджет. ${variant === 'billMc' ? 'Показан е само публикуваният чл. 2 от варианта на МС.' : 'За чл. 5 липсва отпечатан приходен ред, затова общият сбор на собствените приходи не е наличен.'}`,
-        },
-      )}
+      ctx,
+      's10-bill-totals',
+      'Бюджетите на ведомствата общо',
+      kpiGrid([
+        kpi({ label: 'Публикувани бюджети', value: items.length }),
+        kpi({ label: 'Разходи общо', value: total, unit: 'хил. €', d: 1 }),
+        kpi({ label: 'Собствени приходи', value: rev, unit: 'хил. €', d: 1 }),
+      ]),
+      {
+        sub: `${labels[variant]}. Сборът е изчислен от отпечатаните заглавни редове по членове 2–48; не е целият държавен бюджет. ${variant === 'billMc' ? 'Показан е само публикуваният чл. 2 от варианта на МС.' : 'За чл. 5 липсва отпечатан приходен ред, затова общият сбор на собствените приходи не е наличен.'}`,
+      },
+    )}
       ${base(
         ctx,
         's10-bill-list',
@@ -357,18 +442,18 @@ export function municipalityView(ctx) {
       crumbs: listCrumbs(ctx, `Община ${m.displayName}`),
       lede: 'Проект 2027: основните бюджетни взаимоотношения по чл. 52 и разбивката на делегираните дейности по чл. 53. Сумите са в хил. евро.',
       body: html`${municipalTable(
-          ctx,
-          's21-transfers-2027',
-          'Бюджетни взаимоотношения по чл. 52',
-          m.cells,
-          MUNICIPAL_COLUMNS,
-        )}${municipalTable(
-          ctx,
-          's21-delegated-2027',
-          'Делегирани дейности по чл. 53',
-          m.delegated,
-          DELEGATED_COLUMNS,
-        )}
+        ctx,
+        's21-transfers-2027',
+        'Бюджетни взаимоотношения по чл. 52',
+        m.cells,
+        MUNICIPAL_COLUMNS,
+      )}${municipalTable(
+        ctx,
+        's21-delegated-2027',
+        'Делегирани дейности по чл. 53',
+        m.delegated,
+        DELEGATED_COLUMNS,
+      )}
         <p>
           Чл. 53 разпределя делегираните дейности от чл. 52. Двете суми не се събират. Кметовете и
           администрацията са част от общите държавни служби.
@@ -548,45 +633,51 @@ export function debtView(ctx) {
   return {
     lede: 'Прогноза на МФ от 06.11.2026: държавен дълг по ЗДД за 2027–2029 и отделно предложените граници на законопроекта за 2027 г.',
     body: html`${field({
+      id: 's17-scope',
+      label: 'Обхват на дълга',
+      control: selectInput({
         id: 's17-scope',
-        label: 'Обхват на дълга',
-        control: selectInput({
-          id: 's17-scope',
-          name: 'obhvat',
-          query: 'obhvat',
-          value: maastricht ? 'maastricht' : 'zdd',
-          options: [
-            { value: 'zdd', label: 'Държавен дълг' },
-            { value: 'maastricht', label: 'Дълг по Маастрихт' },
-          ],
-        }),
-      })}
-      ${maastricht
-        ? gap(
-            'Няма съпоставим периоден ред по Маастрихт в този набор',
-            'Таблица VI-1 е държавен дълг по ЗДД. Тя не е консолидираният дълг на сектор „Държавно управление“. Историческите отчети по Маастрихт остават достъпни при избор на отчетен период.',
-          )
-        : html`${base(
-            ctx,
-            's17-debt-2027',
-            `Държавен дълг · ${ctx.period.label}`,
-            dataTable({
-              id: 's17-debt-table',
-              caption: 'Таблица VI-1, АСБП 2027–2029',
-              rowUnitKey: 'unit',
-              columns: [...cellColumns(''), { key: 'unit', label: 'Единица' }],
-              rows: debtRows,
-            }),
-            { status: 'forecast', statusLabel: 'Прогноза на МФ', share: { period: ctx.period.key, unit: 'По редове' } },
-          )}${base(ctx, 's17-b-zdd', 'Държавен дълг 2027–2029', chart(spec), {
-            status: 'forecast',
-            statusLabel: 'Прогноза на МФ',
-            share: {
-              chart: spec.id,
-              period: '2027.draft / 2028.forecast / 2029.forecast',
-              unit: 'млн. €',
-            },
-          })}`}
+        name: 'obhvat',
+        query: 'obhvat',
+        value: maastricht ? 'maastricht' : 'zdd',
+        options: [
+          { value: 'zdd', label: 'Държавен дълг' },
+          { value: 'maastricht', label: 'Дълг по Маастрихт' },
+        ],
+      }),
+    })}
+      ${
+        maastricht
+          ? gap(
+              'Няма съпоставим периоден ред по Маастрихт в този набор',
+              'Таблица VI-1 е държавен дълг по ЗДД. Тя не е консолидираният дълг на сектор „Държавно управление“. Историческите отчети по Маастрихт остават достъпни при избор на отчетен период.',
+            )
+          : html`${base(
+              ctx,
+              's17-debt-2027',
+              `Държавен дълг · ${ctx.period.label}`,
+              dataTable({
+                id: 's17-debt-table',
+                caption: 'Таблица VI-1, АСБП 2027–2029',
+                rowUnitKey: 'unit',
+                columns: [...cellColumns(''), { key: 'unit', label: 'Единица' }],
+                rows: debtRows,
+              }),
+              {
+                status: 'forecast',
+                statusLabel: 'Прогноза на МФ',
+                share: { period: ctx.period.key, unit: 'По редове' },
+              },
+            )}${base(ctx, 's17-b-zdd', 'Държавен дълг 2027–2029', chart(spec), {
+              status: 'forecast',
+              statusLabel: 'Прогноза на МФ',
+              share: {
+                chart: spec.id,
+                period: '2027.draft / 2028.forecast / 2029.forecast',
+                unit: 'млн. €',
+              },
+            })}`
+      }
       ${limits}
       <p>
         Прогнозните стойности от таблица VI-1 се различават от законовите тавани. Дяловете от БВП са
@@ -607,11 +698,11 @@ export function billOverview(ctx) {
       title: 'Бюджет 2027 · вариант на Министерския съвет',
       lede: 'Самостоятелният вариант на МС съдържа чл. 1 и 2. Липсващите бюджети и приложения не се допълват от основния проект.',
       body: html`${variantControl(ctx)}${base(
-          ctx,
-          's34-mc-budget',
-          'Чл. 1 · вариант на Министерския съвет',
-          rowsTable('s34-mc-table', billRows(b.rows, variant)),
-        )}
+        ctx,
+        's34-mc-budget',
+        'Чл. 1 · вариант на Министерския съвет',
+        rowsTable('s34-mc-table', billRows(b.rows, variant)),
+      )}
         <p>
           <a href="${ctx.href('S10', {}, { per: '2027.draft', variant: 'billMc' })}"
             >Ведомствени бюджети във варианта на МС</a
@@ -632,21 +723,21 @@ export function billOverview(ctx) {
     title: 'Бюджет 2027',
     lede: 'Официални данни от законопроекта за 2027 г. и АСБП 2027–2029 на Министерството на финансите, публикувани на 06.11.2026. За 2028–2029 г. стойностите са прогноза.',
     body: html`${variantControl(ctx)}${base(
-        ctx,
-        's34-bill',
-        'Държавен бюджет по чл. 1',
-        kpiGrid(
-          ['I', 'II'].map((s, i) =>
-            kpi({
-              label: ['Приходи', 'Разходи'][i],
-              value: cellValue(headline(b, s)),
-              unit: 'хил. €',
-              d: 1,
-            }),
-          ),
+      ctx,
+      's34-bill',
+      'Държавен бюджет по чл. 1',
+      kpiGrid(
+        ['I', 'II'].map((s, i) =>
+          kpi({
+            label: ['Приходи', 'Разходи'][i],
+            value: cellValue(headline(b, s)),
+            unit: 'хил. €',
+            d: 1,
+          }),
         ),
-        { sub: labels[variant] },
-      )}
+      ),
+      { sub: labels[variant] },
+    )}
       <ul>
         <li><a href="${ctx.href('S10', {}, keep(ctx))}">Бюджети на ведомствата</a></li>
         <li><a href="${ctx.href('S20', {}, { per: '2027.draft' })}">Трансфери към общините</a></li>
@@ -730,10 +821,20 @@ export function mountBillSearch(root, ctx) {
   };
   const key = (e) => {
     if (e.isComposing) return;
-    if (e.key === 'Escape' && input.value) { e.preventDefault(); input.value = ''; change(); }
-    else if (e.key === 'Enter') { e.preventDefault(); change(); }
+    if (e.key === 'Escape' && input.value) {
+      e.preventDefault();
+      input.value = '';
+      change();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      change();
+    }
   };
-  const reset = () => { input.value = ''; change(); input.focus(); };
+  const reset = () => {
+    input.value = '';
+    change();
+    input.focus();
+  };
   input.addEventListener('input', typing);
   input.addEventListener('compositionend', change);
   input.addEventListener('keydown', key);
@@ -749,13 +850,15 @@ export function mountBillSearch(root, ctx) {
 
 // Separate phone presentation: the hidden desktop table still owns the unchanged CSV.
 function measureCards(measures) {
-  return html`<div class="measure-cards">${measures.map((r) => html`<div class="measure-card">
+  return html`<div class="measure-cards">${measures.map(
+    (r) => html`<div class="measure-card">
     <h3>${r.label}</h3>
     <dl>${FRAMEWORK.map((key, k) => html`<div class="measure-value"><dt>${periodByKey(key).label}, млн. €</dt><dd>${cellValue(r.cells[k]) == null ? '—' : num(cellValue(r.cells[k]), 1)}${r.gaps[k] ? html`<small class="muted">${r.gaps[k]}</small>` : ''}</dd></div>`)}</dl>
     <details class="measure-origin"><summary>Произход на стойностите</summary>
       <dl>${FRAMEWORK.map((key, k) => html`<div><dt>${periodByKey(key).label}</dt><dd>${r.cells[k]?.provenance ? html`<a href="${provenanceUrl(r.cells[k])}">${r.cells[k].provenance}</a><p>${provenanceUrl(r.cells[k])}</p>` : 'Няма публикувана клетка'}</dd></div>`)}</dl>
     </details>
-  </div>`)}</div>`;
+  </div>`,
+  )}</div>`;
 }
 
 export function measuresView(ctx) {
@@ -774,7 +877,11 @@ export function measuresView(ctx) {
   const body = ['II_7', 'II_8'].map((table, i) => {
     const rows = doc.forecast[table].flatMap((r, rowIndex) =>
       FRAMEWORK.map((key, k) =>
-        cellRow(r.label, r.cells[k], { ...frameworkRow(key), gap: r.gaps[k] || '', _id: `s12-${table}-${rowIndex}-${k}` }),
+        cellRow(r.label, r.cells[k], {
+          ...frameworkRow(key),
+          gap: r.gaps[k] || '',
+          _id: `s12-${table}-${rowIndex}-${k}`,
+        }),
       ),
     );
     return base(

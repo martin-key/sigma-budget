@@ -2,43 +2,144 @@
    every selector scoped to the screen. */
 
 /* five tiles: one column on a phone, two from 640 px, three plus two from 1100 px (a 6-column grid so the last row fills the width) */
-.page[data-route="S05"] .s05-cards { list-style: none; margin: var(--sp-5) 0 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: var(--sp-7) var(--sp-6); }
-.page[data-route="S05"] .s05-card { grid-column: span 6; position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); align-content: start; min-width: 0; padding: var(--sp-4) 0 0; border: 0; border-top: 1px solid var(--ink); border-radius: 0; background: none; }
-.page[data-route="S05"] .s05-card:has(.s05-kpi[data-status="pending"]) { border-top-style: dashed; }
+.page[data-route='S05'] .s05-cards {
+  list-style: none;
+  margin: var(--sp-5) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--sp-7) var(--sp-6);
+}
+.page[data-route='S05'] .s05-card {
+  grid-column: span 6;
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-3);
+  align-content: start;
+  min-width: 0;
+  padding: var(--sp-4) 0 0;
+  border: 0;
+  border-top: 1px solid var(--ink);
+  border-radius: 0;
+  background: none;
+}
+.page[data-route='S05'] .s05-card:has(.s05-kpi[data-status='pending']) {
+  border-top-style: dashed;
+}
 
 /* the head: an icon square, the question as the tile's link (stretched over the whole tile) and an arrow */
-.page[data-route="S05"] .s05-top { display: flex; align-items: center; gap: var(--sp-3); min-width: 0; }
-.page[data-route="S05"] .s05-ic { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid var(--rule); border-radius: 0; background: var(--paper-warm); color: var(--ink); }
-.page[data-route="S05"] .s05-ic svg { width: 22px; height: 22px; }
-.page[data-route="S05"] .s05-q { flex: 1; min-width: 0; margin: 0; font: 400 var(--fs-h3)/1.15 var(--font-serif); letter-spacing: var(--track-head); }
-.page[data-route="S05"] .s05-q a { color: inherit; text-decoration: none; }
-.page[data-route="S05"] .s05-q a::after { content: ""; position: absolute; inset: 0; border-radius: 0; }
-.page[data-route="S05"] .s05-q a:hover,
-.page[data-route="S05"] .s05-card:hover .s05-q a { color: var(--crimson); }
-.page[data-route="S05"] .s05-q a:focus-visible { outline: none; }
-.page[data-route="S05"] .s05-card:has(.s05-q a:focus-visible) { outline: 2px solid var(--focus); outline-offset: 4px; }
-.page[data-route="S05"] .s05-go { flex: none; color: var(--ink); transition: transform var(--t-fast), color var(--t-fast); }
-.page[data-route="S05"] .s05-card:hover .s05-go { color: var(--crimson); transform: translateX(3px); }
+.page[data-route='S05'] .s05-top {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+.page[data-route='S05'] .s05-ic {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--rule);
+  border-radius: 0;
+  background: var(--paper-warm);
+  color: var(--ink);
+}
+.page[data-route='S05'] .s05-ic svg {
+  width: 22px;
+  height: 22px;
+}
+.page[data-route='S05'] .s05-q {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font: 400 var(--fs-h3)/1.15 var(--font-serif);
+  letter-spacing: var(--track-head);
+}
+.page[data-route='S05'] .s05-q a {
+  color: inherit;
+  text-decoration: none;
+}
+.page[data-route='S05'] .s05-q a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 0;
+}
+.page[data-route='S05'] .s05-q a:hover,
+.page[data-route='S05'] .s05-card:hover .s05-q a {
+  color: var(--crimson);
+}
+.page[data-route='S05'] .s05-q a:focus-visible {
+  outline: none;
+}
+.page[data-route='S05'] .s05-card:has(.s05-q a:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 4px;
+}
+.page[data-route='S05'] .s05-go {
+  flex: none;
+  color: var(--ink);
+  transition:
+    transform var(--t-fast),
+    color var(--t-fast);
+}
+.page[data-route='S05'] .s05-card:hover .s05-go {
+  color: var(--crimson);
+  transform: translateX(3px);
+}
 
 /* the number block is the shell's KPI, flattened: the tile carries the rule; the chips of .kpi-meta stay above the stretched link */
-.page[data-route="S05"] .s05-kpi { position: static; overflow: visible; padding: 0; border: 0; border-radius: 0; background: none; }
-.page[data-route="S05"] .s05-kpi .kpi-num { font-size: clamp(2rem, 3.2vw, 2.5rem); }
-.page[data-route="S05"] .s05-kpi .kpi-sub { font-size: var(--fs-0); color: var(--ink); }
+.page[data-route='S05'] .s05-kpi {
+  position: static;
+  overflow: visible;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+.page[data-route='S05'] .s05-kpi .kpi-num {
+  font-size: clamp(2rem, 3.2vw, 2.5rem);
+}
+.page[data-route='S05'] .s05-kpi .kpi-sub {
+  font-size: var(--fs-0);
+  color: var(--ink);
+}
 /* the long scope chip of the third tile wraps inside the tile instead of running over its edge */
-.page[data-route="S05"] .s05-kpi .scope { display: inline-block; max-width: 100%; white-space: normal; border-radius: 0; }
+.page[data-route='S05'] .s05-kpi .scope {
+  display: inline-block;
+  max-width: 100%;
+  white-space: normal;
+  border-radius: 0;
+}
 
 @media (min-width: 640px) {
-  .page[data-route="S05"] .s05-card { grid-column: span 3; }
-  .page[data-route="S05"] .s05-card:last-child { grid-column: span 6; }
+  .page[data-route='S05'] .s05-card {
+    grid-column: span 3;
+  }
+  .page[data-route='S05'] .s05-card:last-child {
+    grid-column: span 6;
+  }
 }
 @media (min-width: 1100px) {
-  .page[data-route="S05"] .s05-card { grid-column: span 2; }
-  .page[data-route="S05"] .s05-card:nth-child(n+4) { grid-column: span 3; }
+  .page[data-route='S05'] .s05-card {
+    grid-column: span 2;
+  }
+  .page[data-route='S05'] .s05-card:nth-child(n + 4) {
+    grid-column: span 3;
+  }
 }
 @media (max-width: 599px) {
-  .page[data-route="S05"] .s05-cards { row-gap: var(--sp-6); }
+  .page[data-route='S05'] .s05-cards {
+    row-gap: var(--sp-6);
+  }
 }
 @media (forced-colors: active) {
-  .page[data-route="S05"] .s05-card { border-top-color: CanvasText; }
-  .page[data-route="S05"] .s05-ic { border: 1px solid CanvasText; }
+  .page[data-route='S05'] .s05-card {
+    border-top-color: CanvasText;
+  }
+  .page[data-route='S05'] .s05-ic {
+    border: 1px solid CanvasText;
+  }
 }

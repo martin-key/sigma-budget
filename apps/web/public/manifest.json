@@ -29,9 +29,5 @@
     }
   ],
   "id": "/",
-  "categories": [
-    "government",
-    "finance",
-    "education"
-  ]
+  "categories": ["government", "finance", "education"]
 }

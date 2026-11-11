@@ -1596,10 +1596,7 @@
       "expected": "8600"
     }
   ],
-  "allowedDocuments": [
-    "1000",
-    "1100"
-  ],
+  "allowedDocuments": ["1000", "1100"],
   "validatedAddition": "1100",
   "publication": "complete 44 existing-builder outputs equal",
   "unverified": []

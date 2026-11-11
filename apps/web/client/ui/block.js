@@ -21,8 +21,9 @@ import { statusPill } from './status.js';
 import { mockNote, mockHidden, pendingState } from './states.js';
 import { reportLink, reportHref } from './cards.js';
 
-const keysOf = s => (Array.isArray(s) ? s : String(s || '').split(',')).map(x => x.trim()).filter(Boolean);
-const scopeOf = s => (!s ? '' : typeof s === 'string' ? scopeChip(s) : scopeChip(s.key, s));   // 'kfp' | {key, note, label, gl}
+const keysOf = (s) =>
+  (Array.isArray(s) ? s : String(s || '').split(',')).map((x) => x.trim()).filter(Boolean);
+const scopeOf = (s) => (!s ? '' : typeof s === 'string' ? scopeChip(s) : scopeChip(s.key, s)); // 'kfp' | {key, note, label, gl}
 
 export function block(o = {}) {
   if (!o.id) throw new Error('block: id is required');
@@ -39,7 +40,9 @@ export function block(o = {}) {
 
   const src = keysOf(o.source);
   const wantShare = o.share === undefined ? src.length > 0 && status !== 'pending' : !!o.share;
-  const wantReport = o.report ?? (status !== false && status !== 'pending' && status !== 'mock' && status !== 'text');
+  const wantReport =
+    o.report ??
+    (status !== false && status !== 'pending' && status !== 'mock' && status !== 'text');
   const report = { block: id, src: src.join(','), type: 'error' };
   if (wantShare) {
     const sh = typeof o.share === 'object' && o.share ? o.share : {};
@@ -47,24 +50,50 @@ export function block(o = {}) {
       title,
       sub: o.sub ? plain(o.sub) : '',
       text: sh.text ?? (o.sub ? plain(o.sub) : undefined),
-      source: src, asOf: o.asOf, status: status || undefined, mock,
-      chart: sh.chart, table: sh.table, embed: sh.embed, embedParams: sh.embedParams, link: sh.link, period: sh.period, unit: sh.unit, scope: o.scope,
-      report: wantReport ? reportHref(report) : undefined
+      source: src,
+      asOf: o.asOf,
+      status: status || undefined,
+      mock,
+      chart: sh.chart,
+      table: sh.table,
+      embed: sh.embed,
+      embedParams: sh.embedParams,
+      link: sh.link,
+      period: sh.period,
+      unit: sh.unit,
+      scope: o.scope,
+      report: wantReport ? reportHref(report) : undefined,
     });
   }
 
   const asOfHtml = o.asOf ? html`<span class="block-asof">Данни към ${date(o.asOf)}</span>` : '';
-  const tags = [scopeOf(o.scope), status && status !== 'text' && o.pill !== false ? statusPill(status, { label: o.statusLabel }) : '', asOfHtml, src.length ? sourceBtn(src, { asOf: o.asOf }) : ''];
-  const tagsHtml = tags.some(t => t && (t.s ?? t)) ? html`<div class="block-tags">${tags}</div>` : '';
+  const tags = [
+    scopeOf(o.scope),
+    status && status !== 'text' && o.pill !== false
+      ? statusPill(status, { label: o.statusLabel })
+      : '',
+    asOfHtml,
+    src.length ? sourceBtn(src, { asOf: o.asOf }) : '',
+  ];
+  const tagsHtml = tags.some((t) => t && (t.s ?? t))
+    ? html`<div class="block-tags">${tags}</div>`
+    : '';
   const tools = [o.tools ?? '', wantShare ? share.shareButton(id) : ''];
-  const toolsHtml = tools.some(t => t && (t.s ?? t)) ? html`<div class="block-tools">${tools}</div>` : '';
+  const toolsHtml = tools.some((t) => t && (t.s ?? t))
+    ? html`<div class="block-tools">${tools}</div>`
+    : '';
 
   const foot = typeof o.foot === 'string' && o.foot ? html`<p>${o.foot}</p>` : o.foot || '';
   const looseReport = wantReport && !wantShare;
-  const footHtml = foot || looseReport ? html`<div class="block-foot">${foot}${looseReport ? reportLink(report) : ''}</div>` : '';
+  const footHtml =
+    foot || looseReport
+      ? html`<div class="block-foot">${foot}${looseReport ? reportLink(report) : ''}</div>`
+      : '';
 
-  const body = o.body ?? (status === 'pending' ? pendingState(o.pending ? { id: o.pending } : { title }) : '');
-  const hOpen = raw(`<h${level} class="block-title" id="${esc(id)}-t">`), hClose = raw(`</h${level}>`);
+  const body =
+    o.body ?? (status === 'pending' ? pendingState(o.pending ? { id: o.pending } : { title }) : '');
+  const hOpen = raw(`<h${level} class="block-title" id="${esc(id)}-t">`),
+    hClose = raw(`</h${level}>`);
 
   return html`<section class="${cx('block', o.flat && 'block-flat', o.quiet && 'block-quiet', o.cls)}" id="${id}" aria-labelledby="${id}-t"${status ? html` data-block-status="${status}"` : ''}${mock ? raw(' data-block-mock="true"') : ''}>
     ${mock ? html`<span class="block-strip" data-mock="true" aria-hidden="true"></span>` : ''}

@@ -25,7 +25,7 @@ export function callout(o = {}) {
 }
 
 export function facts(items = [], o = {}) {
-  return html`<dl class="${cx('facts', o.cls)}">${items.filter(i => i && i.v != null && i.v !== '').map(i => html`<div class="facts-row"><dt>${i.k}</dt><dd>${i.v}</dd></div>`)}</dl>`;
+  return html`<dl class="${cx('facts', o.cls)}">${items.filter((i) => i && i.v != null && i.v !== '').map((i) => html`<div class="facts-row"><dt>${i.k}</dt><dd>${i.v}</dd></div>`)}</dl>`;
 }
 
 export function ext(url, label) {
@@ -35,7 +35,17 @@ export function ext(url, label) {
 /** address of the feedback form for one block; the screen the visitor is on is passed along so the form can say where the report came from */
 export function reportHref(o = {}) {
   const from = share.currentRoute()?.key || '';
-  return routeHref('vrazka', {}, { type: o.type || 'error', from: from || null, block: o.block || null, val: o.val ?? null, src: o.src || null });
+  return routeHref(
+    'vrazka',
+    {},
+    {
+      type: o.type || 'error',
+      from: from || null,
+      block: o.block || null,
+      val: o.val ?? null,
+      src: o.src || null,
+    },
+  );
 }
 export function reportLink(o = {}) {
   return html`<a class="report-link" href="${reportHref(o)}">${icon('flag', { size: 14 })}<span>${o.label || 'Намерих грешка'}</span></a>`;

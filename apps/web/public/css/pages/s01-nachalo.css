@@ -1,22 +1,56 @@
 /* S01 Начало (V5, СИГМА visual language): the v4 opening, one primary button, the plan block (css/components.css), eight question cards. Tokens only.
    The vertical rhythm between the parts is the shared .page-body rhythm (layout.css). */
-.page[data-route="S01"] .lede strong { color: var(--ink); font-weight: 600; }
+.page[data-route='S01'] .lede strong {
+  color: var(--ink);
+  font-weight: 600;
+}
 
 /* the one primary button: right under the lede */
-.page[data-route="S01"] .s01-lead { min-height: 48px; padding-inline: 22px; }
+.page[data-route='S01'] .s01-lead {
+  min-height: 48px;
+  padding-inline: 22px;
+}
 
 /* the eight cards: two columns (four rows); one column only on a very narrow phone */
-.page[data-route="S01"] .s01-ask { list-style: none; margin-bottom: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 var(--sp-7); }
-.page[data-route="S01"] .s01-ask > li { display: flex; min-width: 0; }
-.page[data-route="S01"] .s01-ask .link-card { flex: 1; }
+.page[data-route='S01'] .s01-ask {
+  list-style: none;
+  margin-bottom: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 var(--sp-7);
+}
+.page[data-route='S01'] .s01-ask > li {
+  display: flex;
+  min-width: 0;
+}
+.page[data-route='S01'] .s01-ask .link-card {
+  flex: 1;
+}
 
 /* on a phone the two columns are narrow: the icon sits above the question, the arrow stays in the corner */
 @media (max-width: 599px) {
-  .page[data-route="S01"] .s01-lead { width: 100%; }
-  .page[data-route="S01"] .s01-ask { column-gap: var(--sp-4); }
-  .page[data-route="S01"] .s01-ask .link-card { position: relative; flex-direction: column; gap: var(--sp-3); padding-top: var(--sp-4); }
-  .page[data-route="S01"] .s01-ask .link-card-go { position: absolute; top: var(--sp-4); right: 0; margin-top: 0; }
+  .page[data-route='S01'] .s01-lead {
+    width: 100%;
+  }
+  .page[data-route='S01'] .s01-ask {
+    column-gap: var(--sp-4);
+  }
+  .page[data-route='S01'] .s01-ask .link-card {
+    position: relative;
+    flex-direction: column;
+    gap: var(--sp-3);
+    padding-top: var(--sp-4);
+  }
+  .page[data-route='S01'] .s01-ask .link-card-go {
+    position: absolute;
+    top: var(--sp-4);
+    right: 0;
+    margin-top: 0;
+  }
 }
 @media (max-width: 339px) {
-  .page[data-route="S01"] .s01-ask { grid-template-columns: minmax(0, 1fr); }
+  .page[data-route='S01'] .s01-ask {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

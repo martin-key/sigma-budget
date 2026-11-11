@@ -2,37 +2,108 @@
    „променен“ tags. Tokens only, light only, every selector scoped to the screen. Mobile first. */
 
 /* text under the blocks */
-.page[data-route="S14"] .s14-text { max-width: 72ch; margin: var(--sp-3) 0 0; }
-.page[data-route="S14"] .s14-note { max-width: 72ch; margin: var(--sp-3) 0 0; color: var(--ink-mid); font-size: var(--fs-s); }
+.page[data-route='S14'] .s14-text {
+  max-width: 72ch;
+  margin: var(--sp-3) 0 0;
+}
+.page[data-route='S14'] .s14-note {
+  max-width: 72ch;
+  margin: var(--sp-3) 0 0;
+  color: var(--ink-mid);
+  font-size: var(--fs-s);
+}
 
 /* a stack of disclosures and timelines: one column that may shrink (long tables inside must not widen the page) */
-.page[data-route="S14"] .s14-stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); margin-top: var(--sp-3); }
+.page[data-route='S14'] .s14-stack {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-3);
+  margin-top: var(--sp-3);
+}
 
 /* the timeline: a mono reference line and the links under an event */
-.page[data-route="S14"] .s14-ref { display: block; margin-top: 2px; color: var(--ink-soft); font: 400 var(--fs-xs)/1.5 var(--font-mono); letter-spacing: .02em; }
-.page[data-route="S14"] .s14-links { display: block; margin-top: var(--sp-1); }
-.page[data-route="S14"] ul.s14-links { display: grid; gap: var(--sp-2); margin: var(--sp-3) 0 0; padding: 0; list-style: none; }
+.page[data-route='S14'] .s14-ref {
+  display: block;
+  margin-top: 2px;
+  color: var(--ink-soft);
+  font: 400 var(--fs-xs)/1.5 var(--font-mono);
+  letter-spacing: 0.02em;
+}
+.page[data-route='S14'] .s14-links {
+  display: block;
+  margin-top: var(--sp-1);
+}
+.page[data-route='S14'] ul.s14-links {
+  display: grid;
+  gap: var(--sp-2);
+  margin: var(--sp-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
 
 /* the small „променен“ mark next to a changed line or budget: a square mono tag */
-.page[data-route="S14"] .s14-chg { display: inline-block; padding: 0 6px; border: 1px solid var(--ink-soft); border-radius: 0; background: var(--paper-warm); color: var(--ink); font: 500 var(--fs-xs)/1.6 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+.page[data-route='S14'] .s14-chg {
+  display: inline-block;
+  padding: 0 6px;
+  border: 1px solid var(--ink-soft);
+  border-radius: 0;
+  background: var(--paper-warm);
+  color: var(--ink);
+  font: 500 var(--fs-xs)/1.6 var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
 
 /* the lines of art. 1: the number of the line in mono, an indent for every level of detail */
-.page[data-route="S14"] .s14-no { color: var(--ink-soft); font-family: var(--font-mono); font-size: .8125rem; font-variant-numeric: tabular-nums; }
-.page[data-route="S14"] .s14-l { display: inline-block; }
-.page[data-route="S14"] .s14-l1 { padding-inline-start: var(--sp-3); }
-.page[data-route="S14"] .s14-l2 { padding-inline-start: var(--sp-4); }
-.page[data-route="S14"] .s14-l3 { padding-inline-start: var(--sp-5); }
+.page[data-route='S14'] .s14-no {
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}
+.page[data-route='S14'] .s14-l {
+  display: inline-block;
+}
+.page[data-route='S14'] .s14-l1 {
+  padding-inline-start: var(--sp-3);
+}
+.page[data-route='S14'] .s14-l2 {
+  padding-inline-start: var(--sp-4);
+}
+.page[data-route='S14'] .s14-l3 {
+  padding-inline-start: var(--sp-5);
+}
 
 /* the table: a second line under a name */
-.page[data-route="S14"] .s14-cell-sub { display: block; margin-top: 2px; color: var(--ink-mid); font-size: var(--fs-xs); font-weight: 400; line-height: 1.4; }
+.page[data-route='S14'] .s14-cell-sub {
+  display: block;
+  margin-top: 2px;
+  color: var(--ink-mid);
+  font-size: var(--fs-xs);
+  font-weight: 400;
+  line-height: 1.4;
+}
 
 /* the tables have up to six columns: the headers may wrap so that they fit the content column without a sideways scroll */
-.page[data-route="S14"] .table-wrap thead th { white-space: normal; }
-.page[data-route="S14"] .table-wrap tbody th { min-width: 11rem; }
+.page[data-route='S14'] .table-wrap thead th {
+  white-space: normal;
+}
+.page[data-route='S14'] .table-wrap tbody th {
+  min-width: 11rem;
+}
 
 /* the scope chip of this screen has a note: let it wrap on a narrow screen instead of widening the page */
-.page[data-route="S14"] .block-tags .scope { max-width: 100%; white-space: normal; border-radius: 0; }
+.page[data-route='S14'] .block-tags .scope {
+  max-width: 100%;
+  white-space: normal;
+  border-radius: 0;
+}
 
 @media (pointer: coarse) {
-  .page[data-route="S14"] .s14-note a, .page[data-route="S14"] ul.s14-links a { display: inline-block; padding-block: var(--sp-2); }
+  .page[data-route='S14'] .s14-note a,
+  .page[data-route='S14'] ul.s14-links a {
+    display: inline-block;
+    padding-block: var(--sp-2);
+  }
 }

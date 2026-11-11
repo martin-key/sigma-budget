@@ -8,3 +8,14 @@ apps/web/app/routes/__fixtures__/**
 data/**
 tmp/**
 packages/ingest/src/production/historical/**
+# Frozen donors, oracles and byte-comparison fixtures (never reformat).
+**/fixtures/**
+**/__fixtures__/**
+# Historical Python pipeline and design/source references are replay evidence.
+pipeline/**
+reference/**
+# Vendored assets retain upstream bytes.
+**/vendor/**
+# Coverage is generated evidence, not maintained source.
+**/coverage/**
+coverage-summary.md

@@ -3,56 +3,196 @@
    is set by js/ui/motion.js through html.mo, which exists only when the visitor has NOT asked for reduced motion); prefers-reduced-motion: reduce switches everything off (tokens are 0, html.mo is never set,
    base.css forces .01ms). Print and the picture export (share.renderPng calls motion.settle()) see the final state. */
 
-@keyframes mo-rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-@keyframes mo-fade{from{opacity:0}to{opacity:1}}
-@keyframes mo-drop{from{opacity:0;transform:translateY(-6px) scale(.985)}to{opacity:1;transform:none}}
-@keyframes mo-drop-out{from{opacity:1;transform:none}to{opacity:0;transform:translateY(-4px) scale(.99)}}
+@keyframes mo-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes mo-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes mo-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes mo-drop-out {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.99);
+  }
+}
 
 /* ---- a screen enters: the header parts one after another, the blocks of the first viewport follow (the class .enter-anim and the --i of the blocks come from motion.enter) ---- */
-html.mo .page.enter-anim .crumbs{animation:mo-fade var(--dur-3) var(--ease-out) backwards}
-html.mo .page.enter-anim .eyebrow{animation:mo-rise var(--dur-3) var(--ease-out) backwards;animation-delay:calc(1 * var(--stagger))}
-html.mo .page.enter-anim .page-title{animation:mo-rise var(--dur-3) var(--ease-out) backwards;animation-delay:calc(2 * var(--stagger))}
-html.mo .page.enter-anim .lede{animation:mo-rise var(--dur-3) var(--ease-out) backwards;animation-delay:calc(3 * var(--stagger))}
-html.mo .page.enter-anim .context{animation:mo-rise var(--dur-3) var(--ease-out) backwards;animation-delay:calc(4 * var(--stagger))}
-html.mo .page.enter-anim .page-body>.rv-enter{animation:mo-rise var(--dur-3) var(--ease-out) backwards;animation-delay:calc(var(--i,5) * var(--stagger))}
+html.mo .page.enter-anim .crumbs {
+  animation: mo-fade var(--dur-3) var(--ease-out) backwards;
+}
+html.mo .page.enter-anim .eyebrow {
+  animation: mo-rise var(--dur-3) var(--ease-out) backwards;
+  animation-delay: calc(1 * var(--stagger));
+}
+html.mo .page.enter-anim .page-title {
+  animation: mo-rise var(--dur-3) var(--ease-out) backwards;
+  animation-delay: calc(2 * var(--stagger));
+}
+html.mo .page.enter-anim .lede {
+  animation: mo-rise var(--dur-3) var(--ease-out) backwards;
+  animation-delay: calc(3 * var(--stagger));
+}
+html.mo .page.enter-anim .context {
+  animation: mo-rise var(--dur-3) var(--ease-out) backwards;
+  animation-delay: calc(4 * var(--stagger));
+}
+html.mo .page.enter-anim .page-body > .rv-enter {
+  animation: mo-rise var(--dur-3) var(--ease-out) backwards;
+  animation-delay: calc(var(--i, 5) * var(--stagger));
+}
 
 /* ---- blocks below the first viewport appear as they are scrolled to (IntersectionObserver in motion.js; it also drops [data-rv] after the transition) ---- */
-html.mo [data-rv]{opacity:0;transform:translateY(14px);transition:opacity var(--dur-3) var(--ease-out),transform var(--dur-3) var(--ease-out)}
-html.mo [data-rv].rv-in{opacity:1;transform:none}
+html.mo [data-rv] {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity var(--dur-3) var(--ease-out),
+    transform var(--dur-3) var(--ease-out);
+}
+html.mo [data-rv].rv-in {
+  opacity: 1;
+  transform: none;
+}
 
 /* ---- bars fill from the left (scaleX: the bar keeps its real width, only the paint grows) ---- */
-html.mo [data-pg]{transform-origin:0 50%}
-html.mo [data-pg="0"]{transform:scaleX(0)}
-html.mo [data-pg="1"]{transform:none;transition:transform var(--dur-4) var(--ease-out);transition-delay:calc(var(--pi,0) * var(--stagger))}
+html.mo [data-pg] {
+  transform-origin: 0 50%;
+}
+html.mo [data-pg='0'] {
+  transform: scaleX(0);
+}
+html.mo [data-pg='1'] {
+  transform: none;
+  transition: transform var(--dur-4) var(--ease-out);
+  transition-delay: calc(var(--pi, 0) * var(--stagger));
+}
 
 /* ---- numbers that count keep their width (tabular figures; motion.js also pins min-width while counting) ---- */
-html.mo .kpi-num,html.mo .prog-text{font-variant-numeric:tabular-nums}
+html.mo .kpi-num,
+html.mo .prog-text {
+  font-variant-numeric: tabular-nums;
+}
 
 /* ---- dropdowns: the menus of the header, the search panel (under the header), the settings/legend popovers, the phone drawer ---- */
-html.mo .popover{transform-origin:50% 0;animation:mo-drop var(--dur-2) var(--ease-out)}
-html.mo .popover[data-closing]{animation:mo-drop-out var(--dur-1) var(--ease-io) forwards;pointer-events:none}
-html.mo dialog.palette[open]{transform-origin:100% 0;animation:mo-drop var(--dur-2) var(--ease-out)}
-@media (max-width:599px){html.mo dialog.palette[open]{transform-origin:50% 0}}
-html.mo dialog.palette[open]::backdrop{animation:mo-fade var(--dur-2) var(--ease-out)}
-html.mo dialog.sheet[open]::backdrop{animation:mo-fade var(--dur-2) var(--ease-out)}
-html.mo .nav-main .nav-chev,html.mo .nav-search svg{transition:transform var(--dur-2) var(--ease-out)}
-html.mo .nav-search[aria-expanded="true"] svg{transform:scale(.92)}
+html.mo .popover {
+  transform-origin: 50% 0;
+  animation: mo-drop var(--dur-2) var(--ease-out);
+}
+html.mo .popover[data-closing] {
+  animation: mo-drop-out var(--dur-1) var(--ease-io) forwards;
+  pointer-events: none;
+}
+html.mo dialog.palette[open] {
+  transform-origin: 100% 0;
+  animation: mo-drop var(--dur-2) var(--ease-out);
+}
+@media (max-width: 599px) {
+  html.mo dialog.palette[open] {
+    transform-origin: 50% 0;
+  }
+}
+html.mo dialog.palette[open]::backdrop {
+  animation: mo-fade var(--dur-2) var(--ease-out);
+}
+html.mo dialog.sheet[open]::backdrop {
+  animation: mo-fade var(--dur-2) var(--ease-out);
+}
+html.mo .nav-main .nav-chev,
+html.mo .nav-search svg {
+  transition: transform var(--dur-2) var(--ease-out);
+}
+html.mo .nav-search[aria-expanded='true'] svg {
+  transform: scale(0.92);
+}
 
 /* ---- lists and disclosures that open ---- */
-html.mo details[open]:not(.foot-grp)>:not(summary){animation:mo-rise var(--dur-2) var(--ease-out) backwards}
-html.mo .chart[data-ready="1"]{animation:mo-fade var(--dur-3) var(--ease-out) backwards}
+html.mo details[open]:not(.foot-grp) > :not(summary) {
+  animation: mo-rise var(--dur-2) var(--ease-out) backwards;
+}
+html.mo .chart[data-ready='1'] {
+  animation: mo-fade var(--dur-3) var(--ease-out) backwards;
+}
 
 /* ---- press / hover / focus: a small physical answer, never a layout change ---- */
-html.mo .btn,html.mo .tool-btn,html.mo .nav-cta,html.mo .nav-search,html.mo .menu-btn,html.mo .exp-opt,html.mo .chip,html.mo .tabbar a,html.mo .tabbar button{transition:background var(--dur-1) var(--ease-out),border-color var(--dur-1) var(--ease-out),color var(--dur-1) var(--ease-out),transform var(--dur-1) var(--ease-out)}
-html.mo .btn:active,html.mo .tool-btn:active,html.mo .nav-cta:active,html.mo .nav-search:active,html.mo .exp-opt:active,html.mo .chip:active{transform:translateY(1px) scale(.985)}
-html.mo .tabbar a:active,html.mo .tabbar button:active{transform:scale(.94)}
-html.mo .link-card{transition:color var(--dur-1) var(--ease-out),transform var(--dur-2) var(--ease-out)}
-html.mo .link-card:hover{transform:translateX(2px)}
-html.mo .link-card:active{transform:translateX(0)}
-html.mo .nav-cta:hover{transform:translateY(-1px)}
-html.mo .pal-item{transition:background var(--dur-1) var(--ease-out)}
+html.mo .btn,
+html.mo .tool-btn,
+html.mo .nav-cta,
+html.mo .nav-search,
+html.mo .menu-btn,
+html.mo .exp-opt,
+html.mo .chip,
+html.mo .tabbar a,
+html.mo .tabbar button {
+  transition:
+    background var(--dur-1) var(--ease-out),
+    border-color var(--dur-1) var(--ease-out),
+    color var(--dur-1) var(--ease-out),
+    transform var(--dur-1) var(--ease-out);
+}
+html.mo .btn:active,
+html.mo .tool-btn:active,
+html.mo .nav-cta:active,
+html.mo .nav-search:active,
+html.mo .exp-opt:active,
+html.mo .chip:active {
+  transform: translateY(1px) scale(0.985);
+}
+html.mo .tabbar a:active,
+html.mo .tabbar button:active {
+  transform: scale(0.94);
+}
+html.mo .link-card {
+  transition:
+    color var(--dur-1) var(--ease-out),
+    transform var(--dur-2) var(--ease-out);
+}
+html.mo .link-card:hover {
+  transform: translateX(2px);
+}
+html.mo .link-card:active {
+  transform: translateX(0);
+}
+html.mo .nav-cta:hover {
+  transform: translateY(-1px);
+}
+html.mo .pal-item {
+  transition: background var(--dur-1) var(--ease-out);
+}
 
-@media print{
-  html.mo [data-rv],html.mo [data-pg]{opacity:1!important;transform:none!important;transition:none!important}
-  html.mo *{animation:none!important}
+@media print {
+  html.mo [data-rv],
+  html.mo [data-pg] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  html.mo * {
+    animation: none !important;
+  }
 }

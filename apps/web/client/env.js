@@ -8,7 +8,9 @@ let provider = null;
 /** the scope of the current server request, or null in the browser */
 export const serverScope = () => (provider ? provider() : null);
 /** the server installs its scope provider once (apps/web/workers/app.ts) */
-export function provideScope(fn) { provider = fn; }
+export function provideScope(fn) {
+  provider = fn;
+}
 /** state a screen writes while it renders (the specs of its charts and tables, the export registry): one map per server request, the
  *  module's own map in the browser (where the router clears it on every navigation) */
 export function scoped(key, own) {

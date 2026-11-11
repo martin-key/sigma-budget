@@ -13,52 +13,89 @@
 import { safe } from './store.js';
 
 export const KEY = 'bns.feedback.v1';
-export const TO = (typeof document !== 'undefined' && document.querySelector('meta[name="feedback-email"]')?.content || '').trim();
+export const TO = (
+  (typeof document !== 'undefined' &&
+    document.querySelector('meta[name="feedback-email"]')?.content) ||
+  ''
+).trim();
 export const SEND = TO ? 'Изпрати' : 'Запази в този браузър';
-export const SENT = TO ? 'Благодарим. Остава да изпратиш имейла.' : 'Благодарим. Записахме го в този браузър.';
+export const SENT = TO
+  ? 'Благодарим. Остава да изпратиш имейла.'
+  : 'Благодарим. Записахме го в този браузър.';
 export const TYPES = { error: 'Намерих грешка', unclear: 'Още не разбирам', idea: 'Предложи идея' };
 export const MAX_TEXT = 1000;
 
-const CAP = 30;                 // newest records kept
+const CAP = 30; // newest records kept
 const FIELDS = ['route', 'term', 'from', 'block', 'val', 'src', 'topic', 'contact'];
 let mem = [];
 
-const clean = (v, n = 300) => (typeof v === 'string' ? v.replace(/\s+/g, ' ').trim().slice(0, n) : '');
+const clean = (v, n = 300) =>
+  typeof v === 'string' ? v.replace(/\s+/g, ' ').trim().slice(0, n) : '';
 
 function read() {
   try {
     const a = JSON.parse(safe.get('localStorage', KEY) || '[]');
-    return Array.isArray(a) ? a.filter(r => r && typeof r === 'object' && typeof r.text === 'string' && TYPES[r.type]) : [];
-  } catch { return []; }
+    return Array.isArray(a)
+      ? a.filter((r) => r && typeof r === 'object' && typeof r.text === 'string' && TYPES[r.type])
+      : [];
+  } catch {
+    return [];
+  }
 }
 
 export function list() {
   const stored = read();
-  const ids = new Set(stored.map(r => r.id));
-  return [...stored, ...mem.filter(r => !ids.has(r.id))].sort((a, b) => String(b.at).localeCompare(String(a.at)));
+  const ids = new Set(stored.map((r) => r.id));
+  return [...stored, ...mem.filter((r) => !ids.has(r.id))].sort((a, b) =>
+    String(b.at).localeCompare(String(a.at)),
+  );
 }
 
 export function add(entry = {}) {
   const rec = {
     id: `f${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
     type: TYPES[entry.type] ? entry.type : 'unclear',
-    text: String(entry.text ?? '').replace(/\r\n?/g, '\n').trim().slice(0, MAX_TEXT),
-    at: new Date().toISOString()
+    text: String(entry.text ?? '')
+      .replace(/\r\n?/g, '\n')
+      .trim()
+      .slice(0, MAX_TEXT),
+    at: new Date().toISOString(),
   };
-  for (const f of FIELDS) { const v = clean(entry[f]); if (v) rec[f] = v; }
+  for (const f of FIELDS) {
+    const v = clean(entry[f]);
+    if (v) rec[f] = v;
+  }
   const next = [rec, ...read()].slice(0, CAP);
   const persisted = safe.set('localStorage', KEY, JSON.stringify(next));
   if (!persisted) mem = [rec, ...mem].slice(0, CAP);
   return { ...rec, persisted };
 }
 
-export function clear() { safe.del('localStorage', KEY); mem = []; }
+export function clear() {
+  safe.del('localStorage', KEY);
+  mem = [];
+}
 
-const LABEL = { from: 'Екран', val: 'Число или текст', src: 'Източник', block: 'Блок', topic: 'Част от сайта', term: 'Термин', contact: 'Имейл за отговор' };
+const LABEL = {
+  from: 'Екран',
+  val: 'Число или текст',
+  src: 'Източник',
+  block: 'Блок',
+  topic: 'Част от сайта',
+  term: 'Термин',
+  contact: 'Имейл за отговор',
+};
 /** the e-mail the visitor sends from their own mail app: subject „[СИГМА Бюджет] <form>“, the text, then the context lines and the page */
 export function mailto(rec) {
   if (!TO || !rec) return '';
-  const lines = [rec.text, '', ...Object.keys(LABEL).filter(k => rec[k]).map(k => `${LABEL[k]}: ${rec[k]}`), `Страница: ${location.href}`];
+  const lines = [
+    rec.text,
+    '',
+    ...Object.keys(LABEL)
+      .filter((k) => rec[k])
+      .map((k) => `${LABEL[k]}: ${rec[k]}`),
+    `Страница: ${location.href}`,
+  ];
   const q = `subject=${encodeURIComponent(`[СИГМА Бюджет] ${TYPES[rec.type] || 'Съобщение'}`)}&body=${encodeURIComponent(lines.join('\n'))}`;
   return `mailto:${encodeURIComponent(TO).replace(/%40/g, '@')}?${q}`;
 }

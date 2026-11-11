@@ -11,8 +11,8 @@ import { MAX_QUERY } from '../searchlib.js';
 export const needs = [];
 export const styles = ['s30-404'];
 
-const START = ['S01', 'S06', 'S07', 'S10', 'S18', 'S03'];      // start, revenue, spending, who spends, my taxes, glossary
-const MAX_SHOWN = 80;                                          // characters of the address that are printed
+const START = ['S01', 'S06', 'S07', 'S10', 'S18', 'S03']; // start, revenue, spending, who spends, my taxes, glossary
+const MAX_SHOWN = 80; // characters of the address that are printed
 
 export function render(ctx) {
   const path = String(ctx.params.path ?? '').trim();
@@ -30,15 +30,22 @@ export function render(ctx) {
       </div>
     </form>
     <h2 class="s30-h">Или тръгни от някое от тези места</h2>
-    <ul class="s30-links">${START.map(id => byId[id]).filter(Boolean).map(r => html`<li>${linkCard({ href: routeHref(r.id), title: r.title, text: r.desc, icon: r.icon })}</li>`)}</ul>
-  </div>`
+    <ul class="s30-links">${START.map((id) => byId[id])
+      .filter(Boolean)
+      .map(
+        (r) =>
+          html`<li>${linkCard({ href: routeHref(r.id), title: r.title, text: r.desc, icon: r.icon })}</li>`,
+      )}</ul>
+  </div>`,
   };
 }
 
 export function mount(root, ctx) {
-  const form = root.querySelector('.s30-find'), input = root.querySelector('#s30-q');
+  const form = root.querySelector('.s30-find'),
+    input = root.querySelector('#s30-q');
   if (!form || !input) return undefined;
-  form.addEventListener('submit', e => {                        // a plain form cannot navigate here (hash routes, CSP form-action 'none')
+  form.addEventListener('submit', (e) => {
+    // a plain form cannot navigate here (hash routes, CSP form-action 'none')
     e.preventDefault();
     const q = input.value.replace(/\s+/g, ' ').trim().slice(0, MAX_QUERY);
     ctx.go(routeHref('tarsene', {}, q ? { q } : {}));

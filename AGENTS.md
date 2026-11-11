@@ -12,7 +12,7 @@
 
 ## Проверки и данни
 
-- Инсталирай с `pnpm install --frozen-lockfile`. Според промяната изпълни `pnpm format:check`, `pnpm typecheck`, `pnpm test` и `pnpm build`; обхватът на CI и допълнителните проверки са в `.github/workflows/`. `format:check` покрива само посочените в `package.json` TypeScript файлове. За браузърни и release проверки виж [README](README.md).
+- Инсталирай с `pnpm install --frozen-lockfile`. Според промяната изпълни `pnpm format:check`, `pnpm typecheck`, `pnpm test` и `pnpm build`; обхватът на CI и допълнителните проверки са в `.github/workflows/`. `format:check` проверява всички поддържани от Prettier файлове в хранилището; изключенията за замразени, исторически и генерирани файлове са в `.prettierignore`. Python се проверява чрез отделните Python тестове. За браузърни и release проверки виж [README](README.md).
 - Публикуваните числа идват само от скриптове. `data/release/` е неизменно издание: не го редактирай на ръка, а го генерирай отново през pipeline. Release PR се слива с merge commit.
 - Не отслабвай неуспешни проверки, за да преминат.
 

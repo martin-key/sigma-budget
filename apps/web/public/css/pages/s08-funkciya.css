@@ -2,31 +2,75 @@
    scoped to the screen. Mobile first. */
 
 /* the inside of a block: its parts one under the other, evenly spaced (the frame spaces the blocks, not what is inside them) */
-.page[data-route="S08"] .s08-stack { display: grid; gap: var(--sp-4); min-width: 0; }
-.page[data-route="S08"] .s08-stack > * { min-width: 0; margin: 0; }
-.page[data-route="S08"] .s08-stack > .callout { margin: 0; }
-.page[data-route="S08"] .s08-read { max-width: 68ch; }
-.page[data-route="S08"] .s08-stack > p { max-width: 68ch; }
+.page[data-route='S08'] .s08-stack {
+  display: grid;
+  gap: var(--sp-4);
+  min-width: 0;
+}
+.page[data-route='S08'] .s08-stack > * {
+  min-width: 0;
+  margin: 0;
+}
+.page[data-route='S08'] .s08-stack > .callout {
+  margin: 0;
+}
+.page[data-route='S08'] .s08-read {
+  max-width: 68ch;
+}
+.page[data-route='S08'] .s08-stack > p {
+  max-width: 68ch;
+}
 
 /* the leva addendum under a number in a table cell */
-.page[data-route="S08"] .s08-lev { display: block; color: var(--ink-soft); font-size: var(--fs-xs); font-weight: 400; }
+.page[data-route='S08'] .s08-lev {
+  display: block;
+  color: var(--ink-soft);
+  font-size: var(--fs-xs);
+  font-weight: 400;
+}
 
 /* the measures: one disclosure each (hairline rows, no gap: neighbouring rows share one rule), a little room between the facts and the link */
-.page[data-route="S08"] .s08-meas { display: grid; gap: 0; }
-.page[data-route="S08"] .s08-meas-text { margin: 0 0 var(--sp-3); max-width: 68ch; }
-.page[data-route="S08"] .s08-meas-go { margin: var(--sp-3) 0 0; }
+.page[data-route='S08'] .s08-meas {
+  display: grid;
+  gap: 0;
+}
+.page[data-route='S08'] .s08-meas-text {
+  margin: 0 0 var(--sp-3);
+  max-width: 68ch;
+}
+.page[data-route='S08'] .s08-meas-go {
+  margin: var(--sp-3) 0 0;
+}
 
 /* the notes at the end */
-.page[data-route="S08"] .s08-notes { padding-left: var(--sp-5); display: grid; gap: var(--sp-3); max-width: 68ch; margin: 0; }
+.page[data-route='S08'] .s08-notes {
+  padding-left: var(--sp-5);
+  display: grid;
+  gap: var(--sp-3);
+  max-width: 68ch;
+  margin: 0;
+}
 
 /* the five-year table has up to five columns: the headers may wrap so that they fit without a sideways scroll */
-.page[data-route="S08"] .table-wrap thead th { white-space: normal; }
-.page[data-route="S08"] .table-wrap tbody th { min-width: 9rem; }
+.page[data-route='S08'] .table-wrap thead th {
+  white-space: normal;
+}
+.page[data-route='S08'] .table-wrap tbody th {
+  min-width: 9rem;
+}
 
 /* the scope chip has a note: let it wrap on a narrow screen instead of widening the page */
-.page[data-route="S08"] .block-tags .scope { max-width: 100%; white-space: normal; border-radius: 0; }
+.page[data-route='S08'] .block-tags .scope {
+  max-width: 100%;
+  white-space: normal;
+  border-radius: 0;
+}
 
 @media (pointer: coarse) {
-  .page[data-route="S08"] .s08-meas-go a,
-  .page[data-route="S08"] .s08-stack .btn { display: inline-block; padding-block: var(--sp-2); min-height: 44px; }
+  .page[data-route='S08'] .s08-meas-go a,
+  .page[data-route='S08'] .s08-stack .btn {
+    display: inline-block;
+    padding-block: var(--sp-2);
+    min-height: 44px;
+  }
 }

@@ -4,4 +4,5 @@
 //   gl('dds', 'ДДС')   ->   <a class="gl" data-gl="dds" href="#/rechnik/dds">ДДС</a>
 import { html } from '../html.js';
 
-export const gl = (slug, text) => html`<a class="gl" data-gl="${slug}" href="#/rechnik/${slug}" aria-haspopup="dialog">${text ?? slug}</a>`;
+export const gl = (slug, text) =>
+  html`<a class="gl" data-gl="${slug}" href="#/rechnik/${slug}" aria-haspopup="dialog">${text ?? slug}</a>`;

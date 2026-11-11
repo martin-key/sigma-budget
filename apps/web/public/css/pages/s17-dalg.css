@@ -2,84 +2,250 @@
    square cells, ruled chart columns, mono notes. Tokens only, light only, mobile first. */
 
 /* the controls band: which count of the debt, and the unit of the charts — a filter bar between two hairlines (lighter than the ink-ruled context strip and blocks) */
-.page[data-route="S17"] .s17-controls { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--sp-4) var(--sp-6); margin-bottom: var(--sp-6); padding: var(--sp-4) 0; border: 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); border-radius: 0; background: none; }
-.page[data-route="S17"] .s17-controls .field { min-width: 0; max-width: 100%; }
-.page[data-route="S17"] .s17-seg { display: flex; flex-wrap: wrap; justify-content: stretch; overflow: visible; padding: 0 1px 1px 0; border: 0; border-radius: 0; background: none; }
-.page[data-route="S17"] .s17-seg .seg-opt { flex: 1 1 auto; margin: 0 -1px -1px 0; border: 1px solid var(--ink-soft); }
-.page[data-route="S17"] .s17-seg .seg-opt + .seg-opt { border-left: 1px solid var(--ink-soft); }
-.page[data-route="S17"] .s17-seg .seg-opt label { width: 100%; justify-content: center; min-height: 44px; white-space: normal; text-align: center; border-radius: 0; }
+.page[data-route='S17'] .s17-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--sp-4) var(--sp-6);
+  margin-bottom: var(--sp-6);
+  padding: var(--sp-4) 0;
+  border: 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  border-radius: 0;
+  background: none;
+}
+.page[data-route='S17'] .s17-controls .field {
+  min-width: 0;
+  max-width: 100%;
+}
+.page[data-route='S17'] .s17-seg {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: stretch;
+  overflow: visible;
+  padding: 0 1px 1px 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+.page[data-route='S17'] .s17-seg .seg-opt {
+  flex: 1 1 auto;
+  margin: 0 -1px -1px 0;
+  border: 1px solid var(--ink-soft);
+}
+.page[data-route='S17'] .s17-seg .seg-opt + .seg-opt {
+  border-left: 1px solid var(--ink-soft);
+}
+.page[data-route='S17'] .s17-seg .seg-opt label {
+  width: 100%;
+  justify-content: center;
+  min-height: 44px;
+  white-space: normal;
+  text-align: center;
+  border-radius: 0;
+}
 
 /* plain-language lead and the small notes under a number or a chart */
-.page[data-route="S17"] .s17-lead { max-width: 70ch; margin-bottom: var(--sp-5); }
-.page[data-route="S17"] .s17-lead p + p { margin-top: var(--sp-2); }
-.page[data-route="S17"] .s17-note { max-width: 70ch; margin: var(--sp-3) 0 0; color: var(--ink-mid); font-size: var(--fs-s); }
-.page[data-route="S17"] .s17-minor { margin: var(--sp-6) 0 var(--sp-2); font: 400 var(--fs-1)/1.25 var(--font-serif); letter-spacing: -.01em; }
-.page[data-route="S17"] .s17-switch { margin: var(--sp-3) 0 0; font-weight: 600; }
-.page[data-route="S17"] .s17-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-1); margin: var(--sp-2) 0 0; padding-inline-start: 1.25em; max-width: 70ch; }
-.page[data-route="S17"] .s17-list li::marker { color: var(--ink-soft); font-family: var(--font-mono); }
+.page[data-route='S17'] .s17-lead {
+  max-width: 70ch;
+  margin-bottom: var(--sp-5);
+}
+.page[data-route='S17'] .s17-lead p + p {
+  margin-top: var(--sp-2);
+}
+.page[data-route='S17'] .s17-note {
+  max-width: 70ch;
+  margin: var(--sp-3) 0 0;
+  color: var(--ink-mid);
+  font-size: var(--fs-s);
+}
+.page[data-route='S17'] .s17-minor {
+  margin: var(--sp-6) 0 var(--sp-2);
+  font: 400 var(--fs-1)/1.25 var(--font-serif);
+  letter-spacing: -0.01em;
+}
+.page[data-route='S17'] .s17-switch {
+  margin: var(--sp-3) 0 0;
+  font-weight: 600;
+}
+.page[data-route='S17'] .s17-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-1);
+  margin: var(--sp-2) 0 0;
+  padding-inline-start: 1.25em;
+  max-width: 70ch;
+}
+.page[data-route='S17'] .s17-list li::marker {
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+}
 
 /* the meter „скала до 60%“ */
-.page[data-route="S17"] .s17-meter { margin-bottom: var(--sp-5); max-width: 46rem; }
+.page[data-route='S17'] .s17-meter {
+  margin-bottom: var(--sp-5);
+  max-width: 46rem;
+}
 
 /* the interest and the deficit side by side when there is room: two ruled columns, 48 px apart */
-.page[data-route="S17"] .s17-pair { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-7); margin-bottom: var(--sp-7); }
-.page[data-route="S17"] .s17-pair > * { min-width: 0; margin-bottom: 0; }
+.page[data-route='S17'] .s17-pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-7);
+  margin-bottom: var(--sp-7);
+}
+.page[data-route='S17'] .s17-pair > * {
+  min-width: 0;
+  margin-bottom: 0;
+}
 @media (min-width: 1100px) {
-  .page[data-route="S17"] .s17-pair { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .page[data-route='S17'] .s17-pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 /* second small line in a cell: the amount in leva, or what the line includes */
-.page[data-route="S17"] .s17-lev,
-.page[data-route="S17"] .s17-sub { display: block; color: var(--ink-mid); font-size: var(--fs-xs); font-weight: 400; }
-.page[data-route="S17"] .s17-sub { margin-top: 2px; }
+.page[data-route='S17'] .s17-lev,
+.page[data-route='S17'] .s17-sub {
+  display: block;
+  color: var(--ink-mid);
+  font-size: var(--fs-xs);
+  font-weight: 400;
+}
+.page[data-route='S17'] .s17-sub {
+  margin-top: 2px;
+}
 
 /* indented lines of the financing table: a group, then its parts */
-.page[data-route="S17"] .s17-ind { display: inline-block; }
-.page[data-route="S17"] .s17-ind-0 { font-weight: 600; }
-.page[data-route="S17"] .s17-ind-1 { font-weight: 500; }
-.page[data-route="S17"] .s17-ind-2 { padding-inline-start: var(--sp-4); font-weight: 400; }
+.page[data-route='S17'] .s17-ind {
+  display: inline-block;
+}
+.page[data-route='S17'] .s17-ind-0 {
+  font-weight: 600;
+}
+.page[data-route='S17'] .s17-ind-1 {
+  font-weight: 500;
+}
+.page[data-route='S17'] .s17-ind-2 {
+  padding-inline-start: var(--sp-4);
+  font-weight: 400;
+}
 
 /* wide tables scroll inside their own box; the first column stays in view (a hairline marks its edge) */
-.page[data-route="S17"] table.data th,
-.page[data-route="S17"] table.data td { min-width: 0; }
-.page[data-route="S17"] table.data thead th { white-space: normal; }
-.page[data-route="S17"] table.data tbody th[scope="row"] { position: sticky; inset-inline-start: 0; z-index: 1; background: var(--paper); box-shadow: 1px 0 0 var(--rule-soft); }
+.page[data-route='S17'] table.data th,
+.page[data-route='S17'] table.data td {
+  min-width: 0;
+}
+.page[data-route='S17'] table.data thead th {
+  white-space: normal;
+}
+.page[data-route='S17'] table.data tbody th[scope='row'] {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 1;
+  background: var(--paper);
+  box-shadow: 1px 0 0 var(--rule-soft);
+}
 /* room for the first column only where it holds a long label (my own tables); a year or a month needs none */
-.page[data-route="S17"] table[id^="s17-t-"] tbody th[scope="row"] { min-width: 11rem; }
-.page[data-route="S17"] #s17-t-guar tbody th[scope="row"],
-.page[data-route="S17"] #s17-t-interest tbody th[scope="row"],
-.page[data-route="S17"] #s17-t-issued tbody th[scope="row"],
-.page[data-route="S17"] #s17-t-avg tbody th[scope="row"] { min-width: 0; }
-.page[data-route="S17"] table.data thead th:first-child { position: sticky; inset-inline-start: 0; z-index: 2; background: var(--paper); box-shadow: 1px 0 0 var(--rule-soft); }
-.page[data-route="S17"] table.data tbody tr:hover > th[scope="row"] { background: var(--paper-warm); }
-.page[data-route="S17"] table.data tfoot th { position: sticky; inset-inline-start: 0; z-index: 1; background: var(--paper); box-shadow: 1px 0 0 var(--rule-soft); }
+.page[data-route='S17'] table[id^='s17-t-'] tbody th[scope='row'] {
+  min-width: 11rem;
+}
+.page[data-route='S17'] #s17-t-guar tbody th[scope='row'],
+.page[data-route='S17'] #s17-t-interest tbody th[scope='row'],
+.page[data-route='S17'] #s17-t-issued tbody th[scope='row'],
+.page[data-route='S17'] #s17-t-avg tbody th[scope='row'] {
+  min-width: 0;
+}
+.page[data-route='S17'] table.data thead th:first-child {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 2;
+  background: var(--paper);
+  box-shadow: 1px 0 0 var(--rule-soft);
+}
+.page[data-route='S17'] table.data tbody tr:hover > th[scope='row'] {
+  background: var(--paper-warm);
+}
+.page[data-route='S17'] table.data tfoot th {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 1;
+  background: var(--paper);
+  box-shadow: 1px 0 0 var(--rule-soft);
+}
 @media (max-width: 599px) {
-  .page[data-route="S17"] table[id^="s17-t-"] tbody th[scope="row"] { min-width: 7.5rem; max-width: 9.5rem; }
-  .page[data-route="S17"] #s17-t-guar tbody th[scope="row"],
-  .page[data-route="S17"] #s17-t-interest tbody th[scope="row"],
-  .page[data-route="S17"] #s17-t-issued tbody th[scope="row"],
-  .page[data-route="S17"] #s17-t-avg tbody th[scope="row"] { min-width: 0; max-width: none; }
+  .page[data-route='S17'] table[id^='s17-t-'] tbody th[scope='row'] {
+    min-width: 7.5rem;
+    max-width: 9.5rem;
+  }
+  .page[data-route='S17'] #s17-t-guar tbody th[scope='row'],
+  .page[data-route='S17'] #s17-t-interest tbody th[scope='row'],
+  .page[data-route='S17'] #s17-t-issued tbody th[scope='row'],
+  .page[data-route='S17'] #s17-t-avg tbody th[scope='row'] {
+    min-width: 0;
+    max-width: none;
+  }
 }
 
 /* a chart's data table, once opened, must not widen the figure (the shell's .fig grid track follows the table's minimum width) */
-.page[data-route="S17"] .fig { grid-template-columns: minmax(0, 1fr); }
+.page[data-route='S17'] .fig {
+  grid-template-columns: minmax(0, 1fr);
+}
 
 /* the average maturity: two short columns need no more than this */
-.page[data-route="S17"] .s17-avg { max-width: 30rem; margin-bottom: var(--sp-3); }
+.page[data-route='S17'] .s17-avg {
+  max-width: 30rem;
+  margin-bottom: var(--sp-3);
+}
 
 /* the structure block: five small tables in closed disclosures (hairline rows) */
-.page[data-route="S17"] .s17-groups { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin-top: var(--sp-3); }
+.page[data-route='S17'] .s17-groups {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  margin-top: var(--sp-3);
+}
 
 /* the three plain definitions under the „Не бъркай“ tiles: hairline rows under an ink rule */
-.page[data-route="S17"] .s17-defs { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin: var(--sp-5) 0; max-width: 70ch; border-top: 1px solid var(--ink); }
-.page[data-route="S17"] .s17-defs dt { padding-top: var(--sp-3); font-weight: 600; }
-.page[data-route="S17"] .s17-defs dd { margin: 0; padding: 2px 0 var(--sp-3); border-bottom: 1px solid var(--rule-soft); color: var(--ink-mid); }
+.page[data-route='S17'] .s17-defs {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  margin: var(--sp-5) 0;
+  max-width: 70ch;
+  border-top: 1px solid var(--ink);
+}
+.page[data-route='S17'] .s17-defs dt {
+  padding-top: var(--sp-3);
+  font-weight: 600;
+}
+.page[data-route='S17'] .s17-defs dd {
+  margin: 0;
+  padding: 2px 0 var(--sp-3);
+  border-bottom: 1px solid var(--rule-soft);
+  color: var(--ink-mid);
+}
 
 /* the method note */
-.page[data-route="S17"] .s17-method { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); margin: 0; padding-inline-start: 1.25em; max-width: 70ch; }
-.page[data-route="S17"] .s17-method li::marker { color: var(--ink-soft); font-family: var(--font-mono); }
+.page[data-route='S17'] .s17-method {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-2);
+  margin: 0;
+  padding-inline-start: 1.25em;
+  max-width: 70ch;
+}
+.page[data-route='S17'] .s17-method li::marker {
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+}
 
 @media (forced-colors: active) {
-  .page[data-route="S17"] .s17-controls { border-color: CanvasText; }
-  .page[data-route="S17"] .s17-seg .seg-opt { border-color: ButtonText; }
+  .page[data-route='S17'] .s17-controls {
+    border-color: CanvasText;
+  }
+  .page[data-route='S17'] .s17-seg .seg-opt {
+    border-color: ButtonText;
+  }
 }

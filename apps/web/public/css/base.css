@@ -1,82 +1,359 @@
 /* Reset, typography, focus, utilities. No component styles here. v4 (СИГМА visual language): serif headings at weight 400,
    sans body 15px/1.5, mono uppercase labels; ink links with a 1px underline offset 3px, crimson on hover; focus = 2px crimson ring. */
-*,*::before,*::after{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-padding-top:16px;scroll-padding-bottom:calc(var(--tabbar-h) + 16px)}
-body{margin:0;min-height:100vh;background:var(--paper);color:var(--ink);font:400 var(--fs-0)/var(--lh-body) var(--font-sans);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-wrap:break-word}
-h1,h2,h3,h4{margin:0;font-family:var(--font-serif);font-weight:400;line-height:var(--lh-tight);letter-spacing:var(--track-head);color:var(--ink);text-wrap:balance}
-h1{font-size:var(--fs-h1);letter-spacing:var(--track-display);line-height:1.02}
-h2{font-size:var(--fs-h3);line-height:1.15}
-h3{font-size:var(--fs-1);line-height:1.2}
-h4{font-size:var(--fs-0);line-height:1.3;letter-spacing:-.01em}
-h1 em,h2 em,h3 em,.accent-word{font-style:italic;color:var(--crimson)}
-p,ul,ol,dl,figure,blockquote{margin:0}
-ul,ol{padding-left:1.25em}
-img,svg,canvas{max-width:100%}
-svg{flex:none}
-a{color:var(--ink);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
-a:hover{color:var(--crimson);text-decoration-thickness:1px}
-button,input,select,textarea{font:inherit;color:inherit}
-button{cursor:pointer}
-button:disabled{cursor:not-allowed}
-strong,b{font-weight:600}
-small{font-size:var(--fs-s)}
-hr{border:0;border-top:1px solid var(--rule-soft);margin:var(--sp-6) 0}
-code,kbd,samp{font-family:var(--font-mono);font-size:.92em}
-kbd{display:inline-block;min-width:1.6em;padding:0 .4em;text-align:center;border:1px solid var(--ink-soft);border-radius:var(--r-1);background:var(--paper);color:var(--ink-mid);line-height:1.45;font-size:var(--fs-xs)}
-mark{background:var(--crimson-tint);color:inherit;padding:0 .1em}
-::selection{background:var(--ink);color:var(--paper)}
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: 16px;
+  scroll-padding-bottom: calc(var(--tabbar-h) + 16px);
+}
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 var(--fs-0)/var(--lh-body) var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-wrap: break-word;
+}
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  line-height: var(--lh-tight);
+  letter-spacing: var(--track-head);
+  color: var(--ink);
+  text-wrap: balance;
+}
+h1 {
+  font-size: var(--fs-h1);
+  letter-spacing: var(--track-display);
+  line-height: 1.02;
+}
+h2 {
+  font-size: var(--fs-h3);
+  line-height: 1.15;
+}
+h3 {
+  font-size: var(--fs-1);
+  line-height: 1.2;
+}
+h4 {
+  font-size: var(--fs-0);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+h1 em,
+h2 em,
+h3 em,
+.accent-word {
+  font-style: italic;
+  color: var(--crimson);
+}
+p,
+ul,
+ol,
+dl,
+figure,
+blockquote {
+  margin: 0;
+}
+ul,
+ol {
+  padding-left: 1.25em;
+}
+img,
+svg,
+canvas {
+  max-width: 100%;
+}
+svg {
+  flex: none;
+}
+a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+a:hover {
+  color: var(--crimson);
+  text-decoration-thickness: 1px;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+button {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
+}
+strong,
+b {
+  font-weight: 600;
+}
+small {
+  font-size: var(--fs-s);
+}
+hr {
+  border: 0;
+  border-top: 1px solid var(--rule-soft);
+  margin: var(--sp-6) 0;
+}
+code,
+kbd,
+samp {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+}
+kbd {
+  display: inline-block;
+  min-width: 1.6em;
+  padding: 0 0.4em;
+  text-align: center;
+  border: 1px solid var(--ink-soft);
+  border-radius: var(--r-1);
+  background: var(--paper);
+  color: var(--ink-mid);
+  line-height: 1.45;
+  font-size: var(--fs-xs);
+}
+mark {
+  background: var(--crimson-tint);
+  color: inherit;
+  padding: 0 0.1em;
+}
+::selection {
+  background: var(--ink);
+  color: var(--paper);
+}
 /* mono label voice: navigation, table headers, captions, kickers, KPI labels */
-.mono,.cap{font-family:var(--font-mono);font-size:var(--fs-xs);font-weight:500;letter-spacing:var(--track-mono);text-transform:uppercase}
-.cap{color:var(--ink-soft)}
+.mono,
+.cap {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  letter-spacing: var(--track-mono);
+  text-transform: uppercase;
+}
+.cap {
+  color: var(--ink-soft);
+}
 
 /* focus: always visible for keyboard; the h1 only receives programmatic focus after navigation */
-:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
-:focus:not(:focus-visible){outline:none}
-[tabindex="-1"]:focus{outline:none}
-.hl{animation:hl 2.4s var(--ease)}
-@keyframes hl{0%,60%{background:var(--crimson-tint);box-shadow:0 0 0 6px var(--crimson-tint)}100%{background:transparent;box-shadow:0 0 0 6px transparent}}
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+:focus:not(:focus-visible) {
+  outline: none;
+}
+[tabindex='-1']:focus {
+  outline: none;
+}
+.hl {
+  animation: hl 2.4s var(--ease);
+}
+@keyframes hl {
+  0%,
+  60% {
+    background: var(--crimson-tint);
+    box-shadow: 0 0 0 6px var(--crimson-tint);
+  }
+  100% {
+    background: transparent;
+    box-shadow: 0 0 0 6px transparent;
+  }
+}
 
 /* utilities */
-.sr-only{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
-.skip-link{position:fixed;left:var(--sp-2);top:var(--sp-2);z-index:200;padding:var(--sp-2) var(--sp-3);background:var(--crimson);color:var(--paper);font:500 var(--fs-xs)/1.4 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;text-decoration:none;transform:translateY(-200%)}
-.skip-link:hover{color:var(--paper)}
-.skip-link:focus{transform:none}
-[hidden]{display:none!important}
-.num{font-variant-numeric:tabular-nums}
-.nowrap{white-space:nowrap}
-.muted{color:var(--muted)}
-.small{font-size:var(--fs-s)}
-.stack>*+*{margin-top:var(--sp-4)}
-.stack-lg>*+*{margin-top:var(--sp-6)}
-.cluster{display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-2)}
-.cluster-lg{gap:var(--sp-4)}
-.spread{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--sp-2) var(--sp-4)}
-.grid{display:grid;gap:var(--sp-5);grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr))}
-.grid-2{display:grid;gap:var(--sp-5) var(--sp-7);grid-template-columns:repeat(2,minmax(0,1fr))}
-.grid-3{display:grid;gap:var(--sp-5);grid-template-columns:repeat(3,minmax(0,1fr))}
-@media (max-width:899px){.grid-3{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:599px){.grid-2,.grid-3{grid-template-columns:minmax(0,1fr)}}
-.prose{max-width:68ch}
-.prose>*+*{margin-top:var(--sp-3)}
+.sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+.skip-link {
+  position: fixed;
+  left: var(--sp-2);
+  top: var(--sp-2);
+  z-index: 200;
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--crimson);
+  color: var(--paper);
+  font: 500 var(--fs-xs)/1.4 var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+.skip-link:hover {
+  color: var(--paper);
+}
+.skip-link:focus {
+  transform: none;
+}
+[hidden] {
+  display: none !important;
+}
+.num {
+  font-variant-numeric: tabular-nums;
+}
+.nowrap {
+  white-space: nowrap;
+}
+.muted {
+  color: var(--muted);
+}
+.small {
+  font-size: var(--fs-s);
+}
+.stack > * + * {
+  margin-top: var(--sp-4);
+}
+.stack-lg > * + * {
+  margin-top: var(--sp-6);
+}
+.cluster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.cluster-lg {
+  gap: var(--sp-4);
+}
+.spread {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2) var(--sp-4);
+}
+.grid {
+  display: grid;
+  gap: var(--sp-5);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+}
+.grid-2 {
+  display: grid;
+  gap: var(--sp-5) var(--sp-7);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.grid-3 {
+  display: grid;
+  gap: var(--sp-5);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+@media (max-width: 899px) {
+  .grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 599px) {
+  .grid-2,
+  .grid-3 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.prose {
+  max-width: 68ch;
+}
+.prose > * + * {
+  margin-top: var(--sp-3);
+}
 
 /* mock hatching, the one visual that says "примерни данни": 45 degree crimson hatch */
-.hatch,[data-mock="true"]{background-image:repeating-linear-gradient(45deg,var(--hatch) 0 2px,transparent 2px var(--hatch-step))}
+.hatch,
+[data-mock='true'] {
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--hatch) 0 2px,
+    transparent 2px var(--hatch-step)
+  );
+}
 
-@media (prefers-reduced-motion:reduce){
-  html{scroll-behavior:auto}
-  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:0s!important;scroll-behavior:auto!important}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0s !important;
+    scroll-behavior: auto !important;
+  }
   /* transitions are 0s, not .01ms: with the default transition-property `all`, a duration on every element made every style change a transition that holds
      the OLD value until the next animation frame (body.bare left the embed with the page's padding, 528 px in a 440 px frame). Nothing waits for transitionend here (js/ui/motion.js is off) */
 }
-@media (forced-colors:active){
-  :focus-visible{outline-color:Highlight}
-  .hatch,[data-mock="true"]{background-image:none;border:1px dashed CanvasText}
+@media (forced-colors: active) {
+  :focus-visible {
+    outline-color: Highlight;
+  }
+  .hatch,
+  [data-mock='true'] {
+    background-image: none;
+    border: 1px dashed CanvasText;
+  }
 }
-@media print{
-  :root[data-theme="light"]{color-scheme:light;--paper:#fff;--paper-warm:#fff;--paper-deep:#fff}
-  body{background:#fff;color:#000}
-  .topbar,.sidenav,.tabbar,.mockbar,.share-row,.skip-link,.toasts,.next,.foot-nav,.footer .link-btn,.block-tools,.seg,.tab-list,.fig-views,.unit-switch,.explorer{display:none!important}
-  .kpi-grid,.fig{break-inside:avoid}
-  .shell{display:block}
-  a{color:inherit}
+@media print {
+  :root[data-theme='light'] {
+    color-scheme: light;
+    --paper: #fff;
+    --paper-warm: #fff;
+    --paper-deep: #fff;
+  }
+  body {
+    background: #fff;
+    color: #000;
+  }
+  .topbar,
+  .sidenav,
+  .tabbar,
+  .mockbar,
+  .share-row,
+  .skip-link,
+  .toasts,
+  .next,
+  .foot-nav,
+  .footer .link-btn,
+  .block-tools,
+  .seg,
+  .tab-list,
+  .fig-views,
+  .unit-switch,
+  .explorer {
+    display: none !important;
+  }
+  .kpi-grid,
+  .fig {
+    break-inside: avoid;
+  }
+  .shell {
+    display: block;
+  }
+  a {
+    color: inherit;
+  }
 }

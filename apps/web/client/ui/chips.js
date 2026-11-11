@@ -12,18 +12,25 @@ import { icon } from '../icons.js';
 import { num } from '../format.js';
 
 function chip(it) {
-  const count = typeof it.count === 'number' && Number.isFinite(it.count) ? num(it.count, 0) : typeof it.count === 'string' ? it.count : '';
+  const count =
+    typeof it.count === 'number' && Number.isFinite(it.count)
+      ? num(it.count, 0)
+      : typeof it.count === 'string'
+        ? it.count
+        : '';
   const inner = html`${it.icon ? icon(it.icon, { size: 16 }) : ''}<span class="chip-label">${it.label}</span>${count !== '' ? html`<span class="chip-count">${count}</span>` : ''}`;
   if (it.href) {
     return html`<a class="chip" href="${it.href}"${it.pressed ? raw(' aria-current="true"') : ''}>${inner}</a>`;
   }
-  const pressed = it.pressed === undefined ? '' : html` aria-pressed="${it.pressed ? 'true' : 'false'}"`;      // no `pressed` → a plain action button, not a toggle
-  if (it.query) return html`<button type="button" class="chip" data-query="${it.query}" data-fk="chip:${it.query}"${pressed}>${inner}</button>`;
+  const pressed =
+    it.pressed === undefined ? '' : html` aria-pressed="${it.pressed ? 'true' : 'false'}"`; // no `pressed` → a plain action button, not a toggle
+  if (it.query)
+    return html`<button type="button" class="chip" data-query="${it.query}" data-fk="chip:${it.query}"${pressed}>${inner}</button>`;
   return html`<button type="button" class="chip"${it.key ? html` data-chip="${it.key}" data-fk="chip:${it.key}"` : ''}${pressed}>${inner}</button>`;
 }
 
 export function chips(o = {}) {
-  const items = (o.items || []).filter(it => it && it.label != null && it.label !== '');
+  const items = (o.items || []).filter((it) => it && it.label != null && it.label !== '');
   if (!items.length) return html``;
   return html`<div class="${cx('chips', o.cls)}"${o.id ? html` id="${o.id}"` : ''}${o.label ? html` role="group" aria-label="${plain(o.label)}"` : ''}>${items.map(chip)}</div>`;
 }

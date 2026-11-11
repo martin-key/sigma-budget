@@ -32,12 +32,14 @@ function sandbox() {
   return { root, target, args };
 }
 let shared: ReturnType<typeof sandbox>;
+// Audit: 70-file graph setup took 8.61s unloaded and exceeded 10s under load.
+// Scoped integration setup budget; all six graph assertions remain.
 beforeAll(async () => {
   shared = sandbox();
   mkdirSync(join(shared.target, 'data/ministries'), { recursive: true });
   writeFileSync(join(shared.target, 'data/ministries/stale.json'), '{}');
   expect(await wave13bBuildCli(shared.args(), shared.root)).toBe(0);
-});
+}, 30_000);
 afterAll(() => {
   if (shared) rmSync(shared.root, { recursive: true, force: true });
 });

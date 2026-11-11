@@ -17,36 +17,86 @@ import * as motion from './ui/motion.js';
 import * as share from './share.js';
 import { ROOT, HASH, here, hereHref, toHref, internal, isAppHref } from './loc.js';
 import * as seo from './seo.js';
-import { NotFound, parseHash, canonHash, canonQuery, resolve, prepare as prepareView, build, periodsFor, frameHtml, docTitle,
-  loadingVm, errorVm } from './render.js';
+import {
+  NotFound,
+  parseHash,
+  canonHash,
+  canonQuery,
+  resolve,
+  prepare as prepareView,
+  build,
+  periodsFor,
+  frameHtml,
+  docTitle,
+  loadingVm,
+  errorVm,
+} from './render.js';
 
 export { NotFound };
 
-const RERENDER_KEYS = [...(ROLE_SELECTOR ? ['userType'] : []), 'period', 'unit', 'perPerson', 'leva', 'onlyReal'];     // the role selector is off in V5 (js/store.js ROLE_SELECTOR)
+const RERENDER_KEYS = [
+  ...(ROLE_SELECTOR ? ['userType'] : []),
+  'period',
+  'unit',
+  'perPerson',
+  'leva',
+  'onlyReal',
+]; // the role selector is off in V5 (js/store.js ROLE_SELECTOR)
 const $view = () => document.getElementById('view');
 
-let initialized = false, started = false, applying = false;
+let initialized = false,
+  started = false,
+  applying = false;
 let explicitPeriodSelection = false;
 let finishInitial;
-const initialReady = new Promise(resolve => { finishInitial = resolve; });
-let navSeq = 0, abort = null, cur = null, lastHref = '', histK = Date.now(), curK = 0, cleanups = [], readyP = Promise.resolve();
+const initialReady = new Promise((resolve) => {
+  finishInitial = resolve;
+});
+let navSeq = 0,
+  abort = null,
+  cur = null,
+  lastHref = '',
+  histK = Date.now(),
+  curK = 0,
+  cleanups = [],
+  readyP = Promise.resolve();
 const scrollPos = new Map();
 const listeners = new Set();
 
 /* ------------------------------------------------------------------ url helpers (parseHash, canonHash, canonQuery: js/render.js) */
-const sigOf = (route, params, query) => `${route.id}|${JSON.stringify(params)}|${JSON.stringify(Object.entries(query).filter(([k]) => k !== 'to'))}`;
-const ensureKey = () => { if (!history.state || !history.state.k) history.replaceState({ k: ++histK }, ''); return history.state.k; };
-const saveScroll = () => { if (curK) scrollPos.set(curK, window.scrollY); };
+const sigOf = (route, params, query) =>
+  `${route.id}|${JSON.stringify(params)}|${JSON.stringify(Object.entries(query).filter(([k]) => k !== 'to'))}`;
+const ensureKey = () => {
+  if (!history.state || !history.state.k) history.replaceState({ k: ++histK }, '');
+  return history.state.k;
+};
+const saveScroll = () => {
+  if (curK) scrollPos.set(curK, window.scrollY);
+};
 const bridgeModule = './react-bridge.js';
 let reactBridge;
-const runCleanups = () => { reactBridge?.dispose(); motion.cleanup(); const c = cleanups; cleanups = []; for (const f of c) { try { f(); } catch (e) { console.error(e); } } };
+const runCleanups = () => {
+  reactBridge?.dispose();
+  motion.cleanup();
+  const c = cleanups;
+  cleanups = [];
+  for (const f of c) {
+    try {
+      f();
+    } catch (e) {
+      console.error(e);
+    }
+  }
+};
 
 /* ------------------------------------------------------------------ public helpers (also on ctx) */
 export function announce(msg) {
   const el = document.getElementById('live');
   if (!el) return;
   el.textContent = '';
-  setTimeout(() => { el.textContent = msg; }, 40);
+  setTimeout(() => {
+    el.textContent = msg;
+  }, 40);
 }
 
 /** go('/prihodi/dds') (or the old '#/prihodi/dds') — in-app navigation (history entry); the same address = scroll to top + refocus the h1 */
@@ -55,46 +105,75 @@ export function go(addr, o = {}) {
   const resolved = resolve(target);
   target = internal(resolved.want);
   const { query, segs } = parseHash(target);
-  if (query.per != null) target = internal(canonHash(segs, { ...query, per: resolvePeriod(query.per).resolved }));
+  if (query.per != null)
+    target = internal(canonHash(segs, { ...query, per: resolvePeriod(query.per).resolved }));
   const per = store.get('period');
-  if (!query.per && per !== DEFAULT_PERIOD && (resolved.route.periods === 'all' || resolved.route.periods?.includes?.(per))) target += (target.includes('?') ? '&' : '?') + 'per=' + per;
-  if (query.unit == null && store.get('unit') === 'pct') target += (target.includes('?') ? '&' : '?') + 'unit=pct';
+  if (
+    !query.per &&
+    per !== DEFAULT_PERIOD &&
+    (resolved.route.periods === 'all' || resolved.route.periods?.includes?.(per))
+  )
+    target += (target.includes('?') ? '&' : '?') + 'per=' + per;
+  if (query.unit == null && store.get('unit') === 'pct')
+    target += (target.includes('?') ? '&' : '?') + 'unit=pct';
   target = toHref(target);
-  if (target === hereHref()) { window.scrollTo(0, 0); $view()?.querySelector('h1')?.focus({ preventScroll: true }); return; }
+  if (target === hereHref()) {
+    window.scrollTo(0, 0);
+    $view()?.querySelector('h1')?.focus({ preventScroll: true });
+    return;
+  }
   saveScroll();
   if (o.replace) history.replaceState({ k: ++histK }, '', target);
   else history.pushState({ k: ++histK }, '', target);
-  if (started) render('link'); else dropStalePrerender();
+  if (started) render('link');
+  else dropStalePrerender();
 }
 
 /** setQuery({tab:'programi', q:''}, {rerender:false}) — change query params in place (replaceState), '' / null removes a key */
 export function setQuery(obj, o = {}) {
   const { segs, query } = parseHash(here());
   const q = { ...query };
-  for (const [k, v] of Object.entries(obj || {})) { if (v == null || v === '') delete q[k]; else q[k] = String(v); }
+  for (const [k, v] of Object.entries(obj || {})) {
+    if (v == null || v === '') delete q[k];
+    else q[k] = String(v);
+  }
   const m = match(segs);
   const h = canonHash(m ? m.canon : segs, canonQuery(q));
   history.replaceState({ k: ensureKey() }, '', h);
   lastHref = location.href;
-  if (cur) { const live = cur.ctx?.query; if (live) { for (const k of Object.keys(live)) delete live[k]; Object.assign(live, parseHash(here()).query); } cur.sig = sigOf(cur.route, cur.params, parseHash(here()).query); }
+  if (cur) {
+    const live = cur.ctx?.query;
+    if (live) {
+      for (const k of Object.keys(live)) delete live[k];
+      Object.assign(live, parseHash(here()).query);
+    }
+    cur.sig = sigOf(cur.route, cur.params, parseHash(here()).query);
+  }
   if (!started) dropStalePrerender();
   else if (o.rerender !== false) render('rerender');
 }
 export const rerender = () => render('rerender');
-export const onNavigate = fn => { listeners.add(fn); return () => listeners.delete(fn); };
+export const onNavigate = (fn) => {
+  listeners.add(fn);
+  return () => listeners.delete(fn);
+};
 
 /* ------------------------------------------------------------------ page css + module + data */
 const styleLoaded = new Map();
 function loadStyle(name) {
   if (!/^[a-z0-9-]+$/.test(name)) return Promise.resolve();
   if (styleLoaded.has(name)) return styleLoaded.get(name);
-  if (document.querySelector(`link[data-page="${name}"]`)) { styleLoaded.set(name, Promise.resolve()); return styleLoaded.get(name); }   // in the prerendered HTML already
-  const p = new Promise(res => {
+  if (document.querySelector(`link[data-page="${name}"]`)) {
+    styleLoaded.set(name, Promise.resolve());
+    return styleLoaded.get(name);
+  } // in the prerendered HTML already
+  const p = new Promise((res) => {
     const l = document.createElement('link');
     l.rel = 'stylesheet';
     l.href = new URL(`css/pages/${name}.css`, ROOT).href;
     l.dataset.page = name;
-    l.onload = () => res(); l.onerror = () => res();
+    l.onload = () => res();
+    l.onerror = () => res();
     setTimeout(res, 2000);
     document.head.appendChild(l);
   });
@@ -102,14 +181,19 @@ function loadStyle(name) {
   return p;
 }
 /** load module + css + data for a route (js/render.js), with this page's CSS and the router's actions on ctx. Used by S29 (embed) too. */
-export const prepare = (route, params, query, o = {}) => prepareView(route, params, query, { ...o, loadStyle, actions: { setQuery, rerender, announce, go } });
+export const prepare = (route, params, query, o = {}) =>
+  prepareView(route, params, query, {
+    ...o,
+    loadStyle,
+    actions: { setQuery, rerender, announce, go },
+  });
 
 function paint(vm) {
   document.body.classList.toggle('bare', !!vm.route.bare);
   $view().innerHTML = frameHtml(vm).toString();
   document.title = docTitle(vm);
   $view().removeAttribute('aria-busy');
-  seo.apply(vm, docTitle(vm));                                   // description, canonical, social cards and JSON-LD of the screen (js/seo.js)
+  seo.apply(vm, docTitle(vm)); // description, canonical, social cards and JSON-LD of the screen (js/seo.js)
 }
 
 /* ------------------------------------------------------------------ hydrate: [data-ui="name"] -> js/ui/name.js mount(el, ctx) */
@@ -123,24 +207,42 @@ export async function hydrate(root, ctx, sink = cleanups) {
     if (!todo.has(n)) todo.set(n, []);
     todo.get(n).push(el);
   }
-  await Promise.all([...todo].map(async ([name, els]) => {
-    let m;
-    try { m = await import(`./ui/${name}.js`); } catch (e) { console.error(`[ui] cannot load ui/${name}.js`, e); return; }
-    if (typeof m.mount !== 'function') return;
-    for (const el of els) {
-      try { const c = await m.mount(el, ctx); if (typeof c === 'function') sink.push(c); } catch (e) { console.error(`[ui/${name}] mount failed`, e); }
-    }
-  }));
+  await Promise.all(
+    [...todo].map(async ([name, els]) => {
+      let m;
+      try {
+        m = await import(`./ui/${name}.js`);
+      } catch (e) {
+        console.error(`[ui] cannot load ui/${name}.js`, e);
+        return;
+      }
+      if (typeof m.mount !== 'function') return;
+      for (const el of els) {
+        try {
+          const c = await m.mount(el, ctx);
+          if (typeof c === 'function') sink.push(c);
+        } catch (e) {
+          console.error(`[ui/${name}] mount failed`, e);
+        }
+      }
+    }),
+  );
 }
 
 /* ------------------------------------------------------------------ in-page anchors (?to=id) */
 /** a target inside a hidden tab panel: show that panel and sync its tab (independent of the tabs' own listeners, which may not be mounted yet) */
 function revealTabs(el) {
-  for (let p = el.closest('[role="tabpanel"]'); p; p = p.parentElement?.closest('[role="tabpanel"]')) {
+  for (
+    let p = el.closest('[role="tabpanel"]');
+    p;
+    p = p.parentElement?.closest('[role="tabpanel"]')
+  ) {
     if (!p.hidden) continue;
     const host = p.parentElement;
-    host.querySelectorAll(':scope > [role="tabpanel"]').forEach(x => { x.hidden = x !== p; });
-    host.querySelectorAll(':scope > .tab-list [role="tab"]').forEach(t => {
+    host.querySelectorAll(':scope > [role="tabpanel"]').forEach((x) => {
+      x.hidden = x !== p;
+    });
+    host.querySelectorAll(':scope > .tab-list [role="tab"]').forEach((t) => {
       const on = t.getAttribute('aria-controls') === p.id;
       t.setAttribute('aria-selected', on ? 'true' : 'false');
       t.tabIndex = on ? 0 : -1;
@@ -149,12 +251,21 @@ function revealTabs(el) {
 }
 /** a target inside the view of a list / map / pie switch (ui/treemap-list.js) that is not shown: switch to that view, as a visitor's own choice */
 function revealViews(el) {
-  for (let t = el.closest('[data-ui="treemap-list"]'); t; t = t.parentElement?.closest('[data-ui="treemap-list"]')) {
-    const pane = ['list', 'map', 'pie'].find(v => { const p = t.querySelector(`:scope > .tmap-${v}`); return p && p.contains(el); });
+  for (
+    let t = el.closest('[data-ui="treemap-list"]');
+    t;
+    t = t.parentElement?.closest('[data-ui="treemap-list"]')
+  ) {
+    const pane = ['list', 'map', 'pie'].find((v) => {
+      const p = t.querySelector(`:scope > .tmap-${v}`);
+      return p && p.contains(el);
+    });
     if (!pane || t.dataset.view === pane) continue;
     t.dataset.view = pane;
     t.dataset.explicit = '1';
-    t.querySelectorAll('.tmap-bar input[type="radio"]').forEach(r => { r.checked = r.value === pane; });
+    t.querySelectorAll('.tmap-bar input[type="radio"]').forEach((r) => {
+      r.checked = r.value === pane;
+    });
   }
 }
 function handleTo(id) {
@@ -166,7 +277,9 @@ function handleTo(id) {
   revealTabs(el);
   revealViews(el);
   el.scrollIntoView({ block: 'start' });
-  el.classList.remove('hl'); void el.offsetWidth; el.classList.add('hl');
+  el.classList.remove('hl');
+  void el.offsetWidth;
+  el.classList.add('hl');
   setTimeout(() => el.classList.remove('hl'), 2600);
   if (!el.matches('a,button,input,select,textarea,[tabindex]')) el.setAttribute('tabindex', '-1');
   el.focus({ preventScroll: true });
@@ -174,7 +287,8 @@ function handleTo(id) {
 
 /* ------------------------------------------------------------------ the render pipeline */
 const focusKey = () => {
-  const a = document.activeElement, v = $view();
+  const a = document.activeElement,
+    v = $view();
   if (!a || a === document.body || !v || !v.contains(a)) return null;
   if (a.id) return '#' + CSS.escape(a.id);
   if (a.dataset.fk) return `[data-fk="${CSS.escape(a.dataset.fk)}"]`;
@@ -182,15 +296,23 @@ const focusKey = () => {
 };
 
 async function render(kind) {
-  const { route, params, query, want, segs, periodResolution } = resolve(here());     // an old address → the matching new screen, context kept (js/redirects.js)
-  if (want !== hereHref() || (!HASH && location.hash.startsWith('#/'))) history.replaceState(history.state || { k: ++histK }, '', want);   // path mode: an old #/x link becomes /x
+  const { route, params, query, want, segs, periodResolution } = resolve(here()); // an old address → the matching new screen, context kept (js/redirects.js)
+  if (want !== hereHref() || (!HASH && location.hash.startsWith('#/')))
+    history.replaceState(history.state || { k: ++histK }, '', want); // path mode: an old #/x link becomes /x
   const k = ensureKey();
   lastHref = location.href;
 
   // only the in-page anchor changed: no re-render. Only while no other navigation is in flight (cur.seq === navSeq): when a link was
   // followed and Back came before the new screen was built, Back must supersede that build, or the late screen would paint over the old URL
   const sig = sigOf(route, params, query);
-  if (cur && cur.ok && cur.sig === sig && cur.seq === navSeq && kind !== 'rerender' && kind !== 'load') {
+  if (
+    cur &&
+    cur.ok &&
+    cur.sig === sig &&
+    cur.seq === navSeq &&
+    kind !== 'rerender' &&
+    kind !== 'load'
+  ) {
     if (kind !== 'pop') saveScroll();
     curK = k;
     cur.query = query;
@@ -217,16 +339,21 @@ async function render(kind) {
     store.set('periodNotice', '');
     store.set('period', periodResolution.resolved);
     if (query.unit != null) store.set('unit', query.unit);
-  } finally { applying = false; }
+  } finally {
+    applying = false;
+  }
 
   // the first render over a page the server drew (app/, apps/web/workers/app.ts; data-prerendered names its address): its HTML is already the screen, so no skeleton in between and no rise-in or count-up of what is already shown
   // (dropStalePrerender has taken the mark off an HTML that is the screen of another address)
   const pre = kind === 'load' && document.documentElement.hasAttribute('data-prerendered');
   document.documentElement.removeAttribute('data-prerendered');
-  const timer = kind === 'rerender' || pre ? 0 : setTimeout(() => {
-    if (seq !== navSeq) return;
-    paint(loadingVm(route, params, query));
-  }, 100);
+  const timer =
+    kind === 'rerender' || pre
+      ? 0
+      : setTimeout(() => {
+          if (seq !== navSeq) return;
+          paint(loadingVm(route, params, query));
+        }, 100);
   $view()?.setAttribute('aria-busy', 'true');
 
   let vm;
@@ -234,42 +361,81 @@ async function render(kind) {
   try {
     const seedNode = pre ? document.getElementById('react-screen-seed') : null;
     const seed = seedNode ? JSON.parse(seedNode.textContent) : null;
-    if ((['S26','S30','S25','S35','S14','S16'].includes(route.id))) {
+    if (['S26', 'S30', 'S25', 'S35', 'S14', 'S16'].includes(route.id)) {
       clearTimeout(timer);
       reactBridge = await import(/* @vite-ignore */ bridgeModule);
-      const model = seed?.screen === route.id ? seed : await reactBridge.loadModel(route.id,params,query,signal);
+      const model =
+        seed?.screen === route.id
+          ? seed
+          : await reactBridge.loadModel(route.id, params, query, signal);
       if (!model.view || model.view === 'ready') await loadStyle(route.file);
       if (seq !== navSeq) return;
-      await reactBridge.mount(model,{go,announce,retry:rerender,setQuery},!!seed,signal);
+      await reactBridge.mount(model, { go, announce, retry: rerender, setQuery }, !!seed, signal);
       if (seq !== navSeq || signal.aborted) return;
       seedNode?.remove();
       reactOwned = true;
       vm = await reactBridge.metadata(model);
       if (seq !== navSeq || signal.aborted) return;
       document.title = docTitle(vm);
-      if (!seed) seo.apply(vm,docTitle(vm));
-    } else vm = await build(route, params, query, { signal, kind, path: segs.join('/'), stale: () => seq !== navSeq, loadStyle, actions: { setQuery, rerender, announce, go } });
+      if (!seed) seo.apply(vm, docTitle(vm));
+    } else
+      vm = await build(route, params, query, {
+        signal,
+        kind,
+        path: segs.join('/'),
+        stale: () => seq !== navSeq,
+        loadStyle,
+        actions: { setQuery, rerender, announce, go },
+      });
     if (seq !== navSeq) return;
   } catch (e) {
     if (e?.name === 'AbortError' || seq !== navSeq) return;
     console.error(e);
     vm = errorVm(route, params, query);
-  } finally { clearTimeout(timer); }
+  } finally {
+    clearTimeout(timer);
+  }
 
   if (!reactOwned && vm.route.id === 'S30' && vm.view === 'ready') {
     reactBridge = await import(/* @vite-ignore */ bridgeModule);
-    const model = await reactBridge.loadModel('S30',vm.params,query,signal);
+    const model = await reactBridge.loadModel('S30', vm.params, query, signal);
     if (seq !== navSeq) return;
-    await reactBridge.mount(model,{go,announce,retry:rerender,setQuery},false,signal);
+    await reactBridge.mount(model, { go, announce, retry: rerender, setQuery }, false, signal);
     if (seq !== navSeq || signal.aborted) return;
     vm = await reactBridge.metadata(model);
     if (seq !== navSeq || signal.aborted) return;
-    document.title=docTitle(vm);seo.apply(vm,docTitle(vm));
-    reactOwned=true;
+    document.title = docTitle(vm);
+    seo.apply(vm, docTitle(vm));
+    reactOwned = true;
   }
   if (!reactOwned) paint(vm);
-  cur = { route: vm.route, params: vm.params, query, sig: sigOf(vm.route, vm.params, query), ok: vm.view === 'ready' || vm.view === 'loading' || vm.view === 'empty' || vm.view === 'pending', vm, ctx: vm.ctx, kind, seq };
-  for (const f of listeners) { try { f({ route: vm.route, params: vm.params, query, demo: vm.demo, kind, view: vm.view, title: vm.title }); } catch (e) { console.error(e); } }
+  cur = {
+    route: vm.route,
+    params: vm.params,
+    query,
+    sig: sigOf(vm.route, vm.params, query),
+    ok:
+      vm.view === 'ready' || vm.view === 'loading' || vm.view === 'empty' || vm.view === 'pending',
+    vm,
+    ctx: vm.ctx,
+    kind,
+    seq,
+  };
+  for (const f of listeners) {
+    try {
+      f({
+        route: vm.route,
+        params: vm.params,
+        query,
+        demo: vm.demo,
+        kind,
+        view: vm.view,
+        title: vm.title,
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  }
 
   const article = $view().querySelector('article.page');
   const h1 = article.querySelector('h1');
@@ -280,9 +446,10 @@ async function render(kind) {
     else window.scrollTo(0, 0);
   };
   applyScroll();
-  if (!pre) motion.enter(article, kind);                         // V6: the screen rises in; blocks further down appear on scroll (nothing on a 'rerender'; off for reduced motion)
-  if (kind === 'rerender') { if (fk) document.querySelector(fk)?.focus({ preventScroll: true }); }
-  else if (kind !== 'load' && !query.to) h1.focus({ preventScroll: true });
+  if (!pre) motion.enter(article, kind); // V6: the screen rises in; blocks further down appear on scroll (nothing on a 'rerender'; off for reduced motion)
+  if (kind === 'rerender') {
+    if (fk) document.querySelector(fk)?.focus({ preventScroll: true });
+  } else if (kind !== 'load' && !query.to) h1.focus({ preventScroll: true });
 
   if (reactOwned) return;
 
@@ -296,39 +463,88 @@ async function render(kind) {
           const c = await vm.mod.mount(article.querySelector('.page-body'), vm.ctx);
           if (typeof c === 'function') own.push(c);
         }
-      } else await hydrate(article, { route: vm.route, params: vm.params, query, data: {}, missing: [], period: store.period, store, setQuery, rerender, announce, go }, own);
-    } catch (e) { console.error(e); }
-    if (seq !== navSeq) { for (const f of own) { try { f(); } catch (e) { console.error(e); } } return; }
+      } else
+        await hydrate(
+          article,
+          {
+            route: vm.route,
+            params: vm.params,
+            query,
+            data: {},
+            missing: [],
+            period: store.period,
+            store,
+            setQuery,
+            rerender,
+            announce,
+            go,
+          },
+          own,
+        );
+    } catch (e) {
+      console.error(e);
+    }
+    if (seq !== navSeq) {
+      for (const f of own) {
+        try {
+          f();
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      return;
+    }
     cleanups.push(...own);
-    if (article.querySelector('[data-gl-scan]')) await import('./glossary.js').then(m => m.scan?.(article)).catch(e => console.error('[glossary] scan failed', e));   // before data-ready: a ready screen has its glossary links
-    await import('./ui/png.js').then(m => m.scan?.(article)).catch(e => console.error('[png] scan failed', e));   // „PNG“ button on every statistic
+    if (article.querySelector('[data-gl-scan]'))
+      await import('./glossary.js')
+        .then((m) => m.scan?.(article))
+        .catch((e) => console.error('[glossary] scan failed', e)); // before data-ready: a ready screen has its glossary links
+    await import('./ui/png.js')
+      .then((m) => m.scan?.(article))
+      .catch((e) => console.error('[png] scan failed', e)); // „PNG“ button on every statistic
     if (seq !== navSeq) return;
     if (kind === 'pop' || query.to || kind === 'load') applyScroll();
-    if (!pre) motion.scan(article);                               // bars fill and numbers count when they come into view
+    if (!pre) motion.scan(article); // bars fill and numbers count when they come into view
     article.dataset.ready = '1';
   })();
   await readyP;
 }
 
 /* ------------------------------------------------------------------ events */
-const noFragment = h => h.split('#')[0];
+const noFragment = (h) => h.split('#')[0];
 function onLocation(kind) {
   // path mode: when only a plain #fragment changed (a link to #x, or Back from it), the browser scrolls to it. Chrome fires popstate as well
   // as hashchange for it, so both are ignored; a render would take the screen back to the top
-  if (!HASH && !location.hash.startsWith('#/') && noFragment(location.href) === noFragment(lastHref)) { lastHref = location.href; return; }
+  if (
+    !HASH &&
+    !location.hash.startsWith('#/') &&
+    noFragment(location.href) === noFragment(lastHref)
+  ) {
+    lastHref = location.href;
+    return;
+  }
   if (location.href !== lastHref) render(kind);
 }
 
 function onClick(e) {
-  if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey)
+    return;
   const a = e.target.closest && e.target.closest('a[href]');
   if (a?.hasAttribute('data-current-release')) return;
-  if (!a || (a.getAttribute('target') || '_self') !== '_self' || a.hasAttribute('download')) return;     // getAttribute: an SVG <a> (the map) has an object as .target
+  if (!a || (a.getAttribute('target') || '_self') !== '_self' || a.hasAttribute('download')) return; // getAttribute: an SVG <a> (the map) has an object as .target
   const h = a.getAttribute('href');
-  if (h === '#main') { e.preventDefault(); const mn = document.getElementById('main'); mn?.focus({ preventScroll: false }); return; }
+  if (h === '#main') {
+    e.preventDefault();
+    const mn = document.getElementById('main');
+    mn?.focus({ preventScroll: false });
+    return;
+  }
   if (!isAppHref(h)) return;
   e.preventDefault();
-  if (h.startsWith('#')) { go(h); return; }
+  if (h.startsWith('#')) {
+    go(h);
+    return;
+  }
   const u = new URL(h, location.href);
   go(internal(u.pathname) + u.search);
 }
@@ -352,7 +568,7 @@ function onStore(key) {
       unit: v === 'pct' ? 'Показваме в проценти' : 'Показваме в евро',
       perPerson: `На човек: ${v ? 'включено' : 'изключено'}`,
       leva: `Сумите и в лева: ${v ? 'включено' : 'изключено'}`,
-      onlyReal: `Само официални данни: ${v ? 'включено' : 'изключено'}`
+      onlyReal: `Само официални данни: ${v ? 'включено' : 'изключено'}`,
     }[key];
     if (msg) announce(msg);
   }, 0);
@@ -363,13 +579,17 @@ function onStore(key) {
  *  must not stand under the new address while the core data loads: main.js calls this before it waits, and the view stays empty and
  *  busy until the router paints the screen. */
 export function dropStalePrerender() {
-  const doc = document.documentElement, at = doc.getAttribute('data-prerendered');
+  const doc = document.documentElement,
+    at = doc.getAttribute('data-prerendered');
   if (at === null) return;
-  const { found, screen } = resolve(here());                    // the server draws a screen from its own keys only (js/routes.js screenQuery)
+  const { found, screen } = resolve(here()); // the server draws a screen from its own keys only (js/routes.js screenQuery)
   if (at === '404' ? !found : at === screen && !location.hash.startsWith('#/')) return;
   doc.removeAttribute('data-prerendered');
   const v = $view();
-  if (v) { v.replaceChildren(); v.setAttribute('aria-busy', 'true'); }
+  if (v) {
+    v.replaceChildren();
+    v.setAttribute('aria-busy', 'true');
+  }
 }
 
 export const router = {
@@ -388,7 +608,11 @@ export const router = {
     router.init();
     if (started) return readyP;
     started = true;
-    try { history.scrollRestoration = 'manual'; } catch { /* old browsers */ }
+    try {
+      history.scrollRestoration = 'manual';
+    } catch {
+      /* old browsers */
+    }
     window.addEventListener('popstate', () => onLocation('pop'));
     window.addEventListener('hashchange', () => onLocation('hash'));
     document.addEventListener('click', onClick);
@@ -396,14 +620,34 @@ export const router = {
     load.then(finishInitial, finishInitial);
     return load;
   },
-  go, setQuery, rerender, announce, onNavigate, hydrate, prepare, NotFound,
-  parseHash, href: routeHref,
-  get current() { return cur; },
+  go,
+  setQuery,
+  rerender,
+  announce,
+  onNavigate,
+  hydrate,
+  prepare,
+  NotFound,
+  parseHash,
+  href: routeHref,
+  get current() {
+    return cur;
+  },
   /** the periods the current screen supports: 'all' | 'none' | ['2026.draft', …] (the shell uses it for the period switch) */
-  get periods() { return cur ? periodsFor(cur.route, cur.vm && cur.vm.mod) : periodsFor(resolve(here()).route); },
-  get ready() { return readyP; },
-  get initialReady() { return initialReady; },
-  markPeriodSelection() { explicitPeriodSelection = true; },
-  get periodSelected() { return explicitPeriodSelection; },
-  routes: ROUTES
+  get periods() {
+    return cur ? periodsFor(cur.route, cur.vm && cur.vm.mod) : periodsFor(resolve(here()).route);
+  },
+  get ready() {
+    return readyP;
+  },
+  get initialReady() {
+    return initialReady;
+  },
+  markPeriodSelection() {
+    explicitPeriodSelection = true;
+  },
+  get periodSelected() {
+    return explicitPeriodSelection;
+  },
+  routes: ROUTES,
 };

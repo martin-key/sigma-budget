@@ -5,131 +5,279 @@
    Every colour is a hex value: ECharts (js/charts.js) reads these tokens and cannot parse oklch(). The oklch source values are in the comments.
    The v2/v3 token names are kept as aliases (pages and components use them); the СИГМА names are the source of truth. */
 
-:root{
-  color-scheme:light;   /* the light theme is the default; the dark one is below */
+:root {
+  color-scheme: light; /* the light theme is the default; the dark one is below */
 
   /* ---- СИГМА palette (apps/web/app/styles/tokens.css), converted to sRGB ---- */
-  --paper:#FDFAF4;        /* oklch(98.5% .008 80)  page */
-  --paper-warm:#F6F1E9;   /* oklch(96% .012 78)    hover, zebra, chips, wells */
-  --paper-deep:#F0EAE1;   /* oklch(94% .014 78)    ranked-bar fill */
-  --ink-0:#15110C;        /* oklch(18% .012 70)    text, rules, primary actions */
-  --ink-mid:#46423D;      /* oklch(38% .01 70)     secondary text (9.6:1 on paper) */
-  --ink-soft:#66625E;     /* oklch(50% .008 70)    captions, AA: 5.8:1 paper · 5.4 paper-warm · 5.1 paper-deep */
-  --rule:#D4D0CB;         /* oklch(86% .008 75)    hairline dividers ONLY (1.5:1), never a control border */
-  --rule-soft:#E4E1DC;    /* oklch(91% .008 75)    row dividers */
-  --crimson:#AC1B18;      /* oklch(48% .18 28)     the one accent: 6.9:1 on paper */
-  --crimson-tint:#FFE2DC; /* oklch(94% .04 28)     warning wash */
-  --pos:#006647;          /* oklch(45% .1 165)     positive teal (6.7:1 on paper) */
+  --paper: #fdfaf4; /* oklch(98.5% .008 80)  page */
+  --paper-warm: #f6f1e9; /* oklch(96% .012 78)    hover, zebra, chips, wells */
+  --paper-deep: #f0eae1; /* oklch(94% .014 78)    ranked-bar fill */
+  --ink-0: #15110c; /* oklch(18% .012 70)    text, rules, primary actions */
+  --ink-mid: #46423d; /* oklch(38% .01 70)     secondary text (9.6:1 on paper) */
+  --ink-soft: #66625e; /* oklch(50% .008 70)    captions, AA: 5.8:1 paper · 5.4 paper-warm · 5.1 paper-deep */
+  --rule: #d4d0cb; /* oklch(86% .008 75)    hairline dividers ONLY (1.5:1), never a control border */
+  --rule-soft: #e4e1dc; /* oklch(91% .008 75)    row dividers */
+  --crimson: #ac1b18; /* oklch(48% .18 28)     the one accent: 6.9:1 on paper */
+  --crimson-tint: #ffe2dc; /* oklch(94% .04 28)     warning wash */
+  --pos: #006647; /* oklch(45% .1 165)     positive teal (6.7:1 on paper) */
 
   /* ---- type: three voices, system stacks, no webfont ---- */
-  --font-serif:Charter,"Iowan Old Style",Georgia,"Times New Roman",serif;
-  --font-sans:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;
-  --font-mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
-  --font-body:var(--font-sans);
-  --font-head:var(--font-serif);
+  --font-serif: Charter, 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+  --font-sans:
+    system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+  --font-body: var(--font-sans);
+  --font-head: var(--font-serif);
   /* sizes: 12 mono labels (nothing that carries meaning is smaller) · 14 secondary · 15 body (16 on phones) · 20–26 h3 · 28–40 h2 · 36–56 h1 */
-  --fs-xs:.75rem; --fs-s:.875rem; --fs-0:.9375rem; --fs-1:1.25rem; --fs-3:clamp(1.75rem,3.2vw,2.5rem); --fs-5:clamp(2.25rem,4.4vw,3.5rem);
-  --fs-2:var(--fs-1); --fs-4:var(--fs-3); --fs-6:var(--fs-5);
-  --fs-h1:var(--fs-5); --fs-h2:var(--fs-3); --fs-h3:clamp(1.25rem,2vw,1.625rem); --fs-block:clamp(1.375rem,2.2vw,1.75rem);
-  --fs-lede:clamp(1rem,.9rem + .45vw,1.125rem);
-  --lh-tight:1.1; --lh-body:1.5; --track-head:-.02em; --track-display:-.025em; --track-mono:.14em;
+  --fs-xs: 0.75rem;
+  --fs-s: 0.875rem;
+  --fs-0: 0.9375rem;
+  --fs-1: 1.25rem;
+  --fs-3: clamp(1.75rem, 3.2vw, 2.5rem);
+  --fs-5: clamp(2.25rem, 4.4vw, 3.5rem);
+  --fs-2: var(--fs-1);
+  --fs-4: var(--fs-3);
+  --fs-6: var(--fs-5);
+  --fs-h1: var(--fs-5);
+  --fs-h2: var(--fs-3);
+  --fs-h3: clamp(1.25rem, 2vw, 1.625rem);
+  --fs-block: clamp(1.375rem, 2.2vw, 1.75rem);
+  --fs-lede: clamp(1rem, 0.9rem + 0.45vw, 1.125rem);
+  --lh-tight: 1.1;
+  --lh-body: 1.5;
+  --track-head: -0.02em;
+  --track-display: -0.025em;
+  --track-mono: 0.14em;
 
   /* ---- space (strict 8-pt), radii, shadow, motion ---- */
-  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px; --sp-7:48px; --sp-8:64px; --sp-9:96px;
-  --r-1:2px; --r-2:3px; --r-3:3px; --r-4:3px; --r-full:2px;   /* СИГМА: square; 3px is the largest radius */
-  --shadow-1:none;
-  --shadow-2:0 18px 40px -24px rgb(0 0 0/.45);                  /* popovers only (СИГМА's search popover lift) */
-  --t-fast:150ms; --t-med:250ms; --ease:cubic-bezier(.16,1,.3,1);
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --sp-8: 64px;
+  --sp-9: 96px;
+  --r-1: 2px;
+  --r-2: 3px;
+  --r-3: 3px;
+  --r-4: 3px;
+  --r-full: 2px; /* СИГМА: square; 3px is the largest radius */
+  --shadow-1: none;
+  --shadow-2: 0 18px 40px -24px rgb(0 0 0/0.45); /* popovers only (СИГМА's search popover lift) */
+  --t-fast: 150ms;
+  --t-med: 250ms;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
   /* motion (V6, 26.10): the ONE source of timings; css/motion.css and js/ui/motion.js read these. Only transform and opacity are animated. «prefers-reduced-motion: reduce» zeroes all of them (below) and js/ui/motion.js stays off. */
-  --dur-1:150ms; --dur-2:240ms; --dur-3:420ms; --dur-4:700ms; --stagger:55ms; --ease-out:var(--ease); --ease-io:cubic-bezier(.65,0,.35,1);
+  --dur-1: 150ms;
+  --dur-2: 240ms;
+  --dur-3: 420ms;
+  --dur-4: 700ms;
+  --stagger: 55ms;
+  --ease-out: var(--ease);
+  --ease-io: cubic-bezier(0.65, 0, 0.35, 1);
 
   /* ---- layout ---- */
-  --max:1280px; --max-narrow:880px; --gutter:64px;
-  --content-w:1152px; --nav-w:0px; --topbar-h:0px; --tabbar-h:64px;
+  --max: 1280px;
+  --max-narrow: 880px;
+  --gutter: 64px;
+  --content-w: 1152px;
+  --nav-w: 0px;
+  --topbar-h: 0px;
+  --tabbar-h: 64px;
 
   /* ---- roles (v2/v3 names) mapped onto the СИГМА palette ---- */
-  --bg:var(--paper); --card:var(--paper); --surface:var(--paper); --sunk:var(--paper-warm); --deep:var(--paper-deep);
-  --overlay:rgb(21 17 12/.46);
-  --ink:var(--ink-0); --muted:var(--ink-mid); --faint:var(--ink-soft);
-  --line:var(--rule); --line-soft:var(--rule-soft); --line-strong:var(--ink-soft);   /* line-strong = control borders (5.8:1) */
-  --inv:var(--ink-0); --on-inv:var(--paper); --on-inv-2:#D4D0CB;
-  --data:var(--ink-0); --data-hover:var(--crimson); --data-soft:var(--paper-warm); --data-2:#B4AB9F; --data-3:#D4D0CB; --on-data:var(--paper);
-  --accent:var(--crimson); --accent-soft:var(--crimson-tint); --accent-ink:var(--crimson); --on-accent:var(--paper);
-  --focus:var(--crimson);
-  --cur-ic:var(--paper);
+  --bg: var(--paper);
+  --card: var(--paper);
+  --surface: var(--paper);
+  --sunk: var(--paper-warm);
+  --deep: var(--paper-deep);
+  --overlay: rgb(21 17 12/0.46);
+  --ink: var(--ink-0);
+  --muted: var(--ink-mid);
+  --faint: var(--ink-soft);
+  --line: var(--rule);
+  --line-soft: var(--rule-soft);
+  --line-strong: var(--ink-soft); /* line-strong = control borders (5.8:1) */
+  --inv: var(--ink-0);
+  --on-inv: var(--paper);
+  --on-inv-2: #d4d0cb;
+  --data: var(--ink-0);
+  --data-hover: var(--crimson);
+  --data-soft: var(--paper-warm);
+  --data-2: #b4ab9f;
+  --data-3: #d4d0cb;
+  --on-data: var(--paper);
+  --accent: var(--crimson);
+  --accent-soft: var(--crimson-tint);
+  --accent-ink: var(--crimson);
+  --on-accent: var(--paper);
+  --focus: var(--crimson);
+  --cur-ic: var(--paper);
 
   /* revenue / expenditure pair: teal vs ink (3.6:1 between them, both ≥5:1 on paper) */
-  --rev:#1F7A5C; --exp:#15110C;
+  --rev: #1f7a5c;
+  --exp: #15110c;
 
   /* categorical series, alternating dark / light so that NEIGHBOURS keep ≥ 3:1 (3.1–8.9:1): ink, warm grey, crimson, light teal,
      steel, ochre, plum, light steel. Identity never rests on colour alone: legends, labels and table twins carry it. */
-  --series-1:#15110C; --series-2:#B4AB9F; --series-3:#AC1B18; --series-4:#7AB8A0;
-  --esa:#2E4E6E; --esa-soft:#E4EBF2;
-  --series-5:#2E4E6E; --series-6:#CDA556; --series-7:#6A3E6E; --series-8:#A9B3BF;
-  --series-other:#8C857C; --series-other-2:#5F5A54;
-  --series-ring:var(--paper);
+  --series-1: #15110c;
+  --series-2: #b4ab9f;
+  --series-3: #ac1b18;
+  --series-4: #7ab8a0;
+  --esa: #2e4e6e;
+  --esa-soft: #e4ebf2;
+  --series-5: #2e4e6e;
+  --series-6: #cda556;
+  --series-7: #6a3e6e;
+  --series-8: #a9b3bf;
+  --series-other: #8c857c;
+  --series-other-2: #5f5a54;
+  --series-ring: var(--paper);
 
   /* semantics (always with icon + words, never colour alone) */
-  --ok:var(--pos); --ok-soft:#E3F0E9; --warn:#7A4E00; --warn-soft:#F6EBD3; --bad:var(--crimson); --bad-soft:var(--crimson-tint);
+  --ok: var(--pos);
+  --ok-soft: #e3f0e9;
+  --warn: #7a4e00;
+  --warn-soft: #f6ebd3;
+  --bad: var(--crimson);
+  --bad-soft: var(--crimson-tint);
 
   /* data status: mono tags told apart by their words and icons; colour only supports them */
-  --st-real:#006647;     --st-real-soft:var(--paper);
-  --st-partial:#2E4E6E;  --st-partial-soft:var(--paper);
-  --st-pending:#66625E;  --st-pending-soft:var(--paper-warm);
-  --st-mock:#AC1B18;     --st-mock-soft:var(--crimson-tint);
-  --st-forecast:#46423D; --st-forecast-soft:var(--paper);
-  --hatch:rgb(172 27 24/.24);    /* „примерни данни“: crimson 45° hatch, never used for real data */
-  --hatch-step:7px;
-  --swatch-edge:rgb(0 0 0/.18);  /* the hairline round a legend swatch */
+  --st-real: #006647;
+  --st-real-soft: var(--paper);
+  --st-partial: #2e4e6e;
+  --st-partial-soft: var(--paper);
+  --st-pending: #66625e;
+  --st-pending-soft: var(--paper-warm);
+  --st-mock: #ac1b18;
+  --st-mock-soft: var(--crimson-tint);
+  --st-forecast: #46423d;
+  --st-forecast-soft: var(--paper);
+  --hatch: rgb(172 27 24/0.24); /* „примерни данни“: crimson 45° hatch, never used for real data */
+  --hatch-step: 7px;
+  --swatch-edge: rgb(0 0 0/0.18); /* the hairline round a legend swatch */
 }
 
 /* Currently not selectable: the server fixes data-theme="light". */
 /* ---- dark: the system's choice, or the visitor's (html[data-theme="dark"]); html[data-theme="light"] keeps the light one ---- */
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    color-scheme:dark;
-    --paper:#14120F; --paper-warm:#1D1A16; --paper-deep:#27231E;
-    --ink-0:#F1ECE3; --ink-mid:#CFC8BD; --ink-soft:#A8A094;
-    --rule:#423C35; --rule-soft:#2E2A25;
-    --crimson:#FF7A6B; --crimson-tint:#3A1915; --pos:#5ACB9C;
-    --overlay:rgb(0 0 0/.6); --on-inv-2:#46423D;
-    --data-2:#7A7268; --data-3:#423C35;
-    --rev:#25926E; --exp:#F1ECE3;
-    --series-1:#F1ECE3; --series-2:#726759; --series-3:#F5B6B4; --series-4:#3D735E;
-    --series-5:#B1C8DF; --series-6:#836427; --series-7:#D7BDDA; --series-8:#5C6A7B;
-    --series-other:#8C857C; --series-other-2:#B5AEA4;
-    --esa:#86AEDA; --esa-soft:#1C2733;
-    --ok-soft:#12261D; --warn:#E3B15A; --warn-soft:#2E2410;
-    --st-real:#5ACB9C; --st-partial:#86AEDA; --st-pending:#A8A094; --st-mock:#FF7A6B; --st-forecast:#CFC8BD;
-    --hatch:rgb(255 122 107/.30);
-    --shadow-2:0 18px 40px -24px rgb(0 0 0/.9);
-    --swatch-edge:rgb(255 255 255/.28);
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --paper: #14120f;
+    --paper-warm: #1d1a16;
+    --paper-deep: #27231e;
+    --ink-0: #f1ece3;
+    --ink-mid: #cfc8bd;
+    --ink-soft: #a8a094;
+    --rule: #423c35;
+    --rule-soft: #2e2a25;
+    --crimson: #ff7a6b;
+    --crimson-tint: #3a1915;
+    --pos: #5acb9c;
+    --overlay: rgb(0 0 0/0.6);
+    --on-inv-2: #46423d;
+    --data-2: #7a7268;
+    --data-3: #423c35;
+    --rev: #25926e;
+    --exp: #f1ece3;
+    --series-1: #f1ece3;
+    --series-2: #726759;
+    --series-3: #f5b6b4;
+    --series-4: #3d735e;
+    --series-5: #b1c8df;
+    --series-6: #836427;
+    --series-7: #d7bdda;
+    --series-8: #5c6a7b;
+    --series-other: #8c857c;
+    --series-other-2: #b5aea4;
+    --esa: #86aeda;
+    --esa-soft: #1c2733;
+    --ok-soft: #12261d;
+    --warn: #e3b15a;
+    --warn-soft: #2e2410;
+    --st-real: #5acb9c;
+    --st-partial: #86aeda;
+    --st-pending: #a8a094;
+    --st-mock: #ff7a6b;
+    --st-forecast: #cfc8bd;
+    --hatch: rgb(255 122 107/0.3);
+    --shadow-2: 0 18px 40px -24px rgb(0 0 0/0.9);
+    --swatch-edge: rgb(255 255 255/0.28);
   }
 }
-:root[data-theme="dark"]{
-  color-scheme:dark;
-  --paper:#14120F; --paper-warm:#1D1A16; --paper-deep:#27231E;
-  --ink-0:#F1ECE3; --ink-mid:#CFC8BD; --ink-soft:#A8A094;
-  --rule:#423C35; --rule-soft:#2E2A25;
-  --crimson:#FF7A6B; --crimson-tint:#3A1915; --pos:#5ACB9C;
-  --overlay:rgb(0 0 0/.6); --on-inv-2:#46423D;
-  --data-2:#7A7268; --data-3:#423C35;
-  --rev:#25926E; --exp:#F1ECE3;
-  --series-1:#F1ECE3; --series-2:#726759; --series-3:#F5B6B4; --series-4:#3D735E;
-  --series-5:#B1C8DF; --series-6:#836427; --series-7:#D7BDDA; --series-8:#5C6A7B;
-  --series-other:#8C857C; --series-other-2:#B5AEA4;
-  --esa:#86AEDA; --esa-soft:#1C2733;
-  --ok-soft:#12261D; --warn:#E3B15A; --warn-soft:#2E2410;
-  --st-real:#5ACB9C; --st-partial:#86AEDA; --st-pending:#A8A094; --st-mock:#FF7A6B; --st-forecast:#CFC8BD;
-  --hatch:rgb(255 122 107/.30);
-  --shadow-2:0 18px 40px -24px rgb(0 0 0/.9);
-  --swatch-edge:rgb(255 255 255/.28);
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --paper: #14120f;
+  --paper-warm: #1d1a16;
+  --paper-deep: #27231e;
+  --ink-0: #f1ece3;
+  --ink-mid: #cfc8bd;
+  --ink-soft: #a8a094;
+  --rule: #423c35;
+  --rule-soft: #2e2a25;
+  --crimson: #ff7a6b;
+  --crimson-tint: #3a1915;
+  --pos: #5acb9c;
+  --overlay: rgb(0 0 0/0.6);
+  --on-inv-2: #46423d;
+  --data-2: #7a7268;
+  --data-3: #423c35;
+  --rev: #25926e;
+  --exp: #f1ece3;
+  --series-1: #f1ece3;
+  --series-2: #726759;
+  --series-3: #f5b6b4;
+  --series-4: #3d735e;
+  --series-5: #b1c8df;
+  --series-6: #836427;
+  --series-7: #d7bdda;
+  --series-8: #5c6a7b;
+  --series-other: #8c857c;
+  --series-other-2: #b5aea4;
+  --esa: #86aeda;
+  --esa-soft: #1c2733;
+  --ok-soft: #12261d;
+  --warn: #e3b15a;
+  --warn-soft: #2e2410;
+  --st-real: #5acb9c;
+  --st-partial: #86aeda;
+  --st-pending: #a8a094;
+  --st-mock: #ff7a6b;
+  --st-forecast: #cfc8bd;
+  --hatch: rgb(255 122 107/0.3);
+  --shadow-2: 0 18px 40px -24px rgb(0 0 0/0.9);
+  --swatch-edge: rgb(255 255 255/0.28);
 }
 
 /* 15 px body on wide screens, 16 px on phones (legibility; inputs stay ≥16 px so iOS does not zoom) */
-html{font-size:100%}
-@media (max-width:880px){:root{--gutter:28px}}
-@media (max-width:599px){:root{--gutter:16px;--fs-0:1rem}}
-@media (prefers-reduced-motion:reduce){:root{--t-fast:0ms;--t-med:0ms;--dur-1:0ms;--dur-2:0ms;--dur-3:0ms;--dur-4:0ms;--stagger:0ms}}
+html {
+  font-size: 100%;
+}
+@media (max-width: 880px) {
+  :root {
+    --gutter: 28px;
+  }
+}
+@media (max-width: 599px) {
+  :root {
+    --gutter: 16px;
+    --fs-0: 1rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --t-fast: 0ms;
+    --t-med: 0ms;
+    --dur-1: 0ms;
+    --dur-2: 0ms;
+    --dur-3: 0ms;
+    --dur-4: 0ms;
+    --stagger: 0ms;
+  }
+}
 
-:root[data-theme="light"]{color-scheme:light}
+:root[data-theme='light'] {
+  color-scheme: light;
+}

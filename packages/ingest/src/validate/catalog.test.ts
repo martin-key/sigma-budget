@@ -104,54 +104,60 @@ function capture(fn: (c: Context) => any, ctx: Context): any {
   }
 }
 describe('CORE and CATALOG frozen Python differential', () => {
+  // Cold full-corpus CORE + CATALOG baseline measured 5.43s with V8 coverage.
+  // Keep the default limit for the remaining differential scenarios.
   for (const test of cases)
-    it(test.name, () => {
-      const root = mkdtempSync(join(tmpdir(), 'sigma-17a-'));
-      const item: (typeof evidence)[number] = { name: test.name, status: 'FAIL', groups: {} };
-      try {
-        cpSync(new URL('corpus/', base), root, { recursive: true });
-        if (!originalCases.includes(test))
-          cpSync(new URL('overlay/', base), root, { recursive: true });
-        for (const op of test.ops) mutate(root, op);
-        for (const group of test.groups) {
-          const actual = capture(group === 'CORE' ? core : catalog, new Context(root));
-          item.groups[group] = actual;
-          expect(actual).toEqual(oracle[test.name][group]);
-          if (test.compiled) {
-            const run = spawnSync(
-              process.execPath,
-              [
-                new URL('../../dist/validate/cli17a.js', import.meta.url).pathname,
-                '--root',
-                root,
-                '--only',
-                group,
-              ],
-              { cwd: root, encoding: 'utf8' },
-            );
-            const output = JSON.parse(run.stdout),
-              expected = actual.crash
-                ? {
-                    name: group,
-                    n: 1,
-                    problems: ['group crashed: ' + actual.crash],
-                    warnings: [],
-                    facts: [],
-                  }
-                : oracle[test.name][group],
-              baseline = oracle['key-baseline'][group].problems,
-              problems = expected.problems.filter((p: string) => !baseline.includes(p));
-            expect(output.raw).toEqual([expected]);
-            expect(output.groups[0].problems).toEqual(problems);
-            expect(run.status, run.stderr).toBe(problems.length ? 1 : 0);
+    it(
+      test.name,
+      () => {
+        const root = mkdtempSync(join(tmpdir(), 'sigma-17a-'));
+        const item: (typeof evidence)[number] = { name: test.name, status: 'FAIL', groups: {} };
+        try {
+          cpSync(new URL('corpus/', base), root, { recursive: true });
+          if (!originalCases.includes(test))
+            cpSync(new URL('overlay/', base), root, { recursive: true });
+          for (const op of test.ops) mutate(root, op);
+          for (const group of test.groups) {
+            const actual = capture(group === 'CORE' ? core : catalog, new Context(root));
+            item.groups[group] = actual;
+            expect(actual).toEqual(oracle[test.name][group]);
+            if (test.compiled) {
+              const run = spawnSync(
+                process.execPath,
+                [
+                  new URL('../../dist/validate/cli17a.js', import.meta.url).pathname,
+                  '--root',
+                  root,
+                  '--only',
+                  group,
+                ],
+                { cwd: root, encoding: 'utf8' },
+              );
+              const output = JSON.parse(run.stdout),
+                expected = actual.crash
+                  ? {
+                      name: group,
+                      n: 1,
+                      problems: ['group crashed: ' + actual.crash],
+                      warnings: [],
+                      facts: [],
+                    }
+                  : oracle[test.name][group],
+                baseline = oracle['key-baseline'][group].problems,
+                problems = expected.problems.filter((p: string) => !baseline.includes(p));
+              expect(output.raw).toEqual([expected]);
+              expect(output.groups[0].problems).toEqual(problems);
+              expect(run.status, run.stderr).toBe(problems.length ? 1 : 0);
+            }
           }
+          item.status = 'PASS';
+        } finally {
+          evidence.push(item);
+          rmSync(root, { recursive: true, force: true });
         }
-        item.status = 'PASS';
-      } finally {
-        evidence.push(item);
-        rmSync(root, { recursive: true, force: true });
-      }
-    });
+      },
+      test.name === 'baseline' ? 15_000 : undefined,
+    );
 });
 
 describe('complete vintage-key CLI outcomes from the Python wrapper', () => {

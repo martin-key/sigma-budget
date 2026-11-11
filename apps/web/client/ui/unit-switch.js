@@ -6,15 +6,28 @@
 import { html } from '../html.js';
 import { seg } from './seg.js';
 
-const CARRIES = 'Изборът остава и на другите екрани.';      // `unit` is one shared, stored preference, so the choice follows the visitor; a screen's note must not say otherwise
+const CARRIES = 'Изборът остава и на другите екрани.'; // `unit` is one shared, stored preference, so the choice follows the visitor; a screen's note must not say otherwise
 
 export function unitSwitch(ctx, o = {}) {
   const name = o.name || 'unit';
-  return html`<div class="unit-switch"><span class="unit-switch-label" aria-hidden="true">Покажи сумите в:</span>${seg({ name, label: 'Покажи сумите в', value: ctx.store.get('unit'), options: [{ value: 'eur', label: 'В евро' }, { value: 'pct', label: '% от БВП' }] })}<p class="unit-switch-note small muted">${o.note ? `${o.note} ` : ''}${CARRIES}</p></div>`;
+  return html`<div class="unit-switch"><span class="unit-switch-label" aria-hidden="true">Покажи сумите в:</span>${seg(
+    {
+      name,
+      label: 'Покажи сумите в',
+      value: ctx.store.get('unit'),
+      options: [
+        { value: 'eur', label: 'В евро' },
+        { value: 'pct', label: '% от БВП' },
+      ],
+    },
+  )}<p class="unit-switch-note small muted">${o.note ? `${o.note} ` : ''}${CARRIES}</p></div>`;
 }
 
 export function bindUnitSwitch(root, ctx, name = 'unit') {
-  const onChange = e => { const t = e.target; if (t && t.name === name && t.checked) ctx.store.set('unit', t.value); };
+  const onChange = (e) => {
+    const t = e.target;
+    if (t && t.name === name && t.checked) ctx.store.set('unit', t.value);
+  };
   root.addEventListener('change', onChange);
   return () => root.removeEventListener('change', onChange);
 }

@@ -1,47 +1,70 @@
 <!doctype html>
 <html lang="bg" data-theme="light">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>СИГМА Бюджет</title>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; font-src 'self'; base-uri 'self'; form-action 'none'; object-src 'none'">
-<meta name="description" content="Държавният бюджет на България на разбираем език, по официални данни: откъде идват парите, къде отиват, изпълнява ли се планът и колко дължим.">
-<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
-<meta name="site-origin" content="https://sigma-budget.my-data.bg">
-<meta name="feedback-email" content="">
-<meta name="sigma-url" content="https://sigma.midt.bg/">
-<meta name="color-scheme" content="light">
-<meta name="theme-color" content="#FDFAF4">
-<script src="/js/chrome-boot.js" data-keep></script>
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="manifest" href="/manifest.json">
-<link rel="alternate" type="application/rss+xml" title="СИГМА Бюджет: какво ново" href="/data/feed.xml">
-<link rel="alternate" type="text/plain" title="СИГМА Бюджет за езикови модели" href="/llms.txt">
-<link rel="stylesheet" href="/css/tokens.css">
-<link rel="stylesheet" href="/css/base.css">
-<link rel="stylesheet" href="/css/layout.css">
-<link rel="stylesheet" href="/css/components.css">
-<link rel="stylesheet" href="/css/charts.css">
-<link rel="stylesheet" href="/css/motion.css">
-<link rel="modulepreload" href="/js/router.js">
-<script type="module" src="/js/main.js"></script>
-</head>
-<body>
-<a class="skip-link" href="#main">Към съдържанието</a>
-<div class="mockbar" id="mockbar" role="region" aria-label="Забележка за данните" hidden></div>
-<div class="offline-banner" id="offline" role="status" hidden></div>
-<header class="topbar" id="topbar"></header>
-<div class="shell">
-  <main class="main" id="main" tabindex="-1">
-    <div class="view" id="view" aria-busy="true"><p class="boot-note">Зареждане…</p></div>
-  </main>
-</div>
-<footer class="footer" id="footer"></footer>
-<nav class="tabbar" id="tabbar" aria-label="Бърза навигация"></nav>
-<div class="sr-only" id="live" role="status" aria-live="polite" aria-atomic="true"></div>
-<div class="toasts" id="toasts" aria-live="polite" aria-atomic="false"></div>
-<noscript><p class="noscript">Този сайт показва данни и графики с JavaScript. Включи го в браузъра си, за да го разгледаш. Файловете с данни са отворени и са в папка <a href="/data/catalog.json"><code>data/</code></a>.</p></noscript>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>СИГМА Бюджет</title>
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; font-src 'self'; base-uri 'self'; form-action 'none'; object-src 'none'"
+    />
+    <meta
+      name="description"
+      content="Държавният бюджет на България на разбираем език, по официални данни: откъде идват парите, къде отиват, изпълнява ли се планът и колко дължим."
+    />
+    <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1" />
+    <meta name="site-origin" content="https://sigma-budget.my-data.bg" />
+    <meta name="feedback-email" content="" />
+    <meta name="sigma-url" content="https://sigma.midt.bg/" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#FDFAF4" />
+    <script src="/js/chrome-boot.js" data-keep></script>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title="СИГМА Бюджет: какво ново"
+      href="/data/feed.xml"
+    />
+    <link
+      rel="alternate"
+      type="text/plain"
+      title="СИГМА Бюджет за езикови модели"
+      href="/llms.txt"
+    />
+    <link rel="stylesheet" href="/css/tokens.css" />
+    <link rel="stylesheet" href="/css/base.css" />
+    <link rel="stylesheet" href="/css/layout.css" />
+    <link rel="stylesheet" href="/css/components.css" />
+    <link rel="stylesheet" href="/css/charts.css" />
+    <link rel="stylesheet" href="/css/motion.css" />
+    <link rel="modulepreload" href="/js/router.js" />
+    <script type="module" src="/js/main.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Към съдържанието</a>
+    <div class="mockbar" id="mockbar" role="region" aria-label="Забележка за данните" hidden></div>
+    <div class="offline-banner" id="offline" role="status" hidden></div>
+    <header class="topbar" id="topbar"></header>
+    <div class="shell">
+      <main class="main" id="main" tabindex="-1">
+        <div class="view" id="view" aria-busy="true"><p class="boot-note">Зареждане…</p></div>
+      </main>
+    </div>
+    <footer class="footer" id="footer"></footer>
+    <nav class="tabbar" id="tabbar" aria-label="Бърза навигация"></nav>
+    <div class="sr-only" id="live" role="status" aria-live="polite" aria-atomic="true"></div>
+    <div class="toasts" id="toasts" aria-live="polite" aria-atomic="false"></div>
+    <noscript
+      ><p class="noscript">
+        Този сайт показва данни и графики с JavaScript. Включи го в браузъра си, за да го разгледаш.
+        Файловете с данни са отворени и са в папка
+        <a href="/data/catalog.json"><code>data/</code></a
+        >.
+      </p></noscript
+    >
+  </body>
 </html>

@@ -1,17 +1,49 @@
 // Bulgarian number/date formats. Never returns NaN/undefined: non-finite input prints an em dash.
 // Money is stored in million euro (core.json build.eurRate = 1.95583 leva per euro).
 export const EUR_RATE = 1.95583;
-export const NNBSP = '\u202f', NBSP = '\u00a0', MINUS = '\u2212', DASH = '\u2014';
-const MONTHS = ['януари', 'февруари', 'март', 'април', 'май', 'юни', 'юли', 'август', 'септември', 'октомври', 'ноември', 'декември'];
-const MONTHS_S = ['яну', 'фев', 'мар', 'апр', 'май', 'юни', 'юли', 'авг', 'сеп', 'окт', 'ное', 'дек'];
+export const NNBSP = '\u202f',
+  NBSP = '\u00a0',
+  MINUS = '\u2212',
+  DASH = '\u2014';
+const MONTHS = [
+  'януари',
+  'февруари',
+  'март',
+  'април',
+  'май',
+  'юни',
+  'юли',
+  'август',
+  'септември',
+  'октомври',
+  'ноември',
+  'декември',
+];
+const MONTHS_S = [
+  'яну',
+  'фев',
+  'мар',
+  'апр',
+  'май',
+  'юни',
+  'юли',
+  'авг',
+  'сеп',
+  'окт',
+  'ное',
+  'дек',
+];
 export const monthName = (m, short = false) => (short ? MONTHS_S : MONTHS)[m - 1] || DASH;
-const ok = v => typeof v === 'number' && Number.isFinite(v);
+const ok = (v) => typeof v === 'number' && Number.isFinite(v);
 
 /** 12803.8 -> "12 803,8" (group separator is a narrow no-break space) */
 /** toFixed that rounds half up on the decimal representation (55,525 -> 55,53; plain toFixed gives 55,52) */
 const fixed = (abs, d) => {
   const s = String(abs);
-  if (!s.includes('e')) { const n = Number(`${Math.round(Number(`${s}e${d}`))}e-${d}`); if (Number.isFinite(n)) return n.toFixed(d); }
+  if (!s.includes('e')) {
+    const n = Number(`${Math.round(Number(`${s}e${d}`))}e-${d}`);
+    if (Number.isFinite(n)) return n.toFixed(d);
+  }
   return abs.toFixed(d);
 };
 export function num(v, d = 0, o = {}) {
@@ -58,7 +90,8 @@ export const khil = (v, d = 1) => (ok(v) ? num(v, d) + NBSP + 'хил.' + NBSP +
 export const eur = (v, d = 0) => (ok(v) ? num(v, d) + NBSP + '€' : DASH);
 export const leva = (v, d = 0) => (ok(v) ? num(v, d) + NBSP + 'лв.' : DASH);
 /** per person: million euro and a population -> euro per person */
-export const perPerson = (mln, persons) => (ok(mln) && ok(persons) && persons > 0 ? eur((mln * 1e6) / persons) : DASH);
+export const perPerson = (mln, persons) =>
+  ok(mln) && ok(persons) && persons > 0 ? eur((mln * 1e6) / persons) : DASH;
 
 /** ISO date -> "31.07.2026" | long: "31 юли 2026" */
 export function date(iso, long = false) {
@@ -72,13 +105,24 @@ export const plural = (n, one, many) => `${num(n, 0)} ${n === 1 ? one : many}`;
 /** text for screen readers: spells the unit out, "26,35 милиарда евро" */
 export function moneyLabel(mln) {
   if (!ok(mln)) return 'няма данни';
-  const abs = Math.abs(mln), sign = mln < 0 ? 'минус ' : '';
-  return abs >= 1000 ? `${sign}${num(abs / 1000, 2)} милиарда евро` : `${sign}${num(abs, 1)} милиона евро`;
+  const abs = Math.abs(mln),
+    sign = mln < 0 ? 'минус ' : '';
+  return abs >= 1000
+    ? `${sign}${num(abs / 1000, 2)} милиарда евро`
+    : `${sign}${num(abs, 1)} милиона евро`;
 }
 /** parse "#/path?x=1&y=2" style query strings */
-export const parseQuery = s => Object.fromEntries(new URLSearchParams(s || ''));
-export const buildQuery = o => { const u = new URLSearchParams(); for (const [k, v] of Object.entries(o || {})) if (v != null && v !== '') u.set(k, v); const s = u.toString(); return s ? '?' + s : ''; };
+export const parseQuery = (s) => Object.fromEntries(new URLSearchParams(s || ''));
+export const buildQuery = (o) => {
+  const u = new URLSearchParams();
+  for (const [k, v] of Object.entries(o || {})) if (v != null && v !== '') u.set(k, v);
+  const s = u.toString();
+  return s ? '?' + s : '';
+};
 /** comparison arrow helpers */
-export const arrow = v => (!ok(v) || v === 0 ? '→' : v > 0 ? '▲' : '▼');
+export const arrow = (v) => (!ok(v) || v === 0 ? '→' : v > 0 ? '▲' : '▼');
 /** quote a CSV cell */
-export const csvCell = v => { const s = v == null ? '' : String(v); return /[",;\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+export const csvCell = (v) => {
+  const s = v == null ? '' : String(v);
+  return /[",;\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+};

@@ -2,56 +2,179 @@
    serif names, the two rankings as ruled columns; the example columns of the list stay hatched. Tokens only, light only. */
 
 /* the search bar: one field to find a municipality, one to narrow by oblast, one to switch map and list */
-.page[data-route="S20"] .s20-find { display: grid; gap: var(--sp-4); padding: var(--sp-4) 0; border: 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); border-radius: 0; background: none; box-shadow: none; }
-.page[data-route="S20"] .s20-controls { display: grid; gap: var(--sp-4); }
-.page[data-route="S20"] .s20-controls > .field { min-width: 0; }
-.page[data-route="S20"] .s20-view { display: grid; gap: var(--sp-2); align-content: start; }
-.page[data-route="S20"] .s20-view .seg { justify-self: start; }
-.page[data-route="S20"] .s20-count { margin: 0; color: var(--ink-mid); font: 400 var(--fs-xs)/1.5 var(--font-mono); letter-spacing: .04em; }
+.page[data-route='S20'] .s20-find {
+  display: grid;
+  gap: var(--sp-4);
+  padding: var(--sp-4) 0;
+  border: 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+.page[data-route='S20'] .s20-controls {
+  display: grid;
+  gap: var(--sp-4);
+}
+.page[data-route='S20'] .s20-controls > .field {
+  min-width: 0;
+}
+.page[data-route='S20'] .s20-view {
+  display: grid;
+  gap: var(--sp-2);
+  align-content: start;
+}
+.page[data-route='S20'] .s20-view .seg {
+  justify-self: start;
+}
+.page[data-route='S20'] .s20-count {
+  margin: 0;
+  color: var(--ink-mid);
+  font: 400 var(--fs-xs)/1.5 var(--font-mono);
+  letter-spacing: 0.04em;
+}
 
 /* shortcuts to the first municipalities found (the map is hard to read for a name): real links, hairline rows */
-.page[data-route="S20"] .s20-hits-h { margin: 0 0 var(--sp-2); font: 500 var(--fs-xs)/1.3 var(--font-mono); letter-spacing: var(--track-mono); text-transform: uppercase; color: var(--ink-soft); }
-.page[data-route="S20"] .s20-hits { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--rule); }
-.page[data-route="S20"] .s20-hit { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px var(--sp-3); min-height: 44px; padding: var(--sp-2) var(--sp-1); border: 0; border-bottom: 1px solid var(--rule-soft); border-radius: 0; background: none; color: var(--ink); text-decoration: none; }
-.page[data-route="S20"] .s20-hit:hover { background: var(--paper-warm); color: var(--ink); }
-.page[data-route="S20"] .s20-hit-name { font: 400 1.125rem/1.3 var(--font-serif); text-decoration: none; }
-.page[data-route="S20"] .s20-hit:hover .s20-hit-name { color: var(--crimson); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
-.page[data-route="S20"] .s20-hit-sub { color: var(--ink-soft); font: 400 var(--fs-xs)/1.4 var(--font-mono); letter-spacing: .04em; }
-.page[data-route="S20"] .s20-more { margin: 0; padding: var(--sp-2) var(--sp-1) 0; color: var(--ink-mid); font-size: var(--fs-s); }
-.page[data-route="S20"] #s20-none .state { margin-top: var(--sp-1); }
+.page[data-route='S20'] .s20-hits-h {
+  margin: 0 0 var(--sp-2);
+  font: 500 var(--fs-xs)/1.3 var(--font-mono);
+  letter-spacing: var(--track-mono);
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.page[data-route='S20'] .s20-hits {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--rule);
+}
+.page[data-route='S20'] .s20-hit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2px var(--sp-3);
+  min-height: 44px;
+  padding: var(--sp-2) var(--sp-1);
+  border: 0;
+  border-bottom: 1px solid var(--rule-soft);
+  border-radius: 0;
+  background: none;
+  color: var(--ink);
+  text-decoration: none;
+}
+.page[data-route='S20'] .s20-hit:hover {
+  background: var(--paper-warm);
+  color: var(--ink);
+}
+.page[data-route='S20'] .s20-hit-name {
+  font: 400 1.125rem/1.3 var(--font-serif);
+  text-decoration: none;
+}
+.page[data-route='S20'] .s20-hit:hover .s20-hit-name {
+  color: var(--crimson);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.page[data-route='S20'] .s20-hit-sub {
+  color: var(--ink-soft);
+  font: 400 var(--fs-xs)/1.4 var(--font-mono);
+  letter-spacing: 0.04em;
+}
+.page[data-route='S20'] .s20-more {
+  margin: 0;
+  padding: var(--sp-2) var(--sp-1) 0;
+  color: var(--ink-mid);
+  font-size: var(--fs-s);
+}
+.page[data-route='S20'] #s20-none .state {
+  margin-top: var(--sp-1);
+}
 
 /* the list: the two columns of example numbers are hatched, the real ones are not */
-.page[data-route="S20"] #s20-spisak-wrap table.data thead th:nth-child(n+6),
-.page[data-route="S20"] #s20-spisak-wrap table.data tbody td:nth-child(n+6) {
-  background-image: repeating-linear-gradient(45deg, var(--hatch) 0 1px, transparent 1px var(--hatch-step));
+.page[data-route='S20'] #s20-spisak-wrap table.data thead th:nth-child(n + 6),
+.page[data-route='S20'] #s20-spisak-wrap table.data tbody td:nth-child(n + 6) {
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--hatch) 0 1px,
+    transparent 1px var(--hatch-step)
+  );
   border-left: 1px dashed var(--rule);
 }
-.page[data-route="S20"] .s20-pending { margin: var(--sp-3) 0 0; }
+.page[data-route='S20'] .s20-pending {
+  margin: var(--sp-3) 0 0;
+}
 
 /* the two rankings sit side by side when there is room: two ruled columns, 48 px apart */
-.page[data-route="S20"] .s20-pair { display: grid; gap: var(--sp-7); align-items: start; }
-.page[data-route="S20"] .s20-pair > .block { min-width: 0; margin: 0; }
-.page[data-route="S20"] .s20-solo { margin: 0; padding: var(--sp-4) 0; border: 0; border-top: 1px dashed var(--ink-soft); border-bottom: 1px dashed var(--ink-soft); border-radius: 0; color: var(--ink-mid); }
+.page[data-route='S20'] .s20-pair {
+  display: grid;
+  gap: var(--sp-7);
+  align-items: start;
+}
+.page[data-route='S20'] .s20-pair > .block {
+  min-width: 0;
+  margin: 0;
+}
+.page[data-route='S20'] .s20-solo {
+  margin: 0;
+  padding: var(--sp-4) 0;
+  border: 0;
+  border-top: 1px dashed var(--ink-soft);
+  border-bottom: 1px dashed var(--ink-soft);
+  border-radius: 0;
+  color: var(--ink-mid);
+}
 
-.page[data-route="S20"] .s20-read { max-width: 68ch; }
-.page[data-route="S20"] .s20-fixnote { margin: var(--sp-3) 0 0; max-width: 72ch; }
+.page[data-route='S20'] .s20-read {
+  max-width: 68ch;
+}
+.page[data-route='S20'] .s20-fixnote {
+  margin: var(--sp-3) 0 0;
+  max-width: 72ch;
+}
 
 @media (min-width: 600px) {
-  .page[data-route="S20"] .s20-find { padding: var(--sp-5) 0; }
-  .page[data-route="S20"] .s20-controls { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); align-items: start; }
-  .page[data-route="S20"] .s20-view { grid-column: 1 / -1; }
+  .page[data-route='S20'] .s20-find {
+    padding: var(--sp-5) 0;
+  }
+  .page[data-route='S20'] .s20-controls {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    align-items: start;
+  }
+  .page[data-route='S20'] .s20-view {
+    grid-column: 1 / -1;
+  }
 }
 @media (min-width: 900px) {
-  .page[data-route="S20"] .s20-controls { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) auto; }
-  .page[data-route="S20"] .s20-view { grid-column: auto; }
-  .page[data-route="S20"] .s20-pair { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .page[data-route='S20'] .s20-controls {
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) auto;
+  }
+  .page[data-route='S20'] .s20-view {
+    grid-column: auto;
+  }
+  .page[data-route='S20'] .s20-pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 @media (pointer: coarse) {
-  .page[data-route="S20"] .s20-hit { min-height: 48px; }
+  .page[data-route='S20'] .s20-hit {
+    min-height: 48px;
+  }
 }
 @media (forced-colors: active) {
-  .page[data-route="S20"] #s20-spisak-wrap table.data thead th:nth-child(n+6),
-  .page[data-route="S20"] #s20-spisak-wrap table.data tbody td:nth-child(n+6) { background-image: none; border-left: 2px dashed CanvasText; }
-  .page[data-route="S20"] .s20-find { border-color: CanvasText; }
-  .page[data-route="S20"] .s20-hit { border-color: CanvasText; }
+  .page[data-route='S20'] #s20-spisak-wrap table.data thead th:nth-child(n + 6),
+  .page[data-route='S20'] #s20-spisak-wrap table.data tbody td:nth-child(n + 6) {
+    background-image: none;
+    border-left: 2px dashed CanvasText;
+  }
+  .page[data-route='S20'] .s20-find {
+    border-color: CanvasText;
+  }
+  .page[data-route='S20'] .s20-hit {
+    border-color: CanvasText;
+  }
 }

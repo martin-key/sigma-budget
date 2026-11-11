@@ -9,8 +9,17 @@ export function toast(msg, o = {}) {
   el.className = 'toast' + (o.kind ? ' toast-' + o.kind : '');
   el.innerHTML = `<span class="toast-msg">${esc(msg)}</span>${o.action ? `<button type="button" class="toast-act">${esc(o.action.label)}</button>` : ''}`;
   let timer = 0;
-  const close = () => { clearTimeout(timer); el.remove(); };
-  el.querySelector('.toast-act')?.addEventListener('click', () => { try { o.action.onClick?.(); } finally { close(); } });
+  const close = () => {
+    clearTimeout(timer);
+    el.remove();
+  };
+  el.querySelector('.toast-act')?.addEventListener('click', () => {
+    try {
+      o.action.onClick?.();
+    } finally {
+      close();
+    }
+  });
   box.appendChild(el);
   while (box.children.length > 3) box.firstChild.remove();
   timer = setTimeout(close, o.ms ?? (o.action ? 7000 : 3800));

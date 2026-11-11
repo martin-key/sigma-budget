@@ -43,85 +43,96 @@ const cases = JSON.parse(readFileSync(join(fixtures, 'validate15b/oracle.json'),
   };
   result: unknown;
 }[];
-it.each(cases)('matches the unchanged donor: $mutation.name', ({ mutation, result }) => {
-  if (mutation.file) {
-    const path = join(root, 'data/release', mutation.file);
-    const doc = JSON.parse(readFileSync(path, 'utf8'));
-    let current = doc;
-    for (const key of mutation.path!.slice(0, -1)) current = current[key];
-    const key = mutation.path!.at(-1)!;
-    if (mutation.delete) delete current[key];
-    else current[key] = mutation.value;
-    writeFileSync(path, JSON.stringify(doc));
-  }
-  if (mutation.source) {
-    const forecastPath = join(root, 'data/inputs/budget_forecast_2027.json');
-    const forecast = parsePythonJson<Extraction>(readFileSync(forecastPath, 'utf8'));
-    const billPath = join(root, 'data/inputs/budget_bill_2027.json');
-    let billText = readFileSync(billPath, 'utf8');
-    if (mutation.source === 'project') {
-      const original = parsePythonJson<BillExtraction>(billText);
-      const first = original.projects.rows[0]!.id;
-      const second = original.projects.rows[1]!.id;
-      const previous = JSON.stringify(second);
-      expect(billText.split(previous)).toHaveLength(3);
-      billText = billText.replaceAll(previous, JSON.stringify(first));
-      writeFileSync(billPath, billText);
-    } else if (mutation.source === 'project-count') {
-      const original = parsePythonJson<BillExtraction>(billText);
-      const last = original.projects.rows.at(-1)!.id;
-      const id = billText.indexOf(`"id": ${JSON.stringify(last)}`);
-      const start = billText.lastIndexOf('},\n      {', id) + 1;
-      const end = billText.indexOf('\n      }\n    ]', id) + 8;
-      expect(id).toBeGreaterThan(0);
-      expect(start).toBeGreaterThan(0);
-      expect(end).toBeGreaterThan(start);
-      billText = billText.slice(0, start) + billText.slice(end);
-      expect(parsePythonJson<BillExtraction>(billText).projects.rows).toHaveLength(225);
-      writeFileSync(billPath, billText);
-    } else {
-      forecast.tables.annex1_execution2026!.rows[0]!.values[0] = 49615.4;
-      forecast.tables.annex1_execution2026!.rows[0]!.printed![0] = '49 615,4';
-      writeFileSync(forecastPath, JSON.stringify(forecast));
-    }
-    const bill = parsePythonJson<BillExtraction>(billText);
-    const zip = readFileSync(join(root, 'data/originals/budget_2027/ZDBRB-2027.zip'));
-    const lineage = new AnnualLineage(forecast, bill, { forecast: zip, bill: zip });
-    const annual = buildAnnualPeriods(forecast, lineage);
-    const built = buildBudget2027(lineage, '2026-11-08');
-    for (const [name, records] of Object.entries(annual)) {
-      const path = join(root, `data/release/${name}.json`);
+// Source mutations rebuild annual lineage before validation: measured 5.24–5.33s
+// with V8 coverage on the shared audit host; scoped 15s integration budget.
+it.each(cases)(
+  'matches the unchanged donor: $mutation.name',
+  ({ mutation, result }) => {
+    if (mutation.file) {
+      const path = join(root, 'data/release', mutation.file);
       const doc = JSON.parse(readFileSync(path, 'utf8'));
-      doc.byPeriod = records;
+      let current = doc;
+      for (const key of mutation.path!.slice(0, -1)) current = current[key];
+      const key = mutation.path!.at(-1)!;
+      if (mutation.delete) delete current[key];
+      else current[key] = mutation.value;
       writeFileSync(path, JSON.stringify(doc));
     }
-    writeFileSync(join(root, 'data/release/budget2027.json'), JSON.stringify(built.budget));
-    writeFileSync(
-      join(root, 'data/release/budget2027-provenance.json'),
-      JSON.stringify(built.provenance),
-    );
-  }
-  try {
-    const run = runGroups(
-      [{ name: 'BUDGET2027', description: '', run: budget2027 }],
-      new Context(root),
-      ['BUDGET2027'],
-    );
-    expect(run.groups[0]).toEqual(result);
-  } finally {
-    if (mutation.file) copy(`wave13a/published/${mutation.file}`, `data/release/${mutation.file}`);
     if (mutation.source) {
-      copy(
-        'fiscal/inputs/data/inputs/budget_forecast_2027.json',
-        'data/inputs/budget_forecast_2027.json',
+      const forecastPath = join(root, 'data/inputs/budget_forecast_2027.json');
+      const forecast = parsePythonJson<Extraction>(readFileSync(forecastPath, 'utf8'));
+      const billPath = join(root, 'data/inputs/budget_bill_2027.json');
+      let billText = readFileSync(billPath, 'utf8');
+      if (mutation.source === 'project') {
+        const original = parsePythonJson<BillExtraction>(billText);
+        const first = original.projects.rows[0]!.id;
+        const second = original.projects.rows[1]!.id;
+        const previous = JSON.stringify(second);
+        expect(billText.split(previous)).toHaveLength(3);
+        billText = billText.replaceAll(previous, JSON.stringify(first));
+        writeFileSync(billPath, billText);
+      } else if (mutation.source === 'project-count') {
+        const original = parsePythonJson<BillExtraction>(billText);
+        const last = original.projects.rows.at(-1)!.id;
+        const id = billText.indexOf(`"id": ${JSON.stringify(last)}`);
+        const start = billText.lastIndexOf('},\n      {', id) + 1;
+        const end = billText.indexOf('\n      }\n    ]', id) + 8;
+        expect(id).toBeGreaterThan(0);
+        expect(start).toBeGreaterThan(0);
+        expect(end).toBeGreaterThan(start);
+        billText = billText.slice(0, start) + billText.slice(end);
+        expect(parsePythonJson<BillExtraction>(billText).projects.rows).toHaveLength(225);
+        writeFileSync(billPath, billText);
+      } else {
+        forecast.tables.annex1_execution2026!.rows[0]!.values[0] = 49615.4;
+        forecast.tables.annex1_execution2026!.rows[0]!.printed![0] = '49 615,4';
+        writeFileSync(forecastPath, JSON.stringify(forecast));
+      }
+      const bill = parsePythonJson<BillExtraction>(billText);
+      const zip = readFileSync(join(root, 'data/originals/budget_2027/ZDBRB-2027.zip'));
+      const lineage = new AnnualLineage(forecast, bill, { forecast: zip, bill: zip });
+      const annual = buildAnnualPeriods(forecast, lineage);
+      const built = buildBudget2027(lineage, '2026-11-08');
+      for (const [name, records] of Object.entries(annual)) {
+        const path = join(root, `data/release/${name}.json`);
+        const doc = JSON.parse(readFileSync(path, 'utf8'));
+        doc.byPeriod = records;
+        writeFileSync(path, JSON.stringify(doc));
+      }
+      writeFileSync(join(root, 'data/release/budget2027.json'), JSON.stringify(built.budget));
+      writeFileSync(
+        join(root, 'data/release/budget2027-provenance.json'),
+        JSON.stringify(built.provenance),
       );
-      copy('fiscal/inputs/data/inputs/budget_bill_2027.json', 'data/inputs/budget_bill_2027.json');
-      for (const name of published)
-        copy(`wave13a/published/${name}.json`, `data/release/${name}.json`);
     }
-  }
-});
+    try {
+      const run = runGroups(
+        [{ name: 'BUDGET2027', description: '', run: budget2027 }],
+        new Context(root),
+        ['BUDGET2027'],
+      );
+      expect(run.groups[0]).toEqual(result);
+    } finally {
+      if (mutation.file)
+        copy(`wave13a/published/${mutation.file}`, `data/release/${mutation.file}`);
+      if (mutation.source) {
+        copy(
+          'fiscal/inputs/data/inputs/budget_forecast_2027.json',
+          'data/inputs/budget_forecast_2027.json',
+        );
+        copy(
+          'fiscal/inputs/data/inputs/budget_bill_2027.json',
+          'data/inputs/budget_bill_2027.json',
+        );
+        for (const name of published)
+          copy(`wave13a/published/${name}.json`, `data/release/${name}.json`);
+      }
+    }
+  },
+  15_000,
+);
 
+// Multiple real CLI validations and crash recovery measured 5.94s with coverage.
 it('confines candidate reports and protects inputs even after a crashed validation', async () => {
   const { main } = await import('./budget-2027-cli.js');
   const { linkSync, symlinkSync, existsSync } = await import('node:fs');
@@ -181,7 +192,7 @@ it('confines candidate reports and protects inputs even after a crashed validati
     stdout.mockRestore();
     stderr.mockRestore();
   }
-});
+}, 15_000);
 
 it.each([
   ['float-encoded year', 'outlook.json', '"year":2026', '"year":2026.0'],

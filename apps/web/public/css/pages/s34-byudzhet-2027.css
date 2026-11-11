@@ -3,28 +3,71 @@
    Tokens only, light only, every selector scoped to the screen. */
 
 /* five figures: 3 + 2 on a wide screen, 2 + 2 + 1 on a phone, one column on a very narrow one (only the column count is set here, the band itself is shared) */
-.page[data-route="S34"] #s34-kratko .kpi-grid > .kpi { flex-basis: min(100%, 14rem); }
-@media (max-width: 599px) { .page[data-route="S34"] #s34-kratko .kpi-grid > .kpi { flex-basis: calc(50% - 1px); } }
-@media (max-width: 359px) { .page[data-route="S34"] #s34-kratko .kpi-grid > .kpi { flex-basis: 100%; } }
+.page[data-route='S34'] #s34-kratko .kpi-grid > .kpi {
+  flex-basis: min(100%, 14rem);
+}
+@media (max-width: 599px) {
+  .page[data-route='S34'] #s34-kratko .kpi-grid > .kpi {
+    flex-basis: calc(50% - 1px);
+  }
+}
+@media (max-width: 359px) {
+  .page[data-route='S34'] #s34-kratko .kpi-grid > .kpi {
+    flex-basis: 100%;
+  }
+}
 
 /* plain sentences, lists and the small heading inside a block (the spacing between them comes from .stack) */
-.page[data-route="S34"] .s34-note,
-.page[data-route="S34"] .s34-links,
-.page[data-route="S34"] .s34-list { max-width: 68ch; }
-.page[data-route="S34"] .s34-sub { margin: var(--sp-4) 0 var(--sp-3); color: var(--ink); font: 400 var(--fs-1)/1.25 var(--font-serif); letter-spacing: -.01em; }
-.page[data-route="S34"] .s34-list { margin: 0; padding-left: var(--sp-5); }
-.page[data-route="S34"] .s34-list li + li { margin-top: var(--sp-1); }
-.page[data-route="S34"] .s34-pg { color: var(--ink-soft); font-weight: 400; font-size: var(--fs-xs); white-space: nowrap; }
-.page[data-route="S34"] .s34-src { display: block; color: var(--ink-soft); font-size: var(--fs-xs); }
+.page[data-route='S34'] .s34-note,
+.page[data-route='S34'] .s34-links,
+.page[data-route='S34'] .s34-list {
+  max-width: 68ch;
+}
+.page[data-route='S34'] .s34-sub {
+  margin: var(--sp-4) 0 var(--sp-3);
+  color: var(--ink);
+  font: 400 var(--fs-1)/1.25 var(--font-serif);
+  letter-spacing: -0.01em;
+}
+.page[data-route='S34'] .s34-list {
+  margin: 0;
+  padding-left: var(--sp-5);
+}
+.page[data-route='S34'] .s34-list li + li {
+  margin-top: var(--sp-1);
+}
+.page[data-route='S34'] .s34-pg {
+  color: var(--ink-soft);
+  font-weight: 400;
+  font-size: var(--fs-xs);
+  white-space: nowrap;
+}
+.page[data-route='S34'] .s34-src {
+  display: block;
+  color: var(--ink-soft);
+  font-size: var(--fs-xs);
+}
 
 /* a sentence, a figure or a list that comes straight after a table, a fact list or another sentence gets the same air as in the other screens */
-.page[data-route="S34"] .s34-note + .facts,
-.page[data-route="S34"] .s34-note + .table-wrap,
-.page[data-route="S34"] .facts + .s34-note { margin-top: var(--sp-3); }
+.page[data-route='S34'] .s34-note + .facts,
+.page[data-route='S34'] .s34-note + .table-wrap,
+.page[data-route='S34'] .facts + .s34-note {
+  margin-top: var(--sp-3);
+}
 
 /* the block about the excessive deficit procedure comes right after „Накратко“: a rule in the colour of the ESA basis marks it, nothing else changes */
-.page[data-route="S34"] .s34-ppd { border-top: 4px solid var(--esa); }
+.page[data-route='S34'] .s34-ppd {
+  border-top: 4px solid var(--esa);
+}
 
 /* the two defence panels: КФП (cash) and ЕСС (accrual) side by side on a wide screen, one under the other on a phone; never merged */
-.page[data-route="S34"] .s34-pair { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-4); }
-@media (min-width: 900px) { .page[data-route="S34"] .s34-pair { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.page[data-route='S34'] .s34-pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-4);
+}
+@media (min-width: 900px) {
+  .page[data-route='S34'] .s34-pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

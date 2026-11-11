@@ -5,6 +5,7 @@ python -m tests.e2e.visual_audit --url http://127.0.0.1:8950 --axe /path/to/axe.
 import argparse
 import csv
 import io
+import re
 from pathlib import Path
 
 from playwright.sync_api import expect, sync_playwright
@@ -77,12 +78,13 @@ def main():
             page.emulate_media(media='print')
             assert page.locator('h1').evaluate('(e)=>getComputedStyle(e).color') == 'rgb(21, 17, 12)'
             assert page.evaluate('getComputedStyle(document.documentElement).colorScheme') == 'light'
-            assert page.evaluate('getComputedStyle(document.documentElement).getPropertyValue("--series-1").trim()') == '#15110C'
+            # Hex letter case is serialization only (CSS formatting may change it).
+            assert page.evaluate('getComputedStyle(document.documentElement).getPropertyValue("--series-1").trim()').lower() == '#15110C'.lower()
             assert page.locator('.block-tools:visible, .seg:visible, .unit-switch:visible, .explorer:visible, .foot-nav:visible, .footer .link-btn:visible').count() == 0
             chart = page.locator('.chart').first
             expect(chart).to_be_visible()
             expect(chart).to_have_attribute('data-ready', '1')
-            expect(chart.locator('text').first).to_have_attribute('fill', '#15110C')
+            expect(chart.locator('text').first).to_have_attribute('fill', re.compile(r'^#15110C$', re.IGNORECASE))
             page.emulate_media(media='screen')
             checks += 1
 
@@ -116,7 +118,7 @@ def main():
             chart = page.locator('.chart').first
             chart.scroll_into_view_if_needed()
             expect(chart).to_have_attribute('data-ready', '1')
-            expect(chart.locator('text').first).to_have_attribute('fill', '#15110C')
+            expect(chart.locator('text').first).to_have_attribute('fill', re.compile(r'^#15110C$', re.IGNORECASE))
             page.reload()
             page.locator('article[data-ready="1"]').wait_for()
             expect(page.locator('html')).to_have_attribute('data-theme', 'light')

@@ -21,7 +21,8 @@ export function pageSkeleton() {
 
 function action(a) {
   if (!a) return '';
-  if (a.href) return html`<p class="state-act"><a class="btn${a.primary === false ? '' : ' btn-primary'}" href="${a.href}">${a.label}</a></p>`;
+  if (a.href)
+    return html`<p class="state-act"><a class="btn${a.primary === false ? '' : ' btn-primary'}" href="${a.href}">${a.label}</a></p>`;
   return html`<p class="state-act"><button type="button" class="btn${a.primary === false ? '' : ' btn-primary'}" data-action="${a.action}"${a.value ? html` data-value="${a.value}"` : ''}>${a.label}</button></p>`;
 }
 
@@ -39,7 +40,7 @@ export function errorState(o = {}) {
 }
 
 function publisherOf(keys) {
-  const ps = [...new Set((keys || []).map(k => data.source(k).publisher).filter(Boolean))];
+  const ps = [...new Set((keys || []).map((k) => data.source(k).publisher).filter(Boolean))];
   return ps.join(', ');
 }
 /**
@@ -52,7 +53,11 @@ export function pendingState(o = {}) {
   const title = o.title || p.title;
   const keys = o.source || p.source || [];
   const who = publisherOf(keys);
-  const text = o.text || (who ? `Данните съществуват при ${who}, още не са извлечени.` : 'Данните съществуват при издателя, още не са извлечени.');
+  const text =
+    o.text ||
+    (who
+      ? `Данните съществуват при ${who}, още не са извлечени.`
+      : 'Данните съществуват при издателя, още не са извлечени.');
   const reason = o.reason || p.reason;
   const expected = o.expected || p.expected;
   return html`<div class="state state-pending" data-state="pending"${o.id ? html` data-pending-id="${o.id}"` : ''}><span class="state-ic">${icon('dashed', { size: 28 })}</span>
@@ -65,8 +70,11 @@ export function offlineNote(asOf) {
 }
 
 /** the „Примерни данни“ badge (hatch + words) */
-export const mockBadge = (text = 'Примерни данни') => html`<span class="mock-badge">${icon('hatch', { size: 14 })}<span>${text}</span></span>`;
+export const mockBadge = (text = 'Примерни данни') =>
+  html`<span class="mock-badge">${icon('hatch', { size: 14 })}<span>${text}</span></span>`;
 /** a note under a mock block: badge + why (the why is the dataset's own `why` text); {badge:false} drops the badge when a status pill already says it */
-export const mockNote = (text, o = {}) => html`<p class="mock-note" data-state="mock">${o.badge === false ? icon('hatch', { size: 14 }) : mockBadge()}<span class="small">${text || 'Стойностите са измислени и показват само как ще изглежда екранът.'}</span></p>`;
+export const mockNote = (text, o = {}) =>
+  html`<p class="mock-note" data-state="mock">${o.badge === false ? icon('hatch', { size: 14 }) : mockBadge()}<span class="small">${text || 'Стойностите са измислени и показват само как ще изглежда екранът.'}</span></p>`;
 /** what stands in for a hidden mock block / tile while „Само официални данни“ is on, with a way back */
-export const mockHidden = (text) => html`<p class="mock-hidden" data-state="mock-hidden">${icon('hatch', { size: 16 })}<span>${text || 'Скрит е блок с примерни данни.'}</span> <button type="button" class="link-btn" data-action="show-mock">Покажи</button></p>`;
+export const mockHidden = (text) =>
+  html`<p class="mock-hidden" data-state="mock-hidden">${icon('hatch', { size: 16 })}<span>${text || 'Скрит е блок с примерни данни.'}</span> <button type="button" class="link-btn" data-action="show-mock">Покажи</button></p>`;

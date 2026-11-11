@@ -1,0 +1,25 @@
+{
+  "tolerance": 0.5,
+  "workspaces": {
+    "apps/etl": {
+      "lines": 65.19,
+      "branches": 61.57
+    },
+    "apps/web": {
+      "lines": 48.19,
+      "branches": 41.43
+    },
+    "packages/dataset-schema": {
+      "lines": 98.55,
+      "branches": 92.77
+    },
+    "packages/ingest": {
+      "lines": 84.34,
+      "branches": 78.25
+    },
+    "packages/test-support": {
+      "lines": 91.3,
+      "branches": 94.11
+    }
+  }
+}

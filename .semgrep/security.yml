@@ -7,8 +7,8 @@ rules:
     severity: ERROR
     message: Avoid dynamic code execution; use a fixed parser or function.
     pattern-either:
-      - pattern: "eval(...)"
-      - pattern: "new Function(...)"
+      - pattern: 'eval(...)'
+      - pattern: 'new Function(...)'
   - id: shell-command-execution
     languages: [javascript, typescript]
     severity: ERROR
@@ -35,28 +35,28 @@ rules:
     severity: ERROR
     message: Bind query values instead of interpolating SQL.
     pattern-either:
-      - pattern: "$DB.prepare(`...${$VALUE}...`)"
-      - pattern: "$DB.prepare($A + $B)"
+      - pattern: '$DB.prepare(`...${$VALUE}...`)'
+      - pattern: '$DB.prepare($A + $B)'
   - id: disabled-jwt-verification
     languages: [javascript, typescript]
     severity: ERROR
     message: JWT signature verification must remain enabled.
     pattern-either:
       - pattern: "$JWT.verify(..., { ..., algorithms: ['none'], ... }, ...)"
-      - pattern: "$JWT.decode(..., { ..., verify: false, ... }, ...)"
+      - pattern: '$JWT.decode(..., { ..., verify: false, ... }, ...)'
   - id: unsafe-python-deserialization
     languages: [python]
     severity: ERROR
     message: Use safe structured data parsing instead of executable deserialization.
     pattern-either:
-      - pattern: "pickle.loads(...)"
-      - pattern: "pickle.load(...)"
-      - pattern: "yaml.unsafe_load(...)"
-      - pattern: "yaml.load($VALUE)"
+      - pattern: 'pickle.loads(...)'
+      - pattern: 'pickle.load(...)'
+      - pattern: 'yaml.unsafe_load(...)'
+      - pattern: 'yaml.load($VALUE)'
   - id: python-shell-execution
     languages: [python]
     severity: ERROR
     message: Pass an argument array with shell disabled.
     pattern-either:
-      - pattern: "subprocess.$METHOD(..., shell=True, ...)"
-      - pattern: "os.system(...)"
+      - pattern: 'subprocess.$METHOD(..., shell=True, ...)'
+      - pattern: 'os.system(...)'

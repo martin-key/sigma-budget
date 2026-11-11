@@ -9,7 +9,7 @@ import { html, raw, cx } from '../html.js';
 import { here, parts as addrParts } from '../loc.js';
 
 const MEM = new Map();
-const memKey = id => `${addrParts(here()).path}|${id}`;
+const memKey = (id) => `${addrParts(here()).path}|${id}`;
 
 export function disclosure(o = {}) {
   if (!o.id) throw new Error('disclosure: id is required');
@@ -22,12 +22,23 @@ export function disclosure(o = {}) {
 }
 
 export function mount(el) {
-  const key = el.dataset.mem, sum = el.querySelector(':scope > summary');
+  const key = el.dataset.mem,
+    sum = el.querySelector(':scope > summary');
   if (!key || !sum) return undefined;
-  let armed = false;                                    // only a toggle that follows a click on the summary is the visitor's own choice
-  const arm = () => { armed = true; };
-  const on = () => { if (armed) { MEM.set(key, el.open); armed = false; } };
+  let armed = false; // only a toggle that follows a click on the summary is the visitor's own choice
+  const arm = () => {
+    armed = true;
+  };
+  const on = () => {
+    if (armed) {
+      MEM.set(key, el.open);
+      armed = false;
+    }
+  };
   sum.addEventListener('click', arm);
   el.addEventListener('toggle', on);
-  return () => { sum.removeEventListener('click', arm); el.removeEventListener('toggle', on); };
+  return () => {
+    sum.removeEventListener('click', arm);
+    el.removeEventListener('toggle', on);
+  };
 }

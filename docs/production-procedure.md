@@ -72,11 +72,11 @@ cloudflared access login https://<адрес>/admin/operations
 
 ## 5. Връщане назад
 
-| Какво | Как |
-|---|---|
-| Кодът | `pnpm exec wrangler deployments list -c apps/web/wrangler.jsonc`, после `pnpm exec wrangler rollback <version-id> -c apps/web/wrangler.jsonc` |
-| Данните | `./budget rollback --release-id <по-ранно издание> --environment production` |
-| Регистърът | D1 Time Travel или копие ([ръководството на оператора](operator-guide.md), раздел 6) |
+| Какво      | Как                                                                                                                                           |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Кодът      | `pnpm exec wrangler deployments list -c apps/web/wrangler.jsonc`, после `pnpm exec wrangler rollback <version-id> -c apps/web/wrangler.jsonc` |
+| Данните    | `./budget rollback --release-id <по-ранно издание> --environment production`                                                                  |
+| Регистърът | D1 Time Travel или копие ([ръководството на оператора](operator-guide.md), раздел 6)                                                          |
 
 ## 6. Наблюдение
 
@@ -85,11 +85,11 @@ cloudflared access login https://<адрес>/admin/operations
 
 ## Подписи
 
-| Стъпка | Отговорник | Дата | Подпис |
-|---|---|---|---|
-| 0. Предварителни условия | | | |
-| 1. Средата | | | |
-| 2. Кодът | | | |
-| 3. Първото издание | | | |
+| Стъпка                   | Отговорник | Дата | Подпис |
+| ------------------------ | ---------- | ---- | ------ |
+| 0. Предварителни условия |            |      |        |
+| 1. Средата               |            |      |        |
+| 2. Кодът                 |            |      |        |
+| 3. Първото издание       |            |      |        |
 
 Всички команди тук се изпълняват от корена на хранилището. Конфигурацията за собствен акаунт е `apps/web/wrangler.local.jsonc`, до `apps/web/wrangler.jsonc`, така че относителните `main` и `migrations_dir` запазват значението си. За нея се използва `-c apps/web/wrangler.local.jsonc`, а при сглобяване - `WRANGLER_CONFIG=apps/web/wrangler.local.jsonc`. Vite разрешава тази променлива спрямо корена на хранилището. Deploy на сглобен сайт използва `-c apps/web/build/server/wrangler.json`.

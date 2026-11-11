@@ -1,5 +1,5 @@
-import { json, object } from "@sigma-budget/dataset-schema";
-import { exactPolicy, precision, type Policy } from "./policy.js";
+import { json, object } from '@sigma-budget/dataset-schema';
+import { exactPolicy, precision, type Policy } from './policy.js';
 export interface Difference {
   dataset: string;
   file: string;
@@ -9,16 +9,16 @@ export interface Difference {
   kind: string;
   unit?: string;
   tolerance: number;
-  outcome: "accepted" | "different";
+  outcome: 'accepted' | 'different';
   rationale?: string;
 }
-export type Outcome = "pass" | "fail" | "unverified";
+export type Outcome = 'pass' | 'fail' | 'unverified';
 export interface Report {
   outcome: Outcome;
   differences: Difference[];
   unverified: string[];
 }
-const token = (s: string) => s.replace(/~/g, "~0").replace(/\//g, "~1");
+const token = (s: string) => s.replace(/~/g, '~0').replace(/\//g, '~1');
 export function equal(a: unknown, b: unknown): boolean {
   if (Object.is(a, b)) return true;
   if (Array.isArray(a) && Array.isArray(b))
@@ -33,18 +33,15 @@ export function equal(a: unknown, b: unknown): boolean {
 // Compare the decimal spellings without subtracting large binary floats at a boundary.
 function withinPrecision(a: number, b: number, decimals: number): boolean {
   function scaled(n: number): [bigint, number] {
-    const [mantissa = "", exp = "0"] = n.toString().split("e");
-    const fraction = mantissa.split(".")[1]?.length ?? 0;
-    return [BigInt(mantissa.replace(".", "")), Number(exp) - fraction];
+    const [mantissa = '', exp = '0'] = n.toString().split('e');
+    const fraction = mantissa.split('.')[1]?.length ?? 0;
+    return [BigInt(mantissa.replace('.', '')), Number(exp) - fraction];
   }
   const [x, xe] = scaled(a),
     [y, ye] = scaled(b);
   const exponent = Math.min(xe, ye, -decimals);
-  const delta =
-    x * 10n ** BigInt(xe - exponent) - y * 10n ** BigInt(ye - exponent);
-  return (
-    (delta < 0n ? -delta : delta) * 2n <= 10n ** BigInt(-decimals - exponent)
-  );
+  const delta = x * 10n ** BigInt(xe - exponent) - y * 10n ** BigInt(ye - exponent);
+  return (delta < 0n ? -delta : delta) * 2n <= 10n ** BigInt(-decimals - exponent);
 }
 export function compare(
   expected: unknown,
@@ -62,7 +59,7 @@ export function compare(
     unit?: string,
   ) {
     const accepted =
-      kind === "value" &&
+      kind === 'value' &&
       policy.accepted.find(
         (r) =>
           r.dataset === context.dataset &&
@@ -79,35 +76,33 @@ export function compare(
       kind,
       tolerance,
       unit,
-      outcome: accepted ? "accepted" : "different",
+      outcome: accepted ? 'accepted' : 'different',
       ...(accepted ? { rationale: accepted.rationale } : {}),
     });
   }
   function walk(a: unknown, b: unknown, p: string) {
     if (!json(a) || !json(b)) {
-      add(p, a, b, "invalid-json");
+      add(p, a, b, 'invalid-json');
       return;
     }
-    if (typeof a === "number" && typeof b === "number") {
+    if (typeof a === 'number' && typeof b === 'number') {
       // JSON.parse rounds integers beyond 2^53, so two different literals may parse equal.
       if ([a, b].some((n) => Number.isInteger(n) && !Number.isSafeInteger(n))) {
-        add(p, a, b, "unsafe-integer");
+        add(p, a, b, 'unsafe-integer');
         return;
       }
       const rule = precision(policy, context.dataset, p),
         tolerance = rule && rule.decimals > 0 ? 0.5 * 10 ** -rule.decimals : 0;
       // Integer monetary units are exact; fractional units use decimal half-units.
       if (rule && tolerance ? !withinPrecision(a, b, rule.decimals) : a !== b)
-        add(p, a, b, "value", tolerance, rule?.unit);
+        add(p, a, b, 'value', tolerance, rule?.unit);
     } else if (Array.isArray(a) && Array.isArray(b)) {
-      if (a.length !== b.length) add(p, a.length, b.length, "array-length");
-      for (let i = 0; i < Math.min(a.length, b.length); i++)
-        walk(a[i], b[i], `${p}/${i}`);
+      if (a.length !== b.length) add(p, a.length, b.length, 'array-length');
+      for (let i = 0; i < Math.min(a.length, b.length); i++) walk(a[i], b[i], `${p}/${i}`);
     } else if (object(a) && object(b)) {
       for (const k of new Set([...Object.keys(a), ...Object.keys(b)])) {
         const next = `${p}/${token(k)}`;
-        if (!Object.hasOwn(a, k) || !Object.hasOwn(b, k))
-          add(next, a[k], b[k], "missing-key");
+        if (!Object.hasOwn(a, k) || !Object.hasOwn(b, k)) add(next, a[k], b[k], 'missing-key');
         else walk(a[k], b[k], next);
       }
     } else if (a !== b)
@@ -115,14 +110,11 @@ export function compare(
         p,
         a,
         b,
-        typeof a !== typeof b ||
-          a === null ||
-          b === null ||
-          Array.isArray(a) !== Array.isArray(b)
-          ? "type"
-          : "value",
+        typeof a !== typeof b || a === null || b === null || Array.isArray(a) !== Array.isArray(b)
+          ? 'type'
+          : 'value',
       );
   }
-  walk(expected, actual, "");
+  walk(expected, actual, '');
   return diffs;
 }

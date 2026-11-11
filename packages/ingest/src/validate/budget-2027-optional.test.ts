@@ -10,16 +10,18 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
-import { expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { budget2027 } from './budget-2027.js';
 import { Context } from './context.js';
 const fixtures = resolve(import.meta.dirname, '../../test/fixtures');
 const cases = JSON.parse(readFileSync(join(fixtures, 'validate15b/optional-values.json'), 'utf8'));
 const cli = resolve(import.meta.dirname, '../../dist/validate/budget-2027-cli.js');
 for (const test of cases)
-  it('preserves optional EU contribution: ' + test.name, () => {
-    const root = mkdtempSync(join(tmpdir(), 'budget-optional-'));
-    try {
+  describe('preserves optional EU contribution: ' + test.name, () => {
+    let root: string;
+    // Prepare each scenario once for both independent assertion boundaries.
+    beforeAll(() => {
+      root = mkdtempSync(join(tmpdir(), 'budget-optional-'));
       cpSync(join(fixtures, 'fiscal/inputs/data'), join(root, 'data'), { recursive: true });
       for (const name of [
         'outlook',
@@ -69,14 +71,22 @@ for (const test of cases)
             : value;
         }),
       );
+    });
+    afterAll(() => {
+      if (root) rmSync(root, { recursive: true, force: true });
+    });
+    it('matches the numeric donor in process', () => {
       expect(budget2027(new Context(root))).toEqual(test.result);
+    });
+    it('matches the numeric donor through the compiled CLI', () => {
       const run = spawnSync(process.execPath, [cli, '--root', root], {
         cwd: root,
         encoding: 'utf8',
+        // Audit: fixture + compiled CLI takes 6–7s on a shared host.
+        // Bound the subprocess separately, below the 30s integration case budget.
+        timeout: 20_000,
       });
       expect(run.status, run.stderr).toBe(0);
       expect(JSON.parse(run.stdout).groups).toEqual([test.result]);
-    } finally {
-      rmSync(root, { recursive: true, force: true });
-    }
+    }, 30_000);
   });

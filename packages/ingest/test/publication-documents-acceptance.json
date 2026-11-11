@@ -16,10 +16,7 @@
     "archive": "46 nested ZIP/7z PDFs equal registered PDF pins",
     "preparation": "absent generation + existing-byte verification + stale fail before writes"
   },
-  "inherited": [
-    "all 44 programme budget outputs",
-    "DBP full existing builder output"
-  ],
+  "inherited": ["all 44 programme budget outputs", "DBP full existing builder output"],
   "negative": [
     "corrupt PDF",
     "wrong DBP hash",

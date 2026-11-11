@@ -6,9 +6,11 @@
     "vitest.shared.ts",
     "data/datasets.yaml",
     "data/release/**",
-    "data/inputs/**"
+    "data/inputs/**",
+    "coverage-baseline.json",
+    "coverage-exceptions.json"
   ],
-  "globalEnv": ["CLOUDFLARE_ENV", "WRANGLER_CONFIG"],
+  "globalEnv": ["CLOUDFLARE_ENV", "WRANGLER_CONFIG", "PYTHON312"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
@@ -22,17 +24,38 @@
       "dependsOn": ["^build"]
     },
     "test": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"],
+      "cache": false
     },
     "@sigma-budget/ingest#test": {
-      "dependsOn": ["build"]
+      "dependsOn": ["build"],
+      "outputs": ["coverage/**"],
+      "cache": false
     },
     "@sigma-budget/etl#test": {
-      "dependsOn": ["build"]
+      "dependsOn": ["build"],
+      "outputs": ["coverage/**"],
+      "cache": false
     },
     "dev": {
       "cache": false,
       "persistent": true
     }
-  }
+  },
+  "globalPassThroughEnv": [
+    "PYTHONPATH",
+    "WAVE14_PARITY_REPORT",
+    "WAVE15_PARITY_REPORT",
+    "WAVE15_COMPOUND_REPORT",
+    "WAVE15_NATIVE_REPORT",
+    "WAVE15_ITERABLE_REPORT",
+    "WAVE17A_PARITY_REPORT",
+    "COMMON_PARITY_REPORT",
+    "LAW_PARITY_REPORT",
+    "EDITORIAL_PARITY_REPORT",
+    "COMPONENTS_RATES_PARITY_REPORT",
+    "PROGRAMMES_PARITY_REPORT",
+    "FISCAL_PARITY_REPORT"
+  ]
 }

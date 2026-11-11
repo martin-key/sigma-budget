@@ -13,27 +13,35 @@ import { here, parts as addrParts } from '../loc.js';
 import { num } from '../format.js';
 
 const MEM = new Map();
-const memKey = id => `${addrParts(here()).path}|${id}`;
-const part = k => String(k).replace(/[^\w-]+/g, '_');          // the key as part of an id
+const memKey = (id) => `${addrParts(here()).path}|${id}`;
+const part = (k) => String(k).replace(/[^\w-]+/g, '_'); // the key as part of an id
 
 export function tabs(o = {}) {
   const id = o.id;
-  const items = (o.tabs || []).filter(t => t && t.key != null && t.key !== '');
+  const items = (o.tabs || []).filter((t) => t && t.key != null && t.key !== '');
   if (!id) throw new Error('tabs: id is required');
   if (!items.length) throw new Error(`tabs ${id}: no tabs`);
-  const keys = items.map(t => String(t.key));
+  const keys = items.map((t) => String(t.key));
   const mem = o.query ? undefined : MEM.get(memKey(id));
-  const active = keys.includes(String(o.active)) ? String(o.active) : keys.includes(mem) ? mem : keys[0];
-  const tid = k => `${id}-t-${part(k)}`, pid = k => `${id}-p-${part(k)}`;
+  const active = keys.includes(String(o.active))
+    ? String(o.active)
+    : keys.includes(mem)
+      ? mem
+      : keys[0];
+  const tid = (k) => `${id}-t-${part(k)}`,
+    pid = (k) => `${id}-p-${part(k)}`;
 
-  const tab = t => {
-    const k = String(t.key), on = k === active;
+  const tab = (t) => {
+    const k = String(t.key),
+      on = k === active;
     const c = t.count;
-    const count = typeof c === 'number' && Number.isFinite(c) ? num(c, 0) : typeof c === 'string' && c ? c : '';
+    const count =
+      typeof c === 'number' && Number.isFinite(c) ? num(c, 0) : typeof c === 'string' && c ? c : '';
     return html`<button type="button" role="tab" id="${tid(k)}" aria-controls="${pid(k)}" aria-selected="${on ? 'true' : 'false'}" tabindex="${on ? 0 : -1}" data-key="${k}">${t.label ?? k}${count !== '' ? html` <span class="tab-count">${count}</span>` : ''}</button>`;
   };
-  const panel = t => {
-    const k = String(t.key), on = k === active;
+  const panel = (t) => {
+    const k = String(t.key),
+      on = k === active;
     return html`<div class="tab-panel" role="tabpanel" id="${pid(k)}" aria-labelledby="${tid(k)}" tabindex="0" data-key="${k}"${on ? '' : raw(' hidden')}>${t.body ?? ''}</div>`;
   };
 
@@ -49,7 +57,7 @@ export function mount(el, ctx) {
   const qkey = el.dataset.qkey || '';
   const all = () => [...list.querySelectorAll('[role="tab"]')];
   const panels = [...el.querySelectorAll(':scope > [role="tabpanel"]')];
-  const panelOf = t => panels.find(p => p.id === t.getAttribute('aria-controls'));
+  const panelOf = (t) => panels.find((p) => p.id === t.getAttribute('aria-controls'));
 
   function select(tab, focus) {
     for (const t of all()) {
@@ -59,21 +67,25 @@ export function mount(el, ctx) {
       const p = panelOf(t);
       if (p) p.hidden = !on;
     }
-    if (focus) { tab.focus(); tab.scrollIntoView?.({ block: 'nearest', inline: 'nearest' }); }
+    if (focus) {
+      tab.focus();
+      tab.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+    }
     const key = tab.dataset.key;
     if (qkey) ctx?.setQuery?.({ [qkey]: key }, { rerender: false });
     else MEM.set(memKey(el.id), key);
     el.dispatchEvent(new CustomEvent('tabs:change', { bubbles: true, detail: { id: el.id, key } }));
   }
 
-  const onClick = e => {
+  const onClick = (e) => {
     const t = e.target.closest('[role="tab"]');
     if (t && list.contains(t) && t.getAttribute('aria-selected') !== 'true') select(t, false);
   };
-  const onKey = e => {
+  const onKey = (e) => {
     const t = e.target.closest('[role="tab"]');
     if (!t || e.altKey || e.ctrlKey || e.metaKey) return;
-    const all_ = all(), i = all_.indexOf(t);
+    const all_ = all(),
+      i = all_.indexOf(t);
     let n = -1;
     if (e.key === 'ArrowRight') n = (i + 1) % all_.length;
     else if (e.key === 'ArrowLeft') n = (i - 1 + all_.length) % all_.length;
@@ -85,5 +97,8 @@ export function mount(el, ctx) {
   };
   list.addEventListener('click', onClick);
   list.addEventListener('keydown', onKey);
-  return () => { list.removeEventListener('click', onClick); list.removeEventListener('keydown', onKey); };
+  return () => {
+    list.removeEventListener('click', onClick);
+    list.removeEventListener('keydown', onKey);
+  };
 }

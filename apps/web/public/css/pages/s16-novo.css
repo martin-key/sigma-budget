@@ -2,75 +2,242 @@
    the shared timeline; the thank-you note as a teal-ruled callout. Tokens only, light only, mobile first. */
 
 /* the five sentences of the latest monthly report */
-.page[data-route="S16"] .s16-five { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); margin: 0 0 var(--sp-4); padding-inline-start: 1.75em; max-width: 62ch; font-size: var(--fs-0); }
-@media (min-width: 600px) {
-  .page[data-route="S16"] .s16-five { font-size: var(--fs-1); }
+.page[data-route='S16'] .s16-five {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-3);
+  margin: 0 0 var(--sp-4);
+  padding-inline-start: 1.75em;
+  max-width: 62ch;
+  font-size: var(--fs-0);
 }
-.page[data-route="S16"] .s16-five li::marker { color: var(--ink-soft); font-family: var(--font-mono); font-weight: 500; }
-.page[data-route="S16"] .s16-more { margin: 0; }
-.page[data-route="S16"] .s16-where { color: var(--ink-mid); font-size: var(--fs-s); }
+@media (min-width: 600px) {
+  .page[data-route='S16'] .s16-five {
+    font-size: var(--fs-1);
+  }
+}
+.page[data-route='S16'] .s16-five li::marker {
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
+.page[data-route='S16'] .s16-more {
+  margin: 0;
+}
+.page[data-route='S16'] .s16-where {
+  color: var(--ink-mid);
+  font-size: var(--fs-s);
+}
 
 /* a short plain lead and the small notes under a field or a list */
-.page[data-route="S16"] .s16-lead { max-width: 62ch; margin: 0; }
-.page[data-route="S16"] .s16-note { max-width: 62ch; margin: 0; color: var(--ink-mid); font-size: var(--fs-s); }
-.page[data-route="S16"] .s16-open { margin: 0; }
+.page[data-route='S16'] .s16-lead {
+  max-width: 62ch;
+  margin: 0;
+}
+.page[data-route='S16'] .s16-note {
+  max-width: 62ch;
+  margin: 0;
+  color: var(--ink-mid);
+  font-size: var(--fs-s);
+}
+.page[data-route='S16'] .s16-open {
+  margin: 0;
+}
 
 /* the chronology: the filter row, the line about what is shown, one group per month (a serif month, a mono count) */
-.page[data-route="S16"] .s16-chips { margin: 0; }
-.page[data-route="S16"] .s16-shown { margin: 0; color: var(--ink-mid); font-size: var(--fs-s); }
-.page[data-route="S16"] .s16-groups { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-7); margin-top: var(--sp-2); }
-.page[data-route="S16"] .s16-month { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-4); min-width: 0; }
-.page[data-route="S16"] .s16-month-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--sp-3); margin: 0; padding-bottom: var(--sp-2); border-bottom: 1px solid var(--rule); font: 400 var(--fs-h3)/1.2 var(--font-serif); }
-.page[data-route="S16"] .s16-month-n { color: var(--ink-soft); font: 500 var(--fs-xs)/1.4 var(--font-mono); letter-spacing: .1em; text-transform: uppercase; }
+.page[data-route='S16'] .s16-chips {
+  margin: 0;
+}
+.page[data-route='S16'] .s16-shown {
+  margin: 0;
+  color: var(--ink-mid);
+  font-size: var(--fs-s);
+}
+.page[data-route='S16'] .s16-groups {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-7);
+  margin-top: var(--sp-2);
+}
+.page[data-route='S16'] .s16-month {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-4);
+  min-width: 0;
+}
+.page[data-route='S16'] .s16-month-h {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--sp-3);
+  margin: 0;
+  padding-bottom: var(--sp-2);
+  border-bottom: 1px solid var(--rule);
+  font: 400 var(--fs-h3)/1.2 var(--font-serif);
+}
+.page[data-route='S16'] .s16-month-n {
+  color: var(--ink-soft);
+  font: 500 var(--fs-xs)/1.4 var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
 
 /* the RSS address and its copy button side by side when there is room */
-.page[data-route="S16"] .s16-rss { max-width: 46rem; }
-.page[data-route="S16"] .s16-rss-row { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
-.page[data-route="S16"] .s16-rss-row .input { flex: 1 1 16rem; width: auto; min-width: 0; font-family: var(--font-mono); font-size: .875rem; }
-.page[data-route="S16"] .s16-rss-row .btn { flex: 0 0 auto; }
+.page[data-route='S16'] .s16-rss {
+  max-width: 46rem;
+}
+.page[data-route='S16'] .s16-rss-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+.page[data-route='S16'] .s16-rss-row .input {
+  flex: 1 1 16rem;
+  width: auto;
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+}
+.page[data-route='S16'] .s16-rss-row .btn {
+  flex: 0 0 auto;
+}
 
 /* the subscription form: one column, readable width; the segment options may wrap, so each is its own square cell */
-.page[data-route="S16"] .s16-form { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-5); max-width: 40rem; margin-top: var(--sp-3); }
-.page[data-route="S16"] .s16-form .field { min-width: 0; }
-.page[data-route="S16"] .s16-seg { display: flex; flex-wrap: wrap; justify-content: stretch; overflow: visible; padding: 0 1px 1px 0; border: 0; border-radius: 0; background: none; }
-.page[data-route="S16"] .s16-seg .seg-opt { flex: 1 1 auto; margin: 0 -1px -1px 0; border: 1px solid var(--ink-soft); }
-.page[data-route="S16"] .s16-seg .seg-opt + .seg-opt { border-left: 1px solid var(--ink-soft); }
-.page[data-route="S16"] .s16-seg .seg-opt label { width: 100%; justify-content: center; min-height: 44px; white-space: normal; text-align: center; border-radius: 0; }
+.page[data-route='S16'] .s16-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-5);
+  max-width: 40rem;
+  margin-top: var(--sp-3);
+}
+.page[data-route='S16'] .s16-form .field {
+  min-width: 0;
+}
+.page[data-route='S16'] .s16-seg {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: stretch;
+  overflow: visible;
+  padding: 0 1px 1px 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+.page[data-route='S16'] .s16-seg .seg-opt {
+  flex: 1 1 auto;
+  margin: 0 -1px -1px 0;
+  border: 1px solid var(--ink-soft);
+}
+.page[data-route='S16'] .s16-seg .seg-opt + .seg-opt {
+  border-left: 1px solid var(--ink-soft);
+}
+.page[data-route='S16'] .s16-seg .seg-opt label {
+  width: 100%;
+  justify-content: center;
+  min-height: 44px;
+  white-space: normal;
+  text-align: center;
+  border-radius: 0;
+}
 
 /* the topics: a labelled group of switches, two columns when there is room */
-.page[data-route="S16"] .s16-topics { display: grid; gap: var(--sp-1); min-width: 0; margin: 0; padding: 0; border: 0; }
-.page[data-route="S16"] .s16-topics legend { padding: 0; margin-bottom: var(--sp-2); }
-.page[data-route="S16"] .s16-topic-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 var(--sp-6); }
-@media (min-width: 640px) {
-  .page[data-route="S16"] .s16-topic-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.page[data-route='S16'] .s16-topics {
+  display: grid;
+  gap: var(--sp-1);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
 }
-.page[data-route="S16"] .s16-topics[data-bad] .toggle-box,
-.page[data-route="S16"] .s16-consent .toggle input[aria-invalid="true"] + .toggle-box { border-color: var(--crimson); box-shadow: 0 0 0 1px var(--crimson); }
+.page[data-route='S16'] .s16-topics legend {
+  padding: 0;
+  margin-bottom: var(--sp-2);
+}
+.page[data-route='S16'] .s16-topic-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0 var(--sp-6);
+}
+@media (min-width: 640px) {
+  .page[data-route='S16'] .s16-topic-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.page[data-route='S16'] .s16-topics[data-bad] .toggle-box,
+.page[data-route='S16'] .s16-consent .toggle input[aria-invalid='true'] + .toggle-box {
+  border-color: var(--crimson);
+  box-shadow: 0 0 0 1px var(--crimson);
+}
 
 /* the thank-you note that replaces the form: a callout with a teal rule (СИГМА .callout) */
-.page[data-route="S16"] .s16-ok { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--sp-3); max-width: 42rem; margin-top: var(--sp-3); padding: var(--sp-3) var(--sp-5); border-left: 4px solid var(--pos); border-radius: 0; background: none; }
-.page[data-route="S16"] .s16-ok-ic { display: grid; padding-top: 2px; color: var(--pos); }
-.page[data-route="S16"] .s16-ok-main { display: grid; gap: var(--sp-3); min-width: 0; }
-.page[data-route="S16"] .s16-ok-main p { margin: 0; }
-.page[data-route="S16"] .s16-ok-h { margin: 0; font: 400 var(--fs-1)/1.25 var(--font-serif); }
+.page[data-route='S16'] .s16-ok {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--sp-3);
+  max-width: 42rem;
+  margin-top: var(--sp-3);
+  padding: var(--sp-3) var(--sp-5);
+  border-left: 4px solid var(--pos);
+  border-radius: 0;
+  background: none;
+}
+.page[data-route='S16'] .s16-ok-ic {
+  display: grid;
+  padding-top: 2px;
+  color: var(--pos);
+}
+.page[data-route='S16'] .s16-ok-main {
+  display: grid;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+.page[data-route='S16'] .s16-ok-main p {
+  margin: 0;
+}
+.page[data-route='S16'] .s16-ok-h {
+  margin: 0;
+  font: 400 var(--fs-1)/1.25 var(--font-serif);
+}
 @media (max-width: 599px) {
-  .page[data-route="S16"] .s16-ok { padding: var(--sp-3) var(--sp-4); }
+  .page[data-route='S16'] .s16-ok {
+    padding: var(--sp-3) var(--sp-4);
+  }
 }
 
 /* the two blocks that end the page lay their parts out in one column with an even gap */
-.page[data-route="S16"] #s16-b-rss .block-body,
-.page[data-route="S16"] #s16-b-subscribe .block-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-4); align-content: start; }
-.page[data-route="S16"] #s16-b-subscribe .s16-form { margin-top: 0; }
-.page[data-route="S16"] #s16-b-subscribe .s16-ok { margin-top: 0; }
+.page[data-route='S16'] #s16-b-rss .block-body,
+.page[data-route='S16'] #s16-b-subscribe .block-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-4);
+  align-content: start;
+}
+.page[data-route='S16'] #s16-b-subscribe .s16-form {
+  margin-top: 0;
+}
+.page[data-route='S16'] #s16-b-subscribe .s16-ok {
+  margin-top: 0;
+}
 /* touch-sized buttons of my own (the shared .btn is a little lower) */
-.page[data-route="S16"] .s16-rss-row .btn,
-.page[data-route="S16"] .s16-form .btn,
-.page[data-route="S16"] .s16-ok .btn { min-height: 44px; }
+.page[data-route='S16'] .s16-rss-row .btn,
+.page[data-route='S16'] .s16-form .btn,
+.page[data-route='S16'] .s16-ok .btn {
+  min-height: 44px;
+}
 
 /* the chronology block: the filter, the line about what is shown and the list sit in one column with an even gap */
-.page[data-route="S16"] #s16-b-feed .block-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-4); align-content: start; }
-.page[data-route="S16"] #s16-b-feed .s16-groups { margin-top: var(--sp-3); }
+.page[data-route='S16'] #s16-b-feed .block-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-4);
+  align-content: start;
+}
+.page[data-route='S16'] #s16-b-feed .s16-groups {
+  margin-top: var(--sp-3);
+}
 
 @media (forced-colors: active) {
-  .page[data-route="S16"] .s16-seg .seg-opt { border-color: ButtonText; }
+  .page[data-route='S16'] .s16-seg .seg-opt {
+    border-color: ButtonText;
+  }
 }

@@ -16,53 +16,95 @@
 import { NBSP, DASH, num, khil, eur, EUR_RATE } from './format.js';
 import { norm, lat } from './searchlib.js';
 
-const ok = v => typeof v === 'number' && Number.isFinite(v);
+const ok = (v) => typeof v === 'number' && Number.isFinite(v);
 
 /** the five kinds of transfer (ЗДБ чл. 51) in the order of the data; the sentences are simplified on purpose, the law has the exact rules.
  *  The first four are „основните“ (т. 1) and add up to transfers.total; „други целеви“ (т. 2) come on top and are not in the total. */
 export const TYPES = [
-  { key: 'delegated', label: 'Делегирани дейности', short: 'Делегирани', inTotal: true, text: 'Пари за дейности, които държавата е възложила на общината, например за училища, детски градини и социални услуги.' },
-  { key: 'equalizing', label: 'Изравнителна субсидия', short: 'Изравнителна', inTotal: true, text: 'Помага на общините с по-малко собствени приходи да вършат местните си дейности.' },
-  { key: 'winterRoads', label: 'Зимно поддържане и снегопочистване', short: 'Зимно поддържане', inTotal: true, text: 'Пари за снегопочистване и поддържане на общинските пътища през зимата.' },
-  { key: 'capital', label: 'Капиталови разходи', short: 'Капиталови', inTotal: true, text: 'Пари за строеж и сериозен ремонт на неща, които траят дълго, например улици и сгради.' },
-  { key: 'otherTargeted', label: 'Други целеви трансфери', short: 'Други целеви', inTotal: false, text: 'Целеви суми за конкретни местни дейности. Дават се отгоре и не са част от основните трансфери.' }
+  {
+    key: 'delegated',
+    label: 'Делегирани дейности',
+    short: 'Делегирани',
+    inTotal: true,
+    text: 'Пари за дейности, които държавата е възложила на общината, например за училища, детски градини и социални услуги.',
+  },
+  {
+    key: 'equalizing',
+    label: 'Изравнителна субсидия',
+    short: 'Изравнителна',
+    inTotal: true,
+    text: 'Помага на общините с по-малко собствени приходи да вършат местните си дейности.',
+  },
+  {
+    key: 'winterRoads',
+    label: 'Зимно поддържане и снегопочистване',
+    short: 'Зимно поддържане',
+    inTotal: true,
+    text: 'Пари за снегопочистване и поддържане на общинските пътища през зимата.',
+  },
+  {
+    key: 'capital',
+    label: 'Капиталови разходи',
+    short: 'Капиталови',
+    inTotal: true,
+    text: 'Пари за строеж и сериозен ремонт на неща, които траят дълго, например улици и сгради.',
+  },
+  {
+    key: 'otherTargeted',
+    label: 'Други целеви трансфери',
+    short: 'Други целеви',
+    inTotal: false,
+    text: 'Целеви суми за конкретни местни дейности. Дават се отгоре и не са част от основните трансфери.',
+  },
 ];
-export const KEYS = ['total', ...TYPES.map(t => t.key)];
+export const KEYS = ['total', ...TYPES.map((t) => t.key)];
 
 /** inhabitants, or null when unknown (a zero is treated as unknown: no per-person figure from it) */
-export const popOf = m => (ok(m?.population) && m.population > 0 ? m.population : null);
+export const popOf = (m) => (ok(m?.population) && m.population > 0 ? m.population : null);
 /** the main transfers of the municipality (the first four kinds), хил. € */
-export const totalOf = m => (ok(m?.transfers?.total) ? m.transfers.total : null);
+export const totalOf = (m) => (ok(m?.transfers?.total) ? m.transfers.total : null);
 /** the main transfers plus the other targeted ones, хил. € (null when the file does not carry it) */
-export const allOf = m => (ok(m?.transfers?.all) ? m.transfers.all : null);
+export const allOf = (m) => (ok(m?.transfers?.all) ? m.transfers.all : null);
 /** € per person: the value the data carries, else the total over the population */
 export function pcOf(m) {
   const given = m?.perCapita?.total;
   if (ok(given)) return given;
-  const p = popOf(m), t = totalOf(m);
+  const p = popOf(m),
+    t = totalOf(m);
   return p && t !== null ? (t * 1000) / p : null;
 }
 /** € per person for one kind of transfer (the value the data carries, else computed; 'all' has no given value) */
 export function pcType(m, key) {
   const given = m?.perCapita?.[key];
   if (ok(given)) return given;
-  const p = popOf(m), v = m?.transfers?.[key];
+  const p = popOf(m),
+    v = m?.transfers?.[key];
   return p && ok(v) ? (v * 1000) / p : null;
 }
 
 /** sums and per-person values of a group of municipalities */
 export function aggregate(list) {
   const a = { count: list.length, population: 0, popCount: 0, sum: {}, perCapita: {} };
-  const pc = {}, ks = [...KEYS, 'all'];
-  for (const k of ks) { a.sum[k] = null; pc[k] = { money: 0, pop: 0 }; }
+  const pc = {},
+    ks = [...KEYS, 'all'];
+  for (const k of ks) {
+    a.sum[k] = null;
+    pc[k] = { money: 0, pop: 0 };
+  }
   for (const m of list) {
     const p = popOf(m);
-    if (p) { a.population += p; a.popCount += 1; }
+    if (p) {
+      a.population += p;
+      a.popCount += 1;
+    }
     for (const k of ks) {
       const v = m?.transfers?.[k];
       if (!ok(v)) continue;
       a.sum[k] = (a.sum[k] ?? 0) + v;
-      if (p) { pc[k].money += v; pc[k].pop += p; }
+      if (p) {
+        pc[k].money += v;
+        pc[k].pop += p;
+      }
     }
   }
   for (const k of ks) a.perCapita[k] = pc[k].pop > 0 ? (pc[k].money * 1000) / pc[k].pop : null;
@@ -74,7 +116,8 @@ export function aggregate(list) {
 export function rankOf(list, m) {
   const v = pcOf(m);
   if (v === null) return null;
-  let above = 0, of = 0;
+  let above = 0,
+    of = 0;
   for (const x of list) {
     const w = pcOf(x);
     if (w === null) continue;
@@ -89,41 +132,53 @@ export function similarTo(list, m, n = 10) {
   const p = popOf(m);
   if (!p) return [];
   return list
-    .filter(x => x !== m && x?.id !== m?.id && popOf(x))
-    .map(x => [Math.abs(Math.log(popOf(x) / p)), x])
+    .filter((x) => x !== m && x?.id !== m?.id && popOf(x))
+    .map((x) => [Math.abs(Math.log(popOf(x) / p)), x])
     .sort((a, b) => a[0] - b[0] || String(a[1].id).localeCompare(String(b[1].id)))
     .slice(0, n)
-    .map(x => x[1])
+    .map((x) => x[1])
     .sort((a, b) => popOf(a) - popOf(b) || String(a.id).localeCompare(String(b.id)));
 }
 
 /* ------------------------------------------------------------------ search */
 /** a query folded the way names are: lower case, no quotes or signs, no leading „община“ */
-export const normQuery = q => norm(String(q ?? '').slice(0, 80)).replace(/^(община|obshtina) /, '').trim();
+export const normQuery = (q) =>
+  norm(String(q ?? '').slice(0, 80))
+    .replace(/^(община|obshtina) /, '')
+    .trim();
 
 /** municipalities whose name matches (best first), else those of an oblast with that name; null for an empty query */
 export function search(list, q) {
   const qn = normQuery(q);
   if (!qn) return null;
   const latin = /[a-z]/.test(qn);
-  const key = s => (latin ? lat(norm(s)) : norm(s));
-  const place = s => {
+  const key = (s) => (latin ? lat(norm(s)) : norm(s));
+  const place = (s) => {
     const n = key(s);
     if (n === qn) return 0;
     if (n.startsWith(qn)) return 1;
     if (` ${n}`.includes(` ${qn}`)) return 2;
-    return qn.length >= 3 && n.includes(qn) ? 3 : -1;     // one or two letters match only at the start of a word
+    return qn.length >= 3 && n.includes(qn) ? 3 : -1; // one or two letters match only at the start of a word
   };
   const bg = (a, b) => String(a).localeCompare(String(b), 'bg');
   // the name, and the spelling of the law when it differs („Добричка“, „Столична община“, „Бобовдол“)
-  const rank = m => [m?.name, m?.lawName].reduce((best, s) => { const r = s ? place(s) : -1; return r >= 0 && (best < 0 || r < best) ? r : best; }, -1);
+  const rank = (m) =>
+    [m?.name, m?.lawName].reduce((best, s) => {
+      const r = s ? place(s) : -1;
+      return r >= 0 && (best < 0 || r < best) ? r : best;
+    }, -1);
   const byName = [];
-  for (const m of list) { const r = rank(m); if (r >= 0) byName.push([r, m]); }
+  for (const m of list) {
+    const r = rank(m);
+    if (r >= 0) byName.push([r, m]);
+  }
   if (byName.length) {
     byName.sort((a, b) => a[0] - b[0] || bg(a[1].name, b[1].name) || bg(a[1].id, b[1].id));
-    return { hits: byName.map(x => x[1]), via: 'name' };
+    return { hits: byName.map((x) => x[1]), via: 'name' };
   }
-  const byRegion = list.filter(m => place(m?.region) >= 0).sort((a, b) => bg(a.name, b.name) || bg(a.id, b.id));
+  const byRegion = list
+    .filter((m) => place(m?.region) >= 0)
+    .sort((a, b) => bg(a.name, b.name) || bg(a.id, b.id));
   return byRegion.length ? { hits: byRegion, via: 'region' } : { hits: [], via: null };
 }
 
@@ -139,7 +194,7 @@ export function eurText(v, d = 0, leva = false) {
   return leva ? `${eur(v, d)} (≈${NBSP}${num(v * EUR_RATE, d)}${NBSP}лв.)` : eur(v, d);
 }
 /** „Община Благоевград“; the capital is „Столична община“ */
-export const munName = m => {
+export const munName = (m) => {
   const n = String(m?.name ?? '').trim();
   if (!n) return 'Община';
   return norm(n) === 'столична' ? 'Столична община' : `Община ${n}`;

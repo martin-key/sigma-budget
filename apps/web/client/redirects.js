@@ -15,36 +15,57 @@
 //   /patevoditel[/N]        → /5-minuti?to=<scene of step N>  (the guide is merged into «Бюджетът за 5 минути»: step 1 → scene 1, 2 → 2, 3 and 5 → 3,
 //                             4 → 5 (the measures), 6 → 6, 7 → 4; step 8 → /danaci, the calculator the guide ended with); /patevoditel/9 stays unknown
 const POK = { prihodi: 'rev', razhodi: 'exp.total', saldo: 'balance' };
-const GUIDE_SCENE = { 1: 's04-scene1', 2: 's04-scene2', 3: 's04-scene3', 4: 's04-scene5', 5: 's04-scene3', 6: 's04-scene6', 7: 's04-scene4' };
+const GUIDE_SCENE = {
+  1: 's04-scene1',
+  2: 's04-scene2',
+  3: 's04-scene3',
+  4: 's04-scene5',
+  5: 's04-scene3',
+  6: 's04-scene6',
+  7: 's04-scene4',
+};
 
 export function redirect(segs, query = {}) {
-  const [a, b, c] = segs.map(s => String(s).toLowerCase());
+  const [a, b, c] = segs.map((s) => String(s).toLowerCase());
   const q = { ...query };
   if (a === 'izpalnenie') {
-    if (b === 'pera') { q.pera = q.pera || 'rev,exp'; delete q.ed; delete q.prag; return { segs: ['izpalnenie'], query: q }; }
+    if (b === 'pera') {
+      q.pera = q.pera || 'rev,exp';
+      delete q.ed;
+      delete q.prag;
+      return { segs: ['izpalnenie'], query: q };
+    }
     if (b === 'sravnenie') {
-      if (q.rez == null) q.rez = 'mesec';                      // the old comparison opened on the month alone
-      if (q.pok) { if (POK[q.pok]) q.pokazatel = POK[q.pok]; delete q.pok; }
-      delete q.ed; delete q.prag;
+      if (q.rez == null) q.rez = 'mesec'; // the old comparison opened on the month alone
+      if (q.pok) {
+        if (POK[q.pok]) q.pokazatel = POK[q.pok];
+        delete q.pok;
+      }
+      delete q.ed;
+      delete q.prag;
       return { segs: ['izpalnenie'], query: q };
     }
     if (q.ed != null || q.prag != null || q.pok != null) {
       if (q.pok && POK[q.pok] && !q.pokazatel) q.pokazatel = POK[q.pok];
-      delete q.ed; delete q.prag; delete q.pok;
+      delete q.ed;
+      delete q.prag;
+      delete q.pok;
       return { segs: segs.slice(0, 2), query: q };
     }
     return null;
   }
   if (a === 'razhodi' && c === 'deynosti') return { segs: ['razhodi', segs[1]], query: q };
   if (a === 'plashtania') return { segs: ['izpalnenie'], query: {} };
-  if (a === 'proekti') return { segs: ['vedomstva'], query: { ...(q.per ? { per: q.per } : {}), tab: 'programi' } };
+  if (a === 'proekti')
+    return { segs: ['vedomstva'], query: { ...(q.per ? { per: q.per } : {}), tab: 'programi' } };
   if (a === 'moyat-byudzhet') return { segs: ['razhodi'], query: q.per ? { per: q.per } : {} };
   if (a === 'deystvie') return { segs: [], query: {} };
   if (a === 'patevoditel' && segs.length <= 2 && (b === undefined || /^[1-8]$/.test(b))) {
     if (b === '8') return { segs: ['danaci'], query: {} };
     return { segs: ['5-minuti'], query: GUIDE_SCENE[b] ? { to: GUIDE_SCENE[b] } : {} };
   }
-  if (a === 'razhodi' && !b && q.po === 'vedomstva') return { segs: ['vedomstva'], query: q.per ? { per: q.per } : {} };
+  if (a === 'razhodi' && !b && q.po === 'vedomstva')
+    return { segs: ['vedomstva'], query: q.per ? { per: q.per } : {} };
   if (a === 'klasacii') return { segs: ['razhodi'], query: q.per ? { per: q.per } : {} };
   return null;
 }
@@ -58,6 +79,8 @@ export function redirectHash(hash) {
   if (qi >= 0) for (const [k, v] of new URLSearchParams(s.slice(qi + 1))) query[k] = v;
   const r = redirect(path.split('/').filter(Boolean), query);
   if (!r) return null;
-  const qs = new URLSearchParams(Object.entries(r.query).filter(([, v]) => v != null && v !== '')).toString();
+  const qs = new URLSearchParams(
+    Object.entries(r.query).filter(([, v]) => v != null && v !== ''),
+  ).toString();
   return '#/' + r.segs.map(encodeURIComponent).join('/') + (qs ? '?' + qs : '');
 }

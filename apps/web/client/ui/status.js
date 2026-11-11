@@ -6,14 +6,34 @@ import { icon } from '../icons.js';
 import { sheet } from './sheet.js';
 
 export const STATUS = {
-  real:     { label: 'Официални данни', icon: 'checkCircle', text: 'Взети от официален източник. Показваме откъде са и към коя дата.' },
-  partial:  { label: 'Частични данни',  icon: 'partial',     text: 'Част от показателя е официална, друга част още липсва или е изчислена. Бележката до числото казва коя.' },
-  forecast: { label: 'Прогноза',        icon: 'forecast',    text: 'Официална оценка за бъдещи години. Това не е отчет и може да се промени.' },
-  mock:     { label: 'Примерни данни',  icon: 'hatch',       text: 'Измислени стойности, които показват как ще изглежда екранът. Не са истински и не бива да се цитират. Белязани са със щриховка ▨.' },
-  pending:  { label: 'Предстои',        icon: 'dashed',      text: 'Данните съществуват при издателя, но още не са извлечени. Не показваме число, докато няма официални данни.' }
+  real: {
+    label: 'Официални данни',
+    icon: 'checkCircle',
+    text: 'Взети от официален източник. Показваме откъде са и към коя дата.',
+  },
+  partial: {
+    label: 'Частични данни',
+    icon: 'partial',
+    text: 'Част от показателя е официална, друга част още липсва или е изчислена. Бележката до числото казва коя.',
+  },
+  forecast: {
+    label: 'Прогноза',
+    icon: 'forecast',
+    text: 'Официална оценка за бъдещи години. Това не е отчет и може да се промени.',
+  },
+  mock: {
+    label: 'Примерни данни',
+    icon: 'hatch',
+    text: 'Измислени стойности, които показват как ще изглежда екранът. Не са истински и не бива да се цитират. Белязани са със щриховка ▨.',
+  },
+  pending: {
+    label: 'Предстои',
+    icon: 'dashed',
+    text: 'Данните съществуват при издателя, но още не са извлечени. Не показваме число, докато няма официални данни.',
+  },
 };
 const ORDER = ['real', 'partial', 'forecast', 'pending'];
-export const statusLabel = s => (STATUS[s] || STATUS.pending).label;
+export const statusLabel = (s) => (STATUS[s] || STATUS.pending).label;
 
 /** statusPill('real') -> <span class="st" data-st="real">✓ Официални данни</span> */
 export function statusPill(status, o = {}) {
@@ -24,7 +44,8 @@ export function statusPill(status, o = {}) {
 
 /** the legend as a list (also the body of the „Легенда“ sheet) */
 export function legendBody() {
-  return html`<ul class="legend-list">${ORDER.map(k => html`<li>${statusPill(k)}<p class="small">${STATUS[k].text}</p></li>`)}</ul>
+  return html`<ul class="legend-list">${ORDER.map((k) => html`<li>${statusPill(k)}<p class="small">${STATUS[k].text}</p></li>`)}</ul>
     <p class="small muted">Обхватът (КФП, национален бюджет, ЕС средства, ЗДД, Маастрихт) е показан с етикет до всяко число. Натисни етикета, за да прочетеш какво означава.</p>`;
 }
-export const openLegend = (returnFocus) => sheet.open({ title: 'Легенда: какво означават белезите', body: legendBody(), returnFocus });
+export const openLegend = (returnFocus) =>
+  sheet.open({ title: 'Легенда: какво означават белезите', body: legendBody(), returnFocus });
