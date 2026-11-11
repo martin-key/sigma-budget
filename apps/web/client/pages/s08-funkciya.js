@@ -1,3 +1,4 @@
+import { annualSource } from '../ui/annual-source.js';
 import { periodIndex, previousPeriodIndex } from '../annual.js';
 import { selectPeriod } from '../periods.js';
 import { annualGap } from '../ui/annual.js';
@@ -22,7 +23,7 @@ import { apportion } from '../calc.js';
 import { yIndex, change, chartUnit, perCapita, periodStatus } from '../view.js';
 import { num, pct, money, moneyParts, delta, date, DASH, NBSP } from '../format.js';
 
-export const needs = ['core', 'outlook', 'expenditure', 'ministries?'];
+export const needs = ['budget2027-provenance?', 'core', 'outlook', 'expenditure', 'ministries?'];
 export const styles = ['s08-funkciya'];
 
 const yr = y => `${y}${NBSP}г.`;
@@ -201,14 +202,14 @@ function notesBlock(ctx, M) {
   const F = M.F, X = ctx.data.expenditure;
   const note = id => (Array.isArray(F.notes) ? F.notes.find(n => n.id === id)?.text : F.notes?.[id]) ?? '';
   const items = [note('base'), note('col2025'), M.id === 'drugi' ? note('drugi') : ''].filter(Boolean);
-  if (X.meta?.asOf) items.push(html`Числата са от мотивите към проекта на бюджета, към ${date(X.meta.asOf, true)}. Приетият закон може да се различава от проекта: какво е променено, виж в „<a href="${ctx.href('S14', {}, { per: '2026.law' })}">Пътят на бюджета</a>“.`);
+  items.push(annualSource(ctx, X, { sections: ['functions'], functionLabel: M.name }));
   return block({ id: 's08-notes', title: 'Как да четеш числата', status: 'real', pill: false, report: false, source: ctx.data.expenditure.meta.source, share: false, body: html`<ul class="s08-notes" data-gl-scan>${items.map(t => html`<li>${t}</li>`)}</ul>` });
 }
 
 // ── page contract ──────────────────────────────────────────────────────────────────────────────────────
 function ledeOf(ctx, M) {
   const what = FN_WHAT[M.id] ?? '';
-  if (M.sel < 0 || !ok(M.val)) return `За ${yr(ctx.period?.year)} няма разбивка по функции в таблицата към проекта на бюджета. ${what}`.trim();
+  if (M.sel < 0 || !ok(M.val)) return `За ${yr(ctx.period?.year)} няма разбивка по функции в избрания запис. ${what}`.trim();
   const v = money(M.val, { d: 1 }), y = yr(M.year), what1 = lower(M.short);
   const pg = ok(M.pgSel) ? `, или ${pct(M.pgSel, 1)} от БВП` : '';
   const first = { prelim: `Според програмата за ${y} за ${what1} са предвидени ${v}${pg}.`, plan: `Държавата планира да похарчи ${v} за ${what1} през ${y}${pg}.`, forecast: `Според прогнозата за ${what1} през ${y} ще бъдат похарчени ${v}${pg}.` }[M.kinds[M.sel]]
@@ -227,7 +228,7 @@ export function render(ctx) {
   const M = modelOf(ctx, true);
   if (!M) return pendingState({ title: 'Функция', text: 'Данните за разходите не са налични в момента.' });
   const intro = html`<p class="s08-read" data-gl-scan>Бюджетът дели разходите на девет ${gl('byudzhetna-funktsiya', 'функции')}: показва за какво са парите, а не кое ведомство ги харчи. Тук е една от тях. Всичките девет са на екрана „<a href="${ctx.href('S07')}">Къде отиват парите?</a>“.</p>`;
-  const noCol = callout({ kind: 'info', body: `За ${yr(ctx.period.year)} в таблицата към проекта на бюджета няма разбивка по функции. Избери ${ctx.period.year < 2025 ? '2025 г. или по-нова година' : 'друг период'}. По-долу са данните на Евростат за по-стари години.` });
+  const noCol = callout({ kind: 'info', body: `За ${yr(ctx.period.year)} в избрания запис няма разбивка по функции. Избери ${ctx.period.year < 2025 ? '2025 г. или по-нова година' : 'друг период'}. По-долу са данните на Евростат за по-стари години.` });
   return {
     title: M.name, eyebrow: 'Функция на бюджета', lede: ledeOf(ctx, M), context: 'Консолидирана фискална програма (КФП): разходи по функции',
     body: html`${unitSwitch(ctx, { name: 's08-unit', note: 'Важи за списъците и графиките.' })}

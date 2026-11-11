@@ -1,3 +1,4 @@
+import { annualSource } from '../ui/annual-source.js';
 import { stateDebt } from '../budget-2027.js';
 import { periodIndex, previousPeriodIndex } from '../annual.js';
 import { selectPeriod } from '../periods.js';
@@ -20,7 +21,7 @@ import { pendingState } from '../ui/states.js';
 import { yIndex, change, chartUnit } from '../view.js';
 import { num, pct, money, date, DASH, NBSP } from '../format.js';
 
-export const needs = ['core', 'outlook', 'budget2027?'];
+export const needs = ['budget2027-provenance?', 'core', 'outlook', 'budget2027?'];
 export const styles = ['s13-prognoza'];
 
 /* ---------------------------------------------------------------- words and small helpers */
@@ -246,10 +247,9 @@ function points(f, d) {
 
 function summaryBlock(ctx, f, d) {
   const pts = points(f, d);
-  const py = f.plan >= 0 ? f.years[f.plan] : null;
   const note = callout({
     kind: 'info', title: 'Чии са тези числа?',
-    body: html`<p>Числата са от мотивите към проекта на бюджета${py ? ` за ${yr(py)}` : ''}, към ${date(f.asOf, true)}. ${ctx.period.year >= 2027 ? 'Проектът за 2027 не е приет закон; 2028–2029 са прогнози. Историческото сравнение на проекта и закона за 2026 е в „' : 'Приетият закон може да се различава от проекта. Какво е променено, виж в „'}<a href="${ctx.href('S14', {}, { per: '2026.law' })}">Пътят на бюджета</a>“.</p>`
+    body: html`<p>${annualSource(ctx, f.o)}</p>`
   });
   return block({
     id: 's13-sum', title: 'Накратко', scope: 'kfp', status: 'forecast', statusLabel: f.years[0] === 2027 ? 'Проект и прогноза' : 'Закон, оценка и прогноза', source: f.sources, asOf: f.asOf,

@@ -1,3 +1,4 @@
+import { scopeAnnualCatalogTraps } from '../build/catalog-editorial.js';
 /** Registered, offline production assembly. Every external byte was staged by release-build. */
 import { readFile, readdir, mkdir, writeFile } from 'node:fs/promises';
 import { readFileSync, existsSync } from 'node:fs';
@@ -550,7 +551,7 @@ export async function loadProduction(
         execution,
       },
       editorial: {
-        traps: cat.traps,
+        traps: scopeAnnualCatalogTraps(cat.traps),
         methodology: cat.methodology,
         execution,
         manifest,

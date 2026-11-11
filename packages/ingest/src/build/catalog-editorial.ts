@@ -169,3 +169,17 @@ export function catalogEditorial(input: CatalogEditorialInput): {
   ];
   return { traps, methodology };
 }
+
+/** Current production releases scope the historical extraction without rewriting migration oracles. */
+export function scopeAnnualCatalogTraps(
+  traps: readonly CatalogEditorialRow[],
+): CatalogEditorialRow[] {
+  return traps.map((row) =>
+    row.id === 'two-versions'
+      ? {
+          ...row,
+          text: 'Историческото извличане от PDF (проект от юни 2026 г.) и внесения на 01.07.2026 г. DOCX се отнася само за старите масиви към проекта за 2026 г. Разликите са в %s реда на Приложение 3 (до %s млн. €) и %s реда на Табл. III-1; общите суми и осемте групи приходи съвпадат. Полетата „versions“ в „outlook“ и „expenditure“ описват тези исторически разлики. Серията byPeriod е отделна: 2026.expected е очаквано изпълнение, 2027.draft е проект, а 2028.forecast и 2029.forecast са прогнози. Приходите и икономическите разходни редове са от Приложение 3 (стр. 191–192), а разходите по функции са от Табл. III-1 (стр. 73) на АСБП 2027–2029, публикувана на 06.11.2026 г.',
+        }
+      : row,
+  );
+}

@@ -14,7 +14,7 @@ import { block } from '../ui/block.js';
 import { kpi, kpiGrid } from '../ui/kpi.js';
 import { chart } from '../ui/chart.js';
 import { seg } from '../ui/seg.js';
-import { facts } from '../ui/cards.js';
+import { facts, callout } from '../ui/cards.js';
 import { ranklist } from '../ui/ranklist.js';
 import { gl } from '../ui/gl.js';
 import { scopeChip } from '../ui/scope.js';
@@ -267,7 +267,8 @@ function sectorsBlock(ctx) {
         { k: 'БВП', v: money(gdp, { d: 1 }) }
       ])}
       <p class="s31-note">БВП е сборът от добавената стойност на всички отрасли и данъците върху продуктите (като ДДС и акцизите), намален със субсидиите за продукти. Затова процентите по-горе са дял от добавената стойност, а не от БВП.</p>
-      <p class="small muted">Данни на НСИ, публикувани от Евростат (национални сметки, набори nama_10_a10 и nama_10_gdp), обновени на ${date(asOf)}${NBSP}г.${prov ? ` Данните за ${yr(y)} са предварителни и могат да се променят.` : ''}</p>
+      ${callout({ kind: 'info', title: 'Замразена снимка', body: html`<p>Показаните числа са замразена снимка. Има по-късни ревизии; част от историческите оригинали липсват. <a href="${ctx.href('S35', {}, { to: 's35-coverage' })}">Ограничения на изданието</a>.</p>` })}
+      <p class="small muted">Данни на НСИ чрез Евростат (nama_10_a10 и nama_10_gdp). Версия на източника: ${date(asOf)} г.${g.meta.retrieved ? ` Придобиване: ${date(g.meta.retrieved)} г.` : ''}${prov ? ` Данните за ${yr(y)} са предварителни.` : ''}</p>
     </div>`
   });
 }

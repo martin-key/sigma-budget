@@ -186,10 +186,13 @@ function build(c, srcs) {
     s.hay = `${n} ${lat(n)}`;
   }
 
-  const item = t => ({
+  const item = original => {
+    const t = original.id === 'two-versions' ? { ...original, text: 'Историческото извличане от PDF (проект от юни 2026 г.) и внесения на 01.07.2026 г. DOCX се отнася само за старите масиви към проекта за 2026 г. Разликите са в 9 реда на Приложение 3 (до 4,3 млн. €) и 7 реда на Табл. III-1; общите суми и осемте групи приходи съвпадат. Полетата „versions“ в „outlook“ и „expenditure“ описват тези исторически разлики. Серията byPeriod е отделна: 2026.expected е очаквано изпълнение, 2027.draft е проект, а 2028.forecast и 2029.forecast са прогнози. Приходите и икономическите разходни редове са от Приложение 3 (стр. 191–192), а разходите по функции са от Табл. III-1 (стр. 73) на АСБП 2027–2029, публикувана на 06.11.2026 г.' } : original;
+    return ({
     id: str(t.id), title: str(t.title), text: str(t.text), paras: paras(t.text), related: resolve(t.related),
     evidence: arr(t.evidence).map(e => ({ url: httpUrl(e?.url), status: isNum(e?.httpStatus) ? e.httpStatus : null, checked: str(e?.checked) })).filter(e => e.url)
   });
+  };
   const traps = arr(c.traps).filter(t => t && str(t.id) && str(t.title)).map(item);
   const methods = arr(c.methodology).filter(t => t && str(t.id) && str(t.title)).map(item);
   const files = arr(c.files).filter(f => f && str(f.name)).map(f => ({

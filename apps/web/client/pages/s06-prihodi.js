@@ -1,3 +1,4 @@
+import { annualSource } from '../ui/annual-source.js';
 import { periodIndex, previousPeriodIndex } from '../annual.js';
 import { selectPeriod } from '../periods.js';
 import { annualGap } from '../ui/annual.js';
@@ -23,7 +24,7 @@ import { apportion } from '../calc.js';
 import { yIndex, change, chartUnit, moneyCol, amount, periodStatus } from '../view.js';
 import { num, pct, money, delta, date, DASH, NBSP } from '../format.js';
 
-export const needs = ['core', 'outlook', 'revenue', 'glossary?'];
+export const needs = ['budget2027-provenance?', 'core', 'outlook', 'revenue', 'glossary?'];
 export const styles = ['s06-prihodi'];
 
 const yr = y => `${y}${NBSP}г.`;
@@ -302,7 +303,7 @@ function notesBlock(ctx, m) {
   const r = roundingNote(m);
   if (r) items.push(r);
   if (m.firstForecast > 0) items.push(`${m.years.slice(m.firstForecast).join(' и ')} са прогноза на Министерството на финансите, не приет план.`);
-  if (m.rev.meta?.asOf) items.push(html`Числата са от мотивите към проекта на бюджета, към ${date(m.rev.meta.asOf, true)}. ${ctx.period.year >= 2027 ? 'Проектът за 2027 не е приет закон; 2028–2029 са прогнози. Историческото сравнение за 2026 е в „' : 'Приетият закон може да се различава от проекта: какво е променено, виж в „'}<a href="${ctx.href('S14', {}, { per: '2026.law' })}">Пътят на бюджета</a>“.`);
+  items.push(annualSource(ctx, m.rev));
   return block({
     id: 's06-notes', title: 'Как да четеш числата', status: 'real', pill: false, report: false, source: m?.rev.meta?.source || [], share: false,
     body: html`<ul class="s06-notes" data-gl-scan>${items.map(t => html`<li>${t}</li>`)}</ul>`

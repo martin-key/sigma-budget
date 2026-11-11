@@ -1,3 +1,4 @@
+import { annualSource } from '../ui/annual-source.js';
 import { periodIndex, previousPeriodIndex } from '../annual.js';
 import { selectPeriod } from '../periods.js';
 import { annualGap } from '../ui/annual.js';
@@ -27,7 +28,7 @@ import { apportion } from '../calc.js';
 import { yIndex, change, chartUnit, moneyCol, amount, amountParts, perCapita, periodStatus } from '../view.js';
 import { num, pct, money, delta, date, DASH, NBSP, MINUS } from '../format.js';
 
-export const needs = ['core', 'outlook', 'expenditure', 'ministries?', 'execution?', 'glossary?'];
+export const needs = ['budget2027-provenance?', 'core', 'outlook', 'expenditure', 'ministries?', 'execution?', 'glossary?'];
 export const styles = ['s07-razhodi'];
 
 const yr = y => `${y}${NBSP}г.`;
@@ -561,7 +562,7 @@ function notesBlock(ctx, mm) {
   const X = ctx.data?.expenditure, F = X?.functions;
   const note = id => (Array.isArray(F?.notes) ? F.notes.find(n => n.id === id)?.text : F?.notes?.[id]) ?? '';
   const items = [note('base'), note('col2025'), note('drugi'), mm?.M.scopeNote, X?.cofog?.note].filter(Boolean);
-  if (X?.meta?.asOf) items.push(html`Числата са от мотивите към проекта на бюджета, към ${date(X.meta.asOf, true)}. Приетият закон може да се различава от проекта: какво е променено, виж в „<a href="${ctx.href('S14', {}, { per: '2026.law' })}">Пътят на бюджета</a>“.`);
+  items.push(annualSource(ctx, X, { sections: ['functions', 'rows'] }));
   return block({ id: 's07-notes', title: 'Как да четеш числата', status: 'real', pill: false, report: false, source: ctx.data.expenditure.meta.source, share: false, body: html`<ul class="s07-notes" data-gl-scan>${items.map(t => html`<li>${t}</li>`)}</ul>` });
 }
 
