@@ -5,15 +5,19 @@
 ## Структура
 
 ```text
-apps/web/       React Router SSR на Cloudflare Workers; app/, workers/api/, client/, public/, migrations/, scripts/
-pipeline/       Python пакет budget_pipeline: sources/, extract/, build/, validate/; Dockerfile и зависимости
-data/           originals/, inputs/, cache/ (извън git), release/, sources.yaml, datasets.yaml, originals.sha256
-tests/          e2e/, release/, requirements-dev.txt и requirements-dev.lock
-reference/      исторически prototype/ и mock/; не се сглобяват и изпълняват в CI
-docs/           спецификации, ръководства и архитектурни решения
+apps/web/               React Router SSR, Worker, клиент и публични ресурси
+apps/etl/               Node CLI за обработка на данните
+packages/ingest/        придобиване, сглобяване и проверки на данни
+packages/dataset-schema/ схеми на наборите
+packages/test-support/  помощни средства за тестове
+pipeline/               историческа и референтна Python обработка
+data/                   входове и публикувано издание
+tests/                  браузърни и release проверки
+reference/              исторически прототип и проверки
+docs/                   спецификации и архитектурни решения
 ```
 
-Правилата за нов код и данни са в [ADR 0003](docs/adr/0003-repository-layout.md). Клиентските екрани остават JavaScript модули до етап 2 на [ADR 0002](docs/adr/0002-react-router-ssr.md).
+Workspace-ът обхваща `apps/*` и `packages/*` и използва общия коренов `pnpm-lock.yaml`. `./budget` стартира Node CLI от `@sigma-budget/etl`, който използва `@sigma-budget/ingest`; `./budget-python` и `pipeline/` са за историческо възпроизвеждане и справки. Новият код е TypeScript. Насоките за маршрути и поддръжка на старите екрани са в [ръководството](docs/dev-guide.md), а общите правила за принос - в [AGENTS.md](AGENTS.md). [ADR 0003](docs/adr/0003-repository-layout.md) е историческо решение с отменени части.
 
 ## Локално стартиране
 
