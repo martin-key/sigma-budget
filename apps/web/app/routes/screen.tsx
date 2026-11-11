@@ -2,7 +2,6 @@
 // body of the document, in the same elements as apps/web/public/index.html, which apps/web/client/main.js expects.
 import { data, redirect, useLocation } from 'react-router';
 import type { Route } from './+types/screen';
-import { bannerHtml } from '../components/chrome/chrome';
 import { ROUTES } from '../lib/routes';
 import { AppShell, TopBar, Footer, BottomNav } from '../components/chrome/AppShell';
 import { MigratedScreen, safeJSON } from '../migration/registry';
@@ -31,19 +30,7 @@ export default function Screen({ loaderData }: Route.ComponentProps) {
       <a className="skip-link" href="#main">
         Към съдържанието
       </a>
-      {doc.model ? (
-        <div className="mockbar" id="mockbar" role="region" aria-label="Забележка за данните">
-          {bannerHtml()}
-        </div>
-      ) : (
-        <div
-          className="mockbar"
-          id="mockbar"
-          role="region"
-          aria-label="Забележка за данните"
-          dangerouslySetInnerHTML={html(doc.banner)}
-        />
-      )}
+      <div className="mockbar" id="mockbar" hidden />
       <div className="offline-banner" id="offline" role="status" hidden />
       {doc.model ? (
         <header className="topbar" id="topbar">

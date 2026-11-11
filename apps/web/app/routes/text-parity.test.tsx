@@ -6,6 +6,9 @@ import { MigratedScreen, safeJSON } from '../migration/registry';
 import core from './__fixtures__/core.json';
 import glossary from './__fixtures__/glossary.json';
 import type { TextScreenModel } from '../lib/screen-state';
+import { build, frameHtml } from '../../client/render.js';
+import { byId } from '../lib/legacy';
+import { index as glossaryIndex, link as linkTerms } from '../../client/glossary-scan.js';
 // The route descriptions are source input to the frozen migration oracle too.
 vi.mock('../lib/routes.json', async () => ({
   default: JSON.parse(
@@ -21,7 +24,7 @@ const fixture = (id: string) =>
     'Накъде вървим? 2026–2028',
     'Накъде вървим? 2026–2029',
   );
-function semantics(html: string) {
+function semantics(html: string, checkTargets = true) {
   const { document } = parseHTML(html),
     a = document.querySelector('article')!;
   const headings = [...a.querySelectorAll('h1,h2,h3')].map((x) => [
@@ -38,7 +41,7 @@ function semantics(html: string) {
       link.getAttribute('href')!,
       'https://sigma-budget.my-data.bg',
     ).searchParams.get('to');
-    if (!target) continue;
+    if (!target || !checkTargets) continue;
     const heading = a.querySelectorAll('h1,h2,h3');
     expect(
       [...heading].some((node) => node.id === target),
@@ -60,7 +63,7 @@ function semantics(html: string) {
 }
 describe('frozen main 26f82ea, same release', () => {
   for (const screen of ['S26', 'S30'] as const)
-    it(`${screen} preserves ordered text, headings and link destinations`, () => {
+    it(`${screen} preserves ordered text, headings and link destinations with current data disclosures`, async () => {
       const model: TextScreenModel = {
         screen,
         core,
@@ -72,7 +75,36 @@ describe('frozen main 26f82ea, same release', () => {
       const html = renderToStaticMarkup(
         <MigratedScreen model={model} navigation={{ go() {}, announce() {} }} />,
       );
-      expect(semantics(html)).toEqual(semantics(fixture(screen)));
+      let expected = fixture(screen);
+      if (screen === 'S26') {
+        const url = new URL('/za-proekta', 'https://sigma-budget.my-data.bg');
+        const scope = {
+          url,
+          origin: url.origin,
+          data: new Map<string, unknown>([
+            ['core', core],
+            ['glossary', glossary],
+          ]),
+          state: requestState(null),
+          load: async (name: string) => (name === 'core' ? core : glossary),
+        };
+        provideScope(() => scope);
+        expected = String(frameHtml(await build(byId.S26, {}, {})));
+        const legacyDoc = parseHTML(`<html><body>${expected}</body></html>`).document;
+        linkTerms(legacyDoc.querySelector('article'), glossaryIndex(glossary));
+        expected = legacyDoc.querySelector('article')!.outerHTML.replaceAll('href="#/', 'href="/');
+        expect(html).not.toContain('няколкото стойности');
+        expect(html).not.toContain('data-s26-demo');
+        expect(html).toContain('Официални източници');
+        const actualDoc = parseHTML(html).document,
+          oldDoc = parseHTML(fixture(screen)).document;
+        for (const id of ['s26-open', 's26-roadmap', 's26-credits']) {
+          const section = (d: Document) =>
+            `<article>${d.getElementById(id)!.closest('section')!.outerHTML}</article>`;
+          expect(semantics(section(actualDoc), false)).toEqual(semantics(section(oldDoc), false));
+        }
+      }
+      expect(semantics(html)).toEqual(semantics(expected));
     });
   it('seed cannot terminate its inert script', () =>
     expect(safeJSON({ text: '</script>\u2028' })).toBe('{"text":"\\u003c/script>\\u2028"}'));

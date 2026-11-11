@@ -9,9 +9,8 @@ export const SECTIONS = [
   { id: 's26-pillars', label: 'Два стълба', title: 'Двата стълба' },
   { id: 's26-open', label: 'Отворен код', title: 'Отворен код и данни' },
   { id: 's26-roadmap', label: 'Пътна карта', title: 'Пътна карта' },
-  { id: 's26-versions', label: 'Версии', title: 'Версии на прототипа' },
+  { id: 's26-versions', label: 'Версии', title: 'Версии на данните' },
   { id: 's26-questions', label: 'Въпроси', title: 'Въпроси към работната група' },
-  { id: 's26-demo', label: 'Демо', title: 'Демо на състоянията' },
   { id: 's26-legend', label: 'Легенда', title: 'Легенда на статусите' },
   { id: 's26-credits', label: 'Авторите', title: 'Кой стои зад проекта' },
 ];

@@ -116,25 +116,7 @@ export const tabOf = (route: WebRoute) => {
 
 /* ------------------------------------------------------------------ pieces */
 export function bannerHtml() {
-  return (
-    <>
-      <span className="hatch-swatch" aria-hidden="true"></span>
-      <p>
-        <strong>Бета.</strong> Официални данни; примерните стойности са със щриховка.{' '}
-        <button type="button" className="link-btn" data-action="legend">
-          Легенда
-        </button>
-      </p>
-      <button
-        type="button"
-        className="x"
-        data-action="dismiss-banner"
-        aria-label="Скрий съобщението за тази сесия"
-      >
-        {icon('x', { size: 18 })}
-      </button>
-    </>
-  );
+  return null;
 }
 export const CTA = 'Бюджет 2027';
 /** the header; o.route marks its group, o.periods === 'none' hides the period button (a screen that does not depend on the period) */
@@ -159,10 +141,7 @@ export function topbarHtml(
           {MARK}
           <span className="brand-name">Бюджет на светло</span>
         </a>
-        <span
-          className="badge-mock"
-          title="Бета версия: официални данни и няколко означени примерни стойности"
-        >
+        <span className="badge-mock" title="Бета версия с данни от официални източници">
           Бета
         </span>
         <div className="topbar-tools">
@@ -376,7 +355,9 @@ export function footerHtml(
           ) : (
             ''
           )}
-          <span>Бета версия: няколко стойности са примерни и са означени със щриховка.</span>
+          <span>
+            Данни от официални източници. Законопроектите, прогнозите и отчетите са обозначени.
+          </span>
           <span>Лиценз на данните: предстои решение.</span>
           <span>{sigmaLink('sister-link')}</span>
           <button type="button" className="link-btn" data-action="legend">

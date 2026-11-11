@@ -165,7 +165,7 @@ function build(c, srcs) {
     return { key, title: str(s.title) || srcShort(key), publisher: str(s.publisher), url: httpUrl(s.url), kind: str(s.kind), access: str(s.access), note: str(s.note) };
   };
 
-  const defs = arr(c.groups).filter(g => g && str(g.id)).map(g => ({ id: str(g.id), label: str(g.label) || str(g.id) }));
+  const defs = arr(c.groups).filter(g => g && str(g.id)).map(g => ({ id: str(g.id), label: g.id === 'budget' ? 'Бюджет и прогноза' : str(g.label) || str(g.id) }));
   const known = new Set(defs.map(g => g.id));
   const groups = [...defs, ...(sets.some(s => !known.has(s.group)) ? [OTHER] : [])]
     .map(g => ({ ...g, sets: sets.filter(s => (g === OTHER ? !known.has(s.group) : s.group === g.id)) })).filter(g => g.sets.length);

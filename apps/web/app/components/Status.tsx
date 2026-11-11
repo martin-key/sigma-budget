@@ -32,7 +32,7 @@ export const STATUS = {
   },
 };
 export type DataStatus = keyof typeof STATUS;
-const ORDER: DataStatus[] = ['real', 'partial', 'forecast', 'mock', 'pending'];
+const ORDER: DataStatus[] = ['real', 'partial', 'forecast', 'pending'];
 export const statusLabel = (s: string) => (STATUS[s as DataStatus] || STATUS.pending).label;
 
 /** statusPill('real') -> <span class="st" data-st="real">✓ Официални данни</span> */

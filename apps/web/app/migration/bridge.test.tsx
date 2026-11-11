@@ -48,21 +48,16 @@ it('adopts the server subtree and React owns search; unmount releases the view',
   document.getElementById('view')!.innerHTML = '<article>legacy</article>';
   expect(document.querySelector('article')!.textContent).toBe('legacy');
 });
-it('S26 demo selector changes the destinations and announces the selected screen', async () => {
+it('S26 shows official-data context and retains glossary navigation without prototype demos', async () => {
   const navigation = { go: vi.fn(), announce: vi.fn(), openGlossary: vi.fn() };
   document.body.innerHTML = '<div id="view"></div>';
   await act(async () => {
     await mount({ ...model, screen: 'S26', glossary }, navigation);
   });
-  const select = document.querySelector('select')!;
-  act(() => {
-    select.value = 'razhodi';
-    select.dispatchEvent(new Event('change', { bubbles: true }));
-  });
-  expect(document.querySelector('[data-s26-demo="empty"]')!.getAttribute('href')).toBe(
-    '/razhodi?demo=empty',
-  );
-  expect(navigation.announce).toHaveBeenCalledWith('Връзките сочат към „Къде отиват парите?“.');
+  expect(document.querySelector('[data-s26-demo]')).toBeNull();
+  expect(document.querySelector('[data-st="mock"]')).toBeNull();
+  expect(document.body.textContent).toContain('Официални източници');
+  expect(document.body.textContent).toContain('прогнозата за 2028–2029 г.');
   const term = document.querySelector<HTMLAnchorElement>('a[data-gl]')!;
   act(() => term.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true })));
   expect(navigation.openGlossary).toHaveBeenCalledWith(term, term.dataset.gl);

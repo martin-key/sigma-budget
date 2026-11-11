@@ -43,7 +43,7 @@ function block(id, title, build, o = {}) {
 /* ---------------------------------------------------------------- 1 · what there is and what there is not */
 function stateBlock(M, withFiles, waiting) {
   return block('s25-state', 'Как работят данните на сайта', () => html`
-    ${callout({ kind: 'info', title: 'Няма жив API', body: html`<p>Сайтът е статичен. Няма сървър, който да отговаря на заявки с параметри, няма ключове за достъп и няма регистрация. Всеки набор е един готов файл с постоянен адрес: сваляш го цял и го филтрираш при себе си.</p>` })}
+    ${callout({ kind: 'info', title: 'Отворени файлове с данни', body: html`<p>Всеки набор е готов файл с постоянен адрес: сваляш го цял и го филтрираш при себе си. Публичните файлове се четат без ключ за достъп и без регистрация.</p>` })}
     <p>Днес данните са ${plural(withFiles.length, 'набор', 'набора')} в ${plural(M.counts.files, 'файл', 'файла')}${waiting.length ? `, а още ${plural(waiting.length, 'набор', 'набора')} предстоят` : ''}. Истински API има само като предложение за втората фаза: виж по-долу.</p>
     <ol class="s25-steps">
       <li>Избери файл от списъка „Файловете на сайта“ и го свали, или го поискай по адреса му.</li>
@@ -270,7 +270,7 @@ export async function render(ctx) {
     ? await readBlock(ctx, M, set)
     : block('s25-read', 'Как да прочетеш файл', () => emptyState({ title: 'Още няма файлове за показване', text: 'Каталогът не съдържа набор с файл.' }));
   return {
-    lede: 'Тук няма жив API: всички данни на сайта са готови файлове, които можеш да свалиш и да прочетеш с код. Ето кои са, как изглеждат и как се ползват.',
+    lede: 'Всички публикувани данни са достъпни като файлове, които можеш да свалиш и да прочетеш с код. Тук са адресите, полетата и примерите за използване.',
     body: html`<nav class="s25-toc" aria-label="На тази страница">${chips({ items: toc.map(([id, label]) => ({ label, href: at(id, chosen) })) })}</nav>
       ${stateBlock(M, withFiles, waiting)}${filesBlock(M, waiting)}${read}${proposalBlock(M)}${licenceBlock()}${versionsBlock(ctx, M)}`
   };
