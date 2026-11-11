@@ -26,7 +26,7 @@ import { publicationQuery } from './publication-query.js';
 
 export class NotFound extends Error { constructor(msg) { super(msg || 'not found'); this.name = 'NotFound'; } }
 
-export const SITE = 'Бюджет на светло';
+export const SITE = 'СИГМА Бюджет';
 export const DEMOS = ['loading', 'empty', 'error', 'pending', 'offline'];
 export const groupLabel = id => GROUPS.find(g => g.id === id)?.label || '';
 const aborted = () => new DOMException('Aborted', 'AbortError');

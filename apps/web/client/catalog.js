@@ -244,7 +244,7 @@ export function citation(set, M, o = {}) {
   const from = !who.length ? '' : who.length === 1 ? `Източник: ${who[0]}.` : `Източници: ${who.map((w, i) => `${i + 1}) ${w}`).join('; ')}.`;
   return [
     set.mock ? 'ПРИМЕРНИ ДАННИ: стойностите са измислени, не ги цитирай.' : '',
-    `Бюджет на светло, набор „${set.title}“${set.file ? ` (${dlName(set)})` : ''}.`,
+    `СИГМА Бюджет, набор „${set.title}“${set.file ? ` (${dlName(set)})` : ''}.`,
     from,
     `Статус: ${(STATUS[set.status]?.label || STATUS.pending.label).toLowerCase()}.`,
     set.asOf ? (set.mock ? `Създадени на ${date(set.asOf)}.` : `Данни към ${date(set.asOf)}.`) : '',

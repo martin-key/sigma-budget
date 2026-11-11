@@ -178,7 +178,7 @@ function catalogTable(M) {
 function setsSection(M, f, L) {
   share.register('s24-sets', {
     title: 'Каталог на наборите данни',
-    text: `Каталогът на „Бюджет на светло“ описва ${plural(M.counts.datasets, 'набор данни', 'набора данни')}: ${breakdown(M)}.`,
+    text: `Каталогът на „СИГМА Бюджет“ описва ${plural(M.counts.datasets, 'набор данни', 'набора данни')}: ${breakdown(M)}.`,
     source: ['wg'], asOf: M.meta.asOf || undefined, status: 'real', table: () => catalogTable(M)
   });
   return block('s24-sets', 'Наборите данни', () => html`
@@ -445,7 +445,7 @@ export function schema(ctx) {
   const M = modelOf(ctx), slug = slugOf(ctx);
   if (slug) { const s = M.find(slug); return s && indexable(s) ? [datasetNode(M, s)] : []; }
   return [{
-    '@type': 'DataCatalog', '@id': siteUrl('/danni') + '#catalog', url: siteUrl('/danni'), name: 'Наборите с данни на „Бюджет на светло“',
+    '@type': 'DataCatalog', '@id': siteUrl('/danni') + '#catalog', url: siteUrl('/danni'), name: 'Наборите с данни на „СИГМА Бюджет“',
     description: 'Отворените файлове на сайта: държавният бюджет на България, месечното му изпълнение, дългът, ведомствата и общините, с източник, период и статус.',
     inLanguage: 'bg', publisher: orgRef(),
     dataset: M.sets.filter(indexable).map(s => ({ '@type': 'Dataset', '@id': setUrl(s) + '#dataset', name: s.title, url: setUrl(s) }))

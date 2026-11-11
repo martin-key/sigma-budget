@@ -137,9 +137,9 @@ export function topbarHtml(
         </p>
       ) : null}
       <div className="mast-in">
-        <a className="brand" href={routeHref('S01')} aria-label="Бюджет на светло, към началото">
+        <a className="brand" href={routeHref('S01')} aria-label="СИГМА Бюджет, към началото">
           {MARK}
-          <span className="brand-name">Бюджет на светло</span>
+          <span className="brand-name">СИГМА Бюджет</span>
         </a>
         <span className="badge-mock" title="Бета версия с данни от официални източници">
           Бета

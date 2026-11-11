@@ -4,6 +4,7 @@ import { readPinned, parseJsonStat } from '../io/data.js';
 import { parsePythonJson } from '../common/numbers.js';
 import { executionNumbers } from './context.js';
 import { buildCore, zddTable, pendingFromExecution, type CoreInput } from './aggregation-core.js';
+import { editorialSiteName } from './aggregation-rss.js';
 import { buildFeed, type FeedInput } from './aggregation-feed.js';
 import { buildSearch, orderedKeysFromJson, type SearchInput } from './aggregation-search.js';
 import { projectAggregation } from './aggregation-layers.js';
@@ -82,6 +83,7 @@ export async function loadAggregationFixture(fixture: string, buildDate: string)
     glossaryInput: json('inputs/glossary.json'),
   };
   const feedInput: FeedInput = {
+    siteName: editorialSiteName(json('inputs/glossary.json')),
     buildDate,
     execution,
     law: out['law.json'],

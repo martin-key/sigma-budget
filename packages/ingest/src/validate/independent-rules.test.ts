@@ -27,21 +27,29 @@ const load = (path: string): any => JSON.parse(readFileSync(path, 'utf8'));
 const manifest = load(join(fixture, 'manifest.json')),
   oracle = load(join(fixture, 'oracle.json')),
   cases = load(join(fixture, 'cases.json'));
+// Mutable repository inputs belong to the frozen baseline, not the current checkout.
+const requiredInput = (rel: string) =>
+  join(
+    rel === 'data/originals.sha256' || rel.startsWith('data/inputs/')
+      ? join(fixture, 'inputs')
+      : repo,
+    rel,
+  );
 const root = mkdtempSync(join(tmpdir(), 'sigma-independent-rules-'));
 for (const rel of Object.keys(manifest.requiredInputs)) {
   const dest = join(root, rel);
   mkdirSync(dirname(dest), { recursive: true });
-  cpSync(join(repo, rel), dest);
+  cpSync(requiredInput(rel), dest);
 }
 const data = join(root, 'data/release');
 afterAll(() => rmSync(root, { recursive: true, force: true }));
 beforeEach(() => {
   cpSync(join(fixture, 'data'), data, { recursive: true });
   // Each source-boundary test may mutate only these owned copies.
-  cpSync(join(repo, 'data/originals.sha256'), join(root, 'data/originals.sha256'));
-  cpSync(join(repo, INDIRECT_EVIDENCE_PATH), join(root, INDIRECT_EVIDENCE_PATH));
+  cpSync(requiredInput('data/originals.sha256'), join(root, 'data/originals.sha256'));
+  cpSync(requiredInput(INDIRECT_EVIDENCE_PATH), join(root, INDIRECT_EVIDENCE_PATH));
   cpSync(
-    join(repo, 'data/inputs/budget_forecast_2027.json'),
+    requiredInput('data/inputs/budget_forecast_2027.json'),
     join(root, 'data/inputs/budget_forecast_2027.json'),
   );
   for (const rel of [NAP_ORIGINAL_PATH, ...Object.values(INDIRECT_SOURCE_PATHS)])
@@ -62,7 +70,7 @@ describe('Python 3.12 pinned donor baseline and finite independent mutations', (
     for (const [rel, digest] of Object.entries(manifest.frozen))
       expect(sha256(readFileSync(join(fixture, rel))), rel).toBe(digest);
     for (const [rel, digest] of Object.entries(manifest.requiredInputs))
-      expect(sha256(readFileSync(join(repo, rel))), rel).toBe(digest);
+      expect(sha256(readFileSync(requiredInput(rel))), rel).toBe(digest);
     expect(manifest.repositoryBaseline).toBe('3424bc998c726d6d511d4284295c54c50c42d099');
     expect(manifest.buildDate).toBe('2026-11-10');
   });

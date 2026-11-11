@@ -54,7 +54,7 @@ FAMILIES = ['base', 'demo', 'period', 'user', 'prefs', 'tour', 'to', 'chrome', '
 DEFAULT_OFF = set()                                                  # families that run only when asked for (none now)
 STUB_TEXT = 'Този екран предстои да бъде изграден в прототипа'
 PREFS_KEY = 'bns.prefs.v1'
-THEME_SUFFIX = ' · Бюджет на светло'
+THEME_SUFFIX = ' · СИГМА Бюджет'
 # console / network noise that is expected and not a defect of the site
 IGNORE_CONSOLE = [
     re.compile(r'Service Worker|serviceWorker', re.I),                # contexts run with service_workers="block"
@@ -181,7 +181,7 @@ async (o) => {
   else if (!h1s[0].textContent.trim()) add('h1', 'fail', 'the h1 is empty');
   else if (!view.contains(h1s[0])) add('h1', 'fail', 'the h1 is outside #view');
   info.h1 = h1s[0] ? h1s[0].textContent.trim().slice(0, 80) : '';
-  if (!document.title || document.title === 'Бюджет на светло' || !document.title.includes(' · ')) add('title', 'fail', `document.title is not set for the screen: "${document.title}"`);
+  if (!document.title || document.title === 'СИГМА Бюджет' || !document.title.includes(' · ')) add('title', 'fail', `document.title is not set for the screen: "${document.title}"`);
   if (document.documentElement.lang !== 'bg') add('lang', 'fail', `<html lang> is "${document.documentElement.lang}", expected bg`);
   const mains = document.querySelectorAll('main, [role="main"]');
   if (mains.length !== 1) add('landmark', 'fail', `${mains.length} main landmarks (expected 1)`);
@@ -1220,9 +1220,9 @@ def tour_verify(st, step, prev_title, cell, how):
         F('tour-route', f'{how} navigation to {h} ended on screen {st["route"] or "(none)"} (hash is now {st["hash"]})')
     if st['h1n'] != 1:
         F('tour-h1', f'{st["h1n"]} h1 elements after {how} navigation')
-    ok_title = st['title'].startswith('Бюджет на светло · ') if r == 'S01' else st['title'].endswith(THEME_SUFFIX)
+    ok_title = st['title'].startswith('СИГМА Бюджет · ') if r == 'S01' else st['title'].endswith(THEME_SUFFIX)
     if not ok_title:
-        F('tour-title', f'document.title after {how} navigation is "{st["title"]}" (expected "<screen> · Бюджет на светло")')
+        F('tour-title', f'document.title after {how} navigation is "{st["title"]}" (expected "<screen> · СИГМА Бюджет")')
     elif prev_title and st['title'] == prev_title:
         F('tour-title', f'document.title did not change after {how} navigation ("{st["title"]}")')
     if st['focus'] != 'h1':
@@ -2382,7 +2382,7 @@ def embed_one(page, s, cell, route, h, fs):
         if s['source'] and not st['src'].startswith('Източник:'):
             F('embed-source', f'{s["id"]}: the embedded chart shows no „Източник:“ line (found "{st["src"][:60]}")')
         if not st['brandHref'] or not st['brandHref'].startswith('http') or st['brandTarget'] != '_blank' or 'noopener' not in (st['brandRel'] or ''):
-            F('embed-link', f'{s["id"]}: the „Бюджет на светло“ link must be absolute and open a new tab with rel=noopener (href {st["brandHref"]}, target {st["brandTarget"]}, rel {st["brandRel"]})')
+            F('embed-link', f'{s["id"]}: the „СИГМА Бюджет“ link must be absolute and open a new tab with rel=noopener (href {st["brandHref"]}, target {st["brandTarget"]}, rel {st["brandRel"]})')
         if st['ext']:
             F('embed-link', f'{s["id"]}: links inside the frame that would navigate the frame itself: {st["ext"]}')
         if st['h1'] != 1:

@@ -29,7 +29,7 @@ export function Layout({ children }: { children: ReactNode }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-        <title>{doc?.title ?? 'Бюджет на светло'}</title>
+        <title>{doc?.title ?? 'СИГМА Бюджет'}</title>
         <meta httpEquiv="Content-Security-Policy" content={CSP} />
         {first.map((t, i) => (
           <Tag key={i} t={t} />
@@ -48,13 +48,13 @@ export function Layout({ children }: { children: ReactNode }) {
         <link
           rel="alternate"
           type="application/rss+xml"
-          title="Бюджет на светло: какво ново"
+          title="СИГМА Бюджет: какво ново"
           href="/data/feed.xml"
         />
         <link
           rel="alternate"
           type="text/plain"
-          title="Бюджет на светло за езикови модели"
+          title="СИГМА Бюджет за езикови модели"
           href="/llms.txt"
         />
         {SHARED_CSS.map((n) => (

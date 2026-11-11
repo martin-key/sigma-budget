@@ -42,14 +42,25 @@ export function rssDate(iso: string): string {
   return `${dow}, ${String(day).padStart(2, '0')} ${mon} ${String(year).padStart(4, '0')} 12:00:00 +0000`;
 }
 
-export function buildRss(feed: RssFeed, base: string, buildDate: string): string {
+/** The editorial document preserves its own site identity in its source footer. */
+export function editorialSiteName(input: { source?: { footer?: unknown } }): string {
+  const footer = input.source?.footer;
+  if (typeof footer !== 'string' || !footer.includes('|'))
+    throw new Error('Missing editorial site identity in source.footer');
+  const name = footer.slice(0, footer.indexOf('|')).trim();
+  if (!name) throw new Error('Empty editorial site identity');
+  return name;
+}
+
+export function buildRss(feed: RssFeed, base: string, buildDate: string, siteName: string): string {
+  if (typeof siteName !== 'string' || !siteName.trim()) throw new Error('Missing RSS site identity');
   base = base.endsWith('/') ? base : base + '/';
   const labels = new Map(feed.kinds.map((kind) => [kind.id, kind.label]));
   const lines = [
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">',
     '<channel>',
-    '<title>Бюджет на светло: какво е ново</title>',
+    `<title>${escapeXml(siteName)}: какво е ново</title>`,
     `<link>${escapeXml(base)}</link>`,
     '<description>Събития по данните за държавния бюджет: месечни отчети, законодателен път, ставки и нови набори. Прототип с примерни данни, където е отбелязано.</description>',
     '<language>bg</language>',

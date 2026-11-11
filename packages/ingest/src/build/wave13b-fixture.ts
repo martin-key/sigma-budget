@@ -8,6 +8,7 @@ import { loadAnnex } from './annex.js';
 import { loadEditorialRoutes } from './editorial.js';
 import { executionNumbers } from './context.js';
 import { pendingFromExecution, zddTable } from './aggregation-core.js';
+import { editorialSiteName } from './aggregation-rss.js';
 import { orderedKeysFromJson } from './aggregation-search.js';
 import type { Wave13bInput } from './wave13b.js';
 
@@ -250,6 +251,7 @@ export async function loadWave13bFixture(path: string): Promise<Wave13bInput> {
       glossaryInput: json('aggregation/inputs/glossary.json'),
     },
     feed: {
+      siteName: editorialSiteName(json('aggregation/inputs/glossary.json')),
       annualUpdated: annual.updated,
       quarterUpdated: quarter.updated,
       cofogUpdated: json('fiscal/inputs/data/inputs/cofog_bg.json').updated,

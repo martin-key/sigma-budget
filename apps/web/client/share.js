@@ -291,7 +291,7 @@ export async function renderPng(spec, { watermark = isMock(spec), pixelRatio = 2
   const sl = spec.sub ? wrapLines(probe, spec.sub, `400 13px ${fB}`, maxW) : [];
   const src = sourceLine(spec);
   const lnk = shortLink(spec);
-  const fl = [...(isMock(spec) ? wrapLines(probe, 'Примерни данни: измислени стойности, не са истински.', `700 12px ${fB}`, maxW) : []), ...(src ? wrapLines(probe, src, `400 12px ${fB}`, maxW) : []), ...(lnk ? wrapLink(probe, `Връзка: ${lnk}`, `400 12px ${fB}`, maxW) : []), ...wrapLines(probe, 'Бюджет на светло · прототип', `400 12px ${fB}`, maxW)];
+  const fl = [...(isMock(spec) ? wrapLines(probe, 'Примерни данни: измислени стойности, не са истински.', `700 12px ${fB}`, maxW) : []), ...(src ? wrapLines(probe, src, `400 12px ${fB}`, maxW) : []), ...(lnk ? wrapLink(probe, `Връзка: ${lnk}`, `400 12px ${fB}`, maxW) : []), ...wrapLines(probe, 'СИГМА Бюджет · прототип', `400 12px ${fB}`, maxW)];
   const bodyH = img ? h : 22 * (Math.min(t.rows.length, 16) + 1) + (t.rows.length > 16 ? 20 : 0);
   const H = pad + tl.length * 26 + (sl.length ? 4 + sl.length * 18 : 0) + 12 + bodyH + 14 + fl.length * 17 + pad;
   const c = document.createElement('canvas');

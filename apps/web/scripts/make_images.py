@@ -32,7 +32,7 @@ h1 em{{color:{CRIMSON}}}
 .bars i:nth-child(1){{height:38%}}.bars i:nth-child(2){{height:62%}}.bars i:nth-child(3){{height:100%;position:relative}}
 .bars i:nth-child(3)::after{{content:"";position:absolute;left:50%;top:-54px;width:34px;height:34px;margin-left:-17px;border-radius:50%;background:{CRIMSON}}}
 </style></head><body><div class="c">
-<div class="brand">{MARK}<span>Бюджет на светло</span></div>
+<div class="brand">{MARK}<span>СИГМА Бюджет</span></div>
 <div class="k">Държавният бюджет · 2026</div>
 <h1>Бюджетът на България на <em>достъпен</em> език</h1>
 <div class="bars" aria-hidden="true"><i></i><i></i><i></i></div>

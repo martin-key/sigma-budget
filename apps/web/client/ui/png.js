@@ -445,7 +445,7 @@ export async function canvasFor(spec, { watermark, pixelRatio = 2 } = {}) {
     const link = share.shortLink(spec);
     const fl = [...(mock ? wrap(probe, 'Примерни данни: измислени стойности, не са истински.', `700 12px ${FAM}`, INNER).map(t => ({ t, mock: true })) : []),
       ...(src ? wrap(probe, src, `400 12px ${FAM}`, INNER) : []).map(t => ({ t })),
-      ...(link ? wrapLink(probe, `Връзка: ${link}`, `400 12px ${FAM}`, INNER) : []).map(t => ({ t })), { t: 'Бюджет на светло' }];
+      ...(link ? wrapLink(probe, `Връзка: ${link}`, `400 12px ${FAM}`, INNER) : []).map(t => ({ t })), { t: 'СИГМА Бюджет' }];
     const H = PAD + tl.length * 26 + (sl.length ? 4 + sl.length * 18 : 0) + (meta.length ? 4 + meta.length * 17 : 0) + 14 + bodyH + 16 + fl.length * 17 + PAD;
     const pr = Math.max(1, Math.min(pixelRatio, Math.sqrt(16e6 / (W * H))));   // iOS Safari caps a canvas at about 16 million pixels
     const c = document.createElement('canvas');

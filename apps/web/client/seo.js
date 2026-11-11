@@ -13,7 +13,7 @@ import { here, parts as addrParts, HASH } from './loc.js';
 import { data } from './data.js';
 import { serverScope } from './env.js';
 
-const SITE = 'Бюджет на светло';
+const SITE = 'СИГМА Бюджет';
 const ORG = 'Работна група „Бюджет на светло“';
 const MAXD = 160;
 const origin = () => (serverScope()?.origin || document.querySelector('meta[name="site-origin"]')?.content || location.origin).replace(/\/+$/, '');

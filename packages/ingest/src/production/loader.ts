@@ -6,6 +6,7 @@ import { createHash } from 'node:crypto';
 import { join, dirname, relative } from 'node:path';
 import { isDeepStrictEqual } from 'node:util';
 import { parse as yaml } from 'yaml';
+import { editorialSiteName } from '../build/aggregation-rss.js';
 import { parsePythonJson } from '../common/numbers.js';
 import { parseOrderedPythonJson } from '../validate/ordered-json.js';
 import {
@@ -521,6 +522,7 @@ export async function loadProduction(
       glossaryInput: src('glossary'),
     },
     feed: {
+      siteName: editorialSiteName(src('glossary')),
       annualUpdated: annualJson.updated,
       quarterUpdated: json('data/originals/eurostat/gov_10q_ggdebt_BG.json').updated,
       cofogUpdated: fiscal.cofog.updated,

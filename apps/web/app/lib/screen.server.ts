@@ -121,7 +121,7 @@ export async function renderScreen(url: URL, release: Rel): Promise<ScreenResult
     else if (vm.view === 'error' && !vm.demo) status = 503;
   }
   const shown = vm ? vm.route : route;
-  const title = vm ? docTitle(vm) : `${route.title} · Бюджет на светло`;
+  const title = vm ? docTitle(vm) : `${route.title} · СИГМА Бюджет`;
   const h = vm ? head(vm, title) : { tags: [], ld: '{}' };
   const mod = vm?.mod as { styles?: string[] } | null | undefined;
   const model =

@@ -55,10 +55,10 @@ export function add(entry = {}) {
 export function clear() { safe.del('localStorage', KEY); mem = []; }
 
 const LABEL = { from: 'Екран', val: 'Число или текст', src: 'Източник', block: 'Блок', topic: 'Част от сайта', term: 'Термин', contact: 'Имейл за отговор' };
-/** the e-mail the visitor sends from their own mail app: subject „[Бюджет на светло] <form>“, the text, then the context lines and the page */
+/** the e-mail the visitor sends from their own mail app: subject „[СИГМА Бюджет] <form>“, the text, then the context lines and the page */
 export function mailto(rec) {
   if (!TO || !rec) return '';
   const lines = [rec.text, '', ...Object.keys(LABEL).filter(k => rec[k]).map(k => `${LABEL[k]}: ${rec[k]}`), `Страница: ${location.href}`];
-  const q = `subject=${encodeURIComponent(`[Бюджет на светло] ${TYPES[rec.type] || 'Съобщение'}`)}&body=${encodeURIComponent(lines.join('\n'))}`;
+  const q = `subject=${encodeURIComponent(`[СИГМА Бюджет] ${TYPES[rec.type] || 'Съобщение'}`)}&body=${encodeURIComponent(lines.join('\n'))}`;
   return `mailto:${encodeURIComponent(TO).replace(/%40/g, '@')}?${q}`;
 }

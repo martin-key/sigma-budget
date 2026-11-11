@@ -26,8 +26,13 @@ from budget_pipeline.build import annual_periods as A
 manifest = json.loads((HERE/'manifest.json').read_text())
 for rel, digest in manifest['frozen'].items():
     assert hashlib.sha256((HERE/rel).read_bytes()).hexdigest() == digest, rel
+def required_input(rel):
+    # Mutable baseline inputs are captured; --repo supplies only immutable raw originals.
+    base = HERE/'inputs' if rel == 'data/originals.sha256' or rel.startswith('data/inputs/') else args.repo
+    return base/rel
+
 for rel, digest in manifest['requiredInputs'].items():
-    assert hashlib.sha256((args.repo/rel).read_bytes()).hexdigest() == digest, rel
+    assert hashlib.sha256(required_input(rel).read_bytes()).hexdigest() == digest, rel
 
 class Context:
     def get(self, rel):
@@ -39,7 +44,7 @@ with tempfile.TemporaryDirectory(prefix='sigma-independent-oracle-') as tmp:
     for rel in manifest['requiredInputs']:
         dest = root/rel
         dest.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(args.repo/rel, dest)
+        shutil.copyfile(required_input(rel), dest)
     data = root/'data/release'
     L.ROOT = I.ROOT = str(root)
     L.DATA = E.DATA = I.DATA = str(data)

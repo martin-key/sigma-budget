@@ -56,7 +56,7 @@ const PRINCIPLES = [
 const cardOf = id => { const r = byId[id]; return linkCard({ href: href(r.key), title: r.title, text: r.desc, icon: r.icon }); };
 
 const mission = () => html`
-  <p class="s26-lead">„Бюджет на светло“ е портал с отворен код. Обяснява държавния бюджет на разбираем език, по официални данни.</p>
+  <p class="s26-lead">„СИГМА Бюджет“ е портал с отворен код. Обяснява държавния бюджет на разбираем език, по официални данни.</p>
   <p>Порталът отговаря на шест въпроса. Всеки от тях има свой екран:</p>
   <div class="s26-cards">${SIX.map(cardOf)}</div>
   <h3 class="s26-h3">Как работим</h3>

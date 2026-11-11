@@ -1,4 +1,4 @@
-Бюджет на светло · Mock prototype, v4 trial (СИГМА visual language) — third-party notices
+СИГМА Бюджет · Mock prototype, v4 trial (СИГМА visual language) — third-party notices
 ==========================================================================================
 
 1. Visual language of СИГМА (midt-bg/sigma, https://github.com/midt-bg/sigma)

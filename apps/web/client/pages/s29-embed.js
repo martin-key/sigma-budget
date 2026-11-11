@@ -6,7 +6,7 @@ import { selectPeriod } from '../periods.js';
 // Parameters of the host screen (:code, :fn …) travel as query parameters of the same name (share.embedHash adds them from spec.embedParams);
 // ?per=<period> is the period, as everywhere. `selftest` (no dot) opens the official spending chart: it lets a site owner check that
 // the frame loads using the official spending data.
-// Inside the frame nothing navigates the frame itself: the source and the „Бюджет на светло →“ links are absolute and open a new tab.
+// Inside the frame nothing navigates the frame itself: the source and the „СИГМА Бюджет →“ links are absolute and open a new tab.
 import { html } from '../html.js';
 import { absolute } from '../loc.js';
 import { icon } from '../icons.js';
@@ -91,12 +91,12 @@ function foot(e, link) {
   return html`<div class="s29-foot">
     <p class="s29-src">${src}${e?.asOf ? html`${src ? ' · ' : ''}данни към ${date(e.asOf)}` : ''}</p>
     ${status && status !== 'mock' ? statusPill(status) : ''}
-    <a class="s29-brand" href="${link}" target="_blank" rel="noopener noreferrer">Бюджет на светло ${icon('arrowRight', { size: 16 })}<span class="sr-only"> (отваря се в нов раздел)</span></a>
+    <a class="s29-brand" href="${link}" target="_blank" rel="noopener noreferrer">СИГМА Бюджет ${icon('arrowRight', { size: 16 })}<span class="sr-only"> (отваря се в нов раздел)</span></a>
   </div>`;
 }
 
 const FAIL = {
-  unknown: () => emptyState({ icon: 'search', title: 'Графиката не е намерена', text: 'Адресът не води до графика от „Бюджет на светло“. Провери кода за вграждане.' }),
+  unknown: () => emptyState({ icon: 'search', title: 'Графиката не е намерена', text: 'Адресът не води до графика от „СИГМА Бюджет“. Провери кода за вграждане.' }),
   pending: reason => pendingState({ title: 'Няма графика за избрания период', text: reason || 'Данните за нея още не са включени.' }),
   error: () => errorState({ link: false, title: 'Графиката не се зареди.' })
 };

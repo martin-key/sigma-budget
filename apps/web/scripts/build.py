@@ -286,11 +286,11 @@ def write_extras(out, pages, origin, lastmod, routes, noindex=False):
 
     (out / 'robots.txt').write_text(
         '# Тестова среда: не за индексиране.\nUser-agent: *\nDisallow: /\n' if noindex else
-        '# Бюджет на светло: всички страници са отворени за търсачки и езикови модели.\n'
+        '# СИГМА Бюджет: всички страници са отворени за търсачки и езикови модели.\n'
         'User-agent: *\nAllow: /\nDisallow: /embed/\n\n'
         f'Sitemap: {origin}/sitemap.xml\n', encoding='utf-8')
 
-    title = lambda i: re.sub(r'\s+·\s+Бюджет на светло$', '', re.sub(r'^Бюджет на светло\s+·\s+', '', i['title']))   # noqa: E731
+    title = lambda i: re.sub(r'\s+·\s+СИГМА Бюджет$', '', re.sub(r'^СИГМА Бюджет\s+·\s+', '', i['title']))   # noqa: E731
     by_route = collections.defaultdict(list)
     for p in paths:
         by_route[idx[p]['route']].append(p)
@@ -300,7 +300,7 @@ def write_extras(out, pages, origin, lastmod, routes, noindex=False):
     # (route, heading, with the description): the long lists (ministries, municipalities, terms) keep llms.txt an index, one line per page
     child_groups = [('S08', 'Разходи по функции', True), ('S06', 'Приходи по източници', True), ('S12', 'Мерки в бюджета', False),
                     ('S11', 'Ведомства', False), ('S21', 'Общини', False), ('S03', 'Речник', False), ('S24', 'Набори с данни', False)]
-    L = ['# Бюджет на светло', '',
+    L = ['# СИГМА Бюджет', '',
          '> Държавният бюджет на България за 2026 г. на разбираем език, по официални данни: откъде идват парите, къде отиват, изпълнява ли се планът, '
          'колко дължим и колко плаща всеки. Източниците са Министерството на финансите (месечни отчети по КФП, Закон за държавния бюджет, '
          'средносрочна прогноза), „Държавен вестник“, БНБ, НАП и Евростат. До всяко число стоят източникът, обхватът, статусът (проект, закон, отчет, прогноза) и датата.', '',
@@ -322,7 +322,7 @@ def write_extras(out, pages, origin, lastmod, routes, noindex=False):
           '', '## Optional', '', f'- [Пълният текст на основните страници]({origin}/llms-full.txt)', '']
     (out / 'llms.txt').write_text('\n'.join(L), encoding='utf-8')
 
-    full = ['# Бюджет на светло: пълният текст на основните страници', '',
+    full = ['# СИГМА Бюджет: пълният текст на основните страници', '',
             f'Източник: {origin}/ · данни към {lastmod or "—"} · всяка страница по-долу има адрес, кратък отговор (където има) и текста си, с таблиците.', '']
     for p in main + [q for q in by_route.get('S08', []) if q not in main]:
         i = idx[p]
