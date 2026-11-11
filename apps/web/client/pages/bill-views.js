@@ -715,11 +715,13 @@ export function mountBillSearch(root, ctx) {
   let timer;
   const change = () => {
     clearTimeout(timer);
-    ctx.setQuery({ q: cleanSearch(input.value) || null }, { rerender: false });
+    if (clear) clear.disabled = !input.value;
+    const query = cleanSearch(input.value);
+    if (query === cleanSearch(ctx.query.q)) return;
+    ctx.setQuery({ q: query || null }, { rerender: false });
     const rows = municipalScreen(ctx) ? municipalityRows(ctx) : institutionRows(ctx);
     updateRows(table, rows);
     if (count) count.textContent = resultCount(ctx, rows.length);
-    if (clear) clear.disabled = !input.value;
   };
   const typing = (e) => {
     clearTimeout(timer);
@@ -734,14 +736,12 @@ export function mountBillSearch(root, ctx) {
   const reset = () => { input.value = ''; change(); input.focus(); };
   input.addEventListener('input', typing);
   input.addEventListener('compositionend', change);
-  input.addEventListener('change', change);
   input.addEventListener('keydown', key);
   clear?.addEventListener('click', reset);
   return () => {
     clearTimeout(timer);
     input.removeEventListener('input', typing);
     input.removeEventListener('compositionend', change);
-    input.removeEventListener('change', change);
     input.removeEventListener('keydown', key);
     clear?.removeEventListener('click', reset);
   };
