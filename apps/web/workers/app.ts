@@ -18,6 +18,7 @@ import { screenSearch } from '../app/lib/query-params';
 import { releaseData, noRegistry, candidateReleaseId, type ReleaseData } from './release-data';
 import { inFlight, claim, withinCap } from './render-gate';
 import { CSP } from '../app/lib/security';
+import { bundledFeed, withFeedOrigin } from './feed';
 
 declare module 'react-router' {
   interface AppLoadContext {
@@ -118,23 +119,6 @@ async function fallback(request: Request, env: Env, res: Response): Promise<Resp
    addresses of the prototype. apps/web/scripts/build.py writes the site's origin into the static copy (stamp_files); the stable address of a
    registry release gets the same links here. The file of the release itself (/data/releases/<id>/data/feed.xml) keeps its bytes. */
 const FEED = 'data/feed.xml';
-const PLACEHOLDER = /https?:\/\/budget-na-svetlo\.example\/(?:#\/)?/g;
-async function withOrigin(
-  bytes: ArrayBuffer,
-  origin: string,
-): Promise<{ bytes: ArrayBuffer; tag: string }> {
-  const text = new TextDecoder()
-    .decode(bytes)
-    .replace(PLACEHOLDER, origin + '/')
-    .split(origin + '/#/')
-    .join(origin + '/');
-  const out = new TextEncoder().encode(text);
-  const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', out));
-  return {
-    bytes: out.buffer as ArrayBuffer,
-    tag: [...digest].map((b) => b.toString(16).padStart(2, '0')).join(''),
-  };
-}
 
 /** /data/<file>: from the current release when there is a registry, so the stable addresses follow a new release without a deploy */
 async function dataFile(
@@ -152,9 +136,12 @@ async function dataFile(
     console.error(e);
     return unavailable();
   } // R2 cannot be read right now: not the static file instead
-  if (!f) return env.ASSETS.fetch(request);
+  if (!f)
+    return path === FEED
+      ? encoded(request, await bundledFeed(request, env.ASSETS, origin, data.releaseId))
+      : env.ASSETS.fetch(request);
   if (path === FEED) {
-    const o = await withOrigin(f.bytes, origin);
+    const o = await withFeedOrigin(f.bytes, origin);
     f = { ...f, bytes: o.bytes, sha256: o.tag };
   }
   const etag = `"${f.sha256}"`;

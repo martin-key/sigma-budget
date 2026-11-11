@@ -250,7 +250,7 @@ it.each([
       const { scope, html } = await page(path + '?per=' + per);
       const spec = scope.maps.share.get(id);
       const table = tableData(scope.maps.table.get(tableId));
-      expect(html).toContain('Проект 2027 и прогноза 2028–2029');
+      expect(html).toContain('Законопроект 2027 и прогноза 2028–2029');
       expect(table.statuses).toEqual(
         table.rows.map((row: unknown[]) => (String(row[0]).includes('2027') ? 'real' : 'forecast')),
       );

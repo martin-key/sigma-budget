@@ -9,7 +9,6 @@ import { OpenData } from './za-proekta/OpenData';
 import { Roadmap } from './za-proekta/Roadmap';
 import { Versions } from './za-proekta/Versions';
 import { Questions } from './za-proekta/Questions';
-import { Demo, useDemoScreen } from './za-proekta/Demo';
 import { Legend } from './za-proekta/Legend';
 import { Credits } from './za-proekta/Credits';
 
@@ -29,18 +28,17 @@ export function AboutContent({
   onTerm?: (anchor: HTMLElement, slug: string) => void;
   announce?: (message: string) => void;
 }) {
-  const [screenKey, setScreen] = useDemoScreen();
-
   return glossaryTree(
     <>
       {callout({
         kind: 'info',
-        title: 'Бета версия',
+        title: 'Официални източници',
         body: (
           <>
             <p>
-              Данните са официални, освен няколкото стойности, белязани със щриховка като примерни.
-              Пътната карта и въпросите по-долу са предложение, не готови решения.
+              Бюджетните числа са от официални източници. Законопроектите, прогнозите и отчетите са
+              обозначени със своя период и дата. Липсващите данни не се заменят с измислени
+              стойности. Пътната карта и въпросите по-долу са предложение, не готови решения.
             </p>
           </>
         ),
@@ -54,7 +52,6 @@ export function AboutContent({
       {block('s26-roadmap', Roadmap({ core }))}
       {block('s26-versions', Versions({ core }), { scan: true })}
       {block('s26-questions', Questions(), { scan: true })}
-      {block('s26-demo', <Demo screenKey={screenKey} setScreen={setScreen} announce={announce} />)}
       {block('s26-legend', Legend())}
       {block('s26-credits', Credits())}
     </>,

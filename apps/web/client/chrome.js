@@ -56,16 +56,14 @@ export const tabOf = route => { const root = rootOf(route); return TABS.find(t =
 
 /* ------------------------------------------------------------------ pieces */
 export function bannerHtml() {
-  return html`<span class="hatch-swatch" aria-hidden="true"></span>
-    <p><strong>Бета.</strong> Официални данни; примерните стойности са със щриховка. <button type="button" class="link-btn" data-action="legend">Легенда</button></p>
-    <button type="button" class="x" data-action="dismiss-banner" aria-label="Скрий съобщението за тази сесия">${icon('x', { size: 18 })}</button>`;
+  return html``;
 }
 export const CTA = 'Бюджет 2027';
 /** the header; o.route marks its group, o.periods === 'none' hides the period button (a screen that does not depend on the period) */
 export function topbarHtml(o = {}) {
   const p = store.period;
   return html`<div class="mast-in"><a class="brand" href="${routeHref('S01')}" aria-label="Бюджет на светло, към началото">${MARK}<span class="brand-name">Бюджет на светло</span></a>
-    <span class="badge-mock" title="Бета версия: официални данни и няколко означени примерни стойности">Бета</span>
+    <span class="badge-mock" title="Бета версия с данни от официални източници">Бета</span>
     <div class="topbar-tools">
       <button type="button" class="tool-btn period-btn" id="btn-period" aria-haspopup="dialog" aria-expanded="false" aria-label="Година и статус на данните: ${p.label}"${o.periods === 'none' ? html` hidden` : ''}><span class="p-year">${yearOf(p)}</span><span class="p-status"> · ${statusOf(p)}</span>${icon('chevronDown', { size: 14 })}</button>
       <nav class="sidenav" id="sidenav" aria-label="Основна навигация">${navHtml(o.route)}</nav>
@@ -109,7 +107,7 @@ export function footerHtml(o = {}) {
     <div class="fine">
       ${kfp ? html`<span>Данните: КФП към ${kfp}${b.kfpPublished ? html` (обн. ${date(b.kfpPublished)})` : ''}</span>` : ''}
       ${b && b.dataVersion ? html`<span>Версия на данните: ${b.dataVersion}</span>` : ''}
-      <span>Бета версия: няколко стойности са примерни и са означени със щриховка.</span>
+      <span>Данни от официални източници. Законопроектите, прогнозите и отчетите са обозначени.</span>
       <span>Лиценз на данните: предстои решение.</span>
       <span>${sigmaLink('sister-link')}</span>
       <button type="button" class="link-btn" data-action="legend">Легенда: какво означават белезите</button>

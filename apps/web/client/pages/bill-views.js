@@ -79,7 +79,7 @@ const frameworkRow = (key) => ({
   period: periodByKey(key).label,
   _status: periodByKey(key).status === 'forecast' ? 'forecast' : 'real',
 });
-const frameworkStatus = { status: 'real', statusLabel: 'Проект 2027 и прогноза 2028–2029' };
+const frameworkStatus = { status: 'real', statusLabel: 'Законопроект 2027 и прогноза 2028–2029' };
 export const cellColumns = (unit = 'хил. €') => [
   { key: 'label', label: 'Показател' },
   { key: 'value', label: 'Стойност', unit, num: true, d: 1 },
@@ -629,8 +629,8 @@ export function billOverview(ctx) {
         ${publication(doc)}`,
     };
   return {
-    title: 'Бюджет 2027 (проект)',
-    lede: 'Законопроектът и АСБП 2027–2029, публикувани от Министерството на финансите на 06.11.2026. Проектът не е приет закон.',
+    title: 'Бюджет 2027',
+    lede: 'Официални данни от законопроекта за 2027 г. и АСБП 2027–2029 на Министерството на финансите, публикувани на 06.11.2026. За 2028–2029 г. стойностите са прогноза.',
     body: html`${variantControl(ctx)}${base(
         ctx,
         's34-bill',
@@ -715,11 +715,13 @@ export function mountBillSearch(root, ctx) {
   let timer;
   const change = () => {
     clearTimeout(timer);
-    ctx.setQuery({ q: cleanSearch(input.value) || null }, { rerender: false });
+    if (clear) clear.disabled = !input.value;
+    const query = cleanSearch(input.value);
+    if (query === cleanSearch(ctx.query.q)) return;
+    ctx.setQuery({ q: query || null }, { rerender: false });
     const rows = municipalScreen(ctx) ? municipalityRows(ctx) : institutionRows(ctx);
     updateRows(table, rows);
     if (count) count.textContent = resultCount(ctx, rows.length);
-    if (clear) clear.disabled = !input.value;
   };
   const typing = (e) => {
     clearTimeout(timer);
@@ -734,14 +736,12 @@ export function mountBillSearch(root, ctx) {
   const reset = () => { input.value = ''; change(); input.focus(); };
   input.addEventListener('input', typing);
   input.addEventListener('compositionend', change);
-  input.addEventListener('change', change);
   input.addEventListener('keydown', key);
   clear?.addEventListener('click', reset);
   return () => {
     clearTimeout(timer);
     input.removeEventListener('input', typing);
     input.removeEventListener('compositionend', change);
-    input.removeEventListener('change', change);
     input.removeEventListener('keydown', key);
     clear?.removeEventListener('click', reset);
   };

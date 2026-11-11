@@ -74,7 +74,19 @@ for (const c of manifest.cases) {
     const actual = renderToString(
       <MigratedScreen model={model} navigation={{ go() {}, announce() {} }} />,
     );
-    const frozen = fixture(c.file);
+    // The public group heading now covers the 2027 publication too. Keep the
+    // original captured HTML and its checksums intact.
+    const frozen = fixture(c.file)
+      .replaceAll('Бюджет 2026 и прогноза', 'Бюджет и прогноза')
+      .replaceAll(
+        'Тук няма жив API: всички данни на сайта са готови файлове, които можеш да свалиш и да прочетеш с код. Ето кои са, как изглеждат и как се ползват.',
+        'Всички публикувани данни са достъпни като файлове, които можеш да свалиш и да прочетеш с код. Тук са адресите, полетата и примерите за използване.',
+      )
+      .replaceAll('Няма жив API', 'Отворени файлове с данни')
+      .replaceAll(
+        'Сайтът е статичен. Няма сървър, който да отговаря на заявки с параметри, няма ключове за достъп и няма регистрация. Всеки набор е един готов файл с постоянен адрес: сваляш го цял и го филтрираш при себе си.',
+        'Всеки набор е готов файл с постоянен адрес: сваляш го цял и го филтрираш при себе си. Публичните файлове се четат без ключ за достъп и без регистрация.',
+      );
     // Keep the historical capture intact. S35's intentional copy and input-kind column
     // now follow the current legacy renderer; its links and controls still match the capture.
     const clarified = c.screen === 'S35' && !c.query.demo;

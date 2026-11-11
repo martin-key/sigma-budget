@@ -5,7 +5,7 @@ export const PERIODS = [
   { key: '2025.report', year: 2025, status: 'report', vintage: 'actual', label: '2025 · Отчет', desc: 'Всяка серия пази статуса на отчета при издателя' },
   { key: '2026.law', year: 2026, status: 'law', vintage: 'plan', label: '2026 · Закон', desc: 'Приетият Закон за държавния бюджет' },
   { key: '2026.expected', year: 2026, status: 'expected', vintage: 'expected', label: '2026 · Очаквано', desc: 'Оценка на МФ от 06.11.2026, не отчет' },
-  { key: '2027.draft', year: 2027, status: 'draft', vintage: 'plan', label: '2027 · Проект', desc: 'Проект на МФ от 06.11.2026' },
+  { key: '2027.draft', year: 2027, status: 'draft', vintage: 'plan', label: '2027 · Законопроект', desc: 'Законопроект на МФ от 06.11.2026' },
   { key: '2028.forecast', year: 2028, status: 'forecast', vintage: 'forecast', label: '2028 · Прогноза', desc: 'АСБП 2027–2029 от 06.11.2026' },
   { key: '2029.forecast', year: 2029, status: 'forecast', vintage: 'forecast', label: '2029 · Прогноза', desc: 'АСБП 2027–2029 от 06.11.2026' },
 ];

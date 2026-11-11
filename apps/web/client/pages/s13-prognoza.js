@@ -440,7 +440,6 @@ export function render(ctx) {
   const rev = revExpChart(ctx, f), def = deficitChart(ctx, f), int = interestChart(ctx, f);
   return {
     title: f.years[0] === 2027 ? 'Накъде вървим? 2027–2029' : 'Накъде вървим? 2026–2029',
-    context: `${ctx.period.label}. Публикация на МФ от ${date(f.asOf)}${NBSP}г.`,
     body: html`
       ${summaryBlock(ctx, f, d)}
       ${controls(ctx)}

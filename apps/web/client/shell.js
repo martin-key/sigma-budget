@@ -174,7 +174,7 @@ export const shell = {
     reactChrome = adapter;
     if (reactChrome) reactChrome();
     const bar = $('mockbar');
-    if (bar) { if (!reactChrome) bar.innerHTML = bannerHtml().toString(); bar.hidden = store.bannerDismissed(); }
+    if (bar) { if (!reactChrome) bar.innerHTML = bannerHtml().toString(); bar.hidden = true; }
     if (!reactChrome) $('topbar').innerHTML = topbarHtml().toString();
     if (!reactChrome) $('tabbar').innerHTML = tabbarHtml().toString();
     shell.refreshFooter();
