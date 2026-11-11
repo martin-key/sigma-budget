@@ -1866,49 +1866,51 @@ def ch_phone(w, cell, F, W, j, outs):
         F('sheet', 'the period button opens nothing on a phone')
 
 
+RETIRED_NOTICE_JS = r"""() => {
+  const b = document.getElementById('mockbar');
+  const claims = ['примерните стойности са със щриховка', 'няколко стойности са примерни',
+                  'освен няколкото стойности'];
+  return {
+    shown: !!b && !b.hidden && b.getBoundingClientRect().height > 0,
+    text: (b?.textContent || '').trim(),
+    claims: claims.filter(text => document.body.innerText.includes(text))
+  };
+}"""
+
+
 def ch_mockbar(w, cell, F, W, j, outs):
+    """The retired sample-data notice stays absent; the footer legend remains accessible."""
     o = begin(w, cell, '#/', outs)
     if not o:
         return
     page = o.page
-    st = page.evaluate("() => { const b = document.getElementById('mockbar'), r = b.getBoundingClientRect(); return { hidden: b.hidden, h: Math.round(r.height), t: (b.textContent || '').trim().slice(0, 60), legend: !!b.querySelector('[data-action=\"legend\"]'), x: !!b.querySelector('[data-action=\"dismiss-banner\"]') }; }")
-    if st['hidden'] or st['h'] < 10 or ('Mock' not in st['t'] and 'Бета' not in st['t']):          # V7: the banner says „Бета версия“
-        F('mockbar', f'the Mock banner is not visible on a fresh visit (hidden={st["hidden"]}, height {st["h"]}px, text "{st["t"]}")')
-        return
-    if not st['legend'] or not st['x']:
-        F('mockbar', 'the Mock banner needs a "Легенда" button and a dismiss button')
-        return
-    page.click('#mockbar [data-action="legend"]')
+
+    def absent(when):
+        st = page.evaluate(RETIRED_NOTICE_JS)
+        if st['shown'] or st['text'] or st['claims']:
+            F('mockbar', f'retired sample-data notice returned {when}: {st}')
+
+    absent('on a fresh visit')
+    legend = '#footer [data-action="legend"]'
+    page.click(legend)
     if wait_there(page, 'dialog.sheet[open]'):
+        statuses = page.locator('dialog.sheet[open] [data-st]').evaluate_all(
+            'nodes => nodes.map(node => node.dataset.st)')
+        if statuses != ['real', 'partial', 'forecast', 'pending']:
+            F('legend', f'the legend must describe current data statuses without retired samples: {statuses}')
         page.keyboard.press('Escape')
         wait_gone(page, 'dialog.sheet')
-        if not is_active(page, '#mockbar [data-action="legend"]'):
-            F('sheet-focus', f'after closing the legend the focus is on {act(page)["sig"]}, not back on the banner\'s "Легенда" button')
+        if not is_active(page, legend):
+            F('sheet-focus', f'after closing the legend the focus is on {act(page)["sig"]}, not its footer button')
     else:
-        F('legend', 'the banner\'s "Легенда" button opens nothing')
-    page.focus('#mockbar [data-action="dismiss-banner"]')
-    page.keyboard.press('Enter')
-    page.wait_for_timeout(500)
-    st = page.evaluate("() => { let ss = null; try { ss = sessionStorage.getItem('bns.banner'); } catch (e) { ss = 'err'; } return { hidden: document.getElementById('mockbar').hidden, ss, live: document.getElementById('live').textContent.trim(), ls: Object.keys(localStorage).filter(k => /banner/i.test(k)) }; }")
-    if not st['hidden']:
-        F('mockbar', 'the dismiss button does not hide the Mock banner')
-    if st['ss'] != '1':
-        F('mockbar', f'the dismissal is not kept in sessionStorage "bns.banner" (value {st["ss"]!r})')
-    if st['ls']:
-        F('mockbar', f'the banner dismissal must last only for the session, but localStorage has {st["ls"]}')
-    if not st['live']:
-        W('mockbar-live', 'dismissing the banner is not announced in the live region (#live)')
-    a = act(page)
-    if a['body']:
-        F('banner-focus', 'after the banner is dismissed with the keyboard the focus is lost to the page (the dismiss button disappeared); move it to the main heading')
+        F('legend', 'the footer legend button opens nothing')
     page.reload(wait_until='domcontentloaded')
     w.ready(page)
-    if not page.evaluate("() => document.getElementById('mockbar').hidden"):
-        F('mockbar', 'the banner comes back after a reload in the same session (it must stay dismissed)')
+    absent('after reload')
     page.evaluate("() => { location.hash = '#/prihodi'; }")
-    wait_for(page, "() => { const a = document.querySelector('#view article.page'); return !!a && a.dataset.route === 'S06' && a.dataset.ready === '1'; }", timeout=6000)
-    if not page.evaluate("() => document.getElementById('mockbar').hidden"):
-        F('mockbar', 'the banner comes back after navigating to another screen')
+    if not wait_for(page, "() => { const a = document.querySelector('#view article.page'); return !!a && a.dataset.route === 'S06' && a.dataset.ready === '1'; }", timeout=6000):
+        F('mockbar-navigation', 'the navigation after the legend check did not reach revenues')
+    absent('after navigation')
 
 
 def ch_motion(w, cell, F, W, j, outs):
@@ -3600,12 +3602,9 @@ def job_theme_store(w, j):
         if not r['r'] or r['now'] != 'journalist':
             F('theme-store-session', f'with blocked storage a user-type switch must still apply for the session (store.set -> {r})')
         o.page.wait_for_timeout(250)
-        bar = o.page.evaluate("() => { const b = document.getElementById('mockbar'); const btn = b && b.querySelector('[data-action=\"dismiss-banner\"]'); return { has: !!b, shown: !!b && !b.hidden && b.getBoundingClientRect().height > 0, btn: !!btn }; }")
-        if bar['has'] and bar['shown'] and bar['btn']:
-            o.page.click('#mockbar [data-action="dismiss-banner"]')
-            gone = wait_for(o.page, "() => { const b = document.getElementById('mockbar'); return !b || b.hidden || b.getBoundingClientRect().height === 0; }", timeout=2000)
-            if not gone:
-                F('theme-store-banner', 'with blocked storage the Mock banner cannot be dismissed (the dismissal must at least hold for the current page)')
+        bar = o.page.evaluate(RETIRED_NOTICE_JS)
+        if bar['shown'] or bar['text'] or bar['claims']:
+            F('theme-store-banner', f'the retired sample-data notice returned with blocked storage: {bar}')
         o.page.evaluate("() => { location.hash = '#/prihodi'; }")
         ok = wait_for(o.page, "() => { const a = document.querySelector('#view article.page'); return !!a && a.dataset.ready === '1' && a.dataset.route === 'S06'; }", timeout=6000)
         if not ok:
