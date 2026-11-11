@@ -67,7 +67,19 @@ def main():
             page.set_viewport_size({'width': 820, 'height': 1180})
             expect(page.locator('.measure-cards').first).to_be_hidden()
             expect(page.locator('#s12-II_7-table')).to_be_visible()
-            assert page.locator('#s12-II_7-table th[scope="col"]').count() == 6
+            # Provenance hashes and links are CSV-only: period, indicator, value, missing value.
+            assert page.locator('#s12-II_7-table th[scope="col"]').count() == 4
+            assert page.locator('#s12-II_7-table').get_by_text('budget2027-provenance.json').count() == 0
+            checks += 1
+            go('/byudzhet-2027')
+            projects = page.locator('#s34-projects-table')
+            expect(projects).to_be_visible()
+            assert projects.locator('th[scope="col"]').count() == 3
+            assert projects.get_by_text('budget2027-provenance.json').count() == 0
+            checks += 1
+            go('/prognoza?per=2027.draft')
+            assert page.locator('.fig-table table').count() > 0
+            assert page.locator('.fig-table thead th', has_text='произход').count() == 0
             checks += 1
             go('/merki/kr1?per=2026.law')
             expect(page.locator('h1')).not_to_be_empty()

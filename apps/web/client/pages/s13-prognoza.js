@@ -176,7 +176,7 @@ function twin(f, items) {
     columns.push(
       { key: `m${k}`, label: it.name, unit: 'млн. €', d: 1, num: true },
       { key: `p${k}`, label: it.name, unit: '% от БВП', d: 1, num: true },
-      { key: `src${k}`, label: `${it.name}: произход` },
+      { key: `src${k}`, label: `${it.name}: произход`, csvOnly: true },
     ),
   );
   const rows = f.years.map((y, i) => {

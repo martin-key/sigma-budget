@@ -93,9 +93,11 @@ const base = (ctx, id, title, body, extra = {}) =>
     share: { period: ctx.period.key, unit: 'хил. €' },
     ...extra,
   });
+// Cell provenance (hash and link) is for verification: it stays in the CSV export, not on screen.
 const originCol = {
   key: 'provenance',
   label: 'Произход',
+  csvOnly: true,
   fmt: (v, r) => (v ? html`<a href="${r.origin}">${v}</a>` : 'Няма публикувана клетка'),
 };
 const cellRow = (label, cell, extra = {}) => ({
@@ -114,12 +116,12 @@ export const cellColumns = (unit = 'хил. €') => [
   { key: 'label', label: 'Показател' },
   { key: 'value', label: 'Стойност', unit, num: true, d: 1 },
   originCol,
-  { key: 'origin', label: 'Връзка към произхода' },
+  { key: 'origin', label: 'Връзка към произхода', csvOnly: true },
 ];
 const rowsTable = (id, rows, unit) =>
   dataTable({
     id,
-    caption: 'Публикувани стойности и произход',
+    caption: 'Публикувани стойности',
     columns: [
       ...cellColumns(unit),
       ...(rows.some((r) => r.variant) ? [{ key: 'variant', label: 'Вариант' }] : []),
@@ -337,7 +339,7 @@ export function institutionView(ctx) {
     { key: 'expenditure', label: 'Разходи', unit: 'хил. €', num: true, d: 1 },
     { key: 'revenue', label: 'Собствени приходи', unit: 'хил. €', num: true, d: 1 },
     originCol,
-    { key: 'origin', label: 'Връзка към произхода' },
+    { key: 'origin', label: 'Връзка към произхода', csvOnly: true },
   ];
   const spec = {
     id: 's10-bill-chart',
@@ -502,7 +504,7 @@ export function municipalityView(ctx) {
       d: 1,
     })),
     originCol,
-    { key: 'origin', label: 'Връзка към произхода' },
+    { key: 'origin', label: 'Връзка към произхода', csvOnly: true },
   ];
   return {
     lede: 'Трансферите към всички 265 общини по чл. 52 от проекта за 2027 г. Делегираните дейности са разпределени по чл. 53; не са допълнителен трансфер.',
@@ -757,13 +759,13 @@ export function billOverview(ctx) {
           caption: 'Приложение 2, годишни суми в хил. евро',
           columns: [{ key: 'period', label: 'Период' }, ...cellColumns()],
           rows: FRAMEWORK.map((key) =>
-            cellRow('Сбор на публикуваните годишни стойности', doc.projectAnnualSums[key], {
+            cellRow('Общо за проектите', doc.projectAnnualSums[key], {
               ...frameworkRow(key),
             }),
           ),
         }),
         {
-          sub: 'Изчислен сбор само на отпечатаните числови клетки в 226 проекта, не отпечатан общ ред. Празните клетки не са оценка за нулев разход. Произходът съдържа всички участващи клетки.',
+          sub: 'Сбор на годишните суми на 226-те проекта от Приложение 2. Законопроектът не дава общ ред, а празните клетки не означават нулев разход.',
           ...frameworkStatus,
           share: { period: '2027.draft / 2028.forecast / 2029.forecast', unit: 'хил. €' },
         },

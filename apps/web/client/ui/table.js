@@ -54,10 +54,10 @@ const sorted = (s) => {
 
 function rowsHtml(s) {
   if (!s.rows.length)
-    return html`<tr><td colspan="${s.columns.length}" class="t-empty">${s.empty || 'Няма редове за показване.'}</td></tr>`;
+    return html`<tr><td colspan="${s.view.length}" class="t-empty">${s.empty || 'Няма редове за показване.'}</td></tr>`;
   return html`${sorted(s).map(
     (r) =>
-      html`<tr${r._id ? html` id="${r._id}" tabindex="-1"` : ''}${r._mock ? raw(' data-mock="true"') : ''}>${s.columns.map(
+      html`<tr${r._id ? html` id="${r._id}" tabindex="-1"` : ''}${r._mock ? raw(' data-mock="true"') : ''}>${s.view.map(
         (c, i) => {
           const al = s.aligns[i] === 'end' ? ' class="t-end"' : '';
           const href = i === 0 && (typeof r._href === 'function' ? r._href(s) : r._href);
@@ -100,12 +100,14 @@ export function dataTable(o) {
   if (!o.id) throw new Error('dataTable: id is required');
   const rows = o.rows || [];
   const s = { ...o, rows, columns: o.columns || [], dir: o.dir === 'desc' ? 'desc' : 'asc' };
-  s.aligns = s.columns.map((c) => alignOf(c, rows));
-  if (s.sortBy && !s.columns.some((c) => c.key === s.sortBy)) s.sortBy = null;
+  // csvOnly columns (e.g. cell provenance) stay in the CSV export but are not shown on screen.
+  s.view = s.columns.filter((c) => !c.csvOnly);
+  s.aligns = s.view.map((c) => alignOf(c, rows));
+  if (s.sortBy && !s.view.some((c) => c.key === s.sortBy)) s.sortBy = null;
   specs.set(o.id, s);
   share.attach(o.id, { table: () => tableData(s) });
   const cap = `${o.id}-cap`;
-  const head = s.columns.map((c, i) => {
+  const head = s.view.map((c, i) => {
     const al = s.aligns[i] === 'end' ? ' t-end' : '';
     const sortable = o.sortable && c.sort !== false;
     const on = sortable && s.sortBy === c.key;
@@ -117,7 +119,7 @@ export function dataTable(o) {
       : html`<th scope="col" class="${al.trim()}">${lab}</th>`;
   });
   const foot = o.total
-    ? html`<tfoot><tr><th scope="row">${o.total.label || 'Общо'}</th>${s.columns.slice(1).map((c, i) => html`<td${raw(s.aligns[i + 1] === 'end' ? ' class="t-end"' : '')}>${o.total.values && o.total.values[c.key] != null ? cell(c, o.total.values) : DASH}</td>`)}</tr></tfoot>`
+    ? html`<tfoot><tr><th scope="row">${o.total.label || 'Общо'}</th>${s.view.slice(1).map((c, i) => html`<td${raw(s.aligns[i + 1] === 'end' ? ' class="t-end"' : '')}>${o.total.values && o.total.values[c.key] != null ? cell(c, o.total.values) : DASH}</td>`)}</tr></tfoot>`
     : '';
   return html`<div class="table-wrap${o.dense ? ' dense' : ''}" id="${o.id}-wrap" tabindex="0" role="region" aria-labelledby="${cap}" data-ui="table" data-attach="${o.id}"${o.status === 'mock' ? raw(' data-mock-table="true"') : ''}>
     <table class="data" id="${o.id}"><caption id="${cap}" class="${o.captionVisible ? 'cap-visible' : 'sr-only'}">${o.caption}</caption>
@@ -132,7 +134,7 @@ export function mount(el, ctx) {
     tbody = table.querySelector('tbody');
   const sync = () => {
     table.querySelectorAll('thead th').forEach((th, i) => {
-      const c = s.columns[i],
+      const c = s.view[i],
         on = th.hasAttribute('aria-sort') && s.sortBy === c.key;
       if (th.hasAttribute('aria-sort'))
         th.setAttribute('aria-sort', on ? (s.dir === 'desc' ? 'descending' : 'ascending') : 'none');

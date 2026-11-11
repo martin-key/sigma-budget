@@ -32,7 +32,7 @@ export function annualGap(ctx, dataset, fields = []) {
               { key: 'label', label: 'Показател' },
               { key: 'amount', label: 'Сума', unit: 'млн. €', num: true, d: 1 },
               { key: 'period', label: 'Период' },
-              { key: 'provenance', label: 'Произход' },
+              { key: 'provenance', label: 'Произход', csvOnly: true },
             ],
             rows,
           })
