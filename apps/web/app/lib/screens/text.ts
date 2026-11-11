@@ -1,11 +1,5 @@
 import { viewUnit } from '../../../client/publication-query.js';
-import { narrativeModel } from './narrative';
-import { metadata as lawMetadata, question as lawQuestion } from '../../routes/zakon-content';
-import { lede as feedLede } from '../../routes/novo-content';
 import { href } from '../legacy';
-import { metadataModel } from './metadata';
-import { render as apiContent } from '../../routes/api-content';
-import { render as proofContent } from '../../routes/proverka-content';
 import type { EditorialCore } from '../editorial-types';
 import type { ReleaseReader } from '../release-types';
 import type { TextScreenModel } from '../screen-state';
@@ -20,8 +14,10 @@ export async function textModel(
   query: Record<string, string>,
   reader: ReleaseReader,
 ): Promise<TextScreenModel> {
-  if (screen === 'S14' || screen === 'S16') return narrativeModel(screen, params, query, reader);
-  if (screen === 'S25' || screen === 'S35') return metadataModel(screen, params, query, reader);
+  if (screen === 'S14' || screen === 'S16')
+    return (await import('./narrative')).narrativeModel(screen, params, query, reader);
+  if (screen === 'S25' || screen === 'S35')
+    return (await import('./metadata')).metadataModel(screen, params, query, reader);
   let core: EditorialCore = {},
     glossary: unknown = {};
   try {
@@ -42,7 +38,11 @@ export async function textModel(
   return { screen, params, query, view, core, glossary, release: reader.release };
 }
 /** Shared by the server and the temporary navigation adapter; no screen renderer. */
-export function textMetadata(model: TextScreenModel) {
+export async function textMetadata(model: TextScreenModel) {
+  const law = model.screen === 'S14' ? await import('../../routes/zakon-content') : null;
+  const feed = model.screen === 'S16' ? await import('../../routes/novo-content') : null;
+  const api = model.screen === 'S25' ? await import('../../routes/api-content') : null;
+  const proof = model.screen === 'S35' ? await import('../../routes/proverka-content') : null;
   const route = byId[model.screen],
     title = route.title,
     view = model.view || 'ready';
@@ -58,7 +58,7 @@ export function textMetadata(model: TextScreenModel) {
   const narrative =
     'content' in model && view === 'ready'
       ? model.screen === 'S14'
-        ? lawMetadata({
+        ? law!.metadata({
             data: model.content,
             core: model.core,
             query: model.query,
@@ -67,7 +67,7 @@ export function textMetadata(model: TextScreenModel) {
             href,
           })
         : {
-            lede: feedLede({
+            lede: feed!.lede({
               data: model.content,
               core: model.core,
               query: model.query,
@@ -84,11 +84,11 @@ export function textMetadata(model: TextScreenModel) {
     demo: model.query.demo,
     view,
     title,
-    question: narrative && model.screen === 'S14' ? lawQuestion : undefined,
+    question: narrative && model.screen === 'S14' ? law!.question : undefined,
     lede:
       narrative?.lede ??
       ('documents' in model && view === 'ready'
-        ? (model.screen === 'S25' ? apiContent : proofContent)({
+        ? (model.screen === 'S25' ? api!.render : proof!.render)({
             data: model.documents,
             core: model.core,
             query: model.query,
@@ -98,7 +98,7 @@ export function textMetadata(model: TextScreenModel) {
         : lede),
     answer:
       'documents' in model && model.screen === 'S35' && view === 'ready'
-        ? proofContent({
+        ? proof!.render({
             data: model.documents,
             core: model.core,
             query: model.query,

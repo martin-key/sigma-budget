@@ -8,17 +8,19 @@ import { TextState } from '../components/TextState';
 import { compactText, fixFiles } from '../components/ScreenTree';
 import { pendingState, emptyState, NarrativeNavigation } from '../components/NarrativeUI';
 import { plural } from '../../client/format.js';
-import { render as law } from './zakon-content';
-import { render as feed, lede as feedLede, model as feedModel, shownNote } from './novo-content';
+import type * as Law from './zakon-content';
+import type * as Feed from './novo-content';
 import { copyOrShow } from '../../client/share.js';
 import type { NarrativeModel, NarrativeContext } from '../lib/screens/narrative-types';
 import type { Navigation } from '../lib/screen-state';
 export function NarrativeContent({
   model,
   navigation,
+  content,
 }: {
   model: NarrativeModel;
   navigation: Navigation;
+  content: typeof Law | typeof Feed;
 }) {
   const unit = useSyncExternalStore(
     (f) =>
@@ -43,8 +45,12 @@ export function NarrativeContent({
   const parts =
     model.view === 'ready'
       ? model.screen === 'S14'
-        ? law(ctx)
-        : { body: feed(ctx), lede: feedLede(ctx), context: '' }
+        ? (content as typeof Law).render(ctx)
+        : {
+            body: (content as typeof Feed).render(ctx),
+            lede: (content as typeof Feed).lede(ctx),
+            context: '',
+          }
       : null;
   let body = parts?.body;
   if (model.unsupported) {
@@ -105,11 +111,14 @@ export function NarrativeContent({
               const [key, value] = query.dataset.query!.split('=');
               navigation.setQuery?.({ [key]: value || '' });
               if (model.screen === 'S16' && key === 'vid' && value !== (model.query.vid || '')) {
-                const m = feedModel({ ...ctx, query: { ...ctx.query, vid: value } });
+                const m = (content as typeof Feed).model({
+                  ...ctx,
+                  query: { ...ctx.query, vid: value },
+                });
                 if (m.events.length)
                   navigation.announce(
                     m.vid
-                      ? shownNote(m)
+                      ? (content as typeof Feed).shownNote(m)
                       : `Показани са всички ${plural(m.events.length, 'събитие', 'събития')}.`,
                   );
               }

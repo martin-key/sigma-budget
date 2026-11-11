@@ -137,7 +137,7 @@ wrangler получават `-c apps/web/wrangler.local.jsonc`:
 
 ```bash
 pnpm exec wrangler d1 migrations apply DB --env staging --remote -c apps/web/wrangler.local.jsonc
-CLOUDFLARE_ENV=staging WRANGLER_CONFIG=apps/web/wrangler.local.jsonc pnpm build    # build/: Worker-ът на staging от собствения акаунт
+CLOUDFLARE_ENV=staging WRANGLER_CONFIG=apps/web/wrangler.local.jsonc pnpm build:release    # build/: Worker-ът на staging от собствения акаунт
 pnpm exec wrangler deploy -c apps/web/build/server/wrangler.json
 pnpm exec wrangler secret put OPERATORS --env staging -c apps/web/wrangler.local.jsonc
 ```

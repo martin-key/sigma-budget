@@ -38,8 +38,8 @@ export function selectPeriod(dataset, key) {
   return { available: false, periodKey: key, reason: 'Това издание няма този период', historical: !!dataset && !dataset.byPeriod };
 }
 
-/** Called after client takeover. No storage read affects SSR or hydration. URL always wins. */
-export function migratePeriod({ address, get, set, replace }) {
+/** Called after client takeover. No storage read affects SSR or hydration. URL and explicit controls always win, including a default choice without ?per. */
+export function migratePeriod({ address, get, set, replace, explicitSelection = false }) {
   try {
     const saved = JSON.parse(get('bns.prefs.v1') || '{}');
     if (!saved || typeof saved !== 'object' || Array.isArray(saved) || !Object.hasOwn(saved, 'period')) return null;
@@ -49,7 +49,7 @@ export function migratePeriod({ address, get, set, replace }) {
     const requested = saved.period;
     const result = resolvePeriod(typeof requested === 'string' ? requested : null);
     let applied = false;
-    if (!view.searchParams.has('per') && typeof requested === 'string' && ['2026.draft', '2027.forecast', '2028.forecast'].includes(requested)) {
+    if (!explicitSelection && !view.searchParams.has('per') && typeof requested === 'string' && ['2026.draft', '2027.forecast', '2028.forecast'].includes(requested)) {
       view.searchParams.set('per', result.resolved);
       if (hash) url.hash = view.pathname + view.search;
       replace(url.href); applied = true; // a failed replace must leave the preference intact for another attempt

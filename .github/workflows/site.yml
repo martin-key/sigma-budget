@@ -77,7 +77,9 @@ jobs:
       - name: Build the Worker for staging and check every screen
         env:
           ORIGIN: ${{ vars.STAGING_ORIGIN || 'https://sigma-budget.my-data.bg' }}
-        run: python -m apps.web.scripts.build --env staging --origin "$ORIGIN" --noindex
+        run: pnpm build:release --env staging --origin "$ORIGIN" --noindex
+      - name: Release artifact smoke tests
+        run: python -m unittest tests.release.test_build_artifact
       - name: The checks and the build leave data/release unchanged
         run: test -z "$(git status --porcelain -- data/release)" || { git status --short -- data/release; exit 1; }
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -122,6 +124,7 @@ jobs:
           for i in $(seq 1 60); do curl -sf -o /dev/null http://127.0.0.1:8814/robots.txt && break; sleep 1; done
           python -m tests.e2e.screens --url http://127.0.0.1:8814/
           python -m tests.e2e.visual_audit --url http://127.0.0.1:8814/
+          python -m tests.e2e.boot --url http://127.0.0.1:8814/
           python -m tests.e2e.narrative_adoption --url http://127.0.0.1:8814/
           python -m tests.e2e.security_headers --url http://127.0.0.1:8814/
       - name: Annual periods, aliases, SSR notices and stored preferences

@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "turbo run build",
+    "build": "echo \"Development artifact only. Deploy with pnpm build:release (Python 3.12 + Playwright; see README).\" && turbo run build",
     "typecheck": "turbo run typecheck",
     "dev": "turbo run dev",
     "test": "turbo run test --concurrency=1",
@@ -23,7 +23,8 @@
     "validate:wave18": "pnpm --filter @sigma-budget/ingest... build && node packages/ingest/dist/validate/kfp-cli.js --root packages/ingest/test/fixtures/wave18 --captures captures.json --manifest manifest.json --only KFP --report tmp/ts-migration/candidates/18/report.json",
     "validate:wave18-live": "pnpm --filter @sigma-budget/ingest... build && node packages/ingest/dist/validate/kfp-cli.js --root . --captures packages/ingest/test/fixtures/wave18/captures.json --manifest packages/ingest/test/fixtures/wave18/manifest.json --only KFP --report tmp/ts-migration/candidates/18/report.json",
     "validate:wave15": "pnpm --filter @sigma-budget/ingest... build && node packages/ingest/dist/validate/cli15.js",
-    "validate:wave15-live": "pnpm --filter @sigma-budget/ingest... build && node packages/ingest/dist/validate/cli15.js --live --report tmp/ts-migration/candidates/15/live.json"
+    "validate:wave15-live": "pnpm --filter @sigma-budget/ingest... build && node packages/ingest/dist/validate/cli15.js --live --report tmp/ts-migration/candidates/15/live.json",
+    "build:release": "python3 -m apps.web.scripts.build"
   },
   "packageManager": "pnpm@10.33.0",
   "engines": {

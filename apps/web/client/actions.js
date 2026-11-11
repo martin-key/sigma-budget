@@ -30,7 +30,18 @@ function onClick(e) {
   }
 
   const sh = t.closest('[data-share]');
-  if (sh) { e.preventDefault(); import('./share.js').then(m => m.openMenu(sh, sh.dataset.share)).catch(err => console.error(err)); return; }
+  if (sh) {
+    e.preventDefault();
+    const address = location.href, id = sh.dataset.share;
+    // SSR buttons precede the client share registry. Preserve the request until
+    // the initial screen has registered its blocks, and never replay on another URL.
+    router.initialReady.then(() => {
+      if (location.href !== address) return;
+      const anchor = sh.isConnected ? sh : [...document.querySelectorAll('[data-share]')].find(el => el.dataset.share === id);
+      if (anchor) return import('./share.js').then(m => m.openMenu(anchor, id));
+    }).catch(err => console.error(err));
+    return;
+  }
 
   const act = t.closest('[data-action]');
   if (act) {
@@ -53,7 +64,9 @@ function onClick(e) {
 
 function onChange(e) {
   const t = e.target;
-  if (!(t instanceof Element) || t.closest('[data-react-owned]') || !t.dataset || !t.dataset.query || t.tagName === 'BUTTON' || t.tagName === 'A') return;
+  if (!(t instanceof Element) || t.closest('[data-react-owned]')) return;
+  if (!router.current && t.matches('.unit-switch input[type=radio]') && t.checked) { store.set('unit', t.value); return; }
+  if (!t.dataset || !t.dataset.query || t.tagName === 'BUTTON' || t.tagName === 'A') return;
   const k = t.dataset.query;
   let v = t.value;
   if (t.type === 'checkbox') v = t.checked ? '1' : '';

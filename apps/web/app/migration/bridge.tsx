@@ -5,8 +5,12 @@ import { flushSync } from 'react-dom';
 import { bannerHtml, topbarHtml, tabbarHtml, footerHtml } from '../components/chrome/chrome';
 import { data } from '../lib/legacy';
 import { chromeTree, chromeDOM } from './chrome-tree';
-import { MigratedScreen, textModel } from './registry';
+import { loadScreen } from './screens';
 import type { Navigation, TextScreenModel } from '../lib/screen-state';
+export function preload(screen?: string) {
+  if (screen && ['S26', 'S30', 'S25', 'S35', 'S14', 'S16'].includes(screen))
+    return loadScreen(screen as TextScreenModel['screen']);
+}
 let root: Root | undefined;
 export function dispose() {
   if (root) {
@@ -15,7 +19,14 @@ export function dispose() {
     document.getElementById('view')?.removeAttribute('data-react-owned');
   }
 }
-export function mount(model: TextScreenModel, navigation: Navigation, adopt = false) {
+export async function mount(
+  model: TextScreenModel,
+  navigation: Navigation,
+  adopt = false,
+  signal?: AbortSignal,
+) {
+  const MigratedScreen = await loadScreen(model.screen);
+  if (signal?.aborted) return;
   document.body.classList.remove('bare');
   const view = document.getElementById('view')!;
   view.setAttribute('data-react-owned', '');
@@ -87,7 +98,7 @@ export function refreshChrome(
     tabbar: tabbarHtml(options.route),
   };
   for (const [id, piece] of Object.entries(pieces)) {
-    const element = chromeTree(piece);
+    const element = chromeTree(piece, true);
     const node = document.getElementById(id);
     if (!node) continue;
     let owner = chromeRoots.get(id);
@@ -110,7 +121,7 @@ export function refreshChrome(
   }
 }
 
-export function loadModel(
+export async function loadModel(
   screen: TextScreenModel['screen'],
   params: Record<string, string>,
   query: Record<string, string>,
@@ -118,6 +129,7 @@ export function loadModel(
 ) {
   const meta = (name: string) =>
     document.querySelector<HTMLMetaElement>(`meta[name="${name}"]`)?.content || '';
+  const { textModel } = await import('../lib/screens/text');
   return textModel(screen, params, query, {
     release: {
       id: meta('release-id'),
@@ -131,4 +143,6 @@ export function loadModel(
   });
 }
 
-export { textMetadata as metadata } from '../lib/screens/text';
+export async function metadata(model: TextScreenModel) {
+  return (await import('../lib/screens/text')).textMetadata(model);
+}

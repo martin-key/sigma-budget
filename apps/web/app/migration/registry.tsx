@@ -1,47 +1,17 @@
-import { NarrativeContent } from '../routes/narrative-content';
-import { MetadataContent } from '../routes/metadata-content';
-import { TextState } from '../components/TextState';
-import { byId } from '../lib/legacy';
-import { AboutContent } from '../routes/about-content';
-import { notFoundParts } from '../routes/not-found-content';
-import { PageFrame } from '../components/PageFrame';
+import { MigratedScreen as S26 } from './screen-S26';
+import { MigratedScreen as S30 } from './screen-S30';
+import { MigratedScreen as S25 } from './screen-S25';
+import { MigratedScreen as S35 } from './screen-S35';
+import { MigratedScreen as S14 } from './screen-S14';
+import { MigratedScreen as S16 } from './screen-S16';
 import type { TextScreenModel, Navigation } from '../lib/screen-state';
 export { textModel, textMetadata } from '../lib/screens/text';
 export const migrated = (id: string): id is TextScreenModel['screen'] =>
   ['S26', 'S30', 'S25', 'S35', 'S14', 'S16'].includes(id);
-export function MigratedScreen({
-  model,
-  navigation,
-}: {
-  model: TextScreenModel;
-  navigation: Navigation;
-}) {
-  if ('content' in model) return <NarrativeContent model={model} navigation={navigation} />;
-  if (model.view && model.view !== 'ready')
-    return (
-      <PageFrame model={model}>
-        <TextState view={model.view} title={byId[model.screen].title} retry={navigation.retry} />
-      </PageFrame>
-    );
-  if ('documents' in model) return <MetadataContent model={model} navigation={navigation} />;
-  if (model.screen === 'S30') {
-    const parts = notFoundParts(model.params, navigation);
-    return (
-      <PageFrame model={model} lede={parts.lede}>
-        {parts.body}
-      </PageFrame>
-    );
-  }
-  return (
-    <PageFrame model={model}>
-      <AboutContent
-        core={model.core}
-        glossary={model.glossary}
-        onTerm={navigation.openGlossary}
-        announce={navigation.announce}
-      />
-    </PageFrame>
-  );
+const screens = { S26, S30, S25, S35, S14, S16 };
+export function MigratedScreen(props: { model: TextScreenModel; navigation: Navigation }) {
+  const Screen = screens[props.model.screen];
+  return <Screen {...props} />;
 }
 export const safeJSON = (value: unknown) =>
   JSON.stringify(value)

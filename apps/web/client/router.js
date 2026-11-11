@@ -25,7 +25,10 @@ export { NotFound };
 const RERENDER_KEYS = [...(ROLE_SELECTOR ? ['userType'] : []), 'period', 'unit', 'perPerson', 'leva', 'onlyReal'];     // the role selector is off in V5 (js/store.js ROLE_SELECTOR)
 const $view = () => document.getElementById('view');
 
-let started = false, applying = false;
+let initialized = false, started = false, applying = false;
+let explicitPeriodSelection = false;
+let finishInitial;
+const initialReady = new Promise(resolve => { finishInitial = resolve; });
 let navSeq = 0, abort = null, cur = null, lastHref = '', histK = Date.now(), curK = 0, cleanups = [], readyP = Promise.resolve();
 const scrollPos = new Map();
 const listeners = new Set();
@@ -61,7 +64,7 @@ export function go(addr, o = {}) {
   saveScroll();
   if (o.replace) history.replaceState({ k: ++histK }, '', target);
   else history.pushState({ k: ++histK }, '', target);
-  render('link');
+  if (started) render('link'); else dropStalePrerender();
 }
 
 /** setQuery({tab:'programi', q:''}, {rerender:false}) — change query params in place (replaceState), '' / null removes a key */
@@ -74,7 +77,8 @@ export function setQuery(obj, o = {}) {
   history.replaceState({ k: ensureKey() }, '', h);
   lastHref = location.href;
   if (cur) { const live = cur.ctx?.query; if (live) { for (const k of Object.keys(live)) delete live[k]; Object.assign(live, parseHash(here()).query); } cur.sig = sigOf(cur.route, cur.params, parseHash(here()).query); }
-  if (o.rerender !== false) render('rerender');
+  if (!started) dropStalePrerender();
+  else if (o.rerender !== false) render('rerender');
 }
 export const rerender = () => render('rerender');
 export const onNavigate = fn => { listeners.add(fn); return () => listeners.delete(fn); };
@@ -236,10 +240,12 @@ async function render(kind) {
       const model = seed?.screen === route.id ? seed : await reactBridge.loadModel(route.id,params,query,signal);
       if (!model.view || model.view === 'ready') await loadStyle(route.file);
       if (seq !== navSeq) return;
-      await reactBridge.mount(model,{go,announce,retry:rerender,setQuery},!!seed);
+      await reactBridge.mount(model,{go,announce,retry:rerender,setQuery},!!seed,signal);
+      if (seq !== navSeq || signal.aborted) return;
       seedNode?.remove();
       reactOwned = true;
-      vm = reactBridge.metadata(model);
+      vm = await reactBridge.metadata(model);
+      if (seq !== navSeq || signal.aborted) return;
       document.title = docTitle(vm);
       if (!seed) seo.apply(vm,docTitle(vm));
     } else vm = await build(route, params, query, { signal, kind, path: segs.join('/'), stale: () => seq !== navSeq, loadStyle, actions: { setQuery, rerender, announce, go } });
@@ -254,7 +260,10 @@ async function render(kind) {
     reactBridge = await import(/* @vite-ignore */ bridgeModule);
     const model = await reactBridge.loadModel('S30',vm.params,query,signal);
     if (seq !== navSeq) return;
-    await reactBridge.mount(model,{go,announce,retry:rerender,setQuery});
+    await reactBridge.mount(model,{go,announce,retry:rerender,setQuery},false,signal);
+    if (seq !== navSeq || signal.aborted) return;
+    vm = await reactBridge.metadata(model);
+    if (seq !== navSeq || signal.aborted) return;
     document.title=docTitle(vm);seo.apply(vm,docTitle(vm));
     reactOwned=true;
   }
@@ -325,12 +334,14 @@ function onClick(e) {
 }
 
 function onStore(key) {
-  if (applying || !started || !RERENDER_KEYS.includes(key)) return;
+  if (applying || !RERENDER_KEYS.includes(key)) return;
   if (key === 'period') {
+    explicitPeriodSelection = true;
     const per = store.get('period');
     setQuery({ per: per === DEFAULT_PERIOD ? null : per }, { rerender: false });
   }
   if (key === 'unit') setQuery({ unit: store.get('unit') }, { rerender: false });
+  if (!started) return; // URL changes made by early controls are consumed by start().
   clearTimeout(onStore.t);
   onStore.t = setTimeout(() => {
     render('rerender');
@@ -362,21 +373,37 @@ export function dropStalePrerender() {
 }
 
 export const router = {
+  // Resolve the first route and observe preferences before enabling SSR controls.
+  // Rendering and link interception still wait for start(); anchors remain native.
+  init() {
+    if (initialized) return;
+    initialized = true;
+    const { query, periodResolution } = resolve(here());
+    store.set('period', periodResolution.resolved);
+    store.set('periodRequested', query.per ?? null);
+    if (query.unit != null) store.set('unit', query.unit);
+    store.subscribe(onStore);
+  },
   start() {
+    router.init();
     if (started) return readyP;
     started = true;
     try { history.scrollRestoration = 'manual'; } catch { /* old browsers */ }
     window.addEventListener('popstate', () => onLocation('pop'));
     window.addEventListener('hashchange', () => onLocation('hash'));
     document.addEventListener('click', onClick);
-    store.subscribe(onStore);
-    return render('load');
+    const load = render('load');
+    load.then(finishInitial, finishInitial);
+    return load;
   },
   go, setQuery, rerender, announce, onNavigate, hydrate, prepare, NotFound,
   parseHash, href: routeHref,
   get current() { return cur; },
   /** the periods the current screen supports: 'all' | 'none' | ['2026.draft', …] (the shell uses it for the period switch) */
-  get periods() { return cur ? periodsFor(cur.route, cur.vm && cur.vm.mod) : 'all'; },
+  get periods() { return cur ? periodsFor(cur.route, cur.vm && cur.vm.mod) : periodsFor(resolve(here()).route); },
   get ready() { return readyP; },
+  get initialReady() { return initialReady; },
+  markPeriodSelection() { explicitPeriodSelection = true; },
+  get periodSelected() { return explicitPeriodSelection; },
   routes: ROUTES
 };

@@ -108,6 +108,28 @@ for (const hash of [false, true])
       expect(replaces).toBe(1);
     });
   }
+for (const hash of [false, true])
+  it(`explicit default selection wins over legacy storage, hash=${hash}`, () => {
+    let saved = JSON.stringify({ period: '2026.draft', unit: 'pct' });
+    let address = 'https://budget.test/' + (hash ? '#/razhodi' : 'razhodi');
+    let replacements = 0;
+    const result = migratePeriod({
+      address,
+      explicitSelection: true,
+      get: () => saved,
+      set: (_key: string, value: string) => {
+        saved = value;
+      },
+      replace: (value: string) => {
+        address = value;
+        replacements++;
+      },
+    });
+    expect(result).toBeNull();
+    expect(replacements).toBe(0);
+    expect(address).not.toContain('per=');
+    expect(JSON.parse(saved)).toEqual({ unit: 'pct' });
+  });
 it('URL wins, only the own legacy period is removed, storage failures are harmless', () => {
   let saved = JSON.stringify({ period: '2027.forecast', unit: 'pct' });
   let replacements = 0;

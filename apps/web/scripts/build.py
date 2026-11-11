@@ -18,6 +18,7 @@ link, or lacks a title, description or canonical link fails the build (exit 1).
 """
 
 from pathlib import Path as _Path
+import uuid
 import argparse
 import asyncio
 import collections
@@ -343,6 +344,10 @@ def write_extras(out, pages, origin, lastmod, routes, noindex=False):
     ], cwd=ROOT, text=True)
     (out / '_headers').write_text(
         shared_headers +
+        '/js/chunks/*\n'
+        '  Cache-Control: public, max-age=31536000, immutable\n'
+        '/assets/*\n'
+        '  Cache-Control: public, max-age=31536000, immutable\n'
         '/vendor/*\n'
         '  Cache-Control: public, max-age=604800\n'
         '/data/*\n'
@@ -353,6 +358,18 @@ def write_extras(out, pages, origin, lastmod, routes, noindex=False):
         '/llms*.txt\n'
         '  Content-Type: text/plain; charset=utf-8\n', encoding='utf-8')
     return paths
+
+
+def check_artifact(out, noindex=False):
+    """Fail closed if the deploy artifact loses its public metadata or cache policy."""
+    robots = (out / 'robots.txt').read_text(encoding='utf-8')
+    assert ('Disallow: /\n' in robots) if noindex else ('Allow: /\n' in robots and 'Sitemap:' in robots)
+    assert '<url><loc>https://' in (out / 'sitemap.xml').read_text(encoding='utf-8')
+    assert (out / 'llms.txt').stat().st_size > 0
+    headers = (out / '_headers').read_text(encoding='utf-8')
+    assert '/js/chunks/*\n  Cache-Control: public, max-age=31536000, immutable' in headers
+    assert ('x-robots-tag: noindex' in headers.split('/data/*')[0]) == noindex
+    assert re.search(r"const CACHE = 'bns-.*-[0-9a-f]{12}';", (out / 'sw.js').read_text(encoding='utf-8'))
 
 
 def gz_size(raw):
@@ -385,7 +402,7 @@ def stamp_files(out, origin, data_version):
         rev = subprocess.run(['git', 'rev-parse', '--short', 'HEAD'], cwd=ROOT, capture_output=True, text=True, check=True).stdout.strip()
     except (OSError, subprocess.CalledProcessError):
         rev = 'local'
-    s, n = re.subn(r"const CACHE = '[^']*';", f"const CACHE = 'bns-{data_version or 'data'}-{rev}';", sw.read_text(encoding='utf-8'), count=1)
+    s, n = re.subn(r"const CACHE = '[^']*';", f"const CACHE = 'bns-{data_version or 'data'}-{rev}-{uuid.uuid4().hex[:12]}';", sw.read_text(encoding='utf-8'), count=1)
     if n:
         sw.write_text(s, encoding='utf-8')
 
@@ -423,6 +440,8 @@ def main():
     ap.add_argument('--limit', type=int, default=0, help='check at most N screens (a quick try; links to the others then fail the check)')
     ap.add_argument('--noindex', action='store_true', help='a staging build: robots.txt disallows everything and every file says X-Robots-Tag: noindex')
     a = ap.parse_args()
+    a.env = a.env or os.environ.get('CLOUDFLARE_ENV', '')
+    a.noindex = a.noindex or bool(a.env and a.env != 'production') or os.environ.get('NOINDEX') == '1'
 
     template = (SITE / 'index.html').read_text(encoding='utf-8')
     origin = (a.origin or re.search(r'<meta name="site-origin" content="([^"]+)"', template).group(1)).rstrip('/')
@@ -430,12 +449,14 @@ def main():
         sys.exit('--sigma-url must be an https address')
     if not a.no_build:
         env = dict(os.environ, **({'CLOUDFLARE_ENV': a.env} if a.env else {}))
-        r = subprocess.run([str(ROOT / 'node_modules' / '.bin' / 'react-router'), 'build'], cwd=ROOT / 'apps/web', env=env, capture_output=True, text=True)
+        r = subprocess.run(['pnpm', '--filter', '@sigma-budget/web...', 'build'], cwd=ROOT, env=env, capture_output=True, text=True)
         if r.returncode != 0:
-            sys.exit('build: react-router build failed:\n' + (r.stdout + r.stderr)[-3000:])
+            sys.exit('build: workspace build failed:\n' + (r.stdout + r.stderr)[-3000:])
     out, built = ROOT / 'apps' / 'web' / 'build' / 'client', ROOT / 'apps' / 'web' / 'build' / 'server' / 'wrangler.json'
     if not out.is_dir() or not built.is_file():
         sys.exit('build: no build/ (run without --no-build)')
+    build_vars = json.loads(built.read_text(encoding='utf-8')).get('vars', {})
+    a.noindex = a.noindex or build_vars.get('ENVIRONMENT', 'production') != 'production' or build_vars.get('NOINDEX') == '1'
     (out / 'data' / 'sebra.json').unlink(missing_ok=True)       # СЕБРА: on disk for phase 2, used by no screen and not in the catalog
 
     core = json.loads((ROOT / 'data' / 'release' / 'core.json').read_text(encoding='utf-8'))
@@ -478,6 +499,7 @@ def main():
         fails.append((NOT_FOUND_PROBE, f'an unknown address answers {(nf.get("ssr") or {}).get("status")}, not 404'))
 
     paths = write_extras(out, crawl.pages, origin, lastmod, routes, a.noindex)
+    check_artifact(out, a.noindex)
     dt = time.time() - t0
     print(f'\n{len(crawl.pages)} screens checked ({len(paths)} in the sitemap) in {dt:.0f} s → {out}')
     for path, msg in warns[:40]:

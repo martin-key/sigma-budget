@@ -12,6 +12,7 @@ import { ROUTES } from './routes';
 import { screenQuery, screenSearch } from './query-params';
 import { screenCacheKey } from './cache';
 import { renderScreen } from './screen.server';
+import * as lawContent from '../routes/zakon-content';
 import { NarrativeContent } from '../routes/narrative-content';
 import type { NarrativeModel } from './screens/narrative-types';
 
@@ -111,6 +112,7 @@ it('draws the React law unit from the URL before hydration', async () => {
   if (!('doc' in result)) throw new Error('Unexpected redirect');
   const html = renderToStaticMarkup(
     <NarrativeContent
+      content={lawContent}
       model={result.doc.model as NarrativeModel}
       navigation={{ go() {}, announce() {} }}
     />,

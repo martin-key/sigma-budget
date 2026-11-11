@@ -35,7 +35,7 @@ pnpm exec wrangler d1 migrations apply DB --remote -c apps/web/wrangler.jsonc
 
 ```bash
 git switch --detach <commit> && pnpm install --frozen-lockfile
-PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers tmp/venv/bin/python -m apps.web.scripts.build --origin https://<адрес>   # build/ с проверка на всеки екран
+PATH="$PWD/tmp/venv/bin:$PATH" PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers pnpm build:release --origin https://<адрес>   # build/ с проверка на всеки екран
 python3 -m tests.release.compat_check
 pnpm exec wrangler deploy -c apps/web/build/server/wrangler.json
 pnpm exec wrangler secret put OPERATORS -c apps/web/wrangler.jsonc                            # след deploy-а: таен ключ не може да носи името на променлива (код 10053)
@@ -67,7 +67,7 @@ cloudflared access login https://<адрес>/admin/operations
 
 1. CI е минал на commit-а в `main`.
 2. `python3 -m tests.release.compat_check --env-url https://<адрес>`: новият код чете текущото издание на production.
-3. `apps/web/scripts/build.py --origin https://<адрес>`, после `pnpm exec wrangler deploy -c apps/web/build/server/wrangler.json`.
+3. `pnpm build:release --origin https://<адрес>`, после `pnpm exec wrangler deploy -c apps/web/build/server/wrangler.json`.
 4. Проверката от стъпка 2.
 
 ## 5. Връщане назад

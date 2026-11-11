@@ -3,7 +3,7 @@
   "private": true,
   "description": "The site (React Router SSR on Cloudflare Workers, docs/adr/0002-react-router-ssr.md) and the Node tools of the repository",
   "scripts": {
-    "build": "react-router build",
+    "build": "echo \"Development artifact only; use pnpm -w build:release for deployment.\" && react-router build",
     "typecheck": "react-router typegen && tsc",
     "dev": "wrangler dev -c build/server/wrangler.json",
     "registry:local": "wrangler d1 migrations apply DB --local",

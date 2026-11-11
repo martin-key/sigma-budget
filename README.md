@@ -32,7 +32,9 @@ pnpm dev -- --port 8814
 python3 -m apps.web.scripts.serve
 ```
 
-Зависимостите на Node се инсталират в корена с един `pnpm-lock.yaml` (pnpm workspace). Сглобеният сайт е в `apps/web/build/`. Клиентът се публикува под `/js/`, а данните от `data/release/` под `/data/`; публичните адреси са запазени. SSR чете текущото издание от D1/R2; без регистър използва включеното в сглобяването издание.
+Зависимостите на Node се инсталират в корена с един `pnpm-lock.yaml` (pnpm workspace). `pnpm build` е build за локална разработка, без SEO обхода. Единственият вход за deploy артефакт е `pnpm build:release` (Python 3.12 с зависимостите и Chromium от следващия раздел). Той проверява екраните, генерира sitemap/llms/robots и кеш заглавките и маркира service worker за всяко сглобяване. За staging използвай `--env staging --noindex`; за production - `--origin https://<адрес>`.
+
+Сглобеният сайт е в `apps/web/build/`. Клиентът се публикува под `/js/`, а данните от `data/release/` под `/data/`; публичните адреси са запазени. SSR чете текущото издание от D1/R2; без регистър използва включеното в сглобяването издание.
 
 Нужни са Node 24 и pnpm 10.33.0. `pnpm test` пуска тестовете на TypeScript пакетите. Сравнението `budget-ts parity` и фикстурите са описани в [ръководството за разработка](docs/dev-guide.md); `./budget` изпълнява пълния Node импорт. `./budget-python` е отделната команда за исторически Python издания и референтни проверки.
 
@@ -53,10 +55,12 @@ python -m budget_pipeline.validate.registry check
 python -m budget_pipeline.validate.datasets
 tmp/venv/bin/python -m tests.release.compat_check
 tmp/venv/bin/python -m apps.web.scripts.query_check
-PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers tmp/venv/bin/python -m apps.web.scripts.build --env staging --noindex
+PATH="$PWD/tmp/venv/bin:$PATH" PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers pnpm build:release --env staging --noindex
 # След това Worker-ът се стартира с pnpm dev; пълната проверка върви срещу него:
 PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers tmp/venv/bin/python -m tests.e2e.screens --url http://127.0.0.1:8814/
 ```
+
+Регресията за ранния мобилен tap се проверява с `python -m tests.e2e.boot --url http://127.0.0.1:8814/` срещу сглобения Worker. Release smoke проверките са `python -m unittest tests.release.test_build_artifact`; release командата проверява и действителния артефакт преди успех.
 
 Останалите браузърни проверки са `redirects.py`, `calc_check.py`, `share_check.py`, `accept.py` и `motion.py` в `tests/e2e/`. Те използват временния статичен сайт. `overlap.py` и `perf.py` проверяват припокриване и работа при ограничен процесор. Очакваните числа се четат от текущите данни чрез `expect.py`. Интеграционните проверки `tests/release/release_check.py` и `restore_drill.py` изискват Node, OpenSSL и локален Worker.
 

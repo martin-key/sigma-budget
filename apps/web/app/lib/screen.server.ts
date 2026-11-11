@@ -109,7 +109,7 @@ export async function renderScreen(url: URL, release: Rel): Promise<ScreenResult
           release,
           load: (name) => data.load(name),
         });
-        vm = textMetadata(preparedModel);
+        vm = await textMetadata(preparedModel);
       } else vm = await build(route, params, query, { path: r.segs.join('/') });
     } catch (e) {
       console.error(e);

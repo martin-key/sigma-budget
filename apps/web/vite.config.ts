@@ -66,7 +66,10 @@ function siteFiles(candidate: Candidate | null): Plugin {
       });
       await bundle({
         entryPoints: ['app/migration/bridge.tsx'],
-        outfile: resolve(options.dir, 'js/react-bridge.js'),
+        outdir: resolve(options.dir, 'js'),
+        entryNames: 'react-bridge',
+        chunkNames: 'chunks/[name]-[hash]',
+        splitting: true,
         bundle: true,
         format: 'esm',
         minify: true,

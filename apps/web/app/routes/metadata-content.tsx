@@ -4,20 +4,21 @@ import { useEffect, useRef, useState } from 'react';
 import { PageFrame } from '../components/PageFrame';
 import type { MetadataModel } from '../lib/screens/metadata-types';
 import type { Navigation } from '../lib/screen-state';
-import { render as api } from './api-content';
-import { render as proof } from './proverka-content';
+import type { render as ContentRenderer } from './api-content';
 import { href } from '../lib/legacy';
 import { copyOrShow } from '../../client/share.js';
 export function MetadataContent({
   model,
   navigation,
+  render,
 }: {
   model: MetadataModel;
   navigation: Navigation;
+  render: typeof ContentRenderer;
 }) {
   const root = useRef<HTMLDivElement>(null),
     [newer, setNewer] = useState('');
-  const content = (model.screen === 'S25' ? api : proof)({
+  const content = render({
     newer,
     origin: model.release.origin,
     dataBase: model.release.dataBase,

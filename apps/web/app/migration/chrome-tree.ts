@@ -77,7 +77,7 @@ function identity(node: ReactElement<ChromeProps>): string {
 /** Legacy HTML has indentation text nodes; React chrome has fragments and arrays.
  * Flatten both into the same host-element tree. Element keys follow stable attributes and ignore whitespace,
  * so the first model update retains links, controls, SVG nodes and keyboard focus. */
-export function chromeTree(value: ReactNode): ReactNode[] {
+export function chromeTree(value: ReactNode, preserveControls = false): ReactNode[] {
   const flat: ReactNode[] = [];
   function visit(node: ReactNode) {
     if (Array.isArray(node)) {
@@ -98,6 +98,17 @@ export function chromeTree(value: ReactNode): ReactNode[] {
     if (typeof node.type !== 'string')
       throw new Error('Chrome factories must return host elements');
     const { children, dangerouslySetInnerHTML, ...props } = node.props;
+    // The legacy sheet/search handlers own expanded state even while React adopts the chrome.
+    const attributes = props as ChromeProps;
+    if (preserveControls && 'aria-expanded' in attributes) {
+      const live =
+        typeof attributes.id === 'string'
+          ? document.getElementById(attributes.id)
+          : attributes['data-grp'] != null
+            ? document.querySelector(`[data-grp="${String(attributes['data-grp'])}"]`)
+            : null;
+      if (live) attributes['aria-expanded'] = live.getAttribute('aria-expanded');
+    }
     let content = children;
     if (dangerouslySetInnerHTML) {
       // Parse trusted icon markup only in a detached template; React owns the live SVG.
@@ -109,7 +120,7 @@ export function chromeTree(value: ReactNode): ReactNode[] {
       const parent = node.type === 'svg' ? template.content.firstChild! : template.content;
       content = Array.from(parent.childNodes, fromDOM);
     }
-    flat.push(createElement(node.type, props, ...chromeTree(content)));
+    flat.push(createElement(node.type, props, ...chromeTree(content, preserveControls)));
   }
   visit(value);
   const counts = new Map<string, number>();
