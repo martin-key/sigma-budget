@@ -108,7 +108,7 @@ export function pendingFromExecution(
   result.P04 = {
     ...result.P04!,
     title: `Отчетът към ${day}.${month}.${year} г. и следващите`,
-    reason: `Последният месечен отчет в портала е за ${monthName(last.month)} ${last.asOf.slice(0, 4)} г. Отчетът за ${monthName(next.month)} ${year} г. не е включен.`,
+    reason: `Отчетът за ${monthName(next.month)} ${year} г. още не е добавен: страницата на МФ с месечните отчети се отваря само през браузър (отказ 403 към автоматични заявки), а последният наличен файл е за ${monthName(last.month)} ${last.asOf.slice(0, 4)} г.`,
   };
   return result;
 }
@@ -224,7 +224,7 @@ export function buildCore(input: CoreInput) {
       }),
   );
   const result = {
-    meta: metadata('core', 'Ядро: източници, показатели без данни и основни числа', input.buildDate, {
+    meta: metadata('core', 'Ядро: източници, предстоящи набори и основни числа', input.buildDate, {
       source: ['asbp', 'kfp', 'eurostat'],
       sourceNote:
         'Числата са копирани от наборите, които ги притежават (Прогноза, Изпълнение, Дълг, Разходи, Приходи)',

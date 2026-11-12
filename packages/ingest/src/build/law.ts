@@ -358,7 +358,7 @@ export function buildLaw(
     count: z.proposals.length,
     byDate,
     urlPattern: files + '{file}',
-    note: 'Връзки към документите на Народното събрание. Съдържанието и фискалният ефект на предложенията не са представени в портала (P07).',
+    note: 'Връзки към документите на Народното събрание. Съдържанието и ефектът на предложенията още не са обработени (P07).',
     items: z.proposals.map((p: Data) => ({ no: p.no, date: p.date, file: p.file })),
   };
   const counts = {

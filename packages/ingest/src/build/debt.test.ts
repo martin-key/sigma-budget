@@ -1,4 +1,3 @@
-import { launchTexts } from './launch-texts.test-support.js';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -7,7 +6,7 @@ import { loadAnnex } from './annex.js';
 import { buildDebt, type DebtInput } from './debt.js';
 const root = fileURLToPath(new URL('../../test/fixtures/debt-local/', import.meta.url));
 const text = (n: string) => readFileSync(root + n, 'utf8');
-const read = (n: string) => launchTexts(JSON.parse(text(n)));
+const read = (n: string) => JSON.parse(text(n));
 const input = (): DebtInput => {
   const t = read('inputs/data/originals/asbp/asbp_tables.json').tables,
     cap = read('inputs/reader-captures.json');

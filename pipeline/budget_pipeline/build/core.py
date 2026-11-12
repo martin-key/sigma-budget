@@ -110,7 +110,7 @@ def build_core(ctx):
     if len(pop_years) != len(pop_persons) or pop_years != list(range(pop_years[0], pop_years[0] + len(pop_years))):
         raise ValueError("population.json: years are not consecutive or differ in length from persons")
     obj = {
-        "meta": meta("core", 'Ядро: източници, показатели без данни и основни числа', source=["asbp", "kfp", "eurostat"],
+        "meta": meta("core", "Ядро: източници, предстоящи набори и основни числа", source=["asbp", "kfp", "eurostat"],
                      source_note="Числата са копирани от наборите, които ги притежават (Прогноза, Изпълнение, Дълг, Разходи, Приходи)",
                      as_of=latest["asOf"], unit="млн. €"),
         "build": {"dataVersion": DATA_VERSION, "kfpLatest": latest["asOf"], "kfpMonths2026": latest["month"],

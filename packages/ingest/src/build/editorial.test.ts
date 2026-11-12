@@ -1,4 +1,3 @@
-import { launchTexts } from './launch-texts.test-support.js';
 import { readFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { expect, expectTypeOf, it } from 'vitest';
@@ -30,7 +29,7 @@ it('aligns navigation with injected routes after preserving the frozen snapshot'
     pattern: '/provereni-merki',
   });
   const actual = alignGuideLinks(guide, changed);
-  expect(actual).toEqual(launchTexts(json('guide-aligned-oracle.json')));
+  expect(actual).toEqual(json('guide-aligned-oracle.json'));
   expect(checkGuide(actual, changed)).toEqual([]);
   expect(alignGuideLinks(actual, changed)).toEqual(actual);
   expect(Buffer.from(restored['guide.json'])).toEqual(bytes('inputs/guide.json'));
@@ -45,27 +44,27 @@ it('matches the frozen Python oracle and the historical glossary transform', () 
   );
   differences.push(
     ...compare(
-      launchTexts(json('legacy-glossary.json')),
-      buildGlossary(launchTexts(json('inputs/glossary-source.json')), routes()),
+      json('legacy-glossary.json'),
+      buildGlossary(json('inputs/glossary-source.json'), routes()),
       { dataset: 'glossary', file: 'legacy-glossary.json' },
     ),
   );
   differences.push(
-    ...compare(launchTexts(json('guide-apply.json')), applyGuide(json('inputs/guide.json')), {
+    ...compare(json('guide-apply.json'), applyGuide(json('inputs/guide.json')), {
       dataset: 'guide',
       file: 'guide-apply.json',
     }),
   );
   differences.push(
     ...compare(
-      launchTexts(json('synthetic-guide-oracle.json')),
+      json('synthetic-guide-oracle.json'),
       buildRawGuide(bytes('inputs/synthetic-guide.txt').toString(), routes()),
       { dataset: 'guide', file: 'synthetic-guide.json' },
     ),
   );
   differences.push(
     ...compare(
-      launchTexts(json('synthetic-guide-crlf-oracle.json')),
+      json('synthetic-guide-crlf-oracle.json'),
       buildRawGuide(bytes('inputs/synthetic-guide-crlf.txt').toString('utf8'), routes()),
       { dataset: 'guide', file: 'synthetic-guide-crlf.json' },
     ),
@@ -87,16 +86,16 @@ it('matches the frozen Python oracle and the historical glossary transform', () 
 });
 it('rejects an unresolved href in the build', () => {
   const rs = routes().filter((r) => r.key !== 'prihodi');
-  expect(() => buildGlossary(launchTexts(json('inputs/glossary-source.json')), rs)).toThrow(/Unresolved/);
+  expect(() => buildGlossary(json('inputs/glossary-source.json'), rs)).toThrow(/Unresolved/);
   expect(() => restoreEditorial(snapshots(), rs)).toThrow();
 });
 it('rejects a missing term field', () => {
-  const src = launchTexts(json('inputs/glossary-source.json'));
+  const src = json('inputs/glossary-source.json');
   delete src.terms[0].def;
   expect(() => buildGlossary(src, routes())).toThrow();
 });
 it('rejects a duplicate slug', () => {
-  const src = launchTexts(json('inputs/glossary-source.json'));
+  const src = json('inputs/glossary-source.json');
   src.terms[1].slug = src.terms[0].slug;
   expect(() => buildGlossary(src, routes())).toThrow();
 });
@@ -107,7 +106,7 @@ it('rejects a changed input hash', () => {
 });
 
 it('normalizes CRLF and lone CR as Python text-mode reading does', () => {
-  const expected = launchTexts(json('synthetic-guide-crlf-oracle.json'));
+  const expected = json('synthetic-guide-crlf-oracle.json');
   const crlf = bytes('inputs/synthetic-guide-crlf.txt').toString('utf8');
   expect(crlf).toContain('\r\n');
   expect(buildRawGuide(crlf, routes())).toEqual(expected);

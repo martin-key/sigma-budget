@@ -796,7 +796,7 @@ export function buildSearch(input: SearchInput) {
     rows.add(
       'datasets',
       p.title,
-      `Без данни · ${first(p.reason)}`,
+      `Предстои · ${first(p.reason)}`,
       '',
       '',
       'pending',

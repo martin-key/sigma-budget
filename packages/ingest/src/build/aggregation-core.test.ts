@@ -1,11 +1,10 @@
-import { launchTexts } from './launch-texts.test-support.js';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { buildCore, zddTable, pendingFromExecution, type CoreInput } from './aggregation-core.js';
 import { executionNumbers } from './context.js';
 const root = resolve(import.meta.dirname, '../../test/fixtures/aggregation');
-const read = (name: string): any => launchTexts(JSON.parse(readFileSync(resolve(root, name), 'utf8')));
+const read = (name: string): any => JSON.parse(readFileSync(resolve(root, name), 'utf8'));
 const make = (): CoreInput => {
   const authored = read('authored.json');
   const upstream = (name: string) => read(`upstream/${name}.json`);

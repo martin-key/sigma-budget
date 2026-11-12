@@ -1,4 +1,3 @@
-import { launchTexts } from '../../build/launch-texts.test-support.js';
 import { createRequire } from 'node:module';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -46,7 +45,7 @@ describe('real monthly BIFF -> complete published execution contract', () => {
   it('rebuilds both entire published documents and their sparse law/provenance from all 33 originals', () => {
     const result = build();
     expect(result.execution).toEqual(
-      launchTexts(JSON.parse(readFileSync(join(root, 'data/release/execution.json'), 'utf8'))),
+      JSON.parse(readFileSync(join(root, 'data/release/execution.json'), 'utf8')),
     );
     expect(result.provenance).toEqual(
       JSON.parse(readFileSync(join(root, 'data/release/execution-provenance.json'), 'utf8')),

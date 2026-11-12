@@ -397,7 +397,7 @@ def _datasets(ctx, rows):
         rows.add("datasets", d["title"], "%s · %s" % (groups[d["group"]], _DS_STATUS[st]), "", s.get("period", ""), status=st,
                  href="#/danni/%s" % d["slug"], kw=s.get("kw") or _words(d["slug"].replace("-", " "), *ids, d["file"].rsplit("/", 1)[-1]))
     for pid, p in sorted(PENDING_DEFS.items()):
-        rows.add("datasets", p["title"], 'Без данни · %s' % _first_sentence(p["reason"]), "", "", status="pending", href="#/danni/%s" % pid.lower(),
+        rows.add("datasets", p["title"], "Предстои · %s" % _first_sentence(p["reason"]), "", "", status="pending", href="#/danni/%s" % pid.lower(),
                  kw=_words(pid, p["expected"]))
     # mock rows: every title says "примерен"; the client hides them under "Само реални данни"
     pr = _obj(ctx, "mock/projects.json", optional=True)

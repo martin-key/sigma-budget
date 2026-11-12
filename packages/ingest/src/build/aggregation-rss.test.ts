@@ -1,4 +1,3 @@
-import { launchTexts } from './launch-texts.test-support.js';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -21,12 +20,11 @@ describe('RSS donor serializer', () => {
       const oracle = JSON.parse(readFileSync(join(fixture, 'oracle', `${name}.json`), 'utf8')) as {
         xml: string;
       };
-      expect(Buffer.from(xml)).toEqual(Buffer.from(launchTexts(oracle.xml)));
+      expect(Buffer.from(xml)).toEqual(Buffer.from(oracle.xml));
       const dir = mkdtempSync(join(tmpdir(), 'rss-parity-'));
       try {
         const file = join(dir, 'candidate.xml');
-        // The Python donor retains the historical channel description. Compare all other semantics exactly.
-        writeFileSync(file, xml.replace('Данни от официални източници.', 'Прототип с примерни данни, където е отбелязано.'));
+        writeFileSync(file, xml);
         const python = process.env.PYTHON312 || 'python3.12';
         const result = spawnSync(
           python,

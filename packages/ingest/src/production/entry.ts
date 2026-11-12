@@ -4,6 +4,7 @@ import { join, dirname } from 'node:path';
 import { runGraph } from '../build/graph.js';
 import { wave13bStages } from '../build/wave13b.js';
 import type { ExecutionContext, ExecutorResult } from '../release-build/types.js';
+import { reviseLaunchTexts } from './launch-texts.js';
 import { loadProduction } from './loader.js';
 import { validateProduction } from './validation.js';
 /** This is the committed entry loaded by the offline exported-code compiler. */
@@ -34,7 +35,7 @@ export async function executeRelease(context: Readonly<ExecutionContext>): Promi
     }),
   );
   context = Object.freeze({ ...context, generatedIntermediates });
-  const graph = runGraph(wave13bStages(prepared.input));
+  const graph = runGraph(reviseLaunchTexts(wave13bStages(prepared.input)));
   const failed = graph.states.filter((s) => s.status !== 'success');
   if (failed.length) throw new Error('Production graph failed: ' + JSON.stringify(failed));
   const publication = graph.outputs.get('publication-layers') as {

@@ -62,6 +62,19 @@ function substitute(
   if (i !== values.length) throw new Error('Unexpected editorial value');
   return { ...row, text, related: [...row.related] };
 }
+/**
+ * The authored access text decides what it cites. The historical text (kept in the frozen catalog evidence) names the
+ * blocked sites, the probe date and the last month; the launch text names only the last month.
+ */
+function accessValues(
+  row: CatalogEditorialRow | undefined,
+  [sites, checked, month]: readonly [string, string, string],
+): readonly string[] {
+  const slots = row?.text.match(/%[sd]/g)?.length ?? 0;
+  if (slots === 1) return [month];
+  if (slots === 3) return [sites, checked, month];
+  throw new Error('Unexpected access editorial placeholders');
+}
 export function catalogEditorial(input: CatalogEditorialInput): {
   traps: Record<string, unknown>[];
   methodology: Record<string, unknown>[];
@@ -135,9 +148,11 @@ export function catalogEditorial(input: CatalogEditorialInput): {
       formatMoney(number(outlook.kfp.expenditure.mln[index])),
     ]),
     {
-      ...substitute(trap.get('access'), [
+      ...substitute(trap.get('access'), accessValues(trap.get('access'), [
+        listAnd(blocked),
+        formatDate(bad[0]!.checked, true),
         monthName(input.execution.latest.month),
-      ]),
+      ])),
       evidence: probes,
     },
     substitute(trap.get('two-versions'), [

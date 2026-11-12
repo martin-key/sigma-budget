@@ -129,15 +129,6 @@ export function projectAggregation(input: ScopeLayersInput): Aggregation {
 /** The source glue also extends a historical 64-term glossary, when needed. */
 export function glossarySourceGlue(glossary: any, terms: readonly any[]): any {
   const result = structuredClone(glossary);
-  result.meta.sourceNote = "Речник на СИГМА Бюджет с 64 термина: определенията, примерите и свързаните понятия са дословно от документа; връзките „Виж в бюджета“ са към екраните на този сайт. Числата в примерите са условни. Допълнителни 5 термина (от 65 до 69) са добавени за екрана „Бюджет 2027 (проект)“ и не са от този документ.";
-  for (const term of result.terms) {
-    term.def = term.def.replaceAll("още не е окончателно прието", "не е окончателно прието");
-    term.example = term.example.replaceAll("още не е окончателно прието", "не е окончателно прието");
-    term.def = term.def.replaceAll("Строителството и плащанията тепърва предстоят.", "Одобрената сума е разрешение за разход, а не извършено плащане.");
-    term.example = term.example.replaceAll("Строителството и плащанията тепърва предстоят.", "Одобрената сума е разрешение за разход, а не извършено плащане.");
-    term.def = term.def.replaceAll("Той още не е приет.", "Той не е приет.");
-    term.example = term.example.replaceAll("Той още не е приет.", "Той не е приет.");
-  }
   if (result.terms.some((term: any) => term.slug === 'ess-2010')) return result;
   const existing = new Set<string>(result.terms.map((term: any) => term.slug));
   const added = new Set<string>(terms.map((term) => term.slug));
@@ -159,7 +150,7 @@ export function glossarySourceGlue(glossary: any, terms: readonly any[]): any {
     throw new Error('unexpected glossary count or numbering');
   result.subtitle = '69 основни термина с обяснения и практически примери';
   result.meta.sourceNote =
-    'Речник на СИГМА Бюджет с 64 термина: определенията, примерите и свързаните понятия са дословно от документа; връзките „Виж в бюджета“ са към екраните на този сайт. Числата в примерите са условни. Допълнителни 5 термина (от 65 до 69) са добавени за екрана „Бюджет 2027 (проект)“ и не са от този документ.';
+    'Речник с 64 термина на работна група „Бюджет на светло“: определенията, примерите и свързаните понятия са дословно от документа; връзките „Виж в бюджета“ са към екраните на този сайт. Числата в примерите са условни. Още 5 термина (от 65 до 69) са добавени за екрана „Бюджет 2027 (проект)“ и не са от този документ.';
   result.meta.retrieved = '2026-10-16';
   return result;
 }

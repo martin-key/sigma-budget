@@ -1,4 +1,3 @@
-import { launchTexts } from './launch-texts.test-support.js';
 import { createHash } from 'node:crypto';
 import { mkdirSync, readFileSync, writeFileSync, mkdtempSync, cpSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -15,7 +14,7 @@ import {
 } from './programmes.js';
 import { compare } from '../parity/compare.js';
 const root = resolve(import.meta.dirname, '../../test/fixtures/programmes');
-const read = (path: string) => launchTexts(JSON.parse(readFileSync(resolve(root, path), 'utf8')));
+const read = (path: string) => JSON.parse(readFileSync(resolve(root, path), 'utf8'));
 const evidence = () => ({
   source: read('inputs/program-budgets.json'),
   law: read('inputs/law-cache.json'),

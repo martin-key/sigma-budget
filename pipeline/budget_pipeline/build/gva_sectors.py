@@ -86,7 +86,7 @@ def main(argv):
     doc = {
         "meta": {
             "id": "D31", "title": "Икономиката по отрасли: добавена стойност и БВП 2019–2025", "status": "real", "source": ["eurostat"],
-            "sourceNote": 'Евростат, национални сметки (набори nama_10_a10 и nama_10_gdp), България, текущи цени, млн. €. Евростат публикува данните на НСИ.',
+            "sourceNote": "Евростат, национални сметки (набори nama_10_a10 и nama_10_gdp), България, текущи цени, млн. €. Евростат публикува данните на НСИ; сайтът на НСИ не се отваря за автоматични заявки.",
             "asOf": as_of, "retrieved": "2026-10-09", "unit": "млн. €", "mock": False,
             "provisionalYears": prov,
             "links": {"nama_10_a10": "https://ec.europa.eu/eurostat/databrowser/view/nama_10_a10/default/table?lang=en&geo=BG",
