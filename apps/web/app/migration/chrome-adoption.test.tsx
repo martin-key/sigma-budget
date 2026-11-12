@@ -28,6 +28,10 @@ const frozen = readFileSync(new NodeURL('../routes/__fixtures__/S26.html', impor
   .replace(/<span class="badge-mock"[^>]*>[\s\S]*?<\/span>/, '')
   .replace(/<span class="theme-pick"[\s\S]*?<\/span>/, '')
   .replace(/(<div[^>]*id="mockbar"[^>]*>)[\s\S]*?<\/div>/, '$1</div>') // Historical fixture is unchanged; the retired banner now has no children.
+  .replace(
+    /<svg class="brand-mark"[\s\S]*?<\/svg><span class="brand-name">СИГМА Бюджет<\/span>/,
+    '<img class="brand-logo" src="/sigma-logo.svg" alt="" width="523" height="115"><span class="brand-name">Бюджет</span>',
+  ) // The header now shows the СИГМА logo followed by «Бюджет».
   .replace(/<span>Лиценз на данните: предстои решение\.<\/span>/, '') // the data have no separate licence
   .replace(/<p class="small muted">Работна група „Бюджет на светло“<\/p>/, ''); // the footer no longer names the group
 const hydrate = vi.mocked(client.hydrateRoot);

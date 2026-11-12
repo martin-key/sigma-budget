@@ -14,16 +14,10 @@ import { date } from '../../lib/legacy';
 import { serverScope } from '../../lib/legacy';
 import { toHref } from '../../../client/loc.js';
 
-export const MARK = (
-  <>
-    <svg className="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-      <rect x="3" y="18" width="6" height="11" fill="var(--ink)" />
-      <rect x="12.5" y="12" width="6" height="17" fill="var(--ink)" />
-      <rect x="22" y="6" width="6" height="23" fill="var(--ink)" />
-      <rect x="2" y="29.5" width="28" height="1.5" fill="var(--ink)" />
-      <circle cx="25" cy="2.6" r="2.4" fill="var(--crimson)" />
-    </svg>
-  </>
+// The СИГМА logo (the file of the СИГМА project, unchanged) and then «Бюджет» in the site serif: together «СИГМА Бюджет». The link carries the name
+// (aria-label), so the image is decorative; width/height give its proportions before it loads.
+export const LOGO = (
+  <img className="brand-logo" src="/sigma-logo.svg" alt="" width={523} height={115} />
 );
 export const yearOf = (p: Period) => p.label.split(' · ')[0];
 export const statusOf = (p: Period) => p.label.split(' · ')[1] || '';
@@ -138,8 +132,8 @@ export function topbarHtml(
       ) : null}
       <div className="mast-in">
         <a className="brand" href={routeHref('S01')} aria-label="СИГМА Бюджет, към началото">
-          {MARK}
-          <span className="brand-name">СИГМА Бюджет</span>
+          {LOGO}
+          <span className="brand-name">Бюджет</span>
         </a>
         <div className="topbar-tools">
           <button
