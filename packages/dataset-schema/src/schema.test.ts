@@ -18,7 +18,7 @@ describe('published contracts', () => {
     .map((e) => relative(root, `${e.parentPath}/${e.name}`))
     .sort();
   it('covers exactly the published file inventory', () => {
-    const historical = /^releases\/[a-f0-9]{64}\/(manifest|validation)\.json$/;
+    const historical = /^releases\/[a-f0-9]{64}\/(manifest|validation|receipt)\.json$/;
     expect(files.filter((n) => !historical.test(n))).toEqual(
       Object.keys(datasetGuards)
         .filter((n) => !historical.test(n))
@@ -41,6 +41,13 @@ describe('published contracts', () => {
       if (/^releases\/[a-f0-9]{64}\//.test(name))
         expect(isPublishedDataset(name, JSON.parse(readFileSync(root + name, 'utf8')))).toBe(true);
     }
+  });
+  it('rejects a build receipt with another schema or release identity', () => {
+    const name = files.find((n) => /^releases\/[a-f0-9]{64}\/receipt\.json$/.test(n))!;
+    const receipt = JSON.parse(readFileSync(root + name, 'utf8'));
+    expect(isPublishedDataset(name, receipt)).toBe(true);
+    expect(isPublishedDataset(name, { ...receipt, schema: 'python-release-build/1' })).toBe(false);
+    expect(isPublishedDataset(name, { ...receipt, release_id: 'current' })).toBe(false);
   });
   it('rejects bad decimal encodings', () => {
     for (const v of ['01', '1e3', 'NaN', '-0', '-0.00', 1, null, '+1', '.1'])

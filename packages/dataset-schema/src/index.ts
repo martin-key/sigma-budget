@@ -13,6 +13,7 @@ import {
   metaGuard,
   releasePointerGuard,
   releaseManifestGuard,
+  releaseReceiptGuard,
   mapOf,
   executionColumnsGuard,
   executionPlanGuard,
@@ -441,7 +442,9 @@ export function isDataset<K extends DatasetName>(name: K, value: unknown): value
       ? releaseManifestGuard
       : /^releases\/[a-f0-9]{64}\/validation\.json$/.test(name)
         ? shape({ groups: array, passed: boolean, result: string, tool: string })
-        : undefined);
+        : /^releases\/[a-f0-9]{64}\/receipt\.json$/.test(name)
+          ? releaseReceiptGuard
+          : undefined);
   return (
     !!guard &&
     guard(value) &&
@@ -457,5 +460,6 @@ export function isPublishedDataset(name: string, value: unknown): boolean {
   if (/^releases\/[a-f0-9]{64}\/manifest\.json$/.test(name)) return releaseManifestGuard(value);
   if (/^releases\/[a-f0-9]{64}\/validation\.json$/.test(name))
     return shape({ groups: array, passed: boolean, result: string, tool: string })(value);
+  if (/^releases\/[a-f0-9]{64}\/receipt\.json$/.test(name)) return releaseReceiptGuard(value);
   return Object.hasOwn(datasetGuards, name) && isDataset(name as DatasetName, value);
 }

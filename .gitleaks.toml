@@ -34,3 +34,10 @@ condition = "AND"
 paths = ['''packages/ingest/test/fixtures/validate15/oracle\.json$''']
 regexTarget = "secret"
 regexes = ['''^(annex3ExpenditureMln|discretionary2026)$''']
+
+[[rules.allowlists]]
+description = "Reviewed 2026-11-12: SHA-256 of the locked esbuild API file (compiler identity apiSha256) in release manifests; exact value only."
+condition = "AND"
+paths = ['''data/release/releases/[a-f0-9]{64}/manifest\.json$''']
+regexTarget = "secret"
+regexes = ['''^61ec0ba144ff93f4bf0e96ad6fab6f430ede0aa13e27ace8063ed63ba416b3cd$''']
