@@ -1,27 +1,31 @@
 // Feedback box. The forms of S03 („Още не разбирам“) and S27 (three forms) keep what a visitor sent in this browser, through `safe`
 // (localStorage, key bns.feedback.v1; in memory until reload when storage is blocked), and prepare an e-mail to the team: mailto(rec).
 // The site has no server that receives messages: the visitor sends the e-mail from their own mail app, to <meta name="feedback-email">.
-// Without that address the forms only keep the message here and say so (TO is '').
+// Without that address the forms only keep the message here and say so (to() is '').
 //   add({type, text, ...context})  -> the stored record (always returns one; `persisted` says whether it reached localStorage)
 //   list()                         -> records, newest first
 //   clear()                        -> forget them all
 //   mailto(rec)                    -> 'mailto:…' with the message and its context, or '' without an address
-//   SEND                           -> the label of the submit button: without an address nothing is sent, so it says where the message goes
-//   SENT                           -> the one success sentence (PLAN S27)
-//   TO                             -> the team's address (<meta name="feedback-email">), or ''
+//   send()                         -> the label of the submit button: without an address nothing is sent, so it says where the message goes
+//   sent()                         -> the one success sentence (PLAN S27)
+//   to()                           -> the team's address (the server's FEEDBACK_EMAIL or <meta name="feedback-email">), or ''
 //   TYPES                          -> {error, unclear, idea} -> visible form names
 import { safe } from './store.js';
+import { serverScope } from './env.js';
 
 export const KEY = 'bns.feedback.v1';
-export const TO = (
-  (typeof document !== 'undefined' &&
-    document.querySelector('meta[name="feedback-email"]')?.content) ||
-  ''
-).trim();
-export const SEND = TO ? 'Изпрати' : 'Запази в този браузър';
-export const SENT = TO
-  ? 'Благодарим. Остава да изпратиш имейла.'
-  : 'Благодарим. Записахме го в този браузър.';
+/** the team's address: the server request's FEEDBACK_EMAIL when drawn on the server, else <meta name="feedback-email">; '' without one */
+export const to = () =>
+  String(
+    serverScope()?.feedbackEmail ??
+      (typeof document === 'undefined'
+        ? ''
+        : document.querySelector('meta[name="feedback-email"]')?.content) ??
+      '',
+  ).trim();
+export const send = () => (to() ? 'Изпрати' : 'Запази в този браузър');
+export const sent = () =>
+  to() ? 'Благодарим. Остава да изпратиш имейла.' : 'Благодарим. Записахме го в този браузър.';
 export const TYPES = { error: 'Намерих грешка', unclear: 'Още не разбирам', idea: 'Предложи идея' };
 export const MAX_TEXT = 1000;
 
@@ -87,6 +91,7 @@ const LABEL = {
 };
 /** the e-mail the visitor sends from their own mail app: subject „[СИГМА Бюджет] <form>“, the text, then the context lines and the page */
 export function mailto(rec) {
+  const TO = to();
   if (!TO || !rec) return '';
   const lines = [
     rec.text,

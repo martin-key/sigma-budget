@@ -678,16 +678,16 @@ function missingBlock(ctx, f) {
   const available = (m) => publication && ['zdbrb', 'asbp'].includes(m.id);
   return block({
     id: 's34-lipsva',
-    title: 'Какво липсва в този документ',
+    title: 'Обхват на документа',
     scope: 'esa',
-    status: 'pending',
-    statusLabel: 'Липсва · не е потвърдено',
+    status: 'partial',
+    statusLabel: 'Обхват на бюджетния план',
     asOf: f.asOf,
     source: ['dbp2027', 'ec-dbp'],
     sub: 'Ограничения на проекта на бюджетен план до ЕК от 15.10.2026.',
     share: false,
     body: html`<div class="stack">
-      ${facts((d.missing || []).map((m) => ({ k: m.title, v: available(m) ? `Не е част от този документ. Публикуваният от МФ на ${date(publication)} документ вече е добавен към портала.` : m.text })))}
+      ${facts((d.missing || []).filter((m) => m.id !== 'ec').map((m) => ({ k: m.title, v: available(m) ? `Не е част от този документ. Публикуваният от МФ на ${date(publication)} документ вече е добавен към портала.` : m.text })))}
       ${publication ? html`<p class="s34-note">Законопроектът и АСБП 2027–2029, публикувани на ${date(publication)}, са в <a href="${ctx.href('S34', {}, { dokument: 'bill' })}">основния изглед за бюджет 2027</a>. Числата тук остават от отделния проект на бюджетен план до ЕК.</p>` : html`<p class="s34-note">Описанието е според проверката на проекта на бюджетен план и страниците на Комисията към датата му.</p>`}
     </div>`,
   });

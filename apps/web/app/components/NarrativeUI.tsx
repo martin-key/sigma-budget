@@ -210,7 +210,7 @@ export function kpi(o: KpiOptions, unit = 'eur') {
         )}
       </p>
       <p className="kpi-value">
-        <span className="kpi-num">{pending ? 'Предстои' : p.v}</span>
+        <span className="kpi-num">{pending ? 'Няма данни' : p.v}</span>
         {!pending && p.u ? <span className="kpi-unit">{p.u}</span> : null}
       </p>
       {o.sub ? <p className="kpi-sub">{o.sub}</p> : null}
@@ -284,27 +284,15 @@ export function pendingState(
   const p = core.pending?.[o.id || ''] as
     | { title?: string; reason?: string; expected?: string; source?: string[] }
     | undefined;
-  const publishers = [
-    ...new Set(
-      (o.source || p?.source || []).map((k) => core.sources?.[k]?.publisher).filter(Boolean),
-    ),
-  ].join(', ');
   return (
     <div className="state state-pending" data-state="pending" data-pending-id={o.id}>
       <span className="state-ic">{icon('dashed', { size: 28 })}</span>
       <div className="state-main">
-        <p className="state-kicker">Предстои</p>
+        <p className="state-kicker">Няма данни</p>
         {o.title || p?.title ? <p className="state-title">{o.title || p?.title}</p> : null}
         <p className="state-text">
-          {o.text ||
-            (publishers
-              ? `Данните съществуват при ${publishers}, още не са извлечени.`
-              : 'Данните съществуват при издателя, още не са извлечени.')}
+          Не показваме число без налични официални данни за този показател.
         </p>
-        {p?.reason ? <p className="state-text small">{p.reason}</p> : null}
-        {o.expected || p?.expected ? (
-          <p className="state-text small muted">Къде да ги видиш: {o.expected || p?.expected}</p>
-        ) : null}
       </div>
     </div>
   );

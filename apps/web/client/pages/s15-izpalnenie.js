@@ -15,7 +15,7 @@ import { seg } from '../ui/seg.js';
 import { field, selectInput } from '../ui/forms.js';
 import { dataTable } from '../ui/table.js';
 import { chart } from '../ui/chart.js';
-import { emptyState, pendingState } from '../ui/states.js';
+import { emptyState } from '../ui/states.js';
 import { gl } from '../ui/gl.js';
 import { disclosure } from '../ui/disclosure.js';
 import { planBlock } from '../ui/plan.js';
@@ -33,7 +33,6 @@ import {
   MODES,
   REV_ROWS,
   EXP_ROWS,
-  EARLIEST_REPORT,
   fin,
   pctChange,
   mlrd,
@@ -165,9 +164,9 @@ function monthOptions(C) {
   const later = new Set(C.pendingMonths.filter((m) => m > C.maxM));
   [...later]
     .sort((a, b) => a - b)
-    .forEach((m) => out.push({ value: String(m), label: `${cap1(monthName(m))} (предстои)` }));
+    .forEach((m) => out.push({ value: String(m), label: `${cap1(monthName(m))} (няма отчет)` }));
   if (C.month > C.maxM && !later.has(C.month))
-    out.push({ value: String(C.month), label: `${cap1(monthName(C.month))} (предстои)` });
+    out.push({ value: String(C.month), label: `${cap1(monthName(C.month))} (няма отчет)` });
   return out;
 }
 
@@ -272,14 +271,6 @@ function problemFrame(C) {
       text: `И двете години са ${C.g1} г. Избери две различни години, за да видиш разликите.`,
       action,
     });
-  const early = C.bad.every((y) => typeof y === 'number' && y >= EARLIEST_REPORT && y < C.years[0]);
-  if (early)
-    return pendingState({
-      id: 'P05',
-      title: `Месечните отчети за ${joinBg(C.bad)} г. предстоят`,
-      text: `Още не са добавени. Сега има отчети за ${joinBg(C.years)} г.`,
-      action,
-    });
   return emptyState({
     title: `Няма данни за ${joinBg(C.bad.map(yearWord))}`,
     text: `Има месечни отчети за ${joinBg(C.years)} г. Избери година от тях.`,
@@ -308,7 +299,7 @@ function valueCell(C, y, id, v) {
   if (fin(v))
     return html`<span class="s15-n">${B(v)}</span>${levLine(v)}${id === 'balance' ? html`<span class="s15-sub">${balanceWord(v)}</span>` : ''}`;
   const n = y === C.g1 ? C.n1 : C.n2;
-  return html`<span class="muted" aria-hidden="true">${DASH}</span><span class="s15-sub">${C.month > n ? 'предстои' : 'няма данни'}</span><span class="sr-only">${C.month > n ? 'отчетът предстои' : 'няма данни'}</span>`;
+  return html`<span class="muted" aria-hidden="true">${DASH}</span><span class="s15-sub">${C.month > n ? 'няма отчет' : 'няма данни'}</span><span class="sr-only">${C.month > n ? 'няма отчет за този месец' : 'няма данни'}</span>`;
 }
 
 function balanceNote(a, b) {
@@ -406,12 +397,6 @@ export function compareBlock(C) {
   ]
     .filter(Boolean)
     .join(' ');
-  const wait = C.missing
-    .map(
-      (y) =>
-        `За ${y} г. отчетът за ${mon} предстои${y === C.g2 ? ` (последният е към ${dayOf(C.asOfOf(y, (y === C.g1 ? C.n1 : C.n2) - 1))} ${y} г.)` : ''}.`,
-    )
-    .join(' ');
   share.attach('s15-b-grid', { table: () => csvTable(C) });
   return block({
     id: 's15-b-grid',
@@ -428,7 +413,7 @@ export function compareBlock(C) {
       link: linkOf(C),
       period: `${periodOf(C)} · млрд. €`,
     },
-    body: html`${gridTable(C)}${wait ? html`<p class="s15-wait small">${wait}</p>` : ''}${summaryText(C) ? html`<p class="s15-words"><strong>Накратко.</strong> ${summaryText(C)}</p>` : ''}<p class="table-note small muted">${note}</p>`,
+    body: html`${gridTable(C)}${summaryText(C) ? html`<p class="s15-words"><strong>Накратко.</strong> ${summaryText(C)}</p>` : ''}<p class="table-note small muted">${note}</p>`,
   });
 }
 
@@ -630,9 +615,6 @@ function expertBlock(C) {
 /* ------------------------------------------------------------------ how the numbers are made */
 export function methodDisclosure(C) {
   const conv = C.years.filter((y) => C.ex.data[String(y)] && C.ex.data[String(y)].converted);
-  const first = C.years[0];
-  const before =
-    first - 1 > EARLIEST_REPORT ? `${EARLIEST_REPORT}${DASH}${first - 1}` : String(first - 1);
   const dec = C.ex.reconcile && C.ex.reconcile.dec2024VsAnnex3;
   return disclosure({
     id: 's15-method',
@@ -645,7 +627,7 @@ export function methodDisclosure(C) {
       ${conv.length ? html`<li>Отчетите за ${joinBg(conv)} г. са били в лева. Превърнали сме ги в евро по фиксирания курс ${num(EUR_RATE, 5)} лв. за 1 €.</li>` : ''}
       ${dec ? html`<li>Декемврийският месечен отчет за 2024 г. се различава малко от Приложение 3 към Закона за 2026 г. (например приходите с 8,2 млн. €); показваме отчета.</li>` : ''}
       <li>Процентите се смятат от точните числа, не от закръглените. Процент не се смята, когато числото за по-ранната година е нула или под нулата.</li>
-      <li>Сравняваме със същия период на предходната година. Отчетите за ${before} г. предстоят.</li>
+      <li>Сравняваме със същия период на предходната година.</li>
     </ul>`,
   });
 }
@@ -973,13 +955,6 @@ export function byudzhetiView(C) {
     budgetsBlock(C.ctx),
     c ? otherDisclosure(C.ctx, c) : '',
     natEuBlock(C),
-    block({
-      id: 's15-b-monthly-components',
-      level: 2,
-      title: 'Изпълнение по съставни бюджети',
-      status: 'pending',
-      pending: 'P02',
-    }),
     c ? notesDisclosure(c) : '',
   ]}`;
 }

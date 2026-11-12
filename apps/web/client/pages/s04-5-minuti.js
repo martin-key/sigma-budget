@@ -626,7 +626,6 @@ function scene6(ctx, core) {
     paceExp = pace?.['exp.total']?.[mi];
   const asOf = k.asOf,
     mon = ok(k.month) ? monthName(k.month) : '';
-  const next = core.pending?.P04 && core.build?.kfpNext ? date(core.build.kfpNext) : '';
   const balShare = null;
   const yoy = ok(r.yoyPct) && ok(e.yoyPct);
   const text = html`
@@ -673,7 +672,7 @@ function scene6(ctx, core) {
     });
   const visual = html`<figure class="s04-fig" data-attach="${id}">
     <div class="s04-bars">${row('Приходи', 'rev', r, paceRev, 'rev')}${row('Разходи', 'exp', e, paceExp, 'exp.total')}</div>
-    <figcaption class="s04-cap">${basis.citation}. Изпълнение на плана към ${date(asOf, true)}. ${ok(paceRev) && ok(paceExp) ? ' Чертата: делът от 2025 г. до същия месец.' : ''}${next ? ` Отчетът към ${next} още не е добавен.` : ''}</figcaption>
+    <figcaption class="s04-cap">${basis.citation}. Изпълнение на плана към ${date(asOf, true)}. ${ok(paceRev) && ok(paceExp) ? ' Чертата: делът от 2025 г. до същия месец.' : ''}</figcaption>
   </figure>`;
   const deep = deeper(ctx, 6, 6, [
     {

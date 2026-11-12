@@ -52,7 +52,7 @@ for (const per of ['2026.law']) {
     const debt = [...document.querySelectorAll('#s13-kpis .kpi')].find((tile) =>
       tile.textContent?.includes('Държавен дълг'),
     );
-    expect(debt?.querySelector('.kpi-num')?.textContent).toBe('Предстои');
+    expect(debt?.querySelector('.kpi-num')?.textContent).toBe('Няма данни');
     expect(debt?.textContent).toContain('Няма съпоставими данни за дълга за избрания период.');
   });
 }

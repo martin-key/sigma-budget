@@ -14,7 +14,7 @@ import { data } from './data.js';
 import { serverScope } from './env.js';
 
 const SITE = 'СИГМА Бюджет';
-const ORG = 'Работна група „Бюджет на светло“';
+const ORG = 'СИГМА Бюджет';
 const MAXD = 160;
 const origin = () =>
   (
@@ -155,7 +155,6 @@ function graph(vm, { url, title, desc, question, answer }) {
       '@type': 'Organization',
       '@id': home + '#org',
       name: ORG,
-      alternateName: SITE,
       url: home,
       logo: { '@type': 'ImageObject', url: o + '/icon-512.png', width: 512, height: 512 },
     },

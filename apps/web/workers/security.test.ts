@@ -264,7 +264,8 @@ describe('SECURITY-09 release rate limit', () => {
     expect(new Set(namespaces).size).toBe(2);
     expect(config.name).toBe('sigma-budget');
     expect(config.vars.ENVIRONMENT).toBe('production');
-    expect(config.vars.SITE_ORIGIN).toBe('https://sigma-budget.my-data.bg');
+    expect(config.vars.SITE_ORIGIN).toBe('https://sigma-budget.midt.bg');
+    expect(config.vars.FEEDBACK_EMAIL).toBe('contact@midt.government.bg');
     expect(config.vars.NOINDEX).toBe('');
     expect(config.d1_databases[0].database_name).toBe('sigma-budget-registry');
     expect(config.r2_buckets[0].bucket_name).toBe('sigma-budget-objects');

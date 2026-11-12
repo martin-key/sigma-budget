@@ -17,7 +17,6 @@ import { seg } from '../ui/seg.js';
 import { dataTable, tableData } from '../ui/table.js';
 import { tabs } from '../ui/tabs.js';
 import { unitSwitch, bindUnitSwitch } from '../ui/unit-switch.js';
-import { pendingState } from '../ui/states.js';
 import { moneyCol, change } from '../view.js';
 import * as M from '../muni.js';
 
@@ -151,16 +150,6 @@ function amt(ctx, v, d = 1, sign = false) {
     ? `${eur} (≈${NBSP}${num(v * EUR_RATE, d, { sign })}${NBSP}млн.${NBSP}лв.)`
     : eur;
 }
-const pendingBlock = (id, title, text, o = {}) =>
-  block({
-    id,
-    title,
-    status: 'pending',
-    scope: o.scope,
-    source: o.source,
-    body: pendingState({ title, text, source: o.source }),
-  });
-
 /* ------------------------------------------------------------------ the query */
 function ctl(ctx) {
   const q = ctx.query || {};
@@ -183,7 +172,7 @@ function ctl(ctx) {
   };
 }
 
-/* ------------------------------------------------------------------ models (null = the data is not there: the block says „Предстои“) */
+/* ------------------------------------------------------------------ models (null = the ranking is omitted) */
 /** the nine functions and their 26 lines (the parts of a function; a function without parts is one line), 2025 „Програма“ → 2026 „Проект“ */
 function fnModel(ctx) {
   const F = ctx.data.expenditure && ctx.data.expenditure.functions;
@@ -451,15 +440,13 @@ function rankBox(o) {
     body: list,
   });
 }
-const pendingPair = (ids, titles, text, o) =>
-  pair(pendingBlock(ids[0], titles[0], text, o), pendingBlock(ids[1], titles[1], text, o));
 
 /* 1 · functions and lines of the expenditure */
 function fnBlocks(ctx, C, FM) {
   const o = { scope: 'kfp', source: ['asbp'] };
   const ids = ['s19-b-funkcii', 's19-b-pera'],
     T = ['Най-големите функции на разходите', 'Най-големите пера в разходите'];
-  if (!FM) return pendingPair(ids, T, 'Разходите по функции предстоят.', o);
+  if (!FM) return '';
   const tot = FM.fns.reduce((t, x) => t + x.v, 0);
   const base = {
     ...o,
@@ -508,7 +495,7 @@ function growthBlocks(ctx, C, FM) {
   const o = { scope: 'kfp', source: ['asbp'] };
   const ids = ['s19-b-rast', 's19-b-spad'],
     T = ['Най-голям ръст спрямо 2025 г.', 'Най-голямо намаление спрямо 2025 г.'];
-  if (!FM) return pendingPair(ids, T, 'Разходите по функции предстоят.', o);
+  if (!FM) return '';
   const rows = FM.lines
     .filter((x) => fin(x.p))
     .map((x) => {
@@ -569,7 +556,7 @@ function minBlock(ctx, C, MM) {
   const id = 's19-b-vedomstva',
     title = 'Най-големите бюджети на ведомствата';
   const o = { scope: SCOPE_MIN, source: ['zdb', 'bill', 'prb'] };
-  if (!MM) return pendingBlock(id, title, 'Бюджетите на ведомствата предстоят.', o);
+  if (!MM) return '';
   const list = [...MM.items].sort(bigFirst).slice(0, C.n);
   const star = list.some((m) => m.change && m.change.basis === 'program-budget');
   return rankBox({
@@ -598,7 +585,7 @@ function progBlock(ctx, C, PM) {
   const id = 's19-b-programi',
     title = 'Най-големите програми';
   const o = { scope: SCOPE_PRG, source: ['prb', 'zdb'] };
-  if (!PM) return pendingBlock(id, title, 'Програмите на ведомствата предстоят.', o);
+  if (!PM) return '';
   const list = [...PM.rows].sort(bigFirst).slice(0, C.n);
   return rankBox({
     ...o,
@@ -623,7 +610,7 @@ function measBlocks(ctx, C, MS) {
   const o = { scope: SCOPE_MER, source: ['asbp', 'bill'] };
   const ids = ['s19-b-merki-plus', 's19-b-merki-minus'],
     T = ['Мерки, които носят най-много пари', 'Мерки, които струват най-много пари'];
-  if (!MS) return pendingPair(ids, T, 'Мерките в бюджета предстоят.', o);
+  if (!MS) return '';
   const max = Math.max(
     0,
     MS.plus[0] ? MS.plus[0].eff : 0,
@@ -672,7 +659,7 @@ function taxBlock(ctx, C, TX) {
   const id = 's19-b-danaci',
     title = 'Най-големите данъци и осигуровки';
   const o = { scope: 'kfp', source: ['asbp'] };
-  if (!TX) return pendingBlock(id, title, 'Приходите по източници предстоят.', o);
+  if (!TX) return '';
   const list = [...TX.items].sort(bigFirst).slice(0, C.n);
   return rankBox({
     ...o,
@@ -698,7 +685,7 @@ function munBlocks(ctx, C, MU) {
   const o = { scope: 'nat', source: ['zdb', 'eurostat'] };
   const ids = ['s19-b-obshtini-max', 's19-b-obshtini-min'],
     T = ['Общини с най-много пари на жител', 'Общини с най-малко пари на жител'];
-  if (!MU) return pendingPair(ids, T, 'Данните за общините предстоят.', o);
+  if (!MU) return '';
   const n = Math.min(C.n, Math.floor(MU.per.length / 2)),
     lv = ctx.store.get('leva'),
     max = M.pcOf(MU.per[0]);
@@ -729,7 +716,7 @@ function lagBlock(ctx, C, LG) {
   const id = 's19-b-izostavashti',
     title = 'Пера, които изостават от хода на 2025 г.';
   const o = { scope: 'kfp', source: ['kfp', 'asbp'] };
-  if (!LG) return pendingBlock(id, title, 'Месечният отчет за 2026 г. още не е зареден.', o);
+  if (!LG) return '';
   const list = LG.rows
     .filter((r) => r.diff !== null && r.diff < 0)
     .sort((a, b) => a.diff - b.diff || bgc(a.name, b.name))
@@ -1001,8 +988,7 @@ function godiniPanel(ctx, C, K, FM) {
   }
   const M = yearsModel(ctx, C, K, FM);
   const title = `${CAT_TITLE[C.kat]}: ${yr(C.a)} и ${yr(C.b)}`;
-  if (!M)
-    return html`${controls}${pendingBlock('s19-b-godini', title, 'Тези данни предстоят.', { scope: 'kfp', source: ['asbp'] })}`;
+  if (!M) return controls;
   const { U, cat } = M;
   const noFn = C.kat === 'razhodi-fn' && (C.a === 2024 || C.b === 2024);
   const columns = [

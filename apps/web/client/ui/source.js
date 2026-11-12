@@ -35,11 +35,6 @@ const KIND = {
   doc: 'Документ (Word)',
   generator: 'Генериран набор',
 };
-const ACCESS = {
-  open: 'Отворен достъп',
-  'browser-only': 'Достъпен само през браузър',
-  none: 'Няма публичен достъп',
-};
 const list = (k) =>
   (Array.isArray(k) ? k : String(k || '').split(',')).map((s) => s.trim()).filter(Boolean);
 
@@ -71,7 +66,7 @@ export function sourceCard(keys, o = {}) {
     const known = !!(s.url || s.publisher || s.note);
     return html`<section class="src-item">
       <h3>${s.title || k}</h3>
-      ${known ? html`<p class="small muted">${[s.publisher, KIND[s.kind], ACCESS[s.access]].filter(Boolean).join(' · ')}</p>` : html`<p class="small muted">Подробностите за този източник предстои да бъдат заредени.</p>`}
+      ${known ? html`<p class="small muted">${[s.publisher, KIND[s.kind]].filter(Boolean).join(' · ')}</p>` : html`<p class="small muted">Няма подробности за този източник.</p>`}
       ${s.note ? html`<p class="small">${s.note}</p>` : ''}
       ${s.url ? html`<p class="small"><a class="ext" href="${s.url}" target="_blank" rel="noopener noreferrer">Отвори източника ${icon('external', { size: 14 })}<span class="sr-only"> (в нов раздел)</span></a></p>` : ''}
     </section>`;

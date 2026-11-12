@@ -374,11 +374,7 @@ function cofogBlock(ctx, M) {
 
 /** the main spenders of the function (the budgets of the 2026 law) and the two budgets that sit beside the state budget */
 function vedBlock(ctx, M) {
-  if (ctx.period.key !== '2026.law')
-    return pendingState({
-      title: 'Ведомства',
-      text: 'Няма извлечени ведомствени бюджети за избрания период.',
-    });
+  if (ctx.period.key !== '2026.law') return '';
   const title = 'Кой харчи тези пари';
   const doc = ctx.data?.ministries;
   if (!doc || !Array.isArray(doc.items))

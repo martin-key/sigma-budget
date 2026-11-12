@@ -131,8 +131,7 @@ function stateBlock(M: Catalogue, withFiles: CatalogueSet[], waiting: CatalogueS
         {plural(withFiles.length, 'набор', 'набора')}
         {' в '}
         {plural(M.counts.files, 'файл', 'файла')}
-        {waiting.length ? `, а още ${plural(waiting.length, 'набор', 'набора')} предстоят` : ''}
-        {'. Истински API има само като предложение за втората фаза: виж по-долу.'}
+        {'.'}
       </p>
 
       <ol className="s25-steps">
@@ -263,22 +262,6 @@ function filesBlock(M: Catalogue, waiting: CatalogueSet[]) {
             );
           })}
         </div>
-
-        {waiting.length ? (
-          <>
-            <p className="small muted">
-              {'Още '}
-              {plural(waiting.length, 'набор', 'набора')}
-              {' нямат файл, защото данните им още не са извлечени. Виж ги в '}
-              <a href={'' + href('danni', {}, { status: 'pending', to: 's24-sets' }) + ''}>
-                {'„Откъде са данните?“'}
-              </a>
-              {'.'}
-            </p>
-          </>
-        ) : (
-          ''
-        )}
       </>
     ),
     { scan: true },
@@ -291,15 +274,15 @@ const META_FIELDS = [
   ['title', 'Име на набора.'],
   [
     'status',
-    'Статус на данните: real (официални), partial (частични), forecast (прогнозни), mock (примерни) или pending (предстоящи).',
+    'Статус на публикувания набор: real (официални), partial (частични) или forecast (прогнозни).',
   ],
   ['source', 'Ключове на източниците. Какво е всеки от тях е описано в „Откъде са данните?“.'],
   ['sourceNote', 'С думи: как са взети и подредени числата.'],
   ['asOf', 'Към коя дата са данните.'],
   ['retrieved', 'Кога са изтеглени от издателя.'],
   ['unit', 'Мерна единица на числата във файла.'],
-  ['pending', 'Какво още предстои да се добави, когато има такова.'],
-  ['mock', 'true, ако стойностите са измислени.'],
+  ['pending', 'Описание на липсващите данни, ако е включено във файла.'],
+  ['mock', 'В публикуваните набори стойността е false.'],
 ];
 const TYPE: Record<string, string> = {
   array: 'списък',
@@ -321,6 +304,7 @@ function excerpt(meta: FileMeta) {
   const text = JSON.stringify(
     meta,
     (k, v) => {
+      if (['pending', 'sourceNote'].includes(k)) return undefined;
       if (typeof v === 'string' && v.length > 150) {
         cut = true;
         return `${v.slice(0, 147).trimEnd()}…`;
@@ -527,14 +511,6 @@ function readBlock(ctx: MetadataContext, M: Catalogue, set: CatalogueSet) {
             <p className="s25-set-t">{set.title}</p>
             {statusPill(set.status)}
           </div>
-
-          {set.desc ? (
-            <>
-              <p className="s25-set-d">{rich(set.desc, M)}</p>
-            </>
-          ) : (
-            ''
-          )}
         </div>
 
         {set.mock
@@ -639,7 +615,7 @@ function readBlock(ctx: MetadataContext, M: Catalogue, set: CatalogueSet) {
             <h3 className="s25-h3">{'Така започва файлът'}</h3>
 
             <p>
-              {'Това е действителният блок '}
+              {'Това е блокът с основните полета от '}
               {code('meta')}
               {' на файла'}
               {ex.cut ? ': дългите текстове са съкратени' : ''}
@@ -688,98 +664,6 @@ function readBlock(ctx: MetadataContext, M: Catalogue, set: CatalogueSet) {
   );
 }
 
-/* ---------------------------------------------------------------- 4 · the API of phase 2: a proposal */
-const ENDPOINTS = [
-  ['GET /api/v1/datasets', 'Списък на наборите с описание, статус и период.', 'catalog'],
-  ['GET /api/v1/datasets/{набор}', 'Паспорт на един набор: източници, период, формат.', 'catalog'],
-  ['GET /api/v1/revenue', 'Приходите на КФП по видове.', 'revenue'],
-  [
-    'GET /api/v1/expenditure?view=function',
-    'Разходите по функции, по икономически вид или по COFOG.',
-    'expenditure',
-  ],
-  ['GET /api/v1/ministries', 'Ведомствата и бюджетите им.', 'ministries'],
-  [
-    'GET /api/v1/ministries/{код}/programs',
-    'Политиките и програмите на едно ведомство по години.',
-    'ministries-programs',
-  ],
-  ['GET /api/v1/execution?month={месец}', 'Изпълнението на КФП за един месец.', 'execution'],
-  [
-    'GET /api/v1/municipalities/{код}',
-    'Годишният бюджет и трансферите към една община.',
-    'municipalities',
-  ],
-  ['GET /api/v1/measures', 'Мерките от бюджета и ефектите им.', 'measures'],
-];
-
-function proposalBlock(M: Catalogue) {
-  const today = (slug: string) => {
-    const s = M.bySlug.get(slug);
-    return s && hasFile(s) ? (
-      <>
-        <a href={'' + href('api', {}, { set: s.slug, to: 's25-read' }) + ''}>
-          {code(s.file || s.template)}
-        </a>
-      </>
-    ) : null;
-  };
-  return block('s25-proposal', 'Предложение за истински API (фаза 2)', () => (
-    <>
-      {callout({
-        kind: 'warn',
-        title: 'Предложение, не работеща услуга',
-        body: (
-          <>
-            <p>
-              {
-                'Адресите по-долу са примерни. Нищо от тях не отговаря сега: те показват как би могъл да изглежда API във втората фаза и кои от днешните файлове би заместил.'
-              }
-            </p>
-          </>
-        ),
-      })}
-
-      {dataTable({
-        id: 's25-endpoints',
-        caption: 'Примерни адреси на бъдещия API',
-        dense: true,
-        captionVisible: true,
-        columns: [
-          { key: 'addr', label: 'Примерен адрес', fmt: (v) => code(v) },
-          { key: 'what', label: 'Какво би връщал' },
-          { key: 'today', label: 'Днес го има като', fmt: (v) => v },
-        ],
-        rows: ENDPOINTS.map(([addr, what, slug]) => ({ addr, what, today: today(slug) })),
-      })}
-
-      <h3 className="s25-h3">{'Какво още би имало'}</h3>
-
-      <ul className="s25-list">
-        <li>{'Страниране и филтри по период и по ведомство.'}</li>
-
-        <li>{'Избор на формат: JSON или CSV.'}</li>
-
-        <li>{'Версия в адреса, за да не се чупят приложенията при промяна.'}</li>
-
-        <li>{'Същите статуси и източници във всеки отговор.'}</li>
-
-        <li>{'Ограничение на заявките и по желание ключ за по-голямо натоварване.'}</li>
-      </ul>
-
-      <h3 className="s25-h3">{'Какво трябва да се реши преди това'}</h3>
-
-      <ul className="s25-list">
-        <li>{'Кой го хоства и поддържа.'}</li>
-
-        <li>{'Лиценз и условия за ползване.'}</li>
-
-        <li>{'Колко време се пазят старите версии.'}</li>
-      </ul>
-    </>
-  ));
-}
-
 /* ---------------------------------------------------------------- 5 · licence, 6 · versions */
 function licenceBlock() {
   return block(
@@ -787,21 +671,9 @@ function licenceBlock() {
     'Лиценз и условия за ползване',
     () => (
       <>
-        {callout({
-          kind: 'warn',
-          title: 'За решение',
-          body: (
-            <>
-              <p>
-                {
-                  'Условията за повторно ползване на данните още не са решени. Те зависят от това кой стои зад портала: държавна институция или гражданска инициатива.'
-                }
-              </p>
-            </>
-          ),
-        })}
+        <p>{'Данните са публични: идват от официални документи и нямат отделен лиценз.'}</p>
 
-        <p>{'Какво знаем днес:'}</p>
+        <p>{'При ползване:'}</p>
 
         <ul className="s25-list">
           <li>
@@ -813,8 +685,6 @@ function licenceBlock() {
           </li>
 
           <li>{'Всеки официален набор има готово цитиране в паспорта си.'}</li>
-
-          <li>{'Примерните набори са измислени и не се цитират като действителни.'}</li>
         </ul>
       </>
     ),
@@ -838,17 +708,13 @@ function versionsBlock(ctx: MetadataContext, M: Catalogue) {
         {rows.length ? facts(rows, { cls: 's25-facts' }) : ''}
 
         <p>
-          {
-            'Сайтът е в бета версия: адресите и полетата във файловете още могат да се променят без предупреждение. Затова при ползване записвай версията и датата „Данни към“ от блока '
-          }
+          {'При използване на данните посочвай версията и датата „Данни към“ от блока '}
           {code('meta')}
           {'.'}
         </p>
 
         <p>
-          {
-            'В истинския портал предлагаме версия на схемата в адреса, журнал на промените и предупреждение, преди да се премахне поле.'
-          }
+          Историята на изданията е в <a href={href('proverka')}>„Данни и проверка“</a>.
         </p>
 
         <p>
@@ -887,7 +753,6 @@ export function render(ctx: MetadataContext) {
   const toc = [
     ['s25-files', 'Файловете'],
     ['s25-read', 'Как да прочетеш файл'],
-    ['s25-proposal', 'Предложение за API'],
     ['s25-licence', 'Лиценз'],
     ['s25-versions', 'Версии'],
   ];
@@ -910,7 +775,6 @@ export function render(ctx: MetadataContext) {
         {stateBlock(M, withFiles, waiting)}
         {filesBlock(M, waiting)}
         {read}
-        {proposalBlock(M)}
         {licenceBlock()}
         {versionsBlock(ctx, M)}
       </>

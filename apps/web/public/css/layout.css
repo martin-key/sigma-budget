@@ -123,18 +123,6 @@
 .brand:hover .brand-name {
   color: var(--crimson);
 }
-.badge-mock {
-  display: inline-flex;
-  align-items: center;
-  flex: none;
-  padding: 2px 7px;
-  border: 1px solid var(--crimson);
-  background: var(--crimson-tint);
-  color: var(--crimson);
-  font: 500 var(--fs-xs)/1.4 var(--font-mono);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
 .topbar-tools {
   flex: 1;
   min-width: 0;
@@ -353,9 +341,6 @@
 }
 /* V6 (27.10, final review): the content column stops growing at 1152px (--max 1280 minus the gutters), so what fits at 1280px is all there is at 1440 and 1920 too. The wordmark, the year button, the five group buttons,
    the magnifier and the red button therefore use their compact form at EVERY width (before, from 1361px the «Mock» badge and the year's status word came back and pushed the year button over the wordmark). */
-.badge-mock {
-  display: none;
-}
 .period-btn .p-status {
   display: none;
 }
@@ -372,9 +357,6 @@
 @media (max-width: 1240px) {
   .mast-in {
     gap: 0 var(--sp-1);
-  }
-  .badge-mock {
-    display: none;
   }
   .sidenav .nav-sec,
   .sidenav .nav-cta {
@@ -426,11 +408,6 @@
   }
   .menu-btn {
     padding-left: var(--sp-1);
-  }
-}
-@media (max-width: 479px) {
-  .badge-mock {
-    display: none;
   }
 }
 @media (max-width: 399px) {

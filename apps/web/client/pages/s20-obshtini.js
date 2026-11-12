@@ -465,8 +465,8 @@ export function render(ctx) {
   const md = model(ctx);
   if (!md.ok)
     return pendingState({
-      title: 'Списъкът на общините предстои',
-      text: 'Данните за общините още не са заредени.',
+      title: 'Няма данни за общините',
+      text: 'Няма данни за избрания период.',
     });
   const q = clean(ctx.query.q);
   const live = liveParts(md, ctx, q);

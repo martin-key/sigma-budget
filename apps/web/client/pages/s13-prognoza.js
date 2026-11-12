@@ -357,7 +357,7 @@ const noDebt = {
   title: 'Държавен дълг',
   categories: [],
   series: [{ name: 'Държавен дълг', data: [] }],
-  emptyText: 'Числата за дълга по години още не са включени.',
+  emptyText: 'Няма съпоставими данни за дълга по години.',
 };
 
 export const embeds = {
@@ -513,7 +513,7 @@ function summaryBlock(ctx, f, d) {
     asOf: f.asOf,
     share: { text: pts.join(' ') },
     body: html`<div class="s13-sum stack">
-      ${pts.length ? html`<ul class="s13-points" data-gl-scan>${pts.map((t) => html`<li>${t}</li>`)}</ul>` : pendingState({ title: 'Накратко', text: 'Числата за приходите и разходите още не са налични.' })}
+      ${pts.length ? html`<ul class="s13-points" data-gl-scan>${pts.map((t) => html`<li>${t}</li>`)}</ul>` : pendingState({ title: 'Накратко', text: 'Няма съпоставими данни за приходите и разходите.' })}
       ${note}
     </div>`,
   });
@@ -663,20 +663,7 @@ function debtBlock(ctx, f, d) {
       scope: 'zdd',
       sub: 'Таблица VI-1 на АСБП 2027–2029: прогноза за държавния дълг по ЗДД. Не е дългът на целия сектор „Държавно управление“.',
     });
-  return block({
-    id: 's13-b-debt',
-    title: 'Държавен дълг',
-    scope: 'zdd',
-    status: 'pending',
-    source: f.sources,
-    sub: 'Колко е държавният дълг по години.',
-    body: pendingState({
-      title: 'Няма съпоставим периоден ред за дълга',
-      text: 'Периодните данни за дълга още не са включени. Историческите публикации и законовите тавани са на отделния екран за дълга.',
-      source: f.sources,
-      action: { href: ctx.href('S17'), label: 'Към екрана за дълга', primary: false },
-    }),
-  });
+  return '';
 }
 
 /* ---------------------------------------------------------------- macro frame */

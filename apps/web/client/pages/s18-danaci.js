@@ -510,8 +510,8 @@ function basisText(c, env) {
 export function resultMarkup(c, st, env) {
   if (c.kind === 'pending')
     return pendingState({
-      title: 'Калкулаторът предстои',
-      text: 'Ставките за 2026 г. още не са заредени, затова не показваме числа.',
+      title: 'Калкулаторът не е достъпен',
+      text: 'Няма данни за ставките за 2026 г.',
       source: ['nap'],
     });
   if (c.kind === 'empty')
@@ -734,7 +734,7 @@ function sourcesBody(env) {
       ${applies ? html`<li><strong>За кого важи.</strong> ${applies}</li>` : ''}
       <li><strong>Какво не е включено.</strong> Данъчни облекчения (например за деца или за хора с увреждания), други доходи, доброволни осигуровки, самоосигуряващи се, договор за управление и пенсионери.</li>
       <li><strong>Закръгляване.</strong> Всеки ред е закръглен до цент, както във фиш за заплата. Нетото и сборовете са от показаните редове.</li>
-      <li>Ставките са от официалните документи и предстои да бъдат потвърдени от експерт по публични финанси. ${gl('osiguritelen-dohod', 'Осигурителният доход')} определя вноските, а ${gl('danak-varhu-dohodite', 'данъкът върху дохода')} е приход на бюджета.</li>
+      <li>${gl('osiguritelen-dohod', 'Осигурителният доход')} определя вноските, а ${gl('danak-varhu-dohodite', 'данъкът върху дохода')} е приход на бюджета.</li>
     </ul>`;
 }
 
@@ -743,7 +743,7 @@ function functionTable(id, caption, pot, env, ctx) {
   const decimals = pot >= 1000 ? 0 : 2;
   const rec = receiptByFunction(pot, env.fns, { decimals });
   if (!rec.length)
-    return pendingState({ title: 'Разходите по функции предстоят', source: ['asbp'] });
+    return pendingState({ title: 'Няма данни за разходите по функции', source: ['asbp'] });
   rec.sort((a, b) => b.yearEur - a.yearEur);
   const sh =
     apportion(
@@ -789,7 +789,7 @@ export function receiptMarkup(c, st, env, ctx) {
       icon: 'list',
     });
   if (!env.fns.length)
-    return pendingState({ title: 'Разходите по функции предстоят', source: ['asbp'] });
+    return pendingState({ title: 'Няма данни за разходите по функции', source: ['asbp'] });
   const pot = round2(c.yEmp + c.yTax);
   const totalMln = env.fns.reduce((s, f) => s + (Number(f.mln) || 0), 0);
   const perHead =
@@ -841,7 +841,7 @@ function indirectBlock(st, c, env) {
     ${A ? html`<p class="field-hint">ДДС се изчислява отделно за всяка ставка. Разходите за покупки не включват гориво и цигари. Цигарите се смятат за една цена и един размер на кутия.</p>` : ''}
     ${A ? html`<p class="s18-assume"><strong>Справочни цени:</strong> ${assumptionsText(A)}.</p>` : ''}
     ${toggle({ id: 's18-ind', label: 'Добави оценка на косвените данъци', checked: on, attrs: raw(` aria-controls="s18-ind-fields"${A ? '' : ' disabled'}`) })}
-    ${A ? '' : html`<p class="field-hint">Параметрите за косвените данъци още не са заредени.</p>`}
+    ${A ? '' : html`<p class="field-hint">Няма данни за параметрите за косвените данъци.</p>`}
     <div id="s18-ind-fields" class="s18-ind-fields"${on ? '' : raw(' hidden')}>
       ${moneyField('s18-purchases', 'Покупки с ДДС 20%, €', 'Без гориво и цигари.', st.purchases, c.errors.purchases)}
       ${moneyField('s18-reduced', 'Покупки с ДДС 9%, €', 'Месечна сума.', st.reduced, c.errors.reduced)}
@@ -918,7 +918,7 @@ export function render(ctx) {
         id: 's18-pending',
         title: 'Калкулатор',
         status: 'pending',
-        body: pendingState({ title: 'Калкулаторът предстои', source: ['nap'] }),
+        body: pendingState({ title: 'Калкулаторът не е достъпен', source: ['nap'] }),
       });
   return html`
     ${calc}

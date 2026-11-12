@@ -492,13 +492,13 @@ function askForm(id, o) {
       <textarea class="input s03-textarea" id="${id}-text" name="text" rows="3" maxlength="${feedback.MAX_TEXT}" aria-describedby="${id}-text-hint ${id}-text-err" required></textarea>
       <p class="field-error" id="${id}-text-err" role="alert" hidden></p>
     </div>
-    <div class="cluster"><button type="submit" class="btn btn-primary">${feedback.SEND}</button></div>
-    <p class="s03-ask-done" data-s03-done hidden>${feedback.SENT}${feedback.TO ? html` <a data-s03-mail href="mailto:${feedback.TO}">Отвори имейла</a>` : ''}</p>
+    <div class="cluster"><button type="submit" class="btn btn-primary">${feedback.send()}</button></div>
+    <p class="s03-ask-done" data-s03-done hidden>${feedback.sent()}${feedback.to() ? html` <a data-s03-mail href="mailto:${feedback.to()}">Отвори имейла</a>` : ''}</p>
   </form>`;
 }
 
 const credit = (g) =>
-  html`<p class="s03-credit small muted">Текст на речника: Работна група „Бюджет на светло“ ${srcTag(g.meta?.source || ['wg'], { asOf: g.meta?.asOf })}</p>`;
+  html`<p class="s03-credit small muted">${srcTag(g.meta?.source || ['wg'], { asOf: g.meta?.asOf })}</p>`;
 const disclaimer = (g) =>
   html`<p class="s03-note small muted"><strong>${g.intro.disclaimer.bold}</strong> ${g.intro.disclaimer.text}</p>`;
 
@@ -721,7 +721,7 @@ export function mount(root, ctx) {
       if (mail) mail.href = feedback.mailto(rec);
       ta.value = '';
       done.hidden = false;
-      ctx.announce(feedback.SENT);
+      ctx.announce(feedback.sent());
       return;
     }
     if (e.target.closest('form[data-s03-search]')) e.preventDefault(); // Enter in the search box: no navigation

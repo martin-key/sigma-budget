@@ -121,10 +121,10 @@ export function openPalette(opener, o = {}) {
     }
     const noIndex = ix.hasIndex
       ? ''
-      : html`<p class="pal-note">Предстои: показатели, ведомства и общини. Засега търсим по екрани и понятия.</p>`;
+      : html`<p class="pal-note">Търсенето е по екрани и понятия.</p>`;
     if (!toks.length) {
       body.innerHTML =
-        html`<div class="pal-hint"><p>Търси показатели, ведомства, общини, мерки и понятия.</p><p class="small">Можеш да пишеш и с латински букви: dds, plovdiv.</p>${chipRow(POPULAR, 'Примерни търсения')}</div>${noIndex}`.s;
+        html`<div class="pal-hint"><p>Търси показатели, ведомства, общини, мерки и понятия.</p><p class="small">Можеш да пишеш и с латински букви: dds, plovdiv.</p>${chipRow(POPULAR, 'Популярни търсения')}</div>${noIndex}`.s;
       options = [];
       setActive(-1);
       input.setAttribute('aria-expanded', 'false');
@@ -139,7 +139,7 @@ export function openPalette(opener, o = {}) {
       : '';
     if (!shown.length) {
       body.innerHTML =
-        html`<div class="pal-hint"><p>${res.hidden ? 'Няма официални резултати за' : 'Няма резултат за'} „${q.trim()}“.</p><p class="small">Опитай с по-кратка дума, с друго изписване или с някое от тези:</p>${chipRow(POPULAR, 'Примерни търсения')}</div>${hiddenNote}${noIndex}`.s;
+        html`<div class="pal-hint"><p>${res.hidden ? 'Няма официални резултати за' : 'Няма резултат за'} „${q.trim()}“.</p><p class="small">Опитай с по-кратка дума, с друго изписване или с някое от тези:</p>${chipRow(POPULAR, 'Популярни търсения')}</div>${hiddenNote}${noIndex}`.s;
       options = [];
       setActive(-1);
       input.setAttribute('aria-expanded', 'false');

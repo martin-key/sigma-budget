@@ -4,7 +4,7 @@
 //   'pct' (value is already a percent), 'num' (plain number); or `fmt:(value, item) => string | html``
 // - bars are relative to `max` (default: the largest top-level value); a child's bar is relative to its parent's value
 // - `ordered:true` numbers the rows (<ol>); rows keep the given order unless `sort:'desc'|'asc'` (rows without a value go last)
-// - `value` null/undefined/NaN → a dashed „Предстои“ row, no number and no bar; a negative value prints with its minus and gets no bar
+// - `value` null/undefined/NaN → a dashed „Няма данни“ row, no number and no bar; a negative value prints with its minus and gets no bar
 // - `share` (percent) shows „дял“ after the value; `shares:true` computes it from the top-level total; items with `children` expand (<details>)
 // - `href` makes the label a link (for a row with children the link „Към …“ follows the children: a link inside <summary> would also toggle it)
 // - `caption` is visible and names the list; without it `label` gives the list an accessible name only
@@ -49,7 +49,7 @@ function rowHtml(o, it, { tag, n, rel, total }) {
       : '';
   const val = known
     ? html`${valueHtml(o, it, it.value)}${ok(shareV) ? html`<span class="rank-share">${pct(shareV, 1)}</span>` : ''}`
-    : html`Предстои`;
+    : html`Няма данни`;
   return new SafeHtml(
     `<${tag} class="rank-row"${known ? '' : ' data-st="pending"'}>` +
       (n ? `<span class="rank-n" aria-hidden="true">${n}</span>` : '') +

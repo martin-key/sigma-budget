@@ -126,7 +126,7 @@ const FAIL = {
   pending: (reason) =>
     pendingState({
       title: 'Няма графика за избрания период',
-      text: reason || 'Данните за нея още не са включени.',
+      text: 'Няма данни за тази графика в избрания период.',
     }),
   error: () => errorState({ link: false, title: 'Графиката не се зареди.' }),
 };

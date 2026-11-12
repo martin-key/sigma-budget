@@ -39,17 +39,6 @@ const joinList = (items, sep = ', ') => html`${items.map((x, i) => html`${i ? se
 const metaList = (rows) =>
   html`<dl class="s24-meta">${rows.filter((r) => r && r.v != null && r.v !== '' && r.v !== false).map((r) => html`<div class="s24-m${r.wide ? ' s24-m-wide' : ''}"><dt>${r.k}</dt><dd>${r.v}</dd></div>`)}</dl>`;
 const pageUrl = (addr) => absolute(addr);
-const httpText = (code) =>
-  code === 403
-    ? 'отказан достъп (403)'
-    : code === 404
-      ? 'не е намерен (404)'
-      : code === 200
-        ? 'отговаря (200)'
-        : code
-          ? `отговор ${code}`
-          : '';
-
 const ADJ = {
   real: ['официален', 'официални'],
   partial: ['частичен', 'частични'],
@@ -300,15 +289,7 @@ function item(kind, it, M, extra) {
   const rel = it.related.length
     ? html`<div class="s24-rel"><p class="s24-rel-l">Засяга</p><ul class="s24-rel-list" role="list">${it.related.map((s) => html`<li><a href="${href('danni', { set: s.slug })}">${s.title}</a></li>`)}</ul></div>`
     : '';
-  const ev = it.evidence.length
-    ? disclosure({
-        id: `s24-evidence-${C.idPart(it.id)}`,
-        title: 'Как го проверихме',
-        meta: plural(it.evidence.length, 'адрес', 'адреса'),
-        body: html`<p class="small muted">Опитахме да отворим тези адреси автоматично. Така отговориха сървърите.</p>
-        <ul class="s24-ev" role="list">${it.evidence.map((e) => html`<li>${ext(e.url, e.url.replace(/^https?:\/\//i, ''))}<span class="s24-ev-s">${dot([httpText(e.status), e.checked ? `проверено на ${date(e.checked)}` : ''])}</span></li>`)}</ul>`,
-      })
-    : '';
+  const ev = ''; // Acquisition diagnostics are internal, not catalogue content.
   return html`<article class="s24-item" data-id="${it.id}"><h3 class="s24-h3" id="s24-${kind}-${C.idPart(it.id)}" tabindex="-1">${it.title}</h3>
     ${it.paras.map((p) => html`<p>${C.rich(p, M)}</p>`)}${extra || ''}${rel}${ev}</article>`;
 }
@@ -346,9 +327,9 @@ const methodSection = (M) =>
 function srcItem(k, M) {
   const s = M.src(k);
   const n = M.sets.filter((x) => x.source.includes(k)).length;
-  const meta = dot([pubOf(s), C.kindLabel(s.kind), C.accessLabel(s.access, !!s.url)]);
+  const meta = dot([pubOf(s), C.kindLabel(s.kind)]);
   return html`<li class="s24-src"><h3 class="s24-h3">${s.url ? ext(s.url, s.title) : s.title}</h3>
-    ${meta ? html`<p class="s24-src-m">${meta}</p>` : ''}${s.note ? html`<p>${C.rich(s.note, M)}</p>` : ''}
+    ${meta ? html`<p class="s24-src-m">${meta}</p>` : ''}
     <p><a href="${href('danni', {}, { izvor: k, to: 's24-sets' })}">${plural(n, 'набор', 'набора')} от този източник</a></p></li>`;
 }
 
@@ -470,8 +451,8 @@ async function ministryNames(ctx) {
 const srcBlock = (keys, M) =>
   html`<ul class="s24-srcs" role="list">${keys.map((k) => {
     const s = M.src(k);
-    const meta = dot([pubOf(s), C.kindLabel(s.kind), C.accessLabel(s.access, !!s.url)]);
-    return html`<li><span class="s24-srcs-t">${s.url ? ext(s.url, s.title) : s.title}</span>${meta ? html`<span class="s24-srcs-m">${meta}</span>` : ''}${s.note ? html`<span class="s24-srcs-n">${C.rich(s.note, M)}</span>` : ''}</li>`;
+    const meta = dot([pubOf(s), C.kindLabel(s.kind)]);
+    return html`<li><span class="s24-srcs-t">${s.url ? ext(s.url, s.title) : s.title}</span>${meta ? html`<span class="s24-srcs-m">${meta}</span>` : ''}</li>`;
   })}</ul>`;
 
 function passportRows(set, M) {
@@ -547,8 +528,7 @@ const FORMAT_HINT = {
 };
 
 function getBlock(set, M, names) {
-  const api = href('api');
-  const common = html`<p class="small muted">Таблица (CSV) от конкретен екран получаваш с „Сподели“ до таблицата, където я има. Условията за повторно ползване още не са решени: виж <a href="${api}">${byKey.api?.title || 'Отворени данни и API'}</a>.</p>`;
+  const common = html`<p class="small muted">Таблица (CSV) от конкретен екран получаваш с „Сподели“ до таблицата, където я има. Данните са публични: идват от официални документи и нямат отделен лиценз.</p>`;
   if (set.file) {
     const size = C.sizeLabel(set.bytes);
     return html`<p class="s24-dl"><a class="btn btn-primary" href="${set.file}" download="${C.dlName(set)}">${icon('download', { size: 18 })}<span>Свали ${fmtOf(set)}${size ? ` (${size})` : ''}</span></a>
@@ -576,8 +556,15 @@ function getBlock(set, M, names) {
 
 function notesBlock(set, M, meta) {
   const parts = [];
-  if (meta && typeof meta.sourceNote === 'string' && meta.sourceNote.trim())
-    parts.push(html`<p>${C.rich(meta.sourceNote.trim(), M)}</p>`);
+  if (
+    !['glossary', 'guide'].includes(set.slug) &&
+    meta &&
+    typeof meta.sourceNote === 'string' &&
+    meta.sourceNote.trim()
+  )
+    parts.push(
+      html`<p>${C.rich(meta.sourceNote.trim().replace(' Сценарият „Пенсионер“ и данъкът при самоосигуряване и договор за управление предстоят.', ''), M)}</p>`,
+    );
   const waiting = uniq([
     ...set.pending,
     ...(Array.isArray(meta?.pending) ? meta.pending.filter((x) => typeof x === 'string') : []),

@@ -206,11 +206,17 @@ function normSet(d, i) {
     ext: extOf(file),
     template: str(d.fileTemplate),
     title: str(d.title).trim() || slug,
-    desc: str(d.description).trim(),
+    // Retire future-data sentences from the public description until the next release.
+    desc: str(d.description)
+      .trim()
+      .replace(
+        / (?:Изпълнението по видове данъци|Месечното изпълнение по съставни бюджети|За 4 от 46 бюджета програмите|Падежите и емисиите|Сценарият „Пенсионер“)[^.]*\.(?:$| )/g,
+        '',
+      ),
     group: str(d.group),
     status,
     mock: d.mock === true || status === 'mock',
-    source: strs(d.source),
+    source: strs(d.source).filter((key) => key !== 'wg'),
     period: str(d.period).trim(),
     asOf: str(d.asOf),
     unit: str(d.unit).trim(),
@@ -243,7 +249,7 @@ export function model(cat, sources) {
 function build(c, srcs) {
   const seen = new Set();
   const sets = arr(c.datasets)
-    .filter((d) => d && typeof d === 'object')
+    .filter((d) => d && typeof d === 'object' && d.status !== 'pending')
     .map(normSet)
     .filter((s) => s.slug && !seen.has(s.slug) && seen.add(s.slug));
   const bySlug = new Map(sets.map((s) => [s.slug, s]));
@@ -355,10 +361,10 @@ function build(c, srcs) {
     };
   };
   const traps = arr(c.traps)
-    .filter((t) => t && str(t.id) && str(t.title))
+    .filter((t) => t && str(t.id) && str(t.title) && !['access', 'statuses'].includes(t.id))
     .map(item);
   const methods = arr(c.methodology)
-    .filter((t) => t && str(t.id) && str(t.title))
+    .filter((t) => t && str(t.id) && str(t.title) && !['access', 'statuses'].includes(t.id))
     .map(item);
   const files = arr(c.files)
     .filter((f) => f && str(f.name))

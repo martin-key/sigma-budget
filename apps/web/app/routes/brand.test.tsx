@@ -7,7 +7,7 @@ import core from './__fixtures__/core.json';
 import glossary from './__fixtures__/glossary.json';
 
 afterEach(() => provideScope(() => null));
-it('uses the public product name in the document and metadata while preserving the group credit', async () => {
+it('uses the public product name in the document and metadata without a working-group credit', async () => {
   const url = new URL('https://sigma-budget.my-data.bg/za-proekta');
   const docs: Record<string, unknown> = { core, glossary };
   provideScope(() => ({
@@ -27,7 +27,13 @@ it('uses the public product name in the document and metadata while preserving t
   if ('redirect' in result) throw Error(result.redirect);
   expect(result.doc.title).toContain('СИГМА Бюджет');
   expect(result.doc.ld).toContain('СИГМА Бюджет');
-  expect(result.doc.ld).toContain('Работна група „Бюджет на светло“');
+  expect(result.doc.ld).not.toContain('Работна група');
+  const ld = JSON.parse(result.doc.ld);
+  const organization = ld['@graph'].find(
+    (node: { '@type': string }) => node['@type'] === 'Organization',
+  );
+  expect(organization.name).toBe('СИГМА Бюджет');
+  expect(organization).not.toHaveProperty('alternateName');
 });
 it('names the installed application consistently', () => {
   const manifest = JSON.parse(

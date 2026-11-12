@@ -6,9 +6,7 @@ import { SECTIONS, to, block } from './za-proekta/shared';
 import { Mission } from './za-proekta/Mission';
 import { Pillars } from './za-proekta/Pillars';
 import { OpenData } from './za-proekta/OpenData';
-import { Roadmap } from './za-proekta/Roadmap';
 import { Versions } from './za-proekta/Versions';
-import { Questions } from './za-proekta/Questions';
 import { Legend } from './za-proekta/Legend';
 import { Credits } from './za-proekta/Credits';
 
@@ -38,7 +36,7 @@ export function AboutContent({
             <p>
               Бюджетните числа са от официални източници. Законопроектите, прогнозите и отчетите са
               обозначени със своя период и дата. Липсващите данни не се заменят с измислени
-              стойности. Пътната карта и въпросите по-долу са предложение, не готови решения.
+              стойности.
             </p>
           </>
         ),
@@ -49,9 +47,7 @@ export function AboutContent({
       {block('s26-mission', Mission(), { scan: true })}
       {block('s26-pillars', Pillars(), { scan: true })}
       {block('s26-open', OpenData(), { scan: true })}
-      {block('s26-roadmap', Roadmap({ core }))}
       {block('s26-versions', Versions({ core }), { scan: true })}
-      {block('s26-questions', Questions(), { scan: true })}
       {block('s26-legend', Legend())}
       {block('s26-credits', Credits())}
     </>,

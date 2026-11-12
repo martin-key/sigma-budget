@@ -13,7 +13,7 @@ import { chips } from '../ui/chips.js';
 import { toggle } from '../ui/forms.js';
 import { seg } from '../ui/seg.js';
 import { timeline } from '../ui/timeline.js';
-import { emptyState, pendingState } from '../ui/states.js';
+import { emptyState } from '../ui/states.js';
 import { gl } from '../ui/gl.js';
 import { amount } from '../view.js';
 
@@ -34,7 +34,12 @@ const monthTitle = (key) => {
 export function model(ctx) {
   const f = ctx.data.feed || {};
   const events = (Array.isArray(f.events) ? f.events : []).filter(
-    (e) => e && e.title && /^\d{4}-\d{2}-\d{2}$/.test(e.date || ''),
+    (e) =>
+      e &&
+      e.status !== 'pending' &&
+      e.dateKind !== 'announced' &&
+      e.title &&
+      /^\d{4}-\d{2}-\d{2}$/.test(e.date || ''),
   );
   events.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0)); // newest first; the file's order stays within one day
   const kinds = (Array.isArray(f.kinds) ? f.kinds : []).filter((k) => k && k.id && k.label);
@@ -106,18 +111,7 @@ export function fiveSentences(M) {
 export function summaryBlock(M) {
   const { ctx, h } = M;
   const items = fiveSentences(M);
-  if (!h || !items.length) {
-    return block({
-      id: 's16-b-summary',
-      level: 2,
-      title: 'Последният месечен отчет накратко',
-      status: 'pending',
-      body: pendingState({
-        title: 'Обзорът предстои',
-        text: 'Още няма достатъчно данни от последния месечен отчет, за да го опишем накратко.',
-      }),
-    });
-  }
+  if (!h || !items.length) return '';
   const y = +h.asOf.slice(0, 4),
     m = h.month || +h.asOf.slice(5, 7);
   const title =
@@ -139,37 +133,6 @@ export function summaryBlock(M) {
     asOf: h.asOf,
     share,
     body,
-  });
-}
-
-/* ------------------------------------------------------------------ „Очаква се“ */
-function expectedText(M, x) {
-  const where = x.expected
-    ? html`<p class="s16-where">Къде да го видиш при издателя: ${tidy(x.expected)}.</p>`
-    : '';
-  if (x.id === 'P04') {
-    const last = M.h ? ` Най-новият отчет, който показваме, е към ${date(M.h.asOf)} г.` : '';
-    return html`<p>Отчетът още не е добавен към портала.${last}</p><p>Месечните отчети се добавят, след като Министерството на финансите ги публикува.</p>${where}`;
-  }
-  return html`${x.note ? html`<p>${tidy(x.note)}</p>` : ''}${where}`;
-}
-
-export function expectedBlock(M) {
-  const list = (Array.isArray(M.f.expected) ? M.f.expected : []).filter((x) => x && x.title);
-  if (!list.length) return '';
-  const items = list.map((x, i) => ({
-    id: `s16-x-${i + 1}`,
-    kind: 'expected',
-    title: tidy(x.title),
-    text: expectedText(M, x),
-  }));
-  return block({
-    id: 's16-b-expected',
-    level: 2,
-    title: 'Очаква се',
-    status: 'pending',
-    sub: 'Данни и документи, които още не са в портала.',
-    body: timeline({ label: 'Очаквани данни и документи', items }),
   });
 }
 
@@ -285,7 +248,7 @@ export function rssBlock(M) {
         <button type="button" class="btn" data-s16-copy>Копирай адреса</button>
       </div>
     </div>
-    <p class="s16-note" id="s16-rss-note">Файлът е един и същ за всички и съдържа събитията от хронологията по-горе. Адресите на събитията в него са примерни, докато порталът няма постоянен адрес.</p>
+    <p class="s16-note" id="s16-rss-note">Файлът е един и същ за всички и съдържа събитията от хронологията по-горе.</p>
     <p class="s16-open">${ext(FEED_FILE, 'Отвори RSS файла')}</p>`;
   return block({
     id: 's16-b-rss',
@@ -403,7 +366,7 @@ export function lede(ctx) {
   try {
     const h = ctx.data && ctx.data.feed && ctx.data.feed.highlights;
     if (!h || !h.asOf) return undefined;
-    return `Най-новият месечен отчет е към ${date(h.asOf, true)} г. Тук са новите данни, стъпките по закона и какво предстои.`;
+    return `Най-новият месечен отчет е към ${date(h.asOf, true)} г. Тук са новите данни, стъпките по закона и хронологията на събитията.`;
   } catch (e) {
     return undefined;
   }
@@ -411,7 +374,7 @@ export function lede(ctx) {
 
 export function render(ctx) {
   const M = model(ctx);
-  return html`${summaryBlock(M)}${expectedBlock(M)}${feedBlock(M)}${rssBlock(M)}`; // V7: the sample subscription form (subscribeBlock) is out: it sent nothing, and RSS is the real channel
+  return html`${summaryBlock(M)}${feedBlock(M)}${rssBlock(M)}`; // V7: the sample subscription form (subscribeBlock) is out: it sent nothing, and RSS is the real channel
 }
 
 /* ------------------------------------------------------------------ behaviour: the chronology filter is announced, the mock form is checked and answered, the RSS address is copied */

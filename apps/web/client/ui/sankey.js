@@ -6,7 +6,7 @@
 //   text is added unless you pass `unit`); `d` = decimals (default: none when every number is whole, else one, the same in the diagram, list and table).
 //   The numbers are printed raw (no „на човек“ / „лв.“ switches): convert them yourself before you pass them.
 // - only links with a positive number are drawn. A link without a number (null) or with 0 / a negative number stays in the list and in the table twin
-//   („Предстои“ for null), never in the diagram. No link has a number, or the links loop back (a diagram needs a one-way flow) → the diagram is
+//   („Няма данни“ for null), never in the diagram. No link has a number, or the links loop back (a diagram needs a one-way flow) → the diagram is
 //   left out and the list is shown at every width (class `sankey-flat`).
 // - `mock:true` (everything) or `mock:true` on a link/node → badge „Примерни данни“, hatched nodes (a node touched by a mock link counts as mock)
 //   and hatched bars in the list.
@@ -69,14 +69,14 @@ function flowList(o, { nodes, links, fmt, unitText, mockAll }) {
     const width = known && l.value > 0 && max > 0 ? Math.min(100, (l.value / max) * 100) : 0;
     return html`<li><div class="rank-row"${known ? '' : raw(' data-st="pending"')}>
       <span class="rank-label"><span class="sk-arrow" aria-hidden="true">→</span><span class="sr-only">към </span>${l.target}${mock ? html`<span class="sr-only"> (примерни данни)</span>` : ''}</span>
-      <span class="rank-val">${known ? html`${fmt(l.value)}${unitSr}` : 'Предстои'}</span>
+      <span class="rank-val">${known ? html`${fmt(l.value)}${unitSr}` : 'Няма данни'}</span>
       <span class="rank-bar" aria-hidden="true">${width > 0 ? html`<span class="rank-fill"${mock ? raw(' data-mock="true"') : ''} style="width:${Number(width.toFixed(1))}%"></span>` : ''}</span>
     </div></li>`;
   };
   return html`<div class="sankey-fallback"><ul class="rank-list sk-list" aria-label="${plain(o.label ?? o.title ?? 'Потоци')}: потоци по източник">${groups.map(
     (g) => {
       const sum = g.out.filter((l) => ok(l.value) && l.value > 0).reduce((a, l) => a + l.value, 0);
-      return html`<li class="sk-src"><p class="sk-from"><span class="sk-name">${g.n.name}</span><span class="sk-sum">${sum > 0 ? html`${fmt(sum)}${unitText ? html` ${unitText}` : ''}` : html`<span class="sk-pending">Предстои</span>`}</span></p>
+      return html`<li class="sk-src"><p class="sk-from"><span class="sk-name">${g.n.name}</span><span class="sk-sum">${sum > 0 ? html`${fmt(sum)}${unitText ? html` ${unitText}` : ''}` : html`<span class="sk-pending">Няма данни</span>`}</span></p>
       <ul class="rank-list sk-to">${g.out.map(flow)}</ul></li>`;
     },
   )}</ul></div>`;

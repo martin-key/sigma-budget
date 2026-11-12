@@ -59,10 +59,9 @@ def main():
         page.wait_for_selector('article.page[data-ready="1"]')
         assert page.evaluate('window.initialHeading === document.querySelector("h1")'), 'SSR heading was replaced'
         assert not any('/data/core.json' in url or '/data/glossary.json' in url for url in requests), 'editorial seed refetched'
-        page.select_option('#s26-demo-screen', 'razhodi')
-        assert page.locator('[data-s26-demo="empty"]').get_attribute('href') == '/razhodi?demo=empty'
+        assert page.locator('[data-s26-demo]').count() == 0
         anchors = page.locator('nav.s26-toc a[href]').evaluate_all('(links) => links.map(link => link.getAttribute("href"))')
-        assert len(anchors) == 9
+        assert len(anchors) == 6
         for address in anchors:
             target = parse_qs(urlsplit(address).query)['to'][0]
             page.locator('nav.s26-toc a[href="' + address + '"]').click()

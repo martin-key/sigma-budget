@@ -50,9 +50,9 @@
     "ACCESS_AUD": "",
     "SERVICE_TOKENS": "",
     "ENVIRONMENT": "production",
-    "SITE_ORIGIN": "https://sigma-budget.my-data.bg",
+    "SITE_ORIGIN": "https://sigma-budget.midt.bg",
     "SIGMA_URL": "https://sigma.midt.bg/",
-    "FEEDBACK_EMAIL": "",
+    "FEEDBACK_EMAIL": "contact@midt.government.bg",
     "NOINDEX": ""
   },
   // staging (push to main, .github/workflows/site.yml): its own Worker, a build with --noindex.

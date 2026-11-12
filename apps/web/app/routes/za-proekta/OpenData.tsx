@@ -1,5 +1,5 @@
 import { href } from '../../lib/legacy';
-import { cardOf, to } from './shared';
+import { cardOf } from './shared';
 
 export const OpenData = () => (
   <>
@@ -8,9 +8,6 @@ export const OpenData = () => (
       Така всеки може да провери числото и да го използва в собствена работа.
     </p>
     <div className="s26-cards">{['S24', 'S25'].map(cardOf)}</div>
-    <p>
-      Лицензът на данните още не е избран. Решението зависи от това чий е порталът и е сред{' '}
-      <a href={to('s26-questions')}>въпросите към работната група</a>.
-    </p>
+    <p>Данните са публични: идват от официални документи и нямат отделен лиценз.</p>
   </>
 );

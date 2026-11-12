@@ -1,7 +1,7 @@
 // Progress bar and the thin step strip.
 //   progress({id, label, value, max = 100, text, mock})   a labelled bar: „Изпълнение на приходите  52,3% от годишния план“
 //   steps({current, total, label})                        the strip of the guide (S02/S04): step `current` (1-based) of `total`
-// progress: role="progressbar" with aria-valuenow/-valuetext; no finite `value` → no bar, the text says „Предстои“ and the
+// progress: role="progressbar" with aria-valuenow/-valuetext; no finite `value` → no bar, the text says „Няма данни“ and the
 // track is hidden from assistive tech (the visible words carry the meaning); `mock` hatches the fill and adds the „Примерни данни“ badge.
 import { html, raw, cx, plain } from '../html.js';
 import { pct as fmtPct } from '../format.js';
@@ -14,7 +14,7 @@ export function progress(o = {}) {
   const max = ok(o.max) && o.max > 0 ? o.max : 100;
   const known = ok(o.value);
   const share = known ? Math.min(100, Math.max(0, (o.value / max) * 100)) : 0;
-  const text = o.text ?? (known ? fmtPct(share, 1) : 'Предстои');
+  const text = o.text ?? (known ? fmtPct(share, 1) : 'Няма данни');
   const lid = `${o.id}-l`;
   const mock = o.mock === true;
   const label = o.label

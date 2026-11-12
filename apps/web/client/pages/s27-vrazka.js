@@ -1,6 +1,6 @@
 // S27 · Обратна връзка · #/vrazka · next S01 · periods none
 // Three forms in tabs: „Намерих грешка“ (context from the link that brought the visitor: ?from= ?val= ?src= ?block=), „Още не разбирам“, „Предложи идея“.
-// The site has no server for messages: the submit button (feedback.SEND) keeps the message in this browser (feedback.js, localStorage) and, when <meta name="feedback-email"> names
+// The site has no server for messages: the submit button (feedback.send()) keeps the message in this browser (feedback.js, localStorage) and, when <meta name="feedback-email"> names
 // the team's address, opens a ready e-mail to it (mailto:) that the visitor sends from their own mail app. An unsent draft stays in sessionStorage until the tab closes
 // (so a re-render or a detour through the glossary does not eat the text). ?demo=error is drawn by the shell like on every screen.
 import { html } from '../html.js';
@@ -67,7 +67,7 @@ const TOPICS = [
   { value: 'grafiki', label: 'Графиките и сравненията' },
   { value: 'obyasneniya', label: 'Обясненията и речникът' },
   { value: 'kalkulator', label: 'Калкулаторът за моите данъци' },
-  { value: 'obshtini', label: 'Общини и проекти (предстои)' },
+  { value: 'obshtini', label: 'Общини и проекти' },
   { value: 'telefon', label: 'Достъпност и телефон' },
   { value: 'drugo', label: 'Нещо друго' },
 ];
@@ -224,15 +224,15 @@ function form(key, ctx, ctxInfo, draft) {
   return html`<p class="s27-intro">${spec.intro}</p>
     <form class="s27-form" data-s27-form="${key}" novalidate>
       ${body}
-      <div class="cluster"><button type="submit" class="btn btn-primary">${feedback.SEND}</button></div>
+      <div class="cluster"><button type="submit" class="btn btn-primary">${feedback.send()}</button></div>
     </form>
     <div class="s27-ok" data-s27-ok="${key}" hidden>
       <span class="s27-ok-ic" aria-hidden="true">${icon('checkCircle', { size: 24 })}</span>
       <div class="s27-ok-main">
-        <h3 class="s27-ok-h" tabindex="-1">${feedback.SENT}</h3>
-        <p class="s27-ok-note">${feedback.TO ? html`Имейлът до ${feedback.TO} е готов: отвори го и го изпрати от пощата си. Копие остава долу, в „Записано в този браузър“.` : 'Изпращането към екипа още не е включено. Записахме съобщението в този браузър: виж го долу, в „Записано в този браузър“.'}</p>
+        <h3 class="s27-ok-h" tabindex="-1">${feedback.sent()}</h3>
+        <p class="s27-ok-note">${feedback.to() ? html`Имейлът до ${feedback.to()} е готов: отвори го и го изпрати от пощата си. Копие остава долу, в „Записано в този браузър“.` : 'Съобщението е запазено само в този браузър и не е изпратено. Виж го долу, в „Записано в този браузър“.'}</p>
         <p class="s27-warn" data-s27-warn hidden>${icon('alert', { size: 16 })}<span>Браузърът не позволява да се пази запис. Съобщението остава само докато не презаредиш страницата.</span></p>
-        <div class="cluster">${feedback.TO ? html`<a class="btn btn-primary" data-s27-mail href="mailto:${feedback.TO}">${icon('message', { size: 16 })}<span>Отвори имейла</span></a>` : ''}<button type="button" class="btn" data-s27-again="${key}">${feedback.TO ? 'Изпрати още едно' : 'Напиши още едно'}</button></div>
+        <div class="cluster">${feedback.to() ? html`<a class="btn btn-primary" data-s27-mail href="mailto:${feedback.to()}">${icon('message', { size: 16 })}<span>Отвори имейла</span></a>` : ''}<button type="button" class="btn" data-s27-again="${key}">${feedback.to() ? 'Изпрати още едно' : 'Напиши още едно'}</button></div>
       </div>
     </div>`;
 }
@@ -266,7 +266,7 @@ function savedItem(r) {
 const savedBody = (items) =>
   items.length
     ? html`<ol class="s27-saved-list">${items.map(savedItem)}</ol>`
-    : html`<p class="s27-saved-empty">Тук ще видиш съобщенията, които ${feedback.TO ? 'изпратиш' : 'запазиш'} от тази страница.</p>`;
+    : html`<p class="s27-saved-empty">Тук ще видиш съобщенията, които ${feedback.to() ? 'изпратиш' : 'запазиш'} от тази страница.</p>`;
 const savedCount = (n) =>
   n ? `Записани: ${plural(n, 'съобщение', 'съобщения')}.` : 'Още нищо не е записано.';
 
@@ -289,16 +289,16 @@ export function render(ctx) {
   const draft = readDraft();
   return html`
     ${
-      feedback.TO
+      feedback.to()
         ? callout({
             kind: 'info',
             title: 'Как стига до нас',
-            body: html`<p>Формулярът подготвя имейл до <a href="mailto:${feedback.TO}">${feedback.TO}</a> и го изпращаш от своята поща. Копие остава в този браузър. Не пиши лични данни в текста.</p>`,
+            body: html`<p>Формулярът подготвя имейл до <a href="mailto:${feedback.to()}">${feedback.to()}</a> и го изпращаш от своята поща. Копие остава в този браузър. Не пиши лични данни в текста.</p>`,
           })
         : callout({
             kind: 'info',
-            title: 'Изпращането предстои',
-            body: html`<p>Формулярът още не изпраща до екипа: написаното остава само в този браузър.</p>`,
+            title: 'Запазване в браузъра',
+            body: html`<p>Няма зададен адрес за получаване на съобщения. Написаното се запазва само в този браузър и не се изпраща.</p>`,
           })
     }
     <section class="s27-main" aria-labelledby="s27-main-h">

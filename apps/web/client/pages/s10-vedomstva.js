@@ -466,7 +466,7 @@ function vTable(md, ctx, rows) {
       num: true,
       fmt: (v, r) =>
         r.m.progCount === null
-          ? html`<span class="muted">предстои</span>`
+          ? html`<span class="muted">няма данни</span>`
           : html`${num(r.m.progCount, 0)}`,
     },
   ];
@@ -602,7 +602,7 @@ function exportV(md, ctx) {
       m.rev === null ? '' : r3(m.rev),
       m.change ? m.change.pct : '',
       m.change ? (m.change.basis === 'program-budget' ? 'програмен бюджет' : 'закон') : '',
-      m.progCount === null ? 'предстои' : m.progCount,
+      m.progCount === null ? 'няма данни' : m.progCount,
     ]),
   };
 }
@@ -1019,32 +1019,6 @@ function pFind(pm, ctx, q, p) {
   </div>`;
 }
 
-function pendingBlock(md, pm) {
-  const list = md.items.filter((m) => m.pending);
-  if (!list.length) return '';
-  const groups = [];
-  for (const m of list) {
-    const g = groups.find((x) => x.reason === m.pending.reason);
-    if (g) g.items.push(m);
-    else groups.push({ reason: m.pending.reason, items: [m] });
-  }
-  const text = html`<p>Програмите на ${plural(list.length, 'бюджет', 'бюджета')} още не са извлечени. На страницата на всяко от тези ведомства се виждат общата сума и политиките по закона:</p>
-    <ul class="s10-pending">${groups.map((g) => html`<li>${g.items.map((m, i) => html`${i ? ', ' : ''}<a href="${pm.ctx.href('vedomstvo', { code: m.id })}">${m.short || m.name}</a>`)}: ${g.reason}</li>`)}</ul>`;
-  return block({
-    id: 's10-p03',
-    title: 'Какво още предстои',
-    status: 'pending',
-    source: SOURCE_P,
-    asOf: pm.asOf,
-    body: pendingState({
-      id: 'P03',
-      title: 'Програмите на някои ведомства предстоят',
-      text,
-      source: SOURCE_P,
-    }),
-  });
-}
-
 function pPanel(md, pm, ctx) {
   if (!pm) {
     return block({
@@ -1067,7 +1041,7 @@ function pPanel(md, pm, ctx) {
     id: 's10-programi',
     title: 'Програмите на ведомствата',
     status: 'partial',
-    statusLabel: 'Официални данни, част предстои',
+    statusLabel: 'Официални данни, частично покритие',
     source: SOURCE_P,
     asOf: pm.asOf,
     scope: { key: 'prb-programi', label: 'Програмни бюджети', note: 'без ЕС и други средства' },
@@ -1082,7 +1056,7 @@ function pPanel(md, pm, ctx) {
     `,
     })}</div>
     ${pFind(pm, ctx, q, p)}<div id="s10-p-list" class="s10-list">${p.body}</div><div id="s10-p-notes" class="s10-notes small muted"${p.notes.s ? '' : html` hidden`}>${p.notes}</div>`,
-  })}${pendingBlock(md, pm)}`;
+  })}`;
 }
 
 /* ---------------------------------------------------------------- render */
@@ -1091,8 +1065,8 @@ export function render(ctx) {
   const md = model(ctx);
   if (!md.ok)
     return pendingState({
-      title: 'Бюджетите на ведомствата предстоят',
-      text: 'Данните за ведомствата още не са заредени.',
+      title: 'Няма данни за ведомствата',
+      text: 'Няма данни за избрания период.',
     });
   const pm = pModel(md, ctx);
   const tab = pick(ctx.query.tab, TABS, 'vedomstva');

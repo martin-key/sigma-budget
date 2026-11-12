@@ -34,7 +34,7 @@ export const lede = () =>
 const ok = (v) => typeof v === 'number' && Number.isFinite(v);
 const arr = (a) => (Array.isArray(a) ? a : []);
 const yr = (y) => `${y}${NBSP}г.`;
-const PENDING = 'Тези данни предстоят.';
+const PENDING = 'Няма данни за избрания период.';
 /** a name inside a sentence: „Социални и здравни осигуровки“ -> „социални и здравни осигуровки“, an acronym such as „ДДС“ stays */
 const lc = (s) => {
   const t = String(s);
@@ -302,12 +302,14 @@ export function render(ctx) {
     cardAgencies(ctx, O, D.ministries),
     cardMeasures(ctx, O, D.measures),
     cardOutlook(ctx, O),
-  ].map((c) => {
-    if (c.kpi.scope !== 'kfp') return c;
-    const scope = first ? 'kfp' : { key: 'kfp', gl: null };
-    first = false;
-    return { ...c, kpi: { ...c.kpi, scope } };
-  });
+  ]
+    .filter((c) => ok(c.kpi.mln) || c.kpi.value != null)
+    .map((c) => {
+      if (c.kpi.scope !== 'kfp') return c;
+      const scope = first ? 'kfp' : { key: 'kfp', gl: null };
+      first = false;
+      return { ...c, kpi: { ...c.kpi, scope } };
+    });
   return html`${unitSwitch(ctx, { name: 's05-unit', note: 'Важи за сумите на картите.' })}
     <ul class="s05-cards" role="list">${cards.map(card)}</ul>`;
 }

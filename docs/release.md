@@ -35,7 +35,7 @@
 ./budget build --inputs /path/to/inputs --out /outside/new/site-candidate --build-date 2026-11-10 --site
 ./budget validate --release /outside/new/candidate --inputs /path/to/inputs # манифестът, байтовете и SHA-256 на всеки файл, проверките на данните
 ./budget reproduce --manifest /outside/new/candidate/manifest.json --originals /path/to/inputs
-./budget reproduce --current https://sigma-budget.my-data.bg --originals /път/до/оригиналите
+./budget reproduce --current https://sigma-budget.midt.bg --originals /път/до/оригиналите
 ./budget refetch --manifest /outside/new/candidate/manifest.json --out work/refetch
 ./budget collect --out work/acquisition                # сваля всичко, което регистърът може да свали; snapshot.json ги описва
 ./budget import-source --source kfp --file ~/Downloads/2026-EU\ funds_1026_BG_WEB.xls --out /outside/new/acquired
