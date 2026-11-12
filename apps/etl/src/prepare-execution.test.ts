@@ -19,6 +19,7 @@ const root = fileURLToPath(new URL('../../../', import.meta.url));
 const fixture = join(root, 'packages/ingest/test/fixtures/wave18');
 const manifest = JSON.parse(readFileSync(join(fixture, 'manifest.json'), 'utf8'));
 const pinned = (path: string) => ({ path, sha256: sha256(readFileSync(path)) });
+const published = JSON.parse(readFileSync(join(root, 'data/release/execution.json'), 'utf8'));
 function config(): ExecutionInputConfig {
   const archive = pinned(join(fixture, 'data/originals/budget_2027/ZDBRB-2027.zip'));
   return {
@@ -48,16 +49,14 @@ it('prepares deterministic real-path outputs in a new owned directory and never 
       c = config();
     writeFileSync(input, JSON.stringify(c));
     const out = join(temp, 'one'),
-      args = ['--config', input, '--build-date', '2026-11-08', '--out', out];
+      args = ['--config', input, '--build-date', published.meta.retrieved, '--out', out];
     expect(prepareExecutionCli(args)).toBe(0);
     expect(readdirSync(out).sort()).toEqual([
       'execution-provenance.json',
       'execution-reader-evidence.json',
       'execution.json',
     ]);
-    expect(JSON.parse(readFileSync(join(out, 'execution.json'), 'utf8'))).toEqual(
-      JSON.parse(readFileSync(join(root, 'data/release/execution.json'), 'utf8')),
-    );
+    expect(JSON.parse(readFileSync(join(out, 'execution.json'), 'utf8'))).toEqual(published);
     const hashes = Object.fromEntries(
       readdirSync(out).map((f) => [f, sha256(readFileSync(join(out, f)))]),
     );
