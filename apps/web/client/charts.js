@@ -6,6 +6,7 @@
 import { ROOT } from './loc.js';
 import { num } from './format.js';
 import { esc } from './html.js';
+import { apportion, foldShares } from './calc.js';
 
 /* ---------------------------------------------------------------- loader */
 let loading = null;
@@ -356,7 +357,13 @@ function cartesian(spec, tk, env) {
     min: spec.min,
     max: spec.max,
     splitNumber: horiz && narrow ? valSteps : undefined,
-    axisLabel: { color: tk.faint, fontSize: 12, fontFamily: tk.mono, formatter: (v) => fmt(v) },
+    axisLabel: {
+      color: tk.faint,
+      fontSize: 12,
+      fontFamily: tk.mono,
+      // round ticks drop the empty decimals („2 000“, not „2 000,0“)
+      formatter: (v) => (Number.isInteger(v) ? String(fmt(v)).replace(/,0+(?=\D|$)/, '') : fmt(v)),
+    },
     splitLine: { lineStyle: { color: tk.line } },
     axisLine: { show: false },
     axisTick: { show: false },
@@ -420,6 +427,16 @@ function donut(spec, tk, env) {
       mock: rest.some((d) => d.mock),
     });
   const total = items.reduce((a, d) => a + (d.value || 0), 0);
+  // the tooltip share is apportioned to 100,0 over every part before the tail is folded, like the table twin and the screens' lists
+  // (echarts' own percent rounds each slice alone); „Други“ is the sum of its parts' shares
+  const all = src.some((d) => d.value < 0)
+    ? null
+    : apportion(
+        src.map((d) => d.value),
+        100,
+        1,
+      );
+  const shares = all ? foldShares(all, cut) : null;
   const data = items.map((d) => {
     const mock = !!(spec.mock || d.mock);
     return {
@@ -454,7 +471,7 @@ function donut(spec, tk, env) {
     tooltip: {
       trigger: 'item',
       formatter: (p) =>
-        `<div>${mark(p.color, !!p.data.itemStyle?.decal)}${esc(p.name)}</div><b style="font-variant-numeric:tabular-nums">${esc(fmt(p.value))}${spec.unit ? ' ' + esc(spec.unit) : ''}</b> · ${esc(num(p.percent, 1))}%`,
+        `<div>${mark(p.color, !!p.data.itemStyle?.decal)}${esc(p.name)}</div><b style="font-variant-numeric:tabular-nums">${esc(fmt(p.value))}${spec.unit ? ' ' + esc(spec.unit) : ''}</b> · ${esc(num(shares?.[p.dataIndex] ?? p.percent, 1))}%`,
     },
     series: [
       {

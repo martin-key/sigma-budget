@@ -690,8 +690,8 @@ function yearBars(M, f, o) {
   );
   const names = groupNames(f);
   const groups = [
-    { g: 'rep', color: '--data' },
-    { g: 'plan', color: 1 },
+    { g: 'rep', color: '--data' }, // series-1 is the same near-black as --data, so plans and limits use series 5
+    { g: 'plan', color: 5 },
     { g: 'fc', color: 'other' },
   ].filter((x) => f.kinds.some((k) => grpOf(k) === x.g));
   return {
@@ -1310,8 +1310,8 @@ export function newDebtSpec(M) {
   if (!rows.length) return null;
   const u = chartUnit(M.ctx, { pct: false, max: maxAbs(rows.map((x) => x.mln)) });
   const groups = [
-    { g: 'rep', color: '--data' },
-    { g: 'limit', color: 1 },
+    { g: 'rep', color: '--data' }, // series-1 is the same near-black as --data, so plans and limits use series 5
+    { g: 'limit', color: 5 },
     { g: 'plan', color: 'other' },
   ].filter((x) => rows.some((y) => y.kind === x.g));
   const v = rows.map((x) => u.conv(x.mln, null));

@@ -13,6 +13,7 @@ import { cellValue, stateDebt } from '../budget-2027.js';
 // Motion: bars and cells grow once when their scene scrolls into view; nothing moves under prefers-reduced-motion, and nothing is hidden first.
 import { selectPeriod, DEFAULT_PERIOD } from '../periods.js';
 import { planBasis } from '../exec.js';
+import { apportion } from '../calc.js';
 import { html, raw } from '../html.js';
 import { num, pct, money, date, monthName, NBSP } from '../format.js';
 import { byKey, byId, href as routeHref } from '../routes.js';
@@ -226,9 +227,24 @@ function scene1(ctx, core) {
 
 /* ------------------------------------------------------------------ 2 · where the money comes from (100 €) */
 
+// The same colour for each source as on S06 (s06-prihodi.js, ED[id].c), so a tax looks the same on both screens.
+const SOURCE_COLOR = {
+  dds: 1,
+  osiguritelni: 2,
+  nedanachni: 3,
+  pomoshti: 4,
+  ddfl: 5,
+  akcizi: 7,
+  korporativen: 8,
+};
 function scene2(ctx, core) {
-  const groups = core.revenueGroups;
-  if (!Array.isArray(groups) || !groups.length)
+  // Largest first and „Други“ last, as in the S06 legend (the order in core is the one of another year).
+  const groups = Array.isArray(core.revenueGroups)
+    ? [...core.revenueGroups].sort(
+        (x, y) => (x.id === 'drugi') - (y.id === 'drugi') || (y.share ?? -1) - (x.share ?? -1),
+      )
+    : [];
+  if (!groups.length)
     return block({
       id: 's04-scene2',
       title: SCENES[1].title,
@@ -237,8 +253,7 @@ function scene2(ctx, core) {
     });
   const gdp = core.kpis.gdp?.mlnPrecise;
   const cells = cells100(groups.map((g) => g.share ?? g.mln));
-  let c = 0;
-  const col = groups.map((g) => (g.id === 'drugi' ? 'o' : String(++c))); // the „others“ group has its own neutral colour
+  const col = groups.map((g) => String(SOURCE_COLOR[g.id] ?? 'o')); // „others“ (and anything unknown) has the neutral colour
   const squares = groups.flatMap((g, i) =>
     Array.from({ length: cells[i] }, () => html`<span class="s04-cell" data-g="${col[i]}"></span>`),
   );
@@ -290,7 +305,14 @@ function scene2(ctx, core) {
 /* ------------------------------------------------------------------ 3 · where it goes (the functions) */
 
 function scene3(ctx, core) {
-  const fns = [...(core.functions || [])].filter((f) => ok(f.mln)).sort((x, y) => y.mln - x.mln);
+  const sorted = [...(core.functions || [])].filter((f) => ok(f.mln)).sort((x, y) => y.mln - x.mln);
+  // The shares are apportioned to 100,0 exactly as on S07 („Къде отиват парите?“), so both screens print the same percentage.
+  const fnShares = apportion(
+    sorted.map((f) => f.mln),
+    100,
+    1,
+  );
+  const fns = sorted.map((f, i) => ({ ...f, share: fnShares[i] }));
   if (!fns.length)
     return block({
       id: 's04-scene3',
@@ -711,7 +733,7 @@ export function render(ctx) {
   const nav = html`<nav class="s04-nav" aria-label="Сцени на екрана"><ol>${SCENES.map((s, i) => html`<li><a href="${to(s.id)}"><span class="s04-nav-n" aria-hidden="true">${i + 1}</span>${s.nav}</a></li>`)}</ol></nav>`;
   return html`<div class="s04">
     <div class="s04-top" data-gl-scan>
-      <p class="s04-lead">Проектът за бюджет 2027 и прогнозата за 2027–2029 г. Месечните отчети показват изпълнението за 2026 г. Чете се за около пет минути.</p>
+      <p class="s04-lead">Проектът за бюджет 2027 и прогнозата до 2029 г. Месечните отчети показват изпълнението за 2026 г. Чете се за около пет минути.</p>
       <p class="s04-basis">Числата са в евро. Годишните числа са от проекта на МФ за 2027 г., публикуван на 06.11.2026. Историческите мерки и месечните отчети са обозначени със своята година. Какво промени приетият закон — на екрана <a href="${href('zakon')}">„${byKey.zakon.title}“</a>.</p>
     </div>
     ${nav}

@@ -1220,7 +1220,8 @@ function kpiBlock(ctx, main, eco) {
         mln: a.val,
         pctGdp: a.pgSel,
         delta: main.prevYear ? dl(a.val, a.before, main.prevYear) : null,
-        sub: ok(a.rawShare) ? `${pct(a.rawShare, 1)} от разходите по функции` : '',
+        // the apportioned share, the one the list, the map and the table print next to it
+        sub: ok(a.share) ? `${pct(a.share, 1)} от разходите по функции` : '',
         status: main.kind === 'cofog' ? 'real' : st,
       }),
     );
@@ -1293,8 +1294,8 @@ export const lede = (ctx) => {
         forecast: `Според прогнозата разходите през ${yr(eco.year)} ще бъдат ${v}${pg}.`,
       }[eco.kind0] ?? `Разходите през ${yr(eco.year)} са ${v}${pg}.`;
     const a = kfpModel(ctx)?.ranked[0];
-    return a && ok(a.rawShare)
-      ? `${first} Най-голям дял има функцията „${a.label}“: ${pct(a.rawShare, 1)} от разходите по функции.`
+    return a && ok(a.share)
+      ? `${first} Най-голям дял има функцията „${a.label}“: ${pct(a.share, 1)} от разходите по функции.`
       : first;
   }
   const c = cofogModel(ctx);

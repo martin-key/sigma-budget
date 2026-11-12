@@ -24,7 +24,7 @@ import {
 } from './release-data';
 import { inFlight, claim, withinCap } from './render-gate';
 import { finalizeResponse } from '../app/lib/security';
-import { rateLimitReleaseRead } from './release-rate-limit';
+import { rateLimitReleaseRead, rateLimitRender } from './release-rate-limit';
 import { bundledFeed, withFeedOrigin } from './feed';
 
 declare module 'react-router' {
@@ -274,11 +274,17 @@ async function dispatch(request: Request, env: Env, ctx: ExecutionContext): Prom
     load: data.load,
   };
   const embed = url.pathname.startsWith('/embed/');
-  const cache = request.method === 'GET' && search !== null ? edge() : undefined;
+  // HEAD reads the entry GET stored (headers only) but never draws one into the cache
+  const head = request.method === 'HEAD';
+  const cache = search !== null ? edge() : undefined;
   const key = cacheKey(data.releaseId, screenUrl);
   const fromCache = async () => {
     const hit = cache ? await cache.match(key) : undefined;
-    return hit ? encoded(request, documentHeaders(hit, env, embed, data.releaseId, 'HIT')) : null;
+    if (!hit) return null;
+    const res = documentHeaders(hit, env, embed, data.releaseId, 'HIT');
+    return head
+      ? new Response(null, { status: res.status, headers: res.headers })
+      : encoded(request, res);
   };
   const hit = await fromCache();
   if (hit) return hit;
@@ -290,14 +296,18 @@ async function dispatch(request: Request, env: Env, ctx: ExecutionContext): Prom
     const stored = await fromCache();
     if (stored) return stored;
   }
-  const settle = cache ? claim(key.url) : () => {};
+  // claim the miss before any await, so an identical miss arriving meanwhile waits for this one; the finally settles it on every exit
+  const settle = cache && !head ? claim(key.url) : () => {};
   let stored: Promise<unknown> = Promise.resolve();
   try {
+    // every request that reaches the renderer counts against the client's limit (cached screens do not)
+    const limited = await rateLimitRender(request, env);
+    if (limited) return limited;
     const res = await withinCap(() =>
       scopes.run(scope, () => handler(screenRequest, { cloudflare: { env, ctx }, release })),
     );
     if (!res) return unavailable('Сайтът е претоварен. Опитайте отново след малко.');
-    const cacheable = !!cache && res.status === 200 && !scope.degraded;
+    const cacheable = !!cache && !head && res.status === 200 && !scope.degraded;
     if (cacheable) {
       const copy = new Response(res.clone().body, { status: res.status, headers: res.headers });
       copy.headers.set(

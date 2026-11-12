@@ -327,6 +327,15 @@ it('preserves the Council-of-Ministers variant in institution return links', asy
   expect(vm.ctx.href('S10')).toBe('/vedomstva?variant=billMc');
   expect(vm.ctx.href('S10', {}, { variant: 'bill' })).toBe('/vedomstva?variant=bill');
 });
+it('shows bill rows by their printed labels, without the unprinted marker or a repeated variant', async () => {
+  const { document, html } = await page('/vedomstvo/1200');
+  const policies = document.querySelector('#s11-bill-policies');
+  expect(policies?.textContent).toContain('Всичко:');
+  expect(html).not.toContain('unprinted');
+  expect(
+    [...(policies?.querySelectorAll('thead th') || [])].map((th) => th.textContent),
+  ).not.toContain('Вариант');
+});
 it.each(['blg03', 'bLg03'])(
   'accepts municipality codes with existing case-insensitive semantics: %s',
   async (code) => {
@@ -365,9 +374,14 @@ it.each(['2028.forecast', '2029.forecast'])(
   async (period) => {
     const { html } = await page('/pari?per=' + period);
     expect(html).toContain('/merki?per=' + period);
-    expect(html).not.toContain('Мерки в бюджета за 2026');
+    expect(html).not.toContain('Мерки по законопроекта за 2026');
   },
 );
+it('labels the 2026 measures in the overview as the bill’s, not the adopted law’s', async () => {
+  const { html } = await page('/pari?per=2026.law');
+  expect(html).toContain('Мерки по законопроекта за 2026');
+  expect(html).not.toContain('Мерки в бюджета за 2026');
+});
 it('uses the 2027 draft by default and preserves explicit reports, law, expected and aliases', async () => {
   expect(requestState().period).toBe('2027.draft');
   for (const key of ['2024.report', '2025.report', '2026.law', '2026.expected', ...FRAMEWORK])
@@ -567,5 +581,6 @@ it('preserves municipal region-code URLs while reading only the 2027 allocations
   const rows = scope.maps.table.get('s20-bill-table').rows;
   const original = bill.municipal.art52.rows.filter((r: any) => r.region === 'ОБЛАСТ БЛАГОЕВГРАД');
   expect(rows).toHaveLength(original.length);
-  expect(rows.every((r: any) => r.region === 'ОБЛАСТ БЛАГОЕВГРАД')).toBe(true);
+  // the bill's „ОБЛАСТ БЛАГОЕВГРАД“ is shown by the region name of the municipality identity
+  expect(rows.every((r: any) => r.region === 'Благоевград')).toBe(true);
 });

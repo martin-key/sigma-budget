@@ -257,6 +257,9 @@
 .page[data-route='S04'] .s04-cell[data-g='7'] {
   background: var(--series-7);
 }
+.page[data-route='S04'] .s04-cell[data-g='8'] {
+  background: var(--series-8);
+}
 .page[data-route='S04'] .s04-legend {
   list-style: none;
   margin: 0;
@@ -304,6 +307,9 @@
 }
 .page[data-route='S04'] .s04-sw[data-g='7'] {
   background: var(--series-7);
+}
+.page[data-route='S04'] .s04-sw[data-g='8'] {
+  background: var(--series-8);
 }
 .page[data-route='S04'] .s04-lg-n {
   min-width: 0;

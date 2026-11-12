@@ -118,16 +118,18 @@
     letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--muted);
+    /* year and status on two lines, so the three values stay on one baseline */
+    white-space: pre-line;
   }
   .page[data-route='S34']
     :is(#s34-projects-table, #s34-project-details)
     td:nth-of-type(1):not([colspan])::before {
-    content: '2027 · проект';
+    content: '2027\A проект';
   }
   .page[data-route='S34'] :is(#s34-projects-table, #s34-project-details) td:nth-of-type(2)::before {
-    content: '2028 · прогноза';
+    content: '2028\A прогноза';
   }
   .page[data-route='S34'] :is(#s34-projects-table, #s34-project-details) td:nth-of-type(3)::before {
-    content: '2029 · прогноза';
+    content: '2029\A прогноза';
   }
 }

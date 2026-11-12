@@ -109,6 +109,46 @@ for (const path of [
   }
 }
 
+it('chart share columns are apportioned to 100,0 like the lists beside them', async () => {
+  for (const [path, list] of [
+    ['/razhodi?per=2027.draft', /^s07-map-.+-pie-t$/],
+    ['/prihodi?per=2027.draft', /^s06-by-source-t$/],
+  ] as const) {
+    const url = new URL(path, 'https://budget.test');
+    const scope: { maps?: Record<string, Map<string, any>> } & Record<string, unknown> = {
+      url,
+      origin: url.origin,
+      state: requestState('2027.draft'),
+      data: new Map(),
+      load,
+    };
+    provideScope(() => scope);
+    try {
+      const r = resolve(path);
+      await build(r.route, r.params, r.query);
+      const twins = [...(scope.maps?.table?.entries() || [])].filter(([id]) => list.test(id));
+      expect(twins.length, path).toBeGreaterThan(0);
+      for (const [id, spec] of twins) {
+        const shares = spec.rows
+          .map((row: { p: number | null }) => row.p)
+          .filter((p: unknown) => p != null);
+        const sum = shares.reduce((a: number, p: number) => a + p, 0);
+        expect(Math.round(sum * 10) / 10, id).toBe(100);
+        for (const p of shares) expect(Math.round(p * 10) / 10, id).toBe(p);
+      }
+    } finally {
+      provideScope(() => null);
+    }
+  }
+});
+
+it('opens a revenue source whatever the case of its id', async () => {
+  const lower = await annualDocument('/prihodi/dds');
+  const upper = await annualDocument('/prihodi/DDS');
+  expect(upper.querySelector('article')?.getAttribute('data-route')).toBe('S06');
+  expect(upper.querySelector('h1')?.textContent).toBe(lower.querySelector('h1')?.textContent);
+});
+
 it('old pinned annual data stays unavailable instead of borrowing the current release', async () => {
   const url = new URL('https://budget.test/pari?per=2027.draft');
   const names: string[] = [];

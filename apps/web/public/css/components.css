@@ -3031,21 +3031,6 @@ h4.block-title {
     display: block;
     font-family: var(--font-sans);
   }
-  .measure-origin {
-    margin-top: var(--sp-3);
-    font-size: var(--fs-s);
-    overflow-wrap: anywhere;
-  }
-  .measure-origin summary {
-    cursor: pointer;
-    color: var(--ink-mid);
-  }
-  .measure-origin dl > div {
-    margin-top: var(--sp-3);
-  }
-  .measure-origin dd {
-    margin: var(--sp-1) 0 0;
-  }
 }
 
 /* Tablet tables retain their columns; the edge fade signals horizontal scrolling. */

@@ -8,7 +8,8 @@
 // that the build copies from apps/web/public/index.html; the development server answers it with apps/web/public/index.html): the router builds the screen from the address and the copies in the cache. The shell is
 // stored on install, so the fallback is there whatever page the visitor landed on (before, landing on /prihodi left /razhodi and / without a copy:
 // a network error offline). It is the bare shell, not the start page the server drew, so no other screen's text stands under the address.
-const CACHE = 'bns-v7-1'; // its own cache name per address scheme (a v6 copy holds hash-era pages); the old cache is deleted on activate
+// V7-2: operator pages (/admin) and no-store answers are never kept, so nothing private outlives a sign-out; the new name drops older copies.
+const CACHE = 'bns-v7-2'; // its own cache name per address scheme (a v6 copy holds hash-era pages); the old cache is deleted on activate
 const START = () => new URL('app', self.registration.scope).href;
 self.addEventListener('install', (e) => {
   self.skipWaiting();
@@ -32,11 +33,16 @@ self.addEventListener('fetch', (e) => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
+  if (url.pathname === '/admin' || url.pathname.startsWith('/admin/')) return; // straight to the network, never cached
   e.respondWith(
     (async () => {
       try {
         const res = await fetch(req, { cache: 'no-cache' });
-        if (res.status === 200 && res.type === 'basic') {
+        if (
+          res.status === 200 &&
+          res.type === 'basic' &&
+          !/\bno-store\b/i.test(res.headers.get('Cache-Control') || '')
+        ) {
           const copy = res.clone();
           caches
             .open(CACHE)

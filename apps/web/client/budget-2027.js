@@ -120,6 +120,8 @@ export function municipalRows(doc, identities) {
       id: identity?.id,
       regionId: identity?.regionId,
       displayName: identity?.name || r.name,
+      // the bill prints „ОБЛАСТ БЛАГОЕВГРАД“; the screen uses the region name of the identity
+      regionName: identity?.region || r.region,
       delegated: detail?.cells || [],
     };
   });

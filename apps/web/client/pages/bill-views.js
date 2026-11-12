@@ -124,13 +124,17 @@ const rowsTable = (id, rows, unit) =>
     caption: 'Публикувани стойности',
     columns: [
       ...cellColumns(unit),
-      ...(rows.some((r) => r.variant) ? [{ key: 'variant', label: 'Вариант' }] : []),
+      // the variant is the same on every row (it is in the page control); it stays in the CSV
+      ...(rows.some((r) => r.variant) ? [{ key: 'variant', label: 'Вариант', csvOnly: true }] : []),
     ],
     rows,
   });
 const billRows = (rows, variant) =>
   (rows || []).map((r) =>
-    cellRow(`${r.no || ''} ${r.label}`, r.cell, { variant: labels[variant] }),
+    // „unprinted“ marks a row without a printed number (e.g. the „Всичко:“ total)
+    cellRow([r.no === 'unprinted' ? '' : r.no, r.label].filter(Boolean).join(' '), r.cell, {
+      variant: labels[variant],
+    }),
   );
 const unavailable = (ctx) =>
   ctx.failed?.includes('budget2027')
@@ -214,7 +218,7 @@ function municipalityRows(ctx, all = municipalRows(ctx.data.budget2027, ctx.data
     )
     .map((m) => ({
       name: m.displayName,
-      region: m.region,
+      region: m.regionName,
       ...Object.fromEntries(m.cells.map((c, i) => ['v' + i, cellValue(c)])),
       provenance: m.cells[0]?.provenance,
       origin: provenanceUrl(m.cells[0]),
@@ -337,8 +341,9 @@ export function institutionView(ctx) {
   const columns = [
     { key: 'name', label: 'Ведомство' },
     { key: 'article', label: 'Член' },
-    { key: 'code', label: 'Код' },
-    { key: 'variant', label: 'Вариант' },
+    // the budget code and the variant are for the CSV; on screen the variant is the page control
+    { key: 'code', label: 'Код', csvOnly: true },
+    { key: 'variant', label: 'Вариант', csvOnly: true },
     { key: 'expenditure', label: 'Разходи', unit: 'хил. €', num: true, d: 1 },
     { key: 'revenue', label: 'Собствени приходи', unit: 'хил. €', num: true, d: 1 },
     originCol,
@@ -375,8 +380,11 @@ export function institutionView(ctx) {
       'Бюджетите на ведомствата общо',
       kpiGrid([
         kpi({ label: 'Публикувани бюджети', value: items.length }),
-        kpi({ label: 'Разходи общо', value: total, unit: 'хил. €', d: 1 }),
-        kpi({ label: 'Собствени приходи', value: rev, unit: 'хил. €', d: 1 }),
+        kpi({ label: 'Разходи общо', mln: total == null ? null : total / 1000 }),
+        // without a printed revenue line for every article there is no total; „Предстои“ would promise one
+        rev == null
+          ? kpi({ label: 'Собствени приходи', value: 'Няма сбор', sub: 'липсва отпечатан ред' })
+          : kpi({ label: 'Собствени приходи', mln: rev / 1000 }),
       ]),
       {
         sub: `${labels[variant]}. Сборът е изчислен от отпечатаните заглавни редове по членове 2–48; не е целият държавен бюджет. ${variant === 'billMc' ? 'Показан е само публикуваният чл. 2 от варианта на МС.' : 'За чл. 5 липсва отпечатан приходен ред, затова общият сбор на собствените приходи не е наличен.'}`,
@@ -443,7 +451,7 @@ export function municipalityView(ctx) {
     const m = all.find((x) => x.id === String(ctx.params.code).toUpperCase());
     if (!m) ctx.notFound();
     return {
-      title: `Община ${m.displayName}${all.filter((x) => x.displayName === m.displayName).length > 1 ? ' · ' + m.region : ''}`,
+      title: `Община ${m.displayName}${all.filter((x) => x.displayName === m.displayName).length > 1 ? ' · ' + m.regionName : ''}`,
       crumbs: listCrumbs(ctx, `Община ${m.displayName}`),
       lede: 'Проект 2027: основните бюджетни взаимоотношения по чл. 52 и разбивката на делегираните дейности по чл. 53. Сумите са в хил. евро.',
       body: html`${municipalTable(
@@ -527,7 +535,7 @@ export function municipalityView(ctx) {
           value: region,
           options: [
             { value: '', label: 'Всички области' },
-            ...[...new Map(all.map((m) => [m.regionId || m.region, m.region])).entries()].map(
+            ...[...new Map(all.map((m) => [m.regionId || m.region, m.regionName])).entries()].map(
               ([value, label]) => ({ value, label }),
             ),
           ],
@@ -971,14 +979,13 @@ export const mountBillSearch = (root, ctx) =>
   });
 
 // Separate phone presentation: the hidden desktop table still owns the unchanged CSV.
-function measureCards(measures) {
+// Phone cards show the values only; cell provenance stays in the CSV, as in the desktop table.
+// Each value names its desktop row (data-anchor-for), so a search link (?to=s12-II_7-1-1) also lands on the phone card.
+function measureCards(measures, table) {
   return html`<div class="measure-cards">${measures.map(
-    (r) => html`<div class="measure-card">
+    (r, rowIndex) => html`<div class="measure-card">
     <h3>${r.label}</h3>
-    <dl>${FRAMEWORK.map((key, k) => html`<div class="measure-value"><dt>${periodByKey(key).label}, млн. €</dt><dd>${cellValue(r.cells[k]) == null ? '—' : num(cellValue(r.cells[k]), 1)}${r.gaps[k] ? html`<small class="muted">${r.gaps[k]}</small>` : ''}</dd></div>`)}</dl>
-    <details class="measure-origin"><summary>Произход на стойностите</summary>
-      <dl>${FRAMEWORK.map((key, k) => html`<div><dt>${periodByKey(key).label}</dt><dd>${r.cells[k]?.provenance ? html`<a href="${provenanceUrl(r.cells[k])}">${r.cells[k].provenance}</a><p>${provenanceUrl(r.cells[k])}</p>` : 'Няма публикувана клетка'}</dd></div>`)}</dl>
-    </details>
+    <dl>${FRAMEWORK.map((key, k) => html`<div class="measure-value" data-anchor-for="s12-${table}-${rowIndex}-${k}"><dt>${periodByKey(key).label}, млн. €</dt><dd>${cellValue(r.cells[k]) == null ? '—' : num(cellValue(r.cells[k]), 1)}${r.gaps[k] ? html`<small class="muted">${r.gaps[k]}</small>` : ''}</dd></div>`)}</dl>
   </div>`,
   )}</div>`;
 }
@@ -1019,7 +1026,7 @@ export function measuresView(ctx) {
           { key: 'gap', label: 'Липсваща стойност' },
         ],
         rows,
-      })}</div>${measureCards(doc.forecast[table])}`,
+      })}</div>${measureCards(doc.forecast[table], table)}`,
       {
         sub: 'Показани са отпечатаните ефекти и общият ред. Празните клетки не са нула. Знаците и разликите между годините са запазени.',
         ...frameworkStatus,

@@ -655,7 +655,7 @@ export const lede = (ctx) => {
   if (!m || !ok(m.total)) return null;
   const x = m.byId.get(String(ctx.params?.source || '').toLowerCase());
   if (x && ok(x.val))
-    return `${x.short}: ${money(x.val, { d: 1 })} през ${yr(m.year)}, или ${pct(x.rawShare, 1)} от всички приходи.`;
+    return `${x.short}: ${money(x.val, { d: 1 })} през ${yr(m.year)}, или ${pct(x.share ?? x.rawShare, 1)} от всички приходи.`;
   const v = money(m.total, { d: 1 });
   const first =
     {
@@ -671,7 +671,7 @@ export const lede = (ctx) => {
   const second =
     p >= 23.5 && p < 26.5 && f
       ? `Всяко четвърто евро идва от ${f[0]}.`
-      : `Най-голям е делът на „${a.short}“: ${pct(p, 1)} от приходите.`;
+      : `Най-голям е делът на „${a.short}“: ${pct(a.share ?? p, 1)} от приходите.`; // the printed share is the list's (apportioned)
   const p2 = b && ok(b.rawShare) ? p + b.rawShare : null;
   const w2 =
     p2 == null
@@ -724,8 +724,9 @@ export const embeds = {
 };
 
 export function render(ctx) {
-  if (ctx.params?.source && !ctx.data.revenue.groups.some((item) => item.id === ctx.params.source))
-    ctx.notFound();
+  // source ids are matched case-insensitively everywhere on this screen (/prihodi/DDS is /prihodi/dds)
+  const wanted = String(ctx.params?.source || '').toLowerCase();
+  if (wanted && !ctx.data.revenue.groups.some((item) => item.id === wanted)) ctx.notFound();
   if (selectPeriod(ctx.annualRaw?.revenue, ctx.period.key).gaps?.groups)
     return annualGap(ctx, ctx.annualRaw.revenue, ['groups']);
   const m = model(ctx);

@@ -55,7 +55,7 @@ const ROWS = [
   { id: 'gdpGrowth', name: 'БВП общо', of: 'БВП', color: '--ink' },
   { id: 'consumption', name: 'Потребление', of: 'потреблението', color: 3 },
   { id: 'gfcf', name: 'Инвестиции', of: 'инвестициите', color: 2 },
-  { id: 'exports', name: 'Износ', of: 'износа', color: 1 },
+  { id: 'exports', name: 'Износ', of: 'износа', color: 5 },
   { id: 'imports', name: 'Внос', of: 'вноса', color: 7 },
 ];
 

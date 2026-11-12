@@ -23,6 +23,17 @@ import { dataTable, tableData } from './table.js';
 import { seg } from './seg.js';
 import * as share from '../share.js';
 import { loadECharts, buildOption, tailAt } from '../charts.js';
+import { apportion, foldShares } from '../calc.js';
+
+/** shares of a whole of non-negative parts, apportioned to 100,0 like the screens' own lists; a whole with a negative part keeps plain shares */
+function sharesOf(values) {
+  const fin = values.filter((v) => okn(v));
+  const total = fin.reduce((a, v) => a + v, 0);
+  if (!(total > 0)) return values.map(() => null);
+  if (fin.some((v) => v < 0)) return values.map((v) => (okn(v) ? (v / total) * 100 : null));
+  const shares = apportion(values, 100, 1);
+  return values.map((v, i) => (okn(v) ? shares[i] : null));
+}
 
 const ownSpecs = new Map();
 const specs = {
@@ -90,11 +101,13 @@ function donutLegend(spec) {
       mock: src.slice(cut).some((d) => d.mock),
     });
   if (spec.legendValues) {
-    const total = parts.reduce((a, p) => a + (okn(p.value) ? p.value : 0), 0);
+    // apportioned over every part before the tail is folded, so each share matches the table twin; „Други“ is the sum of its parts
+    const all = sharesOf(src.map((d) => d.value ?? null));
+    const shares = foldShares(all, cut);
     const f = spec.fmt || ((v) => num(v, spec.d ?? (Math.abs(v) >= 100 ? 0 : 1)));
-    parts.forEach((p) => {
+    parts.forEach((p, i) => {
       p.val = okn(p.value) ? f(p.value) : DASH;
-      p.pct = okn(p.value) && total > 0 ? `${num((p.value / total) * 100, 1)}${NBSP}%` : '';
+      p.pct = okn(shares[i]) ? `${num(shares[i], 1)}${NBSP}%` : '';
     });
   }
   return parts;
@@ -137,12 +150,7 @@ function tableSpec(spec) {
       ];
       const share1 =
         spec.views?.includes('pie') && spec.series.length === 1 && pieOk(partsOf(spec)); // one whole in parts: say each part's share
-      const total = share1
-        ? spec.series[0].data.reduce(
-            (a, d) => a + (okn(valOf(d)) && valOf(d) > 0 ? valOf(d) : 0),
-            0,
-          )
-        : 0;
+      const shares = share1 ? sharesOf(spec.series[0].data.map((d) => valOf(d) ?? null)) : [];
       if (share1) columns.push({ key: 'p', label: 'Дял', unit: '%', d: 1, num: true });
       const rows = (spec.categories || []).map((cat, j) => {
         const r = { c: cat };
@@ -151,26 +159,23 @@ function tableSpec(spec) {
           r['s' + i] = valOf(d) ?? null;
           if (s.mock || spec.mock || (isObj(d) && d.mock)) r._mock = true;
         });
-        if (share1) r.p = total > 0 && okn(r.s0) ? (r.s0 / total) * 100 : null;
+        if (share1) r.p = shares[j] ?? null;
         return r;
       });
       return { columns, rows };
     }
     case 'donut': {
-      const total = (spec.data || []).reduce(
-        (a, d) => a + (Number.isFinite(d.value) ? d.value : 0),
-        0,
-      );
+      const shares = sharesOf((spec.data || []).map((d) => d.value ?? null));
       return {
         columns: [
           { key: 'n', label: spec.categoryLabel || 'Позиция' },
           col('v', 'Стойност'),
           { key: 'p', label: 'Дял', unit: '%', d: 1, num: true },
         ],
-        rows: (spec.data || []).map((d) => ({
+        rows: (spec.data || []).map((d, i) => ({
           n: d.name,
           v: d.value ?? null,
-          p: total > 0 && Number.isFinite(d.value) ? (d.value / total) * 100 : null,
+          p: shares[i],
           _mock: !!(spec.mock || d.mock),
         })),
       };

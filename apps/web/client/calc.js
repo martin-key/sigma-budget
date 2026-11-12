@@ -226,6 +226,18 @@ export function apportion(values, total, decimals = 2) {
   return base.map((v) => v / f);
 }
 
+/** shares of a pie whose tail past `cut` is folded into one slice („Други“): the kept shares, then the sum of the tail's (to `decimals`) */
+export function foldShares(shares, cut, decimals = 1) {
+  const list = Array.isArray(shares) ? shares : [];
+  if (list.length <= cut) return list;
+  const tail = list.slice(cut).filter(isNum);
+  const f = 10 ** decimals;
+  return [
+    ...list.slice(0, cut),
+    tail.length ? Math.round(tail.reduce((a, v) => a + v, 0) * f) / f : null,
+  ];
+}
+
 /**
  * Splits a yearly amount (EUR) by the budget's expenditure by function. functions: [{ id, name, short?, mln }] where mln is the plan figure
  * as a number (core.json functions) or an array by year (expenditure.json functions.items; opts.index = the year column, default 1 = 2026).

@@ -8,7 +8,7 @@ export function nextCard(o) {
   return html`<aside class="next" aria-labelledby="next-h" data-ui="next">
     <a class="next-main" href="${o.href}">
       <span class="next-body">
-        <span class="next-kicker" id="next-h">${o.heading || 'Следва'} · ${o.kicker}</span>
+        <span class="next-kicker" id="next-h">${o.heading || 'Следва'}${o.kicker ? ` · ${o.kicker}` : ''}</span>
         <span class="next-title">${o.title}</span>
         ${o.text ? html`<span class="next-text">${o.text}</span>` : ''}
       </span>

@@ -45,6 +45,8 @@ const LONG = {
   plan: 'План по проекта',
   forecast: 'Прогноза',
 };
+/** lower-cases only the first letter, so „МФ“ stays an abbreviation inside a sentence */
+const lowerFirst = (s) => s.charAt(0).toLowerCase() + s.slice(1);
 const list = (a, n) =>
   Array.isArray(a) && a.length === n ? a : Array.from({ length: n }, () => null);
 const pick = (a, i) => (Array.isArray(a) && ok(a[i]) ? a[i] : null);
@@ -254,6 +256,7 @@ const grpOf = (k) =>
 function groupNames(f) {
   const rep = new Set(f.kinds.filter((k) => grpOf(k) === 'rep'));
   const planYears = f.years.filter((_, i) => ['plan', 'law', 'draft'].includes(f.kinds[i]));
+  const planKinds = new Set(f.kinds.filter((k) => ['plan', 'law', 'draft'].includes(k)));
   return {
     rep:
       rep.size === 2
@@ -261,7 +264,10 @@ function groupNames(f) {
         : rep.has('prelim')
           ? LONG.prelim
           : LONG.actual,
-    plan: planYears.length === 1 ? `План за ${yr(planYears[0])}` : 'Закон и проект',
+    plan:
+      planYears.length === 1
+        ? `${planKinds.has('draft') ? 'Проект' : planKinds.has('law') ? 'Закон' : 'План'} за ${yr(planYears[0])}`
+        : 'Закон и проект',
     expected: LONG.expected,
     fc: LONG.forecast,
   };
@@ -272,8 +278,8 @@ function barsByKind(ctx, f, o) {
     names = groupNames(f),
     tx = (v) => unitTxt(u, v);
   const groups = [
-    { g: 'rep', color: '--data' },
-    { g: 'plan', color: 1 },
+    { g: 'rep', color: '--data' }, // series-1 is the same near-black as --data, so plans and limits use series 5
+    { g: 'plan', color: 5 },
     { g: 'expected', color: 2 },
     { g: 'fc', color: 'other' },
   ].filter((x) => f.kinds.some((k) => grpOf(k) === x.g));
@@ -392,7 +398,7 @@ function points(f, d) {
     ex = f.exp.mln[i],
     bl = f.bal.mln[i];
   const lead =
-    k === 'plan' ? `По проекта на бюджета за ${yr(y)}` : `За ${yr(y)} (${LONG[k].toLowerCase()})`;
+    k === 'plan' ? `По проекта на бюджета за ${yr(y)}` : `За ${yr(y)} (${lowerFirst(LONG[k])})`;
   if (ok(rv) && ok(ex))
     out.push(
       `${lead} приходите са ${withPg(rv, f.rev.pg[i])}, а разходите — ${withPg(ex, f.exp.pg[i])}.`,
@@ -612,11 +618,11 @@ function kpiBlock(ctx, f, debt) {
     scope: 'kfp',
     status: kind === 'forecast' ? 'forecast' : 'real',
     statusLabel: LONG[kind],
-    sub: `${LONG[kind]}.${p >= 0 ? ` Сравнението е с ${yr(prevYear)} (${LONG[f.kinds[p]].toLowerCase()}).` : ''}`,
+    sub: `${LONG[kind]}.${p >= 0 ? ` Сравнението е с ${yr(prevYear)} (${lowerFirst(LONG[f.kinds[p]])}).` : ''}`,
     source: f.sources,
     asOf: f.asOf,
     share: {
-      text: `${yr(year)} (${LONG[kind].toLowerCase()}): приходи ${money(f.rev.mln[i])}, разходи ${money(f.exp.mln[i])}.`,
+      text: `${yr(year)} (${lowerFirst(LONG[kind])}): приходи ${money(f.rev.mln[i])}, разходи ${money(f.exp.mln[i])}.`,
     },
     body: kpiGrid(
       [

@@ -240,7 +240,8 @@ function cardMeasures(ctx, O, MS) {
         ? `Заедно те ${r >= 0 ? 'увеличават' : 'намаляват'} приходите с ${part(r)} и ${e <= 0 ? 'намаляват' : 'увеличават'} разходите с ${part(e)} (без двете индикативни мерки).`
         : PENDING,
     kpi: {
-      label: `Мерки в бюджета за ${yr(2026)}`,
+      // the measures and their effects are the bill's (S12 says so too), not a confirmed effect of the adopted law
+      label: `Мерки по законопроекта за ${yr(2026)}`,
       value: C && ok(C.all) ? C.all : null,
       unit: 'мерки',
       scope: 'kfp',

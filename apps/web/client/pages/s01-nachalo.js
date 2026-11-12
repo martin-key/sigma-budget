@@ -34,7 +34,7 @@ export function next() {
 
 /** Primary bill context; monthly execution keeps its actual year. */
 export function lede(ctx) {
-  return html`Виж <a href="${ctx.href('S06')}">приходите</a> и <a href="${ctx.href('S07')}">разходите</a> по проекта за <span class="nowrap">2027 г.</span> и прогнозата за 2027–2029 г., както и <a href="${ctx.href('S15')}">изпълнението за 2026 г.</a>`;
+  return html`Виж <a href="${ctx.href('S06')}">приходите</a> и <a href="${ctx.href('S07')}">разходите</a> по проекта за <span class="nowrap">2027 г.</span> и прогнозата до 2029 г., както и <a href="${ctx.href('S15')}">изпълнението за 2026 г.</a>`;
 }
 
 export function render(ctx) {

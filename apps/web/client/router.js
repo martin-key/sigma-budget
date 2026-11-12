@@ -268,14 +268,26 @@ function revealViews(el) {
     });
   }
 }
-function handleTo(id) {
-  if (!id) return;
-  const el = document.getElementById(id);
-  if (!el) return;
+function reveal(el) {
   for (let p = el.parentElement; p; p = p.parentElement) if (p.tagName === 'DETAILS') p.open = true;
   if (el.tagName === 'DETAILS') el.open = true;
   revealTabs(el);
   revealViews(el);
+}
+function handleTo(id) {
+  if (!id) return;
+  let el = document.getElementById(id);
+  if (!el) return;
+  reveal(el);
+  // a layout that hides the target (a desktop table on a phone) draws the same row elsewhere, marked data-anchor-for="<id>"
+  if (!el.getClientRects().length)
+    for (const alt of document.querySelectorAll(`[data-anchor-for="${CSS.escape(id)}"]`)) {
+      reveal(alt);
+      if (alt.getClientRects().length) {
+        el = alt;
+        break;
+      }
+    }
   el.scrollIntoView({ block: 'start' });
   el.classList.remove('hl');
   void el.offsetWidth;
