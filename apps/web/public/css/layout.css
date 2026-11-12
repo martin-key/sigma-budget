@@ -93,35 +93,39 @@
 }
 .brand {
   display: inline-flex;
-  align-items: center;
-  gap: 10px;
+  align-items: baseline;
+  gap: 0.32em;
   flex: none;
   min-width: 0;
-  min-height: 32px;
+  padding-block: max(0px, (32px - 1em) / 2);
   color: var(--ink);
+  font-size: 1.9375rem;
   text-decoration: none;
 }
 @media (max-width: 640px) {
   .brand {
-    min-height: 44px;
+    padding-block: calc((44px - 1em) / 2);
   }
-}
+} /* the line is 1em: the padding makes the link 32px (44px on a phone) and keeps the baseline-aligned pair in the middle */
 .brand:hover {
   color: var(--ink);
   text-decoration: none;
 }
-.brand-mark {
+/* The СИГМА logo and «Бюджет» stand on one baseline with the same capital height. Everything is in em of the brand's font size, so the
+   breakpoints change only that: the letters of the logo are 103 of its 114.89 units (0.9 of its height) and serif capitals about 0.69em,
+   so the logo is 0.775em tall; it is laid on the baseline by its bottom edge and moved down by the magnifier's handle below the letters. */
+.brand-logo {
   flex: none;
-  width: 22px;
-  height: 22px;
+  display: block;
+  width: auto;
+  height: 0.775em;
+  position: relative;
+  top: 0.08em;
 }
 .brand-name {
-  font: 400 1.5rem/1 var(--font-serif);
+  font: 400 1em/1 var(--font-serif);
   letter-spacing: -0.02em;
   white-space: nowrap;
-}
-.brand:hover .brand-name {
-  color: var(--crimson);
 }
 .topbar-tools {
   flex: 1;
@@ -388,20 +392,16 @@
   .mast-in {
     padding: 12px var(--gutter);
   }
-  .brand-name {
-    font-size: 1.3125rem;
+  .brand {
+    font-size: 1.5625rem;
   }
 }
 @media (max-width: 599px) {
   .mast-in {
     padding: 10px var(--gutter);
   }
-  .brand-name {
-    font-size: 1.0625rem;
-  }
-  .brand-mark {
-    width: 20px;
-    height: 20px;
+  .brand {
+    font-size: 1.3125rem;
   }
   .period-btn svg {
     display: none;
@@ -416,15 +416,8 @@
   }
 } /* the year, the magnifier and «Меню» 4px apart: 12px gaps pushed the right-aligned tools over the wordmark at 320–328 and 340–344px, and left 1px at 380px (none with Georgia) */
 @media (max-width: 379px) {
-  .brand-name {
-    font-size: 1rem;
-  }
   .brand {
-    gap: 6px;
-  }
-  .brand-mark {
-    width: 20px;
-    height: 20px;
+    font-size: 1.1875rem;
   }
   .menu-btn > span:last-child {
     position: absolute;

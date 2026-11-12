@@ -10,7 +10,9 @@ import { date } from './format.js';
 import { serverScope } from './env.js';
 import { toHref } from './loc.js';
 
-export const MARK = html`<svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect x="3" y="18" width="6" height="11" fill="var(--ink)"/><rect x="12.5" y="12" width="6" height="17" fill="var(--ink)"/><rect x="22" y="6" width="6" height="23" fill="var(--ink)"/><rect x="2" y="29.5" width="28" height="1.5" fill="var(--ink)"/><circle cx="25" cy="2.6" r="2.4" fill="var(--crimson)"/></svg>`;
+// The СИГМА logo (the file of the СИГМА project, unchanged) and then «Бюджет» in the site serif: together «СИГМА Бюджет». The link carries the name
+// (aria-label), so the image is decorative; width/height give its proportions before it loads.
+export const LOGO = html`<img class="brand-logo" src="/sigma-logo.svg" alt="" width="523" height="115">`;
 export const yearOf = (p) => p.label.split(' · ')[0];
 export const statusOf = (p) => p.label.split(' · ')[1] || '';
 
@@ -101,7 +103,7 @@ export const CTA = 'Бюджет 2027';
 /** the header; o.route marks its group, o.periods === 'none' hides the period button (a screen that does not depend on the period) */
 export function topbarHtml(o = {}) {
   const p = store.period;
-  return html`<div class="mast-in"><a class="brand" href="${routeHref('S01')}" aria-label="СИГМА Бюджет, към началото">${MARK}<span class="brand-name">СИГМА Бюджет</span></a>
+  return html`<div class="mast-in"><a class="brand" href="${routeHref('S01')}" aria-label="СИГМА Бюджет, към началото">${LOGO}<span class="brand-name">Бюджет</span></a>
     <div class="topbar-tools">
       <button type="button" class="tool-btn period-btn" id="btn-period" aria-haspopup="dialog" aria-expanded="false" aria-label="Година и статус на данните: ${p.label}"${o.periods === 'none' ? html` hidden` : ''}><span class="p-year">${yearOf(p)}</span><span class="p-status"> · ${statusOf(p)}</span>${icon('chevronDown', { size: 14 })}</button>
       <nav class="sidenav" id="sidenav" aria-label="Основна навигация">${navHtml(o.route)}</nav>
