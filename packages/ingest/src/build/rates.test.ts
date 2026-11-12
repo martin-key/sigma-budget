@@ -1,10 +1,11 @@
+import { launchTexts } from './launch-texts.test-support.js';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { transformRatesAnnexes, transformContributionRows, type LawBlock } from './rates.js';
 
 const root = resolve(import.meta.dirname, '../../test/fixtures/components-rates');
-const read = (name: string): unknown => JSON.parse(readFileSync(resolve(root, name), 'utf8'));
+const read = (name: string): unknown => launchTexts(JSON.parse(readFileSync(resolve(root, name), 'utf8')));
 const blocks = () => read('inputs/doo-blocks.json') as LawBlock[];
 const heading = (list: LawBlock[], title: string) => {
   const i = list.findIndex((b) => b[0] === 'p' && b[1].startsWith(title));

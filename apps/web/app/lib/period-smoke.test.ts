@@ -325,6 +325,7 @@ for (const [per, attribution] of [
   });
 }
 it('scopes the displayed catalogue note without mutating its release', async () => {
+  const originalCatalog = structuredClone(await load('catalog'));
   const document = await annualDocument('/danni');
   expect(document.querySelector('article')?.textContent).toContain(
     'само за старите масиви към проекта за 2026',
@@ -333,9 +334,7 @@ it('scopes the displayed catalogue note without mutating its release', async () 
     '2026.expected е очаквано изпълнение',
   );
   expect(document.querySelector('article')?.textContent).toContain('2027.draft е проект');
-  expect(
-    (await load('catalog')).traps.find((t: any) => t.id === 'two-versions').text,
-  ).not.toContain('byPeriod');
+  expect(await load('catalog')).toEqual(originalCatalog);
 });
 
 for (const per of [

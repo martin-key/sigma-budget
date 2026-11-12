@@ -260,9 +260,8 @@ def rss(feed, base):
     base = base if base.endswith("/") else base + "/"
     lines = ['<?xml version="1.0" encoding="UTF-8"?>',
              '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">', "<channel>",
-             "<title>Бюджет на светло: какво е ново</title>", "<link>%s</link>" % escape(base),
-             "<description>Събития по данните за държавния бюджет: месечни отчети, законодателен път, ставки и нови набори. "
-             "Прототип с примерни данни, където е отбелязано.</description>",
+             "<title>СИГМА Бюджет: какво е ново</title>", "<link>%s</link>" % escape(base),
+             '<description>Събития по данните за държавния бюджет: месечни отчети, законодателен път, ставки и нови набори. Данни от официални източници.</description>',
              "<language>bg</language>", "<lastBuildDate>%s</lastBuildDate>" % _rfc822(BUILD_DATE),
              '<atom:link href="%sdata/feed.xml" rel="self" type="application/rss+xml"/>' % escape(base)]
     for e in feed["events"][:30]:

@@ -62,7 +62,7 @@ export function buildRss(feed: RssFeed, base: string, buildDate: string, siteNam
     '<channel>',
     `<title>${escapeXml(siteName)}: какво е ново</title>`,
     `<link>${escapeXml(base)}</link>`,
-    '<description>Събития по данните за държавния бюджет: месечни отчети, законодателен път, ставки и нови набори. Прототип с примерни данни, където е отбелязано.</description>',
+    '<description>Събития по данните за държавния бюджет: месечни отчети, законодателен път, ставки и нови набори. Данни от официални източници.</description>',
     '<language>bg</language>',
     `<lastBuildDate>${rssDate(buildDate)}</lastBuildDate>`,
     `<atom:link href="${escapeXml(base)}data/feed.xml" rel="self" type="application/rss+xml"/>`,

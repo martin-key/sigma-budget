@@ -1,3 +1,4 @@
+import { launchTexts } from './launch-texts.test-support.js';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -46,7 +47,7 @@ function fiscalEvidence(): FiscalEvidence {
 it('builds outlook and revenue from the frozen source evidence', () => {
   const e = fiscalEvidence();
   expect(buildOutlook(e, '2026-11-08')).toEqual(JSON.parse(bytes('donor/outlook.json').toString()));
-  expect(buildRevenue(e, '2026-11-08')).toEqual(JSON.parse(bytes('donor/revenue.json').toString()));
+  expect(buildRevenue(e, '2026-11-08')).toEqual(launchTexts(JSON.parse(bytes('donor/revenue.json').toString())));
 });
 import { buildExpenditure, type ExpenditureEvidence } from './fiscal-expenditure.js';
 function expenditureEvidence(): ExpenditureEvidence {

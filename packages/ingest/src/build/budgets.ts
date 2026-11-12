@@ -141,7 +141,7 @@ const PRB_NOTE =
 const TIERS = {
   validated: 'Програмният бюджет съвпада със закона',
   'program-budget-differs': 'Програмният бюджет към законопроекта се различава от приетия закон',
-  pending: 'Програмите предстои да бъдат добавени',
+  pending: 'Програми без данни в портала',
 };
 const KINDS: Record<string, string> = {
   ministry: 'Министерства',

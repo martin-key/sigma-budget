@@ -334,8 +334,8 @@ sources:
     member: ZDBRB-2027/3-PZDBRB-2027.pdf
     sha256: 7d8dae763e9a69080f1c9a5e98666bd7dd08ca6162f1da9107de121170d5c119
 - id: wg
-  title: 'Работна група „Бюджет на светло“: редакционни текстове'
-  publisher: Работна група „Бюджет на светло“
+  title: 'СИГМА Бюджет: редакционни текстове'
+  publisher: СИГМА Бюджет
   access: supplied
   acquisition: supplied
   format: pdf, txt

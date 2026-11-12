@@ -34,7 +34,7 @@ GLOSSARY_SRC = os.path.join(ROOT, "data", "inputs", "glossary.json")
 GUIDE_SRC = os.path.join(ROOT, "data", "cache", "research", "guide", "guide_raw.txt")   # not in the repository
 from budget_pipeline.routes import CATALOGUE, load_routes
 
-BUILD_DATE = os.environ.get("BUILD_DATE", "2026-11-08")   # same default as pipeline/budget_pipeline/build/data_io.py; a constant => byte-identical rebuilds
+BUILD_DATE = os.environ.get("BUILD_DATE", "2026-11-12")   # same default as pipeline/budget_pipeline/build/data_io.py; a constant => byte-identical rebuilds
 TEXT_AS_OF = "2026-10-01"                                  # date of the source documents
 
 # route params that have a closed registry (DATA_SPEC 2.3)
@@ -276,8 +276,7 @@ def build_glossary(routes):
     intro = src["intro"]
     out = {
         "meta": meta("D22", src["title"],
-                     "Речник с 64 термина на работна група „Бюджет на светло“: определенията, примерите и свързаните понятия са дословно "
-                     "от документа; връзките „Виж в бюджета“ са към екраните на този сайт. Числата в примерите са условни.",
+                     'Речник на СИГМА Бюджет с 64 термина: определенията, примерите и свързаните понятия са дословно от документа; връзките „Виж в бюджета“ са към екраните на този сайт. Числата в примерите са условни.',
                      TEXT_AS_OF),
         "title": src["title"],
         "subtitle": src["subtitle"],
@@ -325,7 +324,7 @@ CHECKS_HEADING = "Преди да използваш или споделиш ч�
 NEXT_PREFIX = "Следва: "
 CHECK_RE = re.compile(r"^(Провери пет неща:) (.+?)\. (Използвай .+)$")
 CHECK_SHORT = ["Период", "Обхват", "Единица", "Статус", "Източник"]       # editorial short labels (also in the old frozen input v3.4)
-CREDIT = "Работна група „Бюджет на светло“"
+CREDIT = 'СИГМА Бюджет'
 
 
 def read_guide_blocks():
@@ -456,8 +455,7 @@ def build_guide(routes):
 
     return {
         "meta": meta("D23", "Пътеводител: разбери бюджета стъпка по стъпка",
-                     "Текстът на пътеводителя на работна група „Бюджет на светло“ е дословно от оригинала: въведение, осем стъпки и "
-                     "„Преди да използваш или споделиш число“. Препратките към екраните на сайта са добавени.",
+                     'Пътеводител на СИГМА Бюджет: въведение, осем стъпки и „Преди да използваш или споделиш число“. Препратките към екраните на сайта са добавени.',
                      TEXT_AS_OF),
         "title": title,
         "lead": lead,

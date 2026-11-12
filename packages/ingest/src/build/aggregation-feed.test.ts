@@ -1,3 +1,4 @@
+import { launchTexts } from './launch-texts.test-support.js';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -7,7 +8,7 @@ import { executionNumbers } from './context.js';
 import { pendingFromExecution } from './aggregation-core.js';
 import { parseJsonStat } from '../io/data.js';
 const root = resolve(import.meta.dirname, '../../test/fixtures/aggregation');
-const text = (name: string) => readFileSync(resolve(root, name), 'utf8');
+const text = (name: string) => launchTexts(readFileSync(resolve(root, name), 'utf8'));
 const read = (name: string): any => JSON.parse(text(name));
 const make = (): FeedInput => ({
   siteName: editorialSiteName(read('inputs/glossary.json')),
@@ -82,7 +83,7 @@ describe('feed from frozen donor inputs', () => {
 it('uses the current editorial identity without changing feed events or other RSS bytes', () => {
   const input = make();
   const historical = buildFeed(input);
-  const current = JSON.parse(readFileSync(resolve(import.meta.dirname, '../../../../data/inputs/glossary.json'), 'utf8'));
+  const current = launchTexts(JSON.parse(readFileSync(resolve(import.meta.dirname, '../../../../data/inputs/glossary.json'), 'utf8')));
   input.siteName = editorialSiteName(current);
   const actual = buildFeed(input);
   expect(actual.feed).toEqual(historical.feed);

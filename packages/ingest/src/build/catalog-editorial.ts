@@ -136,8 +136,6 @@ export function catalogEditorial(input: CatalogEditorialInput): {
     ]),
     {
       ...substitute(trap.get('access'), [
-        listAnd(blocked),
-        formatDate(bad[0]!.checked, true),
         monthName(input.execution.latest.month),
       ]),
       evidence: probes,

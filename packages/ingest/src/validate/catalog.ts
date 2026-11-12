@@ -517,14 +517,16 @@ export function core(ctx: Context): Check {
         .reverse()
         .join('.')} г.`,
     ) &&
-      contains(
-        reason,
-        `за ${monthName(nxt, 'month')} ${pstr(ny)} г. още не е добавен`,
-        kind(reason, p04, 'reason'),
-      ) &&
-      pyMethod(reason, 'endswith', kind(reason, p04, 'reason')).endsWith(
-        `е за ${monthName(latest(), 'month')} ${prefixText(get(latest(), 'asOf', kind(latest(), ex, 'latest')), 4, kind(get(latest(), 'asOf'), latest(), 'asOf'))} г.`,
-      ),
+      (reason ===
+        `Последният месечен отчет в портала е за ${monthName(latest(), 'month')} ${prefixText(get(latest(), 'asOf', kind(latest(), ex, 'latest')), 4, kind(get(latest(), 'asOf'), latest(), 'asOf'))} г. Отчетът за ${monthName(nxt, 'month')} ${pstr(ny)} г. не е включен.` ||
+        (contains(
+          reason,
+          `за ${monthName(nxt, 'month')} ${pstr(ny)} г. още не е добавен`,
+          kind(reason, p04, 'reason'),
+        ) &&
+          pyMethod(reason, 'endswith', kind(reason, p04, 'reason')).endsWith(
+            `е за ${monthName(latest(), 'month')} ${prefixText(get(latest(), 'asOf', kind(latest(), ex, 'latest')), 4, kind(get(latest(), 'asOf'), latest(), 'asOf'))} г.`,
+          ))),
     `pending P04 must name the pending report ${pstr(nas, kind(nas, nxt, 'asOf'))} and the latest ${strAt(latest(), 'asOf', kind(latest(), ex, 'latest'))}`,
   );
   const n = get(core, 'counts'),

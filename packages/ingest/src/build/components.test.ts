@@ -1,9 +1,10 @@
+import { launchTexts } from './launch-texts.test-support.js';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, it } from 'vitest';
 import { transformState, type StateLaw } from './components.js';
 const root = resolve(import.meta.dirname, '../../test/fixtures/components-rates');
-const read = (name: string): unknown => JSON.parse(readFileSync(resolve(root, name), 'utf8'));
+const read = (name: string): unknown => launchTexts(JSON.parse(readFileSync(resolve(root, name), 'utf8')));
 const law = () => read('inputs/law.json') as StateLaw;
 it('matches the independent Python state transformation', () => {
   expect(transformState(law())).toEqual(read('state.json'));

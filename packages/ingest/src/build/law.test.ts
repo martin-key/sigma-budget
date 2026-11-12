@@ -1,10 +1,11 @@
+import { launchTexts } from './launch-texts.test-support.js';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { expect, expectTypeOf, it } from 'vitest';
 import { buildLaw, type LawEvidence, type LawDataset } from './law.js';
 import { compare } from '../parity/compare.js';
 const fixture = (name: string) =>
-  JSON.parse(readFileSync(resolve(import.meta.dirname, '../../test/fixtures/law', name), 'utf8'));
+  launchTexts(JSON.parse(readFileSync(resolve(import.meta.dirname, '../../test/fixtures/law', name), 'utf8')));
 it('builds the law dataset against the Python oracle', () => {
   const actual = buildLaw(fixture('evidence.json'), '2026-11-08');
   const differences = compare(fixture('oracle.json'), actual, { dataset: 'law', file: 'law.json' });
@@ -27,7 +28,7 @@ it('changes only next for the optional current publication, matching the frozen 
   const original = buildLaw(evidence, '2026-11-08');
   for (const { input, next } of cases) {
     const actual = buildLaw(evidence, '2026-11-08', input);
-    expect(actual.next).toEqual(next);
+    expect(actual.next).toEqual(launchTexts(next));
     expect({ ...actual, next: original.next }).toEqual(original);
   }
   expect(() => buildLaw(evidence, '2026-11-08', { other: 1 } as never)).toThrow();
