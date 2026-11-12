@@ -64,9 +64,11 @@ export function TextState({
     <div className="state state-pending" data-state="pending">
       <span className="state-ic">{icon('dashed', { size: 28 })}</span>
       <div className="state-main">
-        <p className="state-kicker">Предстои</p>
+        <p className="state-kicker">Няма данни</p>
         <p className="state-title">{title}</p>
-        <p className="state-text">Данните съществуват при издателя, още не са извлечени.</p>
+        <p className="state-text">
+          Не показваме число без налични официални данни за този показател.
+        </p>
       </div>
     </div>
   );

@@ -539,7 +539,7 @@ export async function renderPng(spec, { watermark = isMock(spec), pixelRatio = 2
       : []),
     ...(src ? wrapLines(probe, src, `400 12px ${fB}`, maxW) : []),
     ...(lnk ? wrapLink(probe, `Връзка: ${lnk}`, `400 12px ${fB}`, maxW) : []),
-    ...wrapLines(probe, 'СИГМА Бюджет · прототип', `400 12px ${fB}`, maxW),
+    ...wrapLines(probe, 'СИГМА Бюджет', `400 12px ${fB}`, maxW),
   ];
   const bodyH = img ? h : 22 * (Math.min(t.rows.length, 16) + 1) + (t.rows.length > 16 ? 20 : 0);
   const H =

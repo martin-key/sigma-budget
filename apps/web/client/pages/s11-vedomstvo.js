@@ -16,7 +16,7 @@ import { kpi, kpiGrid } from '../ui/kpi.js';
 import { dataTable } from '../ui/table.js';
 import { disclosure } from '../ui/disclosure.js';
 import { callout, facts, ext } from '../ui/cards.js';
-import { errorState, pendingState } from '../ui/states.js';
+import { errorState } from '../ui/states.js';
 import { gl } from '../ui/gl.js';
 import { unitSwitch, bindUnitSwitch } from '../ui/unit-switch.js';
 
@@ -382,19 +382,6 @@ function policiesBlock(M) {
         rows: m.policies.map((p) => ({ name: p.name, khil: p.khil })),
         total: { label: 'Общо', values: { khil: m.expKhil } },
       })}`,
-    })}
-    ${block({
-      id: 's11-p03',
-      title: 'Програми',
-      status: 'pending',
-      source: ['prb'],
-      asOf: doc.meta.asOf,
-      body: pendingState({
-        id: 'P03',
-        title: 'Програмите на ведомството предстои да бъдат добавени',
-        text: m.programs?.reason || 'Програмите на ведомството още не са извлечени.',
-        source: ['prb'],
-      }),
     })}`;
   }
   if (!file) {
@@ -447,17 +434,6 @@ function policiesBlock(M) {
   });
 }
 
-function skippedBlock(M) {
-  const sk = Array.isArray(M.file?.skipped) ? M.file.skipped.filter(Boolean) : [];
-  if (!sk.length) return '';
-  return disclosure({
-    id: 's11-propusnati',
-    title: 'Редове, които не се показват',
-    meta: num(sk.length, 0),
-    body: html`<p>Тези редове в документа не можаха да се прочетат със сигурност и затова не са в таблиците.</p><ul>${sk.map((s) => html`<li>${s}</li>`)}</ul>`,
-  });
-}
-
 function countKpi(M) {
   const { m, list } = M;
   const n = m.programs?.count;
@@ -465,7 +441,7 @@ function countKpi(M) {
     return kpi({
       label: 'Политики и програми',
       value: null,
-      sub: `Законът разпределя парите по ${plural(m.policies.length, 'политика', 'политики')}. Програмите предстоят.`,
+      sub: `Законът разпределя парите по ${plural(m.policies.length, 'политика', 'политики')}.`,
     });
   const pol = list.filter((e) => e.level === 'policy').length,
     solo = list.filter((e) => e.level === 'solo').length;
@@ -528,7 +504,7 @@ function ministryBody(M) {
       ])}`,
   });
   return html`${unitSwitch(ctx, { name: 's11-unit', note: '„% от БВП“ е спрямо планирания БВП за 2026 г.' })}
-    ${summary}${M.differs ? lawBlock(M) : ''}${policiesBlock(M)}${M.file ? yearsBlock(M, 's11-godini', M.file.total) : ''}${skippedBlock(M)}${docBlock(M)}`;
+    ${summary}${M.differs ? lawBlock(M) : ''}${policiesBlock(M)}${M.file ? yearsBlock(M, 's11-godini', M.file.total) : ''}${docBlock(M)}`;
 }
 
 /* ---------------------------------------------------------------- a policy or a programme */

@@ -19,6 +19,7 @@ import { statusPill, STATUS as UI_STATUS } from '../components/Status';
 import { siteUrl } from '../../client/seo.js';
 import { dataHref } from '../../client/data.js';
 import { sizeLabel } from '../../client/catalog.js';
+import { checkRows } from '../../client/check-groups.js';
 const ext = (url: string, label: ReactNode) => (
   <a className="ext" href={url} target="_blank" rel="noopener noreferrer">
     {label}
@@ -407,28 +408,24 @@ function checksBlock(v: Validation | undefined) {
           captionVisible: true,
           dense: true,
           columns: [
-            { key: 'group', label: 'Група', fmt: (x) => code(x) },
+            { key: 'label', label: 'Какво се проверява' },
+            { key: 'checks', label: 'Проверки' },
             { key: 'status', label: 'Резултат' },
-            {
-              key: 'summary',
-              label: 'Обобщение',
-              fmt: (x) => (
-                <>
-                  <span lang="en">{x || ''}</span>
-                </>
-              ),
-            },
           ],
-          rows: groups.map((g) => ({
-            group: g.group,
-            status: g.status === 'OK' ? 'наред' : g.status,
-            summary: g.summary,
-          })),
+          rows: checkRows(groups),
         })
       ) : (
         <>
           <p className="muted">{'Резултатите от проверките не са в изданието.'}</p>
         </>
+      )}
+      {groups.length ? (
+        <p className="small muted">
+          Техническото обобщение на всяка група (на английски) е във файла{' '}
+          <code>validation.json</code> от списъка с файлове.
+        </p>
+      ) : (
+        ''
       )}
 
       <p>

@@ -56,9 +56,9 @@ function view(ix, q, g, o) {
   const toks = parse(q);
   const note = ix.hasIndex
     ? ''
-    : html`<p class="s28-note">${statusPill('pending')}<span>Показатели, ведомства и общини ще се търсят, когато данните бъдат включени. Засега търсим по екрани и понятия.</span></p>`;
+    : html`<p class="s28-note"><span>Търсенето е по екрани и понятия.</span></p>`;
   const suggest = chips({
-    label: 'Примерни търсения',
+    label: 'Популярни търсения',
     items: POPULAR.map((w) => ({ label: w, key: `q:${w}` })),
   });
 

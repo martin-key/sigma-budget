@@ -8,11 +8,10 @@
 
 ## 0. Преди да започнеш (раздел 12)
 
-- [ ] Потвърдени домейн и Cloudflare акаунт; адресът става `SITE_ORIGIN` в `apps/web/wrangler.jsonc` (днес `https://sigma-budget.my-data.bg`, непотвърден).
+- [ ] Потвърден Cloudflare акаунт и делегиран домейн `sigma-budget.midt.bg` (`SITE_ORIGIN` в `apps/web/wrangler.jsonc`).
 - [ ] Списък на операторите и техните входове в Zero Trust (метод за вход: Cloudflare или One-time PIN).
 - [ ] Оригиналите на изданието, което ще бъде първо, и копие извън Cloudflare.
 - [ ] Прегледани семантични съпоставки (перата на КФП срещу Приложение 3; „% от плана“ спрямо закона или проекта).
-- [ ] Лиценз на данните и `FEEDBACK_EMAIL`.
 - [ ] Изданието е публикувано на staging и `./budget reproduce --current <staging>` дава „reproduced byte for byte“.
 
 ## 1. Създаване на средата (веднъж)

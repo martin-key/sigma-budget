@@ -75,10 +75,7 @@ export function NarrativeContent({
   } else if (model.view !== 'ready')
     body =
       model.view === 'pending' && !model.query.demo ? (
-        pendingState({
-          title: 'Тези данни още не са включени',
-          text: 'Данните съществуват при издателя, още не са извлечени.',
-        })
+        pendingState({ title: 'Няма данни за този изглед' })
       ) : (
         <TextState view={model.view!} title={byId[model.screen].title} retry={navigation.retry} />
       );

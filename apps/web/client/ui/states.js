@@ -39,30 +39,12 @@ export function errorState(o = {}) {
     <p class="state-act">${o.retry === false ? '' : html`<button type="button" class="btn btn-primary" data-action="retry">${icon('refresh', { size: 16 })} Опитай пак</button> `}${o.link === false ? '' : html`<a class="btn" href="#/danni">Откъде са данните</a>`}</p></div></div>`;
 }
 
-function publisherOf(keys) {
-  const ps = [...new Set((keys || []).map((k) => data.source(k).publisher).filter(Boolean))];
-  return ps.join(', ');
-}
-/**
- * pendingState({id:'P01'})            takes title/reason/expected/source from core.pending
- * pendingState({title, text, source}) explicit; with neither, the generic „Предстои“ note
- * Never shows a number: this is what stands in for data that exists at the publisher but is not extracted yet.
- */
+/** Missing-data state: keep the dataset title, hide internal acquisition notes. */
 export function pendingState(o = {}) {
   const p = (o.id && data.pending(o.id)) || {};
   const title = o.title || p.title;
-  const keys = o.source || p.source || [];
-  const who = publisherOf(keys);
-  const text =
-    o.text ||
-    (who
-      ? `Данните съществуват при ${who}, още не са извлечени.`
-      : 'Данните съществуват при издателя, още не са извлечени.');
-  const reason = o.reason || p.reason;
-  const expected = o.expected || p.expected;
   return html`<div class="state state-pending" data-state="pending"${o.id ? html` data-pending-id="${o.id}"` : ''}><span class="state-ic">${icon('dashed', { size: 28 })}</span>
-    <div class="state-main"><p class="state-kicker">Предстои</p>${title ? html`<p class="state-title">${title}</p>` : ''}<p class="state-text">${text}</p>
-    ${reason ? html`<p class="state-text small">${reason}</p>` : ''}${expected ? html`<p class="state-text small muted">Къде да ги видиш: ${expected}</p>` : ''}${action(o.action)}</div></div>`;
+    <div class="state-main"><p class="state-kicker">Няма данни</p>${title ? html`<p class="state-title">${title}</p>` : ''}<p class="state-text">Не показваме число без налични официални данни за този показател.</p>${action(o.action)}</div></div>`;
 }
 
 export function offlineNote(asOf) {

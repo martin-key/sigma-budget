@@ -1,5 +1,5 @@
 // KPI tile and grid: one headline number with its label, change, scope and status. Never shows a made-up number:
-// no value → a dashed „Предстои“ tile; a mock tile is hatched on its top edge and says so in words.
+// no value → a dashed „Няма данни“ tile; a mock tile is hatched on its top edge and says so in words.
 //   kpi({label, value, unit, d, mln, pctGdp, delta, sub, scope, status, mock, source, asOf, gl, href, id})
 //   kpiGrid([kpi(…), kpi(…)], {label, cls})
 // `mln` (money in млн. €) goes through view.amountParts, so „% от БВП“, „на човек“ and „и в лева“ apply; `value` is printed as given.
@@ -82,7 +82,7 @@ export function kpi(o = {}) {
     <p class="kpi-label">${label}</p>
     <p class="kpi-value">${
       pending
-        ? html`<span class="kpi-num">Предстои</span>`
+        ? html`<span class="kpi-num">Няма данни</span>`
         : html`<span class="kpi-num">${v}</span>${u ? html`<span class="kpi-unit">${u}</span>` : ''}${lev ? html`<span class="kpi-lev">(${lev})</span>` : ''}`
     }</p>
     ${pending ? '' : deltaHtml(o.delta)}

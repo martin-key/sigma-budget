@@ -1,3 +1,4 @@
+import { publicOrganization, finalPendingCopy } from './launch-copy-test-helper';
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { renderToStaticMarkup } from 'react-dom/server';
@@ -97,8 +98,15 @@ describe('frozen main 26f82ea, same release', () => {
         expect(html).not.toContain('data-s26-demo');
         expect(html).toContain('Официални източници');
         const actualDoc = parseHTML(html).document,
-          oldDoc = parseHTML(fixture(screen)).document;
-        for (const id of ['s26-open', 's26-roadmap', 's26-credits']) {
+          oldDoc = parseHTML(
+            // The data have no separate licence: they are public official documents.
+            fixture(screen).replace(
+              /<p>Лицензът на данните още не е избран\.[\s\S]*?<\/p>/,
+              '<p>Данните са публични: идват от официални документи и нямат отделен лиценз.</p>',
+            ),
+          ).document;
+        // Roadmap and working-group credits are intentionally retired; keep the open-data oracle.
+        for (const id of ['s26-open']) {
           const section = (d: Document) =>
             `<article>${d.getElementById(id)!.closest('section')!.outerHTML}</article>`;
           expect(semantics(section(actualDoc), false)).toEqual(semantics(section(oldDoc), false));
@@ -147,7 +155,7 @@ for (const [screen, path, status] of [
       expect(match, JSON.stringify(tag)).toBeTruthy();
     }
     expect(JSON.parse(result.doc.ld)).toEqual(
-      JSON.parse(document.querySelector('#ld-page')!.textContent!),
+      JSON.parse(publicOrganization(document.querySelector('#ld-page')!.textContent!)),
     );
   });
 }
@@ -170,6 +178,6 @@ for (const screen of ['S26', 'S30'] as const)
             <MigratedScreen model={model} navigation={{ go() {}, announce() {} }} />,
           ),
         ),
-      ).toEqual(semantics(fixture(`${screen}-${view}`)));
+      ).toEqual(semantics(finalPendingCopy(fixture(`${screen}-${view}`))));
     });
   }

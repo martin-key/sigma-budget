@@ -8,11 +8,9 @@ export const SECTIONS = [
   { id: 's26-mission', label: 'Мисия', title: 'Мисия' },
   { id: 's26-pillars', label: 'Два стълба', title: 'Двата стълба' },
   { id: 's26-open', label: 'Отворен код', title: 'Отворен код и данни' },
-  { id: 's26-roadmap', label: 'Пътна карта', title: 'Пътна карта' },
   { id: 's26-versions', label: 'Версии', title: 'Версии на данните' },
-  { id: 's26-questions', label: 'Въпроси', title: 'Въпроси към работната група' },
   { id: 's26-legend', label: 'Легенда', title: 'Легенда на статусите' },
-  { id: 's26-credits', label: 'Авторите', title: 'Кой стои зад проекта' },
+  { id: 's26-credits', label: 'Текстове и данни', title: 'Текстовете и данните' },
 ];
 const TITLE = Object.fromEntries(SECTIONS.map((s) => [s.id, s.title]));
 export const to = (id: string) => href('za-proekta', {}, { to: id }); // same-screen jump: the router scrolls, highlights and focuses the heading, no re-render

@@ -11,7 +11,7 @@ import { seg } from '../ui/seg.js';
 import { dataTable } from '../ui/table.js';
 import { chart } from '../ui/chart.js';
 import { kpi, kpiGrid } from '../ui/kpi.js';
-import { emptyState, pendingState } from '../ui/states.js';
+import { emptyState } from '../ui/states.js';
 import { callout } from '../ui/cards.js';
 import { progress } from '../ui/progress.js';
 import { gl } from '../ui/gl.js';
@@ -1793,7 +1793,6 @@ function compareBlock(M) {
     title: 'Защо числата за дълга се различават',
     source: srcOf(...c.rows.map((r) => r.source)),
     asOf: M.d.meta && M.d.meta.asOf,
-    share: { text: c.note },
     sub: `Три реда от различни институции за ${c.years.map(yr).join(' и ')}`,
     body: html`${dataTable({
       id: 's17-t-compare',
@@ -1804,20 +1803,7 @@ function compareBlock(M) {
         ...c.years.map((y, i) => mcol(mc, `y${i}`, String(y), `m${i}`)),
       ],
       rows,
-    })}${note(c.note)}<p class="s17-switch"><a href="${href}">${other.label}</a></p>`,
-  });
-}
-
-/* ---- what is not on the screen yet */
-function maturitiesBlock(M) {
-  return block({
-    id: 's17-b-maturities',
-    level: 2,
-    title: 'Падежи на дълга и емисии на държавни ценни книжа',
-    scope: ZDD,
-    status: 'pending',
-    share: false,
-    body: html`${pendingState({ id: 'P06' })}<p class="s17-note">Какво вече има на екрана: срокът на дълга и средната му продължителност са в блока „Из какво се състои държавният дълг“. Издадените през 2026 г. ДЦК са в блока „Колко нов дълг се поема“.</p>`,
+    })}<p class="s17-switch"><a href="${href}">${other.label}</a></p>`,
   });
 }
 
@@ -1909,7 +1895,7 @@ export function render(ctx) {
     M.scope === MAA
       ? [maastrichtBlock(M), euBlock(M), quarterBlock(M), compareBlock(M)]
       : [zddBlock(M), compareBlock(M)];
-  return html`${controls(M)}${kpisBlock(M)}${top}${confuseBlock(M)}${financeBlock(M, F)}${financeTableBlock(M, F)}${newDebtBlock(M)}<div class="s17-pair">${interestBlock(M)}${balanceBlock(M)}</div>${structureBlock(M)}${guaranteesBlock(M)}${limitsBlock(M)}${maturitiesBlock(M)}${methodDisclosure(M)}`;
+  return html`${controls(M)}${kpisBlock(M)}${top}${confuseBlock(M)}${financeBlock(M, F)}${financeTableBlock(M, F)}${newDebtBlock(M)}<div class="s17-pair">${interestBlock(M)}${balanceBlock(M)}</div>${structureBlock(M)}${guaranteesBlock(M)}${limitsBlock(M)}${methodDisclosure(M)}`;
 }
 
 let lastScope = null;

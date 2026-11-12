@@ -16,7 +16,6 @@ import {
   timeline,
   gl,
   unitSwitch,
-  pendingState as pending,
   dataTable,
 } from '../components/NarrativeUI';
 import { disclosure } from '../components/Disclosure';
@@ -592,59 +591,43 @@ function budgetsBlock(G: LawModel) {
       ok(m.programBudgetVsLaw!.diffKhil) &&
       Math.abs(m.programBudgetVsLaw!.diffKhil) >= 0.05,
   );
-  const pend = arr(M?.items).filter((m) => m.programs?.status === 'pending');
-  const prog =
-    pbl.length || pend.length
-      ? disclosure({
-          id: 's14-programni',
-          title: 'Програмни бюджети и закон',
-          meta: pbl.length ? plural(pbl.length, 'различие', 'различия') : '',
-          body: (
-            <>
-              <p className="s14-text">
-                {'Програмният бюджет на всяко ведомство е отделен документ към законопроекта.'}
-                {pbl.length
-                  ? ` При ${plural(pbl.length, 'ведомство', 'ведомства')} сумата в него се различава от тази в закона.`
-                  : ''}
-              </p>
+  const prog = pbl.length
+    ? disclosure({
+        id: 's14-programni',
+        title: 'Програмни бюджети и закон',
+        meta: pbl.length ? plural(pbl.length, 'различие', 'различия') : '',
+        body: (
+          <>
+            <p className="s14-text">
+              {'Програмният бюджет на всяко ведомство е отделен документ към законопроекта.'}
               {pbl.length
-                ? dataTable({
-                    id: 's14-t-programni',
-                    caption:
-                      'Ведомства, при които програмният бюджет се различава от закона, хил. €',
-                    columns: [
-                      { key: 'name', label: 'Ведомство' },
-                      amt('prb', 'Програмен бюджет'),
-                      amt('law', 'Закон'),
-                      dif('diff'),
-                    ],
-                    rows: pbl.map((m) => ({
-                      name: labelOf(m),
-                      prb: m.programBudgetVsLaw!.prbKhil,
-                      law: m.programBudgetVsLaw!.lawKhil,
-                      diff: m.programBudgetVsLaw!.diffKhil,
-                      _href: ctx.href('vedomstvo', { code: m.id }),
-                    })),
-                    dense: true,
-                  })
+                ? ` При ${plural(pbl.length, 'ведомство', 'ведомства')} сумата в него се различава от тази в закона.`
                 : ''}
-              {pend.length ? (
-                <>
-                  <p className="s14-text">
-                    {'За '}
-                    {plural(pend.length, 'ведомство', 'ведомства')}
-                    {' програмите още не са добавени в тази версия: '}
-                    {joinBg(pend.map((m) => m.name))}
-                    {'.'}
-                  </p>
-                </>
-              ) : (
-                ''
-              )}
-            </>
-          ),
-        })
-      : '';
+            </p>
+            {pbl.length
+              ? dataTable({
+                  id: 's14-t-programni',
+                  caption: 'Ведомства, при които програмният бюджет се различава от закона, хил. €',
+                  columns: [
+                    { key: 'name', label: 'Ведомство' },
+                    amt('prb', 'Програмен бюджет'),
+                    amt('law', 'Закон'),
+                    dif('diff'),
+                  ],
+                  rows: pbl.map((m) => ({
+                    name: labelOf(m),
+                    prb: m.programBudgetVsLaw!.prbKhil,
+                    law: m.programBudgetVsLaw!.lawKhil,
+                    diff: m.programBudgetVsLaw!.diffKhil,
+                    _href: ctx.href('vedomstvo', { code: m.id }),
+                  })),
+                  dense: true,
+                })
+              : ''}
+          </>
+        ),
+      })
+    : '';
   return block({
     id: 's14-bjudzheti',
     title: `${num(t.count, 0)} бюджета по чл. 2–47`,
@@ -751,14 +734,6 @@ function committeesBlock(G: LawModel) {
               })
             : ''}
         </div>
-        {pending(
-          {
-            id: 'P07',
-            text: 'Показваме колко са предложенията и връзките към самите документи в Народното събрание.',
-            source: ['parliament'],
-          },
-          G.ctx.core,
-        )}
       </>
     ),
   });
@@ -890,17 +865,6 @@ function docsBlock(G: LawModel) {
   });
 }
 
-function nextBlock(G: LawModel) {
-  const n = G.L.next;
-  if (!n) return '';
-  return block({
-    id: 's14-2027',
-    title: n.title || 'Следващият бюджет',
-    status: 'pending',
-    body: pending({ title: n.title, text: n.note, expected: n.expected }, G.ctx.core),
-  });
-}
-
 export const question = 'Кога и как беше приет бюджетът за 2026 г.?'; // js/seo.js: the lede answers it with the dates
 
 export function render(ctx: NarrativeContext) {
@@ -921,7 +885,6 @@ export function render(ctx: NarrativeContext) {
         {changesBlock(G)}
         {budgetsBlock(G)}
         {docsBlock(G)}
-        {nextBlock(G)}
       </>
     ),
   };

@@ -15,7 +15,6 @@ import { kpi, kpiGrid } from '../ui/kpi.js';
 import { dataTable } from '../ui/table.js';
 import { disclosure } from '../ui/disclosure.js';
 import { ext } from '../ui/cards.js';
-import { pendingState } from '../ui/states.js';
 import { timeline } from '../ui/timeline.js';
 import { gl } from '../ui/gl.js';
 import { unitSwitch, bindUnitSwitch } from '../ui/unit-switch.js';
@@ -409,14 +408,12 @@ function budgetsBlock(G) {
       ok(m.programBudgetVsLaw.diffKhil) &&
       Math.abs(m.programBudgetVsLaw.diffKhil) >= 0.05,
   );
-  const pend = arr(M?.items).filter((m) => m.programs?.status === 'pending');
-  const prog =
-    pbl.length || pend.length
-      ? disclosure({
-          id: 's14-programni',
-          title: 'Програмни бюджети и закон',
-          meta: pbl.length ? plural(pbl.length, 'различие', 'различия') : '',
-          body: html`<p class="s14-text">Програмният бюджет на всяко ведомство е отделен документ към законопроекта.${pbl.length ? ` При ${plural(pbl.length, 'ведомство', 'ведомства')} сумата в него се различава от тази в закона.` : ''}</p>
+  const prog = pbl.length
+    ? disclosure({
+        id: 's14-programni',
+        title: 'Програмни бюджети и закон',
+        meta: pbl.length ? plural(pbl.length, 'различие', 'различия') : '',
+        body: html`<p class="s14-text">Програмният бюджет на всяко ведомство е отделен документ към законопроекта.${pbl.length ? ` При ${plural(pbl.length, 'ведомство', 'ведомства')} сумата в него се различава от тази в закона.` : ''}</p>
       ${
         pbl.length
           ? dataTable({
@@ -439,9 +436,9 @@ function budgetsBlock(G) {
             })
           : ''
       }
-      ${pend.length ? html`<p class="s14-text">За ${plural(pend.length, 'ведомство', 'ведомства')} програмите още не са добавени в тази версия: ${joinBg(pend.map((m) => m.name))}.</p>` : ''}`,
-        })
-      : '';
+`,
+      })
+    : '';
   return block({
     id: 's14-bjudzheti',
     title: `${num(t.count, 0)} бюджета по чл. 2–47`,
@@ -538,7 +535,7 @@ function committeesBlock(G) {
             })
           : ''
       }</div>
-      ${pendingState({ id: 'P07', text: 'Показваме колко са предложенията и връзките към самите документи в Народното събрание.', source: ['parliament'] })}`,
+`,
   });
 }
 
@@ -643,17 +640,6 @@ function docsBlock(G) {
   });
 }
 
-function nextBlock(G) {
-  const n = G.L.next;
-  if (!n) return '';
-  return block({
-    id: 's14-2027',
-    title: n.title || 'Следващият бюджет',
-    status: 'pending',
-    body: pendingState({ title: n.title, text: n.note, expected: n.expected }),
-  });
-}
-
 export const question = 'Кога и как беше приет бюджетът за 2026 г.?'; // js/seo.js: the lede answers it with the dates
 
 export function render(ctx) {
@@ -661,7 +647,7 @@ export function render(ctx) {
   return {
     ...head(G),
     body: html`${unitSwitch(ctx, { name: 's14-unit', note: '„% от БВП“ е спрямо планирания БВП за 2026 г.' })}
-      ${summary(G)}${whenBlock(G)}${committeesBlock(G)}${lawsBlock(G)}${art1Block(G)}${changesBlock(G)}${budgetsBlock(G)}${docsBlock(G)}${nextBlock(G)}`,
+      ${summary(G)}${whenBlock(G)}${committeesBlock(G)}${lawsBlock(G)}${art1Block(G)}${changesBlock(G)}${budgetsBlock(G)}${docsBlock(G)}`,
   };
 }
 

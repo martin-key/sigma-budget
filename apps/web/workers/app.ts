@@ -46,6 +46,7 @@ interface Scope {
   releaseId: string;
   dataBase: string;
   sigmaUrl: string;
+  feedbackEmail: string;
   state: Record<string, unknown>;
   data: Map<string, unknown>;
   load: ReleaseData['load'];
@@ -269,6 +270,7 @@ async function dispatch(request: Request, env: Env, ctx: ExecutionContext): Prom
     releaseId: data.releaseId,
     dataBase: data.dataBase,
     sigmaUrl,
+    feedbackEmail: release.feedbackEmail,
     state: requestState(screenUrl.searchParams.get('per')),
     data: new Map(),
     load: data.load,

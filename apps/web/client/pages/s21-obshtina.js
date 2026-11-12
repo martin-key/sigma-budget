@@ -493,8 +493,8 @@ export function render(ctx) {
   const md = model(ctx);
   if (!md.ok)
     return pendingState({
-      title: 'Данните за общините предстоят',
-      text: 'Данните за общините още не са заредени.',
+      title: 'Няма данни за общините',
+      text: 'Няма данни за избрания период.',
     });
   if (!md.m) ctx.notFound();
   return {

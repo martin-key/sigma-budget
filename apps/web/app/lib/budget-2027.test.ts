@@ -514,7 +514,10 @@ it('exports source IDs, full provenance links, selected period, units, release a
   expect(sourceIndex.documents.forecast.memberSha256).toBe(forecast.source.pdf_sha256);
 });
 it('exposes missing programmes, absent future allocations and old releases explicitly', async () => {
-  expect((await page('/vedomstvo/1300/1300.01.01')).html).toContain('Няма пълен програмен архив');
+  // The programme URL now uses a neutral unavailable-period explanation.
+  expect((await page('/vedomstvo/1300/1300.01.01')).html).toContain(
+    'Няма програма за избрания период',
+  );
   expect((await page('/obshtina/BLG03?per=2029.forecast')).html).toContain(
     'Няма индивидуално общинско разпределение',
   );
@@ -583,4 +586,58 @@ it('preserves municipal region-code URLs while reading only the 2027 allocations
   expect(rows).toHaveLength(original.length);
   // the bill's „ОБЛАСТ БЛАГОЕВГРАД“ is shown by the region name of the municipality identity
   expect(rows.every((r: any) => r.region === 'Благоевград')).toBe(true);
+});
+
+it.each(['/vedomstva', '/vedomstvo/1300', '/vedomstvo/art1'])(
+  'shows the published institution tables without programme placeholders: %s',
+  async (address) => {
+    const { document } = await page(address);
+    const body = document.querySelector('.page-body')!;
+    expect(body.querySelector('table')).not.toBeNull();
+    expect(body.textContent).not.toMatch(/Предстои|пълен програмен архив|Програмите за 2027/);
+  },
+);
+it('keeps historical measure navigation with a neutral explanation', async () => {
+  const { document } = await page('/merki/historical');
+  expect(document.querySelector('article')!.textContent).toContain(
+    'Мярката е от бюджета за 2026 г.',
+  );
+  expect(document.querySelector('.page-body [data-st="pending"]')).toBeNull();
+  expect(document.querySelector('a[href*="merki?per=2027.draft"]')).not.toBeNull();
+});
+it('keeps feedback usable without a configured mail address', async () => {
+  const { document } = await page('/vrazka');
+  expect(document.querySelector('article')!.textContent).toContain('Запазване в браузъра');
+  expect(document.querySelector('article')!.textContent).toContain('не се изпраща');
+  expect(document.querySelector('article')!.textContent).not.toMatch(
+    /Изпращането предстои|към екипа още|Общини и проекти \(предстои\)/,
+  );
+  expect(document.querySelector('#s27-ideya-topic option[value="obshtini"]')?.textContent).toBe(
+    'Общини и проекти',
+  );
+});
+it('keeps the budget-plan document limitations without a future-review placeholder', async () => {
+  const { document } = await page('/byudzhet-2027?dokument=plan');
+  const limitations = document.querySelector('#s34-lipsva')!;
+  expect(limitations.textContent).toContain('Обхват на документа');
+  expect(limitations.textContent).not.toContain('Предстои');
+  expect(limitations.textContent).not.toContain('Оценката на Европейската комисия');
+});
+
+it.each(release('expenditure').functions.items.map((f: any) => f.id) as string[])(
+  'omits the empty ministry block for function %s in the launch period',
+  async (fn) => {
+    const { document } = await page('/razhodi/' + fn);
+    expect(document.querySelector('#s08-godini')).not.toBeNull();
+    expect(document.querySelector('#s08-vedomstva')).toBeNull();
+    expect(document.querySelector('.page-body')!.textContent).not.toContain(
+      'Няма извлечени ведомствени бюджети',
+    );
+  },
+);
+it('keeps the glossary source and date without the working-group credit', async () => {
+  const { document } = await page('/rechnik');
+  const credit = document.querySelector('.s03-credit')!;
+  expect(credit.querySelector('[data-src]')).not.toBeNull();
+  expect(credit.textContent).not.toContain('Работна група');
 });

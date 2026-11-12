@@ -15,7 +15,6 @@ export function Versions({ core }: { core: EditorialCore }) {
   const b = core.build || {},
     c = core.counts || {};
   const latest = dateG(b.kfpLatest);
-  const next = dateG(b.kfpNext);
   const inside = [
     Number.isFinite(c.budgets) &&
       plural(c.budgets, 'бюджет', 'бюджета') + ' на ведомства и институции',
@@ -43,10 +42,6 @@ export function Versions({ core }: { core: EditorialCore }) {
             v:
               latest &&
               `към ${latest}${monthsText(b.kfpMonths2026) ? ` (${monthsText(b.kfpMonths2026)})` : ''}`,
-          },
-          {
-            k: 'Следващ отчет',
-            v: next && `към ${next}${core.pending?.P04 ? ' (още не е извлечен)' : ''}`,
           },
           {
             k: 'Курс на еврото',

@@ -382,14 +382,7 @@ export async function build(route, params, query, o = {}) {
       }),
     );
   if (demo === 'error') return frame('error', errorState());
-  if (demo === 'pending')
-    return frame(
-      'pending',
-      pendingState({
-        title: route.title,
-        text: 'Данните съществуват при издателя, още не са извлечени.',
-      }),
-    );
+  if (demo === 'pending') return frame('pending', pendingState({ title: route.title }));
 
   const { mod, ctx, fail } = await prepare(route, params, query, { ...o, demo });
   if (o.stale?.()) throw aborted();
@@ -416,12 +409,7 @@ export async function build(route, params, query, o = {}) {
   if (fail) {
     return frame(
       fail.kind,
-      fail.kind === 'pending'
-        ? pendingState({
-            title: 'Тези данни още не са включени',
-            text: 'Данните съществуват при издателя, още не са извлечени.',
-          })
-        : errorState(),
+      fail.kind === 'pending' ? pendingState({ title: 'Няма данни за този изглед' }) : errorState(),
       { ctx, mod },
     );
   }

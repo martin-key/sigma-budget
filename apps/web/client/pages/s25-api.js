@@ -1,8 +1,4 @@
-// S25 · Отворени данни и API · #/api · next S01 · periods none
-// There is NO live API: the data of the site are static files (data/**). This screen says so plainly, lists every file with its address, size and
-// download link, and shows how to read one: address, schema, the real `meta` block of the file, curl / Python / JavaScript. ?set=<slug> picks the set
-// of the „Как да прочетеш файл“ block (S24 links here with it). The API of phase 2 (example addresses, no numbers) and the licence are written as what
-// they are: a proposal and an open question. All catalogue logic is in ../catalog.js: one page module never imports another (DEV_GUIDE §17.6).
+// Static data files, metadata, download links and runnable reading examples.
 import { html, raw } from '../html.js';
 import { date, plural } from '../format.js';
 import { href } from '../routes.js';
@@ -58,7 +54,7 @@ function stateBlock(M, withFiles, waiting) {
     'Как работят данните на сайта',
     () => html`
     ${callout({ kind: 'info', title: 'Отворени файлове с данни', body: html`<p>Всеки набор е готов файл с постоянен адрес: сваляш го цял и го филтрираш при себе си. Публичните файлове се четат без ключ за достъп и без регистрация.</p>` })}
-    <p>Днес данните са ${plural(withFiles.length, 'набор', 'набора')} в ${plural(M.counts.files, 'файл', 'файла')}${waiting.length ? `, а още ${plural(waiting.length, 'набор', 'набора')} предстоят` : ''}. Истински API има само като предложение за втората фаза: виж по-долу.</p>
+    <p>Днес данните са ${plural(withFiles.length, 'набор', 'набора')} в ${plural(M.counts.files, 'файл', 'файла')}.</p>
     <ol class="s25-steps">
       <li>Избери файл от списъка „Файловете на сайта“ и го свали, или го поискай по адреса му.</li>
       <li>Отвори блока ${code('meta')} в началото на файла: той казва какво е наборът, откъде е, към коя дата е и в каква мерна единица са числата.</li>
@@ -98,7 +94,7 @@ function filesBlock(M, waiting) {
         <ul class="s25-files" role="list">${sets.map(fileRow)}</ul></div>`
         : '';
     })}</div>
-    ${waiting.length ? html`<p class="small muted">Още ${plural(waiting.length, 'набор', 'набора')} нямат файл, защото данните им още не са извлечени. Виж ги в <a href="${href('danni', {}, { status: 'pending', to: 's24-sets' })}">„Откъде са данните?“</a>.</p>` : ''}`,
+`,
     { scan: true },
   );
 }
@@ -109,15 +105,15 @@ const META_FIELDS = [
   ['title', 'Име на набора.'],
   [
     'status',
-    'Статус на данните: real (официални), partial (частични), forecast (прогнозни), mock (примерни) или pending (предстоящи).',
+    'Статус на публикувания набор: real (официални), partial (частични) или forecast (прогнозни).',
   ],
   ['source', 'Ключове на източниците. Какво е всеки от тях е описано в „Откъде са данните?“.'],
   ['sourceNote', 'С думи: как са взети и подредени числата.'],
   ['asOf', 'Към коя дата са данните.'],
   ['retrieved', 'Кога са изтеглени от издателя.'],
   ['unit', 'Мерна единица на числата във файла.'],
-  ['pending', 'Какво още предстои да се добави, когато има такова.'],
-  ['mock', 'true, ако стойностите са измислени.'],
+  ['pending', 'Описание на липсващите данни, ако е включено във файла.'],
+  ['mock', 'В публикуваните набори стойността е false.'],
 ];
 const TYPE = {
   array: 'списък',
@@ -139,6 +135,7 @@ function excerpt(meta) {
   const text = JSON.stringify(
     meta,
     (k, v) => {
+      if (['pending', 'sourceNote'].includes(k)) return undefined;
       if (typeof v === 'string' && v.length > 150) {
         cut = true;
         return `${v.slice(0, 147).trimEnd()}…`;
@@ -266,8 +263,7 @@ async function readBlock(ctx, M, set) {
     ${field({ id: 's25-set', label: 'Набор', hint: 'Избери файл, за да видиш адреса, полетата и кода му.', control: selectInput({ id: 's25-set', name: 'set', query: 'set', hint: true, value: set.slug, options }) })}
     <div class="s25-set" data-st="${set.status}">
       <div class="s25-set-top"><p class="s25-set-t">${set.title}</p>${statusPill(set.status)}</div>
-      ${set.desc ? html`<p class="s25-set-d">${C.rich(set.desc, M)}</p>` : ''}
-    </div>
+      </div>
     ${set.mock ? callout({ kind: 'warn', title: 'Примерни данни: не ги цитирай', body: html`<p>Стойностите в този файл са измислени: той показва как ще изглежда екранът, а не какво е в действителност.</p>` }) : ''}
     <h3 class="s25-h3">Адрес и формат</h3>
     ${facts(rows, { cls: 's25-facts' })}
@@ -309,7 +305,7 @@ async function readBlock(ctx, M, set) {
     ${
       ex
         ? html`<h3 class="s25-h3">Така започва файлът</h3>
-      <p>Това е действителният блок ${code('meta')} на файла${ex.cut ? ': дългите текстове са съкратени' : ''}.</p>
+      <p>Това е блокът с основните полета от ${code('meta')} на файла${ex.cut ? ': дългите текстове са съкратени' : ''}.</p>
       ${snippet('s25-c-meta', 'Блокът meta (JSON)', ex.text)}`
         : state === 'skip'
           ? html`<p class="small muted">Файлът е голям и затова блокът ${code('meta')} не е показан тук. Той е в началото на файла.</p>`
@@ -321,74 +317,8 @@ async function readBlock(ctx, M, set) {
       ${snippet('s25-c-py', 'Python 3', c.py)}
       ${snippet('s25-c-js', c.json ? 'JavaScript (браузър или Node.js 18+)' : 'JavaScript (браузър)', c.js)}
     </div>
-    <p class="small muted">${c.json ? 'Всеки пример отпечатва името на набора и датата „Данни към“.' : 'Всеки пример отпечатва заглавията на събитията.'} Файловете са в UTF-8. Ако ги четеш от страница на друг сайт, браузърът може да поиска разрешение от сървъра (CORS): за истинския портал това още не е решено.</p>`,
+    <p class="small muted">${c.json ? 'Всеки пример отпечатва името на набора и датата „Данни към“.' : 'Всеки пример отпечатва заглавията на събитията.'} Файловете са в UTF-8. Публичните /api/releases и /data адреси позволяват четене от други сайтове чрез GET и HEAD (CORS: *), без изпращане на cookies или други удостоверителни данни.</p>`,
     { scan: true },
-  );
-}
-
-/* ---------------------------------------------------------------- 4 · the API of phase 2: a proposal */
-const ENDPOINTS = [
-  ['GET /api/v1/datasets', 'Списък на наборите с описание, статус и период.', 'catalog'],
-  ['GET /api/v1/datasets/{набор}', 'Паспорт на един набор: източници, период, формат.', 'catalog'],
-  ['GET /api/v1/revenue', 'Приходите на КФП по видове.', 'revenue'],
-  [
-    'GET /api/v1/expenditure?view=function',
-    'Разходите по функции, по икономически вид или по COFOG.',
-    'expenditure',
-  ],
-  ['GET /api/v1/ministries', 'Ведомствата и бюджетите им.', 'ministries'],
-  [
-    'GET /api/v1/ministries/{код}/programs',
-    'Политиките и програмите на едно ведомство по години.',
-    'ministries-programs',
-  ],
-  ['GET /api/v1/execution?month={месец}', 'Изпълнението на КФП за един месец.', 'execution'],
-  [
-    'GET /api/v1/municipalities/{код}',
-    'Годишният бюджет и трансферите към една община.',
-    'municipalities',
-  ],
-  ['GET /api/v1/measures', 'Мерките от бюджета и ефектите им.', 'measures'],
-];
-
-function proposalBlock(M) {
-  const today = (slug) => {
-    const s = M.bySlug.get(slug);
-    return s && hasFile(s)
-      ? html`<a href="${href('api', {}, { set: s.slug, to: 's25-read' })}">${code(s.file || s.template)}</a>`
-      : null;
-  };
-  return block(
-    's25-proposal',
-    'Предложение за истински API (фаза 2)',
-    () => html`
-    ${callout({ kind: 'warn', title: 'Предложение, не работеща услуга', body: html`<p>Адресите по-долу са примерни. Нищо от тях не отговаря сега: те показват как би могъл да изглежда API във втората фаза и кои от днешните файлове би заместил.</p>` })}
-    ${dataTable({
-      id: 's25-endpoints',
-      caption: 'Примерни адреси на бъдещия API',
-      dense: true,
-      captionVisible: true,
-      columns: [
-        { key: 'addr', label: 'Примерен адрес', fmt: (v) => code(v) },
-        { key: 'what', label: 'Какво би връщал' },
-        { key: 'today', label: 'Днес го има като', fmt: (v) => v },
-      ],
-      rows: ENDPOINTS.map(([addr, what, slug]) => ({ addr, what, today: today(slug) })),
-    })}
-    <h3 class="s25-h3">Какво още би имало</h3>
-    <ul class="s25-list">
-      <li>Страниране и филтри по период и по ведомство.</li>
-      <li>Избор на формат: JSON или CSV.</li>
-      <li>Версия в адреса, за да не се чупят приложенията при промяна.</li>
-      <li>Същите статуси и източници във всеки отговор.</li>
-      <li>Ограничение на заявките и по желание ключ за по-голямо натоварване.</li>
-    </ul>
-    <h3 class="s25-h3">Какво трябва да се реши преди това</h3>
-    <ul class="s25-list">
-      <li>Кой го хоства и поддържа.</li>
-      <li>Лиценз и условия за ползване.</li>
-      <li>Колко време се пазят старите версии.</li>
-    </ul>`,
   );
 }
 
@@ -398,12 +328,11 @@ function licenceBlock() {
     's25-licence',
     'Лиценз и условия за ползване',
     () => html`
-    ${callout({ kind: 'warn', title: 'За решение', body: html`<p>Условията за повторно ползване на данните още не са решени. Те зависят от това кой стои зад портала: държавна институция или гражданска инициатива.</p>` })}
-    <p>Какво знаем днес:</p>
+    <p>Данните са публични: идват от официални документи и нямат отделен лиценз.</p>
+    <p>При ползване:</p>
     <ul class="s25-list">
       <li>Числата са на първичните източници, а всеки източник има свои условия. Виж ги в <a href="${href('danni', {}, { to: 's24-sources' })}">„Откъде са данните?“</a>.</li>
       <li>Всеки официален набор има готово цитиране в паспорта си.</li>
-      <li>Примерните набори са измислени и не се цитират като действителни.</li>
     </ul>`,
     { scan: true },
   );
@@ -422,8 +351,8 @@ function versionsBlock(ctx, M) {
     'Версии и стабилност',
     () => html`
     ${rows.length ? facts(rows, { cls: 's25-facts' }) : ''}
-    <p>Сайтът е в бета версия: адресите и полетата във файловете още могат да се променят без предупреждение. Затова при ползване записвай версията и датата „Данни към“ от блока ${code('meta')}.</p>
-    <p>В истинския портал предлагаме версия на схемата в адреса, журнал на промените и предупреждение, преди да се премахне поле.</p>
+    <p>При използване на данните посочвай версията и датата „Данни към“ от блока ${code('meta')}.</p>
+    <p>Историята на изданията е в <a href="${href('proverka')}">„Данни и проверка“</a>.</p>
     <p>Кога излизат нови данни: виж <a href="${href('novo')}">„Какво ново?“</a>${feed && hasFile(feed) ? html` и RSS файла ${html`<a href="${href('api', {}, { set: feed.slug, to: 's25-read' })}">${code(feed.file)}</a>`}` : ''}.</p>`,
     { scan: true },
   );
@@ -440,7 +369,6 @@ export async function render(ctx) {
   const toc = [
     ['s25-files', 'Файловете'],
     ['s25-read', 'Как да прочетеш файл'],
-    ['s25-proposal', 'Предложение за API'],
     ['s25-licence', 'Лиценз'],
     ['s25-versions', 'Версии'],
   ];
@@ -455,7 +383,7 @@ export async function render(ctx) {
   return {
     lede: 'Всички публикувани данни са достъпни като файлове, които можеш да свалиш и да прочетеш с код. Тук са адресите, полетата и примерите за използване.',
     body: html`<nav class="s25-toc" aria-label="На тази страница">${chips({ items: toc.map(([id, label]) => ({ label, href: at(id, chosen) })) })}</nav>
-      ${stateBlock(M, withFiles, waiting)}${filesBlock(M, waiting)}${read}${proposalBlock(M)}${licenceBlock()}${versionsBlock(ctx, M)}`,
+      ${stateBlock(M, withFiles, waiting)}${filesBlock(M, waiting)}${read}${licenceBlock()}${versionsBlock(ctx, M)}`,
   };
 }
 

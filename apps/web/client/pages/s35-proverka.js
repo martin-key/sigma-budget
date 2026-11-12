@@ -14,6 +14,7 @@ import { statusPill, STATUS as UI_STATUS } from '../ui/status.js';
 import { siteUrl } from '../seo.js';
 import { dataHref, fromRegistry } from '../data.js';
 import { sizeLabel } from '../catalog.js';
+import { checkRows } from '../check-groups.js';
 
 export const needs = [
   'releases/current',
@@ -227,22 +228,15 @@ function checksBlock(v) {
             captionVisible: true,
             dense: true,
             columns: [
-              { key: 'group', label: 'Група', fmt: (x) => code(x) },
+              { key: 'label', label: 'Какво се проверява' },
+              { key: 'checks', label: 'Проверки' },
               { key: 'status', label: 'Резултат' },
-              {
-                key: 'summary',
-                label: 'Обобщение',
-                fmt: (x) => html`<span lang="en">${x || ''}</span>`,
-              },
             ],
-            rows: groups.map((g) => ({
-              group: g.group,
-              status: g.status === 'OK' ? 'наред' : g.status,
-              summary: g.summary,
-            })),
+            rows: checkRows(groups),
           })
         : html`<p class="muted">Резултатите от проверките не са в изданието.</p>`
     }
+    ${groups.length ? html`<p class="small muted">Техническото обобщение на всяка група (на английски) е във файла <code>validation.json</code> от списъка с файлове.</p>` : ''}
     <p>Изданието може да се пресъздаде от входните му файлове, включително запазените междинни данни, и всеки изходен файл да се сравни байт по байт. Нужни са кодът и Docker:</p>
     <pre class="s35-cmd"><code>git clone ${REPO}.git && cd sigma-budget
 ./budget reproduce --current ${origin}</code></pre>

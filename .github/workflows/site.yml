@@ -202,7 +202,7 @@ jobs:
         run: python -m apps.web.scripts.query_check
       - name: Build the Worker for staging and check every screen
         env:
-          ORIGIN: ${{ vars.STAGING_ORIGIN || 'https://sigma-budget.my-data.bg' }}
+          ORIGIN: ${{ vars.STAGING_ORIGIN || 'https://sigma-budget.midt.bg' }}
         run: pnpm build:release --env staging --origin "$ORIGIN" --noindex
       - name: Release artifact smoke tests
         run: python -m unittest tests.release.test_build_artifact

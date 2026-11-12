@@ -1,6 +1,6 @@
 import { chips } from '../../components/Chips';
 import { byKey, href } from '../../lib/legacy';
-import { link, to } from './shared';
+import { link } from './shared';
 
 function pillar(n: number, title: string, text: string, keys: string[]) {
   return (
@@ -20,7 +20,7 @@ function pillar(n: number, title: string, text: string, keys: string[]) {
 
 export const Pillars = () => (
   <>
-    <p>Основата са два стълба. Около тях има още три слоя.</p>
+    <p>Основата са два стълба. Около тях има още два слоя.</p>
     <div className="s26-pillars">
       {pillar(
         1,
@@ -35,7 +35,7 @@ export const Pillars = () => (
         ['izpalnenie', 'novo'],
       )}
     </div>
-    <h3 className="s26-h3">Още три слоя</h3>
+    <h3 className="s26-h3">Още два слоя</h3>
     <ul className="s26-layers">
       <li>
         <strong>Учебен слой.</strong> {link('5-minuti')} с връзки към подробностите,{' '}
@@ -44,10 +44,6 @@ export const Pillars = () => (
       <li>
         <strong>Слой на доверието.</strong> До всяко число стоят източникът, обхватът, статусът
         (проект, закон, отчет, прогноза) и датата. Наборите са описани в „{link('danni')}“.
-      </li>
-      <li>
-        <strong>Следващи стъпки.</strong> Какво още предстои, пише в{' '}
-        <a href={to('s26-roadmap')}>пътната карта</a>.
       </li>
     </ul>
   </>

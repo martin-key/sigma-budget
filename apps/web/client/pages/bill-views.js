@@ -5,7 +5,7 @@ import { block } from '../ui/block.js';
 import { dataTable, updateRows, tableData } from '../ui/table.js';
 import { chart } from '../ui/chart.js';
 import { kpi, kpiGrid } from '../ui/kpi.js';
-import { pendingState, errorState } from '../ui/states.js';
+import { emptyState, errorState } from '../ui/states.js';
 import { field, textInput, selectInput } from '../ui/forms.js';
 import { disclosure } from '../ui/disclosure.js';
 import {
@@ -27,7 +27,7 @@ import { norm, lat } from '../searchlib.js';
 const labels = { bill: 'Основен проект', billMc: 'Вариант на Министерския съвет' };
 const variantOf = (ctx) => (ctx.query.variant === 'billMc' ? 'billMc' : 'bill');
 const source = ['budget2027'];
-const gap = (title, text) => pendingState({ title, text, source });
+const gap = (title, text) => emptyState({ title, text });
 const publication = (doc) =>
   html`<p>
       МФ, 06.11.2026. Проектът за 2027 г. не е приет закон. Прогнозите са за 2028–2029 г. Сумите и
@@ -298,7 +298,7 @@ export function institutionView(ctx) {
       crumbs: listCrumbs(ctx, selected.name),
       body: html`${variantControl(ctx)}${gap(
         ctx.params.program
-          ? 'Няма пълен програмен архив за 2027–2029'
+          ? 'Няма програма за избрания период'
           : 'Няма публикуван бюджет в този вариант',
         'Основният проект и вариантът на Министерския съвет са отделни. Липсващи членове и програми не се попълват от друг вариант или от 2026 г.',
       )}`,
@@ -330,10 +330,7 @@ export function institutionView(ctx) {
         'Ангажименти и нови задължения',
         rowsTable('s11-bill-commitments', billRows(b.commitmentRows, variant)),
       )}
-      ${gap(
-        'Програмите за 2027–2029 не са налични в пълен архив',
-        'Показани са разпределенията, отпечатани в законопроекта. Пълните програмни бюджети за новия период липсват.',
-      )}${publication(doc)}`,
+      ${publication(doc)}`,
     };
   const rows = institutionRows(ctx, items);
   const total = strictSum(items.map((i) => i.expenditure)),
@@ -412,7 +409,7 @@ export function institutionView(ctx) {
       <p>
         <a href="${ctx.href('S11', { code: 'art1' }, keep(ctx))}">Държавният бюджет по чл. 1</a>
       </p>
-      ${gap('Няма пълен програмен архив за 2027–2029', doc.gaps.programmes)}${publication(doc)}`,
+      ${publication(doc)}`,
   };
 }
 
@@ -995,10 +992,7 @@ export function measuresView(ctx) {
   const doc = ctx.data.budget2027;
   if (ctx.params.id)
     return {
-      body: gap(
-        'Тази историческа мярка няма идентификатор в проекта за 2027',
-        'Мерките от АСБП 2027–2029 са в общия списък.',
-      ),
+      body: html`${gap('Мярката е от бюджета за 2026 г.', 'Мерките от АСБП 2027–2029 са в общия списък.')}<p><a href="${ctx.href('S12', {}, { per: '2027.draft' })}">Мерки в проекта за 2027</a></p>`,
       next: [
         { href: ctx.href('S12', {}, { per: '2027.draft' }), title: 'Мерки в проекта за 2027' },
       ],
