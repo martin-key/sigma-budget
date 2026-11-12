@@ -223,7 +223,7 @@ sources:
 - id: gisco
   title: 'Eurostat GISCO: местни административни единици (LAU) 2024, граници и население'
   publisher: Евростат (GISCO)
-  page: https://ec.europa.eu/eurostat/web/gisco/geodata/administrative-units/local-administrative-units
+  page: https://ec.europa.eu/eurostat/web/gisco/geodata/statistical-units/local-administrative-units
   access: auto
   acquisition: fetch
   format: json
