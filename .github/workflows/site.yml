@@ -87,7 +87,7 @@ jobs:
         run: node scripts/check-parity-reports.mjs
       - name: Per-workspace regression gate
         run: pnpm check:coverage
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: coverage
@@ -96,13 +96,13 @@ jobs:
             apps/*/coverage/coverage-summary.json
             packages/*/coverage/coverage-summary.json
           if-no-files-found: error
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: validation-wave14-parity
           path: ${{ env.WAVE14_PARITY_REPORT }}
           if-no-files-found: error
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: validation-wave15-parity
@@ -112,44 +112,44 @@ jobs:
             ${{ env.WAVE15_NATIVE_REPORT }}
             ${{ env.WAVE15_ITERABLE_REPORT }}
           if-no-files-found: error
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: validation-wave17a-parity
           path: ${{ env.WAVE17A_PARITY_REPORT }}
           if-no-files-found: error
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: editorial-parity
           path: ${{ env.EDITORIAL_PARITY_REPORT }}
           if-no-files-found: error
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: components-rates-parity
           path: ${{ env.COMPONENTS_RATES_PARITY_REPORT }}
           if-no-files-found: error
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: programmes-parity
           path: ${{ env.PROGRAMMES_PARITY_REPORT }}
           if-no-files-found: error
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: law-parity
           path: ${{ env.LAW_PARITY_REPORT }}
           if-no-files-found: error
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: common-parity
           path: ${{ env.COMMON_PARITY_REPORT }}
           if-no-files-found: error
 
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: fiscal-node-parity
@@ -208,7 +208,7 @@ jobs:
         run: python -m unittest tests.release.test_build_artifact
       - name: The checks and the build leave data/release unchanged
         run: test -z "$(git status --porcelain -- data/release)" || { git status --short -- data/release; exit 1; }
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: build
           path: apps/web/build
@@ -540,7 +540,7 @@ jobs:
           for stage in donor projected published; do
             pnpm exec budget-ts parity --registry packages/ingest/test/fixtures/debt-local/registry.yaml --oracle packages/ingest/test/fixtures/debt-local/$stage --candidate tmp/ts-migration/candidates/07/data --scope debt,municipalities,geo-obshtini,sebra --policy packages/ingest/test/fixtures/debt-local/policy.json --report tmp/ts-migration/candidates/07/$stage-diff.json
           done
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: debt-local-parity
@@ -552,7 +552,7 @@ jobs:
           pnpm exec budget-ts build --inputs packages/ingest/test/fixtures/dbp-gva --out tmp/ts-migration/candidates/10 --scope dbp2027,gva-sectors --build-date 2026-11-08
           pnpm exec budget-ts parity --registry packages/ingest/test/fixtures/dbp-gva/datasets.yaml --oracle packages/ingest/test/fixtures/dbp-gva/published --candidate tmp/ts-migration/candidates/10/data --scope dbp2027 --policy packages/ingest/test/fixtures/dbp-gva/policy.json --report tmp/ts-migration/candidates/10/dbp-parity.json
           git diff --exit-code -- data/release
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: dbp-gva-proof
           path: |
@@ -566,7 +566,7 @@ jobs:
           python packages/ingest/test/fixtures/fiscal/generate_datasets.py --check
           pnpm exec budget-ts build --inputs packages/ingest/test/fixtures/fiscal --out tmp/ts-migration/candidates/candidate03 --scope outlook,revenue,expenditure,measures --build-date 2026-11-08
           pnpm exec budget-ts parity --registry packages/ingest/test/fixtures/fiscal/inputs/datasets.yaml --oracle packages/ingest/test/fixtures/fiscal/oracle --candidate tmp/ts-migration/candidates/candidate03/data --scope outlook,revenue,expenditure,measures --policy packages/ingest/test/fixtures/fiscal/policy.json --report tmp/ts-migration/candidates/candidate03/cli-diff.json
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: fiscal-parity
@@ -606,7 +606,7 @@ jobs:
             pnpm exec budget-ts parity --registry packages/ingest/test/fixtures/aggregation/metadata/data/datasets.yaml --oracle packages/ingest/test/fixtures/aggregation/$stage --candidate tmp/ts-migration/candidates/11/data --scope core,feed,feed-rss,search-index --policy packages/ingest/test/fixtures/aggregation/policy.json --report tmp/ts-migration/candidates/11/$stage-parity.json
           done
           test -z "$(git status --porcelain -- data/release)"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: aggregation-parity
@@ -645,7 +645,7 @@ jobs:
           done
           node apps/etl/dist/catalog-metadata.js
           test -z "$(git status --porcelain -- data/release)"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: catalog-parity
@@ -685,7 +685,7 @@ jobs:
             pnpm exec budget-ts parity --registry packages/ingest/test/fixtures/wave13a/datasets.yaml --oracle packages/ingest/test/fixtures/wave13a/$stage --candidate tmp/ts-migration/candidates/13a/data --scope outlook,revenue,expenditure,budget2027,budget2027-provenance,law --policy packages/ingest/test/fixtures/wave13a/policy.json --protect packages/ingest/test/fixtures --report tmp/ts-migration/candidates/13a/$stage-parity.json
           done
           git diff --exit-code -- data/release
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: wave13a-parity
@@ -720,7 +720,7 @@ jobs:
           python packages/ingest/test/fixtures/wave13b/generate_oracle.py --check
       - name: Build and compare the frozen candidate
         run: pnpm exec budget-ts build --inputs packages/ingest/test/fixtures --out tmp/ts-migration/candidates/candidate13b --scope wave13b --build-date 2026-11-08
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: wave13b-parity
@@ -758,7 +758,7 @@ jobs:
         run: |
           pnpm --filter @sigma-budget/ingest... build
           node packages/ingest/dist/validate/kfp-cli.js --root packages/ingest/test/fixtures/wave18 --captures captures.json --manifest manifest.json --only KFP --report tmp/ts-migration/candidates/18/report.json
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: validation-wave18
@@ -798,7 +798,7 @@ jobs:
         run: |
           pnpm --filter @sigma-budget/ingest... build
           node packages/ingest/dist/validate/feed-cli.js --root packages/ingest/test/fixtures/validate17b/corpus --only FEED --report tmp/ts-migration/candidates/17b/report.json
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: validation-wave17b
@@ -846,7 +846,7 @@ jobs:
       - name: Independent SEARCH, mutation and compiled CLI checks
         run: |
           node packages/ingest/dist/validate/search-cli.js --root packages/ingest/test/fixtures/wave17c/corpus --only SEARCH --raw --report tmp/ts-migration/candidates/17c/report.json
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: validation-wave17c
@@ -871,7 +871,7 @@ jobs:
           gh api --hostname github.com repos/midt-bg/sigma-budget/releases/assets/733218674 -H 'Accept: application/octet-stream' > "$RUNNER_TEMP/registered-node-inputs.tar.gz"
           printf '%s  %s\n' '8617be55dad2d9605ac1c83876685d68650ecd3b709b4066ea8b018dd416090e' "$RUNNER_TEMP/registered-node-inputs.tar.gz" | sha256sum --check
           test "$(stat -c '%s' "$RUNNER_TEMP/registered-node-inputs.tar.gz")" = 151787132
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: registered-node-input-archive
           path: ${{ runner.temp }}/registered-node-inputs.tar.gz
@@ -915,7 +915,7 @@ jobs:
       - name: Protected checkout state
         if: always()
         run: test -z "$(git status --porcelain -- data packages/ingest/test/fixtures tests/pipeline/fixtures)"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: node-import-acceptance
