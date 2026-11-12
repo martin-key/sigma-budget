@@ -72,10 +72,24 @@ def main():
             assert page.locator('#s12-II_7-table').get_by_text('budget2027-provenance.json').count() == 0
             checks += 1
             go('/byudzhet-2027')
+            # Investment projects: three year totals, a chart by institution, the top ten (project + three years) and a searchable full list.
+            assert page.locator('#s34-projects .kpi').count() == 3
+            expect(page.locator('#s34-projects-by-institution-fig')).to_be_visible()
             projects = page.locator('#s34-projects-table')
             expect(projects).to_be_visible()
-            assert projects.locator('th[scope="col"]').count() == 3
+            assert projects.locator('thead th').count() == 4
+            assert projects.locator('tbody tr').count() == 10
             assert projects.get_by_text('budget2027-provenance.json').count() == 0
+            page.locator('#s34-all-projects > summary').click()
+            page.fill('#s34-q', 'струма')
+            expect(page.locator('#s34-count')).to_have_text(re.compile(r'^Намерени проекти: [1-9]\d?\.$'))
+            assert 0 < page.locator('#s34-project-details tbody tr').count() < 226
+            checks += 1
+            page.set_viewport_size({'width': 412, 'height': 900})
+            go('/byudzhet-2027')
+            assert page.evaluate('document.documentElement.scrollWidth') <= 412
+            assert page.locator('#s34-projects-table thead').evaluate('(e)=>e.getBoundingClientRect().height') <= 1
+            page.set_viewport_size({'width': 820, 'height': 1180})
             checks += 1
             go('/prognoza?per=2027.draft')
             assert page.locator('.fig-table table').count() > 0

@@ -71,3 +71,63 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* investment projects (main bill view): the institution sits under the project name, so the year columns keep their width on a phone */
+.page[data-route='S34'] .proj-inst {
+  display: block;
+  margin-top: 0.15rem;
+  font-weight: 400;
+}
+
+/* on a phone each project is one card: the name across the top, the three years side by side under it (the table, its sorting and its CSV stay the same) */
+@media (max-width: 599px) {
+  .page[data-route='S34'] :is(#s34-projects-table, #s34-project-details) thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .page[data-route='S34'] :is(#s34-projects-table, #s34-project-details),
+  .page[data-route='S34'] :is(#s34-projects-table, #s34-project-details) tbody {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+  .page[data-route='S34'] :is(#s34-projects-table, #s34-project-details) tbody tr {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.35rem 0.75rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .page[data-route='S34'] :is(#s34-projects-table, #s34-project-details) tbody tr > * {
+    padding: 0;
+    border: 0;
+    text-align: start;
+  }
+  .page[data-route='S34'] :is(#s34-projects-table, #s34-project-details) tbody tr > :first-child,
+  .page[data-route='S34'] :is(#s34-projects-table, #s34-project-details) tbody tr > [colspan] {
+    grid-column: 1 / -1;
+  }
+  .page[data-route='S34'] :is(#s34-projects-table, #s34-project-details) td:not([colspan])::before {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .page[data-route='S34']
+    :is(#s34-projects-table, #s34-project-details)
+    td:nth-of-type(1):not([colspan])::before {
+    content: '2027 · проект';
+  }
+  .page[data-route='S34'] :is(#s34-projects-table, #s34-project-details) td:nth-of-type(2)::before {
+    content: '2028 · прогноза';
+  }
+  .page[data-route='S34'] :is(#s34-projects-table, #s34-project-details) td:nth-of-type(3)::before {
+    content: '2029 · прогноза';
+  }
+}

@@ -1,4 +1,4 @@
-import { billOverview } from './bill-views.js';
+import { billOverview, mountProjectSearch } from './bill-views.js';
 import { periodByKey } from '../periods.js';
 import { isBudgetPlan } from '../budget-documents.js';
 // S34 · Бюджет 2027 (проект) · #/byudzhet-2027 · next S13 · periods none
@@ -713,4 +713,8 @@ export function render(ctx) {
       ${missingBlock(ctx, f)}
       <p class="s34-links small">Още по темата: <a href="${ctx.href('S13')}">${byId.S13.title}</a> · <a href="${ctx.href('S12')}">${byId.S12.title}</a> · <a href="${ctx.href('S17')}">${byId.S17.title}</a></p>`,
   };
+}
+
+export function mount(root, ctx) {
+  if (!isBudgetPlan(ctx.query)) return mountProjectSearch(root, ctx);
 }
