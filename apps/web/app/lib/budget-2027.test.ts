@@ -593,10 +593,24 @@ it('adds the defence, EU co-financing, КФП parts and tax expenditure tables t
   const { scope, html } = await page('/prognoza');
   for (const id of ['s13-defence', 's13-eu-cap', 's13-kfp-parts', 's13-tax-expenditures'])
     expect(html).toContain(`id="${id}"`);
-  const defence = tableData(scope.maps.table.get('s13-defence-III_2')).rows;
-  expect(defence[0].slice(2)).toEqual(annex('III_2')[0].values);
+  const defenceTable = tableData(scope.maps.table.get('s13-defence-III_2'));
+  const n = annex('III_2')[0].values.length;
+  expect(defenceTable.rows[0].slice(2, 2 + n)).toEqual(annex('III_2')[0].values);
+  // the CSV carries the provenance ID and link of every number after the numbers; the screen shows the numbers alone
+  const ids = defenceTable.rows[0].slice(2 + n).filter((v: unknown, i: number) => i % 2 === 0);
+  const links = defenceTable.rows[0].slice(2 + n).filter((v: unknown, i: number) => i % 2 === 1);
+  expect(ids).toHaveLength(n);
+  for (const [i, id] of ids.entries()) {
+    if (annex('III_2')[0].values[i] == null) continue;
+    expect(sourceIndex.entries[id as string].table).toBe('III_2');
+    expect(links[i]).toBe(`/data/budget2027-provenance.json#${id}`);
+  }
+  expect(defenceTable.columns.at(-1)).toMatch(/: връзка към произхода$/);
+  expect(html).not.toContain('budget2027-provenance.json#');
   const tax = tableData(scope.maps.table.get('s13-tax-expenditures-annex10')).rows;
-  expect(tax.map((r: any) => r.slice(2))).toEqual(annex('annex10').map((r: any) => r.values));
+  expect(tax.map((r: any) => r.slice(2, 2 + (r.length - 2) / 3))).toEqual(
+    annex('annex10').map((r: any) => r.values),
+  );
 });
 
 it('keeps the previous forecast-year notice for a release without the tables file', async () => {

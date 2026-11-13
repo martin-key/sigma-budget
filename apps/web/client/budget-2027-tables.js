@@ -22,17 +22,16 @@ export function publishedColumns(doc, table) {
 export const columnLabel = (c) =>
   `${periodByKey(c.period)?.label || c.year}${c.measure && MEASURES[c.measure] ? ' · ' + MEASURES[c.measure] : ''}`;
 
-/** a published number as a link to where it comes from; an empty printed cell prints a dash */
-export function cellLink(cell, d = 1) {
+/** a published number; an empty printed cell prints a dash. Not a link: its provenance record is an API answer for machines, the
+    reader finds the source of the table under its „Източник“ button (the record itself is in budget2027-provenance) */
+export function cellText(cell, d = 1) {
   const v = cellValue(cell);
   if (v == null) return html`<span class="muted" title="Празна печатна клетка">${DASH}</span>`;
-  const href = provenanceUrl(cell);
-  return href
-    ? html`<a href="${href}" title="Произход на числото">${num(v, d)}</a>`
-    : html`${num(v, d)}`;
+  return html`${num(v, d)}`;
 }
 
-/** rows of a forecast table for dataTable: one numeric column per published column, each value linked to its origin */
+/** rows of a forecast table for dataTable: one numeric column per published column; after them, for the CSV only (exportOnly), the
+    provenance ID and link of each of those columns (the numbers keep their positions, the screen shows the numbers alone) */
 export function forecastTable(doc, table, { columns, rows, d = () => 1 } = {}) {
   const cols = columns || publishedColumns(doc, table);
   const source = (doc?.forecast?.[table] || []).map((r, i) => ({ ...r, index: i }));
@@ -45,8 +44,12 @@ export function forecastTable(doc, table, { columns, rows, d = () => 1 } = {}) {
         key: 'c' + c.index,
         label: columnLabel(c),
         num: true,
-        fmt: (v, r) => cellLink(r['_c' + c.index], d(r, c)),
+        fmt: (v, r) => cellText(r['_c' + c.index], d(r, c)),
       })),
+      ...cols.flatMap((c) => [
+        { key: 'p' + c.index, label: `${columnLabel(c)}: произход`, exportOnly: true },
+        { key: 'o' + c.index, label: `${columnLabel(c)}: връзка към произхода`, exportOnly: true },
+      ]),
     ],
     rows: picked.map((r) => {
       const out = { label: r.label, unit: '', _index: r.index };
@@ -54,6 +57,8 @@ export function forecastTable(doc, table, { columns, rows, d = () => 1 } = {}) {
         const cell = r.cells?.[String(c.index)];
         out['c' + c.index] = cellValue(cell);
         out['_c' + c.index] = cell;
+        out['p' + c.index] = cell?.provenance || '';
+        out['o' + c.index] = provenanceUrl(cell);
         if (cell?.unit && !out.unit) out.unit = cell.unit;
       }
       return out;

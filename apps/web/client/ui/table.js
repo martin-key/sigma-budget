@@ -2,6 +2,8 @@
 //   dataTable({id, caption, columns:[{key,label,align,fmt,sort,unit,d}], rows:[{…, _mock:true, _href}], total, sortable, sortBy, dir, query, dense, note, empty, captionVisible})
 //   - columns[0] is the row header (<th scope="row">); `fmt(value,row)` may return a string or html``; numbers default to Bulgarian format
 //   - rows are plain objects; a row with `_mock:true` is hatched and read as „примерни данни“; `_href` links the first cell
+//   - a column with `exportOnly:true` is in the CSV and the table data, not on the screen (e.g. the provenance ID and link of every number:
+//     for those who reuse the data, meaningless to a reader of the page)
 //   - a null/undefined value prints an em dash (never a made-up number); an unknown number prints "—", never NaN
 //   - sortable:true adds header buttons (aria-sort). With query:true the choice is written to ?sort=&dir= (pass ctx.query.sort/dir as sortBy/dir)
 // The table registers itself with share.attach(), so a block's „Изтегли CSV“ finds it without extra code.
@@ -33,7 +35,7 @@ const cmp = (a, b, dir) => {
 };
 const sorted = s => {
   if (!s.sortBy) return s.rows;
-  const c = s.columns.find(x => x.key === s.sortBy);
+  const c = (s.all || s.columns).find(x => x.key === s.sortBy);
   return c ? s.rows.map((r, i) => [r, i]).sort((x, y) => cmp(x[0][c.key], y[0][c.key], s.dir) || x[1] - y[1]).map(x => x[0]) : s.rows;
 };
 
@@ -48,9 +50,10 @@ function rowsHtml(s) {
 
 /** the table as plain values: used by the CSV export and by figure twins */
 export function tableData(s) {
+  const cols = s.all || s.columns;                                   // every column, the export-only ones too, in their order
   return {
-    columns: s.columns.map(unitLabel),
-    rows: sorted(s).map(r => s.columns.map(c => { const v = r[c.key]; return v instanceof SafeHtml ? v.s.replace(/<[^>]*>/g, '') : v ?? ''; })),
+    columns: cols.map(unitLabel),
+    rows: sorted(s).map(r => cols.map(c => { const v = r[c.key]; return v instanceof SafeHtml ? v.s.replace(/<[^>]*>/g, '') : v ?? ''; })),
     statuses: sorted(s).map(r => (r._mock ? 'mock' : r._status)),
     ...(s.rowUnitKey ? { units: sorted(s).map(r => r[s.rowUnitKey]) } : {})
   };
@@ -59,9 +62,10 @@ export function tableData(s) {
 export function dataTable(o) {
   if (!o.id) throw new Error('dataTable: id is required');
   const rows = o.rows || [];
-  const s = { ...o, rows, columns: o.columns || [], dir: o.dir === 'desc' ? 'desc' : 'asc' };
+  const all = o.columns || [];
+  const s = { ...o, rows, all, columns: all.filter(c => !c.exportOnly), dir: o.dir === 'desc' ? 'desc' : 'asc' };
   s.aligns = s.columns.map(c => alignOf(c, rows));
-  if (s.sortBy && !s.columns.some(c => c.key === s.sortBy)) s.sortBy = null;
+  if (s.sortBy && !all.some(c => c.key === s.sortBy)) s.sortBy = null;
   specs.set(o.id, s);
   share.attach(o.id, { table: () => tableData(s) });
   const cap = `${o.id}-cap`;

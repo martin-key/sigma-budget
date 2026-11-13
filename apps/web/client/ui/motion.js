@@ -1,8 +1,9 @@
 // Motion (V6, 26.10): the small shared module behind css/motion.css. No library; only opacity/transform are animated, so nothing moves the layout.
 //   init()              once at boot: sets html.mo (the CSS hook for every start state) unless the visitor asked for reduced motion or the browser has no IntersectionObserver;
 //                       follows a later change of the OS setting
-//   enter(article,kind) a screen was painted: the header parts and the blocks of the first viewport rise in turn, the blocks further down get [data-rv] and appear when scrolled to
-//                       (kind 'rerender' = a unit/period change on the same screen: no replay)
+//   enter(article,kind,{header,swap}) a screen was painted: the header parts and the blocks of the first viewport rise in turn, the blocks further down get [data-rv] and appear when scrolled to
+//                       (header:false = a skeleton showed the header already: only the blocks rise; kind 'rerender' = a unit/period change on the same screen:
+//                       no replay, only a short fade-in when swap:true, i.e. the old screen had faded back while the new one loaded)
 //   scan(article)       after hydration: bars (.prog-fill, .rank-fill) fill from the left and numbers (.prog-text, .kpi-num) count up when they come into view
 //   settle()            finish everything NOW (final state): used before a picture export and when the safety timer runs out
 //   cleanup()           before replacing a screen: stop counters and release all observed elements of the old page
@@ -52,16 +53,17 @@ function rescue() {
 }
 
 /** a screen was painted */
-export function enter(article, kind) {
+export function enter(article, kind, o = {}) {
   if (!active() || !article?.isConnected || article.classList.contains('page-bare')) return;
-  if (kind === 'rerender') return;
-  article.classList.add('enter-anim');
+  if (kind === 'rerender') { if (o.swap) article.classList.add('enter-swap'); return; }
+  const header = o.header !== false;
+  article.classList.add(header ? 'enter-anim' : 'enter-body');
   const vh = innerHeight || 800;
   [...article.querySelectorAll(':scope > .page-body > *')].forEach((el, n) => {
     if (el.dataset.mo) return;
     el.dataset.mo = '1';
     const top = el.getBoundingClientRect().top;
-    if (top < vh * 0.92) { el.classList.add('rv-enter'); el.style.setProperty('--i', String(Math.min(5 + n, 9))); }
+    if (top < vh * 0.92) { el.classList.add('rv-enter'); el.style.setProperty('--i', String(header ? Math.min(5 + n, 9) : Math.min(n, 4))); }
     else { el.setAttribute('data-rv', ''); (rvIo ||= new IntersectionObserver((es, observer) => es.forEach(e => { if (e.isIntersecting) { observer.unobserve(e.target); revealRv(e.target); } }), { rootMargin: '0px 0px -6% 0px' })).observe(el); }
   });
   const next = article.querySelector(':scope > .next');
