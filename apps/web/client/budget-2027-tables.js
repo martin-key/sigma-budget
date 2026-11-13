@@ -5,7 +5,7 @@
 import { html } from './html.js';
 import { num, DASH } from './format.js';
 import { periodByKey } from './periods.js';
-import { cellValue, provenanceUrl } from './budget-2027.js';
+import { cellValue } from './budget-2027.js';
 
 export const TABLES = 'budget2027-tables';
 export const tablesOf = (ctx) => ctx.data?.[TABLES] || null;
@@ -22,17 +22,15 @@ export function publishedColumns(doc, table) {
 export const columnLabel = (c) =>
   `${periodByKey(c.period)?.label || c.year}${c.measure && MEASURES[c.measure] ? ' · ' + MEASURES[c.measure] : ''}`;
 
-/** a published number as a link to where it comes from; an empty printed cell prints a dash */
-export function cellLink(cell, d = 1) {
+/** a published number; an empty printed cell prints a dash. Not a link: its provenance record is an API answer for machines, the
+    reader finds the source of the table under its „Източник“ button (the record itself is in budget2027-provenance) */
+export function cellText(cell, d = 1) {
   const v = cellValue(cell);
   if (v == null) return html`<span class="muted" title="Празна печатна клетка">${DASH}</span>`;
-  const href = provenanceUrl(cell);
-  return href
-    ? html`<a href="${href}" title="Произход на числото">${num(v, d)}</a>`
-    : html`${num(v, d)}`;
+  return html`${num(v, d)}`;
 }
 
-/** rows of a forecast table for dataTable: one numeric column per published column, each value linked to its origin */
+/** rows of a forecast table for dataTable: one numeric column per published column */
 export function forecastTable(doc, table, { columns, rows, d = () => 1 } = {}) {
   const cols = columns || publishedColumns(doc, table);
   const source = (doc?.forecast?.[table] || []).map((r, i) => ({ ...r, index: i }));
@@ -45,7 +43,7 @@ export function forecastTable(doc, table, { columns, rows, d = () => 1 } = {}) {
         key: 'c' + c.index,
         label: columnLabel(c),
         num: true,
-        fmt: (v, r) => cellLink(r['_c' + c.index], d(r, c)),
+        fmt: (v, r) => cellText(r['_c' + c.index], d(r, c)),
       })),
     ],
     rows: picked.map((r) => {

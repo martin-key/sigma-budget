@@ -106,10 +106,11 @@ function describe(name, verbs, years, vals, tx) {
 }
 const PLURAL = ['растат', 'намаляват'], SINGULAR = ['расте', 'намалява'];
 
-/** the table twin of a chart: the published numbers, always in млн. € and % от БВП, whatever the chart shows */
+/** the table twin of a chart: the published numbers, always in млн. € and % от БВП, whatever the chart shows; the provenance ID of
+    each number only in the CSV (js/ui/table.js exportOnly) */
 function twin(f, items) {
   const columns = [{ key: 'y', label: 'Година' }, { key: 'v', label: 'Вид данни' }];
-  items.forEach((it, k) => columns.push({ key: `m${k}`, label: it.name, unit: 'млн. €', d: 1, num: true }, { key: `p${k}`, label: it.name, unit: '% от БВП', d: 1, num: true }, {key:`src${k}`, label: `${it.name}: произход`}));
+  items.forEach((it, k) => columns.push({ key: `m${k}`, label: it.name, unit: 'млн. €', d: 1, num: true }, { key: `p${k}`, label: it.name, unit: '% от БВП', d: 1, num: true }, {key:`src${k}`, label: `${it.name}: произход`, exportOnly: true}));
   const rows = f.years.map((y, i) => {
     const r = { y: String(y), v: LONG[f.kinds[i]], _status: f.kinds[i] === 'forecast' ? 'forecast' : 'real' };
     items.forEach((it, k) => { r[`m${k}`] = it.s.mln[i]; r[`p${k}`] = it.s.pg[i]; r[`src${k}`] = it.s.origins?.[i] || f.o.records?.[i]?.series?.[{ 'Приходи':'revenue', 'Разходи':'expenditure', 'Дефицит':'balance', 'Салдо':'balance', 'Лихви по дълга':'interest' }[it.name]]?.provenance || ''; });
@@ -353,7 +354,7 @@ function debtBlock(ctx, f, d) {
 }
 
 /* ---------------------------------------------------------------- further АСБП 2027–2029 tables (budget2027-tables.json, D37) */
-// Each number is a link to the PDF page it comes from (the shared budget2027 provenance index). The tables are printed as they are:
+// Where each number comes from (its PDF page) is in the shared budget2027 provenance index, not on the screen. The tables are printed as they are:
 // no sums, no shares and no conversions are made here. A release without the file shows none of these blocks.
 const ASBP = [
   {

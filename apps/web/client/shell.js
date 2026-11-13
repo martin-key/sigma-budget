@@ -24,13 +24,15 @@ import { yearOf, statusOf, TABS, NAV_GROUPS, sigmaLink, groupOf, groupItems, nav
 let reactChrome;
 const $ = id => document.getElementById(id);
 const NEWS_KEY = 'bns.news.seen';
+const NEWS_TITLE = 'Има нови данни, които още не си видял: „Какво ново“';
 // the pieces of the shell (header, tab bar, footer, banner, the menu lists) are built by js/chrome.js, which the server uses too
 const syncLinks = () => reactChrome ? reactChrome() : document.querySelectorAll('#tabbar a[data-route], #footer a[data-route]').forEach(a => a.setAttribute('href', navHref(a.dataset.route)));
 
 const openSearch = el => import('./search.js').then(m => m.openPalette(el)).catch(e => { console.error(e); });
 
 /* ------------------------------------------------------------------ popovers */
-function openPeriod(btn) {
+/** the year popover; opened with the keyboard, the focus goes to the chosen year (arrows move between years), with the mouse to the popover itself */
+function openPeriod(btn, keyboard = true) {
   const sup = router.periods;
   const allowed = k => !Array.isArray(sup) || sup.includes(k);
   const name = nextId('per');
@@ -39,14 +41,14 @@ function openPeriod(btn) {
     return html`<label class="opt${ok ? '' : ' opt-off'}"><input type="radio" name="${name}" value="${p.key}"${p.key === store.get('period') ? html` checked` : ''}${ok ? '' : html` disabled`}><span class="opt-main"><span class="opt-label">${p.label}</span><span class="opt-desc">${p.desc}${ok ? '' : ' · не се показва на този екран'}</span></span></label>`;
   })}</fieldset>`)}</fieldset>`;
   const note = sup === 'none' ? html`<p class="period-note">Този екран не зависи от годината. Изборът важи за екраните с данни по години.</p>` : '';
-  const pop = popover.open(btn, { title: 'Година и статус', body: html`${note}${body}`, label: 'Година и статус на данните' });
+  const pop = popover.open(btn, { title: 'Година и статус', body: html`${note}${body}`, label: 'Година и статус на данните', focus: keyboard ? 'first' : 'self' });
   pop.el.addEventListener('change', e => {
     const t = e.target;
     if (!t || t.name !== name) return;
     store.set('period', t.value);
     pop.close();
   });
-  pop.el.querySelector('input:checked')?.focus({ preventScroll: true });
+  if (keyboard) pop.el.querySelector('input:checked')?.focus({ preventScroll: true });
 }
 function openMoreSheet(btn) {
   const nav = NAV_GROUPS.map(([label, ids]) => html`<section class="more-grp"><h3>${label}</h3><ul class="more-list">${groupItems(ids).map(r => html`<li><a href="${navHref(r.id)}"${router.current?.route?.id === r.id ? html` aria-current="page"` : ''}>${icon(r.icon, { size: 18 })}<span>${navName(r)}</span></a></li>`)}</ul></section>`);
@@ -59,13 +61,16 @@ function openMoreSheet(btn) {
   s.el.addEventListener('click', e => { if (isAppLink(e.target.closest('a[href]'))) s.close(); });
 }
 
-/** a dropdown of the wide header: the screens of one group (the popover closes on Esc, on a click outside and on navigation; focus goes back to the button) */
-function openNavGroup(btn, i) {
+/** a dropdown of the wide header: the screens of one group (the popover closes on Esc, on a click outside, on navigation and on a second
+    click of its button; focus goes back to the button). A menu, so no header row with an X. Opened with the keyboard, the focus goes to
+    the first screen; opened with the mouse, to the menu itself, so no item looks selected. While the news dot is on, «Какво ново» says «ново». */
+function openNavGroup(btn, i, keyboard) {
   const [label, ids] = NAV_GROUPS[i];
   const cur = router.current?.route;
-  const items = groupItems(ids).map(r => html`<li><a href="${navHref(r.id)}"${cur && (cur.id === r.id) ? html` aria-current="page"` : ''}><span>${navName(r)}</span></a></li>`);
+  const fresh = !!document.querySelector('[data-news-dot]:not([hidden])');
+  const items = groupItems(ids).map(r => html`<li><a href="${navHref(r.id)}"${cur && (cur.id === r.id) ? html` aria-current="page"` : ''}><span>${navName(r)}</span>${fresh && r.id === 'S16' ? html`<span class="nav-tag nav-new">ново</span>` : ''}</a></li>`);
   if (i === NAV_GROUPS.length - 1) items.push(html`<li class="nav-sister">${sigmaLink('sister-link')}</li>`);
-  popover.open(btn, { body: html`<nav class="nav-pop" aria-label="${label}"><ul class="more-list">${items}</ul></nav>`, label, align: 'start' });
+  popover.open(btn, { body: html`<nav class="nav-pop" aria-label="${label}"><ul class="more-list">${items}</ul></nav>`, label, align: 'start', bare: true, focus: keyboard ? 'first' : 'self' });
 }
 
 const WIDE = '(min-width: 961px)';
@@ -164,14 +169,14 @@ async function checkNews() {
     if (!latest) return;
     const seen = safe.get('localStorage', NEWS_KEY);
     if (seen && seen >= latest) return;
-    document.querySelectorAll('[data-news-dot]').forEach(dot => { dot.hidden = false; dot.dataset.latest = latest; dot.parentElement.setAttribute('aria-label', dot.dataset.label); });
+    document.querySelectorAll('[data-news-dot]').forEach(dot => { dot.hidden = false; dot.dataset.latest = latest; dot.parentElement.setAttribute('aria-label', dot.dataset.label); dot.parentElement.title = NEWS_TITLE; });
   } catch { /* no feed yet: no dot */ }
 }
 function markNewsSeen() {
   const dots = [...document.querySelectorAll('[data-news-dot]')].filter(d => !d.hidden);
   if (!dots.length) return;
   if (dots[0].dataset.latest) safe.set('localStorage', NEWS_KEY, dots[0].dataset.latest);
-  dots.forEach(dot => { dot.hidden = true; dot.parentElement.removeAttribute('aria-label'); });
+  dots.forEach(dot => { dot.hidden = true; dot.parentElement.removeAttribute('aria-label'); dot.parentElement.removeAttribute('title'); });
 }
 
 /* ------------------------------------------------------------------ boot */
@@ -191,10 +196,14 @@ export const shell = {
 
     $('topbar').addEventListener('click', e => {
       const period = e.target.closest('#btn-period');
-      if (period) { openPeriod(period); return; }
+      if (period) { openPeriod(period, e.detail === 0); return; }
       if (e.target.closest('[data-theme-toggle]')) { pickTheme(themeNow() === 'dark' ? 'light' : 'dark'); return; }
       const group = e.target.closest('.nav-main');
-      if (group) { openNavGroup(group, Number(group.dataset.grp)); return; }
+      if (group) {
+        if (group.getAttribute('aria-expanded') === 'true' && popover.isOpen) { popover.close(); return; }   // the open menu's own button closes it
+        openNavGroup(group, Number(group.dataset.grp), e.detail === 0);    // detail 0: Enter or Space, not a mouse click
+        return;
+      }
       const b = e.target.closest('#btn-menu');
       if (!b) return;
       b.setAttribute('aria-expanded', 'true');

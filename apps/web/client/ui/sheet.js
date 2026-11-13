@@ -1,6 +1,8 @@
 // Sheet (modal dialog / bottom sheet on phones) and popover (anchored, non-modal on wide screens).
 //   sheet.open({title, body, id, wide, cls, returnFocus, onClose}) -> {el, close}   (cls: extra class, e.g. 'sheet-drawer' = the right-side menu drawer)
-//   popover.open(anchor, {title, body, label, id, align:'start'|'end', onClose}) -> {el, close}
+//   popover.open(anchor, {title, body, label, id, align:'start'|'end', bare, focus:'first'|'self', onClose}) -> {el, close}
+//     bare: no header row with the X (a menu: Esc and a click outside close it); focus 'self': the popover itself takes the focus, not its
+//     first control (a menu opened with the mouse shows no focus ring on its first item; Tab still goes into it)
 // body is SafeHtml (html`…`) | Node | string (shown as plain text).  Sheets use the native <dialog>: focus trap, Esc, inert background.
 // A popover on a <=600px screen becomes a sheet.  Both return focus to the opener and close on Esc.
 // Opening one while another is open replaces it at once; a change of the address hash (any navigation, also Back) closes it, so neither outlives its screen.
@@ -84,7 +86,8 @@ export const popover = {
     el.setAttribute('aria-label', o.label || o.title || 'Подробности');
     el.tabIndex = -1;
     if (o.id) el.id = o.id;
-    el.innerHTML = `${o.title ? `<div class="pop-head"><strong>${esc(o.title)}</strong>` : '<div class="pop-head pop-head-bare">'}<button type="button" class="icon-btn" data-close aria-label="Затвори">${icon('x', { size: 18 })}</button></div><div class="pop-body"></div>`;
+    const head = o.bare ? '' : `${o.title ? `<div class="pop-head"><strong>${esc(o.title)}</strong>` : '<div class="pop-head pop-head-bare">'}<button type="button" class="icon-btn" data-close aria-label="Затвори">${icon('x', { size: 18 })}</button></div>`;
+    el.innerHTML = `${head}<div class="pop-body"></div>`;
     toNode(o.body, el.querySelector('.pop-body'));
     document.body.appendChild(el);
     place(anchor, el, o.align);
@@ -119,7 +122,7 @@ export const popover = {
     on(window, 'resize', reflow);
     on(window, 'scroll', reflow, { passive: true, capture: true });
     // focus the first control (or the popover itself) so keyboard users land inside
-    const first = el.querySelector(`.pop-body ${FOCUSABLE.split(',').join(',.pop-body ')}`);
+    const first = o.focus === 'self' ? null : el.querySelector(`.pop-body ${FOCUSABLE.split(',').join(',.pop-body ')}`);
     (first || el).focus({ preventScroll: true });
     activePop = { el, close };
     return activePop;

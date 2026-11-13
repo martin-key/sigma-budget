@@ -14,7 +14,9 @@ html.mo .page.enter-anim .eyebrow{animation:mo-rise var(--dur-3) var(--ease-out)
 html.mo .page.enter-anim .page-title{animation:mo-rise var(--dur-3) var(--ease-out) backwards;animation-delay:calc(2 * var(--stagger))}
 html.mo .page.enter-anim .lede{animation:mo-rise var(--dur-3) var(--ease-out) backwards;animation-delay:calc(3 * var(--stagger))}
 html.mo .page.enter-anim .context{animation:mo-rise var(--dur-3) var(--ease-out) backwards;animation-delay:calc(4 * var(--stagger))}
-html.mo .page.enter-anim .page-body>.rv-enter{animation:mo-rise var(--dur-3) var(--ease-out) backwards;animation-delay:calc(var(--i,5) * var(--stagger))}
+html.mo .page:is(.enter-anim,.enter-body) .page-body>.rv-enter{animation:mo-rise var(--dur-3) var(--ease-out) backwards;animation-delay:calc(var(--i,5) * var(--stagger))}
+/* after a skeleton (.enter-body) the header is already in place: only the blocks rise. Another year or filter on the same screen (.enter-swap): a short fade-in, only when the old screen had faded back */
+html.mo .page.enter-swap{animation:mo-fade var(--dur-2) var(--ease-out) backwards}
 
 /* ---- blocks below the first viewport appear as they are scrolled to (IntersectionObserver in motion.js; it also drops [data-rv] after the transition) ---- */
 html.mo [data-rv]{opacity:0;transform:translateY(14px);transition:opacity var(--dur-3) var(--ease-out),transform var(--dur-3) var(--ease-out)}

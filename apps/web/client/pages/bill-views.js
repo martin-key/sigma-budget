@@ -21,7 +21,7 @@ import {
   DELEGATED_COLUMNS,
 } from '../budget-2027.js';
 import { periodByKey } from '../periods.js';
-import { dataHref } from '../data.js';
+import { href as routeHref } from '../routes.js';
 import {
   tablesOf,
   forecastTable,
@@ -39,11 +39,10 @@ const publication = (doc) =>
       МФ, 06.11.2026. Проектът за 2027 г. не е приет закон. Прогнозите са за 2028–2029 г. Сумите и
       празните клетки следват съответната таблица.
     </p>
-    <p>
-      <a href="${dataHref('budget2027-provenance')}"
-        >Произход на клетките, PDF страници и SHA-256 на оригиналния ZIP архив и двата PDF
-        документа</a
-      >.
+    <p class="small muted">
+      Откъде е всяко число (страница в PDF документа и контролна сума на оригинала): набор
+      <a href="${routeHref('S24', { set: 'budget2027-provenance' })}">„Произход на бюджетните числа за 2027“</a>
+      в „Данни“. Колоните с произхода са и във файла CSV на всяка таблица.
     </p>`;
 const namedScope = (key, label, long = label, note) => ({ key, label, long, note, gl: null });
 function scopeFor(ctx, id) {
@@ -99,11 +98,10 @@ const base = (ctx, id, title, body, extra = {}) =>
     share: { period: ctx.period.key, unit: 'хил. €' },
     ...extra,
   });
-const originCol = {
-  key: 'provenance',
-  label: 'Произход',
-  fmt: (v, r) => (v ? html`<a href="${r.origin}">${v}</a>` : 'Няма публикувана клетка'),
-};
+// the provenance ID of a number and its link: in the CSV, for those who check or reuse the data, not on the screen (a reader gets a hash
+// and an API address there); the source of every block is under its „Източник“ button and the note under it
+const originCol = { key: 'provenance', label: 'Произход', exportOnly: true };
+const originLink = { key: 'origin', label: 'Връзка към произхода', exportOnly: true };
 const cellRow = (label, cell, extra = {}) => ({
   label,
   value: cellValue(cell),
@@ -120,12 +118,12 @@ export const cellColumns = (unit = 'хил. €') => [
   { key: 'label', label: 'Показател' },
   { key: 'value', label: 'Стойност', unit, num: true, d: 1 },
   originCol,
-  { key: 'origin', label: 'Връзка към произхода' },
+  originLink,
 ];
 const rowsTable = (id, rows, unit) =>
   dataTable({
     id,
-    caption: 'Публикувани стойности и произход',
+    caption: 'Публикувани стойности',
     columns: [
       ...cellColumns(unit),
       ...(rows.some((r) => r.variant) ? [{ key: 'variant', label: 'Вариант' }] : []),
@@ -362,7 +360,7 @@ function ceilingsView(ctx, doc, t, items) {
             { key: 'kind', label: 'Ред' },
             { key: 'ceiling', label: 'Таван', unit: 'хил. €', num: true, d: 1 },
             originCol,
-            { key: 'origin', label: 'Връзка към произхода' },
+            originLink,
           ],
           rows,
           sortable: true,
@@ -509,7 +507,7 @@ export function institutionView(ctx) {
     { key: 'expenditure', label: 'Разходи', unit: 'хил. €', num: true, d: 1 },
     { key: 'revenue', label: 'Собствени приходи', unit: 'хил. €', num: true, d: 1 },
     originCol,
-    { key: 'origin', label: 'Връзка към произхода' },
+    originLink,
   ];
   const spec = {
     id: 's10-bill-chart',
@@ -695,7 +693,7 @@ export function municipalityView(ctx) {
       d: 1,
     })),
     originCol,
-    { key: 'origin', label: 'Връзка към произхода' },
+    originLink,
   ];
   return {
     lede: 'Трансферите към всички 265 общини по чл. 52 от проекта за 2027 г. Делегираните дейности са разпределени по чл. 53; не са допълнителен трансфер.',
