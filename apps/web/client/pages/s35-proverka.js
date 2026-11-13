@@ -84,7 +84,13 @@ function coverageBlock(m) {
     status: d.status,
     period: d.period,
     unit: d.unit,
-    rebuilt: d.rebuiltByThisRelease ? 'да' : 'не, пренесен от git',
+    rebuilt:
+      d.status === 'pending' && !d.files?.length
+        ? '—'
+        : d.rebuiltByThisRelease
+          ? 'да'
+          : 'не, пренесен от git',
+    reason: d.reason || '',
   }));
   const limited = sets.filter((d) => (d.limitations || []).length);
   const missing = m.coverage?.missingInputs || [];
@@ -113,6 +119,7 @@ function coverageBlock(m) {
         { key: 'status', label: 'Статус', fmt: statusCell },
         { key: 'period', label: 'Период' },
         { key: 'unit', label: 'Единица' },
+        { key: 'reason', label: 'Обхват без данни' },
         { key: 'rebuilt', label: 'Пресглобен в това издание' },
       ],
       rows,

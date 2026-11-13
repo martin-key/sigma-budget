@@ -57,6 +57,8 @@ export interface Manifest {
       period: string;
       unit: string;
       rebuiltByThisRelease?: boolean;
+      files?: string[];
+      reason?: string;
       scope?: string;
       limitations?: string[];
     }[];
