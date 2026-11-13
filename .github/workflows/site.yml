@@ -8,6 +8,9 @@
 # The staging deployment needs the repository secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID and the variable STAGING_ORIGIN
 # (the staging Worker's address). Without the secrets the deploy step is skipped; with them but without STAGING_ORIGIN it fails, because
 # the compatibility check of the code against the current release (tests/release/compat_check.py) needs that address.
+# A staging environment in a Cloudflare account of its own (docs/release.md, „Своя среда“) keeps its ids and hostname out of git, in
+# apps/web/wrangler.local.jsonc. Its whole text in the secret WRANGLER_LOCAL_JSONC makes a push to main build with it (WRANGLER_CONFIG)
+# and apply the new D1 migrations of that staging before the deployment; without the secret apps/web/wrangler.jsonc is used, as before.
 name: site
 
 on:
@@ -71,6 +74,17 @@ jobs:
         run: python -m tests.release.compat_check
       - name: The query each screen is drawn and cached by (apps/web/client/routes.js)
         run: python -m apps.web.scripts.query_check
+      - name: The staging configuration of this repository's own Cloudflare account (push to main)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          WRANGLER_LOCAL_JSONC: ${{ secrets.WRANGLER_LOCAL_JSONC }}
+        run: |
+          if [ -z "$WRANGLER_LOCAL_JSONC" ]; then
+            echo "::notice::WRANGLER_LOCAL_JSONC is not set: building with apps/web/wrangler.jsonc."
+            exit 0
+          fi
+          printf '%s\n' "$WRANGLER_LOCAL_JSONC" > apps/web/wrangler.local.jsonc
+          echo "WRANGLER_CONFIG=apps/web/wrangler.local.jsonc" >> "$GITHUB_ENV"
       - name: Build the Worker for staging and check every screen
         env:
           ORIGIN: ${{ vars.STAGING_ORIGIN || 'https://sigma-budget.my-data.bg' }}
@@ -191,6 +205,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           STAGING_ORIGIN: ${{ vars.STAGING_ORIGIN }}
+          WRANGLER_LOCAL_JSONC: ${{ secrets.WRANGLER_LOCAL_JSONC }}
         run: |
           if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
             echo "::notice::Cloudflare secrets are not set: skipping the deployment."
@@ -203,7 +218,13 @@ jobs:
             exit 1
           fi
           python3 -m tests.release.compat_check --env-url "$STAGING_ORIGIN"
+          # an own account's staging (the build used the same config): its registry gets the new migrations before the code that needs them
+          if [ -n "$WRANGLER_LOCAL_JSONC" ]; then
+            printf '%s\n' "$WRANGLER_LOCAL_JSONC" > apps/web/wrangler.local.jsonc
+            pnpm exec wrangler d1 migrations apply DB --env staging --remote -c apps/web/wrangler.local.jsonc
+          fi
           pnpm exec wrangler deploy -c apps/web/build/server/wrangler.json      # built with CLOUDFLARE_ENV=staging: the staging Worker, D1 and R2
+          echo "Deployed to $STAGING_ORIGIN" >> "$GITHUB_STEP_SUMMARY"
 
   validation-wave14:
     # Frozen Python evidence and the independent scoped TypeScript checks. No live release oracle.
