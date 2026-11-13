@@ -15,7 +15,7 @@ SITE = os.path.join(ROOT, "apps", "web", "public")                     # the sit
 DATA = os.environ.get("BUDGET_DATA_DIR") or os.path.join(ROOT, "data", "release")   # pipeline/budget_pipeline/cli.py validate points it at a release
 RAW = os.path.join(ROOT, "data", "originals")              # raw originals; tracked MF documents and downloaded external sources: see docs/data-sources.md
 TMP = os.path.join(ROOT, "tmp")                       # scratch and outputs (gitignored)
-BUILD_DATE = os.environ.get("BUILD_DATE", "2026-11-12")
+BUILD_DATE = os.environ.get("BUILD_DATE", "2026-11-13")
 ISO = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 

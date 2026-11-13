@@ -22,7 +22,7 @@ PROTO_SRC = os.path.join(ROOT, "data", "inputs")
 ROUTES_JS = os.path.join(ROOT, "apps", "web", "client", "routes.js")
 
 SEED = 20261002
-BUILD_DATE = os.environ.get("BUILD_DATE", "2026-11-05")
+BUILD_DATE = os.environ.get("BUILD_DATE", "2026-11-13")
 
 GISCO_JSON = os.path.join(CACHE, "gisco_lau_bg.json")
 LAW_JSON = os.path.join(CACHE, "law_bill.json")

@@ -4,7 +4,13 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { Context } from '../validate/context.js';
 import { Check } from '../validate/checks.js';
-import { runGroups, foundationGroups, applyExceptions, type Group } from '../validate/runner.js';
+import {
+  runGroups,
+  foundationGroups,
+  applyExceptions,
+  type Group,
+  type Exception,
+} from '../validate/runner.js';
 import { wave15Groups } from '../validate/wave15.js';
 import { core, catalog } from '../validate/catalog.js';
 import { budget2027 } from '../validate/budget-2027.js';
@@ -107,6 +113,60 @@ export function readExecutionLaw(pdf: { bytes: Uint8Array; sha256: string }): Ex
     rows,
   };
 }
+const PRODUCTION_UNLISTED_FILES = ['dbp2027.json', 'sebra.json'] as const;
+const UNLISTED_FILES_OBSERVATION =
+  "files on disk but not in the catalog: ['dbp2027.json', 'sebra.json']; in the catalog but not on disk: []";
+const COUNT_KEYS = ['datasets', 'files', 'real', 'mock', 'pending', 'primarySources'];
+
+function countObservation(text: string): Record<string, number> | null {
+  if (!text.startsWith('{') || !text.endsWith('}')) return null;
+  const pairs = text
+    .slice(1, -1)
+    .split(', ')
+    .map((part) => /^'([A-Za-z]+)': (0|[1-9]\d*)$/.exec(part));
+  if (pairs.length !== COUNT_KEYS.length || pairs.some((pair) => !pair)) return null;
+  const counts = Object.fromEntries(pairs.map((pair) => [pair![1]!, Number(pair![2])]));
+  if (
+    Object.keys(counts).length !== COUNT_KEYS.length ||
+    !COUNT_KEYS.every((key) => Number.isSafeInteger(counts[key]))
+  )
+    return null;
+  return counts;
+}
+
+/** The unchanged two-file defect, accepted only with its exact observation accepted in this run. */
+export function acceptProductionCatalogCounts(
+  c: Check,
+  accepted: readonly Exception[],
+): Exception[] {
+  if (c.name !== 'CATALOG') return [];
+  const observation = accepted.find(
+    (item) => item.group === c.name && item.problem === UNLISTED_FILES_OBSERVATION,
+  );
+  if (!observation) return [];
+  const found: Exception[] = [];
+  const keep = c.problems.filter((problem) => {
+    const match = /^counts (\{[^{}]+\}) do not match the catalog (\{[^{}]+\})$/.exec(problem);
+    if (!match) return true;
+    const declared = countObservation(match[1]!),
+      actual = countObservation(match[2]!);
+    if (
+      !declared ||
+      !actual ||
+      !COUNT_KEYS.filter((key) => key !== 'files').every((key) => declared[key] === actual[key]) ||
+      actual.files! - declared.files! !== PRODUCTION_UNLISTED_FILES.length
+    )
+      return true;
+    found.push({ group: c.name, problem, reason: observation.reason });
+    return false;
+  });
+  if (found.length) {
+    c.problems.splice(0, c.problems.length, ...keep);
+    c.fact(`${found.length} accepted production catalog count exception(s): ${observation.reason}`);
+  }
+  return found;
+}
+
 export function validateProduction(
   context: Readonly<ExecutionContext>,
   prepared: PreparedProduction,
@@ -198,7 +258,8 @@ export function validateProduction(
   const result = runGroups(groups, ctx, wanted);
   for (const c of result.groups) {
     applyExceptions(c, true);
-    applyWave17aExceptions(c, true);
+    const accepted = applyWave17aExceptions(c, true);
+    acceptProductionCatalogCounts(c, accepted);
   }
   const output = result.groups.map((c) => ({
     group: c.name,

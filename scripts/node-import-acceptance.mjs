@@ -24,7 +24,7 @@ import { wave13bStages } from '../packages/ingest/dist/build/wave13b.js';
 import { compare } from '../packages/ingest/dist/parity/compare.js';
 import { auditCatalogMetadata } from '../packages/ingest/dist/build/catalog-metadata.js';
 const root = resolve(dirname(new URL(import.meta.url).pathname), '..'),
-  [inputArg, outArg, date = '2026-11-10', reference] = process.argv.slice(2);
+  [inputArg, outArg, date = '2026-11-13', reference] = process.argv.slice(2);
 assert(
   inputArg && outArg,
   'Usage: node scripts/node-import-acceptance.mjs INPUTS NEW_OUTPUT_ROOT YYYY-MM-DD [PYTHON_REFERENCE]',
