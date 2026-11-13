@@ -147,7 +147,7 @@ function coverageBlock(m: Manifest) {
         ? '—'
         : d.rebuiltByThisRelease
           ? 'да'
-          : 'не, пренесен от git',
+          : 'не, запазен от предходното издание',
     reason: d.reason || '',
   }));
   const limited = sets.filter((d) => (d.limitations || []).length);
