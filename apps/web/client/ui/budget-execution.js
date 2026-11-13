@@ -14,10 +14,11 @@ export function budgetExecution(ctx) {
   const monthly = ctx.data['state-budget'],
     quarterly = ctx.data['kfp-subsectors'];
   if (!monthly || !quarterly) return '';
-  const monthlyTables = monthly.tables.map((t) => {
+  const monthlyTables = [...monthly.tables].reverse().map((t) => {
     const rows = t.rows.filter((r) => r.row >= 9 && r.row <= (t.year === 2025 ? 19 : 18));
     return disclosure({
       id: `state-${t.year}-${t.period}`,
+      open: t === monthly.tables.at(-1),
       title: `${t.year} г., месец ${t.period}`,
       body: dataTable({
         id: `state-table-${t.year}-${t.period}`,
@@ -31,9 +32,11 @@ export function budgetExecution(ctx) {
       }),
     });
   });
-  const subsectors = quarterly.tables.map((t) =>
+  const subsectors = [...quarterly.tables].reverse().map((t) =>
     disclosure({
       id: `quarter-${t.scope}-${t.year}`,
+      open:
+        t.scope === 'consolidated' && t.year === Math.max(...quarterly.tables.map((x) => x.year)),
       title: `${SCOPES[t.scope]}, ${t.year} г.`,
       body: dataTable({
         id: `quarter-table-${t.scope}-${t.year}`,

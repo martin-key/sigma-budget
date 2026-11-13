@@ -28,7 +28,7 @@
       "bytes": 47104,
       "retrieved": "2026-11-13",
       "via": "Firefox",
-      "path": "data/originals/kfp_quarterly/Soc_4Q_2024_BG.xls",
+      "path": "data/originals/fiscal_quarterly/Soc_4Q_2024_BG.xls",
       "mode": "import via browser"
     },
     {
@@ -38,7 +38,7 @@
       "bytes": 42496,
       "retrieved": "2026-11-13",
       "via": "Firefox",
-      "path": "data/originals/kfp_quarterly/Local_4Q_2024_BG.xls",
+      "path": "data/originals/fiscal_quarterly/Local_4Q_2024_BG.xls",
       "mode": "import via browser"
     },
     {
@@ -48,7 +48,7 @@
       "bytes": 43008,
       "retrieved": "2026-11-13",
       "via": "Firefox",
-      "path": "data/originals/kfp_quarterly/Central_4Q_2024_BG.xls",
+      "path": "data/originals/fiscal_quarterly/Central_4Q_2024_BG.xls",
       "mode": "import via browser"
     },
     {
@@ -58,7 +58,7 @@
       "bytes": 45568,
       "retrieved": "2026-11-13",
       "via": "Firefox",
-      "path": "data/originals/kfp_quarterly/Cons_4Q_2024_BG.xls",
+      "path": "data/originals/fiscal_quarterly/Cons_4Q_2024_BG.xls",
       "mode": "import via browser"
     },
     {
@@ -168,7 +168,7 @@
       "bytes": 47104,
       "retrieved": "2026-11-13",
       "via": "Firefox",
-      "path": "data/originals/kfp_quarterly/Soc_4Q_2025_BG.xls",
+      "path": "data/originals/fiscal_quarterly/Soc_4Q_2025_BG.xls",
       "mode": "import via browser"
     },
     {
@@ -178,7 +178,7 @@
       "bytes": 42496,
       "retrieved": "2026-11-13",
       "via": "Firefox",
-      "path": "data/originals/kfp_quarterly/Local_4Q_2025_BG.xls",
+      "path": "data/originals/fiscal_quarterly/Local_4Q_2025_BG.xls",
       "mode": "import via browser"
     },
     {
@@ -188,7 +188,7 @@
       "bytes": 45568,
       "retrieved": "2026-11-13",
       "via": "Firefox",
-      "path": "data/originals/kfp_quarterly/Cons_4Q_2025_BG.xls",
+      "path": "data/originals/fiscal_quarterly/Cons_4Q_2025_BG.xls",
       "mode": "import via browser"
     },
     {
@@ -288,7 +288,7 @@
       "bytes": 44032,
       "retrieved": "2026-11-13",
       "via": "Firefox",
-      "path": "data/originals/kfp_quarterly/Cons_2Q_2026_BG.xls",
+      "path": "data/originals/fiscal_quarterly/Cons_2Q_2026_BG.xls",
       "mode": "import via browser"
     },
     {
@@ -298,7 +298,7 @@
       "bytes": 41984,
       "retrieved": "2026-11-13",
       "via": "Firefox",
-      "path": "data/originals/kfp_quarterly/Central_2Q_2026_BG.xls",
+      "path": "data/originals/fiscal_quarterly/Central_2Q_2026_BG.xls",
       "mode": "import via browser"
     },
     {
@@ -308,7 +308,7 @@
       "bytes": 46080,
       "retrieved": "2026-11-13",
       "via": "Firefox",
-      "path": "data/originals/kfp_quarterly/Soc_2Q_2026_BG.xls",
+      "path": "data/originals/fiscal_quarterly/Soc_2Q_2026_BG.xls",
       "mode": "import via browser"
     },
     {
@@ -318,7 +318,7 @@
       "bytes": 41984,
       "retrieved": "2026-11-13",
       "via": "Firefox",
-      "path": "data/originals/kfp_quarterly/Local_2Q_2026_BG.xls",
+      "path": "data/originals/fiscal_quarterly/Local_2Q_2026_BG.xls",
       "mode": "import via browser"
     }
   ],

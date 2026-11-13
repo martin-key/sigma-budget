@@ -11,6 +11,7 @@ import re
 
 import budget_pipeline.validate.checks as L
 from budget_pipeline.validate.catalog import g_core, g_catalog
+from budget_pipeline.validate.budget_tables import valid_budget_tables
 from budget_pipeline.validate.checks import Check, isnum, pattern, walk
 
 STATUSES = ("real", "mock", "pending")
@@ -79,6 +80,8 @@ def g_envelope(ctx):
         c.ok(m.get("mock") is (m.get("status") == "mock"), "%s: meta.mock must equal (status == 'mock')" % f)
         if m.get("status") in counts:
             counts[m["status"]] += 1
+        if f in ('state-budget.json', 'kfp-subsectors.json'):
+            c.ok(valid_budget_tables(d), f + ': strict budget table contract')
         for s in m.get("source") or []:
             c.ok(s in srcs, "%s: meta.source %r is not in core.sources" % (f, s))
         for k in ("asOf", "retrieved"):
@@ -154,11 +157,12 @@ def g_numbers(ctx):
     biggest = 0.0
     for f in L.json_files():
         d = ctx.get(f)                                   # strict load: NaN / Infinity raise
+        budget_contract = f in ("state-budget.json", "kfp-subsectors.json") and valid_budget_tables(d)
         bad = {}
         for p, v in walk(d):
             if v is None:
                 nulls += 1
-                if not _allowed(NULL_OK, f, pattern(p)):
+                if not _allowed(NULL_OK, f, pattern(p)) and not (budget_contract and re.fullmatch(r"\$\.tables\[\]\.rows\[\]\.(source|eur)\[\]", pattern(p))):
                     bad.setdefault("null", []).append(p)
             elif v == "":
                 empties += 1

@@ -66,5 +66,5 @@ data/cache/
 coverage/
 
 !data/originals/state_budget/
-!data/originals/kfp_quarterly/
+!data/originals/fiscal_quarterly/
 !data/originals/taxes-subsectors-acquisition.json

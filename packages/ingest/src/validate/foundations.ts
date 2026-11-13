@@ -1,3 +1,4 @@
+import { isPublishedDataset } from '@sigma-budget/dataset-schema';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { relative, join } from 'node:path';
@@ -209,6 +210,9 @@ export function numeric(ctx: Context): Check {
     numstr = 0,
     noise = 0;
   for (const f of ctx.jsonFiles()) {
+    const doc = ctx.get(f);
+    const budgetContract =
+      ['state-budget.json', 'kfp-subsectors.json'].includes(f) && isPublishedDataset(f, doc);
     const bad: Record<string, string[]> = {};
     const add = (k: string, p: string) => {
       (bad[k] ??= []).push(p);
@@ -217,7 +221,11 @@ export function numeric(ctx: Context): Check {
       const pat = pattern(p);
       if (v === null) {
         nulls++;
-        if (!NULL_OK.some(([file, re]) => file === f && re.test(pat))) add('null', p);
+        if (
+          !NULL_OK.some(([file, re]) => file === f && re.test(pat)) &&
+          !(budgetContract && /^\$\.tables\[\]\.rows\[\]\.(source|eur)\[\]$/.test(pat))
+        )
+          add('null', p);
       } else if (v === '') {
         empties++;
         if (!EMPTY_OK.some(([file, re]) => file === f && re.test(pat))) add('empty string', p);

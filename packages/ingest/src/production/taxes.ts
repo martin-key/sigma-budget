@@ -28,7 +28,7 @@ export function assertConsolidation(tables: BudgetTable[]): void {
 }
 export function readTaxDatasets(context: Readonly<ExecutionContext>) {
   const originals = context.inputs.filter((f) =>
-    /^data\/originals\/(state_budget|kfp_quarterly)\/.*\.xls$/i.test(f.path),
+    /^data\/originals\/(state_budget|fiscal_quarterly)\/.*\.xls$/i.test(f.path),
   );
   if (originals.length !== 32) throw new Error('Expected exactly 32 tax/subsector originals');
   const tables = originals
@@ -50,6 +50,8 @@ export function readTaxDatasets(context: Readonly<ExecutionContext>) {
   )
     throw new Error('Budget series coverage');
   assertConsolidation(quarterly);
+  const reportingDate = (table: BudgetTable, multiplier: number) =>
+    new Date(Date.UTC(table.year, table.period * multiplier, 0)).toISOString().slice(0, 10);
   const common = {
     sourceIntegerScale: 10000000,
     conversionRate: 1.95583,
@@ -68,6 +70,7 @@ export function readTaxDatasets(context: Readonly<ExecutionContext>) {
         context.buildDate,
         {
           source: ['minfin'],
+          asOf: reportingDate(monthly.at(-1)!, 1),
           sourceNote: 'МФ, официални XLS таблици; придобиване чрез браузър на 13.11.2026 г.',
           unit: 'млн. €',
         },
@@ -89,6 +92,7 @@ export function readTaxDatasets(context: Readonly<ExecutionContext>) {
         context.buildDate,
         {
           source: ['minfin'],
+          asOf: reportingDate(quarterly.at(-1)!, 3),
           sourceNote: 'МФ, официални XLS таблици; придобиване чрез браузър на 13.11.2026 г.',
           unit: 'млн. €',
         },
@@ -181,7 +185,12 @@ export function registerTaxCatalog(input: Wave13bInput, context: Readonly<Execut
   for (const file of record.files) {
     const key = file.path.replace(/^data\/originals\//, '');
     primary.manifest[key] = { ...file, http_status: 200 };
-    files.push([key, key, ['minfin'], [key.startsWith('state_budget/') ? 'D36' : 'D37']]);
+    files.push([
+      key,
+      key,
+      ['minfin'],
+      [key.startsWith('state_budget/') ? 'state-budget' : 'kfp-subsectors'],
+    ]);
   }
   primary.manifestFiles = files;
 }

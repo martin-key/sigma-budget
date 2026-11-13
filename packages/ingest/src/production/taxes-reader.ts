@@ -25,7 +25,7 @@ const norm = (s: unknown) =>
   String(s ?? '')
     .replace(/\s+/gu, ' ')
     .trim();
-const micro = (n: number) => {
+const sourceUnits = (n: number) => {
   const v = Math.round(n * 1e7);
   if (!Number.isSafeInteger(v) || Math.abs(n * 1e7 - v) > 0.001)
     throw new Error('Unexpected source precision');
@@ -47,7 +47,7 @@ export function assertBudgetChecks(table: BudgetTable, registry: DifferenceRegis
       'Unregistered source differences: ' + table.file + ' ' + JSON.stringify(differences),
     );
 }
-/** Saved caches only. Integer source currency units remove binary floating point noise, without a tolerance on identities. */
+/** Saved caches only. Integer tenths of source currency units remove binary floating point noise, without a tolerance on identities. */
 export function parseBudgetTable(w: Workbook, filename: string): BudgetTable {
   if (w.sheetNames.length !== 1) throw new Error('Expected one budget worksheet');
   const s = w.sheets[w.sheetNames[0]!]!;
@@ -125,7 +125,12 @@ export function parseBudgetTable(w: Workbook, filename: string): BudgetTable {
     : 54;
   for (let row = 8; row < limit; row++) {
     const label = norm(cell(row, labelCol).value);
-    if (!label || !columns.some((_, i) => cell(row, labelCol + 1 + i).type === 'number')) continue;
+    if (
+      !label ||
+      (!columns.some((_, i) => cell(row, labelCol + 1 + i).type === 'number') &&
+        !(state && row >= 11 && row <= (year === 2025 ? 19 : 18)))
+    )
+      continue;
     const source = columns.map((_, i) => {
       const c = cell(row, labelCol + 1 + i);
       if (c.value === null || c.value === '') {
@@ -134,7 +139,7 @@ export function parseBudgetTable(w: Workbook, filename: string): BudgetTable {
       }
       if (c.type !== 'number' || typeof c.value !== 'number' || !Number.isFinite(c.value))
         throw new Error('Non-numeric budget cell');
-      return micro(c.value);
+      return sourceUnits(c.value);
     });
     rows.push({
       row,

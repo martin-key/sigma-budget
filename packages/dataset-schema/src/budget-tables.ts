@@ -35,6 +35,11 @@ export function budgetTablesGuard(v: unknown): v is Record<string, Json> {
   const monthly = v.schema === 'state-budget/1';
   if (!monthly && v.schema !== 'kfp-subsectors/1') return false;
   if (v.tables.length !== (monthly ? 21 : 11)) return false;
+  if (
+    v.scope !== (monthly ? 'държавен бюджет' : 'КФП по подсектори') ||
+    v.frequency !== (monthly ? 'monthly-cumulative' : 'quarterly-flows')
+  )
+    return false;
   const keys = new Set<string>();
   for (const t of v.tables) {
     if (
@@ -63,9 +68,39 @@ export function budgetTablesGuard(v: unknown): v is Record<string, Json> {
     keys.add(key);
     if (!t.columns.every(column) || !t.rows.every(row) || !Object.values(t.checks).every(integer))
       return false;
+    const requiredRows = monthly
+      ? Array.from({ length: t.year === 2025 ? 11 : 10 }, (_, i) => i + 9)
+      : [
+          8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 23, 26, 28, 30, 31, 32, 35, 38, 40, 41, 42,
+          47, 49, 50, 51, 52,
+        ];
+    if (
+      new Set(t.rows.map((r) => r.row)).size !== t.rows.length ||
+      !requiredRows.every((n) => t.rows.some((r) => row(r) && r.row === n))
+    )
+      return false;
+    for (let c = 0; c < t.columns.length; c++) {
+      const col = t.columns[c]!;
+      if (
+        col.id !== (monthly ? ['law', 'execution'][c] : `Q${c + 1}`) ||
+        col.unit !== (t.year < 2026 || (monthly && c === 0 && t.period <= 6) ? 'BGN' : 'EUR')
+      )
+        return false;
+    }
     for (const r of t.rows) {
       if (!row(r) || r.source.length !== t.columns.length || r.eur.length !== t.columns.length)
         return false;
+      for (let c = 0; c < r.source.length; c++) {
+        const source = r.source[c],
+          value = r.eur[c];
+        if (
+          source === null
+            ? value !== null
+            : value !==
+              Number((source! / 10000000 / (t.columns[c]!.unit === 'BGN' ? 1.95583 : 1)).toFixed(6))
+        )
+          return false;
+      }
     }
   }
   return (

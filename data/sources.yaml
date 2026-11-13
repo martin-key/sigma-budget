@@ -58,7 +58,7 @@ sources:
   unit: млн. лв. до 2025; млн. евро през 2026
   live: false
   files:
-  - path: data/originals/kfp_quarterly/*
+  - path: data/originals/fiscal_quarterly/*
     title: Official XLS originals, import via browser
   limitations:
   - 'Quarterly flows. Central government 2025 is missing: the MF link serves the 2024 original.'

@@ -131,3 +131,51 @@ it('rejects malformed published scope, coverage, currency, cells and missing-per
   d.missing = [];
   expect(isPublishedDataset('kfp-subsectors.json', d)).toBe(false);
 });
+for (const [identity, label] of Object.entries({
+  'tax-components': /^Данъчни приходи$/,
+  revenue: /^(I\. ПРИХОДИ|Приходи и помощи)/,
+  'non-tax': /^Неданъчни приходи$/,
+  expenditure: /^(Разходи|Общо разходи)$/,
+  interest: /^Лихви(?: - общо)?$/,
+  'expenditure-transfers': /^II\./,
+  'transfers-net': /^Трансфери \(нето\)$/,
+  'transfers-paid': /^(Предоставени на:|Предоставени трансфери)$/,
+  'transfers-received': /^(Получени от:|Получени трансфери)$/,
+  balance: /^(IV\.|Бюджетно салдо)/,
+  financing: /^(V\.|Финансиране$)/,
+  'financing-balance': /^(V\.|Финансиране$)/,
+  'current-expenditure': /^Текущи разходи$/,
+  subsidies: /^Субсидии$/,
+}))
+  it('recomputes ' + identity + ' from mutated physical source cells', () => {
+    const t = tables.find((t) => Object.keys(t.checks).some((k) => k.startsWith(identity + '/')))!;
+    const x = acquisition.files.find((f: any) => f.sha256 === t.sha256),
+      path = join(root, x.path);
+    const w = readWorkbook({ path, sha256: t.sha256, format: 'xls' }),
+      s = w.sheets[t.sheet]!;
+    const target = t.rows.find((r) => label.test(r.label))!;
+    const col = t.scope === 'state' ? 'D' : t.scope === 'social' ? 'C' : 'B';
+    const cell = s.cells[col + target.row]!;
+    cell.value = (cell.value as number) + 1;
+    const changed = parseBudgetTable(w, t.file);
+    const key = identity + '/' + (t.scope === 'state' ? 'execution' : 'Q1');
+    expect(changed.checks[key]).not.toEqual(t.checks[key]);
+    expect(() => assertBudgetChecks(changed, differences)).toThrow('Unregistered');
+  });
+
+import { numeric } from '../validate/foundations.js';
+import type { Context } from '../validate/context.js';
+it('allows only documented null source/converted cells in complete budget contracts', () => {
+  for (const [file, doc] of Object.entries(datasets)) {
+    const check = (value: unknown, name = file) =>
+      numeric({ jsonFiles: () => [name], get: () => value } as unknown as Context);
+    expect(check(doc).problems).toEqual([]);
+    expect(
+      check({ ...doc, unexpected: null }).problems.some((p) => p.includes('unexpected null')),
+    ).toBe(true);
+    expect(
+      check({ ...doc, schema: 'unknown' }).problems.some((p) => p.includes('unexpected null')),
+    ).toBe(true);
+    expect(check(doc, 'other.json').problems.some((p) => p.includes('unexpected null'))).toBe(true);
+  }
+});
