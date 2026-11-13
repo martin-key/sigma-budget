@@ -15,6 +15,7 @@ import {
   SHEET,
   type Columns,
   type ExecutionReport,
+  type ExecutionSourceDifferences,
 } from './report.js';
 import {
   readExecutionAnnual,
@@ -73,6 +74,8 @@ export interface PrepareExecutionOptions {
   annual: ExecutionAnnualInput;
   buildDate: string;
   headlines?: readonly ExecutionHeadline[];
+  firstYear?: 2022 | 2024;
+  sourceDifferences?: ExecutionSourceDifferences;
 }
 
 function columns<T>(make: () => Record<string, T>): Columns<T> {
@@ -120,7 +123,7 @@ export function prepareExecution(options: PrepareExecutionOptions): ExecutionRes
   requireDate(options.buildDate);
   if (!options.reports.length) throw new Error('No execution reports');
   const reports = options.reports
-    .map(readExecutionReport)
+    .map((input) => readExecutionReport(input, options.sourceDifferences))
     .sort((a, b) => a.year - b.year || a.month - b.month);
   const byYear = new Map<number, ExecutionReport[]>();
   for (const report of reports) {
@@ -130,7 +133,13 @@ export function prepareExecution(options: PrepareExecutionOptions): ExecutionRes
     byYear.set(report.year, list);
   }
   const years = [...byYear.keys()];
-  if (years.join(',') !== '2024,2025,2026')
+  if (
+    years.join(',') !==
+    Array.from(
+      { length: 2027 - (options.firstYear ?? 2024) },
+      (_, i) => (options.firstYear ?? 2024) + i,
+    ).join(',')
+  )
     throw new Error(
       'Execution requires consecutive years 2024..2026; generalise the production contract before adding 2027',
     );

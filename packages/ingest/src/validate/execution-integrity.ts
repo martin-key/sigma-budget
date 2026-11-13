@@ -615,7 +615,13 @@ function integrityCoverage(ctx: Context, c: Check, ex: Doc, p: Doc, files: Doc):
     equal(p.columns, { kfp: 'B', nat: 'C', eu: 'D' }) && p.sheet === 'стартова',
     'provenance worksheet and column locators',
   );
-  c.ok(equal(p.rules, provenanceRules), 'every derived block has its canonical provenance rule');
+  const expectedRules = Object.hasOwn(ex.data, '2022')
+    ? {
+        ...provenanceRules,
+        data: 'the cell of the original of the month; 2022–2025: млн. лв. ÷ 1.95583, rounded to 3 places (contract.conversion)',
+      }
+    : provenanceRules;
+  c.ok(equal(p.rules, expectedRules), 'every derived block has its canonical provenance rule');
   const unavailable: string[] = [];
   for (const [key, f] of Object.entries(files) as [string, Doc][]) {
     const year = key.slice(0, 4),

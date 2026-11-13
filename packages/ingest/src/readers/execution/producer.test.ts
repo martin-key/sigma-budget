@@ -37,18 +37,28 @@ function config(): ExecutionInputConfig {
     },
   };
 }
-const buildDate = JSON.parse(readFileSync(join(root, 'data/release/execution.json'), 'utf8')).meta
-  .retrieved;
+const legacyExecution = JSON.parse(
+  readFileSync(join(fixture, 'data/release/execution.json'), 'utf8'),
+);
+// The reader already publishes the reviewed final wording; the frozen oracle retains its historical suffix.
+legacyExecution.reconcile.note = legacyExecution.reconcile.note.replace(
+  '; причината предстои да бъде проверена от експерт по публични финанси.',
+  '.',
+);
+const buildDate = legacyExecution.meta.retrieved;
 const build = (input = config()) => prepareExecutionFiles(input, buildDate);
 
 describe('real monthly BIFF -> complete published execution contract', () => {
   it('rebuilds both entire published documents and their sparse law/provenance from all 33 originals', () => {
     const result = build();
-    expect(result.execution).toEqual(
-      JSON.parse(readFileSync(join(root, 'data/release/execution.json'), 'utf8')),
-    );
+    expect(result.execution).toEqual(legacyExecution);
     expect(result.provenance).toEqual(
-      JSON.parse(readFileSync(join(root, 'data/release/execution-provenance.json'), 'utf8')),
+      JSON.parse(
+        readFileSync(
+          join(root, 'packages/ingest/test/fixtures/wave13b/oracle/execution-provenance.json'),
+          'utf8',
+        ),
+      ),
     );
     expect(result.evidence.reports).toHaveLength(33);
     expect(result.evidence.reports.every((r) => r.dimensions.join(',') === '54,4')).toBe(true);

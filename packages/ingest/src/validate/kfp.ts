@@ -1,3 +1,4 @@
+import historicalDifferences from '../production/kfp-source-differences.json' with { type: 'json' };
 import { isDeepStrictEqual } from 'node:util';
 import { pythonFloat } from '../build/context.js';
 import { parsePythonJson } from '../common/numbers.js';
@@ -239,7 +240,7 @@ export function kfp(ctx: Context, evidence: KfpEvidence): Check {
   c.ok(
     isDeepStrictEqual(
       years,
-      years.map((_, i) => String(2024 + i)),
+      years.map((_, i) => String((years[0] === '2022' ? 2022 : 2024) + i)),
     ),
     `data years ${pyList(years)}, not consecutive from 2024`,
   );
@@ -384,7 +385,16 @@ export function kfp(ctx: Context, evidence: KfpEvidence): Check {
           `${ym} ${col}: balance != rev - exp + transfers - eucontrib (${f6(dev)})`,
         );
         dev = Math.abs(n(rw.fin) + n(rw.balance));
-        if (y === '2024' && month === 5 && dev > 0.005) {
+        const historical = (
+          historicalDifferences as Record<string, { differences: Record<string, number> }>
+        )[file.sha256]?.differences[`fin=-balance/${['B', 'C', 'D'][COLS.indexOf(col)]}`];
+        if (historical !== undefined) {
+          c.ok(
+            Math.abs(n(rw.fin) + n(rw.balance) - historical) <= 1e-6,
+            `${ym} ${col}: registered source difference`,
+          );
+          knownSeen.add(`${ym} ${col} ${f6(dev)}`);
+        } else if (y === '2024' && month === 5 && dev > 0.005) {
           c.ok(
             dev <= 0.0101,
             `${ym} ${col}: financing != -balance (${f6(dev)}) beyond the known source difference`,
@@ -424,7 +434,17 @@ export function kfp(ctx: Context, evidence: KfpEvidence): Check {
           `${y} ${col} month ${i + 1}: converted balance identity`,
         );
         c.ok(
-          Math.abs(n(val(s.fin, i)) + n(val(s.balance, i))) <= 0.0061,
+          Math.abs(
+            n(val(s.fin, i)) +
+              n(val(s.balance, i)) -
+              ((historicalDifferences as Record<string, { differences: Record<string, number> }>)[
+                data[y].files[i].sha256
+              ]?.differences[`fin=-balance/${['B', 'C', 'D'][COLS.indexOf(col)]}`] ?? 0) /
+                (data[y].currency === 'BGN' ? 1.95583 : 1),
+          ) <=
+            ((historicalDifferences as Record<string, unknown>)[data[y].files[i].sha256]
+              ? 0.0011
+              : 0.0061),
           `${y} ${col} month ${i + 1}: converted financing != -balance`,
         );
         c.ok(

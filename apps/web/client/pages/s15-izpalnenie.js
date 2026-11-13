@@ -1036,6 +1036,42 @@ export function contextLine(C) {
   return html`<span class="ctx-period"><strong>Отчет ${when ? `· ${when}` : ''}</strong> <span class="muted">· ${C.g1} и ${C.g2} · ${C.scope === 'kfp' ? 'КФП' : SCOPE_NAME[C.scope]} · ${C.mode === 'mesec' ? 'за месеца' : 'натрупано'} · млрд. €</span></span>`;
 }
 
+/** Same-period historical reference; shares use each year's December actual, never a law denominator. */
+export function historicalReference(C) {
+  const rows = [2022, 2023].flatMap((year) => {
+    const data = C.ex.data?.[year];
+    if (!data || data.months !== 12) return [];
+    return ['rev', 'exp.total', 'exp.capex'].map((id) => ({
+      year,
+      name: C.rowName(id),
+      value: data.kfp[id]?.[C.month - 1],
+      share: C.ex.pace?.[year]?.[id]?.[C.month - 1],
+    }));
+  });
+  if (!rows.length) return '';
+  return block({
+    id: 's15-historical-reference',
+    level: 2,
+    title: 'Ориентир 2022–2023',
+    source: ['kfp'],
+    scope: 'kfp',
+    status: 'real',
+    body: html`<p>КФП, натрупано до края на ${monthName(C.month)}. Дял от действително отчетеното за цялата съответна година. Сумите са преобразувани от лева по 1,95583 лв./€.</p>${dataTable(
+      {
+        id: 's15-historical-table',
+        caption: 'Исторически месечен ориентир за КФП',
+        columns: [
+          { key: 'year', label: 'Година' },
+          { key: 'name', label: 'Показател' },
+          { key: 'value', label: 'Натрупано, млн. €', fmt: (v) => num(v, 3) },
+          { key: 'share', label: 'Дял от годишния отчет', fmt: (v) => pct(v, 2) },
+        ],
+        rows,
+      },
+    )}`,
+  });
+}
+
 export function render(ctx) {
   const C = model(ctx);
   let body;
@@ -1045,7 +1081,7 @@ export function render(ctx) {
   else {
     const links = html`<p class="s15-links small"><a href="${ctx.href('S15', { sub: 'byudzheti' }, keepQuery(ctx))}">Планът по бюджети и средствата от ЕС</a></p>`;
     const plan = planBlock(C, { link: linkOf(C) });
-    body = html`${controlsDisclosure(C)}${PLAN_FIRST ? plan : ''}${compareBlock(C)}${PLAN_FIRST ? '' : plan}${chartsView(C)}${links}${expertBlock(C)}${methodDisclosure(C)}${proofDisclosure(ctx, C)}`;
+    body = html`${controlsDisclosure(C)}${PLAN_FIRST ? plan : ''}${compareBlock(C)}${PLAN_FIRST ? '' : plan}${chartsView(C)}${historicalReference(C)}${links}${expertBlock(C)}${methodDisclosure(C)}${proofDisclosure(ctx, C)}`;
   }
   return { body, context: C.page === 'main' && !C.problem ? '' : contextLine(C), ownContext: true }; // the main screen says it in the line under the heading and in the «Избери месец и сравнение» row
 }

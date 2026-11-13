@@ -8,10 +8,16 @@ sources:
   acquisition: import
   format: xls
   parser: python -m budget_pipeline.extract.kfp_full
-  period: monthly from January 2024, cumulative since 1 January (the newest is `latest` in data/release/execution.json)
-  unit: млн. лв. (2024–2025), млн. € (2026)
+  period: monthly from January 2022, cumulative since 1 January (the newest is `latest` in data/release/execution.json)
+  unit: млн. лв. (2022–2025), млн. € (2026)
   live: false
   files:
+  - path: data/originals/kfp-history-acquisition.json
+    title: Original URLs, hashes and import via browser on 2026-11-13
+  - path: data/originals/kfp_2022/*.xls
+    title: 12 monthly reports for 2022
+  - path: data/originals/kfp_2023/*.xls
+    title: 12 monthly reports for 2023
   - path: data/originals/kfp_2024/*.xls
     title: 12 monthly reports for 2024
   - path: data/originals/kfp_2025/*.xls

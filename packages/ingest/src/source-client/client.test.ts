@@ -698,21 +698,34 @@ describe('controlled manual imports and review', () => {
 });
 
 it('reads the actual registry and pinned supplied XLS/PDF/ZIP bytes without network or fixture-only paths', async () => {
-  const sourceRoot = resolve('../..');
+  const repositoryRoot = resolve('../..');
+  const sourceRoot = (await fixture()).source;
+  // Exercise the real pinned files, without scanning/seeding arbitrary local research caches.
+  for (const year of [2022, 2023, 2024, 2025, 2026]) {
+    const folder = `data/originals/kfp_${year}`;
+    await mkdir(join(sourceRoot, folder), { recursive: true });
+    for (const file of await readdir(join(repositoryRoot, folder))) {
+      if (!file.endsWith('.xls')) continue;
+      await writeFile(
+        join(sourceRoot, folder, file),
+        await readFile(join(repositoryRoot, folder, file)),
+      );
+    }
+  }
   const client = await SourceClient.open({
     sourceRoot,
-    registryPath: join(sourceRoot, 'data/sources.yaml'),
-    pinsPath: join(sourceRoot, 'data/originals.sha256'),
+    registryPath: join(repositoryRoot, 'data/sources.yaml'),
+    pinsPath: join(repositoryRoot, 'data/originals.sha256'),
     clock: now,
   });
   const status = await client.status();
   expect(status.rows.filter((r) => r.state === 'present' && /\/kfp_/.test(r.path))).toHaveLength(
-    33,
+    57,
   );
   expect(status.rows.some((r) => r.state === 'historical-unverified')).toBe(true);
   expect(status.latestAsOf).toBe('2026-09-30');
   const f = await fixture();
-  const actual = join(sourceRoot, 'data/originals/kfp_2026/2026-EU_funds_0926_BG_WEB.xls');
+  const actual = join(repositoryRoot, 'data/originals/kfp_2026/2026-EU_funds_0926_BG_WEB.xls');
   const baseline = await readFile(actual);
   const imported = await client.importSource({ source: 'kfp', file: actual, snapshotRoot: f.out });
   const row = imported.snapshot.collected[0]!;

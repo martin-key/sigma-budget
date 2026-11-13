@@ -50,7 +50,7 @@ export function lastDay(year: number, month: number): string {
   if (
     !Number.isInteger(year) ||
     !Number.isInteger(month) ||
-    year < 2024 ||
+    year < 2022 ||
     year > 9999 ||
     month < 1 ||
     month > 12
@@ -59,7 +59,11 @@ export function lastDay(year: number, month: number): string {
   return new Date(Date.UTC(year, month, 0)).toISOString().slice(0, 10);
 }
 /** Parse a freshly decoded workbook, keeping caches exactly as saved by the Ministry. */
-export function parseExecutionReport(workbook: Workbook, filename: string): ExecutionReport {
+export function parseExecutionReport(
+  workbook: Workbook,
+  filename: string,
+  knownDifferences: Readonly<Record<string, number>> = {},
+): ExecutionReport {
   if (workbook.format !== 'xls') throw new Error('Execution reports must be BIFF .xls');
   const sheet = sheetByName(workbook, SHEET);
   if (sheet.rows !== 54 || sheet.columns !== 4)
@@ -116,7 +120,18 @@ export function parseExecutionReport(workbook: Workbook, filename: string): Exec
   for (const row of BLANK_ROWS)
     for (const col of ['B', 'C', 'D']) {
       const cell = workbookCell(sheet, `${col}${row}`);
-      if (!['blank', 'missing'].includes(cell.type) && !(cell.type === 'text' && cell.value === ''))
+      if (
+        !(
+          year === 2022 &&
+          month! < 12 &&
+          row === 47 &&
+          ['C', 'D'].includes(col) &&
+          cell.type === 'number' &&
+          cell.value === 0
+        ) &&
+        !['blank', 'missing'].includes(cell.type) &&
+        !(cell.type === 'text' && cell.value === '')
+      )
         throw new Error(`${filename}: expected blank cell ${col}${row}`);
       if (cell.formula !== undefined || cell.arrayFormula !== undefined)
         throw new Error(`${filename}: formula in blank row ${row}`);
@@ -143,7 +158,14 @@ export function parseExecutionReport(workbook: Workbook, filename: string): Exec
     const deviation = Math.abs(v('fin') + v('balance'));
     if (year === 2024 && month === 5 && deviation > 0.005 && deviation <= 0.0101)
       warnings.push(`${filename}: known source difference fin=-balance/${scope}: ${deviation}`);
-    else check(deviation, 0.005, `fin=-balance/${scope}`);
+    else if (knownDifferences[`fin=-balance/${letters[scope]}`] !== undefined) {
+      check(
+        Math.abs(v('fin') + v('balance') - knownDifferences[`fin=-balance/${letters[scope]}`]!),
+        1e-6,
+        `registered fin=-balance/${scope}`,
+      );
+      warnings.push(`${filename}: source fin=-balance/${scope}: ${v('fin') + v('balance')}`);
+    } else check(deviation, 0.005, `fin=-balance/${scope}`);
     const cell = workbookCell(sheet, `${letters[scope]}34`);
     const control =
       cell.type === 'blank' || cell.type === 'missing'
@@ -151,7 +173,14 @@ export function parseExecutionReport(workbook: Workbook, filename: string): Exec
         : pythonRound(numericCell(sheet, cell.address), 6);
     if (year === 2024 && month === 11 && Math.abs(control) > 1e-5 && Math.abs(control) <= 0.00004)
       warnings.push(`${filename}: known source difference row34/${scope}: ${control}`);
-    else check(Math.abs(control), 1e-5, `row34/${scope}`);
+    else if (knownDifferences[`row34/${letters[scope]}`] !== undefined) {
+      check(
+        Math.abs(control - knownDifferences[`row34/${letters[scope]}`]!),
+        1e-6,
+        `registered row34/${scope}`,
+      );
+      warnings.push(`${filename}: source row34/${scope}: ${control}`);
+    } else check(Math.abs(control), 1e-5, `row34/${scope}`);
   }
   for (const [id, value] of Object.entries(values))
     check(Math.abs(value.kfp - (value.nat + value.eu)), 1e-6, `к.2=к.3+к.4/${id}`);
@@ -178,6 +207,25 @@ export function parseExecutionReport(workbook: Workbook, filename: string): Exec
     },
   };
 }
-export function readExecutionReport(input: PinnedFile): ExecutionReport {
-  return parseExecutionReport(readWorkbook({ ...input, format: 'xls' }), basename(input.path));
+export type ExecutionSourceDifferences = Readonly<
+  Record<
+    string,
+    {
+      readonly file: string;
+      readonly differences: Readonly<Record<string, number>>;
+    }
+  >
+>;
+export function readExecutionReport(
+  input: PinnedFile,
+  sourceDifferences: ExecutionSourceDifferences = {},
+): ExecutionReport {
+  const registered = sourceDifferences[input.sha256];
+  if (registered && registered.file !== basename(input.path))
+    throw new Error('Historical source filename mismatch');
+  return parseExecutionReport(
+    readWorkbook({ ...input, format: 'xls' }),
+    basename(input.path),
+    registered?.differences,
+  );
 }

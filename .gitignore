@@ -19,6 +19,9 @@ data/raw/
 # …освен файловете на МФ (minfin.bg): 33-те месечни отчета по КФП, PDF-а с АСБП и материалите за бюджет 2027, около 13 MB. С тях всеки може да сглоби данните
 # от чисто копие. Останалите източници се свалят автоматично (pipeline/budget_pipeline/sources/originals.py) и остават извън Git.
 !data/originals/budget_2027/
+!data/originals/kfp_2022/
+!data/originals/kfp_2023/
+!data/originals/kfp-history-acquisition.json
 !data/originals/kfp_2024/
 !data/originals/kfp_2025/
 !data/originals/kfp_2026/

@@ -27,7 +27,7 @@ export const EXP_ROWS = [
   'exp.abroad',
   'exp.reserve',
 ];
-export const EARLIEST_REPORT = 2022; // core.pending P05: the monthly reports from this year up to the first year in the file are still to come
+export const EARLIEST_REPORT = 2022; // first year of the historical comparison
 
 export const fin = (v) => typeof v === 'number' && Number.isFinite(v);
 /** change in % from a to b, only on a positive base: a deficit or a zero gives null (no percent on a non-positive base) */

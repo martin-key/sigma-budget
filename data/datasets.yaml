@@ -257,7 +257,7 @@ datasets:
   - S07
   - S15
   - S17
-  period: 2024-01 … 2026-09
+  period: 2022-01 … 2026-09
   scope: КФП, national budget and EU funds, cash basis
   unit: млн. €
   rebuild: python -m budget_pipeline.build.rebuild --build-date 2026-11-05
@@ -642,17 +642,6 @@ datasets:
   screens:
   - S15
   - S16
-- id: p05
-  catalogId: P05
-  title: Ориентир 2022–2023
-  status: pending
-  files: []
-  reason: Месечните отчети за 2022–2023 г. не са включени в портала; сравнението на изпълнението е със същия период на предходната година (2024 или 2025 г.).
-  expected: Месечна информация за КФП за предходните години, minfin.bg
-  sources:
-  - minfin
-  screens:
-  - S15
 - id: p06
   catalogId: P06
   title: Падежи и емисии на държавния дълг

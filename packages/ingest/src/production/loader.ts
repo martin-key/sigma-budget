@@ -43,7 +43,7 @@ import { verifyLegacyProgrammeSource } from '../readers/publication-documents/le
 import { extractProgrammeArchive, programmeZip } from '../readers/publication-documents/archive.js';
 import { physicalLawSummary } from './intermediates.js';
 import { AnnualLineage } from '../build/annual-lineage.js';
-import { prepareExecution, executionAnnualFromPrepared } from '../readers/execution/index.js';
+import { executionAnnualFromPrepared } from '../readers/execution/index.js';
 import {
   readWorkbook,
   workbookCellText,
@@ -61,6 +61,7 @@ import type { ExecutionContext } from '../release-build/types.js';
 import type { KfpEvidence } from '../validate/kfp.js';
 import type { GazetteBlock, LawKey } from '../build/law-types.js';
 import { authored } from './authored.js';
+import { prepareProductionExecution, resolveProductionPending } from './supplements.js';
 
 export const sha256 = (bytes: Uint8Array | string) =>
   createHash('sha256').update(bytes).digest('hex');
@@ -348,9 +349,9 @@ export async function loadProduction(
     };
   const lineage = new AnnualLineage(forecast, bill, { forecast: archive, bill: archive });
   const reports = context.inputs
-    .filter((f) => /^data\/originals\/kfp_202[456]\/.*\.xls$/u.test(f.path))
+    .filter((f) => /^data\/originals\/kfp_202[23456]\/.*\.xls$/u.test(f.path))
     .map((f) => ({ path: join(root, f.path), sha256: f.sha256 }));
-  const executionResult = prepareExecution({
+  const executionResult = prepareProductionExecution({
     reports,
     annual: executionAnnualFromPrepared(lineage, tables),
     buildDate: date,
@@ -410,7 +411,9 @@ export async function loadProduction(
   const sebra = await readSebra(root, reader, receipts);
   const aggregate = {
     ...authored.aggregation,
-    pending: pendingFromExecution(authored.aggregation.pending, execution),
+    pending: resolveProductionPending(
+      pendingFromExecution(authored.aggregation.pending, execution),
+    ),
   };
   const cat = authored.catalog;
   const manifest = json('data/originals/MANIFEST.json');
