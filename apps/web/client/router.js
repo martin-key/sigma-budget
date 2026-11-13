@@ -321,6 +321,8 @@ function onClick(e) {
 function onStore(key) {
   if (applying || !started || !RERENDER_KEYS.includes(key)) return;
   if (key === 'period') {
+    // a screen that does not depend on the period keeps its address and its content; the choice goes with the links to the next screen
+    if (cur && periodsFor(cur.route, cur.vm && cur.vm.mod) === 'none') { announce(`Избрахме ${store.period.label}. Годината важи за екраните с данни по години.`); return; }
     const per = store.get('period');
     setQuery({ per: per === DEFAULT_PERIOD ? null : per }, { rerender: false });
   }

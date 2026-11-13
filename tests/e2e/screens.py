@@ -209,9 +209,9 @@ async (o) => {
   else {
     if (!shown('topbar')) add('layout', 'fail', 'the top bar is not visible');
     const navBtn = [...document.querySelectorAll('#sidenav .nav-main')].filter(isVis).length;
-    if (wide && window.innerWidth >= 1241 && (!shown('sidenav') || navBtn !== 5)) add('layout', 'fail', `wide screen: the header shows ${navBtn} group buttons (expected 5)`);
+    if (wide && window.innerWidth >= 1280 && (!shown('sidenav') || navBtn !== 5)) add('layout', 'fail', `wide screen: the header shows ${navBtn} group buttons (expected 5)`);
     if (wide && shown('tabbar')) add('layout', 'fail', 'wide screen shows the bottom bar');
-    if (!wide && (navBtn || [...document.querySelectorAll('#sidenav .nav-cta')].some(isVis)) && window.innerWidth <= 1240) add('layout', 'fail', 'narrow screen shows the group buttons / the red button (only the magnifier stays; the rest is in «Меню»)');
+    if (!wide && (navBtn || [...document.querySelectorAll('#sidenav .nav-cta')].some(isVis)) && window.innerWidth <= 1279) add('layout', 'fail', 'narrow screen shows the group buttons / the red button (only the magnifier stays; the rest is in «Меню»)');
     if (!wide && !shown('tabbar')) add('layout', 'fail', 'narrow screen without the bottom bar');
     const sb = document.getElementById('btn-search');
     // V6 (26.10): the search is a magnifier button in the header (#btn-search, aria-label «Търсене», 44px target) on every screen and every width; it opens the search panel under the header
@@ -1250,8 +1250,8 @@ def tour_verify(st, step, prev_title, cell, how):
         tab_expected = r == 'S01' or any(x in ('g1', 'g2') for x in secs)                    # the bottom bar has the three tabs Начало · Отчет · Бюджет
         if len(st['tab']) > 1 or (len(st['tab']) == 0 and tab_expected):
             F('tour-nav', f'#tabbar has {len(st["tab"])} aria-current items (expected one on a screen of the three sections, none elsewhere): {st["tab"]}')
-        if st['periodHidden'] is not None and st['periodHidden'] != (step['periods'] == 'none'):
-            F('tour-period', f'the period button is {"hidden" if st["periodHidden"] else "shown"} on a screen with periods={step["periods"]}')
+        if st['periodHidden']:                                  # the year stays in the header on every screen: the header must not jump between screens
+            F('tour-period', f'the period button is hidden on a screen with periods={step["periods"]} (it stays on every screen)')
     return out
 
 
@@ -1771,26 +1771,36 @@ def ch_popovers(w, cell, F, W, j, outs):
     for gone in ('#btn-sources', '#btn-more', '#link-tax'):
         if present(page, gone):
             F('header-nav', f'{gone} is still in the page (removed in V6)')
-    # the theme switch in the footer (spec 9.3): dark is applied, kept over a reload before the first paint (js/theme-boot.js), and
-    # „системна“ gives the choice back to the system
+    # the theme (spec 9.3): light for everyone, whatever the system prefers; the switch in the header (next to the magnifier, phones too)
+    # and the one in the footer give the dark theme, kept over a reload before the first paint (js/theme-boot.js); «светла» goes back
     st = lambda: page.evaluate("() => ({ th: document.documentElement.getAttribute('data-theme'), cs: getComputedStyle(document.documentElement).colorScheme, "
-                               "ls: localStorage.getItem('bns.theme'), pressed: [...document.querySelectorAll('[data-theme-pick][aria-pressed=\"true\"]')].map(b => b.dataset.themePick) })")
-    if not present(page, '#footer [data-theme-pick="dark"]'):
-        F('theme-switch', 'the footer has no theme switch (системна · светла · тъмна)')
+                               "ls: localStorage.getItem('bns.theme'), pressed: [...document.querySelectorAll('[data-theme-pick][aria-pressed=\"true\"]')].map(b => b.dataset.themePick), "
+                               "toggle: document.getElementById('btn-theme')?.getAttribute('aria-pressed') ?? null, "
+                               "icon: [...document.querySelectorAll('#btn-theme svg')].filter(s => s.getClientRects().length).map(s => s.classList.contains('th-sun') ? 'sun' : 'moon') })")
+    z = st()
+    if z['th'] is not None or 'dark' in (z['cs'] or '') or z['toggle'] != 'false' or z['icon'] != ['moon']:
+        F('theme-default', f'without a choice the page is not light (OS {CELLS[cell]["scheme"]}): data-theme={z["th"]!r}, color-scheme={z["cs"]!r}, toggle={z["toggle"]!r}, icon={z["icon"]}')
+    if not present(page, '#btn-theme'):
+        F('theme-switch', 'the header has no theme switch (#btn-theme)')
     else:
-        page.click('#footer [data-theme-pick="dark"]')
+        page.click('#btn-theme')
         a = st()
-        if a['th'] != 'dark' or 'dark' not in (a['cs'] or '') or a['ls'] != 'dark' or a['pressed'] != ['dark']:
-            F('theme-switch', f'after «тъмна»: data-theme={a["th"]!r}, color-scheme={a["cs"]!r}, stored={a["ls"]!r}, pressed={a["pressed"]}')
+        if a['th'] != 'dark' or 'dark' not in (a['cs'] or '') or a['ls'] != 'dark' or a['toggle'] != 'true' or a['pressed'] != ['dark'] or a['icon'] != ['sun']:
+            F('theme-switch', f'after the header switch: data-theme={a["th"]!r}, color-scheme={a["cs"]!r}, stored={a["ls"]!r}, toggle={a["toggle"]!r}, footer={a["pressed"]}, icon={a["icon"]}')
+        if not is_active(page, '#btn-theme'):
+            F('theme-switch', f'after the header switch the focus is on {act(page)["sig"]}, not on #btn-theme')
         page.reload()
         page.wait_for_selector('article.page[data-ready="1"]', timeout=15000)
         b = st()
-        if b['th'] != 'dark':
-            F('theme-switch', f'after a reload the dark choice is lost: data-theme={b["th"]!r}')
-        page.click('#footer [data-theme-pick=""]')
-        c = st()
-        if c['th'] is not None or c['ls'] is not None:
-            F('theme-switch', f'after «системна»: data-theme={c["th"]!r}, stored={c["ls"]!r}')
+        if b['th'] != 'dark' or b['toggle'] != 'true':
+            F('theme-switch', f'after a reload the dark choice is lost: data-theme={b["th"]!r}, toggle={b["toggle"]!r}')
+        if not present(page, '#footer [data-theme-pick="light"]'):
+            F('theme-switch', 'the footer has no theme switch (светла · тъмна)')
+        else:
+            page.click('#footer [data-theme-pick="light"]')
+            c = st()
+            if c['th'] is not None or c['ls'] is not None or c['toggle'] != 'false' or c['pressed'] != ['light']:
+                F('theme-switch', f'after «светла»: data-theme={c["th"]!r}, stored={c["ls"]!r}, toggle={c["toggle"]!r}, footer={c["pressed"]}')
     page.evaluate("() => localStorage.removeItem('bns.theme')")
     page.evaluate("() => localStorage.removeItem('bns.prefs.v1')")
 

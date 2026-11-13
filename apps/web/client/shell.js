@@ -6,8 +6,8 @@
 // mono-uppercase band with the three main sections «Начало · Изпълнение · Бюджет» (the current one underlined) and the current section's
 // screens on a second line; «Още» (data and methodology, glossary, learning path, project) opens as a dropdown there. The phone bar has
 // three tabs «Начало · Отчет · Бюджет»; everything else is under «Меню».
-// Light and dark (spec 9.3): the footer has the theme switch (system, light, dark; js/theme-boot.js applies it before the first paint). Built once at boot from the route table. It follows the store (period, user type, sources) and the router
-// (current item, period switch hidden on screens that do not depend on a period). Page workers never edit this file.
+// Light and dark (spec 9.3): light for everyone; the header and the footer have the switch to dark (js/theme-boot.js applies it before the first paint). Built once at boot from the route table. It follows the store (period, user type, sources) and the router
+// (current item; the period switch stays on every screen, so the header does not jump). Page workers never edit this file.
 import { store, safe } from './store.js';
 import { byId, href as routeHref } from './routes.js';
 import { html, nextId } from './html.js';
@@ -19,7 +19,7 @@ import { date } from './format.js';
 import { router } from './router.js';
 import { here, parts as addrParts, toHref, isAppLink } from './loc.js';
 import { yearOf, statusOf, TABS, NAV_GROUPS, sigmaLink, groupOf, groupItems, navName, navHref, bannerHtml, CTA, topbarHtml, tabbarHtml,
-  footerHtml, THEME_KEY, THEMES, rootOf } from './chrome.js';
+  footerHtml, THEME_KEY, THEMES, themeOf, rootOf } from './chrome.js';
 
 let reactChrome;
 const $ = id => document.getElementById(id);
@@ -38,7 +38,8 @@ function openPeriod(btn) {
     const ok = allowed(p.key);
     return html`<label class="opt${ok ? '' : ' opt-off'}"><input type="radio" name="${name}" value="${p.key}"${p.key === store.get('period') ? html` checked` : ''}${ok ? '' : html` disabled`}><span class="opt-main"><span class="opt-label">${p.label}</span><span class="opt-desc">${p.desc}${ok ? '' : ' · не се показва на този екран'}</span></span></label>`;
   })}</fieldset>`)}</fieldset>`;
-  const pop = popover.open(btn, { title: 'Година и статус', body, label: 'Година и статус на данните' });
+  const note = sup === 'none' ? html`<p class="period-note">Този екран не зависи от годината. Изборът важи за екраните с данни по години.</p>` : '';
+  const pop = popover.open(btn, { title: 'Година и статус', body: html`${note}${body}`, label: 'Година и статус на данните' });
   pop.el.addEventListener('change', e => {
     const t = e.target;
     if (!t || t.name !== name) return;
@@ -87,18 +88,23 @@ function footClick(e) {
 }
 
 /* ------------------------------------------------------------------ theme (docs/approach-specification.md, section 9.3) */
-// '' follows the system (prefers-color-scheme), 'light' and 'dark' are the visitor's choice (localStorage bns.theme, read by js/theme-boot.js)
-const DARK = '(prefers-color-scheme: dark)';
-const themeNow = () => { const t = safe.get('localStorage', THEME_KEY); return t === 'light' || t === 'dark' ? t : ''; };
-const isDark = () => (themeNow() ? themeNow() === 'dark' : !!window.matchMedia?.(DARK).matches);
+// light for everyone, whatever the system prefers; dark only when the visitor chooses it in the header or the footer (localStorage
+// bns.theme = 'dark', read by js/theme-boot.js before the first paint). An older stored 'light' is the same as nothing.
+const themeNow = () => themeOf(safe.get('localStorage', THEME_KEY));
 function applyTheme() {
-  const t = themeNow();
-  if (t) document.documentElement.setAttribute('data-theme', t); else document.documentElement.removeAttribute('data-theme');
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', isDark() ? '#14120F' : '#FDFAF4');
-  if (reactChrome) reactChrome(); else document.querySelectorAll('[data-theme-pick]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.themePick === t)));
+  const dark = themeNow() === 'dark', de = document.documentElement;
+  if (dark) de.setAttribute('data-theme', 'dark'); else de.removeAttribute('data-theme');
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#14120F' : '#FDFAF4');
+  document.querySelector('meta[name="color-scheme"]')?.setAttribute('content', dark ? 'dark' : 'light');
+  if (reactChrome) reactChrome();
+  else {
+    document.querySelectorAll('[data-theme-pick]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.themePick === themeNow())));
+    document.querySelectorAll('[data-theme-toggle]').forEach(b => b.setAttribute('aria-pressed', String(dark)));
+  }
 }
 function pickTheme(t) {
-  if (t) safe.set('localStorage', THEME_KEY, t); else safe.del('localStorage', THEME_KEY);
+  t = themeOf(t);
+  if (t === 'dark') safe.set('localStorage', THEME_KEY, t); else safe.del('localStorage', THEME_KEY);
   applyTheme();
   router.rerender();                                           // the charts read the colours when they draw
   router.announce(`Тема: ${THEMES.find(x => x[0] === t)[1]}.`);
@@ -181,12 +187,12 @@ export const shell = {
     $('footer')?.addEventListener('click', footClick);
     window.matchMedia(WIDE).addEventListener?.('change', syncFooter);
     applyTheme();
-    window.matchMedia?.(DARK).addEventListener?.('change', () => { if (!themeNow()) { applyTheme(); router.rerender(); } });   // the system switched, the visitor follows it
     applySources();
 
     $('topbar').addEventListener('click', e => {
       const period = e.target.closest('#btn-period');
       if (period) { openPeriod(period); return; }
+      if (e.target.closest('[data-theme-toggle]')) { pickTheme(themeNow() === 'dark' ? 'light' : 'dark'); return; }
       const group = e.target.closest('.nav-main');
       if (group) { openNavGroup(group, Number(group.dataset.grp)); return; }
       const b = e.target.closest('#btn-menu');
@@ -204,9 +210,6 @@ export const shell = {
     router.onNavigate(({ route, demo }) => {
       setCurrent(route);
       syncLinks();
-      const per = router.periods;
-      const b = $('btn-period');
-      if (b && !reactChrome) b.hidden = per === 'none';
       updateOffline(demo);
       if (route.id === 'S16') markNewsSeen();
       const fb = document.querySelector('[data-feedback-link]');
