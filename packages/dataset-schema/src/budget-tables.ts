@@ -82,6 +82,7 @@ export function budgetTablesGuard(v: unknown): v is Record<string, Json> {
           8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 23, 26, 28, 30, 31, 32, 35, 38, 40, 41, 42,
           47, 49, 50, 51, 52,
         ];
+    if (!monthly && t.scope !== 'consolidated') requiredRows.push(44);
     if (
       new Set(t.rows.map((r) => r.row)).size !== t.rows.length ||
       !requiredRows.every((n) => t.rows.some((r) => row(r) && r.row === n))

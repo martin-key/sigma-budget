@@ -1,3 +1,4 @@
+import consolidationDifferences from './taxes-consolidation-differences.json' with { type: 'json' };
 import { RESOLVED_PENDING } from './supplements.js';
 import { join } from 'node:path';
 import { metadata } from '../common/metadata.js';
@@ -12,8 +13,36 @@ export function assertConsolidation(tables: BudgetTable[]): void {
     const set = scopes.map((scope) => tables.filter((t) => t.year === year && t.scope === scope));
     if (set.some((a) => a.length !== 1)) throw new Error('Missing/duplicate consolidation scope');
     const [cons, ...parts] = set.map((a) => a[0]!);
+    const observation = (
+      consolidationDifferences as Record<
+        string,
+        { year: number; sources: Record<string, string>; differences: Record<string, number> }
+      >
+    )[cons!.sha256];
+    if (
+      !observation ||
+      observation.year !== year ||
+      Object.keys(observation.sources).sort().join(',') !== 'central,local,social' ||
+      !parts.every((t) => observation.sources[t.scope] === t.sha256)
+    )
+      throw new Error('Consolidation transfer source pins');
+    const observed: Record<string, number> = {};
+    for (let c = 0; c < cons!.columns.length; c++) {
+      const transfers = parts.map((t) => t.rows.find((r) => r.row === 44));
+      if (transfers.some((r) => !r || r.source[c] === null))
+        throw new Error('Consolidation transfer row missing');
+      observed['net-transfers/' + cons!.columns[c]!.id] = transfers.reduce(
+        (n, r) => n + r!.source[c]!,
+        0,
+      );
+    }
+    if (
+      JSON.stringify(Object.entries(observed).sort()) !==
+      JSON.stringify(Object.entries(observation.differences).sort())
+    )
+      throw new Error('Consolidation transfers: unregistered source difference');
     // The GFS tables use identical rows; revenue, expenditure and balances are additive;
-    // net transfers cancel. Do not apply to 2025: its central table is unavailable.
+    // net transfers have only the exact SHA-bound source residuals. Do not apply to 2025: its central table is unavailable.
     for (const row of cons!.rows)
       for (let c = 0; c < cons!.columns.length; c++) {
         const found = parts.map((t) => t.rows.find((r) => r.row === row.row));

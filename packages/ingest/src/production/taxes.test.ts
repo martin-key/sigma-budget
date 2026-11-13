@@ -218,3 +218,25 @@ it('binds each tax schema to its own published filename and real dataset identit
     ).toBe(false);
   }
 });
+
+it('checks the cancellation of net transfers even though Cons has no labelled transfer row', () => {
+  for (const year of [2024, 2026]) {
+    const q = structuredClone(datasets['kfp-subsectors.json'].tables);
+    q
+      .find((t) => t.scope === 'central' && t.year === year)!
+      .rows.find((r) => r.row === 44)!.source[0]! += 1;
+    expect(() => assertConsolidation(q)).toThrow('Consolidation transfers');
+  }
+});
+it('binds the transfer residual to all four original hashes and complete source rows', () => {
+  const quarterly = datasets['kfp-subsectors.json'].tables;
+  for (const scope of ['central', 'social', 'local', 'consolidated']) {
+    const q = structuredClone(quarterly);
+    q.find((t) => t.scope === scope && t.year === 2024)!.sha256 = '0'.repeat(64);
+    expect(() => assertConsolidation(q)).toThrow('source pins');
+  }
+  const q = structuredClone(quarterly),
+    central = q.find((t) => t.scope === 'central' && t.year === 2024)!;
+  central.rows = central.rows.filter((r) => r.row !== 44);
+  expect(() => assertConsolidation(q)).toThrow('transfer row missing');
+});

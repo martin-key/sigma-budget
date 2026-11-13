@@ -43,6 +43,8 @@ def valid_budget_tables(doc, filename=None):
         if any(not isinstance(c, dict) or c.get('unit') not in ('BGN', 'EUR') for c in columns):
             return False
         required = set(range(9, 20 if year == 2025 else 19)) if monthly else {8,10,11,12,13,14,15,16,17,18,19,21,23,26,28,30,31,32,35,38,40,41,42,47,49,50,51,52}
+        if not monthly and scope != 'consolidated':
+            required.add(44)
         row_ids = [r.get('row') for r in rows if isinstance(r, dict)]
         if len(set(row_ids)) != len(rows) or not required.issubset(row_ids):
             return False
