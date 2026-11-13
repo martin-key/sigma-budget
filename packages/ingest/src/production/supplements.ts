@@ -1,7 +1,7 @@
 import { prepareExecution, type PrepareExecutionOptions } from '../readers/execution/producer.js';
 import type { PinnedFile } from '../readers/workbooks/index.js';
 import { readExecutionReport } from '../readers/execution/report.js';
-import differences from './kfp-source-differences.json' with { type: 'json' };
+import differences from '../validate/kfp-source-differences.json' with { type: 'json' };
 
 /** Resolutions are shared by core, catalog, feed and search before graph construction. */
 export const RESOLVED_PENDING = new Set(['P05']);

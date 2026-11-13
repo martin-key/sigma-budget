@@ -1,4 +1,4 @@
-import historicalDifferences from '../production/kfp-source-differences.json' with { type: 'json' };
+import historicalDifferences from './kfp-source-differences.json' with { type: 'json' };
 import { isDeepStrictEqual } from 'node:util';
 import { pythonFloat } from '../build/context.js';
 import { parsePythonJson } from '../common/numbers.js';

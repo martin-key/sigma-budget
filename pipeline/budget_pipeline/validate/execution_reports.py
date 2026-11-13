@@ -23,7 +23,7 @@ from budget_pipeline.validate.checks import Check, fmt, isnum
 # the raw reports are NOT in the repository (docs/data-sources.md): without data/originals the independent re-read is skipped with a warning
 RAW_PRESENT = os.path.isdir(os.path.join(ROOT, "data", "originals"))
 
-HISTORICAL_DIFFERENCES = json.loads((ROOT / "packages/ingest/src/production/kfp-source-differences.json").read_text())
+HISTORICAL_DIFFERENCES = json.loads((ROOT / "packages/ingest/src/validate/kfp-source-differences.json").read_text())
 EUR = 1.95583
 SHEET = "стартова"
 COLS = (("kfp", 1, "к.2"), ("nat", 2, "к.3"), ("eu", 3, "к.4"))
