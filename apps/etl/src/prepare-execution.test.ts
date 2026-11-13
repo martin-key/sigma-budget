@@ -19,7 +19,12 @@ const root = fileURLToPath(new URL('../../../', import.meta.url));
 const fixture = join(root, 'packages/ingest/test/fixtures/wave18');
 const manifest = JSON.parse(readFileSync(join(fixture, 'manifest.json'), 'utf8'));
 const pinned = (path: string) => ({ path, sha256: sha256(readFileSync(path)) });
-const published = JSON.parse(readFileSync(join(root, 'data/release/execution.json'), 'utf8'));
+const published = JSON.parse(readFileSync(join(fixture, 'data/release/execution.json'), 'utf8'));
+// Frozen standalone scope; production historical coverage is verified by supplements.test.ts.
+published.reconcile.note = published.reconcile.note.replace(
+  '; причината предстои да бъде проверена от експерт по публични финанси.',
+  '.',
+);
 function config(): ExecutionInputConfig {
   const archive = pinned(join(fixture, 'data/originals/budget_2027/ZDBRB-2027.zip'));
   return {

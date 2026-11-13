@@ -475,7 +475,9 @@ export function core(ctx: Context): Check {
   c.ok(
     equal(
       iterable(pending, kind(pending, core, 'pending')).sort(),
-      Array.from({ length: 7 }, (_, i) => `P0${i + 1}`),
+      Array.from({ length: 7 }, (_, i) => `P0${i + 1}`).filter(
+        (id) => id !== 'P05' || !Object.hasOwn(ctx.get('execution.json').data, '2022'),
+      ),
     ),
     `pending ids ${pyRepr(iterable(pending, kind(pending, core, 'pending')).sort())}`,
   );

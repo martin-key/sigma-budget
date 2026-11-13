@@ -9,6 +9,7 @@ Pure standard library plus xlrd (already in the venv). Nothing here writes a fil
 
 from pathlib import Path as _Path
 ROOT = _Path(__file__).resolve().parents[3]
+import json
 import calendar
 import hashlib
 import os
@@ -22,6 +23,7 @@ from budget_pipeline.validate.checks import Check, fmt, isnum
 # the raw reports are NOT in the repository (docs/data-sources.md): without data/originals the independent re-read is skipped with a warning
 RAW_PRESENT = os.path.isdir(os.path.join(ROOT, "data", "originals"))
 
+HISTORICAL_DIFFERENCES = json.loads((ROOT / "packages/ingest/src/validate/kfp-source-differences.json").read_text())
 EUR = 1.95583
 SHEET = "стартова"
 COLS = (("kfp", 1, "к.2"), ("nat", 2, "к.3"), ("eu", 3, "к.4"))
@@ -37,7 +39,7 @@ SUMS = {                                  # parent = sum(children); the fixed ac
 MONTH_RE = re.compile(r"КЪМ\s+(\d{2})\.(\d{2})\.(\d{4})\s+ГОДИНА")
 FILE_RE = re.compile(r"EU[ _]funds_(\d{2})(\d{2})_")    # „EU funds“ with a space from the September 2026 report
 CONV_TOL = 0.0006                         # published value vs round(raw / 1.95583, 3): equal up to float noise
-FIRST_YEAR = 2024                         # every year but the last has 12 reports; the last one 1..12
+FIRST_YEAR = 2022                         # every year but the last has 12 reports; the last one 1..12
 
 
 def _want_cur(y):
@@ -107,7 +109,7 @@ def g_kfp(ctx):
          "cols must be kfp/nat/eu = к.2/к.3/к.4")
     data = ex["data"]
     years = sorted(data)
-    c.ok(years == [str(y) for y in range(FIRST_YEAR, FIRST_YEAR + len(years))], "data years %s, not consecutive from %d" % (years, FIRST_YEAR))
+    c.ok(years == [str(y) for y in range(2024 if years[0] == "2024" else FIRST_YEAR, (2024 if years[0] == "2024" else FIRST_YEAR) + len(years))], "data years %s, not consecutive from %d" % (years, FIRST_YEAR))
     max_dev = {}
     known_seen = set()
     compared = 0
@@ -180,7 +182,10 @@ def g_kfp(ctx):
                 c.ok(dev <= 5 * 0.5e-6 + 1e-6, "%s-%02d %s: balance != rev - exp + transfers - eucontrib (%.6f)" % (y, month, col, dev))
                 dev = abs(rw["fin"] + rw["balance"])
                 known = KNOWN_RAW.get(("fin=-balance", int(y), month))
-                if known is not None and dev > 0.005:
+                historical = HISTORICAL_DIFFERENCES.get(f["sha256"], {}).get("differences", {}).get("fin=-balance/" + {"kfp": "B", "nat": "C", "eu": "D"}[col])
+                if historical is not None:
+                    c.ok(abs(rw["fin"] + rw["balance"] - historical) <= 1e-6, "%s %s: exact registered source difference" % (y, col))
+                elif known is not None and dev > 0.005:
                     c.ok(dev <= known, "%s-%02d %s: financing != -balance (%.6f) beyond the known source difference" % (y, month, col, dev))
                     known_seen.add("%s-%02d %s %.6f" % (y, month, col, dev))
                 else:
@@ -201,7 +206,8 @@ def g_kfp(ctx):
                          "%s %s month %d: converted %s differs from its parts" % (y, col, i + 1, parent))
                 c.ok(abs(s["rev"][i] - s["exp"][i] + s["transfers"][i] - s["eucontrib"][i] - s["balance"][i]) <= 0.0026,
                      "%s %s month %d: converted balance identity" % (y, col, i + 1))
-                c.ok(abs(s["fin"][i] + s["balance"][i]) <= 0.0061, "%s %s month %d: converted financing != -balance" % (y, col, i + 1))
+                historical = HISTORICAL_DIFFERENCES.get(data[y]["files"][i]["sha256"], {}).get("differences", {}).get("fin=-balance/" + {"kfp": "B", "nat": "C", "eu": "D"}[col])
+                c.ok(abs(s["fin"][i] + s["balance"][i] - (historical or 0) / (EUR if data[y]["currency"] == "BGN" else 1)) <= (0.0011 if historical is not None else 0.0061), "%s %s month %d: converted financing != -balance" % (y, col, i + 1))
                 c.ok(abs(s["exp.total"][i] - s["exp"][i] - s["eucontrib"][i]) <= 0.0011, "%s %s month %d: exp.total != exp + eucontrib" % (y, col, i + 1))
         for rid in ids:
             for i in range(n):

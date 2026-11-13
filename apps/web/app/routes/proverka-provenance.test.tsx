@@ -46,6 +46,14 @@ it('distinguishes preserved intermediates from source inputs without overstating
           rebuiltByThisRelease: true,
           limitations: ['Historical original missing; preserved reader capture used.'],
         },
+        {
+          dataset: 'p04',
+          status: 'pending',
+          period: '2026',
+          unit: '',
+          files: [],
+          reason: 'Отчетът не е публикуван от източника.',
+        },
       ],
     },
   };
@@ -76,6 +84,9 @@ it('distinguishes preserved intermediates from source inputs without overstating
       'Пресглобен в това издание',
     );
     expect(doc.querySelector('#s35-sets tbody td:last-child')!.textContent).toBe('да');
+    const pendingRow = doc.querySelectorAll('#s35-sets tbody tr')[1]!;
+    expect(pendingRow.lastElementChild!.textContent).toBe('—');
+    expect(pendingRow.textContent).toContain('Отчетът не е публикуван от източника.');
     const rows = [...doc.querySelectorAll('#s35-in tbody tr')];
     expect(rows).toHaveLength(4);
     rows.forEach((row, i) => {

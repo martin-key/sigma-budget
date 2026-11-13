@@ -1,0 +1,93 @@
+{
+  "556723053cee674a20567974a7504fccabe007b8716af4ec371e6ad3c5851a73": {
+    "file": "2022-EU_funds_0122_BG_WEB.xls",
+    "differences": {
+      "fin=-balance/B": -0.010497,
+      "fin=-balance/C": -0.010497
+    }
+  },
+  "4d37662b66dcfa168320ec14ecfdfb99645be4c82126100d9299ca771b6d4fc0": {
+    "file": "2022-EU_funds_0322_BG_WEB.xls",
+    "differences": {
+      "fin=-balance/B": 0.006416,
+      "fin=-balance/C": 0.006416
+    }
+  },
+  "3fdf6ad995b15009ad5f85a08bbcdcbba948695ffabe231fec7398a6204e39a9": {
+    "file": "2022-EU_funds_0522_BG_WEB.xls",
+    "differences": {
+      "fin=-balance/B": -0.009701,
+      "fin=-balance/C": -0.009701
+    }
+  },
+  "a8d09ddc40dc4b09441b28c8dfc7322aee334a1ed31fab90075ba9a18fe137d8": {
+    "file": "2022-EU_funds_0622_BG_WEB.xls",
+    "differences": {
+      "fin=-balance/B": 0.010475,
+      "fin=-balance/C": 0.010475
+    }
+  },
+  "79014ecb60f8f80816f6d65c0cd6557926d68147b85a77242eded237c0e5cf51": {
+    "file": "2022-EU_funds_0822_BG_WEB.xls",
+    "differences": {
+      "row34/B": 0.000578,
+      "row34/C": 0.000578
+    }
+  },
+  "933bb3aac408165aaa27413d31285803f0ad5415fbd1b17badcd72684980dfe7": {
+    "file": "2023-EU_funds_0123_BG_WEB.xls",
+    "differences": {
+      "fin=-balance/B": -0.008185,
+      "fin=-balance/C": -0.008185
+    }
+  },
+  "fecfaf8c12ff9ff0bebac1173679b47087647316462a283b3bdfd9768da0c45a": {
+    "file": "2023-EU_funds_0223_BG_WEB.xls",
+    "differences": {
+      "fin=-balance/B": -0.008114,
+      "fin=-balance/C": -0.008114
+    }
+  },
+  "86f92aeb81f13d3aa90f5d1c724a1656b8d491a213e0021a5af1ee273f1f871d": {
+    "file": "2023-EU_funds_0423_BG_WEB.xls",
+    "differences": {
+      "fin=-balance/B": -0.008193,
+      "fin=-balance/C": -0.008193
+    }
+  },
+  "5224416f08a696aa81401ea3976b9780c76cc61f0212154bade989af1dcf6783": {
+    "file": "2023-EU_funds_0723_BG_WEB.xls",
+    "differences": {
+      "fin=-balance/B": -0.008142,
+      "fin=-balance/C": -0.008142
+    }
+  },
+  "60c685c8ca0cb39ffc6a1c16b9fad1c77e4c90ccc0a6db89e091fc9b70292e8a": {
+    "file": "2023-EU_funds_0823_BG_WEB.xls",
+    "differences": {
+      "fin=-balance/B": -0.018144,
+      "fin=-balance/C": -0.018144
+    }
+  },
+  "987287f40f121f0f33faf82379ba2efe9846ec113789f3ceea5232e4415c29ba": {
+    "file": "2023-EU_funds_0923_BG_WEB.xls",
+    "differences": {
+      "fin=-balance/B": -0.018207,
+      "fin=-balance/C": -0.018207
+    }
+  },
+  "ddfffcab16c894a3d5d1c5f9cda513c74c8ede9f47a0919fe7c09879f399a757": {
+    "file": "2023-EU_funds_1123_BG_WEB.xls",
+    "differences": {
+      "fin=-balance/B": 0.012139,
+      "fin=-balance/C": 0.012139
+    }
+  },
+  "ebf43751dbfd6d5d8116ea0b9837c08f42c37df5252c4b72d76379c7e85efe25": {
+    "file": "2023-EU_funds_1223_BG_WEB.xls",
+    "differences": {
+      "fin=-balance/B": -0.008178,
+      "fin=-balance/C": -0.008178
+    }
+  }
+}

@@ -21,7 +21,7 @@ RAW = ROOT / "data" / "originals"                     # raw originals; tracked M
 SOURCES = TMP / "sources"                        # manual acquisition inbox; the tracked budget 2027 PDF lives in RAW / budget_2027
 RESEARCH = ROOT / "data" / "cache" / "research"                      # working extracts, not in the repository
 
-BUILD_DATE = os.environ.get("BUILD_DATE", "2026-11-12")
+BUILD_DATE = os.environ.get("BUILD_DATE", "2026-11-13")
 DATA_VERSION = BUILD_DATE + ".1"
 SEED = 20261002
 EUR = 1.95583                                     # BGN per EUR (fixed conversion rate)
