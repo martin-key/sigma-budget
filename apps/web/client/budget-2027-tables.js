@@ -5,7 +5,7 @@
 import { html } from './html.js';
 import { num, DASH } from './format.js';
 import { periodByKey } from './periods.js';
-import { cellValue } from './budget-2027.js';
+import { cellValue, provenanceUrl } from './budget-2027.js';
 
 export const TABLES = 'budget2027-tables';
 export const tablesOf = (ctx) => ctx.data?.[TABLES] || null;
@@ -30,7 +30,8 @@ export function cellText(cell, d = 1) {
   return html`${num(v, d)}`;
 }
 
-/** rows of a forecast table for dataTable: one numeric column per published column */
+/** rows of a forecast table for dataTable: one numeric column per published column; after them, for the CSV only (exportOnly), the
+    provenance ID and link of each of those columns (the numbers keep their positions, the screen shows the numbers alone) */
 export function forecastTable(doc, table, { columns, rows, d = () => 1 } = {}) {
   const cols = columns || publishedColumns(doc, table);
   const source = (doc?.forecast?.[table] || []).map((r, i) => ({ ...r, index: i }));
@@ -45,6 +46,10 @@ export function forecastTable(doc, table, { columns, rows, d = () => 1 } = {}) {
         num: true,
         fmt: (v, r) => cellText(r['_c' + c.index], d(r, c)),
       })),
+      ...cols.flatMap((c) => [
+        { key: 'p' + c.index, label: `${columnLabel(c)}: произход`, exportOnly: true },
+        { key: 'o' + c.index, label: `${columnLabel(c)}: връзка към произхода`, exportOnly: true },
+      ]),
     ],
     rows: picked.map((r) => {
       const out = { label: r.label, unit: '', _index: r.index };
@@ -52,6 +57,8 @@ export function forecastTable(doc, table, { columns, rows, d = () => 1 } = {}) {
         const cell = r.cells?.[String(c.index)];
         out['c' + c.index] = cellValue(cell);
         out['_c' + c.index] = cell;
+        out['p' + c.index] = cell?.provenance || '';
+        out['o' + c.index] = provenanceUrl(cell);
         if (cell?.unit && !out.unit) out.unit = cell.unit;
       }
       return out;
