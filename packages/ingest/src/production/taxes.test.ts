@@ -179,3 +179,28 @@ it('allows only documented null source/converted cells in complete budget contra
     expect(check(doc, 'other.json').problems.some((p) => p.includes('unexpected null'))).toBe(true);
   }
 });
+it('rejects changed quarterly sheet, period, currency, headings, precision and cache evidence', () => {
+  const t = tables.find((t) => t.scope === 'consolidated')!,
+    x = acquisition.files.find((f: any) => f.sha256 === t.sha256),
+    path = join(root, x.path);
+  for (const mutate of [
+    (w: any) => w.sheetNames.push('other'),
+    (w: any) => (w.sheets[t.sheet].rows = 56),
+    (w: any) => (w.sheets[t.sheet].cells.A5.value = 'million BGN'),
+    (w: any) => (w.sheets[t.sheet].cells.B4.value = 'Q2'),
+    (w: any) => (w.sheets[t.sheet].cells.B5.value = 2023),
+    (w: any) => (w.sheets[t.sheet].cells.B10.value = Infinity),
+    (w: any) => (w.sheets[t.sheet].cells.B10.value += 1e-8),
+    (w: any) => {
+      w.sheets[t.sheet].cells.B10.value = null;
+      w.sheets[t.sheet].cells.B10.formula = 'SUM(B11:B19)';
+    },
+  ]) {
+    const w = readWorkbook({ path, sha256: t.sha256, format: 'xls' });
+    mutate(w);
+    expect(() => parseBudgetTable(w, t.file)).toThrow();
+  }
+  const w = readWorkbook({ path, sha256: t.sha256, format: 'xls' });
+  expect(() => parseBudgetTable(w, 'Central_4Q_2025_BG.xls')).toThrow();
+  expect(() => parseBudgetTable(w, 'Cons_2Q_2024_BG.xls')).toThrow();
+});

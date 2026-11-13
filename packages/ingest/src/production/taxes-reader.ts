@@ -137,7 +137,12 @@ export function parseBudgetTable(w: Workbook, filename: string): BudgetTable {
         if (c.formula) throw new Error('Missing formula cache');
         return null;
       }
-      if (c.type !== 'number' || typeof c.value !== 'number' || !Number.isFinite(c.value))
+      if (
+        c.type !== 'number' ||
+        typeof c.value !== 'number' ||
+        !Number.isFinite(c.value) ||
+        c.cache === 'missing'
+      )
         throw new Error('Non-numeric budget cell');
       return sourceUnits(c.value);
     });

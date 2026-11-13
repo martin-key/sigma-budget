@@ -868,9 +868,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh api --hostname github.com repos/midt-bg/sigma-budget/releases/assets/745038105 -H 'Accept: application/octet-stream' > "$RUNNER_TEMP/registered-node-inputs.tar.gz"
-          printf '%s  %s\n' '5a18e02288bfcf9e20446d0f00af1b6ce80e89748c159f3fdfe1f6b0f3ff9c72' "$RUNNER_TEMP/registered-node-inputs.tar.gz" | sha256sum --check
-          test "$(stat -c '%s' "$RUNNER_TEMP/registered-node-inputs.tar.gz")" = 152065699
+          gh api --hostname github.com repos/midt-bg/sigma-budget/releases/assets/745517582 -H 'Accept: application/octet-stream' > "$RUNNER_TEMP/registered-node-inputs.tar.gz"
+          printf '%s  %s\n' 'f4b9a7650bb89736d4cf924d6b446a22691ba8c1e7bb9e7aea31ab61f0f331ae' "$RUNNER_TEMP/registered-node-inputs.tar.gz" | sha256sum --check
+          test "$(stat -c '%s' "$RUNNER_TEMP/registered-node-inputs.tar.gz")" = 152549590
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: registered-node-input-archive
