@@ -356,7 +356,10 @@ export function debt(ctx: Context): Check {
     'compare.gg must equal the Maastricht series',
   );
   c.ok(
-    text(cp.note) && cp.note.includes('експерт по публични финанси'),
+    text(cp.note) &&
+      ['таблица VI-1', 'БНБ', 'Маастрихт', 'Държавно управление'].every((scope) =>
+        cp.note.includes(scope),
+      ),
     'compare.note must carry the generic verification wording',
   );
   for (const x of Object.values(r)) c.ok(text(x.label), `compare.${x.id}: label`);

@@ -142,7 +142,7 @@ export const sources = {
   gisco: {
     title: 'Eurostat GISCO: местни административни единици (LAU) 2024, граници и население',
     publisher: 'Евростат (GISCO)',
-    url: 'https://ec.europa.eu/eurostat/web/gisco/geodata/administrative-units/local-administrative-units',
+    url: 'https://ec.europa.eu/eurostat/web/gisco/geodata/statistical-units/local-administrative-units',
     kind: 'api',
     access: 'open',
     note: 'Населението на общините е към 1 януари 2024 г. (сборът за страната е 6 445 481, колкото е официалното число на Евростат за същата дата). Границите са опростени за показване.',

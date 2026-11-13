@@ -37,7 +37,9 @@ function config(): ExecutionInputConfig {
     },
   };
 }
-const build = (input = config()) => prepareExecutionFiles(input, '2026-11-08');
+const buildDate = JSON.parse(readFileSync(join(root, 'data/release/execution.json'), 'utf8')).meta
+  .retrieved;
+const build = (input = config()) => prepareExecutionFiles(input, buildDate);
 
 describe('real monthly BIFF -> complete published execution contract', () => {
   it('rebuilds both entire published documents and their sparse law/provenance from all 33 originals', () => {

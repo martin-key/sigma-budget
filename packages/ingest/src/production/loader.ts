@@ -425,7 +425,7 @@ export async function loadProduction(
     );
   const gvaPath = 'packages/ingest/src/production/historical/gva-sectors.json',
     gvaBytes = raw(gvaPath);
-  if (sha256(gvaBytes) !== 'f1d96acd63f3db527e696194d23bd142f774168259aeb4dd6868ce1a23a447a2')
+  if (sha256(gvaBytes) !== '8e3342db45caf3f3019bcf789d0f4655fd44ad3de1a1e746347d050e68571b9e')
     throw new Error('Historical GVA material changed');
   const routes = json('apps/web/app/lib/routes.json'),
     registry = yaml(raw('data/datasets.yaml').toString('utf8'));

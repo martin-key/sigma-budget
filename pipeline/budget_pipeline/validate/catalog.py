@@ -68,8 +68,9 @@ def g_core(ctx):
     # P04 names the next report and the last one added (definitions.set_kfp_pending), never a month written into the code
     p04, ny = core["pending"].get("P04", {}), nxt["asOf"][:4]
     c.ok(p04.get("title", "").startswith("Отчетът към %s г." % ".".join(reversed(nxt["asOf"].split("-"))))
-         and "за %s %s г. още не е добавен" % (MONTHS[nxt["month"] - 1], ny) in p04.get("reason", "")
-         and p04.get("reason", "").endswith("е за %s %s г." % (MONTHS[ex["latest"]["month"] - 1], ex["latest"]["asOf"][:4])),
+         and (p04.get("reason", "") == "Последният месечен отчет в портала е за %s %s г. Отчетът за %s %s г. не е включен." % (MONTHS[ex["latest"]["month"] - 1], ex["latest"]["asOf"][:4], MONTHS[nxt["month"] - 1], ny)
+              or ("за %s %s г. още не е добавен" % (MONTHS[nxt["month"] - 1], ny) in p04.get("reason", "")
+         and p04.get("reason", "").endswith("е за %s %s г." % (MONTHS[ex["latest"]["month"] - 1], ex["latest"]["asOf"][:4])))),
          "pending P04 must name the pending report %s and the latest %s" % (nxt["asOf"], ex["latest"]["asOf"]))
     # --- counts
     n = core["counts"]

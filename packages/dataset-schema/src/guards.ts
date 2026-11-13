@@ -101,6 +101,18 @@ export const releaseManifestGuard = shape({
     registries: record,
   }),
 });
+/** Build receipt that a local Node release installation keeps next to the manifest and validation report. */
+export const releaseReceiptGuard = shape({
+  schema: literal('node-release-build/1'),
+  release_id: sha256,
+  built: string,
+  env: literal('node-offline'),
+  commit: string,
+  executor: record,
+  snapshot: shape({ sha256 }),
+  validation_sha256: sha256,
+  outputs_sha256: sha256,
+});
 export type ReleaseInput = Infer<typeof releaseInputGuard>;
 export type ReleaseOutput = Infer<typeof releaseOutputGuard>;
 

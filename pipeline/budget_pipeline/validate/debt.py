@@ -161,7 +161,7 @@ def g_debt(ctx):
     c.ok(r["zdd"]["mln"] == [z["totalMln"][yrs.index(y)] for y in cp["years"]] and r["zdd"]["source"] == ["asbp"], "compare.zdd must equal table VI-1")
     c.ok(r["cg"]["mln"] == [cmap["%d-Q4" % y] for y in cp["years"]] and r["cg"]["source"] == ["bnb"], "compare.cg must equal the BNB central-government fourth quarter")
     c.ok(r["gg"]["mln"] == [mx["bg"]["mln"][my.index(y)] for y in cp["years"]] and r["gg"]["source"] == ["eurostat"], "compare.gg must equal the Maastricht series")
-    c.ok(isinstance(cp["note"], str) and "експерт по публични финанси" in cp["note"], "compare.note must carry the generic verification wording")
+    c.ok(isinstance(cp["note"], str) and all(scope in cp["note"] for scope in ("таблица VI-1", "БНБ", "Маастрихт", "Държавно управление")), "compare.note must carry the generic verification wording")
     for x in r.values():
         c.ok(isinstance(x["label"], str) and x["label"].strip(), "compare.%s: label" % x["id"])
     # --- structure, table VI-2
