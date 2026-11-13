@@ -60,5 +60,5 @@ export function budgetExecution(ctx) {
       }),
     }),
   );
-  return html`${block({ id: 'state-budget-taxes', title: monthly.meta.title, source: monthly.meta.source, asOf: monthly.meta.asOf, body: html`<p>${monthly.limitations.join(' ')}</p><p>Законът е годишен, а изпълнението е натрупано от януари до съответния месец. „—“ означава празна клетка в оригинала.</p>${monthlyTables}` })}${block({ id: 'kfp-subsector-taxes', title: quarterly.meta.title, source: quarterly.meta.source, asOf: quarterly.meta.asOf, body: html`<p>${quarterly.limitations.join(' ')}</p><p>${quarterly.missing[0].reason}</p>${subsectors}` })}`;
+  return html`${block({ id: 'state-budget-taxes', title: monthly.meta.title, source: monthly.meta.source, asOf: monthly.meta.asOf, body: html`<p>${monthly.limitations.join(' ')}</p><p><a href="${monthly.sourcePage}">МФ: месечни данни по държавния бюджет</a></p><p>Законът е годишен, а изпълнението е натрупано от януари до съответния месец. „—“ означава празна клетка в оригинала.</p>${monthlyTables}` })}${block({ id: 'kfp-subsector-taxes', title: quarterly.meta.title, source: quarterly.meta.source, asOf: quarterly.meta.asOf, body: html`<p>${quarterly.limitations.join(' ')}</p><p><a href="${quarterly.sourcePage}">МФ: тримесечни данни по КФП</a></p><p>${quarterly.missing[0].reason}</p>${subsectors}` })}`;
 }

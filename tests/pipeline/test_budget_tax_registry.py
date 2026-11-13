@@ -30,6 +30,8 @@ class BudgetTableContracts(unittest.TestCase):
                 lambda d: d['tables'][0]['rows'][0]['source'].__setitem__(0, '1'),
                 lambda d: d['tables'][0]['rows'][0]['eur'].pop(),
                 lambda d: d.update(sourceIntegerScale=1),
+                lambda d: d.update(sourcePage='https://example.invalid/'),
+                lambda d: d['tables'][0]['columns'][0].update(id='unknown'),
             )
             for change in mutations:
                 doc = copy.deepcopy(original)

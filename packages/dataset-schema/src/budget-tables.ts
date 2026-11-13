@@ -40,6 +40,14 @@ export function budgetTablesGuard(v: unknown): v is Record<string, Json> {
     v.frequency !== (monthly ? 'monthly-cumulative' : 'quarterly-flows')
   )
     return false;
+  if (v.sourcePage !== `https://www.minfin.bg/bg/statistics/${monthly ? 18 : 6}`) return false;
+  if (
+    !record(v.meta) ||
+    v.meta.id !== (monthly ? 'D36' : 'D37') ||
+    v.meta.status !== 'real' ||
+    v.meta.mock !== false
+  )
+    return false;
   const keys = new Set<string>();
   for (const t of v.tables) {
     if (
@@ -114,3 +122,8 @@ export function budgetTablesGuard(v: unknown): v is Record<string, Json> {
       })(v.missing[0]))
   );
 }
+
+export const stateBudgetGuard = (v: unknown): v is Record<string, Json> =>
+  budgetTablesGuard(v) && v.schema === 'state-budget/1';
+export const kfpSubsectorsGuard = (v: unknown): v is Record<string, Json> =>
+  budgetTablesGuard(v) && v.schema === 'kfp-subsectors/1';

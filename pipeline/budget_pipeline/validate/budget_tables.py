@@ -3,13 +3,20 @@ import math
 import re
 
 
-def valid_budget_tables(doc):
+def valid_budget_tables(doc, filename=None):
     if not isinstance(doc, dict) or doc.get('sourceIntegerScale') != 10000000 or doc.get('conversionRate') != 1.95583 or doc.get('unit') != 'млн. €':
         return False
     monthly = doc.get('schema') == 'state-budget/1'
     if not monthly and doc.get('schema') != 'kfp-subsectors/1':
         return False
     if doc.get('scope') != ('държавен бюджет' if monthly else 'КФП по подсектори') or doc.get('frequency') != ('monthly-cumulative' if monthly else 'quarterly-flows'):
+        return False
+    if doc.get('sourcePage') != 'https://www.minfin.bg/bg/statistics/%d' % (18 if monthly else 6):
+        return False
+    if filename is not None and doc.get('schema') != {'state-budget.json': 'state-budget/1', 'kfp-subsectors.json': 'kfp-subsectors/1'}.get(filename):
+        return False
+    meta = doc.get('meta')
+    if not isinstance(meta, dict) or meta.get('id') != ('D36' if monthly else 'D37') or meta.get('status') != 'real' or meta.get('mock') is not False:
         return False
     tables = doc.get('tables')
     if not isinstance(tables, list) or len(tables) != (21 if monthly else 11):
@@ -69,6 +76,6 @@ def valid_budget_tables(doc):
 
 def has_tax_contracts(ctx):
     try:
-        return all(valid_budget_tables(ctx.get(name)) for name in ('state-budget.json', 'kfp-subsectors.json'))
+        return all(valid_budget_tables(ctx.get(name), name) for name in ('state-budget.json', 'kfp-subsectors.json'))
     except FileNotFoundError:
         return False

@@ -121,6 +121,9 @@ it('rejects malformed published scope, coverage, currency, cells and missing-per
       (d: any) => d.tables[0].rows[0].eur.pop(),
       (d: any) => (d.tables[0].scope = 'unknown'),
       (d: any) => (d.sourceIntegerScale = 1),
+      (d: any) => (d.sourcePage = 'https://example.invalid/'),
+      (d: any) => (d.tables[0].rows[0].eur[0] += 1),
+      (d: any) => (d.tables[0].columns[0].id = 'unknown'),
     ]) {
       const d = structuredClone(original);
       mutate(d);
@@ -203,4 +206,15 @@ it('rejects changed quarterly sheet, period, currency, headings, precision and c
   const w = readWorkbook({ path, sha256: t.sha256, format: 'xls' });
   expect(() => parseBudgetTable(w, 'Central_4Q_2025_BG.xls')).toThrow();
   expect(() => parseBudgetTable(w, 'Cons_2Q_2024_BG.xls')).toThrow();
+});
+
+it('binds each tax schema to its own published filename and real dataset identity', () => {
+  expect(isPublishedDataset('state-budget.json', datasets['kfp-subsectors.json'])).toBe(false);
+  expect(isPublishedDataset('kfp-subsectors.json', datasets['state-budget.json'])).toBe(false);
+  for (const [file, doc] of Object.entries(datasets)) {
+    expect(isPublishedDataset(file, { ...doc, meta: { ...doc.meta, id: 'D00' } })).toBe(false);
+    expect(
+      isPublishedDataset(file, { ...doc, meta: { ...doc.meta, status: 'mock', mock: true } }),
+    ).toBe(false);
+  }
 });

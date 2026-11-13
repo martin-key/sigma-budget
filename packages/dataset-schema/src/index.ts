@@ -1,4 +1,4 @@
-import { budgetTablesGuard } from './budget-tables.js';
+import { stateBudgetGuard, kfpSubsectorsGuard } from './budget-tables.js';
 import {
   shape,
   optionalPeriods,
@@ -74,8 +74,8 @@ const cigaretteTaxGuard = shape({
   quote: string,
 });
 export const datasetGuards = {
-  'state-budget.json': budgetTablesGuard,
-  'kfp-subsectors.json': budgetTablesGuard,
+  'state-budget.json': stateBudgetGuard,
+  'kfp-subsectors.json': kfpSubsectorsGuard,
   'budget2027.json': shape({
     meta: metaGuard,
     schema: string,
