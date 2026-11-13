@@ -167,6 +167,15 @@ export function acceptProductionCatalogCounts(
   return found;
 }
 
+/** Keep the legacy validator's financial facts; update only its pending count for production. */
+export function reviseProductionPendingFact(c: Check, pendingCount: number): void {
+  if (c.name !== 'CORE') return;
+  c.facts.forEach((fact, index) => {
+    if (fact.startsWith('core 2026:') && fact.endsWith('; 7 pending blocks'))
+      c.facts[index] = fact.replace(/7 pending blocks$/, `${pendingCount} pending blocks`);
+  });
+}
+
 export function validateProduction(
   context: Readonly<ExecutionContext>,
   prepared: PreparedProduction,
@@ -257,6 +266,8 @@ export function validateProduction(
   ];
   const result = runGroups(groups, ctx, wanted);
   for (const c of result.groups) {
+    if (c.name === 'CORE')
+      reviseProductionPendingFact(c, Object.keys(ctx.get('core.json').pending).length);
     applyExceptions(c, true);
     const accepted = applyWave17aExceptions(c, true);
     acceptProductionCatalogCounts(c, accepted);
