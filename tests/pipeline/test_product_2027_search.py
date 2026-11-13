@@ -74,19 +74,12 @@ class ProductSearchTest(unittest.TestCase):
             self.assertIn('to=s12-II_7-1-', row[6])
 
     def test_validator_rejects_wrong_current_budget_value_period_and_missing_row(self):
-        from budget_pipeline.build.context import Ctx as Build
-        from budget_pipeline.build.search import search
-        from budget_pipeline.build.definitions import set_kfp_pending
-        from budget_pipeline.build.active_data import GONE_ROUTES
         from budget_pipeline.validate.checks import Ctx as Validation
         from budget_pipeline.validate.search_feed import g_search
         import copy
-        build = Build()
-        set_kfp_pending(build.execution)
-        build.texts['feed.xml'] = ''
-        search(build)
-        index = build.out['search-index.json']
-        index['items'] = [r for r in index['items'] if r[5] == 'real' and not r[6].startswith(GONE_ROUTES) and 'СЕБРА' not in r[1]]
+        # The frozen builder does not emit production-only datasets. Validate the
+        # complete published index against its owners, retaining every mutation.
+        index = json.loads((ROOT / 'data/release/search-index.json').read_text())
         baseline = Validation()
         baseline._json['search-index.json'] = index
         self.assertEqual(g_search(baseline).problems, [])
