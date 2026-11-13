@@ -60,6 +60,11 @@ def script(entry):
     import shlex
     if not entry:
         return entry
+    if entry in {
+        'packages/ingest/src/production/taxes-reader.ts',
+        'packages/ingest/src/production/taxes.ts',
+    }:
+        return entry
     parts = shlex.split(entry)
     if len(parts) < 3 or parts[:2] != ['python', '-m']:
         raise ValueError('producer must be a python -m command: ' + entry)

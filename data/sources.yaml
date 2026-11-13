@@ -28,6 +28,40 @@ sources:
   - 'minfin.bg answers 403 to automatic requests: every report is downloaded by a person and imported with python -m budget_pipeline.sources.originals
     import, which checks the sheet, the period and the unit'
   - the MF release of 02.11.2026 uses a September 2025 base 0.9 млн. € above the archived report (docs/data-sources.md, section 4.1)
+- id: state-budget
+  title: 'Държавен бюджет: месечни данъци и изпълнение'
+  publisher: Министерство на финансите
+  page: https://www.minfin.bg/bg/statistics/18
+  access: browser-only
+  acquisition: import
+  format: xls
+  parser: packages/ingest/src/production/taxes-reader.ts
+  period: 2025-01–2026-09
+  unit: млн. лв. до 2025; млн. евро през 2026
+  live: false
+  files:
+  - path: data/originals/state_budget/*
+    title: Official XLS originals, import via browser
+  - path: data/originals/taxes-subsectors-acquisition.json
+    title: URLs, SHA-256 and acquisition record; excluded duplicate and source limitations
+  limitations:
+  - 'State budget only, cumulative monthly. Law cells are blank in January–June 2026.'
+- id: kfp-subsectors
+  title: 'КФП по подсектори: тримесечно изпълнение'
+  publisher: Министерство на финансите
+  page: https://www.minfin.bg/bg/statistics/6
+  access: browser-only
+  acquisition: import
+  format: xls
+  parser: packages/ingest/src/production/taxes-reader.ts
+  period: 2024-Q1–2026-Q2
+  unit: млн. лв. до 2025; млн. евро през 2026
+  live: false
+  files:
+  - path: data/originals/kfp_quarterly/*
+    title: Official XLS originals, import via browser
+  limitations:
+  - 'Quarterly flows. Central government 2025 is missing: the MF link serves the 2024 original.'
 - id: asbp
   title: 'Мотиви към законопроекта за държавния бюджет 2026: актуализирана средносрочна бюджетна прогноза (АСБП) 2026–2028'
   publisher: Министерство на финансите

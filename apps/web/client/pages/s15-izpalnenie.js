@@ -1,3 +1,4 @@
+import { budgetExecution } from '../ui/budget-execution.js';
 // S15 Изпълнение (V5). The monthly reports of the КФП, comparison first: two permanent year columns («2025» and «2026»), the same period,
 // the same scope, the same mode («Натрупано» or «За месеца»). Every number comes from execution.json (D06/D16/D26) through js/exec.js.
 // Routes: #/izpalnenie (the comparison), #/izpalnenie/byudzheti (the plan of every budget and the national budget against the EU funds).
@@ -964,6 +965,8 @@ export const needs = [
   'core',
   'execution',
   'components?',
+  'state-budget?',
+  'kfp-subsectors?',
   'execution-provenance?',
   'releases/current?',
 ];
@@ -1083,7 +1086,11 @@ export function render(ctx) {
     const plan = planBlock(C, { link: linkOf(C) });
     body = html`${controlsDisclosure(C)}${PLAN_FIRST ? plan : ''}${compareBlock(C)}${PLAN_FIRST ? '' : plan}${chartsView(C)}${historicalReference(C)}${links}${expertBlock(C)}${methodDisclosure(C)}${proofDisclosure(ctx, C)}`;
   }
-  return { body, context: C.page === 'main' && !C.problem ? '' : contextLine(C), ownContext: true }; // the main screen says it in the line under the heading and in the «Избери месец и сравнение» row
+  return {
+    body: html`${body}${budgetExecution(ctx)}`,
+    context: C.page === 'main' && !C.problem ? '' : contextLine(C),
+    ownContext: true,
+  }; // the main screen says it in the line under the heading and in the «Избери месец и сравнение» row
 }
 
 export function mount(root, ctx) {

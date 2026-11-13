@@ -1,0 +1,348 @@
+{
+  "schema": "mf-taxes-acquisition/1",
+  "files": [
+    {
+      "file": "state_budget/State_Bud_01-25_BG.xls",
+      "url": "https://www.minfin.bg/upload/60773/State_Bud_01-25_BG.xls",
+      "sha256": "ca9f67eb77122bb321b8db9ebf649cb16667e4b7efeee002c232cfc00cacf8d5",
+      "bytes": 62976,
+      "retrieved": "2026-11-13",
+      "via": "Firefox",
+      "path": "data/originals/state_budget/State_Bud_01-25_BG.xls",
+      "mode": "import via browser"
+    },
+    {
+      "file": "state_budget/State_Bud_02-25_BG.xls",
+      "url": "https://www.minfin.bg/upload/60952/State_Bud_02-25_BG.xls",
+      "sha256": "199d80e2e8c1f5e473a047af09466a55c8bbe48dbf2e6f3c23efc424070df093",
+      "bytes": 62976,
+      "retrieved": "2026-11-13",
+      "via": "Firefox",
+      "path": "data/originals/state_budget/State_Bud_02-25_BG.xls",
+      "mode": "import via browser"
+    },
+    {
+      "file": "quarterly/Soc_4Q_2024_BG.xls",
+      "url": "https://www.minfin.bg/upload/60960/Soc_4Q_2024_BG.xls",
+      "sha256": "a94f48f209ff5f42fccfbef4f7e67911158c62c137f2329e54bd9c8656027784",
+      "bytes": 47104,
+      "retrieved": "2026-11-13",
+      "via": "Firefox",
+      "path": "data/originals/kfp_quarterly/Soc_4Q_2024_BG.xls",
+      "mode": "import via browser"
+    },
+    {
+      "file": "quarterly/Local_4Q_2024_BG.xls",
+      "url": "https://www.minfin.bg/upload/60961/Local_4Q_2024_BG.xls",
+      "sha256": "9160ed01667465c5c08644ac528f5f440d4f3c8a86d5a9b94e7a65d025d21404",
+      "bytes": 42496,
+      "retrieved": "2026-11-13",
+      "via": "Firefox",
+      "path": "data/originals/kfp_quarterly/Local_4Q_2024_BG.xls",
+      "mode": "import via browser"
+    },
+    {
+      "file": "quarterly/Central_4Q_2024_BG.xls",
+      "url": "https://www.minfin.bg/upload/60962/Central_4Q_2024_BG.xls",
+      "sha256": "7a6ce34861b972ff5f30ec33772504b47bfc85ac4efa34c82043ee8f63d3d31b",
+      "bytes": 43008,
+      "retrieved": "2026-11-13",
+      "via": "Firefox",
+      "path": "data/originals/kfp_quarterly/Central_4Q_2024_BG.xls",
+      "mode": "import via browser"
+    },
+    {
+      "file": "quarterly/Cons_4Q_2024_BG.xls",
+      "url": "https://www.minfin.bg/upload/60963/Cons_4Q_2024_BG.xls",
+      "sha256": "5f9db748541b58cdada60d1080f3ea87b9793782e854e5dff272d5bbd04b74d0",
+      "bytes": 45568,
+      "retrieved": "2026-11-13",
+      "via": "Firefox",
+      "path": "data/originals/kfp_quarterly/Cons_4Q_2024_BG.xls",
+      "mode": "import via browser"
+    },
+    {
+      "file": "state_budget/State_Bud_03-25_BG.xls",
+      "url": "https://www.minfin.bg/upload/61187/State_Bud_03-25_BG.xls",
+      "sha256": "08967a9b6c171520b945826d15cefd6f6147b51e63d70313b52915ecadac5772",
+      "bytes": 63488,
+      "retrieved": "2026-11-13",
+      "via": "Firefox",
+      "path": "data/originals/state_budget/State_Bud_03-25_BG.xls",
+      "mode": "import via browser"
+    },
+    {
+      "file": "state_budget/State_Bud_05-25_BG.xls",
+      "url": "https://www.minfin.bg/upload/61664/State_Bud_05-25_BG.xls",
+      "sha256": "1b6f25b822850071f0eb9c6e0a910009df51edc902747a69d19ad368450854cc",
+      "bytes": 58880,
+      "retrieved": "2026-11-13",
+      "via": "Firefox",
+      "path": "data/originals/state_budget/State_Bud_05-25_BG.xls",
+      "mode": "import via browser"
+    },
+    {
+      "file": "state_budget/State_Bud_06-25_BG.xls",
+      "url": "https://www.minfin.bg/upload/61961/State_Bud_06-25_BG.xls",
+      "sha256": "c6e2bf8adc4e8ee030e0911828e17046f7a6636ca51327ed034f267e4c8cde81",
+      "bytes": 63488,
+      "retrieved": "2026-11-13",
+      "via": "Firefox",
+      "path": "data/originals/state_budget/State_Bud_06-25_BG.xls",
+      "mode": "import via browser"
+    },
+    {
+      "file": "state_budget/State_Bud_07-25_BG.xls",
+      "url": "https://www.minfin.bg/upload/62136/State_Bud_07-25_BG.xls",
+      "sha256": "c70f36e590e8a0c9d1f28414878a8d8ddb9fc164f6bfd68dda719259b0ec8ecf",
+      "bytes": 58880,
+      "retrieved": "2026-11-13",
+      "via": "Firefox",
+      "path": "data/originals/state_budget/State_Bud_07-25_BG.xls",
+      "mode": "import via browser"
+    },
+    {
+      "file": "state_budget/State_Bud_08-25_BG.xls",
+      "url": "https://www.minfin.bg/upload/62313/State_Bud_08-25_BG.xls",
+      "sha256": "0b3bfb5e90a161904df1ea9113cfd393a34f92bd0d25cb9010deeb845357c1ef",
+      "bytes": 63488,
+      "retrieved": "2026-11-13",
+      "via": "Firefox",
+      "path": "data/originals/state_budget/State_Bud_08-25_BG.xls",
+      "mode": "import via browser"
+    },
+    {
+      "file": "state_budget/State_Bud_09-25_BG.xls",
+      "url": "https://www.minfin.bg/upload/62547/State_Bud_09-25_BG.xls",
+      "sha256": "651d9f3f5704339a90300dc060b07b240fce056ac5d3bd9a6b7a261c7558971a",
+      "bytes": 58880,
+      "retrieved": "2026-11-13",
+      "via": "Firefox",
+      "path": "data/originals/state_budget/State_Bud_09-25_BG.xls",
+      "mode": "import via browser"
+    },
+    {
+      "file": "state_budget/State_Bud_10-25_BG.xls",
+      "url": "https://www.minfin.bg/upload/62745/State_Bud_10-25_BG.xls",
+      "sha256": "c8aeca06b8f196d1b94a3e9f4c662a9bf0ee88d33585271818a7a8d661bc2233",
+      "bytes": 63488,
+      "retrieved": "2026-11-13",
+      "via": "Firefox",
+      "path": "data/originals/state_budget/State_Bud_10-25_BG.xls",
+      "mode": "import via browser"
+    },
+    {
+      "file": "state_budget/State_Bud_11-25_BG.xls",
+      "url": "https://www.minfin.bg/upload/63021/State_Bud_11-25_BG.xls",
+      "sha256": "4817245963f8b539376ba444fe66dcd396bf829f51407edcac2486b2ee3bf69b",
+      "bytes": 58880,
+      "retrieved": "2026-11-13",
+      "via": "Firefox",
+      "path": "data/originals/state_budget/State_Bud_11-25_BG.xls",
+      "mode": "import via browser"
+    },
+    {
+      "file": "state_budget/State_Bud_12-25_BG.xls",
+      "url": "https://www.minfin.bg/upload/63265/State_Bud_12-25_BG.xls",
+      "sha256": "8c1b609455875bd469e675f6fcfed08b802262aa409cf3871dbb4509f8b06cac",
+      "bytes": 62464,
+      "retrieved": "2026-11-13",
+      "via": "Firefox",
+      "path": "data/originals/state_budget/State_Bud_12-25_BG.xls",
+      "mode": "import via browser"
+    },
+    {
+      "file": "state_budget/State_Bud_01-26_BG.xls",
+      "url": "https://www.minfin.bg/upload/63477/State_Bud_01-26_BG.xls",
+      "sha256": "d4c26490cc8fa94b2a04c32edd82e7d8af0c5b0f22269a27322bfa818f7a155b",
+      "bytes": 59904,
+      "retrieved": "2026-11-13",
+      "via": "Firefox",
+      "path": "data/originals/state_budget/State_Bud_01-26_BG.xls",
+      "mode": "import via browser"
+    },
+    {
+      "file": "quarterly/Soc_4Q_2025_BG.xls",
+      "url": "https://www.minfin.bg/upload/63729/Soc_4Q_2025_BG.xls",
+      "sha256": "4ad7bcd9aac8b6107054c6ff2dfddd04bfaf643e609e73fc86c1a690974cfbe7",
+      "bytes": 47104,
+      "retrieved": "2026-11-13",
+      "via": "Firefox",
+      "path": "data/originals/kfp_quarterly/Soc_4Q_2025_BG.xls",
+      "mode": "import via browser"
+    },
+    {
+      "file": "quarterly/Local_4Q_2025_BG.xls",
+      "url": "https://www.minfin.bg/upload/63730/Local_4Q_2025_BG.xls",
+      "sha256": "26668f30cd88f99cb8dac6f3f5fce9bcfe6921aa1862517af86a69befdc1251f",
+      "bytes": 42496,
+      "retrieved": "2026-11-13",
+      "via": "Firefox",
+      "path": "data/originals/kfp_quarterly/Local_4Q_2025_BG.xls",
+      "mode": "import via browser"
+    },
+    {
+      "file": "quarterly/Cons_4Q_2025_BG.xls",
+      "url": "https://www.minfin.bg/upload/63732/Cons_4Q_2025_BG.xls",
+      "sha256": "325a8fe8324cbf07bec382050f4102e7473ee1a44bdac8b644133801c4c6492a",
+      "bytes": 45568,
+      "retrieved": "2026-11-13",
+      "via": "Firefox",
+      "path": "data/originals/kfp_quarterly/Cons_4Q_2025_BG.xls",
+      "mode": "import via browser"
+    },
+    {
+      "file": "state_budget/State_Bud_02-26_BG.xls",
+      "url": "https://www.minfin.bg/upload/63743/State_Bud_02-26_BG.xls",
+      "sha256": "de0938cff5c05cb2f39782f5a844375f89f786ea1a168b36da72bb52ba3fc2a4",
+      "bytes": 58368,
+      "retrieved": "2026-11-13",
+      "via": "Firefox",
+      "path": "data/originals/state_budget/State_Bud_02-26_BG.xls",
+      "mode": "import via browser"
+    },
+    {
+      "file": "state_budget/State_Bud_03-26_BG.xls",
+      "url": "https://www.minfin.bg/upload/63955/State_Bud_03-26_BG.xls",
+      "sha256": "469669e04d5554406b48d2dd617957a2fd0b51d2ad8cbe21d794f682082ec2d2",
+      "bytes": 58368,
+      "retrieved": "2026-11-13",
+      "via": "Firefox",
+      "path": "data/originals/state_budget/State_Bud_03-26_BG.xls",
+      "mode": "import via browser"
+    },
+    {
+      "file": "state_budget/State_Bud_04-26_BG.xls",
+      "url": "https://www.minfin.bg/upload/64145/State_Bud_04-26_BG.xls",
+      "sha256": "fde9f33ab86a5e49f8ad4465131c275b28e980750e3fa7d64ec7ac588265424d",
+      "bytes": 58368,
+      "retrieved": "2026-11-13",
+      "via": "Firefox",
+      "path": "data/originals/state_budget/State_Bud_04-26_BG.xls",
+      "mode": "import via browser"
+    },
+    {
+      "file": "state_budget/State_Bud_05-26_BG.xls",
+      "url": "https://www.minfin.bg/upload/64413/State_Bud_05-26_BG.xls",
+      "sha256": "85431beca2a73598eab916e6583ba423640d0bb4b0bd13125031e87c62317c7e",
+      "bytes": 58368,
+      "retrieved": "2026-11-13",
+      "via": "Firefox",
+      "path": "data/originals/state_budget/State_Bud_05-26_BG.xls",
+      "mode": "import via browser"
+    },
+    {
+      "file": "state_budget/State_Bud_06-26_BG.xls",
+      "url": "https://www.minfin.bg/upload/64621/State_Bud_06-26_BG.xls",
+      "sha256": "8d9f9b24ae4b74fdbbd5885db495dabb5ff66a0a41cde78ca1ebc4538d2f30bd",
+      "bytes": 59904,
+      "retrieved": "2026-11-13",
+      "via": "Firefox",
+      "path": "data/originals/state_budget/State_Bud_06-26_BG.xls",
+      "mode": "import via browser"
+    },
+    {
+      "file": "state_budget/State__Bud_07-26_BG.xls",
+      "url": "https://www.minfin.bg/upload/64863/State_+Bud+07-26_BG.xls",
+      "sha256": "82efb05648c1e74a4bc586d994a10c113eb86ce408a7c7be505bb6db34ccd3fb",
+      "bytes": 61440,
+      "retrieved": "2026-11-13",
+      "via": "Firefox",
+      "path": "data/originals/state_budget/State__Bud_07-26_BG.xls",
+      "mode": "import via browser"
+    },
+    {
+      "file": "state_budget/State_Bud_08-26_BG.xls",
+      "url": "https://www.minfin.bg/upload/65208/State_Bud_08-26_BG.xls",
+      "sha256": "0ad797a8e4936b49e9d719697e25d82bb514772afa3ef76f0583f60234d2156f",
+      "bytes": 61440,
+      "retrieved": "2026-11-13",
+      "via": "Firefox",
+      "path": "data/originals/state_budget/State_Bud_08-26_BG.xls",
+      "mode": "import via browser"
+    },
+    {
+      "file": "state_budget/State_Bud_09-26_BG.xls",
+      "url": "https://www.minfin.bg/upload/65479/State_Bud_09-26_BG.xls",
+      "sha256": "6c960bf9d42bdbd17195ec4570779391c55ea50a7a93678d2d021bb5dc815459",
+      "bytes": 61440,
+      "retrieved": "2026-11-13",
+      "via": "Firefox",
+      "path": "data/originals/state_budget/State_Bud_09-26_BG.xls",
+      "mode": "import via browser"
+    },
+    {
+      "file": "state_budget/State__Bud_04-BG1NEW.XLS",
+      "url": "https://www.minfin.bg/upload/61497/State_+Bud+04-BG1NEW.XLS",
+      "sha256": "b8f2954ac65a6c02af9f82eb4f34b3a2c52dd675fb337fb29fde93483f078ec4",
+      "bytes": 63488,
+      "retrieved": "2026-11-13",
+      "via": "Firefox",
+      "path": "data/originals/state_budget/State__Bud_04-BG1NEW.XLS",
+      "mode": "import via browser"
+    },
+    {
+      "file": "quarterly/Cons_2Q_2026_BG.xls",
+      "url": "https://www.minfin.bg/upload/65306/Cons_2Q_2026_BG.xls",
+      "sha256": "43be8d83f07871a85902276403915d81334b9d3d6a6300f1525121ed1e87b2f5",
+      "bytes": 44032,
+      "retrieved": "2026-11-13",
+      "via": "Firefox",
+      "path": "data/originals/kfp_quarterly/Cons_2Q_2026_BG.xls",
+      "mode": "import via browser"
+    },
+    {
+      "file": "quarterly/Central_2Q_2026_BG.xls",
+      "url": "https://www.minfin.bg/upload/65193/Central_2Q_2026_BG.xls",
+      "sha256": "d223dccc3f363bf04e61c79c52f418d762c0b7da6f3fd8ba8274fe2b6d644fa8",
+      "bytes": 41984,
+      "retrieved": "2026-11-13",
+      "via": "Firefox",
+      "path": "data/originals/kfp_quarterly/Central_2Q_2026_BG.xls",
+      "mode": "import via browser"
+    },
+    {
+      "file": "quarterly/Soc_2Q_2026_BG.xls",
+      "url": "https://www.minfin.bg/upload/65189/Soc_2Q_2026_BG.xls",
+      "sha256": "b280af2d2e506d31729ad290c977434001787fd1a150b2525496863e24b54cff",
+      "bytes": 46080,
+      "retrieved": "2026-11-13",
+      "via": "Firefox",
+      "path": "data/originals/kfp_quarterly/Soc_2Q_2026_BG.xls",
+      "mode": "import via browser"
+    },
+    {
+      "file": "quarterly/Local_2Q_2026_BG.xls",
+      "url": "https://www.minfin.bg/upload/65191/Local_2Q_2026_BG.xls",
+      "sha256": "58f4af0f8f4ea708ffc428810fe8b2a7eee91d282f25c07602e7769422dde736",
+      "bytes": 41984,
+      "retrieved": "2026-11-13",
+      "via": "Firefox",
+      "path": "data/originals/kfp_quarterly/Local_2Q_2026_BG.xls",
+      "mode": "import via browser"
+    }
+  ],
+  "excluded": [
+    {
+      "file": "quarterly/Central_4Q_2024_BG_dup1.xls",
+      "url": "https://www.minfin.bg/upload/63731/Central_4Q_2024_BG.xls",
+      "sha256": "7a6ce34861b972ff5f30ec33772504b47bfc85ac4efa34c82043ee8f63d3d31b",
+      "bytes": 43008,
+      "retrieved": "2026-11-13",
+      "via": "Firefox",
+      "status": "excluded-duplicate",
+      "reason": "Връзката „Централно правителство 2025 г.“ сочи към таблицата за 2024 г.; файлът е байтово идентичен. Данни за 2025 г. не са внесени."
+    }
+  ],
+  "pageReview": {
+    "date": "2026-11-13",
+    "pages": [
+      "https://www.minfin.bg/bg/statistics/5",
+      "https://www.minfin.bg/bg/statistics/6",
+      "https://www.minfin.bg/bg/statistics/12",
+      "https://www.minfin.bg/bg/statistics/18"
+    ],
+    "method": "Previously acquired official HTML in the local browser cache; fresh requests blocked by security verification.",
+    "finding": "Pages 5 and 18 contain monthly consolidated and state-budget tables; page 6 contains quarterly subsectors. No separate monthly DОО, НЗОК or municipality tables were identified on these pages. Other MF pages were not verified."
+  }
+}
