@@ -8,7 +8,7 @@ It builds the site (react-router build: the Worker of apps/web/workers/app.ts an
 `wrangler dev` on it (node_modules, pnpm-lock.yaml) with a fresh local D1 and R2, applies migrations/, and signs Cloudflare Access
 tokens with an RSA key made for the run (openssl; the Worker gets the public key as ACCESS_JWKS). Then:
   9  operator: no token, a foreign key, a wrong audience, an expired token and a person who is not an operator are refused
-  3  damaged upload: wrong bytes, an object missing, an unsafe path, a too large object: nothing becomes current
+  3  damaged upload: wrong bytes, an object missing, an unsafe path, a too large object or request: nothing becomes current
   —  `budget upload` and `budget publish` publish a candidate with one command and read it back
   4  interruption: the same publish again answers the first result without a second event; a new request on an old revision is refused
   5  two operators publish at the same moment on the same revision: one succeeds, the other gets 409 and nothing is overwritten
@@ -17,6 +17,8 @@ tokens with an RSA key made for the run (openssl; the Worker gets the public key
      originals in HTML as a download, unknown and unpublished releases 404, and no public route that writes
   6  one release: a screen is drawn from the current release and names it with its data base; the stable /data/<file> follows it;
      the edge cache keys a screen on the query it reads only and never keeps the 404 screen
+  —  an original over the old limit of 50 MiB (the archive to the budget bill has 63 MB) goes up in parts of part_bytes: a wrong part
+     or a damaged one is refused and takes no key; `budget publish` sends it in parts and the next release reuses it without sending it
 Exit code 0 only when every check passes.
 """
 
@@ -36,6 +38,7 @@ import tempfile
 import threading
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
@@ -119,22 +122,35 @@ def free_port():
     return int(os.environ.get('BUDGET_TEST_PORT', '8816'))
 
 
-def make_release(root, name, text, commit="a" * 40):
-    """a small release folder and its originals: one data file per dataset, validation.json, an xls-like and an HTML original"""
+MiB = 1024 * 1024
+PART = 16 * MiB                                           # PART_BYTES of apps/web/workers/api/store.js
+OLD_LIMIT = 50 * MiB                                      # the default MAX_OBJECT_BYTES before large objects went up in parts
+DEFAULT_LIMIT = 256 * MiB                                 # the default MAX_OBJECT_BYTES now
+
+
+def noise(seed, n):
+    """n deterministic bytes that do not repeat: a stand-in for a large archive"""
+    return hashlib.shake_256(seed.encode()).digest(n)
+
+
+def make_release(root, name, text, commit="a" * 40, extra=None):
+    """a small release folder and its originals: one data file per dataset, validation.json, an xls-like and an HTML original
+    (and the originals in `extra`)"""
     rel, orig = root / ("rel-" + name), root / ("orig-" + name)
     feed = ('<rss version="2.0"><channel><title>%s</title><link>https://budget-na-svetlo.example/</link>'
             '<item><link>https://budget-na-svetlo.example/#/izpalnenie?mesec=9</link></item></channel></rss>\n' % text).encode()
     files = {"data/x.json": json.dumps({"meta": {"status": "real"}, "value": text}).encode(), "data/feed.xml": feed,
              "validation.json": b'{"passed":true}\n'}
     originals = {"data/originals/kfp_2026/report.xls": b"\xd0\xcf\x11\xe0" + text.encode() * 8,
-                 "data/originals/dv/law.html": ("<html><script>alert(1)</script>%s</html>" % text).encode()}
+                 "data/originals/dv/law.html": ("<html><script>alert(1)</script>%s</html>" % text).encode(), **(extra or {})}
     for p, b in files.items():
         (rel / p).parent.mkdir(parents=True, exist_ok=True)
         (rel / p).write_bytes(b)
     for p, b in originals.items():
         (orig / p).parent.mkdir(parents=True, exist_ok=True)
         (orig / p).write_bytes(b)
-    mime = {".json": "application/json", ".xls": "application/vnd.ms-excel", ".html": "text/html", ".xml": "application/rss+xml"}
+    mime = {".json": "application/json", ".xls": "application/vnd.ms-excel", ".html": "text/html", ".xml": "application/rss+xml",
+            ".zip": "application/zip"}
     m = {"manifest_schema": "budget-release/1", "data_schema": {"execution": "execution/2"}, "provenance_format": "provenance/1",
          "processing": {"code": {"commit": commit, "repository": "https://github.com/midt-bg/sigma-budget"}, "parameters": {"build_date": "2026-11-05"}},
          "inputs": [{"path": p, "kind": "source", "source": "test", "acquisition": "fetch", "mime": mime[Path(p).suffix], "bytes": len(b), "sha256": sha(b)}
@@ -175,8 +191,8 @@ def main(argv):
     subprocess.run([str(wrangler), "d1", "migrations", "apply", "DB", "--local", "-c", str(built), "--persist-to", str(state)], cwd=ROOT, check=True, capture_output=True)
     dev = subprocess.Popen([str(wrangler), "dev", "-c", str(built), "--ip", "127.0.0.1", "--port", str(port), "--persist-to", str(state),
                             "--var", "ACCESS_ISSUER:" + ISSUER, "--var", "ACCESS_AUD:" + AUD, "--var", "OPERATORS:" + OPERATORS,
-                            "--var", "SERVICE_TOKENS:ci-publisher", "--var", "ACCESS_JWKS:" + json.dumps({"keys": [key.jwk]}),
-                            "--var", "MAX_OBJECT_BYTES:%d" % (64 * 1024 * 1024 if a.real else 4096)], cwd=ROOT, stdout=open(tmp / "wrangler.log", "w"), stderr=subprocess.STDOUT)
+                            "--var", "SERVICE_TOKENS:ci-publisher", "--var", "ACCESS_JWKS:" + json.dumps({"keys": [key.jwk]})],
+                           cwd=ROOT, stdout=open(tmp / "wrangler.log", "w"), stderr=subprocess.STDOUT)  # the default size limits
     try:
         for _ in range(90):
             try:
@@ -218,17 +234,23 @@ def main(argv):
         bad["outputs"][0]["path"] = "../escape.json"
         s, _h, b = req("POST", base + "/admin/operations", canonical(bad), dict(alice, **{"Content-Type": "application/json"}))
         ok(s == 422 and any("unsafe path" in p for p in jbody(b).get("problems", [])), "a manifest with ../ in a path: 422")
+        huge = json.loads(A[0].joinpath("manifest.json").read_bytes())
+        huge["inputs"][0]["bytes"] = DEFAULT_LIMIT + 1
+        s, _h, b = req("POST", base + "/admin/operations", canonical(huge), dict(alice, **{"Content-Type": "application/json"}))
+        ok(s == 422 and any("limit %d" % DEFAULT_LIMIT in p for p in jbody(b).get("problems", [])),
+           "a manifest that lists an object over MAX_OBJECT_BYTES (256 MiB by default): 422, before any byte is sent")
         s, _h, b = req("POST", base + "/admin/operations", B[0].joinpath("manifest.json").read_bytes(), dict(alice, **{"Content-Type": "application/json"}))
         op = jbody(b).get("operation_id")
-        ok(s == 201 and jbody(b).get("release_id") == B[2], "an operation for B, the manifest stored and checked at once")
+        ok(s == 201 and jbody(b).get("release_id") == B[2] and jbody(b).get("part_bytes") == PART,
+           "an operation for B, the manifest stored and checked at once; it names part_bytes, the most one request carries")
         target = B[3]["outputs"][0]
         s, _h, b = req("PUT", base + "/admin/operations/%s/objects/%s" % (op, target["sha256"]), b"not the bytes of the manifest", alice)
         ok(s == 422, "wrong bytes for a listed sha256: 422, the key is not taken")
         s, _h, b = req("PUT", base + "/admin/operations/%s/objects/%s" % (op, "0" * 64), b"x", alice)
         ok(s == 404, "an object the manifest does not list: 404")
-        if not a.real:                                       # with --real the limit is 64 MB: the real originals are larger than 4 KB
-            s, _h, b = req("PUT", base + "/admin/operations/%s/objects/%s" % (op, target["sha256"]), b"x" * 5000, alice)
-            ok(s == 413, "an object over MAX_OBJECT_BYTES: 413")
+        # the Worker answers from the declared length before it reads the body (urllib would not read an answer to 16 MiB it is still sending)
+        s, _h, b = req("PUT", base + "/admin/operations/%s/objects/%s" % (op, target["sha256"]), b"x", dict(alice, **{"Content-Length": str(PART + 1)}))
+        ok(s == 413 and jbody(b).get("part_bytes") == PART, "a PUT over one request (part_bytes): 413, larger objects go up in parts")
         s, _h, b = req("POST", base + "/admin/operations/%s/seal" % op, b"{}", alice)
         ok(s == 409 and jbody(b).get("needed"), "seal with objects missing: 409, no candidate")
         s, _h, b = req("PUT", base + "/admin/operations/%s/objects/%s" % (op, target["sha256"]), B[0].joinpath(target["path"]).read_bytes(), bob)
@@ -372,6 +394,50 @@ def main(argv):
         revs = [e["revision"] for e in jbody(req("GET", base + "/api/releases?limit=50")[2]).get("items", [])]
         ok(s == 200 and 'data-view="ready"' in page and rid in page and 'id="s35-journal' in page and all(">%d<" % r in page for r in revs),
            "„Данни и проверка“ (section 9.1) is drawn from the current release, with its files and the registry's journal (%d revisions)" % len(revs))
+
+        print("an original over the old limit of 50 MiB, in parts")
+        jhdr = dict(alice, **{"Content-Type": "application/json"})
+        two = noise("parts", PART + 5)                           # two parts: part_bytes and 5 bytes
+        P = make_release(tmp, "P", "parts", extra={"data/originals/parliament/parts.zip": two})
+        s, _h, b = req("POST", base + "/admin/operations", P[0].joinpath("manifest.json").read_bytes(), jhdr)
+        pop = jbody(b).get("operation_id")
+        ok(s == 201 and sha(two) in [o["sha256"] for o in jbody(b).get("needed", [])], "an operation for P lists its original of two parts")
+        obj = base + "/admin/operations/%s/objects/%s" % (pop, sha(two))
+        s, _h, b = req("POST", obj + "/parts", b"{}", alice)
+        up = jbody(b)
+        ok(s == 201 and up.get("parts") == 2 and up.get("part_bytes") == PART and up.get("upload_id"), "a multipart upload of it: two parts")
+
+        def part(n, body, uid=None):
+            return req("PUT", obj + "/parts/%s?upload_id=%s" % (n, urllib.parse.quote(uid or up.get("upload_id", ""), safe="")), body, alice)
+        # small bodies: the Worker refuses these before it reads them, and wrangler dev drops a refused body it has not read
+        codes = [part(1, two[:5])[0], part(2, two[:6])[0], part(3, two[:5])[0], part(2, two[PART:], "not-an-upload")[0]]
+        ok(codes == [422, 422, 404, 409], "a part of the wrong size, a last part of the wrong size, a part the object does not have, "
+                                          "a foreign upload: 422, 422, 404, 409 (%s)" % codes)
+        tags = [jbody(part(1, two[:PART])[2]).get("etag"), jbody(part(2, b"xxxxx")[2]).get("etag")]  # the last: the right length, other bytes
+        joined = lambda uid, tags: json.dumps({"upload_id": uid, "parts": [{"part": n + 1, "etag": t} for n, t in enumerate(tags)]}).encode()  # noqa: E731
+        s, _h, b = req("POST", obj + "/parts/complete", joined(up.get("upload_id"), tags), jhdr)
+        ok(s == 422 and "do not match" in jbody(b).get("error", ""), "a damaged part: the joined object does not hash, 422 (%s)" % jbody(b).get("error"))
+        s, _h, b = req("POST", base + "/admin/operations/%s/seal" % pop, b"{}", alice)
+        ok(s == 409 and sha(two) in jbody(b).get("needed", []), "seal: 409, the original is still needed")
+        up = jbody(req("POST", obj + "/parts", b"{}", alice)[2])
+        tags = [jbody(part(1, two[:PART])[2]).get("etag"), jbody(part(2, two[PART:])[2]).get("etag")]
+        s, _h, b = req("POST", obj + "/parts/complete", joined(up.get("upload_id"), tags), jhdr)
+        ok(s == 200 and jbody(b) == {"sha256": sha(two), "verified": True},
+           "the right parts: verified under its key (the damaged one took no key, else this would be a storage incident)")
+
+        big = noise("archive", OLD_LIMIT + 3 * MiB + 5)          # over the old limit, like the 63 MB archive: four parts
+        E = make_release(tmp, "E", "fifth", extra={"data/originals/parliament/archive.zip": big})
+        code, r = budget(["publish", "--release", str(E[0]), "--originals", str(E[1]), "--environment", "local", "--yes"], env)
+        ok(code == 0 and r.get("release_id") == E[2], "budget publish E with an original of %d bytes, over the old limit of %d: current, read back (%s)"
+           % (len(big), OLD_LIMIT, json.dumps(r)[:300]))
+        sent = (tmp / "wrangler.log").read_text(errors="replace").count("/objects/%s/parts/" % sha(big))
+        ok(sent == 5, "budget sent it in parts: four parts and complete (%d requests in the log of wrangler dev)" % sent)
+        s, _h, b = req("GET", base + "/data/releases/%s/data/originals/parliament/archive.zip" % E[2])
+        ok(s == 200 and len(b) == len(big) and sha(b) == sha(big), "the original downloads whole from the release: %d bytes of its sha256" % len(b))
+        F = make_release(tmp, "F", "sixth", extra={"data/originals/parliament/archive.zip": big})
+        code, r = budget(["upload", "--release", str(F[0]), "--originals", str(F[1]), "--environment", "local", "--yes"], env)
+        ok(code == 0 and r.get("objects") == 4, "budget upload F with the same original: the server hashes the stored one and reuses it; "
+                                                 "only the 4 new small files are sent (%s)" % json.dumps(r)[:300])
 
         if a.real:
             print("the release of budget build, published and reproduced from the Worker")

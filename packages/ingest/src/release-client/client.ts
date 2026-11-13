@@ -18,6 +18,7 @@ import {
 import { credentialHeaders, nodeHttpTransport, releaseEnvironment } from './transport.js';
 import {
   MANIFEST_LIMIT,
+  MIN_PART_BYTES,
   OPERATION_ID,
   parseJson,
   record,
@@ -268,10 +269,14 @@ export class ReleaseClient {
       !Array.isArray(data.needed) ||
       !revision(data.objects) ||
       data.objects !== pkg.objects.size ||
-      (data.state !== undefined && data.state !== 'open' && data.state !== 'sealed')
+      (data.state !== undefined && data.state !== 'open' && data.state !== 'sealed') ||
+      (data.part_bytes !== undefined &&
+        (!Number.isSafeInteger(data.part_bytes) || Number(data.part_bytes) < MIN_PART_BYTES))
     )
       throw new ReleaseError(2, 'Operation response does not match the local package');
     const operation = String(data.operation_id);
+    // A server without part_bytes takes every object in one PUT; one with it takes larger objects in parts.
+    const partBytes = data.part_bytes === undefined ? undefined : Number(data.part_bytes);
     const needed = new Set<string>();
     for (const entry of data.needed) {
       if (
@@ -295,11 +300,11 @@ export class ReleaseClient {
         object,
         object.role === 'manifest' ? MANIFEST_LIMIT : this.limit,
       );
-      const verified = this.expect(
-        await this.request('PUT', `/admin/operations/${operation}/objects/${sha}`, body, true),
-        [200],
-        'Object upload',
-      );
+      const path = `/admin/operations/${operation}/objects/${sha}`;
+      const verified =
+        partBytes !== undefined && body.byteLength > partBytes
+          ? await this.uploadParts(path, body, partBytes)
+          : this.expect(await this.request('PUT', path, body, true), [200], 'Object upload');
       if (!record(verified) || verified.sha256 !== sha || verified.verified !== true)
         throw new ReleaseError(2, 'Server did not verify the uploaded object');
     }
@@ -328,6 +333,48 @@ export class ReleaseClient {
       dryRun: false,
       state: 'sealed: a candidate, not current',
     };
+  }
+  /** An object larger than one request goes up in parts (R2 multipart); the server hashes the joined object before it gets its key. */
+  private async uploadParts(path: string, body: Buffer, partBytes: number): Promise<unknown> {
+    const count = Math.ceil(body.byteLength / partBytes);
+    const begun = this.expect(
+      await this.request('POST', path + '/parts', Buffer.from('{}'), true),
+      [200, 201],
+      'Multipart upload',
+    );
+    if (record(begun) && begun.verified === true) return begun; // verified since the operation listed it
+    if (
+      !record(begun) ||
+      typeof begun.upload_id !== 'string' ||
+      !begun.upload_id ||
+      begun.part_bytes !== partBytes ||
+      begun.parts !== count
+    )
+      throw new ReleaseError(2, 'Multipart upload response does not match the object');
+    const query = '?upload_id=' + encodeURIComponent(begun.upload_id);
+    const parts: { part: number; etag: string }[] = [];
+    for (let part = 1; part <= count; part++) {
+      const chunk = body.subarray((part - 1) * partBytes, part * partBytes);
+      const stored = this.expect(
+        await this.request('PUT', `${path}/parts/${part}${query}`, chunk, true),
+        [200],
+        'Object part upload',
+      );
+      if (
+        !record(stored) ||
+        stored.part !== part ||
+        typeof stored.etag !== 'string' ||
+        !stored.etag
+      )
+        throw new ReleaseError(2, 'Server did not store the object part');
+      parts.push({ part, etag: stored.etag });
+    }
+    const complete = Buffer.from(JSON.stringify({ upload_id: begun.upload_id, parts }));
+    return this.expect(
+      await this.request('POST', path + '/parts/complete', complete, true),
+      [200],
+      'Object upload',
+    );
   }
   async publish(options: PublishOptions) {
     const pkg = await this.preflight(options);

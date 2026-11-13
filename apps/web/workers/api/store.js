@@ -38,7 +38,27 @@ export const sha256 = async (data) =>
       typeof data === 'string' ? new TextEncoder().encode(data) : data,
     ),
   );
-export const maxBytes = (env) => Number(env.MAX_OBJECT_BYTES || 50 * 1024 * 1024);
+// The size limits of the operator API (section 10.2). An object may have up to MAX_OBJECT_BYTES, by default 256 MiB: what the source
+// client downloads at most (packages/ingest/src/source-client/transport.ts), four times the archive to the 2026 budget bill (63 MB).
+// One request carries at most PART_BYTES: a larger object goes up as an R2 multipart upload in parts of this size (R2 wants at least
+// 5 MiB and every part but the last of one size), far below the request body of 100 MB on the Free and Pro plans. The Worker reads
+// and hashes an object as a stream and never holds it whole: an isolate has 128 MB of memory.
+export const maxBytes = (env) => Number(env.MAX_OBJECT_BYTES || 256 * 1024 * 1024);
+export const PART_BYTES = 16 * 1024 * 1024;
+
+/** the SHA-256 of a stream, read through once and never held whole (crypto.DigestStream of the Workers runtime) */
+export async function digestStream(stream) {
+  const ds = new crypto.DigestStream('SHA-256');
+  await stream.pipeTo(ds);
+  return hex(await ds.digest);
+}
+
+/** a request body as a stream of exactly `bytes` bytes, the known length R2 needs; a body of another length fails the write */
+export function sized(body, bytes) {
+  const { readable, writable } = new FixedLengthStream(bytes);
+  (body ? body.pipeTo(writable) : writable.close()).catch(() => {}); // the error reaches the write through `readable`
+  return readable;
+}
 
 /** reads that decide the result of a publish use the primary (section 7.3), not a replica that may lag */
 export const primary = (env) =>

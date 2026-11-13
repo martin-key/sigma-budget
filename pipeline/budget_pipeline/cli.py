@@ -692,6 +692,36 @@ def save_receipt(r):
     RECEIPTS.mkdir(parents=True, exist_ok=True)
     receipt_path(r["release_id"]).write_text(json.dumps(r, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
 
+def retried(call):
+    """a request that is safe to repeat: three tries on a network error"""
+    for attempt in range(3):
+        try:
+            return call()
+        except Fail as e:
+            if e.code != EXIT_MISSING or attempt == 2:
+                raise
+            time.sleep(2 * (attempt + 1))
+
+def send_object(base, creds, op, sha, b, part_bytes):
+    """one object in one PUT, or, larger than part_bytes, in parts (an R2 multipart upload: no request comes near the request limit of
+    the plan). Either way the server reads the whole object back and checks its size and sha256 before it gets its key."""
+    path = "/admin/operations/%s/objects/%s" % (op, sha)
+    if not part_bytes or len(b) <= part_bytes:
+        return retried(lambda: admin("PUT", base, path, b, creds, "application/octet-stream"))
+    status, data = retried(lambda: admin("POST", base, path + "/parts", b"{}", creds))
+    if status != 201 or not isinstance(data, dict):
+        return status, data                                   # 200: verified since the operation listed it
+    size, uid, parts = data["part_bytes"], data["upload_id"], []
+    for n in range(1, data["parts"] + 1):
+        chunk = b[(n - 1) * size:n * size]
+        url = "%s/parts/%d?upload_id=%s" % (path, n, urllib.parse.quote(uid, safe=""))
+        status, got = retried(lambda: admin("PUT", base, url, chunk, creds, "application/octet-stream"))
+        if status != 200:
+            return status, got
+        parts.append({"part": n, "etag": got["etag"]})
+    body = json.dumps({"upload_id": uid, "parts": parts}).encode()
+    return retried(lambda: admin("POST", base, path + "/parts/complete", body, creds))
+
 def upload_release(release, originals, base, creds, dry_run=False, log=print):
     """resumable: an open operation of this release (the receipt) is continued; objects the server has are not sent again"""
     mbytes = (release / "manifest.json").read_bytes()
@@ -699,10 +729,11 @@ def upload_release(release, originals, base, creds, dry_run=False, log=print):
     m = json.loads(mbytes)
     r = load_receipt(rid)
     need = None
+    part_bytes = None                                         # a server that does not name it takes every object in one PUT
     if r.get("operation") and r.get("environment") == base:
         status, data = admin("GET", base, "/admin/operations/" + r["operation"], creds=creds)
         if status == 200 and data.get("state") == "open":
-            need = data["needed"]
+            need, part_bytes = data["needed"], data.get("part_bytes")
             log("upload: continuing operation %s (%d objects left)" % (r["operation"], len(need)))
         elif status == 200 and data.get("state") == "sealed":
             return rid, r["operation"], 0
@@ -715,7 +746,7 @@ def upload_release(release, originals, base, creds, dry_run=False, log=print):
             raise Fail(EXIT_INVALID, "the server refused the manifest: %s" % json.dumps(data, ensure_ascii=False)[:600])
         r.update({"operation": data["operation_id"], "environment": base})
         save_receipt(r)
-        need = data["needed"]
+        need, part_bytes = data["needed"], data.get("part_bytes")
         log("upload: operation %s, %d of %d objects to send" % (data["operation_id"], len(need), data["objects"]))
     for o in need:
         f = object_file(release, originals, m, o["sha256"])
@@ -724,14 +755,7 @@ def upload_release(release, originals, base, creds, dry_run=False, log=print):
         b = f.read_bytes()
         if sha256_bytes(b) != o["sha256"]:
             raise Fail(EXIT_INVALID, "%s does not hash to the manifest" % f)
-        for attempt in range(3):
-            try:
-                status, data = admin("PUT", base, "/admin/operations/%s/objects/%s" % (r["operation"], o["sha256"]), b, creds, "application/octet-stream")
-                break
-            except Fail as e:
-                if e.code != EXIT_MISSING or attempt == 2:
-                    raise
-                time.sleep(2 * (attempt + 1))
+        status, data = send_object(base, creds, r["operation"], o["sha256"], b, part_bytes)
         if status != 200:
             raise Fail(EXIT_INVALID, "%s: %s" % (f, data))
     status, data = admin("POST", base, "/admin/operations/%s/seal" % r["operation"], b"{}", creds)
