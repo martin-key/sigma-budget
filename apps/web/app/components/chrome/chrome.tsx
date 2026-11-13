@@ -6,7 +6,7 @@ import type { WebRoute } from '../../lib/routes';
 // (docs/adr/0002-react-router-ssr.md). js/shell.js puts it in the page and keeps it in step with the navigation; the server writes it
 // into the first response with the current screen already marked. Nothing here touches the DOM.
 import { store } from '../../lib/legacy';
-import { ROUTES, byId, href as routeHref } from '../../lib/legacy';
+import { ROUTES, byId, href as routeHref, keepsPeriod } from '../../lib/legacy';
 
 import { icon } from '../Icon';
 import { data } from '../../lib/legacy';
@@ -100,11 +100,7 @@ export const navName = (r: WebRoute) => r.short || r.title;
 export const navHref = (id: string) => {
   const per = store.periodParam(),
     p = byId[id].periods;
-  return routeHref(
-    id,
-    {},
-    per && (p === 'all' || (Array.isArray(p) && p.includes(per))) ? { per } : {},
-  );
+  return routeHref(id, {}, per && keepsPeriod(p, per) ? { per } : {});
 };
 /** the tab of the phone bar a screen belongs to */
 export const tabOf = (route: WebRoute) => {

@@ -2,7 +2,7 @@
 // (docs/adr/0002-react-router-ssr.md). js/shell.js puts it in the page and keeps it in step with the navigation; the server writes it
 // into the first response with the current screen already marked. Nothing here touches the DOM.
 import { store } from './store.js';
-import { ROUTES, byId, href as routeHref } from './routes.js';
+import { ROUTES, byId, href as routeHref, keepsPeriod } from './routes.js';
 import { html } from './html.js';
 import { icon } from './icons.js';
 import { data } from './data.js';
@@ -49,7 +49,7 @@ export const navName = r => r.short || r.title;
    The dropdowns and the drawer are built when they open; the tab bar and the footer are built once, so js/shell.js syncLinks() follows every navigation. */
 export const navHref = id => {
   const per = store.periodParam(), p = byId[id].periods;
-  return routeHref(id, {}, per && (p === 'all' || (Array.isArray(p) && p.includes(per))) ? { per } : {});
+  return routeHref(id, {}, per && keepsPeriod(p, per) ? { per } : {});
 };
 /** the tab of the phone bar a screen belongs to */
 export const tabOf = route => { const root = rootOf(route); return TABS.find(t => t.routes.includes(route.id) || (route.parent && t.routes.includes(root.id))); };

@@ -147,6 +147,37 @@ def main():
             page.keyboard.press('Escape')
             ok(page.locator('#btn-period').evaluate('(b)=>document.activeElement===b'), 'period focus restored')
             ctx.close()
+        # The year stays in the header on every screen, so a choice made where it does not matter must hold: over a rerender (the theme
+        # switch), a reload, the start screen (whose address never names a period) and the next screens; only an address that names one changes it.
+        ctx = browser.new_context(viewport={'width': 1280, 'height': 900}, service_workers='block', reduced_motion='reduce')
+        page = ctx.new_page()
+        year = lambda: page.locator('#btn-period').inner_text().strip()
+
+        def follow(path, route):
+            page.evaluate("(h) => { const a = document.createElement('a'); a.href = h; document.querySelector('#view').appendChild(a); a.click(); a.remove(); }", path)
+            page.wait_for_function('(r) => document.querySelector(\'article.page[data-ready="1"]\')?.dataset.route === r', arg=route)
+
+        page.goto(base + '/danni')
+        page.wait_for_selector('article.page[data-ready="1"]')
+        page.evaluate("window.periodMark = document.querySelector('article.page')")
+        page.click('#btn-period')
+        ok('не зависи от годината' in page.locator('.popover .period-note').inner_text(), 'period note on a screen without periods')
+        page.locator('.popover input[value="2026.law"]').click()   # the popover closes on the choice
+        page.wait_for_function("() => location.search === '?per=2026.law'")
+        ok(page.evaluate("window.periodMark === document.querySelector('article.page')"), 'no redraw of a screen without periods')
+        page.click('#btn-theme')
+        ok(year().startswith('2026'), 'period kept over a rerender')
+        page.click('#btn-theme')
+        page.reload()
+        page.wait_for_selector('article.page[data-ready="1"]')
+        ok(year().startswith('2026'), 'period kept over a reload of a screen without periods')
+        follow('/', 'S01')
+        ok(year().startswith('2026') and page.evaluate('location.search') == '', 'period kept on the start screen, its address without one')
+        follow('/byudzhet-2027', 'S34')
+        ok(year().startswith('2026') and page.evaluate('location.search') == '?per=2026.law', 'period carried to a screen without periods')
+        follow('/prihodi?per=2027.draft', 'S06')
+        ok(year().startswith('2027'), 'an address that names a period changes it')
+        ctx.close()
         browser.close()
     for error in errors:
         print('FAIL', error)

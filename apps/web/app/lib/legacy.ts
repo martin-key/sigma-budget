@@ -5,6 +5,7 @@ import {
   byId as legacyById,
   byKey as legacyByKey,
   href as legacyHref,
+  keepsPeriod as legacyKeepsPeriod,
 } from '../../client/routes.js';
 import {
   date as legacyDate,
@@ -25,6 +26,10 @@ export type PathValues = Record<string, string | number>;
 export const byId: Readonly<Record<string, WebRoute>> = legacyById;
 export const byKey: Readonly<Record<string, WebRoute>> = legacyByKey;
 export const href = legacyHref as (key: string, params?: PathValues, query?: QueryValues) => string;
+export const keepsPeriod = legacyKeepsPeriod as (
+  periods: WebRoute['periods'] | undefined,
+  period: string,
+) => boolean;
 export const date = legacyDate as (iso: string | undefined, long?: boolean) => string;
 export const num = legacyNum as (value: number | undefined, decimals?: number) => string;
 export const plural = legacyPlural as (

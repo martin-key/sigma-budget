@@ -104,7 +104,7 @@ def main():
         page.wait_for_selector('article[data-ready="1"]')
         check('legacy deep target opens disclosure', page.locator('#s14-t-chl1-redove').evaluate('el => el.closest("details").open'))
         page.locator('.nav-main[data-grp="1"]').click()
-        page.locator('[role=dialog] a[href="/novo"]').click()
+        page.locator('[role=dialog] a[href^="/novo"]').click()   # /novo?per=2026.law: the year of /zakon goes with the visitor (js/routes.js keepsPeriod)
         page.wait_for_selector('article[data-route="S16"][data-ready="1"]')
         check('navigation reaches React feed', page.locator('#view').get_attribute('data-react-owned') is not None)
         page.go_back()
