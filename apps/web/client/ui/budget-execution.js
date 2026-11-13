@@ -15,12 +15,17 @@ export function budgetExecution(ctx) {
     quarterly = ctx.data['kfp-subsectors'];
   if (!monthly || !quarterly) return '';
   const monthlyTables = [...monthly.tables].reverse().map((t) => {
-    const rows = t.rows.filter((r) => r.row >= 9 && r.row <= (t.year === 2025 ? 19 : 18));
+    const rows = t.rows.filter(
+      (r) =>
+        (r.row >= 9 && r.row <= (t.year === 2025 ? 19 : 18)) ||
+        /^(Неданъчни приходи|Помощи|II\.|Разходи$|Трансфери \(нето\)|III\.|IV\.|V\.)/.test(r.label),
+    );
     return disclosure({
       id: `state-${t.year}-${t.period}`,
       open: t === monthly.tables.at(-1),
       title: `${t.year} г., месец ${t.period}`,
       body: dataTable({
+        captionVisible: true,
         id: `state-table-${t.year}-${t.period}`,
         caption: 'Държавен бюджет, натрупано от януари, млн. €',
         columns: [
@@ -39,6 +44,7 @@ export function budgetExecution(ctx) {
         t.scope === 'consolidated' && t.year === Math.max(...quarterly.tables.map((x) => x.year)),
       title: `${SCOPES[t.scope]}, ${t.year} г.`,
       body: dataTable({
+        captionVisible: true,
         id: `quarter-table-${t.scope}-${t.year}`,
         caption: 'Потоци за отделното тримесечие, млн. €',
         columns: [

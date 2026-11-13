@@ -9,7 +9,13 @@ it('renders distinct scopes, law blanks and missing central 2025 without unsafe 
       meta,
       sourcePage: 'https://www.minfin.bg/bg/statistics/18',
       limitations: ['Само държавен бюджет'],
-      tables: [{ year: 2026, period: 1, rows: [row] }],
+      tables: [
+        {
+          year: 2026,
+          period: 1,
+          rows: [row, { row: 26, label: 'II. РАЗХОДИ И ТРАНСФЕРИ', eur: [null, 2] }],
+        },
+      ],
     },
     'kfp-subsectors': {
       meta: { ...meta, title: 'КФП по подсектори' },
@@ -23,6 +29,8 @@ it('renders distinct scopes, law blanks and missing central 2025 without unsafe 
   };
   const text = String(budgetExecution({ data }));
   expect(text).toContain('<table');
+  expect(text).toContain('II. РАЗХОДИ И ТРАНСФЕРИ');
+  expect(text).toContain('class="cap-visible"');
   expect(text).toContain('href="https://www.minfin.bg/bg/statistics/18"');
   expect(text).toContain('href="https://www.minfin.bg/bg/statistics/6"');
   expect(text).toContain('Държавен бюджет');
