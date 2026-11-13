@@ -1061,7 +1061,7 @@ export function historicalReference(C) {
         id: 's15-historical-table',
         caption: 'Исторически месечен ориентир за КФП',
         columns: [
-          { key: 'year', label: 'Година' },
+          { key: 'year', label: 'Година', fmt: (v) => String(v) },
           { key: 'name', label: 'Показател' },
           { key: 'value', label: 'Натрупано, млн. €', fmt: (v) => num(v, 3) },
           { key: 'share', label: 'Дял от годишния отчет', fmt: (v) => pct(v, 2) },
