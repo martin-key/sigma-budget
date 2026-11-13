@@ -30,8 +30,8 @@ export function budgetExecution(ctx) {
         caption: 'Държавен бюджет, натрупано от януари, млн. €',
         columns: [
           { key: 'label', label: 'Показател' },
-          { key: 'law', label: 'Закон', num: true, fmt: money },
-          { key: 'execution', label: 'Изпълнение', num: true, fmt: money },
+          { key: 'law', label: 'Закон', num: true, unit: 'млн. €', fmt: money },
+          { key: 'execution', label: 'Изпълнение', num: true, unit: 'млн. €', fmt: money },
         ],
         rows: rows.map((r) => ({ label: r.label, law: r.eur[0], execution: r.eur[1] })),
       }),
@@ -49,11 +49,12 @@ export function budgetExecution(ctx) {
         caption: 'Потоци за отделното тримесечие, млн. €',
         columns: [
           { key: 'label', label: 'Показател' },
-          ...t.columns.map((c, i) => ({
+          ...t.columns.map((c) => ({
             key: c.id,
             label: c.id,
             num: true,
-            fmt: (_, r) => money(r.eur[i]),
+            fmt: money,
+            unit: 'млн. €',
           })),
         ],
         rows: t.rows
@@ -62,7 +63,10 @@ export function budgetExecution(ctx) {
               8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 23, 26, 28, 40, 41, 42, 44, 47, 49,
             ].includes(r.row),
           )
-          .map((r) => ({ label: r.label, eur: r.eur })),
+          .map((r) => ({
+            label: r.label,
+            ...Object.fromEntries(t.columns.map((c, i) => [c.id, r.eur[i]])),
+          })),
       }),
     }),
   );

@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
-import { expect, it } from 'vitest';
+import { expect, it, vi } from 'vitest';
+import * as share from '../../client/share.js';
 import { budgetExecution } from '../../client/ui/budget-execution.js';
 it('renders distinct scopes, law blanks and missing central 2025 without unsafe HTML', () => {
   const meta = { title: 'Държавен бюджет', source: [], asOf: '2026-11-13' };
@@ -27,7 +28,14 @@ it('renders distinct scopes, law blanks and missing central 2025 without unsafe 
       tables: [{ scope: 'social', year: 2026, columns: [{ id: 'Q1' }, { id: 'Q2' }], rows: [row] }],
     },
   };
+  const attachments = vi.spyOn(share, 'attach');
   const text = String(budgetExecution({ data }));
+  const quarter = attachments.mock.calls.find(([id]) => id === 'quarter-table-social-2026')![1] as {
+    table: () => { columns: string[]; rows: unknown[][] };
+  };
+  expect(quarter.table().rows[0]!.slice(1)).toEqual(['', 1]);
+  expect(quarter.table().columns[1]).toContain('млн. €');
+  attachments.mockRestore();
   expect(text).toContain('<table');
   expect(text).toContain('II. РАЗХОДИ И ТРАНСФЕРИ');
   expect(text).toContain('class="cap-visible"');
