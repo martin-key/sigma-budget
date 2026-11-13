@@ -10,7 +10,7 @@
 //   per   period key, written only when it is not the default 2026.law (the URL decides; a link click keeps the session period)
 //   to    in-page anchor: scroll + highlight (+ opens an ancestor <details>); changing only `to` does not re-render
 //   demo  loading | empty | error | pending | offline: renders that state component on any URL
-import { ROUTES, match, href as routeHref } from './routes.js';
+import { ROUTES, match, href as routeHref, keepsPeriod } from './routes.js';
 import { resolvePeriod } from './periods.js';
 import { store, DEFAULT_PERIOD, ROLE_SELECTOR } from './store.js';
 import * as motion from './ui/motion.js';
@@ -54,7 +54,7 @@ export function go(addr, o = {}) {
   const { query, segs } = parseHash(target);
   if (query.per != null) target = internal(canonHash(segs, { ...query, per: resolvePeriod(query.per).resolved }));
   const per = store.get('period');
-  if (!query.per && per !== DEFAULT_PERIOD && (resolved.route.periods === 'all' || resolved.route.periods?.includes?.(per))) target += (target.includes('?') ? '&' : '?') + 'per=' + per;
+  if (!query.per && per !== DEFAULT_PERIOD && keepsPeriod(resolved.route.periods, per)) target += (target.includes('?') ? '&' : '?') + 'per=' + per;
   target = toHref(target);
   if (target === hereHref()) { window.scrollTo(0, 0); $view()?.querySelector('h1')?.focus({ preventScroll: true }); return; }
   saveScroll();
@@ -207,7 +207,12 @@ async function render(kind) {
   curK = k;
 
   applying = true;
-  try { store.set('periodRequested', query.per ?? null); store.set('periodNotice', ''); store.set('period', periodResolution.resolved); } finally { applying = false; }
+  try {
+    store.set('periodRequested', query.per ?? null); store.set('periodNotice', '');
+    // only an address that names a period changes the chosen one: a screen that does not depend on the period leaves it as it is (the
+    // start screen and «Бюджетът за 5 минути» never carry one in their address, js/publication-query.js), so the year in the header holds
+    if (kind === 'load' || query.per != null || route.periods !== 'none') store.set('period', periodResolution.resolved);
+  } finally { applying = false; }
 
   // the first render over a page the server drew (app/, apps/web/workers/app.ts; data-prerendered names its address): its HTML is already the screen, so no skeleton in between and no rise-in or count-up of what is already shown
   // (dropStalePrerender has taken the mark off an HTML that is the screen of another address)
@@ -322,7 +327,9 @@ function onStore(key) {
   if (applying || !started || !RERENDER_KEYS.includes(key)) return;
   if (key === 'period') {
     const per = store.get('period');
-    setQuery({ per: per === DEFAULT_PERIOD ? null : per }, { rerender: false });
+    setQuery({ per: per === DEFAULT_PERIOD ? null : per }, { rerender: false });   // every render reads the period from the address
+    // a screen that does not depend on the period keeps its content (the address carries the choice to the next screen and over a reload)
+    if (cur && periodsFor(cur.route, cur.vm && cur.vm.mod) === 'none') { announce(`Избрахме ${store.period.label}. Годината важи за екраните с данни по години.`); return; }
   }
   clearTimeout(onStore.t);
   onStore.t = setTimeout(() => {

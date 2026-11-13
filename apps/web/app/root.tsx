@@ -35,7 +35,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <meta name="sigma-url" content={doc?.release.sigmaUrl ?? ''} />
         <meta name="release-id" content={doc?.release.id ?? ''} />
         <meta name="data-base" content={doc?.release.dataBase ?? '/data/'} />
-        <meta name="color-scheme" content="light dark" />
+        <meta name="color-scheme" content="light" />
         <meta name="theme-color" content="#FDFAF4" />
         <script src="/js/theme-boot.js" data-keep="" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />

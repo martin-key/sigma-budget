@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { act, type CSSProperties } from 'react';
 import * as client from 'react-dom/client';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { readFileSync } from 'node:fs';
 import { URL as NodeURL } from 'node:url';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
@@ -27,6 +28,21 @@ const frozen = readFileSync(
   new NodeURL('../routes/__fixtures__/S26.html', import.meta.url),
   'utf8',
 );
+// S26.html is frozen at the reference commit; the header and the footer in it are replaced by the ones the server draws now (the theme
+// switch in the header, light and dark in the footer), the rest of the document stays as it was captured
+async function openFrozen() {
+  document.documentElement.innerHTML = frozen
+    .replace(/^<!doctype html>\s*/i, '')
+    .replace(/^<html[^>]*>|<\/html>$/g, '');
+  const { topbarHtml, footerHtml } = await import('../components/chrome/chrome');
+  const { byId } = await import('../lib/legacy');
+  document.getElementById('topbar')!.innerHTML = renderToStaticMarkup(
+    topbarHtml({ route: byId.S26, periods: byId.S26.periods }),
+  );
+  document.getElementById('footer')!.innerHTML = renderToStaticMarkup(
+    footerHtml({ wide: true, cur: 'S26', theme: '', from: 'za-proekta' }),
+  );
+}
 const hydrate = vi.mocked(client.hydrateRoot);
 beforeEach(() => {
   vi.resetModules();
@@ -48,9 +64,7 @@ for (const [id, focus] of [
   ['tabbar', 'a'],
 ]) {
   it(`${id} retains every element and pre-existing focus through adoption and its first refresh`, async () => {
-    document.documentElement.innerHTML = frozen
-      .replace(/^<!doctype html>\s*/i, '')
-      .replace(/^<html[^>]*>|<\/html>$/g, '');
+    await openFrozen();
     const { refreshChrome } = await import('./bridge');
     const { byId } = await import('../lib/legacy');
     const containers = ['mockbar', 'topbar', 'footer', 'tabbar'].map(
@@ -70,6 +84,9 @@ for (const [id, focus] of [
     };
     await act(async () => refreshChrome(options));
     expect(document.activeElement).toBe(focused);
+    // S26 does not depend on the period, and the year stays in the header anyway (the header must not jump between screens)
+    expect(document.querySelector('#btn-period')?.hasAttribute('hidden')).toBe(false);
+    expect(document.querySelector('#btn-theme')?.getAttribute('aria-pressed')).toBe('false');
     containers.forEach((node, index) =>
       expect([...node.querySelectorAll('*')]).toEqual(elements[index]),
     );
@@ -90,6 +107,10 @@ for (const [id, focus] of [
       updated.forEach((element, i) => expect(element).toBe(elements[index][i]));
     });
     expect(document.querySelector('#btn-period')?.hasAttribute('hidden')).toBe(false);
+    expect(document.querySelector('#btn-theme')?.getAttribute('aria-pressed')).toBe('true');
+    expect(
+      document.querySelector('#footer [data-theme-pick="dark"]')?.getAttribute('aria-pressed'),
+    ).toBe('true');
     expect(
       document.querySelector('#footer a[data-route="S06"]')?.getAttribute('aria-current'),
     ).toBe('page');
@@ -97,11 +118,9 @@ for (const [id, focus] of [
   });
 }
 
-for (const selector of ['.sister-link', '[data-theme-pick=""]']) {
+for (const selector of ['.sister-link', '[data-theme-pick="light"]']) {
   it(`footer retains ${selector} focus when core data is late and then arrives`, async () => {
-    document.documentElement.innerHTML = frozen
-      .replace(/^<!doctype html>\s*/i, '')
-      .replace(/^<html[^>]*>|<\/html>$/g, '');
+    await openFrozen();
     const { refreshChrome } = await import('./bridge');
     const { byId } = await import('../lib/legacy');
     const focused = document.querySelector<HTMLElement>(`#footer ${selector}`)!;

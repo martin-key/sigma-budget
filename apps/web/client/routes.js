@@ -7,7 +7,12 @@ export const byId = Object.fromEntries(ROUTES.map(r => [r.id, r]));
 export const byKey = Object.fromEntries(ROUTES.map(r => [r.key, r]));
 export const NOT_FOUND = byId.S30;
 
-/** Keep a selected historical publication when the destination supports it. */
+/** Does the address of a screen with these periods keep the chosen one when the visitor goes there (js/router.js go, the header and footer
+ *  links)? Yes when the screen shows it ('all', or a list with it) and when it does not depend on the period at all ('none'): the year stays
+ *  in the header on every screen, so the choice must survive the screens without one (and a reload there). */
+export const keepsPeriod = (periods, period) => periods === 'all' || periods === 'none' || (Array.isArray(periods) && periods.includes(period));
+/** Keep a selected historical publication when the destination supports it. The links inside a screen name only the publications the
+ *  target shows (the published HTML stays as it was); a click on one still carries the choice, router.go adds it by keepsPeriod. */
 export function periodHref(period, id, params = {}, query = {}) {
   const target = byId[id] || byKey[id];
   const preserve = period && period !== DEFAULT_PERIOD && (target?.periods === 'all' || target?.periods?.includes?.(period));

@@ -6,7 +6,7 @@ import type { WebRoute } from '../../lib/routes';
 // (docs/adr/0002-react-router-ssr.md). js/shell.js puts it in the page and keeps it in step with the navigation; the server writes it
 // into the first response with the current screen already marked. Nothing here touches the DOM.
 import { store } from '../../lib/legacy';
-import { ROUTES, byId, href as routeHref } from '../../lib/legacy';
+import { ROUTES, byId, href as routeHref, keepsPeriod } from '../../lib/legacy';
 
 import { icon } from '../Icon';
 import { data } from '../../lib/legacy';
@@ -100,11 +100,7 @@ export const navName = (r: WebRoute) => r.short || r.title;
 export const navHref = (id: string) => {
   const per = store.periodParam(),
     p = byId[id].periods;
-  return routeHref(
-    id,
-    {},
-    per && (p === 'all' || (Array.isArray(p) && p.includes(per))) ? { per } : {},
-  );
+  return routeHref(id, {}, per && keepsPeriod(p, per) ? { per } : {});
 };
 /** the tab of the phone bar a screen belongs to */
 export const tabOf = (route: WebRoute) => {
@@ -137,11 +133,13 @@ export function bannerHtml() {
   );
 }
 export const CTA = 'Бюджет 2027';
-/** the header; o.route marks its group, o.periods === 'none' hides the period button (a screen that does not depend on the period) */
+/** the header; o.route marks its group. The period button stays on every screen, so the header does not jump between screens (on a screen
+    that does not depend on the period the choice is kept for the next one: js/shell.js openPeriod says so); o.theme is the visitor's theme */
 export function topbarHtml(
   o: {
     route?: WebRoute;
     periods?: WebRoute['periods'];
+    theme?: string;
   } = {},
 ) {
   const p = store.period;
@@ -173,14 +171,13 @@ export function topbarHtml(
             aria-haspopup="dialog"
             aria-expanded="false"
             aria-label={'Година и статус на данните: ' + p.label}
-            hidden={o.periods === 'none'}
           >
             <span className="p-year">{yearOf(p)}</span>
             <span className="p-status"> · {statusOf(p)}</span>
             {icon('chevronDown', { size: 14 })}
           </button>
           <nav className="sidenav" id="sidenav" aria-label="Основна навигация">
-            {navHtml(o.route)}
+            {navHtml(o.route, o.theme)}
           </nav>
           <button
             type="button"
@@ -205,7 +202,7 @@ const NEWS_DOT = (label: string) => (
     <span className="nav-dot" data-news-dot data-label={label} hidden></span>
   </>
 );
-export function navHtml(route?: WebRoute) {
+export function navHtml(route?: WebRoute, theme = '') {
   const g = route ? groupOf(route) : -1;
   const rows = NAV_GROUPS.map(([label], i) => (
     <>
@@ -254,6 +251,7 @@ export function navHtml(route?: WebRoute) {
       <div className="nav-in">
         {rows}
         {lupa}
+        {themeToggle(theme)}
         <a className="nav-cta" href={routeHref('S34')} data-nav="S34" aria-current={cta}>
           {CTA}
         </a>
@@ -283,13 +281,31 @@ export function tabbarHtml(route?: WebRoute) {
 }
 
 /* ------------------------------------------------------------------ theme (docs/approach-specification.md, section 9.3) */
-// '' follows the system (prefers-color-scheme), 'light' and 'dark' are the visitor's choice (localStorage bns.theme, read by js/theme-boot.js)
+// light for everyone; dark only when the visitor chooses it (localStorage bns.theme = 'dark', read by js/theme-boot.js before the first paint)
 export const THEME_KEY = 'bns.theme';
 export const THEMES = [
-  ['', 'системна'],
   ['light', 'светла'],
   ['dark', 'тъмна'],
 ];
+export const themeOf = (t?: string) => (t === 'dark' ? 'dark' : 'light');
+/* the switch in the header, next to the magnifier (phones too): a toggle button. Its icon follows html[data-theme] in the CSS
+   (a moon on the light page, a sun on the dark one), so it is right from the first paint, before the scripts run. */
+export const themeToggle = (now?: string) => (
+  <>
+    <button
+      type="button"
+      className="nav-theme"
+      id="btn-theme"
+      data-theme-toggle
+      aria-pressed={themeOf(now) === 'dark'}
+      aria-label="Тъмна тема"
+      title="Тъмна тема"
+    >
+      {icon('moon', { size: 20, cls: 'th-moon' })}
+      {icon('sun', { size: 20, cls: 'th-sun' })}
+    </button>
+  </>
+);
 export const themePicker = (now: string) => (
   <>
     <span className="theme-pick" role="group" aria-label="Тема на сайта">
@@ -297,7 +313,12 @@ export const themePicker = (now: string) => (
       {THEMES.map(([v, label]) => (
         <>
           {' '}
-          <button type="button" className="link-btn" data-theme-pick={v} aria-pressed={now === v}>
+          <button
+            type="button"
+            className="link-btn"
+            data-theme-pick={v}
+            aria-pressed={themeOf(now) === v}
+          >
             {label}
           </button>
         </>

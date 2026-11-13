@@ -2,7 +2,7 @@
 // (docs/adr/0002-react-router-ssr.md). js/shell.js puts it in the page and keeps it in step with the navigation; the server writes it
 // into the first response with the current screen already marked. Nothing here touches the DOM.
 import { store } from './store.js';
-import { ROUTES, byId, href as routeHref } from './routes.js';
+import { ROUTES, byId, href as routeHref, keepsPeriod } from './routes.js';
 import { html } from './html.js';
 import { icon } from './icons.js';
 import { data } from './data.js';
@@ -49,7 +49,7 @@ export const navName = r => r.short || r.title;
    The dropdowns and the drawer are built when they open; the tab bar and the footer are built once, so js/shell.js syncLinks() follows every navigation. */
 export const navHref = id => {
   const per = store.periodParam(), p = byId[id].periods;
-  return routeHref(id, {}, per && (p === 'all' || (Array.isArray(p) && p.includes(per))) ? { per } : {});
+  return routeHref(id, {}, per && keepsPeriod(p, per) ? { per } : {});
 };
 /** the tab of the phone bar a screen belongs to */
 export const tabOf = route => { const root = rootOf(route); return TABS.find(t => t.routes.includes(route.id) || (route.parent && t.routes.includes(root.id))); };
@@ -61,24 +61,25 @@ export function bannerHtml() {
     <button type="button" class="x" data-action="dismiss-banner" aria-label="Скрий съобщението за тази сесия">${icon('x', { size: 18 })}</button>`;
 }
 export const CTA = 'Бюджет 2027';
-/** the header; o.route marks its group, o.periods === 'none' hides the period button (a screen that does not depend on the period) */
+/** the header; o.route marks its group. The period button stays on every screen, so the header does not jump between screens (on a screen
+    that does not depend on the period the choice is kept for the next one: js/shell.js openPeriod says so); o.theme is the visitor's theme */
 export function topbarHtml(o = {}) {
   const p = store.period;
   return html`<div class="mast-in"><a class="brand" href="${routeHref('S01')}" aria-label="Бюджет на светло, към началото">${MARK}<span class="brand-name">Бюджет на светло</span></a>
     <span class="badge-mock" title="Бета версия: официални данни и няколко означени примерни стойности">Бета</span>
     <div class="topbar-tools">
-      <button type="button" class="tool-btn period-btn" id="btn-period" aria-haspopup="dialog" aria-expanded="false" aria-label="Година и статус на данните: ${p.label}"${o.periods === 'none' ? html` hidden` : ''}><span class="p-year">${yearOf(p)}</span><span class="p-status"> · ${statusOf(p)}</span>${icon('chevronDown', { size: 14 })}</button>
-      <nav class="sidenav" id="sidenav" aria-label="Основна навигация">${navHtml(o.route)}</nav>
+      <button type="button" class="tool-btn period-btn" id="btn-period" aria-haspopup="dialog" aria-expanded="false" aria-label="Година и статус на данните: ${p.label}"><span class="p-year">${yearOf(p)}</span><span class="p-status"> · ${statusOf(p)}</span>${icon('chevronDown', { size: 14 })}</button>
+      <nav class="sidenav" id="sidenav" aria-label="Основна навигация">${navHtml(o.route, o.theme)}</nav>
       <button type="button" class="menu-btn" id="btn-menu" aria-haspopup="dialog" aria-expanded="false"><span class="menu-box" aria-hidden="true"><span></span><span></span></span><span>Меню</span></button>
     </div></div>`;
 }
 const NEWS_DOT = label => html`<span class="nav-dot" data-news-dot data-label="${label}" hidden></span>`;
-export function navHtml(route) {
+export function navHtml(route, theme = '') {
   const g = route ? groupOf(route) : -1;
   const rows = NAV_GROUPS.map(([label], i) => html`<div class="nav-sec" data-sec="g${i}"${i === g ? html` data-current` : ''}><button type="button" class="nav-main" data-grp="${i}" aria-haspopup="dialog" aria-expanded="false"${i === g ? html` aria-current="true"` : ''}><span>${label}</span>${i === 1 ? NEWS_DOT('Изпълнение (има непрочетено)') : ''}${icon('chevronDown', { size: 12, cls: 'nav-chev' })}</button></div>`);
   const lupa = html`<button type="button" class="nav-search" id="btn-search" data-action="search" aria-haspopup="dialog" aria-expanded="false" aria-keyshortcuts="/ Control+K Meta+K" aria-label="Търсене" title="Търсене (/)">${icon('search', { size: 22 })}</button>`;
   const cta = route ? (route.id === 'S34' ? html` aria-current="page"` : rootId(route) === 'S34' ? html` aria-current="true"` : '') : '';
-  return html`<div class="nav-in">${rows}${lupa}<a class="nav-cta" href="${routeHref('S34')}" data-nav="S34"${cta}>${CTA}</a></div>`;
+  return html`<div class="nav-in">${rows}${lupa}${themeToggle(theme)}<a class="nav-cta" href="${routeHref('S34')}" data-nav="S34"${cta}>${CTA}</a></div>`;
 }
 export function tabbarHtml(route) {
   const tab = route ? tabOf(route) : null;
@@ -86,10 +87,14 @@ export function tabbarHtml(route) {
 }
 
 /* ------------------------------------------------------------------ theme (docs/approach-specification.md, section 9.3) */
-// '' follows the system (prefers-color-scheme), 'light' and 'dark' are the visitor's choice (localStorage bns.theme, read by js/theme-boot.js)
+// light for everyone; dark only when the visitor chooses it (localStorage bns.theme = 'dark', read by js/theme-boot.js before the first paint)
 export const THEME_KEY = 'bns.theme';
-export const THEMES = [['', 'системна'], ['light', 'светла'], ['dark', 'тъмна']];
-export const themePicker = now => html`<span class="theme-pick" role="group" aria-label="Тема на сайта">Тема:${THEMES.map(([v, label]) => html` <button type="button" class="link-btn" data-theme-pick="${v}" aria-pressed="${String(now === v)}">${label}</button>`)}</span>`;
+export const THEMES = [['light', 'светла'], ['dark', 'тъмна']];
+export const themeOf = t => (t === 'dark' ? 'dark' : 'light');
+export const themePicker = now => html`<span class="theme-pick" role="group" aria-label="Тема на сайта">Тема:${THEMES.map(([v, label]) => html` <button type="button" class="link-btn" data-theme-pick="${v}" aria-pressed="${String(themeOf(now) === v)}">${label}</button>`)}</span>`;
+/* the switch in the header, next to the magnifier (phones too): a toggle button. Its icon follows html[data-theme] in the CSS
+   (a moon on the light page, a sun on the dark one), so it is right from the first paint, before the scripts run. */
+export const themeToggle = now => html`<button type="button" class="nav-theme" id="btn-theme" data-theme-toggle aria-pressed="${String(themeOf(now) === 'dark')}" aria-label="Тъмна тема" title="Тъмна тема">${icon('moon', { size: 20, cls: 'th-moon' })}${icon('sun', { size: 20, cls: 'th-sun' })}</button>`;
 
 /* V6 footer: every screen of the menu, grouped (the ids are the real routes of js/routes.js; nav:false screens like S08/S11/S21 are children of listed ones).
    Phones: one collapsible group per heading (native <details>, keyboard-operable); wide screens: all groups open side by side (js/shell.js syncFooter).

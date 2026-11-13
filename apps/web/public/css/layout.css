@@ -60,21 +60,30 @@
 .nav-cta{display:inline-flex;align-items:center;justify-content:center;min-height:40px;margin-left:var(--sp-3);padding:6px 14px;border:1px solid var(--crimson);background:var(--crimson);color:var(--on-accent);font:600 var(--fs-xs)/1.2 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;text-decoration:none;white-space:nowrap}
 .nav-cta:hover{background:var(--ink);border-color:var(--ink);color:var(--on-inv);text-decoration:none}
 .nav-cta[aria-current="page"]{background:var(--ink);border-color:var(--ink)}
-.nav-cta:focus-visible,.nav-main:focus-visible,.nav-search:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.nav-cta:focus-visible,.nav-main:focus-visible,.nav-search:focus-visible,.nav-theme:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 /* the magnifier: an icon button, 44px target; pressed (panel open) = ink frame */
-.nav-search{display:inline-grid;place-items:center;width:44px;height:44px;margin-left:var(--sp-1);border:1px solid transparent;border-radius:0;background:none;color:var(--ink);cursor:pointer}
+.nav-search{display:inline-grid;place-items:center;width:44px;height:44px;margin-left:0;border:1px solid transparent;border-radius:0;background:none;color:var(--ink);cursor:pointer}
 .nav-search:hover{color:var(--crimson)}
 .nav-search[aria-expanded="true"]{border-color:var(--ink);background:var(--paper-warm)}
+/* the theme switch next to it (js/chrome.js themeToggle): the same icon button; a moon on the light page, a sun on the dark one. The icon
+   follows html[data-theme] (set before the first paint), not aria-pressed, so it is right before the scripts run */
+.nav-theme{display:inline-grid;place-items:center;width:44px;height:44px;border:1px solid transparent;border-radius:0;background:none;color:var(--ink);cursor:pointer}
+.nav-theme:hover{color:var(--crimson)}
+.nav-theme .th-sun,:root[data-theme="dark"] .nav-theme .th-moon{display:none}
+:root[data-theme="dark"] .nav-theme .th-sun{display:block}
+/* the period popover on a screen that does not depend on the period (js/shell.js openPeriod) */
+.period-note{margin:0 0 var(--sp-3);color:var(--ink-mid);font-size:var(--fs-s)}
 /* the dropdown (a popover built from the same links) */
 .nav-pop .more-list{border-top:0}
 /* V6 (27.10, final review): the content column stops growing at 1152px (--max 1280 minus the gutters), so what fits at 1280px is all there is at 1440 and 1920 too. The wordmark, the year button, the five group buttons,
    the magnifier and the red button therefore use their compact form at EVERY width (before, from 1361px the «Mock» badge and the year's status word came back and pushed the year button over the wordmark). */
 .badge-mock{display:none}
 .period-btn .p-status{display:none}
-.nav-main{padding-inline:7px;letter-spacing:.06em}
-.nav-cta{margin-left:var(--sp-2);padding-inline:11px;letter-spacing:.08em}
-/* below 1241px the five buttons no longer fit next to the wordmark: «Меню» (the drawer, same groups) takes over; the bottom tab bar only appears at ≤960px */
-@media (max-width:1240px){
+.nav-main{padding-inline:5px;letter-spacing:.04em}   /* (13.11) tighter, so the theme switch fits next to the magnifier */
+.nav-cta{margin-left:var(--sp-1);padding-inline:11px;letter-spacing:.08em}
+/* below 1280px (the width at which the column stops growing) the five buttons and the two icon buttons no longer fit next to the wordmark:
+   «Меню» (the drawer, same groups) takes over; the bottom tab bar only appears at ≤960px */
+@media (max-width:1279px){
   .mast-in{gap:0 var(--sp-1)}
   .badge-mock{display:none}
   .sidenav .nav-sec,.sidenav .nav-cta{display:none}                      /* only the magnifier stays in the bar */
@@ -96,10 +105,9 @@
   .period-btn svg{display:none}
   .menu-btn{padding-left:var(--sp-1)}
 }
-@media (max-width:479px){.badge-mock{display:none}}
-@media (max-width:399px){.topbar-tools{gap:0 var(--sp-1)}}   /* the year, the magnifier and «Меню» 4px apart: 12px gaps pushed the right-aligned tools over the wordmark at 320–328 and 340–344px, and left 1px at 380px (none with Georgia) */
-@media (max-width:379px){.brand-name{font-size:1rem}.brand{gap:6px}.brand-mark{width:20px;height:20px}.menu-btn>span:last-child{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}.menu-btn{min-width:44px;justify-content:center}}   /* narrowest phones: the two-bar icon alone, the word stays for screen readers */
-@media (max-width:339px){.nav-search{width:40px}.menu-btn{min-width:40px}.period-btn svg{display:none}.mast-in{padding-inline:12px}}
+@media (max-width:479px){.badge-mock{display:none}.topbar-tools{gap:0}.menu-btn>span:last-child{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}.menu-btn{min-width:44px;padding-left:0;justify-content:center}}   /* phones: the year, the magnifier, the theme switch and the two-bar «Меню» icon (the word stays for screen readers), side by side: the 44px targets carry their own space */
+@media (max-width:379px){.brand-name{font-size:1rem}.brand-mark{display:none}.period-btn{padding-inline:2px}}   /* narrowest phones: the wordmark without the small bars, so the four tools fit next to it */
+@media (max-width:339px){.nav-search,.nav-theme{width:40px}.menu-btn{min-width:40px}.period-btn svg{display:none}.mast-in{padding-inline:12px}}
 /* the red button also leads the phone drawer */
 .more-cta{margin:0 0 var(--sp-4)}
 .more-cta .nav-cta{display:flex;margin:0;min-height:48px;width:100%}

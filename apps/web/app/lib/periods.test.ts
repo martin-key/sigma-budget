@@ -255,3 +255,13 @@ it('an explicitly empty or prototype-named period is unknown and never redirects
     expect(selectPeriod({ byPeriod: {} }, key).available).toBe(false);
   }
 });
+
+it('the chosen period goes with the visitor to every screen that shows it or does not depend on it', async () => {
+  const { keepsPeriod, periodHref } = await import('../../client/routes.js');
+  expect(keepsPeriod('all', '2026.law')).toBe(true);
+  expect(keepsPeriod('none', '2026.law')).toBe(true); // the year stays in the header there, and over a reload
+  expect(keepsPeriod(['2026.law', '2027.draft'], '2026.law')).toBe(true);
+  expect(keepsPeriod(['2027.draft'], '2026.law')).toBe(false);
+  // the links inside a screen keep their published form: only the screens that show the period name it
+  expect(periodHref('2026.law', 'S15')).not.toContain('per=');
+});

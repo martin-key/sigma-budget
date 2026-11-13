@@ -1,8 +1,8 @@
 /* Design tokens, v4 trial: the visual language of СИГМА (sigma.midt.bg, MIT, © 2026 МИДТ; see THIRD-PARTY.txt).
    Flat warm paper, ink type, hairline rules instead of cards, ONE crimson accent, three type voices (serif headings, sans body,
    mono labels), 8-pt spacing, radius ≤ 3px, no soft shadows (only popovers lift).
-   Light and dark (docs/approach-specification.md, section 9.3; СИГМА itself has only the light one): the dark theme below follows the system
-   (prefers-color-scheme) unless the visitor chose a theme in the footer (html[data-theme], js/theme-boot.js before the first paint).
+   Light and dark (docs/approach-specification.md, section 9.3; СИГМА itself has only the light one): the site is light for everyone; the dark
+   theme below is the visitor's choice in the header or the footer (html[data-theme="dark"], js/theme-boot.js before the first paint).
    It changes only the palette and the few role values that are not palette references; every role keeps its meaning. Contrast on the
    dark paper: ink 15.9, ink-mid 11.3, ink-soft 7.2, crimson 7.3, teal 9.3:1; the series alternate light and mid tones with ≥3.2:1 between
    neighbours and ≥3.4:1 on the paper.
@@ -87,28 +87,7 @@
   --swatch-edge:rgb(0 0 0/.18);  /* the hairline round a legend swatch */
 }
 
-/* ---- dark: the system's choice, or the visitor's (html[data-theme="dark"]); html[data-theme="light"] keeps the light one ---- */
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    color-scheme:dark;
-    --paper:#14120F; --paper-warm:#1D1A16; --paper-deep:#27231E;
-    --ink-0:#F1ECE3; --ink-mid:#CFC8BD; --ink-soft:#A8A094;
-    --rule:#423C35; --rule-soft:#2E2A25;
-    --crimson:#FF7A6B; --crimson-tint:#3A1915; --pos:#5ACB9C;
-    --overlay:rgb(0 0 0/.6); --on-inv-2:#46423D;
-    --data-2:#7A7268; --data-3:#423C35;
-    --rev:#25926E; --exp:#F1ECE3;
-    --series-1:#F1ECE3; --series-2:#726759; --series-3:#F5B6B4; --series-4:#3D735E;
-    --series-5:#B1C8DF; --series-6:#836427; --series-7:#D7BDDA; --series-8:#5C6A7B;
-    --series-other:#8C857C; --series-other-2:#B5AEA4;
-    --esa:#86AEDA; --esa-soft:#1C2733;
-    --ok-soft:#12261D; --warn:#E3B15A; --warn-soft:#2E2410;
-    --st-real:#5ACB9C; --st-partial:#86AEDA; --st-pending:#A8A094; --st-mock:#FF7A6B; --st-forecast:#CFC8BD;
-    --hatch:rgb(255 122 107/.30);
-    --shadow-2:0 18px 40px -24px rgb(0 0 0/.9);
-    --swatch-edge:rgb(255 255 255/.28);
-  }
-}
+/* ---- dark: only the visitor's choice (html[data-theme="dark"]); without it the page stays light, whatever the system prefers ---- */
 :root[data-theme="dark"]{
   color-scheme:dark;
   --paper:#14120F; --paper-warm:#1D1A16; --paper-deep:#27231E;
