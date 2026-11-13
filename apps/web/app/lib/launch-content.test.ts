@@ -9,6 +9,23 @@ import * as catalogue from '../../client/catalog.js';
 import * as feed from '../../client/pages/s16-novo.js';
 import * as reactFeed from '../routes/novo-content';
 
+// A narrow no-break space is a numeric grouping separator, not a word boundary
+// inside a printed amount (2\u202f403 is 2403, not an HTTP 403 notice).
+const numericText = (text: string) => text.replace(/(?<=\d)[\u00a0\u202f](?=\d)/g, '');
+const internalCopy =
+  /предстои|предстоят|още не|в тази версия|\b403\b|само през браузър|работна група/i;
+it('distinguishes a grouped amount from a forbidden HTTP notice without hiding prose', () => {
+  expect(numericText('2\u202f403,174')).toBe('2403,174');
+  expect(numericText('2\u202f403,174')).not.toMatch(internalCopy);
+  for (const text of [
+    'отказ 403',
+    '403 Forbidden',
+    'предстои сума 2\u202f403,174',
+    'още не е добавен',
+  ])
+    expect(numericText(text)).toMatch(internalCopy);
+});
+
 const load = async (name: string) =>
   parse(
     name,
@@ -44,9 +61,7 @@ for (const path of ['/danni', '/izpalnenie', '/izpalnenie/byudzheti', '/5-minuti
   it(`${path} has no future-data notices or pending catalogue links`, async () => {
     const doc = await documentAt(path);
     const article = doc.querySelector('article')!;
-    expect(article.textContent).not.toMatch(
-      /предстои|предстоят|още не|в тази версия|\b403\b|само през браузър|работна група/i,
-    );
+    expect(numericText(article.textContent || '')).not.toMatch(internalCopy);
     expect(
       article.querySelector('a[href*="/danni/p0"],.chip[data-query="status=pending"]'),
     ).toBeNull();
