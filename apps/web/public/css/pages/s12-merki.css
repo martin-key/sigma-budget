@@ -215,3 +215,67 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* ---------------------------------------------------------------- the 2027–2029 measures (m27-*): the same tiles as 2026, grouped under hairline headings */
+.page[data-route='S12'] .m27-group {
+  display: grid;
+  gap: var(--sp-4);
+}
+.page[data-route='S12'] .m27-group-h {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sp-2) var(--sp-3);
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--rule);
+  font: 400 var(--fs-h3)/1.2 var(--font-serif);
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.page[data-route='S12'] .m27-group-h .s12-count,
+.page[data-route='S12'] .m27-abbr {
+  font: 500 var(--fs-xs)/1.3 var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.page[data-route='S12'] .m27-card .s12-name {
+  font-size: var(--fs-1);
+}
+.page[data-route='S12'] .m27-area {
+  color: var(--ink-mid);
+}
+.page[data-route='S12'] .m27-year:focus-visible {
+  outline: 2px solid var(--crimson);
+  outline-offset: 2px;
+}
+.page[data-route='S12'] .m27-row {
+  margin-top: var(--sp-2);
+  overflow-wrap: anywhere;
+}
+/* the measures by law: a list of links under each law */
+.page[data-route='S12'] .m27-laws {
+  display: grid;
+  gap: var(--sp-5);
+}
+.page[data-route='S12'] .m27-law {
+  display: grid;
+  gap: var(--sp-2);
+}
+.page[data-route='S12'] .m27-law-list {
+  display: grid;
+  gap: var(--sp-2);
+  margin: 0;
+  padding-left: var(--sp-5);
+  max-width: 68ch;
+}
+/* the printed table under the cards is the expert and CSV view: while it is folded its rows take no room (a phone never lays out the wide table), opened it scrolls inside its frame */
+.page[data-route='S12'] .m27-table:not([open]) > .disc-body {
+  display: none;
+}
+/* the three lists fit a phone without a sideways scroll */
+@media (max-width: 599px) {
+  .page[data-route='S12'] .m27 .tab-list {
+    gap: var(--sp-4);
+  }
+}

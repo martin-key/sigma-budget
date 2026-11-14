@@ -12,7 +12,6 @@ import {
   institutions,
   cellValue,
   strictSum,
-  headline,
   municipalRows,
   stateDebt,
   provenanceUrl,
@@ -27,8 +26,8 @@ import { norm, lat } from '../searchlib.js';
 const labels = { bill: 'Основен проект', billMc: 'Вариант на Министерския съвет' };
 const variantOf = (ctx) => (ctx.query.variant === 'billMc' ? 'billMc' : 'bill');
 const source = ['budget2027'];
-const gap = (title, text) => emptyState({ title, text });
-const publication = (doc) =>
+export const gap = (title, text) => emptyState({ title, text });
+export const publication = (doc) =>
   html`<p>
       МФ, 06.11.2026. Проектът за 2027 г. не е приет закон. Прогнозите са за 2028–2029 г. Сумите и
       празните клетки следват съответната таблица.
@@ -80,7 +79,7 @@ function scopeFor(ctx, id) {
     'не е целият бюджет',
   );
 }
-const base = (ctx, id, title, body, extra = {}) =>
+export const base = (ctx, id, title, body, extra = {}) =>
   block({
     id,
     title,
@@ -100,18 +99,21 @@ const originCol = {
   csvOnly: true,
   fmt: (v, r) => (v ? html`<a href="${r.origin}">${v}</a>` : 'Няма публикувана клетка'),
 };
-const cellRow = (label, cell, extra = {}) => ({
+export const cellRow = (label, cell, extra = {}) => ({
   label,
   value: cellValue(cell),
   provenance: cell?.provenance || '',
   origin: provenanceUrl(cell),
   ...extra,
 });
-const frameworkRow = (key) => ({
+export const frameworkRow = (key) => ({
   period: periodByKey(key).label,
   _status: periodByKey(key).status === 'forecast' ? 'forecast' : 'real',
 });
-const frameworkStatus = { status: 'real', statusLabel: 'Законопроект 2027 и прогноза 2028–2029' };
+export const frameworkStatus = {
+  status: 'real',
+  statusLabel: 'Законопроект 2027 и прогноза 2028–2029',
+};
 export const cellColumns = (unit = 'хил. €') => [
   { key: 'label', label: 'Показател' },
   { key: 'value', label: 'Стойност', unit, num: true, d: 1 },
@@ -136,7 +138,7 @@ const billRows = (rows, variant) =>
       variant: labels[variant],
     }),
   );
-const unavailable = (ctx) =>
+export const unavailable = (ctx) =>
   ctx.failed?.includes('budget2027')
     ? {
         body: errorState({
@@ -153,7 +155,7 @@ const unavailable = (ctx) =>
           ),
         }
       : null;
-const keep = (ctx, over = {}) => ({ ...ctx.query, per: ctx.period.key, ...over });
+export const keep = (ctx, over = {}) => ({ ...ctx.query, per: ctx.period.key, ...over });
 const municipalScreen = (ctx) => ['S20', 'S21'].includes(ctx.route.id);
 const listQuery = (ctx, over = {}) => {
   const keys = municipalScreen(ctx)
@@ -256,7 +258,7 @@ const searchBox = (ctx, prefix, label, count) => html`${field({
 <p><button type="button" class="btn btn-sm" data-${prefix}-clear${cleanSearch(ctx.query.q) ? '' : html` disabled`}>Изчисти търсенето</button></p>`;
 const searchField = (ctx, rows, label) =>
   searchBox(ctx, 'bill', label, resultCount(ctx, rows.length));
-const variantControl = (ctx) =>
+export const variantControl = (ctx) =>
   field({
     id: 'bill-variant',
     label: 'Вариант на законопроекта',
@@ -744,7 +746,7 @@ const projectRows = (ctx, projects) =>
     .filter((r) => matches(`${r.name} ${r.institution} ${r.id}`, ctx.query.q))
     .map((r) => projectRow(r, (v) => v));
 const projectCount = (n) => `Намерени проекти: ${num(n)}.`;
-function projectsBlocks(ctx, doc) {
+export function projectsBlocks(ctx, doc) {
   const projects = doc.projects || [];
   const sums = FRAMEWORK.map((key) => cellValue(doc.projectAnnualSums?.[key]));
   const byInstitution = new Map();
@@ -847,7 +849,8 @@ export const mountProjectSearch = (root, ctx) =>
     rows: () => projectRows(ctx, ctx.data.budget2027?.projects || []),
     count: projectCount,
   });
-export function billOverview(ctx) {
+/** S34 for the November bill: the Council of Ministers variant here, the main bill through `main(doc, article1)` (pages/budget-2027-overview.js) */
+export function billOverview(ctx, main) {
   if (unavailable(ctx)) return unavailable(ctx);
   const doc = ctx.data.budget2027,
     variant = variantOf(ctx),
@@ -879,43 +882,7 @@ export function billOverview(ctx) {
         </p>
         ${publication(doc)}`,
     };
-  return {
-    title: 'Бюджет 2027',
-    lede: 'Официални данни от законопроекта за 2027 г. и АСБП 2027–2029 на Министерството на финансите, публикувани на 06.11.2026. За 2028–2029 г. стойностите са прогноза.',
-    body: html`${variantControl(ctx)}${base(
-      ctx,
-      's34-bill',
-      'Държавен бюджет по чл. 1',
-      kpiGrid(
-        ['I', 'II'].map((s, i) =>
-          kpi({
-            label: ['Приходи', 'Разходи'][i],
-            value: cellValue(headline(b, s)),
-            unit: 'хил. €',
-            d: 1,
-          }),
-        ),
-      ),
-      { sub: labels[variant] },
-    )}
-      <ul>
-        <li><a href="${ctx.href('S10', {}, keep(ctx))}">Бюджети на ведомствата</a></li>
-        <li><a href="${ctx.href('S20', {}, { per: '2027.draft' })}">Трансфери към общините</a></li>
-        <li>
-          <a href="${ctx.href('S17', {}, { per: '2027.draft' })}">Дълг и предложени граници</a>
-        </li>
-        <li>
-          <a href="${ctx.href('S13', {}, { per: '2027.draft' })}">Прогнозна рамка 2027–2029</a>
-        </li>
-      </ul>
-      ${projectsBlocks(ctx, doc)}
-      <p>
-        <a href="${ctx.href('S34', {}, { dokument: 'plan' })}"
-          >Предходна публикация: проект на бюджетен план до ЕК от 15.10.2026</a
-        >
-      </p>
-      ${publication(doc)}`,
-  };
+  return main(doc, b);
 }
 // Filters a table in place as the reader types and keeps ?q= in the address without re-rendering the screen.
 function wireSearch(root, ctx, { prefix, table, rows, count }) {
@@ -974,66 +941,3 @@ export const mountBillSearch = (root, ctx) =>
     rows: () => (municipalScreen(ctx) ? municipalityRows(ctx) : institutionRows(ctx)),
     count: (n) => resultCount(ctx, n),
   });
-
-// Separate phone presentation: the hidden desktop table still owns the unchanged CSV.
-// Phone cards show the values only; cell provenance stays in the CSV, as in the desktop table.
-// Each value names its desktop row (data-anchor-for), so a search link (?to=s12-II_7-1-1) also lands on the phone card.
-function measureCards(measures, table) {
-  return html`<div class="measure-cards">${measures.map(
-    (r, rowIndex) => html`<div class="measure-card">
-    <h3>${r.label}</h3>
-    <dl>${FRAMEWORK.map((key, k) => html`<div class="measure-value" data-anchor-for="s12-${table}-${rowIndex}-${k}"><dt>${periodByKey(key).label}, млн. €</dt><dd>${cellValue(r.cells[k]) == null ? '—' : num(cellValue(r.cells[k]), 1)}${r.gaps[k] ? html`<small class="muted">${r.gaps[k]}</small>` : ''}</dd></div>`)}</dl>
-  </div>`,
-  )}</div>`;
-}
-
-export function measuresView(ctx) {
-  if (unavailable(ctx)) return unavailable(ctx);
-  const doc = ctx.data.budget2027;
-  if (ctx.params.id)
-    return {
-      body: html`${gap('Мярката е от бюджета за 2026 г.', 'Мерките от АСБП 2027–2029 са в общия списък.')}<p><a href="${ctx.href('S12', {}, { per: '2027.draft' })}">Мерки в проекта за 2027</a></p>`,
-      next: [
-        { href: ctx.href('S12', {}, { per: '2027.draft' }), title: 'Мерки в проекта за 2027' },
-      ],
-    };
-  const body = ['II_7', 'II_8'].map((table, i) => {
-    const rows = doc.forecast[table].flatMap((r, rowIndex) =>
-      FRAMEWORK.map((key, k) =>
-        cellRow(r.label, r.cells[k], {
-          ...frameworkRow(key),
-          gap: r.gaps[k] || '',
-          _id: `s12-${table}-${rowIndex}-${k}`,
-        }),
-      ),
-    );
-    return base(
-      ctx,
-      's12-' + table,
-      i === 0 ? 'Приходни мерки 2027–2029' : 'Разходни мерки 2027–2029',
-      html`<div class="measures-desktop">${dataTable({
-        id: 's12-' + table + '-table',
-        caption: `Таблица ${table.replace('_', '-')}, АСБП 2027–2029`,
-        columns: [
-          { key: 'period', label: 'Период' },
-          ...cellColumns('млн. €'),
-          { key: 'gap', label: 'Липсваща стойност' },
-        ],
-        rows,
-      })}</div>${measureCards(doc.forecast[table], table)}`,
-      {
-        sub: 'Показани са отпечатаните ефекти и общият ред. Празните клетки не са нула. Знаците и разликите между годините са запазени.',
-        ...frameworkStatus,
-        share: { period: '2027.draft / 2028.forecast / 2029.forecast', unit: 'млн. €' },
-      },
-    );
-  });
-  return {
-    title: 'Мерки в проекта за бюджет 2027',
-    lede: 'Приходните и разходните мерки от таблици II-7 и II-8 на АСБП 2027–2029, публикувани от МФ на 06.11.2026. Проектът не е приет закон.',
-    body: html`${body}${publication(doc)}
-      <p>
-        <a href="${ctx.href('S12', {}, { per: '2026.law' })}">Исторически мерки за 2026 г.</a>
-      </p>`,
-  };
-}

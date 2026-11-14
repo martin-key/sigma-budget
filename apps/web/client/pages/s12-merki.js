@@ -1,5 +1,5 @@
 import { isFramework } from '../budget-2027.js';
-import { measuresView } from './bill-views.js';
+import { measuresView } from './measures-2027-view.js';
 // S12 · Мерки в бюджета 2026 · #/merki[/<мярка>] · next S10 · periods 2026.draft, 2026.law (both set on the route)
 // Data: source-checked excerpts in measures.json.
 import { html } from '../html.js';

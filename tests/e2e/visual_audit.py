@@ -31,18 +31,20 @@ def main():
                 page.locator('article[data-ready="1"]').wait_for()
 
             go('/merki')
-            cards = page.locator('.measure-card')
+            cards = page.locator('[role="tabpanel"]:not([hidden]) .m27-card')
             assert cards.count() > 0
-            expect(page.locator('.measures-desktop').first).to_be_hidden()
+            # The printed table is the folded expert view; the cards carry every value.
+            expect(page.locator('#s12-II_7-table')).to_be_hidden()
             # Every visible container fits; no values require a sideways gesture.
             assert page.evaluate('''() => [...document.querySelectorAll('article *')].filter(e =>
                 e.getClientRects().length && getComputedStyle(e).overflowX === 'auto')
                 .every(e => e.scrollWidth <= e.clientWidth + 1)''')
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
-            desktop_rows = page.locator('.measures-desktop tbody tr').count()
-            assert cards.count() * 3 == desktop_rows
+            printed_rows = page.locator('#s12-II_7-table tbody tr').count()
+            # three years of every measure, plus the „Общо:“ row that the sums above the lists show
+            assert (cards.count() + 1) * 3 == printed_rows
             for card in cards.all():
-                values = card.locator('.measure-value')
+                values = card.locator('.m27-year')
                 assert values.count() == 3
                 for year, row in zip(('2027', '2028', '2029'), values.all()):
                     expect(row.locator('dt')).to_contain_text(year)
@@ -50,13 +52,14 @@ def main():
                     assert row.locator('dd').inner_text().strip()
                     box = row.bounding_box()
                     assert box['x'] >= 0 and box['x'] + box['width'] <= 390
-                # Provenance hashes stay in the CSV, not on the phone cards.
-                assert card.locator('.measure-origin').count() == 0
+                # The paragraph of the motives is folded under every card; provenance hashes stay in the CSV.
+                assert card.locator('details.s12-quote blockquote').count() == 1
+                assert card.get_by_text('budget2027-provenance.json').count() == 0
             checks += 1
 
-            # A search link to one measure value lands on its phone card (the desktop row is hidden).
+            # A search link to one measure value lands on that value of its card.
             go('/merki?per=2028.forecast&to=s12-II_7-1-1')
-            target = page.locator('[data-anchor-for="s12-II_7-1-1"]')
+            target = page.locator('#s12-II_7-1-1')
             expect(target).to_be_focused()
             expect(target).to_be_in_viewport()
             checks += 1
@@ -71,13 +74,18 @@ def main():
             checks += 1
 
             page.set_viewport_size({'width': 820, 'height': 1180})
-            expect(page.locator('.measure-cards').first).to_be_hidden()
+            expect(page.locator('.m27-card').first).to_be_visible()
+            page.locator('#s12-II_7-d > summary').click()
             expect(page.locator('#s12-II_7-table')).to_be_visible()
             # Provenance hashes and links are CSV-only: period, indicator, value, missing value.
             assert page.locator('#s12-II_7-table th[scope="col"]').count() == 4
             assert page.locator('#s12-II_7-table').get_by_text('budget2027-provenance.json').count() == 0
             checks += 1
             go('/byudzhet-2027')
+            # The answer first: six key figures of 2027, the comparison with 2026 and 2025 and the capital expenditure.
+            assert page.locator('#b27-nakratko .kpi').count() == 6
+            expect(page.locator('#b27-sravnenie-table')).to_be_visible()
+            expect(page.locator('#b27-kapitalovi-fig')).to_be_visible()
             # Investment projects: three year totals, a chart by institution, the top ten (project + three years) and a searchable full list.
             assert page.locator('#s34-projects .kpi').count() == 3
             expect(page.locator('#s34-projects-by-institution-fig')).to_be_visible()

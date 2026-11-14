@@ -351,7 +351,8 @@ it.each(['blg03', 'bLg03'])(
 it('provides row anchors for searched measures, preserving effects and blank cells', async () => {
   const { document } = await page('/merki?per=2028.forecast&to=s12-II_7-1-1');
   const effect = document.getElementById('s12-II_7-1-1')!;
-  expect(effect.textContent).toContain('електронно фактуриране');
+  // the anchor is the 2028 value on the card of the measure; the card carries the printed row
+  expect(effect.closest('.m27-card')?.textContent).toContain('електронно фактуриране');
   expect(effect.textContent).toContain('400,0');
   expect(effect.textContent).toContain('2028');
   const missing = document.getElementById('s12-II_7-1-0')!;
