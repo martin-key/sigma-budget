@@ -1,3 +1,4 @@
+import { parse as parseYaml } from 'yaml';
 import { readFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { expect, it } from 'vitest';
@@ -293,5 +294,18 @@ it('accepts registered blanks only without a value or formula and under their or
     else delete sheet.cells[address];
     w.sha256 = '0'.repeat(64);
     expect(() => parseBudgetTable(w, t.file)).toThrow('Unregistered budget source positions');
+  }
+});
+
+it('keeps the published tax-dataset limitations in Bulgarian without internal null wording', () => {
+  const registry = parseYaml(readFileSync(join(root, 'data/datasets.yaml'), 'utf8'));
+  for (const id of ['state-budget', 'kfp-subsectors']) {
+    const entry = registry.datasets.find((d: any) => d.id === id);
+    expect(entry.limitations.length).toBeGreaterThan(0);
+    for (const text of entry.limitations) {
+      expect(text).toMatch(/[А-Яа-я]/);
+      expect(text.replaceAll('SHA-256', '')).not.toMatch(/[A-Za-z]{2,}/);
+      expect(text).not.toMatch(/null|предстои|прототип|още не/i);
+    }
   }
 });

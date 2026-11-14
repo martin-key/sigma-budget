@@ -779,7 +779,7 @@ datasets:
   rebuild: ./budget build
   checked: '2026-11-14'
   limitations:
-  - 'Source blanks remain null; source discrepancies are exact and SHA-bound.'
+  - 'Празните клетки са запазени според оригиналите; точните разлики в сборовете са описани и обвързани с SHA-256 на източника.'
 
 - id: kfp-subsectors
   catalogId: D37
@@ -798,4 +798,4 @@ datasets:
   rebuild: ./budget build
   checked: '2026-11-14'
   limitations:
-  - 'Source blanks remain null; source discrepancies are exact and SHA-bound.'
+  - 'Празните клетки са запазени според оригиналите; точните разлики в сборовете са описани и обвързани с SHA-256 на източника.'
