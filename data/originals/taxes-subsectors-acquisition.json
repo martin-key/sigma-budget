@@ -335,14 +335,30 @@
     }
   ],
   "pageReview": {
-    "date": "2026-11-13",
+    "date": "2026-11-14",
     "pages": [
       "https://www.minfin.bg/bg/statistics/5",
       "https://www.minfin.bg/bg/statistics/6",
       "https://www.minfin.bg/bg/statistics/12",
       "https://www.minfin.bg/bg/statistics/18"
     ],
-    "method": "Previously acquired official HTML in the local browser cache; fresh requests blocked by security verification.",
-    "finding": "Pages 5 and 18 contain monthly consolidated and state-budget tables; page 6 contains quarterly subsectors. No separate monthly DОО, НЗОК or municipality tables were identified on these pages. Other MF pages were not verified."
+    "method": "Previously acquired official HTML in the local browser cache and the supplied September monthly bulletin PDF; fresh page requests blocked by security verification.",
+    "finding": "Monthly state-budget and quarterly subsector tables are imported. The MF monthly bulletin contains monthly cumulative totals for social security funds collectively and municipalities; a complete monthly bulletin series is not imported."
+  },
+  "deferredMonthlySource": {
+    "file": "bulletin/BULETIN_September__2026.pdf",
+    "url": "https://www.minfin.bg/upload/65481/BULETIN_September+_2026.pdf",
+    "sha256": "96ca9f6ef83d9b0a766e59f42ec4e65f4c1530ccab20c6077fcda78b3ad61013",
+    "bytes": 891837,
+    "retrieved": "2026-11-13",
+    "via": "Firefox",
+    "imported": false,
+    "printedPage": 11,
+    "pdfPage": 11,
+    "sections": [
+      "III. Социалноосигурителни фондове",
+      "IV. Общини"
+    ],
+    "note": "Text summaries, not a separately numbered table. Table 1 on page 4 is the state budget. Social funds are reported collectively (НОИ, НЗОК, УПФ, ФГВРС). No figures from this PDF enter this release."
   }
 }

@@ -34,7 +34,7 @@ GLOSSARY_SRC = os.path.join(ROOT, "data", "inputs", "glossary.json")
 GUIDE_SRC = os.path.join(ROOT, "data", "cache", "research", "guide", "guide_raw.txt")   # not in the repository
 from budget_pipeline.routes import CATALOGUE, load_routes
 
-BUILD_DATE = os.environ.get("BUILD_DATE", "2026-11-13")   # same default as pipeline/budget_pipeline/build/data_io.py; a constant => byte-identical rebuilds
+BUILD_DATE = os.environ.get("BUILD_DATE", "2026-11-14")   # same default as pipeline/budget_pipeline/build/data_io.py; a constant => byte-identical rebuilds
 TEXT_AS_OF = "2026-10-01"                                  # date of the source documents
 
 # route params that have a closed registry (DATA_SPEC 2.3)

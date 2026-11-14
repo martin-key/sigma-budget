@@ -1,7 +1,7 @@
 import { prepareExecution, type PrepareExecutionOptions } from '../readers/execution/producer.js';
 import type { PinnedFile } from '../readers/workbooks/index.js';
 import { readExecutionReport } from '../readers/execution/report.js';
-import { P02_TITLE, P02_REASON } from './launch-texts.js';
+import { P02_TITLE, P02_REASON, P02_EXPECTED } from './launch-texts.js';
 import differences from '../validate/kfp-source-differences.json' with { type: 'json' };
 
 /** Resolutions are shared by core, catalog, feed and search before graph construction. */
@@ -12,7 +12,9 @@ export function resolveProductionPending<T>(pending: Record<string, T>): Record<
       .filter(([id]) => !RESOLVED_PENDING.has(id))
       .map(([id, value]) => [
         id,
-        id === 'P02' ? { ...value, title: P02_TITLE, reason: P02_REASON } : value,
+        id === 'P02'
+          ? { ...value, title: P02_TITLE, reason: P02_REASON, expected: P02_EXPECTED }
+          : value,
       ]),
   );
 }
