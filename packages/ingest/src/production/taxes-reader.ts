@@ -1,3 +1,4 @@
+import { budgetSourceCells } from '@sigma-budget/dataset-schema';
 import { basename } from 'node:path';
 import {
   readWorkbook,
@@ -118,23 +119,28 @@ export function parseBudgetTable(w: Workbook, filename: string): BudgetTable {
     });
   }
   const rows: BudgetTable['rows'] = [];
-  const limit = state
-    ? (Array.from({ length: s.rows }, (_, i) => i + 1).find((r) =>
-        norm(cell(r, labelCol).value).startsWith('Забележки'),
-      ) ?? s.rows)
-    : 54;
-  for (let row = 8; row < limit; row++) {
+  const registered = budgetSourceCells[w.sha256];
+  if (
+    !registered ||
+    registered.file !== filename ||
+    registered.scope !== scope ||
+    registered.year !== year ||
+    registered.period !== period
+  )
+    throw new Error('Unregistered budget source positions');
+  for (const row of registered.rows) {
     const label = norm(cell(row, labelCol).value);
-    if (
-      !label ||
-      (!columns.some((_, i) => cell(row, labelCol + 1 + i).type === 'number') &&
-        !(state && row >= 11 && row <= (year === 2025 ? 19 : 18)))
-    )
-      continue;
+    if (!label) throw new Error('Missing budget row label');
     const source = columns.map((_, i) => {
       const c = cell(row, labelCol + 1 + i);
-      if (c.value === null || c.value === '') {
-        if (c.formula) throw new Error('Missing formula cache');
+      const blank = registered.blanks.some(
+        (entry) => entry.row === row && entry.column === c.address.replace(/\d+$/, ''),
+      );
+      if (c.formula && (c.value === null || c.value === '' || c.cache === 'missing'))
+        throw new Error('Missing formula cache');
+      if (blank) {
+        if (c.value !== null || c.formula || !['blank', 'missing'].includes(c.type))
+          throw new Error('Registered blank budget cell changed');
         return null;
       }
       if (
@@ -169,7 +175,7 @@ export function parseBudgetTable(w: Workbook, filename: string): BudgetTable {
           throw new Error('Partial identity ' + id);
         continue;
       }
-      // Empty printed components denote no entry; retain null in the published cells.
+      // Only the registered physical blanks denote no entry.
       const sum = terms.reduce(
         (n, [r, sign]) => n + sign * (rows.find((x) => x.row === r)?.source[c] ?? 0),
         0,

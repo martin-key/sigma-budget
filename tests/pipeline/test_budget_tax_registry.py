@@ -60,3 +60,33 @@ class BudgetTableContracts(unittest.TestCase):
                 bad = copy.deepcopy(doc)
                 bad['schema'] = 'unknown'
                 self.assertTrue(g_numbers(SimpleNamespace(get=lambda _: bad)).problems)
+
+    def test_exact_registered_null_positions_and_changed_pins(self):
+        import copy
+        import json
+        from pathlib import Path
+        from budget_pipeline.validate.budget_tables import valid_budget_tables, SOURCE_CELLS
+        root = Path(__file__).resolve().parents[2]
+        total = law = 0
+        for name in ('state-budget.json', 'kfp-subsectors.json'):
+            doc = json.loads((root / 'data/release' / name).read_text())
+            for t in doc['tables']:
+                reg = SOURCE_CELLS[t['sha256']]
+                allowed = {(p['row'], p['column']) for p in reg['blanks']}
+                for row in t['rows']:
+                    for c, value in enumerate(row['source']):
+                        self.assertEqual(value is None, (row['row'], reg['columns'][c]) in allowed)
+                        if value is None:
+                            total += 1
+                            law += t['scope'] == 'state' and t['year'] == 2026 and t['period'] <= 6 and c == 0
+                            continue
+                        original_eur = row['eur'][c]
+                        row['source'][c] = row['eur'][c] = None
+                        self.assertFalse(valid_budget_tables(doc), (name, t['file'], row['row'], c))
+                        row['source'][c], row['eur'][c] = value, original_eur
+                if allowed:
+                    pin = t['sha256']
+                    t['sha256'] = '0' * 64
+                    self.assertFalse(valid_budget_tables(doc))
+                    t['sha256'] = pin
+        self.assertEqual((total, law, total-law), (394, 300, 94))

@@ -1,3 +1,4 @@
+import { budgetSourceCells } from './budget-source-cells.js';
 import { record, string, number, array, shape, literal, metaGuard, type Json } from './guards.js';
 const amount = (v: unknown): v is number | null => v === null || number(v);
 const integer = (v: unknown): v is number => number(v) && Number.isSafeInteger(v);
@@ -74,7 +75,8 @@ export function budgetTablesGuard(v: unknown): v is Record<string, Json> {
     const key = `${t.scope}/${t.year}/${t.period}`;
     if (keys.has(key)) return false;
     keys.add(key);
-    if (!t.columns.every(column) || !t.rows.every(row) || !Object.values(t.checks).every(integer))
+    const rows = t.rows;
+    if (!t.columns.every(column) || !rows.every(row) || !Object.values(t.checks).every(integer))
       return false;
     const requiredRows = monthly
       ? Array.from({ length: t.year === 2025 ? 11 : 10 }, (_, i) => i + 9)
@@ -84,7 +86,7 @@ export function budgetTablesGuard(v: unknown): v is Record<string, Json> {
         ];
     if (!monthly && t.scope !== 'consolidated') requiredRows.push(44);
     if (
-      new Set(t.rows.map((r) => r.row)).size !== t.rows.length ||
+      new Set(rows.map((r) => r.row)).size !== t.rows.length ||
       !requiredRows.every((n) => t.rows.some((r) => row(r) && r.row === n))
     )
       return false;
@@ -96,12 +98,27 @@ export function budgetTablesGuard(v: unknown): v is Record<string, Json> {
       )
         return false;
     }
-    for (const r of t.rows) {
+    const registered = budgetSourceCells[t.sha256];
+    if (
+      !registered ||
+      registered.file !== t.file ||
+      registered.scope !== t.scope ||
+      registered.year !== t.year ||
+      registered.period !== t.period ||
+      registered.rows.length !== t.rows.length ||
+      !registered.rows.every((n) => rows.some((r) => r.row === n))
+    )
+      return false;
+    for (const r of rows) {
       if (!row(r) || r.source.length !== t.columns.length || r.eur.length !== t.columns.length)
         return false;
       for (let c = 0; c < r.source.length; c++) {
         const source = r.source[c],
           value = r.eur[c];
+        const blank = registered.blanks.some(
+          (cell) => cell.row === r.row && cell.column === registered.columns[c],
+        );
+        if (blank !== (source === null)) return false;
         if (
           source === null
             ? value !== null

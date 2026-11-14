@@ -240,3 +240,58 @@ it('binds the transfer residual to all four original hashes and complete source 
   central.rows = central.rows.filter((r) => r.row !== 44);
   expect(() => assertConsolidation(q)).toThrow('transfer row missing');
 });
+
+it('rejects blanking every originally numeric monthly and quarterly cell, including zero C11', () => {
+  for (const t of tables) {
+    const x = acquisition.files.find((f: any) => f.sha256 === t.sha256);
+    const w = readWorkbook({ path: join(root, x.path), sha256: t.sha256, format: 'xls' });
+    const sheet = w.sheets[t.sheet]!;
+    const offset = t.scope === 'state' || t.scope === 'social' ? 2 : 1;
+    for (const r of t.rows)
+      for (let c = 0; c < t.columns.length; c++) {
+        if (r.source[c] === null) continue;
+        const address = String.fromCharCode(65 + offset + c) + r.row;
+        const original = sheet.cells[address]!;
+        sheet.cells[address] = {
+          ...original,
+          type: 'blank',
+          value: null,
+          formula: undefined,
+          cache: 'not-formula',
+        };
+        expect(() => parseBudgetTable(w, t.file), `${t.file}/${address}`).toThrow(
+          'Non-numeric budget cell',
+        );
+        sheet.cells[address] = original;
+      }
+  }
+}, 30_000);
+
+it('accepts registered blanks only without a value or formula and under their original SHA', () => {
+  for (const t of tables.filter((t) => t.rows.some((r) => r.source.includes(null)))) {
+    const x = acquisition.files.find((f: any) => f.sha256 === t.sha256);
+    const w = readWorkbook({ path: join(root, x.path), sha256: t.sha256, format: 'xls' });
+    const r = t.rows.find((r) => r.source.includes(null))!;
+    const c = r.source.indexOf(null);
+    const address =
+      String.fromCharCode(65 + (t.scope === 'state' || t.scope === 'social' ? 2 : 1) + c) + r.row;
+    const sheet = w.sheets[t.sheet]!;
+    const original = sheet.cells[address];
+    const empty = {
+      address,
+      row: r.row - 1,
+      column: address.charCodeAt(0) - 65,
+      type: 'blank' as const,
+      value: null,
+      cache: 'not-formula' as const,
+    };
+    sheet.cells[address] = { ...(original ?? empty), formula: 'SUM(A1:A2)', cache: 'missing' };
+    expect(() => parseBudgetTable(w, t.file)).toThrow('Missing formula cache');
+    sheet.cells[address] = { ...empty, type: 'text', value: '' };
+    expect(() => parseBudgetTable(w, t.file)).toThrow('Registered blank budget cell changed');
+    if (original) sheet.cells[address] = original;
+    else delete sheet.cells[address];
+    w.sha256 = '0'.repeat(64);
+    expect(() => parseBudgetTable(w, t.file)).toThrow('Unregistered budget source positions');
+  }
+});

@@ -1,6 +1,10 @@
 """Strict envelopes for the additional published monthly and quarterly budget contracts."""
 import math
 import re
+import json
+from pathlib import Path
+
+SOURCE_CELLS = json.loads((Path(__file__).resolve().parents[3] / "packages/dataset-schema/src/budget-source-cells.json").read_text())["tables"]
 
 
 def valid_budget_tables(doc, filename=None):
@@ -53,6 +57,10 @@ def valid_budget_tables(doc, filename=None):
             unit = 'BGN' if year < 2026 or (monthly and index == 0 and period <= 6) else 'EUR'
             if col.get('id') != expected_id or col.get('unit') != unit:
                 return False
+        registered = SOURCE_CELLS.get(t['sha256'])
+        if not registered or any(registered[k] != t.get(k) for k in ('file', 'scope', 'year', 'period')) or len(registered['rows']) != len(rows) or set(registered['rows']) != set(row_ids):
+            return False
+        blanks = {(cell['row'], cell['column']) for cell in registered['blanks']}
         for row in rows:
             if not isinstance(row, dict) or type(row.get('row')) is not int or not isinstance(row.get('label'), str):
                 return False
@@ -60,6 +68,8 @@ def valid_budget_tables(doc, filename=None):
             if not isinstance(source, list) or not isinstance(eur, list) or len(source) != len(columns) or len(eur) != len(columns):
                 return False
             for index, (a, b) in enumerate(zip(source, eur)):
+                if ((row['row'], registered['columns'][index]) in blanks) != (a is None):
+                    return False
                 if a is None:
                     if b is not None:
                         return False
