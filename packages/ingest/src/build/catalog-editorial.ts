@@ -148,11 +148,14 @@ export function catalogEditorial(input: CatalogEditorialInput): {
       formatMoney(number(outlook.kfp.expenditure.mln[index])),
     ]),
     {
-      ...substitute(trap.get('access'), accessValues(trap.get('access'), [
-        listAnd(blocked),
-        formatDate(bad[0]!.checked, true),
-        monthName(input.execution.latest.month),
-      ])),
+      ...substitute(
+        trap.get('access'),
+        accessValues(trap.get('access'), [
+          listAnd(blocked),
+          formatDate(bad[0]!.checked, true),
+          monthName(input.execution.latest.month),
+        ]),
+      ),
       evidence: probes,
     },
     substitute(trap.get('two-versions'), [

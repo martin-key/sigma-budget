@@ -53,7 +53,8 @@ export function editorialSiteName(input: { source?: { footer?: unknown } }): str
 }
 
 export function buildRss(feed: RssFeed, base: string, buildDate: string, siteName: string): string {
-  if (typeof siteName !== 'string' || !siteName.trim()) throw new Error('Missing RSS site identity');
+  if (typeof siteName !== 'string' || !siteName.trim())
+    throw new Error('Missing RSS site identity');
   base = base.endsWith('/') ? base : base + '/';
   const labels = new Map(feed.kinds.map((kind) => [kind.id, kind.label]));
   const lines = [

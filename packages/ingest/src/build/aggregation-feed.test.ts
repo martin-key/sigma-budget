@@ -39,9 +39,11 @@ describe('feed from frozen donor inputs', () => {
     input.law.timeline[0]!.title = 'Промяна & <данни>';
     input.sebra.overall.count++;
     input.rates.meta.asOf = '2026-08-13';
-    input.annualUpdated='2026-10-22T11:00:00+0200'; input.debt.latest.maastricht.asOf='2026-10-22';
-    input.quarterUpdated='2026-10-23T11:00:00+0200'; input.debt.latest.maastricht.quarter.asOf='2026-10-23';
-    input.cofogUpdated='2026-09-17T23:00:00+0200';
+    input.annualUpdated = '2026-10-22T11:00:00+0200';
+    input.debt.latest.maastricht.asOf = '2026-10-22';
+    input.quarterUpdated = '2026-10-23T11:00:00+0200';
+    input.debt.latest.maastricht.quarter.asOf = '2026-10-23';
+    input.cofogUpdated = '2026-09-17T23:00:00+0200';
     const actual = buildFeed(input);
     expect(actual.feed).toEqual(read('mutants/feed-changed.json'));
     expect(actual.rss).toBe(text('mutants/feed-changed.xml'));
@@ -82,12 +84,16 @@ describe('feed from frozen donor inputs', () => {
 it('uses the current editorial identity without changing feed events or other RSS bytes', () => {
   const input = make();
   const historical = buildFeed(input);
-  const current = JSON.parse(readFileSync(resolve(import.meta.dirname, '../../../../data/inputs/glossary.json'), 'utf8'));
+  const current = JSON.parse(
+    readFileSync(resolve(import.meta.dirname, '../../../../data/inputs/glossary.json'), 'utf8'),
+  );
   input.siteName = editorialSiteName(current);
   const actual = buildFeed(input);
   expect(actual.feed).toEqual(historical.feed);
-  expect(actual.rss).toBe(historical.rss.replace(
-    '<title>Бюджет на светло: какво е ново</title>',
-    '<title>СИГМА Бюджет: какво е ново</title>',
-  ));
+  expect(actual.rss).toBe(
+    historical.rss.replace(
+      '<title>Бюджет на светло: какво е ново</title>',
+      '<title>СИГМА Бюджет: какво е ново</title>',
+    ),
+  );
 });

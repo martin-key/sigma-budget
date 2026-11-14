@@ -13,7 +13,11 @@ function decimalNumber(s: string, field = 'number'): number {
   const token = s.trim();
   // Python float accepts decimal/exponent spellings and digit separators,
   // but not JavaScript's empty, hexadecimal, binary or octal number strings.
-  if (!/^[+-]?(?:\d(?:_?\d)*(?:\.(?:\d(?:_?\d)*)?)?|\.\d(?:_?\d)*)(?:[eE][+-]?\d(?:_?\d)*)?$/.test(token))
+  if (
+    !/^[+-]?(?:\d(?:_?\d)*(?:\.(?:\d(?:_?\d)*)?)?|\.\d(?:_?\d)*)(?:[eE][+-]?\d(?:_?\d)*)?$/.test(
+      token,
+    )
+  )
     throw new Error(`invalid ${field} ${s}`);
   const value = Number(token.replaceAll('_', ''));
   if (!Number.isFinite(value)) throw new Error(`invalid ${field} ${s}`);
