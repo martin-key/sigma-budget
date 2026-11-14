@@ -405,5 +405,5 @@ export function render(ctx: NarrativeContext) {
       {feedBlock(M)}
       {rssBlock(M)}
     </>
-  ); // V7: the sample subscription form (subscribeBlock) is out: it sent nothing, and RSS is the real channel
+  );
 }
