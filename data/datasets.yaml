@@ -595,25 +595,13 @@ datasets:
   checked: '2026-11-05'
   limitations:
   - 'after catalog: the v5 wording and removals and catalog_refresh.py (layers)'
-- id: p01
-  catalogId: P01
-  title: Изпълнение по видове данъци
-  status: pending
-  files: []
-  reason: Месечният отчет на МФ дава само общата сума на данъчните приходи. Разбивката по видове данъци (ДДС, ДДФЛ, корпоративен данък, акцизи) не е включена в портала.
-  expected: Месечен бюлетин за изпълнението на КФП, minfin.bg
-  sources:
-  - minfin
-  screens:
-  - S06
-  - S15
 - id: p02
   catalogId: P02
-  title: Месечно изпълнение по съставни бюджети (държавен бюджет, ДОО, НЗОК, общини)
+  title: Месечни данни за ДОО, НЗОК и общините
   status: pending
   files: []
-  reason: Месечните отчети в портала обхващат консолидираната програма, националния бюджет и европейските средства. Месечна разбивка на националния бюджет по съставни бюджети не е включена.
-  expected: Отделни таблици към месечната информация за КФП, minfin.bg
+  reason: 'Месечни сборове за социалноосигурителните фондове и общините се публикуват в месечния бюджетен бюлетин на МФ (PDF). Месечна серия по съставни бюджети за ДОО, НЗОК и общините не е включена в това издание. Порталът представя държавния бюджет месечно, а подсекторите — тримесечно. За централното правителство през 2025 г. връзката на МФ предоставя таблицата за 2024 г.; данни за 2025 г. не са включени.'
+  expected: Месечен бюджетен бюлетин на МФ (PDF), https://www.minfin.bg/bg/statistics/12
   sources:
   - minfin
   screens:
@@ -773,3 +761,41 @@ datasets:
   rebuild: python -m budget_pipeline.build.rebuild
   limitations:
   - Цените са исторически справки; изчисленията са сценарий. Без LPG и периоди преди 01.08.2026.
+
+- id: state-budget
+  catalogId: D36
+  title: 'Държавен бюджет: месечни данъци и изпълнение'
+  status: real
+  files:
+  - data/release/state-budget.json
+  producer: packages/ingest/src/production/taxes.ts
+  inputs:
+  - state-budget
+  schema: docs/data-spec.md
+  screens: [S06, S15, S35]
+  period: 2025–2026
+  scope: 'държавен бюджет'
+  unit: млн. €
+  rebuild: ./budget build
+  checked: '2026-11-14'
+  limitations:
+  - 'Празните клетки са запазени според оригиналите; точните разлики в сборовете са описани и обвързани с SHA-256 на източника.'
+
+- id: kfp-subsectors
+  catalogId: D37
+  title: 'КФП по подсектори: тримесечни данъци и изпълнение'
+  status: real
+  files:
+  - data/release/kfp-subsectors.json
+  producer: packages/ingest/src/production/taxes.ts
+  inputs:
+  - kfp-subsectors
+  schema: docs/data-spec.md
+  screens: [S06, S15, S35]
+  period: 2024–2026
+  scope: 'КФП, централно правителство, социалноосигурителни фондове и местни власти'
+  unit: млн. €
+  rebuild: ./budget build
+  checked: '2026-11-14'
+  limitations:
+  - 'Празните клетки са запазени според оригиналите; точните разлики в сборовете са описани и обвързани с SHA-256 на източника.'

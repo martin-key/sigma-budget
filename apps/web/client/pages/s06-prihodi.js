@@ -1,3 +1,4 @@
+import { budgetExecution } from '../ui/budget-execution.js';
 import { annualSource } from '../ui/annual-source.js';
 import { periodIndex, previousPeriodIndex } from '../annual.js';
 import { selectPeriod } from '../periods.js';
@@ -24,7 +25,15 @@ import { apportion } from '../calc.js';
 import { yIndex, change, chartUnit, moneyCol, amount, periodStatus } from '../view.js';
 import { num, pct, money, delta, date, DASH, NBSP } from '../format.js';
 
-export const needs = ['budget2027-provenance?', 'core', 'outlook', 'revenue', 'glossary?'];
+export const needs = [
+  'budget2027-provenance?',
+  'core',
+  'outlook',
+  'revenue',
+  'glossary?',
+  'state-budget?',
+  'kfp-subsectors?',
+];
 export const styles = ['s06-prihodi'];
 
 const yr = (y) => `${y}${NBSP}г.`;
@@ -745,7 +754,7 @@ export function render(ctx) {
     context: 'Консолидирана фискална програма (КФП): приходи, помощи и дарения',
     body: html`${explorer(ctx, 'prihodi')}${stripBlock(ctx, m)}
       ${unitSwitch(ctx, { name: 's06-unit', note: 'Важи за числата и графиките.' })}
-      ${kpiBlock(ctx, m)}${viewsBlock(ctx, m)}${sourcesBlock(ctx, m, sel)}${execPointer(ctx)}${notesBlock(ctx, m)}`,
+      ${kpiBlock(ctx, m)}${viewsBlock(ctx, m)}${sourcesBlock(ctx, m, sel)}${execPointer(ctx)}${notesBlock(ctx, m)}${budgetExecution(ctx)}`,
   };
 }
 

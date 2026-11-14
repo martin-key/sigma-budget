@@ -1,0 +1,28 @@
+{
+  "5f9db748541b58cdada60d1080f3ea87b9793782e854e5dff272d5bbd04b74d0": {
+    "year": 2024,
+    "sources": {
+      "central": "7a6ce34861b972ff5f30ec33772504b47bfc85ac4efa34c82043ee8f63d3d31b",
+      "social": "a94f48f209ff5f42fccfbef4f7e67911158c62c137f2329e54bd9c8656027784",
+      "local": "9160ed01667465c5c08644ac528f5f440d4f3c8a86d5a9b94e7a65d025d21404"
+    },
+    "differences": {
+      "net-transfers/Q1": 110,
+      "net-transfers/Q2": -20,
+      "net-transfers/Q3": -10,
+      "net-transfers/Q4": -50
+    }
+  },
+  "43be8d83f07871a85902276403915d81334b9d3d6a6300f1525121ed1e87b2f5": {
+    "year": 2026,
+    "sources": {
+      "central": "d223dccc3f363bf04e61c79c52f418d762c0b7da6f3fd8ba8274fe2b6d644fa8",
+      "social": "b280af2d2e506d31729ad290c977434001787fd1a150b2525496863e24b54cff",
+      "local": "58f4af0f8f4ea708ffc428810fe8b2a7eee91d282f25c07602e7769422dde736"
+    },
+    "differences": {
+      "net-transfers/Q1": 50,
+      "net-transfers/Q2": -10
+    }
+  }
+}

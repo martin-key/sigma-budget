@@ -1,3 +1,4 @@
+import { isPublishedDataset } from '@sigma-budget/dataset-schema';
 /** Independent ports of the Python CORE and CATALOG validation groups. */
 import { readFileSync } from 'node:fs';
 import { Check, fmt, gzipSize, isnum, pyRepr as baseRepr, pyTruth } from './checks.js';
@@ -476,7 +477,12 @@ export function core(ctx: Context): Check {
     equal(
       iterable(pending, kind(pending, core, 'pending')).sort(),
       Array.from({ length: 7 }, (_, i) => `P0${i + 1}`).filter(
-        (id) => id !== 'P05' || !Object.hasOwn(ctx.get('execution.json').data, '2022'),
+        (id) =>
+          (id !== 'P05' || !Object.hasOwn(ctx.get('execution.json').data, '2022')) &&
+          (id !== 'P01' ||
+            !['state-budget.json', 'kfp-subsectors.json'].every(
+              (name) => ctx.exists(name) && isPublishedDataset(name, ctx.get(name)),
+            )),
       ),
     ),
     `pending ids ${pyRepr(iterable(pending, kind(pending, core, 'pending')).sort())}`,

@@ -1,0 +1,2011 @@
+{
+  "schema": "budget-source-cells/1",
+  "tables": {
+    "ca9f67eb77122bb321b8db9ebf649cb16667e4b7efeee002c232cfc00cacf8d5": {
+      "file": "State_Bud_01-25_BG.xls",
+      "scope": "state",
+      "year": 2025,
+      "period": 1,
+      "columns": ["C", "D"],
+      "rows": [
+        9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 25, 26, 27, 28, 29, 30, 32, 33,
+        34, 35, 36, 37, 38, 39, 40, 41, 45, 46, 47, 48, 49, 50, 52, 53, 54, 55, 58, 60, 62, 63, 64,
+        67, 68, 72, 73, 74
+      ],
+      "blanks": [
+        {
+          "row": 18,
+          "column": "C"
+        },
+        {
+          "row": 18,
+          "column": "D"
+        },
+        {
+          "row": 41,
+          "column": "D"
+        },
+        {
+          "row": 54,
+          "column": "C"
+        },
+        {
+          "row": 64,
+          "column": "C"
+        },
+        {
+          "row": 67,
+          "column": "C"
+        },
+        {
+          "row": 74,
+          "column": "C"
+        }
+      ]
+    },
+    "199d80e2e8c1f5e473a047af09466a55c8bbe48dbf2e6f3c23efc424070df093": {
+      "file": "State_Bud_02-25_BG.xls",
+      "scope": "state",
+      "year": 2025,
+      "period": 2,
+      "columns": ["C", "D"],
+      "rows": [
+        9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 25, 26, 27, 28, 29, 30, 32, 33,
+        34, 35, 36, 37, 38, 39, 40, 41, 45, 46, 47, 48, 49, 50, 52, 53, 54, 55, 58, 60, 62, 63, 64,
+        67, 68, 72, 73, 74
+      ],
+      "blanks": [
+        {
+          "row": 18,
+          "column": "C"
+        },
+        {
+          "row": 18,
+          "column": "D"
+        },
+        {
+          "row": 41,
+          "column": "D"
+        },
+        {
+          "row": 54,
+          "column": "C"
+        },
+        {
+          "row": 64,
+          "column": "C"
+        },
+        {
+          "row": 67,
+          "column": "C"
+        },
+        {
+          "row": 74,
+          "column": "C"
+        }
+      ]
+    },
+    "08967a9b6c171520b945826d15cefd6f6147b51e63d70313b52915ecadac5772": {
+      "file": "State_Bud_03-25_BG.xls",
+      "scope": "state",
+      "year": 2025,
+      "period": 3,
+      "columns": ["C", "D"],
+      "rows": [
+        9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 25, 26, 27, 28, 29, 30, 32, 33,
+        34, 35, 36, 37, 38, 39, 40, 41, 45, 46, 47, 48, 49, 50, 52, 53, 54, 55, 58, 60, 62, 63, 64,
+        67, 68, 72, 73, 74
+      ],
+      "blanks": [
+        {
+          "row": 18,
+          "column": "C"
+        },
+        {
+          "row": 18,
+          "column": "D"
+        },
+        {
+          "row": 41,
+          "column": "D"
+        },
+        {
+          "row": 54,
+          "column": "C"
+        },
+        {
+          "row": 64,
+          "column": "C"
+        },
+        {
+          "row": 67,
+          "column": "C"
+        },
+        {
+          "row": 74,
+          "column": "C"
+        }
+      ]
+    },
+    "b8f2954ac65a6c02af9f82eb4f34b3a2c52dd675fb337fb29fde93483f078ec4": {
+      "file": "State__Bud_04-BG1NEW.XLS",
+      "scope": "state",
+      "year": 2025,
+      "period": 4,
+      "columns": ["C", "D"],
+      "rows": [
+        9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 25, 26, 27, 28, 29, 30, 32, 33,
+        34, 35, 36, 37, 38, 39, 40, 41, 45, 46, 47, 48, 49, 50, 52, 53, 54, 55, 58, 60, 62, 63, 64,
+        67, 68, 72, 73, 74
+      ],
+      "blanks": [
+        {
+          "row": 18,
+          "column": "C"
+        },
+        {
+          "row": 18,
+          "column": "D"
+        },
+        {
+          "row": 41,
+          "column": "D"
+        },
+        {
+          "row": 54,
+          "column": "C"
+        },
+        {
+          "row": 64,
+          "column": "C"
+        },
+        {
+          "row": 67,
+          "column": "C"
+        },
+        {
+          "row": 74,
+          "column": "C"
+        }
+      ]
+    },
+    "1b6f25b822850071f0eb9c6e0a910009df51edc902747a69d19ad368450854cc": {
+      "file": "State_Bud_05-25_BG.xls",
+      "scope": "state",
+      "year": 2025,
+      "period": 5,
+      "columns": ["C", "D"],
+      "rows": [
+        9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 25, 26, 27, 28, 29, 30, 32, 33,
+        34, 35, 36, 37, 38, 39, 40, 41, 45, 46, 47, 48, 49, 50, 52, 53, 54, 55, 58, 60, 62, 63, 64,
+        67, 68, 72, 73, 74
+      ],
+      "blanks": [
+        {
+          "row": 18,
+          "column": "C"
+        },
+        {
+          "row": 18,
+          "column": "D"
+        },
+        {
+          "row": 41,
+          "column": "D"
+        },
+        {
+          "row": 54,
+          "column": "C"
+        },
+        {
+          "row": 64,
+          "column": "C"
+        },
+        {
+          "row": 67,
+          "column": "C"
+        },
+        {
+          "row": 74,
+          "column": "C"
+        }
+      ]
+    },
+    "c6e2bf8adc4e8ee030e0911828e17046f7a6636ca51327ed034f267e4c8cde81": {
+      "file": "State_Bud_06-25_BG.xls",
+      "scope": "state",
+      "year": 2025,
+      "period": 6,
+      "columns": ["C", "D"],
+      "rows": [
+        9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 25, 26, 27, 28, 29, 30, 32, 33,
+        34, 35, 36, 37, 38, 39, 40, 41, 45, 46, 47, 48, 49, 50, 52, 53, 54, 55, 58, 60, 62, 63, 64,
+        67, 68, 72, 73, 74
+      ],
+      "blanks": [
+        {
+          "row": 18,
+          "column": "C"
+        },
+        {
+          "row": 18,
+          "column": "D"
+        },
+        {
+          "row": 41,
+          "column": "D"
+        },
+        {
+          "row": 54,
+          "column": "C"
+        },
+        {
+          "row": 64,
+          "column": "C"
+        },
+        {
+          "row": 67,
+          "column": "C"
+        },
+        {
+          "row": 74,
+          "column": "C"
+        }
+      ]
+    },
+    "c70f36e590e8a0c9d1f28414878a8d8ddb9fc164f6bfd68dda719259b0ec8ecf": {
+      "file": "State_Bud_07-25_BG.xls",
+      "scope": "state",
+      "year": 2025,
+      "period": 7,
+      "columns": ["C", "D"],
+      "rows": [
+        9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 25, 26, 27, 28, 29, 30, 32, 33,
+        34, 35, 36, 37, 38, 39, 40, 41, 45, 46, 47, 48, 49, 50, 52, 53, 54, 55, 58, 60, 62, 63, 64,
+        67, 68, 72, 73, 74
+      ],
+      "blanks": [
+        {
+          "row": 18,
+          "column": "C"
+        },
+        {
+          "row": 18,
+          "column": "D"
+        },
+        {
+          "row": 41,
+          "column": "D"
+        },
+        {
+          "row": 54,
+          "column": "C"
+        },
+        {
+          "row": 64,
+          "column": "C"
+        },
+        {
+          "row": 67,
+          "column": "C"
+        },
+        {
+          "row": 74,
+          "column": "C"
+        }
+      ]
+    },
+    "0b3bfb5e90a161904df1ea9113cfd393a34f92bd0d25cb9010deeb845357c1ef": {
+      "file": "State_Bud_08-25_BG.xls",
+      "scope": "state",
+      "year": 2025,
+      "period": 8,
+      "columns": ["C", "D"],
+      "rows": [
+        9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 25, 26, 27, 28, 29, 30, 32, 33,
+        34, 35, 36, 37, 38, 39, 40, 41, 45, 46, 47, 48, 49, 50, 52, 53, 54, 55, 58, 60, 62, 63, 64,
+        67, 68, 72, 73, 74
+      ],
+      "blanks": [
+        {
+          "row": 18,
+          "column": "C"
+        },
+        {
+          "row": 18,
+          "column": "D"
+        },
+        {
+          "row": 41,
+          "column": "D"
+        },
+        {
+          "row": 54,
+          "column": "C"
+        },
+        {
+          "row": 64,
+          "column": "C"
+        },
+        {
+          "row": 67,
+          "column": "C"
+        },
+        {
+          "row": 74,
+          "column": "C"
+        }
+      ]
+    },
+    "651d9f3f5704339a90300dc060b07b240fce056ac5d3bd9a6b7a261c7558971a": {
+      "file": "State_Bud_09-25_BG.xls",
+      "scope": "state",
+      "year": 2025,
+      "period": 9,
+      "columns": ["C", "D"],
+      "rows": [
+        9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 25, 26, 27, 28, 29, 30, 32, 33,
+        34, 35, 36, 37, 38, 39, 40, 41, 45, 46, 47, 48, 49, 50, 52, 53, 54, 55, 58, 60, 62, 63, 64,
+        67, 68, 72, 73, 74
+      ],
+      "blanks": [
+        {
+          "row": 18,
+          "column": "C"
+        },
+        {
+          "row": 18,
+          "column": "D"
+        },
+        {
+          "row": 41,
+          "column": "D"
+        },
+        {
+          "row": 54,
+          "column": "C"
+        },
+        {
+          "row": 64,
+          "column": "C"
+        },
+        {
+          "row": 67,
+          "column": "C"
+        },
+        {
+          "row": 74,
+          "column": "C"
+        }
+      ]
+    },
+    "c8aeca06b8f196d1b94a3e9f4c662a9bf0ee88d33585271818a7a8d661bc2233": {
+      "file": "State_Bud_10-25_BG.xls",
+      "scope": "state",
+      "year": 2025,
+      "period": 10,
+      "columns": ["C", "D"],
+      "rows": [
+        9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 25, 26, 27, 28, 29, 30, 32, 33,
+        34, 35, 36, 37, 38, 39, 40, 41, 45, 46, 47, 48, 49, 50, 52, 53, 54, 55, 58, 60, 62, 63, 64,
+        67, 68, 72, 73, 74
+      ],
+      "blanks": [
+        {
+          "row": 18,
+          "column": "C"
+        },
+        {
+          "row": 18,
+          "column": "D"
+        },
+        {
+          "row": 41,
+          "column": "D"
+        },
+        {
+          "row": 54,
+          "column": "C"
+        },
+        {
+          "row": 64,
+          "column": "C"
+        },
+        {
+          "row": 67,
+          "column": "C"
+        },
+        {
+          "row": 74,
+          "column": "C"
+        }
+      ]
+    },
+    "4817245963f8b539376ba444fe66dcd396bf829f51407edcac2486b2ee3bf69b": {
+      "file": "State_Bud_11-25_BG.xls",
+      "scope": "state",
+      "year": 2025,
+      "period": 11,
+      "columns": ["C", "D"],
+      "rows": [
+        9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 25, 26, 27, 28, 29, 30, 32, 33,
+        34, 35, 36, 37, 38, 39, 40, 41, 45, 46, 47, 48, 49, 50, 52, 53, 54, 55, 58, 60, 62, 63, 64,
+        67, 68, 72, 73, 74
+      ],
+      "blanks": [
+        {
+          "row": 18,
+          "column": "C"
+        },
+        {
+          "row": 18,
+          "column": "D"
+        },
+        {
+          "row": 41,
+          "column": "D"
+        },
+        {
+          "row": 54,
+          "column": "C"
+        },
+        {
+          "row": 64,
+          "column": "C"
+        },
+        {
+          "row": 67,
+          "column": "C"
+        },
+        {
+          "row": 74,
+          "column": "C"
+        }
+      ]
+    },
+    "8c1b609455875bd469e675f6fcfed08b802262aa409cf3871dbb4509f8b06cac": {
+      "file": "State_Bud_12-25_BG.xls",
+      "scope": "state",
+      "year": 2025,
+      "period": 12,
+      "columns": ["C", "D"],
+      "rows": [
+        9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 25, 26, 27, 28, 29, 30, 32, 33,
+        34, 35, 36, 37, 38, 39, 41, 42, 45, 46, 47, 48, 49, 50, 52, 53, 54, 55, 58, 60, 62, 63, 64,
+        67, 68, 69, 70, 72, 73, 74
+      ],
+      "blanks": [
+        {
+          "row": 18,
+          "column": "C"
+        },
+        {
+          "row": 18,
+          "column": "D"
+        },
+        {
+          "row": 42,
+          "column": "D"
+        },
+        {
+          "row": 54,
+          "column": "C"
+        },
+        {
+          "row": 64,
+          "column": "C"
+        },
+        {
+          "row": 67,
+          "column": "C"
+        },
+        {
+          "row": 69,
+          "column": "C"
+        },
+        {
+          "row": 70,
+          "column": "C"
+        },
+        {
+          "row": 74,
+          "column": "C"
+        }
+      ]
+    },
+    "d4c26490cc8fa94b2a04c32edd82e7d8af0c5b0f22269a27322bfa818f7a155b": {
+      "file": "State_Bud_01-26_BG.xls",
+      "scope": "state",
+      "year": 2026,
+      "period": 1,
+      "columns": ["C", "D"],
+      "rows": [
+        9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
+        32, 33, 34, 35, 36, 37, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 52, 54, 56, 57, 58, 61, 62,
+        63, 64, 66, 67
+      ],
+      "blanks": [
+        {
+          "row": 9,
+          "column": "C"
+        },
+        {
+          "row": 10,
+          "column": "C"
+        },
+        {
+          "row": 11,
+          "column": "C"
+        },
+        {
+          "row": 12,
+          "column": "C"
+        },
+        {
+          "row": 13,
+          "column": "C"
+        },
+        {
+          "row": 14,
+          "column": "C"
+        },
+        {
+          "row": 15,
+          "column": "C"
+        },
+        {
+          "row": 16,
+          "column": "C"
+        },
+        {
+          "row": 17,
+          "column": "C"
+        },
+        {
+          "row": 18,
+          "column": "C"
+        },
+        {
+          "row": 19,
+          "column": "C"
+        },
+        {
+          "row": 20,
+          "column": "C"
+        },
+        {
+          "row": 21,
+          "column": "C"
+        },
+        {
+          "row": 22,
+          "column": "C"
+        },
+        {
+          "row": 23,
+          "column": "C"
+        },
+        {
+          "row": 24,
+          "column": "C"
+        },
+        {
+          "row": 25,
+          "column": "C"
+        },
+        {
+          "row": 26,
+          "column": "C"
+        },
+        {
+          "row": 27,
+          "column": "C"
+        },
+        {
+          "row": 28,
+          "column": "C"
+        },
+        {
+          "row": 29,
+          "column": "C"
+        },
+        {
+          "row": 30,
+          "column": "C"
+        },
+        {
+          "row": 31,
+          "column": "C"
+        },
+        {
+          "row": 32,
+          "column": "C"
+        },
+        {
+          "row": 33,
+          "column": "C"
+        },
+        {
+          "row": 34,
+          "column": "C"
+        },
+        {
+          "row": 35,
+          "column": "C"
+        },
+        {
+          "row": 36,
+          "column": "C"
+        },
+        {
+          "row": 37,
+          "column": "C"
+        },
+        {
+          "row": 40,
+          "column": "C"
+        },
+        {
+          "row": 41,
+          "column": "C"
+        },
+        {
+          "row": 42,
+          "column": "C"
+        },
+        {
+          "row": 43,
+          "column": "C"
+        },
+        {
+          "row": 44,
+          "column": "C"
+        },
+        {
+          "row": 45,
+          "column": "C"
+        },
+        {
+          "row": 46,
+          "column": "C"
+        },
+        {
+          "row": 47,
+          "column": "C"
+        },
+        {
+          "row": 48,
+          "column": "C"
+        },
+        {
+          "row": 49,
+          "column": "C"
+        },
+        {
+          "row": 52,
+          "column": "C"
+        },
+        {
+          "row": 54,
+          "column": "C"
+        },
+        {
+          "row": 56,
+          "column": "C"
+        },
+        {
+          "row": 57,
+          "column": "C"
+        },
+        {
+          "row": 58,
+          "column": "C"
+        },
+        {
+          "row": 61,
+          "column": "C"
+        },
+        {
+          "row": 62,
+          "column": "C"
+        },
+        {
+          "row": 63,
+          "column": "C"
+        },
+        {
+          "row": 64,
+          "column": "C"
+        },
+        {
+          "row": 66,
+          "column": "C"
+        },
+        {
+          "row": 67,
+          "column": "C"
+        }
+      ]
+    },
+    "de0938cff5c05cb2f39782f5a844375f89f786ea1a168b36da72bb52ba3fc2a4": {
+      "file": "State_Bud_02-26_BG.xls",
+      "scope": "state",
+      "year": 2026,
+      "period": 2,
+      "columns": ["C", "D"],
+      "rows": [
+        9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
+        32, 33, 34, 35, 36, 37, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 52, 54, 56, 57, 58, 61, 62,
+        63, 64, 66, 67
+      ],
+      "blanks": [
+        {
+          "row": 9,
+          "column": "C"
+        },
+        {
+          "row": 10,
+          "column": "C"
+        },
+        {
+          "row": 11,
+          "column": "C"
+        },
+        {
+          "row": 12,
+          "column": "C"
+        },
+        {
+          "row": 13,
+          "column": "C"
+        },
+        {
+          "row": 14,
+          "column": "C"
+        },
+        {
+          "row": 15,
+          "column": "C"
+        },
+        {
+          "row": 16,
+          "column": "C"
+        },
+        {
+          "row": 17,
+          "column": "C"
+        },
+        {
+          "row": 18,
+          "column": "C"
+        },
+        {
+          "row": 19,
+          "column": "C"
+        },
+        {
+          "row": 20,
+          "column": "C"
+        },
+        {
+          "row": 21,
+          "column": "C"
+        },
+        {
+          "row": 22,
+          "column": "C"
+        },
+        {
+          "row": 23,
+          "column": "C"
+        },
+        {
+          "row": 24,
+          "column": "C"
+        },
+        {
+          "row": 25,
+          "column": "C"
+        },
+        {
+          "row": 26,
+          "column": "C"
+        },
+        {
+          "row": 27,
+          "column": "C"
+        },
+        {
+          "row": 28,
+          "column": "C"
+        },
+        {
+          "row": 29,
+          "column": "C"
+        },
+        {
+          "row": 30,
+          "column": "C"
+        },
+        {
+          "row": 31,
+          "column": "C"
+        },
+        {
+          "row": 32,
+          "column": "C"
+        },
+        {
+          "row": 33,
+          "column": "C"
+        },
+        {
+          "row": 34,
+          "column": "C"
+        },
+        {
+          "row": 35,
+          "column": "C"
+        },
+        {
+          "row": 36,
+          "column": "C"
+        },
+        {
+          "row": 37,
+          "column": "C"
+        },
+        {
+          "row": 40,
+          "column": "C"
+        },
+        {
+          "row": 41,
+          "column": "C"
+        },
+        {
+          "row": 42,
+          "column": "C"
+        },
+        {
+          "row": 43,
+          "column": "C"
+        },
+        {
+          "row": 44,
+          "column": "C"
+        },
+        {
+          "row": 45,
+          "column": "C"
+        },
+        {
+          "row": 46,
+          "column": "C"
+        },
+        {
+          "row": 47,
+          "column": "C"
+        },
+        {
+          "row": 48,
+          "column": "C"
+        },
+        {
+          "row": 49,
+          "column": "C"
+        },
+        {
+          "row": 52,
+          "column": "C"
+        },
+        {
+          "row": 54,
+          "column": "C"
+        },
+        {
+          "row": 56,
+          "column": "C"
+        },
+        {
+          "row": 57,
+          "column": "C"
+        },
+        {
+          "row": 58,
+          "column": "C"
+        },
+        {
+          "row": 61,
+          "column": "C"
+        },
+        {
+          "row": 62,
+          "column": "C"
+        },
+        {
+          "row": 63,
+          "column": "C"
+        },
+        {
+          "row": 64,
+          "column": "C"
+        },
+        {
+          "row": 66,
+          "column": "C"
+        },
+        {
+          "row": 67,
+          "column": "C"
+        }
+      ]
+    },
+    "469669e04d5554406b48d2dd617957a2fd0b51d2ad8cbe21d794f682082ec2d2": {
+      "file": "State_Bud_03-26_BG.xls",
+      "scope": "state",
+      "year": 2026,
+      "period": 3,
+      "columns": ["C", "D"],
+      "rows": [
+        9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
+        32, 33, 34, 35, 36, 37, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 52, 54, 56, 57, 58, 61, 62,
+        63, 64, 66, 67
+      ],
+      "blanks": [
+        {
+          "row": 9,
+          "column": "C"
+        },
+        {
+          "row": 10,
+          "column": "C"
+        },
+        {
+          "row": 11,
+          "column": "C"
+        },
+        {
+          "row": 12,
+          "column": "C"
+        },
+        {
+          "row": 13,
+          "column": "C"
+        },
+        {
+          "row": 14,
+          "column": "C"
+        },
+        {
+          "row": 15,
+          "column": "C"
+        },
+        {
+          "row": 16,
+          "column": "C"
+        },
+        {
+          "row": 17,
+          "column": "C"
+        },
+        {
+          "row": 18,
+          "column": "C"
+        },
+        {
+          "row": 19,
+          "column": "C"
+        },
+        {
+          "row": 20,
+          "column": "C"
+        },
+        {
+          "row": 21,
+          "column": "C"
+        },
+        {
+          "row": 22,
+          "column": "C"
+        },
+        {
+          "row": 23,
+          "column": "C"
+        },
+        {
+          "row": 24,
+          "column": "C"
+        },
+        {
+          "row": 25,
+          "column": "C"
+        },
+        {
+          "row": 26,
+          "column": "C"
+        },
+        {
+          "row": 27,
+          "column": "C"
+        },
+        {
+          "row": 28,
+          "column": "C"
+        },
+        {
+          "row": 29,
+          "column": "C"
+        },
+        {
+          "row": 30,
+          "column": "C"
+        },
+        {
+          "row": 31,
+          "column": "C"
+        },
+        {
+          "row": 32,
+          "column": "C"
+        },
+        {
+          "row": 33,
+          "column": "C"
+        },
+        {
+          "row": 34,
+          "column": "C"
+        },
+        {
+          "row": 35,
+          "column": "C"
+        },
+        {
+          "row": 36,
+          "column": "C"
+        },
+        {
+          "row": 37,
+          "column": "C"
+        },
+        {
+          "row": 40,
+          "column": "C"
+        },
+        {
+          "row": 41,
+          "column": "C"
+        },
+        {
+          "row": 42,
+          "column": "C"
+        },
+        {
+          "row": 43,
+          "column": "C"
+        },
+        {
+          "row": 44,
+          "column": "C"
+        },
+        {
+          "row": 45,
+          "column": "C"
+        },
+        {
+          "row": 46,
+          "column": "C"
+        },
+        {
+          "row": 47,
+          "column": "C"
+        },
+        {
+          "row": 48,
+          "column": "C"
+        },
+        {
+          "row": 49,
+          "column": "C"
+        },
+        {
+          "row": 52,
+          "column": "C"
+        },
+        {
+          "row": 54,
+          "column": "C"
+        },
+        {
+          "row": 56,
+          "column": "C"
+        },
+        {
+          "row": 57,
+          "column": "C"
+        },
+        {
+          "row": 58,
+          "column": "C"
+        },
+        {
+          "row": 61,
+          "column": "C"
+        },
+        {
+          "row": 62,
+          "column": "C"
+        },
+        {
+          "row": 63,
+          "column": "C"
+        },
+        {
+          "row": 64,
+          "column": "C"
+        },
+        {
+          "row": 66,
+          "column": "C"
+        },
+        {
+          "row": 67,
+          "column": "C"
+        }
+      ]
+    },
+    "fde9f33ab86a5e49f8ad4465131c275b28e980750e3fa7d64ec7ac588265424d": {
+      "file": "State_Bud_04-26_BG.xls",
+      "scope": "state",
+      "year": 2026,
+      "period": 4,
+      "columns": ["C", "D"],
+      "rows": [
+        9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
+        32, 33, 34, 35, 36, 37, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 52, 54, 56, 57, 58, 61, 62,
+        63, 64, 66, 67
+      ],
+      "blanks": [
+        {
+          "row": 9,
+          "column": "C"
+        },
+        {
+          "row": 10,
+          "column": "C"
+        },
+        {
+          "row": 11,
+          "column": "C"
+        },
+        {
+          "row": 12,
+          "column": "C"
+        },
+        {
+          "row": 13,
+          "column": "C"
+        },
+        {
+          "row": 14,
+          "column": "C"
+        },
+        {
+          "row": 15,
+          "column": "C"
+        },
+        {
+          "row": 16,
+          "column": "C"
+        },
+        {
+          "row": 17,
+          "column": "C"
+        },
+        {
+          "row": 18,
+          "column": "C"
+        },
+        {
+          "row": 19,
+          "column": "C"
+        },
+        {
+          "row": 20,
+          "column": "C"
+        },
+        {
+          "row": 21,
+          "column": "C"
+        },
+        {
+          "row": 22,
+          "column": "C"
+        },
+        {
+          "row": 23,
+          "column": "C"
+        },
+        {
+          "row": 24,
+          "column": "C"
+        },
+        {
+          "row": 25,
+          "column": "C"
+        },
+        {
+          "row": 26,
+          "column": "C"
+        },
+        {
+          "row": 27,
+          "column": "C"
+        },
+        {
+          "row": 28,
+          "column": "C"
+        },
+        {
+          "row": 29,
+          "column": "C"
+        },
+        {
+          "row": 30,
+          "column": "C"
+        },
+        {
+          "row": 31,
+          "column": "C"
+        },
+        {
+          "row": 32,
+          "column": "C"
+        },
+        {
+          "row": 33,
+          "column": "C"
+        },
+        {
+          "row": 34,
+          "column": "C"
+        },
+        {
+          "row": 35,
+          "column": "C"
+        },
+        {
+          "row": 36,
+          "column": "C"
+        },
+        {
+          "row": 37,
+          "column": "C"
+        },
+        {
+          "row": 40,
+          "column": "C"
+        },
+        {
+          "row": 41,
+          "column": "C"
+        },
+        {
+          "row": 42,
+          "column": "C"
+        },
+        {
+          "row": 43,
+          "column": "C"
+        },
+        {
+          "row": 44,
+          "column": "C"
+        },
+        {
+          "row": 45,
+          "column": "C"
+        },
+        {
+          "row": 46,
+          "column": "C"
+        },
+        {
+          "row": 47,
+          "column": "C"
+        },
+        {
+          "row": 48,
+          "column": "C"
+        },
+        {
+          "row": 49,
+          "column": "C"
+        },
+        {
+          "row": 52,
+          "column": "C"
+        },
+        {
+          "row": 54,
+          "column": "C"
+        },
+        {
+          "row": 56,
+          "column": "C"
+        },
+        {
+          "row": 57,
+          "column": "C"
+        },
+        {
+          "row": 58,
+          "column": "C"
+        },
+        {
+          "row": 61,
+          "column": "C"
+        },
+        {
+          "row": 62,
+          "column": "C"
+        },
+        {
+          "row": 63,
+          "column": "C"
+        },
+        {
+          "row": 64,
+          "column": "C"
+        },
+        {
+          "row": 66,
+          "column": "C"
+        },
+        {
+          "row": 67,
+          "column": "C"
+        }
+      ]
+    },
+    "85431beca2a73598eab916e6583ba423640d0bb4b0bd13125031e87c62317c7e": {
+      "file": "State_Bud_05-26_BG.xls",
+      "scope": "state",
+      "year": 2026,
+      "period": 5,
+      "columns": ["C", "D"],
+      "rows": [
+        9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
+        32, 33, 34, 35, 36, 37, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 52, 54, 56, 57, 58, 61, 62,
+        63, 64, 66, 67
+      ],
+      "blanks": [
+        {
+          "row": 9,
+          "column": "C"
+        },
+        {
+          "row": 10,
+          "column": "C"
+        },
+        {
+          "row": 11,
+          "column": "C"
+        },
+        {
+          "row": 12,
+          "column": "C"
+        },
+        {
+          "row": 13,
+          "column": "C"
+        },
+        {
+          "row": 14,
+          "column": "C"
+        },
+        {
+          "row": 15,
+          "column": "C"
+        },
+        {
+          "row": 16,
+          "column": "C"
+        },
+        {
+          "row": 17,
+          "column": "C"
+        },
+        {
+          "row": 18,
+          "column": "C"
+        },
+        {
+          "row": 19,
+          "column": "C"
+        },
+        {
+          "row": 20,
+          "column": "C"
+        },
+        {
+          "row": 21,
+          "column": "C"
+        },
+        {
+          "row": 22,
+          "column": "C"
+        },
+        {
+          "row": 23,
+          "column": "C"
+        },
+        {
+          "row": 24,
+          "column": "C"
+        },
+        {
+          "row": 25,
+          "column": "C"
+        },
+        {
+          "row": 26,
+          "column": "C"
+        },
+        {
+          "row": 27,
+          "column": "C"
+        },
+        {
+          "row": 28,
+          "column": "C"
+        },
+        {
+          "row": 29,
+          "column": "C"
+        },
+        {
+          "row": 30,
+          "column": "C"
+        },
+        {
+          "row": 31,
+          "column": "C"
+        },
+        {
+          "row": 32,
+          "column": "C"
+        },
+        {
+          "row": 33,
+          "column": "C"
+        },
+        {
+          "row": 34,
+          "column": "C"
+        },
+        {
+          "row": 35,
+          "column": "C"
+        },
+        {
+          "row": 36,
+          "column": "C"
+        },
+        {
+          "row": 37,
+          "column": "C"
+        },
+        {
+          "row": 40,
+          "column": "C"
+        },
+        {
+          "row": 41,
+          "column": "C"
+        },
+        {
+          "row": 42,
+          "column": "C"
+        },
+        {
+          "row": 43,
+          "column": "C"
+        },
+        {
+          "row": 44,
+          "column": "C"
+        },
+        {
+          "row": 45,
+          "column": "C"
+        },
+        {
+          "row": 46,
+          "column": "C"
+        },
+        {
+          "row": 47,
+          "column": "C"
+        },
+        {
+          "row": 48,
+          "column": "C"
+        },
+        {
+          "row": 49,
+          "column": "C"
+        },
+        {
+          "row": 52,
+          "column": "C"
+        },
+        {
+          "row": 54,
+          "column": "C"
+        },
+        {
+          "row": 56,
+          "column": "C"
+        },
+        {
+          "row": 57,
+          "column": "C"
+        },
+        {
+          "row": 58,
+          "column": "C"
+        },
+        {
+          "row": 61,
+          "column": "C"
+        },
+        {
+          "row": 62,
+          "column": "C"
+        },
+        {
+          "row": 63,
+          "column": "C"
+        },
+        {
+          "row": 64,
+          "column": "C"
+        },
+        {
+          "row": 66,
+          "column": "C"
+        },
+        {
+          "row": 67,
+          "column": "C"
+        }
+      ]
+    },
+    "8d9f9b24ae4b74fdbbd5885db495dabb5ff66a0a41cde78ca1ebc4538d2f30bd": {
+      "file": "State_Bud_06-26_BG.xls",
+      "scope": "state",
+      "year": 2026,
+      "period": 6,
+      "columns": ["C", "D"],
+      "rows": [
+        9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
+        32, 33, 34, 35, 36, 37, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 52, 54, 56, 57, 58, 61, 62,
+        63, 64, 66, 67
+      ],
+      "blanks": [
+        {
+          "row": 9,
+          "column": "C"
+        },
+        {
+          "row": 10,
+          "column": "C"
+        },
+        {
+          "row": 11,
+          "column": "C"
+        },
+        {
+          "row": 12,
+          "column": "C"
+        },
+        {
+          "row": 13,
+          "column": "C"
+        },
+        {
+          "row": 14,
+          "column": "C"
+        },
+        {
+          "row": 15,
+          "column": "C"
+        },
+        {
+          "row": 16,
+          "column": "C"
+        },
+        {
+          "row": 17,
+          "column": "C"
+        },
+        {
+          "row": 18,
+          "column": "C"
+        },
+        {
+          "row": 19,
+          "column": "C"
+        },
+        {
+          "row": 20,
+          "column": "C"
+        },
+        {
+          "row": 21,
+          "column": "C"
+        },
+        {
+          "row": 22,
+          "column": "C"
+        },
+        {
+          "row": 23,
+          "column": "C"
+        },
+        {
+          "row": 24,
+          "column": "C"
+        },
+        {
+          "row": 25,
+          "column": "C"
+        },
+        {
+          "row": 26,
+          "column": "C"
+        },
+        {
+          "row": 27,
+          "column": "C"
+        },
+        {
+          "row": 28,
+          "column": "C"
+        },
+        {
+          "row": 29,
+          "column": "C"
+        },
+        {
+          "row": 30,
+          "column": "C"
+        },
+        {
+          "row": 31,
+          "column": "C"
+        },
+        {
+          "row": 32,
+          "column": "C"
+        },
+        {
+          "row": 33,
+          "column": "C"
+        },
+        {
+          "row": 34,
+          "column": "C"
+        },
+        {
+          "row": 35,
+          "column": "C"
+        },
+        {
+          "row": 36,
+          "column": "C"
+        },
+        {
+          "row": 37,
+          "column": "C"
+        },
+        {
+          "row": 40,
+          "column": "C"
+        },
+        {
+          "row": 41,
+          "column": "C"
+        },
+        {
+          "row": 42,
+          "column": "C"
+        },
+        {
+          "row": 43,
+          "column": "C"
+        },
+        {
+          "row": 44,
+          "column": "C"
+        },
+        {
+          "row": 45,
+          "column": "C"
+        },
+        {
+          "row": 46,
+          "column": "C"
+        },
+        {
+          "row": 47,
+          "column": "C"
+        },
+        {
+          "row": 48,
+          "column": "C"
+        },
+        {
+          "row": 49,
+          "column": "C"
+        },
+        {
+          "row": 52,
+          "column": "C"
+        },
+        {
+          "row": 54,
+          "column": "C"
+        },
+        {
+          "row": 56,
+          "column": "C"
+        },
+        {
+          "row": 57,
+          "column": "C"
+        },
+        {
+          "row": 58,
+          "column": "C"
+        },
+        {
+          "row": 61,
+          "column": "C"
+        },
+        {
+          "row": 62,
+          "column": "C"
+        },
+        {
+          "row": 63,
+          "column": "C"
+        },
+        {
+          "row": 64,
+          "column": "C"
+        },
+        {
+          "row": 66,
+          "column": "C"
+        },
+        {
+          "row": 67,
+          "column": "C"
+        }
+      ]
+    },
+    "82efb05648c1e74a4bc586d994a10c113eb86ce408a7c7be505bb6db34ccd3fb": {
+      "file": "State__Bud_07-26_BG.xls",
+      "scope": "state",
+      "year": 2026,
+      "period": 7,
+      "columns": ["C", "D"],
+      "rows": [
+        9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
+        32, 33, 34, 35, 36, 37, 38, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 52, 54, 56, 57, 58, 61,
+        62, 63, 64, 66, 67
+      ],
+      "blanks": [
+        {
+          "row": 38,
+          "column": "D"
+        }
+      ]
+    },
+    "0ad797a8e4936b49e9d719697e25d82bb514772afa3ef76f0583f60234d2156f": {
+      "file": "State_Bud_08-26_BG.xls",
+      "scope": "state",
+      "year": 2026,
+      "period": 8,
+      "columns": ["C", "D"],
+      "rows": [
+        9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
+        32, 33, 34, 35, 36, 37, 38, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 52, 54, 56, 57, 58, 61,
+        62, 63, 64, 66, 67
+      ],
+      "blanks": [
+        {
+          "row": 38,
+          "column": "D"
+        }
+      ]
+    },
+    "6c960bf9d42bdbd17195ec4570779391c55ea50a7a93678d2d021bb5dc815459": {
+      "file": "State_Bud_09-26_BG.xls",
+      "scope": "state",
+      "year": 2026,
+      "period": 9,
+      "columns": ["C", "D"],
+      "rows": [
+        9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
+        32, 33, 34, 35, 36, 37, 38, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 52, 54, 56, 57, 58, 61,
+        62, 63, 64, 66, 67
+      ],
+      "blanks": [
+        {
+          "row": 38,
+          "column": "D"
+        }
+      ]
+    },
+    "7a6ce34861b972ff5f30ec33772504b47bfc85ac4efa34c82043ee8f63d3d31b": {
+      "file": "Central_4Q_2024_BG.xls",
+      "scope": "central",
+      "year": 2024,
+      "period": 4,
+      "columns": ["B", "C", "D", "E"],
+      "rows": [
+        8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 23, 26, 28, 30, 31, 32, 33, 34, 35, 36, 37,
+        38, 40, 41, 42, 44, 47, 49, 50, 51, 52, 53
+      ],
+      "blanks": [
+        {
+          "row": 53,
+          "column": "C"
+        }
+      ]
+    },
+    "5f9db748541b58cdada60d1080f3ea87b9793782e854e5dff272d5bbd04b74d0": {
+      "file": "Cons_4Q_2024_BG.xls",
+      "scope": "consolidated",
+      "year": 2024,
+      "period": 4,
+      "columns": ["B", "C", "D", "E"],
+      "rows": [
+        8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 23, 26, 28, 30, 31, 32, 33, 34, 35, 36, 37,
+        38, 40, 41, 42, 47, 49, 50, 51, 52, 53
+      ],
+      "blanks": []
+    },
+    "9160ed01667465c5c08644ac528f5f440d4f3c8a86d5a9b94e7a65d025d21404": {
+      "file": "Local_4Q_2024_BG.xls",
+      "scope": "local",
+      "year": 2024,
+      "period": 4,
+      "columns": ["B", "C", "D", "E"],
+      "rows": [
+        8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 23, 26, 28, 30, 31, 32, 33, 34, 35, 36, 37,
+        38, 40, 41, 42, 44, 47, 49, 50, 51, 52, 53
+      ],
+      "blanks": [
+        {
+          "row": 53,
+          "column": "C"
+        }
+      ]
+    },
+    "a94f48f209ff5f42fccfbef4f7e67911158c62c137f2329e54bd9c8656027784": {
+      "file": "Soc_4Q_2024_BG.xls",
+      "scope": "social",
+      "year": 2024,
+      "period": 4,
+      "columns": ["C", "D", "E", "F"],
+      "rows": [
+        8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 23, 26, 28, 30, 31, 32, 33, 34, 35, 36, 37,
+        38, 40, 41, 42, 44, 47, 49, 50, 51, 52, 53
+      ],
+      "blanks": []
+    },
+    "325a8fe8324cbf07bec382050f4102e7473ee1a44bdac8b644133801c4c6492a": {
+      "file": "Cons_4Q_2025_BG.xls",
+      "scope": "consolidated",
+      "year": 2025,
+      "period": 4,
+      "columns": ["B", "C", "D", "E"],
+      "rows": [
+        8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 23, 26, 28, 30, 31, 32, 33, 34, 35, 36, 37,
+        38, 40, 41, 42, 47, 49, 50, 51, 52, 53
+      ],
+      "blanks": [
+        {
+          "row": 53,
+          "column": "D"
+        }
+      ]
+    },
+    "26668f30cd88f99cb8dac6f3f5fce9bcfe6921aa1862517af86a69befdc1251f": {
+      "file": "Local_4Q_2025_BG.xls",
+      "scope": "local",
+      "year": 2025,
+      "period": 4,
+      "columns": ["B", "C", "D", "E"],
+      "rows": [
+        8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 23, 26, 28, 30, 31, 32, 33, 34, 35, 36, 37,
+        38, 40, 41, 42, 44, 47, 49, 50, 51, 52, 53
+      ],
+      "blanks": []
+    },
+    "4ad7bcd9aac8b6107054c6ff2dfddd04bfaf643e609e73fc86c1a690974cfbe7": {
+      "file": "Soc_4Q_2025_BG.xls",
+      "scope": "social",
+      "year": 2025,
+      "period": 4,
+      "columns": ["C", "D", "E", "F"],
+      "rows": [
+        8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 23, 26, 28, 30, 31, 32, 33, 34, 35, 36, 37,
+        38, 40, 41, 42, 44, 47, 49, 50, 51, 52, 53
+      ],
+      "blanks": [
+        {
+          "row": 52,
+          "column": "E"
+        },
+        {
+          "row": 53,
+          "column": "E"
+        }
+      ]
+    },
+    "d223dccc3f363bf04e61c79c52f418d762c0b7da6f3fd8ba8274fe2b6d644fa8": {
+      "file": "Central_2Q_2026_BG.xls",
+      "scope": "central",
+      "year": 2026,
+      "period": 2,
+      "columns": ["B", "C"],
+      "rows": [
+        8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 23, 26, 28, 30, 31, 32, 33, 34, 35, 36, 37,
+        38, 40, 41, 42, 44, 47, 49, 50, 51, 52, 53
+      ],
+      "blanks": []
+    },
+    "43be8d83f07871a85902276403915d81334b9d3d6a6300f1525121ed1e87b2f5": {
+      "file": "Cons_2Q_2026_BG.xls",
+      "scope": "consolidated",
+      "year": 2026,
+      "period": 2,
+      "columns": ["B", "C"],
+      "rows": [
+        8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 23, 26, 28, 30, 31, 32, 33, 34, 35, 36, 37,
+        38, 40, 41, 42, 47, 49, 50, 51, 52, 53
+      ],
+      "blanks": []
+    },
+    "58f4af0f8f4ea708ffc428810fe8b2a7eee91d282f25c07602e7769422dde736": {
+      "file": "Local_2Q_2026_BG.xls",
+      "scope": "local",
+      "year": 2026,
+      "period": 2,
+      "columns": ["B", "C"],
+      "rows": [
+        8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 23, 26, 28, 30, 31, 32, 33, 34, 35, 36, 37,
+        38, 40, 41, 42, 44, 47, 49, 50, 51, 52, 53
+      ],
+      "blanks": []
+    },
+    "b280af2d2e506d31729ad290c977434001787fd1a150b2525496863e24b54cff": {
+      "file": "Soc_2Q_2026_BG.xls",
+      "scope": "social",
+      "year": 2026,
+      "period": 2,
+      "columns": ["C", "D"],
+      "rows": [
+        8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 23, 26, 28, 30, 31, 32, 33, 34, 35, 36, 37,
+        38, 40, 41, 42, 44, 47, 49, 50, 51, 52, 53
+      ],
+      "blanks": []
+    }
+  }
+}

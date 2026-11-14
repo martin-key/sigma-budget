@@ -1,3 +1,6 @@
+import { readTaxDatasets } from './taxes.js';
+import { isPublishedDataset } from '@sigma-budget/dataset-schema';
+import { isDeepStrictEqual } from 'node:util';
 import { applyWave17aExceptions } from '../validate/wave17a.js';
 import { productionSourceGroups } from './source-validation.js';
 import { readFileSync } from 'node:fs';
@@ -190,7 +193,24 @@ export function validateProduction(
   );
   const expected = prepared.independentIndirect;
   const sourceGroups = productionSourceGroups(context, prepared);
+  const budgetTables: Group<Context> = {
+    name: 'BUDGET-TABLES',
+    description: 'Pinned monthly and quarterly budget tables, exact identities and missing scope',
+    run(c) {
+      const check = new Check('BUDGET-TABLES');
+      for (const [file, expected] of Object.entries(readTaxDatasets(context))) {
+        const actual = c.get(file);
+        check.ok(isPublishedDataset(file, actual), file + ': strict contract');
+        check.ok(
+          isDeepStrictEqual(actual, expected),
+          file + ': every published cell equals the pinned original and conversion',
+        );
+      }
+      return check;
+    },
+  };
   const groups: Group<Context>[] = [
+    budgetTables,
     ...sourceGroups,
     ...foundationGroups,
     ...wave15Groups,
@@ -261,6 +281,7 @@ export function validateProduction(
   const wanted = [
     ...REQUIRED_VALIDATION_GROUPS,
     'REGISTRY',
+    'BUDGET-TABLES',
     ...debtLocalSafetyGroups.map((g) => g.name),
     ...sourceGroups.map((g) => g.name),
   ];

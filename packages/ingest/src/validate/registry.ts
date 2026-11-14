@@ -41,6 +41,13 @@ function glob(pattern: string, path: string): boolean {
 }
 /** A producer is a Python module command; module names cannot escape the tree. */
 export function script(entry: string): string {
+  if (
+    [
+      'packages/ingest/src/production/taxes-reader.ts',
+      'packages/ingest/src/production/taxes.ts',
+    ].includes(entry)
+  )
+    return entry;
   if (!entry) return entry;
   const parts =
     entry.match(/(?:[^\s'\"]+|'[^']*'|"[^"]*")+/g)?.map((x) => x.replace(/^(['"])(.*)\1$/, '$2')) ??
