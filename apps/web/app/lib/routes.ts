@@ -23,6 +23,8 @@ export interface WebRoute {
   short: string;
   query: string[];
   bare?: boolean;
+  /** kept only as an id that the current data release still names (see docs/dev-guide.md, section 11): no address, no screen */
+  retired?: boolean;
 }
 
 type RouteOptions = Partial<

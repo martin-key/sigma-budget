@@ -1,0 +1,11 @@
+{
+  "8670a89001a46165f55f94ee4d760eedf08e3b69476a4b36cb9f29cacd3360f7": {
+    "file": "Bulletin_GovDebt_09-2026_bg.pdf",
+    "differences": {
+      "externalStockComponents": -100000,
+      "domesticStock": -43320,
+      "originalMaturity": 1,
+      "residualMaturity": -1
+    }
+  }
+}

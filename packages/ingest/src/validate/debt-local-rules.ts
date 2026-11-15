@@ -1,3 +1,4 @@
+import { isPublishedDataset } from '@sigma-budget/dataset-schema';
 /** Independent ports of validate/{debt,local_finance}.py at 3424bc998c726d6d511d4284295c54c50c42d099.
  * These rules inspect published datasets, not the corresponding production builders.
  * Original-source and additional safety checks are separate APIs; see debt-local/README.md.
@@ -83,7 +84,13 @@ export function debt(ctx: Context): Check {
     m.id === 'D13+D14' &&
       m.status === 'real' &&
       eq(m.source, ['asbp', 'eurostat', 'bnb']) &&
-      eq(m.pending, ['P06']) &&
+      eq(
+        m.pending,
+        ctx.exists('debt-issues.json') &&
+          isPublishedDataset('debt-issues.json', ctx.get('debt-issues.json'))
+          ? []
+          : ['P06'],
+      ) &&
       m.mock === false,
     'meta id/status/source/pending/mock',
   );

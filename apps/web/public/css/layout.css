@@ -8,7 +8,8 @@
   border-image: linear-gradient(to top, var(--rule-soft) 1px, transparent 1px) fill 0 / /0 100vw;
 }
 
-/* ---- prototype notice (mock banner): a quiet warm strip, crimson hatch swatch ---- */
+/* ---- data notice strip (#mockbar, „Забележка за данните“): a quiet warm strip, crimson hatch swatch.
+   The screens still render the container, but it is empty and hidden (chrome bannerHtml has nothing to say). ---- */
 .mockbar {
   display: flex;
   align-items: flex-start;
@@ -433,19 +434,13 @@
   }
 } /* narrowest phones: the two-bar icon alone, the word stays for screen readers */
 @media (max-width: 339px) {
-  .nav-search {
-    width: 40px;
-  }
-  .menu-btn {
-    min-width: 40px;
-  }
   .period-btn svg {
     display: none;
   }
   .mast-in {
     padding-inline: 12px;
   }
-}
+} /* the magnifier and «Меню» keep their 44px targets here too (they were 40px wide); at 320px about 17px stay free next to the wordmark */
 /* the red button also leads the phone drawer */
 .more-cta {
   margin: 0 0 var(--sp-4);
@@ -775,16 +770,25 @@ body.bare .page {
   text-underline-offset: 4px;
   text-decoration-color: var(--crimson);
 }
+/* The fine print is one wrapping row of items on the same baseline (the СИГМА link is taller on touch screens). The separator of an item
+   sits in the gap before it, so an item that starts a line has its separator outside the box, where it is clipped: no line starts or ends
+   with a lone «·». The clip is a clip-path drawn a little outside the box, so the focus ring of a link at the edge stays whole
+   (overflow-clip-margin would do the same, but Safari does not have it). */
 .footer .fine {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--sp-1) var(--sp-2);
+  align-items: baseline;
+  gap: var(--sp-1) var(--sp-5);
   padding-top: var(--sp-3);
   border-top: 1px solid var(--rule);
+  clip-path: inset(calc(-1 * var(--sp-1)));
 }
-.footer .fine span + span::before {
+.footer .fine > * + *::before {
   content: '·';
-  margin-right: var(--sp-2);
+  display: inline-block;
+  width: var(--sp-5);
+  margin-left: calc(-1 * var(--sp-5));
+  text-align: center;
   color: var(--ink-soft);
 }
 .footer .small {
@@ -910,30 +914,6 @@ body.bare .page {
     background: Highlight;
     color: HighlightText;
     border-color: Highlight;
-  }
-}
-.footer .link-btn {
-  display: inline-flex;
-  align-items: center;
-  min-height: 28px;
-  padding: 0 2px;
-  border: 0;
-  background: none;
-  color: var(--ink-mid);
-  font: inherit;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
-}
-.footer .link-btn:hover {
-  color: var(--crimson);
-}
-@media (pointer: coarse) {
-  .footer .link-btn {
-    min-height: 44px;
   }
 }
 .popover:has(.nav-pop) {

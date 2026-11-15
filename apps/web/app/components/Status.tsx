@@ -32,7 +32,6 @@ export const STATUS = {
   },
 };
 export type DataStatus = keyof typeof STATUS;
-const ORDER: DataStatus[] = ['real', 'partial', 'forecast', 'pending'];
 export const statusLabel = (s: string) => (STATUS[s as DataStatus] || STATUS.pending).label;
 
 /** statusPill('real') -> <span class="st" data-st="real">✓ Официални данни</span> */
@@ -45,28 +44,6 @@ export function statusPill(status: string, o: { label?: string } = {}) {
         {icon(s.icon, { size: 14 })}
         <span>{o.label || s.label}</span>
       </span>
-    </>
-  );
-}
-
-/** the legend as a list (also the body of the „Легенда“ sheet) */
-export function legendBody() {
-  return (
-    <>
-      <ul className="legend-list">
-        {ORDER.map((k) => (
-          <>
-            <li>
-              {statusPill(k)}
-              <p className="small">{STATUS[k].text}</p>
-            </li>
-          </>
-        ))}
-      </ul>
-      <p className="small muted">
-        Обхватът (КФП, национален бюджет, ЕС средства, ЗДД, Маастрихт) е показан с етикет до всяко
-        число. Натисни етикета, за да прочетеш какво означава.
-      </p>
     </>
   );
 }

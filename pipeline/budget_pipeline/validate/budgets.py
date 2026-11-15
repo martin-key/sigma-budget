@@ -9,6 +9,7 @@ Pure standard library.
 
 from pathlib import Path as _Path
 ROOT = _Path(__file__).resolve().parents[3]
+from budget_pipeline.validate.programme_supplements import counts, valid_supplement
 import collections
 import os
 import re
@@ -68,13 +69,14 @@ def g_budgets(ctx):
     law = ctx.get("law.json")
     core = ctx.get("core.json")
     mm = m["meta"]
+    supplement=counts(ctx)
     c.ok(list(m) == ["meta", "totals", "kinds", "tiers", "programTotals", "scopeNote", "items"], "ministries.json keys %s" % list(m))
-    c.ok(mm["id"] == "D08+D09" and mm["status"] == "real" and mm["unit"] == "хил. €" and mm["pending"] == ["P03"] and mm["mock"] is False,
+    c.ok(mm["id"] == "D08+D09" and mm["status"] == "real" and mm["unit"] == "хил. €" and mm["pending"] == ([] if supplement["budgets"]==4 else ["P03"]) and mm["mock"] is False,
          "meta id/status/unit/pending")
     c.ok(L.ISO.match(mm["asOf"]) and mm["asOf"] <= L.BUILD_DATE and set(mm["source"]) <= set(core["sources"]), "meta asOf/source")
-    c.ok(any(p["id"] == "P03" for p in (core["pending"] if isinstance(core["pending"], list) else core["pending"].values())), "core.pending has P03")
+    c.ok(any(p["id"] == "P03" for p in (core["pending"] if isinstance(core["pending"], list) else core["pending"].values())) == (supplement["budgets"]!=4), "core.pending has P03")
     c.ok(list(m["kinds"]) == list(KINDS) or sorted(m["kinds"]) == sorted(KINDS), "kinds %s" % list(m["kinds"]))
-    c.ok(sorted(m["tiers"]) == sorted(TIERS) and all(isinstance(v, str) and v for v in m["tiers"].values()), "tiers %s" % list(m["tiers"]))
+    c.ok(sorted(m["tiers"]) == sorted(("validated","program-budget-differs","source-verified") if supplement["budgets"]==4 else TIERS) and all(isinstance(v, str) and v for v in m["tiers"].values()), "tiers %s" % list(m["tiers"]))
     c.ok(isinstance(m["scopeNote"], str) and m["scopeNote"].strip() != "", "scopeNote")
     items = m["items"]
     ids = [x["id"] for x in items]
@@ -137,7 +139,12 @@ def g_budgets(ctx):
         # programs
         p = x["programs"]
         tiers[p.get("tier", "pending")] += 1
-        if p["status"] == "real":
+        if p.get('tier')=='source-verified':
+            file='ministries/'+i+'.json'
+            c.ok(p['status']=='real' and p['file']==file and L.exists(file) and pb is None,w+': source-verified programme summary')
+            if L.exists(file):_check_supplement(c,x,ctx.get(file))
+            pol_total+=p['policyCount'];prog_total+=p['count']
+        elif p["status"] == "real":
             c.ok(p["tier"] in ("validated", "program-budget-differs") and p["file"] == "ministries/%s.json" % i and L.exists(p["file"]),
                  w + ": programs block %s" % p)
             c.ok(isinstance(p["count"], int) and isinstance(p["policyCount"], int) and p["count"] >= p["policyCount"] >= 1, w + ": programs counts")
@@ -159,24 +166,31 @@ def g_budgets(ctx):
     c.near(m["totals"]["revKhil"], law["totals"]["law"]["rev"], TOL, "totals.revKhil = law totals")
     c.near(m["totals"]["expKhil"], law["totals"]["law"]["exp"], TOL, "totals.expKhil = law totals (13 326 470,3)")
     pt = m["programTotals"]
-    c.ok(pt["budgets"] == tiers["validated"] + tiers["program-budget-differs"] == 42 and pt["pending"] == tiers["pending"] == 4
-         and pt["differ"] == tiers["program-budget-differs"] == 3, "programTotals %s vs tiers %s" % (pt, dict(tiers)))
-    c.ok(pt["policies"] == pol_total == 82 and pt["programs"] == prog_total == 190, "programTotals policies/programs %s/%s vs %s/%s" % (
+    c.ok(pt["budgets"] == tiers["validated"] + tiers["program-budget-differs"] + supplement["budgets"] == 42+supplement["budgets"] and pt["pending"] == tiers["pending"] == 4-supplement["budgets"]
+         and pt["differ"] == tiers["program-budget-differs"]+supplement["differ"] and tiers["program-budget-differs"] == 3, "programTotals %s vs tiers %s" % (pt, dict(tiers)))
+    c.ok(pt["policies"] == pol_total == 82+supplement["policies"] and pt["programs"] == prog_total == 190+supplement["programs"], "programTotals policies/programs %s/%s vs %s/%s" % (
         pt["policies"], pt["programs"], pol_total, prog_total))
     c.ok(sorted(kinds) == sorted(KINDS) and sum(kinds.values()) == 46, "kinds used %s" % dict(kinds))
     c.ok(sorted(x["id"] for x in items if x.get("change") is None) == ["0100", "0500", "1800", "2300", "3200", "4700"],
          "budgets without a 2025 total: %s" % [x["id"] for x in items if x.get("change") is None])
     c.fact("46 budgets: revenue %s, expenditure %s хил. €; program budgets: %d validated / %d differ from the law / %d pending (P03); %d policies, %d programs" % (
-        fmt(m["totals"]["revKhil"]), fmt(m["totals"]["expKhil"]), tiers["validated"], tiers["program-budget-differs"], tiers["pending"],
+        fmt(m["totals"]["revKhil"]), fmt(m["totals"]["expKhil"]), tiers["validated"], tiers["program-budget-differs"]+supplement["differ"], tiers["pending"],
         pt["policies"], pt["programs"]))
     return c
 
 
 # ------------------------------------------------------------------------------------------------ PROGRAMS
+def _check_supplement(c,item,d):
+    valid=valid_supplement(d)
+    c.ok(valid,'Independently verified programme source contract '+item['id'])
+    c.ok(valid and all(d[k]==item[k] for k in ('id','art','name','short','policiesKind')) and d['check']['zdbExp']==item['expKhil'] and item['programs']['tier']==d['tier'] and item['programs']['matchesLaw']==d['check']['matchesLaw'] and item['programs']['notes']==d['notes'] and item['programs']['policyCount']==sum(p['kind']=='policy' for p in d['policies']) and item['programs']['count']==sum(r['kind']=='program' for r in d['sourceAudit']['rows']),'Programme summary/law '+item['id'])
+    return _prog_rows(d) if valid else []
+
 def _check_file(c, ctx, item, d):
     """One ministries/<code>.json against its ministries.json item; returns its (level, policy, row) list."""
     i = item["id"]
     w = "ministries/%s.json" % i
+    if "sourceContract" in d or d.get('tier')=='source-verified':return _check_supplement(c,item,d)
     c.ok(list(d) == ["meta", "id", "art", "name", "short", "tier", "years", "yearLabels", "vintage", "cols", "policiesKind", "total", "policies",
                      "yearsComplete", "check", "skipped", "skippedTotal", "doc"], w + ": keys %s" % list(d))
     mt = d["meta"]
@@ -262,9 +276,10 @@ def g_programs(ctx):
     c = Check("PROGRAMS")
     m = ctx.get("ministries.json")
     pj = ctx.get("programs.json")
+    supplement=counts(ctx)
     files = sorted(f for f in os.listdir(os.path.join(L.DATA, "ministries")) if f.endswith(".json"))
     real = sorted(x["id"] for x in m["items"] if x["programs"]["status"] == "real")
-    c.ok([f[:-5] for f in files] == real and len(real) == 42, "ministries/ holds %d files, ministries.json announces %d: %s" % (
+    c.ok([f[:-5] for f in files] == real and len(real) == 42+supplement["budgets"], "ministries/ holds %d files, ministries.json announces %d: %s" % (
         len(files), len(real), sorted(set(f[:-5] for f in files) ^ set(real))))
     byid = dict((x["id"], x) for x in m["items"])
     expect = {}
@@ -279,7 +294,7 @@ def g_programs(ctx):
     c.ok(list(pj) == ["meta", "fields", "sentinels", "note", "items"] and pj["fields"] == FIELDS and pj["sentinels"] == SENTINELS
          and isinstance(pj["note"], str) and pj["note"], "programs.json keys / fields / sentinels")
     rows = pj["items"]
-    c.ok(len(rows) == len(expect) == 272, "programs.json has %d rows, the files %d (272 expected)" % (len(rows), len(expect)))
+    c.ok(len(rows) == len(expect) == 272+supplement["policies"]+supplement["programs"], "programs.json has %d rows, the files %d (272 expected)" % (len(rows), len(expect)))
     seen = set()
     levels = collections.Counter()
     for row in rows:
@@ -294,6 +309,7 @@ def g_programs(ctx):
         i, lvl, parent, src = expect[code]
         levels[r["level"]] += 1
         c.ok(r["ministry"] == i and r["level"] == lvl and r["policy"] == parent and r["name"] == src["name"], w + ": ministry/level/policy/name differ from the file")
+        if i in ('0100','1800','2300','7400'):c.ok(row==[i,src['code'],src['name'],lvl,parent,src['values']['2026'][0],-1,-101,0,src['values']['2026'][1],-1],w+': exact independently verified programme index cell')
         v = src["values"]                                       # column 0 = consolidated total, column 1 = the budget's own column
         y26, p26 = (v["2026"][0], v["2026"][1]) if "2026" in v else (-1, -1)
         y25, p25 = (v["2025"][0], v["2025"][1]) if "2025" in v else (-1, -1)
@@ -307,7 +323,7 @@ def g_programs(ctx):
             c.ok(r["growthPct"] == SENTINELS["noGrowth"], w + ": growthPct must be the no-growth sentinel, got %s" % r["growthPct"])
         c.ok(r["isNew"] == (1 if (0 <= y25 <= 0.05 and y26 > 0) else 0), w + ": isNew %s" % r["isNew"])
     c.ok(set(expect) == seen, "rows missing from programs.json: %s" % sorted(set(expect) - seen)[:5])
-    c.ok(levels == {"policy": 82, "program": 190}, "programs.json levels %s (82 policies, 190 programs expected)" % dict(levels))
+    c.ok(levels == {"policy": 82+supplement["policies"], "program": 190+supplement["programs"]}, "programs.json levels %s (82 policies, 190 programs expected)" % dict(levels))
     c.fact("%d program files; %d rows in programs.json (%d policies, %d programs); every policy sums to its programs and the total, every name clean" % (
         len(files), len(rows), levels["policy"], levels["program"]))
     return c

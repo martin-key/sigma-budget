@@ -4,7 +4,7 @@
 
 Новият код е TypeScript. Workspace-ът е описан в [README](../README.md); общите правила са в [AGENTS.md](../AGENTS.md). За обработката на данни `./budget` стартира Node CLI в `apps/etl/` и пакетите за обработка в `packages/ingest/`. Python пътят е исторически и референтен.
 
-Маршрутите са в `apps/web/app/routes.ts`. Мигрираните екрани S26, S25, S35, S14 и S16 имат отделни route модули, а S30 използва `not-found.tsx`. Модулите използват loader, headers и компоненти; моделите и React представянето се свързват чрез `apps/web/app/migration/registry.tsx`. За нова работа следвай съществуващите модули и тестовете им. Останалите маршрути използват общия `screen.tsx` и стария renderer.
+Маршрутите са в `apps/web/app/routes.ts`. Мигрираните екрани S25, S35, S14 и S16 имат отделни route модули, а S30 използва `not-found.tsx`. Модулите използват loader, headers и компоненти; моделите и React представянето се свързват чрез `apps/web/app/migration/registry.tsx`. За нова работа следвай съществуващите модули и тестовете им. Останалите маршрути използват общия `screen.tsx` и стария renderer.
 
 ## Поддръжка на старите екрани
 
@@ -600,7 +600,7 @@ moneyCol(ctx, { d = 1 })      // (G1) ПАРИЧНА колона на ТАБЛ�
 
 ### 5.23 Какво обвивката вече осигурява (не го прави наново)
 
-Едноредова горна лента с пет падащи групи („Начало“, „Изпълнение“, „Бюджет“, „Данъци и контекст“, „Данни и проект“), бутон „Бюджет 2027“, избор на период и винаги видима лупа за търсене. Под 1241 px групите и червеният бутон са в чекмеджето „Меню“; долната лента с табове остава до 960 px включително. Хедърът е компактен на всички ширини. Обвивката осигурява още банер „Примерни данни“, футър с навигационните групи и „Легенда“, бележка за липса на връзка, връзка „прескочи към съдържанието“, `aria-live` области и изскачащи за речник, търсене, източник и споделяне. Няма панел „Настройки“ или превключвател на тема.
+Едноредова горна лента с пет падащи групи („Начало“, „Изпълнение“, „Бюджет“, „Данъци и контекст“, „Данни и проект“), бутон „Бюджет 2027“, избор на период и винаги видима лупа за търсене. Под 1241 px групите и червеният бутон са в чекмеджето „Меню“; долната лента с табове остава до 960 px включително. Хедърът е компактен на всички ширини. Обвивката осигурява още футър с навигационните групи и връзка към СИГМА, бележка за липса на връзка, връзка „прескочи към съдържанието“, `aria-live` области и изскачащи за речник, търсене, източник и споделяне. Няма панел „Настройки“ или превключвател на тема.
 
 ### 5.24 `calc.js` — [готов] — чиста логика на калкулатора (притежател: авторът на екрани G3; споделена между S18 и мини калкулатора на S01)
 
@@ -905,12 +905,14 @@ export const styles = ['s06-prihodi'];       // зарежда css/pages/s06-pri
 | S23 | `plashtania`    | `#/plashtania/:eik?`                  | `pages/s23-plashtania.js`                | Кой на кого плаща?       | phase2         | 2026.draft, 2026.law  | S24,S01       | `#/plashtania` `#/plashtania/999000012`                     |
 | S24 | `danni`         | `#/danni/:set?`                       | `pages/s24-danni.js`                     | Откъде са данните?       | ref            | none                  | S25,S01       | `#/danni` `#/danni/execution`                               |
 | S25 | `api`           | `#/api`                               | `pages/s25-api.js`                       | Отворени данни и API     | ref            | none                  | S01           | `#/api`                                                     |
-| S35 | `proverka`      | `#/proverka`                          | `pages/s35-proverka.js`                  | Данни и проверка         | ref            | none                  | S24,S25       | `#/proverka`                                                |
-| S26 | `za-proekta`    | `#/za-proekta`                        | `pages/s26-za-proekta.js`                | За проекта               | ref            | none                  | S27,S01       | `#/za-proekta`                                              |
+| S35 | `proverka`      | `#/proverka`                          | `pages/s35-proverka.js`                  | Проверка на данните      | ref            | none                  | S24,S25       | `#/proverka`                                                |
+| S26 | `za-proekta`    | — (оттеглен, без адрес)               | —                                        | За проекта               | ref            | none                  |               | —                                                           |
 | S27 | `vrazka`        | `#/vrazka`                            | `pages/s27-vrazka.js`                    | Обратна връзка           | ref            | none                  | S01           | `#/vrazka`                                                  |
 | S28 | `tarsene`       | `#/tarsene`                           | `pages/s28-tarsene.js`                   | Търсене                  | util           | none                  | S02,S01       | `#/tarsene` `#/tarsene?q=%D0%94%D0%94%D0%A1`                |
 | S29 | `embed`         | `#/embed/:chart`                      | `pages/s29-embed.js`                     | Вграден изглед           | util           | none                  |               | `#/embed/selftest` `#/embed/neznajna.grafika`               |
 | S30 | `ne-e-namereno` | `#(404)`                              | `pages/s30-404.js`                       | Няма такава страница     | util           | none                  |               |                                                             |
+
+**S26 е оттеглен.** Екранът „За проекта“ го няма: `/za-proekta` пренасочва с 301 към `/danni` (`apps/web/client/redirects.js`), а бележките му са в долния край на сайта. Записът в `apps/web/app/lib/routes.json` (`retired: true`, без адрес и извън менюто) пази само идентификатора, докато следващото редовно издание на данните махне S26 от `screens` на `core` в `data/datasets.yaml`; тогава записът се изтрива.
 
 Колони: **Периоди** `all` = поддържа се всеки период; `none` = изборът на период е скрит за екрана (редът за периода не се показва); списък = само тези периоди (за останалите обвивката показва празно състояние). **Група** `start budget exec debt phase2 ref util` (страничната навигация; числото е стъпката от водения път). `S29` е гола рамка (без елементи на обвивката); `S30` няма шаблон (отговаря на всеки непознат хеш).
 
@@ -1084,6 +1086,27 @@ pnpm build
 pnpm typecheck
 pnpm test
 pnpm dev
+```
+
+### Входове за `pnpm test`
+
+В чисто копие на хранилището липсват два входа, които CI подготвя преди `pnpm test`. Без тях тестовете на `packages/ingest` пропадат.
+
+Първият вход са четирите програмни PDF-а в `data/originals/program_budgets/`, описани в `packages/dataset-schema/src/programme-references.json`. Те не са в Git. CI ги възстановява от одобрения архив на хранилището (`scripts/registered-node-inputs.json`) със стъпката `Restore the four pinned programme originals`. Архивът е draft release asset и за свалянето му е нужен достъп за писане до хранилището:
+
+```sh
+mkdir -p tmp/ci-inputs
+gh api repos/midt-bg/sigma-budget/releases/assets/$(node -p "require('./scripts/registered-node-inputs.json').assetId") \
+  -H 'Accept: application/octet-stream' > tmp/ci-inputs/registered-node-inputs.tar.gz
+node scripts/restore-programme-test-inputs.mjs tmp/ci-inputs/registered-node-inputs.tar.gz
+```
+
+Скриптът проверява размера и SHA-256 на архива и на всеки PDF и не презаписва съществуващ оригинал. Първото изпълнение отпечатва `{"restored":4,"unchanged":0}`, а следващите `{"restored":0,"unchanged":4}`.
+
+Вторият вход е Python 3.12. Диференциалните тестове викат интерпретатора от `PYTHON312`, а без него системния `python3` или `python3.12`; системният `python3` може да е друга версия. Тогава например `catalog-refresh.test.ts` спира на `assert sys.version_info[:2] == (3, 12)`. Ползва се средата `tmp/venv-data` от [README](../README.md) („Среда и проверки“) със същия `PYTHONPATH` като в CI:
+
+```sh
+PYTHON312=$PWD/tmp/venv-data/bin/python PYTHONPATH=$PWD/pipeline pnpm test
 ```
 
 Python командите остават действащи. След сглобяване на пакетите JSON наборите се сравняват по избран обхват:

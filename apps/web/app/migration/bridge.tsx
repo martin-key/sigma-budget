@@ -8,7 +8,7 @@ import { chromeTree, chromeDOM } from './chrome-tree';
 import { loadScreen } from './screens';
 import type { Navigation, TextScreenModel } from '../lib/screen-state';
 export function preload(screen?: string) {
-  if (screen && ['S26', 'S30', 'S25', 'S35', 'S14', 'S16'].includes(screen))
+  if (screen && ['S30', 'S25', 'S35', 'S14', 'S16'].includes(screen))
     return loadScreen(screen as TextScreenModel['screen']);
 }
 let root: Root | undefined;

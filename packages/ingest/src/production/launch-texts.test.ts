@@ -63,3 +63,35 @@ it('copies stage outputs, keeps bytes and rejects unknown stages', () => {
   expect(output.text).toBe('стар текст');
   expect(() => reviseLaunchTexts([], { a: [] })).toThrow('unknown stage: a');
 });
+
+import { reviseProgrammeCatalog } from './launch-texts.js';
+it('replaces only the complete-programme catalog note and rejects stale wording', () => {
+  const data = {
+    description: 'За 0 от 46 бюджета програмите не са включени (P03).',
+    index: 'Индекс на 312 програми от програмните бюджети:',
+  };
+  expect(reviseProgrammeCatalog(data)).toEqual({
+    description:
+      'Програмите за 2026 г. са включени за всички 46 ведомства. Историческите години са представени според разчетените таблици.',
+    index: 'Индекс на политиките и програмите от програмните бюджети:',
+  });
+  expect(data.description).toContain('P03');
+  expect(() => reviseProgrammeCatalog({ description: 'other' })).toThrow('Stale');
+});
+
+import { reviseProgrammeSources } from './launch-texts.js';
+it('states the source scope without claiming every source total equals the law', () => {
+  const input = { sources: { prb: { note: 'Общите суми съответстват на закона.' } } };
+  const revised = reviseProgrammeSources(input) as typeof input;
+  expect(revised.sources.prb.note).toContain('към законопроекта');
+  expect(input.sources.prb.note).toContain('съответстват');
+  expect(() => reviseProgrammeSources({ sources: {} })).toThrow('Stale');
+});
+
+import { authored } from './authored.js';
+it('revises the actual production source declaration without changing its evidence', () => {
+  const sources = authored.aggregation.sources;
+  const revised = reviseProgrammeSources(sources) as typeof sources;
+  expect((revised.prb as any).note).toContain('към законопроекта');
+  expect((sources.prb as any).note).toContain('съответстват');
+});

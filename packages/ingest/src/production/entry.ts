@@ -1,10 +1,12 @@
+import { readProductionProgrammes, withProductionProgrammes } from './programmes.js';
+import { readDebtIssues, registerDebtCatalog } from './debt-issues.js';
 import { mkdir, writeFile, cp, readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { join, dirname } from 'node:path';
 import { runGraph } from '../build/graph.js';
 import { wave13bStages } from '../build/wave13b.js';
 import type { ExecutionContext, ExecutorResult } from '../release-build/types.js';
-import { reviseLaunchTexts } from './launch-texts.js';
+import { reviseLaunchTexts, reviseProgrammeSources } from './launch-texts.js';
 import { loadProduction } from './loader.js';
 import { readTaxDatasets, withProductionBudgets, registerTaxCatalog } from './taxes.js';
 import { validateProduction } from './validation.js';
@@ -37,10 +39,20 @@ export async function executeRelease(context: Readonly<ExecutionContext>): Promi
   );
   context = Object.freeze({ ...context, generatedIntermediates });
   registerTaxCatalog(prepared.input, context);
+  registerDebtCatalog(prepared.input, context);
+  prepared.input.core.sources = reviseProgrammeSources(
+    prepared.input.core.sources,
+  ) as typeof prepared.input.core.sources;
   const graph = runGraph(
     withProductionBudgets(
-      reviseLaunchTexts(wave13bStages(prepared.input)),
-      readTaxDatasets(context),
+      withProductionProgrammes(
+        reviseLaunchTexts(wave13bStages(prepared.input)),
+        readProductionProgrammes(context),
+      ),
+      {
+        ...readTaxDatasets(context),
+        'debt-issues.json': readDebtIssues(context),
+      },
     ),
   );
   const failed = graph.states.filter((s) => s.status !== 'success');

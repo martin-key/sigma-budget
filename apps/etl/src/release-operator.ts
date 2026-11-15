@@ -8,6 +8,7 @@ import {
   type ClientOptions,
   type ReleaseEnvironment,
 } from '@sigma-budget/ingest/release-client';
+import { operatorReceipts, REPOSITORY_ROOT } from './repository.js';
 
 const usage = `Usage: node apps/etl/dist/release-operator.js <status|preflight|upload|publish|rollback>
   --environment <name> --url <https-origin> [--receipts <directory>]
@@ -18,6 +19,9 @@ const usage = `Usage: node apps/etl/dist/release-operator.js <status|preflight|u
   [--max-object-bytes <integer>] [--json]
 Protected process inputs: BUDGET_ACCESS_TOKEN, or CF_ACCESS_CLIENT_ID + CF_ACCESS_CLIENT_SECRET.
 No credential flags, home auth discovery, environment file loading or default environment.`;
+
+/** Receipts stay in the ignored /work/ of this checkout unless --receipts names another directory. */
+export const DEFAULT_RECEIPT_DIRECTORY = operatorReceipts(REPOSITORY_ROOT);
 
 export interface OperatorCliDependencies {
   /** Parent may inject its existing environment registry after resolving it. */
@@ -99,7 +103,7 @@ export async function releaseOperatorCli(
     const maxObjectBytes = integer('--max-object-bytes');
     const options: ClientOptions = {
       environment,
-      receiptDirectory: get('--receipts') ?? resolve('work/ts-operator-receipts'),
+      receiptDirectory: get('--receipts') ?? DEFAULT_RECEIPT_DIRECTORY,
       maxObjectBytes,
       credentials: () =>
         credentialsFromEnvironment(dependencies.credentialEnvironment ?? process.env),

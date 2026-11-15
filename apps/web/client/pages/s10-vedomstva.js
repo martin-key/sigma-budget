@@ -155,7 +155,9 @@ function model(ctx) {
       share: total > 0 ? (mln / total) * 100 : null,
       change: m.change && ok(m.change.pct) ? { pct: m.change.pct, basis: m.change.basis } : null,
       differs: !!m.billVsLaw || (!!pbl && ok(pbl.diffKhil) && Math.abs(pbl.diffKhil) > 0.05),
-      progDiffers: m.programs?.tier === 'program-budget-differs',
+      progDiffers:
+        m.programs?.tier === 'program-budget-differs' || m.programs?.matchesLaw === false,
+      programmeNotes: m.programs?.notes ?? [],
       progCount: real && ok(m.programs.count) ? m.programs.count : null,
       progPolicies: real && ok(m.programs.policyCount) ? m.programs.policyCount : null,
       pending: m.programs && m.programs.status === 'pending' ? m.programs : null,
@@ -678,6 +680,16 @@ function pRows(pm, q) {
 
 function pNotes(pm, ctx, tops) {
   const out = [];
+  const supplements = [
+    ...new Map(
+      tops.filter((t) => t.row.min?.programmeNotes?.length).map((t) => [t.row.ministry, t.row.min]),
+    ).values(),
+  ];
+  for (const agency of supplements)
+    out.push(
+      html`<details><summary>Бележки към програмите: ${plainName(agency)}</summary>${agency.programmeNotes.map((note) => html`<p>${note}</p>`)}</details>`,
+    );
+
   const diff = [
     ...new Map(
       tops.filter((t) => t.row.min?.progDiffers).map((t) => [t.row.ministry, t.row.min]),
@@ -1040,8 +1052,11 @@ function pPanel(md, pm, ctx) {
   return html`${block({
     id: 's10-programi',
     title: 'Програмите на ведомствата',
-    status: 'partial',
-    statusLabel: 'Официални данни, частично покритие',
+    status: md.doc.programTotals?.pending === 0 ? 'real' : 'partial',
+    statusLabel:
+      md.doc.programTotals?.pending === 0
+        ? 'Програми на всички ведомства'
+        : 'Официални данни, частично покритие',
     source: SOURCE_P,
     asOf: pm.asOf,
     scope: { key: 'prb-programi', label: 'Програмни бюджети', note: 'без ЕС и други средства' },

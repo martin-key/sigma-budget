@@ -63,6 +63,8 @@ def script(entry):
     if entry in {
         'packages/ingest/src/production/taxes-reader.ts',
         'packages/ingest/src/production/taxes.ts',
+        'packages/ingest/src/production/debt-issues.ts',
+      'packages/ingest/src/production/programmes.ts',
     }:
         return entry
     parts = shlex.split(entry)

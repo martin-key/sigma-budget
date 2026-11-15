@@ -1,17 +1,14 @@
-// S16 Какво ново? (G3). What changed lately in the data and in the law: the latest monthly report in five sentences, what is still
-// expected, a month-by-month chronology of events and a prototype subscription (RSS is real, e-mail and Viber only show the flow).
+// S16 Какво ново? (G3). What changed lately in the data and in the law: the latest monthly report in five sentences, a month-by-month
+// chronology of events and the RSS file that follows them in a reader (RSS is the only subscription channel).
 // Every number and every event comes from feed.json (built by the data pipeline from the other data sets); nothing is typed from memory.
 // The visitor filters the chronology in the query: ?vid=report|law|plenary|rates|eurostat|data (none = all events).
-import { html, plain, raw } from '../html.js';
+import { html, plain } from '../html.js';
 import { ROOT } from '../loc.js';
-import { icon } from '../icons.js';
 import { pct, date, monthName, plural, NBSP } from '../format.js';
 import { copyOrShow } from '../share.js';
 import { block } from '../ui/block.js';
 import { ext } from '../ui/cards.js';
 import { chips } from '../ui/chips.js';
-import { toggle } from '../ui/forms.js';
-import { seg } from '../ui/seg.js';
 import { timeline } from '../ui/timeline.js';
 import { emptyState } from '../ui/states.js';
 import { gl } from '../ui/gl.js';
@@ -262,102 +259,6 @@ export function rssBlock(M) {
   });
 }
 
-/* ------------------------------------------------------------------ the subscription: only the flow is shown, nothing is sent or kept */
-const TOPICS = [
-  {
-    value: 'report',
-    label: 'Нов месечен отчет',
-    short: 'нов месечен отчет',
-    hint: 'Когато излязат данните за поредния месец.',
-    on: true,
-  },
-  {
-    value: 'law',
-    label: 'Закон и гласувания',
-    short: 'закон и гласувания',
-    hint: 'Стъпките на закона за бюджета и гласуванията в залата.',
-    on: true,
-  },
-  {
-    value: 'rates',
-    label: 'Данъци и осигуровки',
-    short: 'данъци и осигуровки',
-    hint: 'Промени в ставките и границите.',
-    on: false,
-  },
-  {
-    value: 'data',
-    label: 'Нови данни и Евростат',
-    short: 'нови данни и Евростат',
-    hint: 'Нови набори от данни и нови публикации на Евростат.',
-    on: false,
-  },
-];
-const CHANNELS = [
-  { value: 'email', label: 'По имейл' },
-  { value: 'viber', label: 'Във Viber' },
-];
-
-/** one labelled field with a persistent (empty) alert for its error, so a message is spoken when it is filled in */
-function fld(o) {
-  return html`<div class="field" data-s16-pane="${o.pane}"${o.hidden ? html` hidden` : ''}>
-    <label class="field-label" for="${o.id}">${o.label}</label>
-    <p class="field-hint" id="${o.id}-hint">${o.hint}</p>
-    ${o.control}
-    <p class="field-error" id="${o.id}-err" role="alert"></p>
-  </div>`;
-}
-
-export function subscribeBlock() {
-  const email = fld({
-    pane: 'email',
-    id: 's16-email',
-    label: 'Имейл адрес',
-    hint: 'Пиши само адреса си.',
-    control: html`<input class="input" id="s16-email" name="email" type="email" inputmode="email" autocomplete="email" spellcheck="false" placeholder="ime@example.com" aria-describedby="s16-email-hint s16-email-err">`,
-  });
-  const viber = fld({
-    pane: 'viber',
-    id: 's16-phone',
-    label: 'Телефон във Viber',
-    hint: 'Пиши само цифрите, например 0888 000 000 или +359 888 000 000.',
-    hidden: true,
-    control: html`<input class="input" id="s16-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="0888 000 000" aria-describedby="s16-phone-hint s16-phone-err">`,
-  });
-  const topics = html`<fieldset class="s16-topics" aria-describedby="s16-topics-err">
-      <legend class="field-label">За какво да ти съобщаваме?</legend>
-      <div class="s16-topic-list">${TOPICS.map((t) => toggle({ id: `s16-t-${t.value}`, name: 'topic', label: t.label, hint: t.hint, checked: t.on, attrs: raw(` value="${t.value}"`) }))}</div>
-      <p class="field-error" id="s16-topics-err" role="alert"></p>
-    </fieldset>`;
-  const consent = html`<div class="field s16-consent">
-      ${toggle({ id: 's16-consent', name: 'consent', label: 'Съгласен съм да получавам съобщения за избраното', attrs: raw(' aria-describedby="s16-consent-err"') })}
-      <p class="field-error" id="s16-consent-err" role="alert"></p>
-    </div>`;
-  const body = html`<p class="s16-lead">Получавай кратко съобщение, когато има нов отчет или промяна в закона. Избери къде и за какво.</p>
-    <form class="s16-form" data-s16-form novalidate>
-      ${seg({ name: 's16-ch', label: 'Къде да ти съобщаваме?', value: 'email', options: CHANNELS, cls: 's16-seg' })}
-      ${email}${viber}${topics}${consent}
-      <div class="cluster"><button type="submit" class="btn btn-primary">Абонирай ме</button></div>
-    </form>
-    <div class="s16-ok" data-s16-ok hidden>
-      <span class="s16-ok-ic" aria-hidden="true">${icon('checkCircle', { size: 24 })}</span>
-      <div class="s16-ok-main">
-        <h3 class="s16-ok-h" tabindex="-1">Благодарим!</h3>
-        <p data-s16-ok-text></p>
-        <p class="s16-note">Това е примерен формуляр: нищо не е изпратено и нищо не е записано.</p>
-        <div class="cluster"><button type="button" class="btn" data-s16-again>Попълни отново</button></div>
-      </div>
-    </div>`;
-  return block({
-    id: 's16-b-subscribe',
-    level: 2,
-    title: 'Съобщения по имейл или във Viber',
-    status: 'mock',
-    body,
-    why: 'Това е примерен формуляр: показва как ще работи абонаментът, но прототипът не изпраща нищо и не пази въведеното.',
-  });
-}
-
 /* ------------------------------------------------------------------ the page */
 export const needs = ['core', 'feed'];
 export const styles = ['s16-novo'];
@@ -374,12 +275,10 @@ export function lede(ctx) {
 
 export function render(ctx) {
   const M = model(ctx);
-  return html`${summaryBlock(M)}${feedBlock(M)}${rssBlock(M)}`; // V7: the sample subscription form (subscribeBlock) is out: it sent nothing, and RSS is the real channel
+  return html`${summaryBlock(M)}${feedBlock(M)}${rssBlock(M)}`;
 }
 
-/* ------------------------------------------------------------------ behaviour: the chronology filter is announced, the mock form is checked and answered, the RSS address is copied */
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-const PHONE = /^\+?\d{9,15}$/;
+/* ------------------------------------------------------------------ behaviour: the chronology filter is announced, the RSS address is copied */
 let lastVid = null; // the filter the previous render showed: a change is announced once
 
 export function mount(root, ctx) {
@@ -398,100 +297,6 @@ export function mount(root, ctx) {
   }
   lastVid = M.vid;
 
-  const channel = () => (one('input[name="s16-ch"]:checked') || {}).value || 'email';
-  const syncPane = () => {
-    const ch = channel();
-    root.querySelectorAll('[data-s16-pane]').forEach((p) => {
-      p.hidden = p.dataset.s16Pane !== ch;
-    });
-  };
-  const setError = (control, message) => {
-    const err = one(`#${control.id}-err`);
-    if (err) err.textContent = message;
-    if (message) control.setAttribute('aria-invalid', 'true');
-    else control.removeAttribute('aria-invalid');
-  };
-  const setTopicsError = (message) => {
-    one('#s16-topics-err').textContent = message;
-    const fs = one('.s16-topics');
-    if (message) fs.setAttribute('data-bad', 'true');
-    else fs.removeAttribute('data-bad');
-  };
-
-  on(root, 'submit', (e) => {
-    const f = e.target.closest('form[data-s16-form]');
-    if (!f) return;
-    e.preventDefault();
-    const ch = channel();
-    const email = f.elements.email,
-      phone = f.elements.phone,
-      consent = f.elements.consent;
-    const bad = [];
-    setError(email, '');
-    setError(phone, '');
-    if (ch === 'email') {
-      const v = email.value.trim();
-      if (!v) {
-        setError(email, 'Напиши имейл адрес.');
-        bad.push(email);
-      } else if (!EMAIL.test(v)) {
-        setError(email, 'Това не прилича на имейл адрес. Провери го.');
-        bad.push(email);
-      }
-    } else {
-      const v = phone.value.replace(/[\s\-().]/g, '');
-      if (!v) {
-        setError(phone, 'Напиши номер на телефон.');
-        bad.push(phone);
-      } else if (!PHONE.test(v)) {
-        setError(
-          phone,
-          'Това не прилича на телефонен номер. Пиши само цифри, например 0888 000 000.',
-        );
-        bad.push(phone);
-      }
-    }
-    const picked = [...f.querySelectorAll('input[name="topic"]:checked')].map((i) => i.value);
-    setTopicsError(picked.length ? '' : 'Избери поне една тема.');
-    if (!picked.length) bad.push(f.querySelector('input[name="topic"]'));
-    setError(consent, consent.checked ? '' : 'Отбележи съгласието, за да продължиш.');
-    if (!consent.checked) bad.push(consent);
-    if (bad.length) {
-      bad
-        .sort((a, b) =>
-          a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1,
-        )[0]
-        .focus();
-      return;
-    }
-    const words = TOPICS.filter((t) => picked.includes(t.value)).map((t) => t.short);
-    one('[data-s16-ok-text]').textContent =
-      `Така би работил абонаментът: съобщения ${ch === 'email' ? 'по имейл' : 'във Viber'} за ${words.join(', ')}.`;
-    const ok = one('[data-s16-ok]');
-    f.hidden = true;
-    ok.hidden = false;
-    ok.querySelector('.s16-ok-h').focus();
-    ctx.announce('Благодарим! Това е примерен формуляр: нищо не е изпратено.');
-  });
-
-  on(root, 'change', (e) => {
-    const t = e.target;
-    if (!t || !t.matches) return;
-    if (t.matches('input[name="s16-ch"]')) {
-      syncPane();
-      const f = t.form;
-      if (f) {
-        setError(f.elements.email, '');
-        setError(f.elements.phone, '');
-      }
-    } else if (t.matches('input[name="topic"]')) setTopicsError('');
-    else if (t.matches('input[name="consent"]')) setError(t, '');
-  });
-  on(root, 'input', (e) => {
-    const t = e.target;
-    if (t && t.matches && t.matches('#s16-email, #s16-phone') && t.getAttribute('aria-invalid'))
-      setError(t, '');
-  });
   on(root, 'focusin', (e) => {
     if (e.target && e.target.id === 's16-rss-url') e.target.select();
   });
@@ -499,20 +304,6 @@ export function mount(root, ctx) {
     const copy = e.target.closest('[data-s16-copy]');
     if (copy) {
       void copyOrShow(one('#s16-rss-url').value, 'Адресът е копиран.', 'Адрес на RSS файла', copy);
-      return;
-    }
-    if (e.target.closest('[data-s16-again]')) {
-      const f = one('form[data-s16-form]');
-      one('[data-s16-ok]').hidden = true;
-      f.reset();
-      f.querySelectorAll('[aria-invalid]').forEach((c) => c.removeAttribute('aria-invalid'));
-      f.querySelectorAll('.field-error').forEach((p) => {
-        p.textContent = '';
-      });
-      setTopicsError('');
-      syncPane();
-      f.hidden = false;
-      (channel() === 'email' ? f.elements.email : f.elements.phone).focus();
     }
   });
 

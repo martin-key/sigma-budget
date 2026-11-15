@@ -1,6 +1,6 @@
 # TypeScript release оператор
 
-Node 24 клиентът използва съществуващите маршрути в `apps/web/workers/api/` и същия `budget-release/1` пакет. Няма нов backend или регистър. Общият `budget`/`budget-ts` dispatch остава за последващата интеграция; този модул вече има самостоятелен вход.
+Node 24 клиентът използва съществуващите маршрути в `apps/web/workers/api/` и същия `budget-release/1` пакет. Няма нов backend или регистър. Общият `budget`/`budget-ts` dispatch (`apps/etl/src/production-cli.ts`) препраща към него `status`, `preflight`, `upload`, `publish` и `rollback`; модулът има и самостоятелен вход.
 
 ```sh
 pnpm --filter @sigma-budget/etl... build
@@ -62,7 +62,7 @@ await preflightRelease({ release, originals, maxObjectBytes });
 
 ## Прекъсване, повторение и ревизии
 
-Receipts по подразбиране са в `work/ts-operator-receipts`, отделно от build receipt-а. Името включва SHA-256 на environment name + origin и release ID. Съдържанието също проверява тази самоличност. Директорията трябва да е операторски контролирана, отделна от candidate и source `data/`. Старите Python receipts не се преизползват автоматично.
+Receipts по подразбиране са в `work/ts-operator-receipts` в корена на копието на хранилището, от което върви командата, независимо от текущата папка (`/work/` е в `.gitignore`), отделно от build receipt-а. През `budget`/`budget-ts` те са в `<root>/work/ts-operator-receipts`: без `--root` това е същата папка, а с изричен `--root /друго-копие` разписките остават в това копие, при неговите `data/` и среди. Изричен `--receipts` ги премества и в двата случая. Името включва SHA-256 на environment name + origin и release ID. Съдържанието също проверява тази самоличност. Директорията трябва да е операторски контролирана, отделна от candidate и source `data/`. Старите Python receipts не се преизползват автоматично.
 
 Записът е временен файл с mode `0600`, `fsync`, atomic rename и directory `fsync`. Един процес държи directory lock за конкретния environment/release. Lock-ът се освобождава във `finally`. След принудително прекратен процес оставащият `.json.lock` трябва да се отстрани ръчно само след проверка, че процесът е спрял; клиентът не гадае дали lock е стар.
 

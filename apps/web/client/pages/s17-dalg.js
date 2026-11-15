@@ -1,3 +1,4 @@
+import { debtIssues } from '../ui/debt-issues.js';
 import { isFramework } from '../budget-2027.js';
 import { debtView, mountBillSearch, debtChart2027 } from './bill-views.js';
 // S17 Колко дължим? (G3). The state debt counted two ways: by the State Debt Act (ЗДД: table VI-1 of the budget motives, 2024-2028)
@@ -1826,7 +1827,9 @@ function methodDisclosure(M) {
 
 /* ------------------------------------------------------------------ the page */
 export const needs = (ctx) =>
-  isFramework(ctx) ? ['core', 'budget2027?'] : ['core', 'debt', 'execution?', 'outlook?'];
+  isFramework(ctx)
+    ? ['core', 'budget2027?', 'debt-issues?']
+    : ['core', 'debt', 'execution?', 'outlook?', 'debt-issues?'];
 export const styles = ['s17-dalg'];
 
 export function lede(ctx) {
@@ -1888,14 +1891,17 @@ const historicalEmbeds = {
 };
 
 export function render(ctx) {
-  if (isFramework(ctx)) return debtView(ctx);
+  if (isFramework(ctx)) {
+    const page = debtView(ctx);
+    return { ...page, body: html`${page.body}${debtIssues(ctx)}` };
+  }
   const M = model(ctx);
   const F = finModel(M);
   const top =
     M.scope === MAA
       ? [maastrichtBlock(M), euBlock(M), quarterBlock(M), compareBlock(M)]
       : [zddBlock(M), compareBlock(M)];
-  return html`${controls(M)}${kpisBlock(M)}${top}${confuseBlock(M)}${financeBlock(M, F)}${financeTableBlock(M, F)}${newDebtBlock(M)}<div class="s17-pair">${interestBlock(M)}${balanceBlock(M)}</div>${structureBlock(M)}${guaranteesBlock(M)}${limitsBlock(M)}${methodDisclosure(M)}`;
+  return html`${controls(M)}${kpisBlock(M)}${top}${confuseBlock(M)}${financeBlock(M, F)}${financeTableBlock(M, F)}${newDebtBlock(M)}<div class="s17-pair">${interestBlock(M)}${balanceBlock(M)}</div>${structureBlock(M)}${guaranteesBlock(M)}${limitsBlock(M)}${methodDisclosure(M)}${debtIssues(ctx)}`;
 }
 
 let lastScope = null;

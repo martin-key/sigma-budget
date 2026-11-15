@@ -1,0 +1,35 @@
+{
+  "504b3c85c8bac40f693b278782c1195ba38cc70e858cec7b493ae51ddaf137b2": {
+    "code": "1800",
+    "unit": "0.1 хил. EUR",
+    "differences": {
+      "row/6/sectors/1": -19,
+      "policy/1800.02.00/1": 19,
+      "programmes/prb": 19
+    }
+  },
+  "8bb6d5fc9e2076d6d6ee75032b2a8b1aa671edb6d9781e7022433a85ec1b241e": {
+    "code": "2300",
+    "unit": "0.1 хил. EUR",
+    "differences": {}
+  },
+  "af582f8a5b5a14f07b1d0e3a14be1b89ce3193e4ac674c419c36d313e84a8a3b": {
+    "code": "7400",
+    "unit": "0.1 хил. EUR",
+    "differences": {
+      "row/0/split/3": -120001,
+      "row/0/sectors/0": 120001,
+      "row/4/split/3": -80172,
+      "row/4/sectors/0": 80172,
+      "row/6/split/3": -80172,
+      "row/6/sectors/0": 80172,
+      "row/7/split/3": -39829,
+      "row/7/sectors/0": 39829
+    }
+  },
+  "bc103ceeeaadef1b9420ff91a90dea16e6afec75b8fd8b94cfa581b878137883": {
+    "code": "0100",
+    "unit": "0.1 хил. EUR",
+    "differences": {}
+  }
+}

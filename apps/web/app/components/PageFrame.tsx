@@ -20,7 +20,6 @@ export function PageFrame({
   useEffect(() => setReady(true), []);
   const r = byId[model.screen],
     accent = {
-      S26: 'проекта',
       S30: 'страница',
       S25: 'данни',
       S35: '',

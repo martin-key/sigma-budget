@@ -3,7 +3,7 @@
 //   no registry or no current release (local, CI): the files of data/release that the build put in the static assets, under the release that
 //   data/release/releases/current.json names
 // A file that is not in the release is PENDING (the „Предстои“ state), as a 404 is in the browser; an unreadable one is an error.
-// Three names are not files of data/ (S35 „Данни и проверка“): release/manifest and release/validation are the manifest and the checks of
+// Three names are not files of data/ (S35 „Проверка на данните“): release/manifest and release/validation are the manifest and the checks of
 // the release, release/journal is the registry's public journal (PENDING without a registry).
 import { current, manifestOf, readObject } from './api/store.js';
 import { publicApi } from './api/api.js';

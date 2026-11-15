@@ -120,7 +120,7 @@ def main():
             assert page.evaluate('getComputedStyle(document.documentElement).colorScheme') == 'light'
             # Hex letter case is serialization only (CSS formatting may change it).
             assert page.evaluate('getComputedStyle(document.documentElement).getPropertyValue("--series-1").trim()').lower() == '#15110C'.lower()
-            assert page.locator('.block-tools:visible, .seg:visible, .unit-switch:visible, .explorer:visible, .foot-nav:visible, .footer .link-btn:visible').count() == 0
+            assert page.locator('.block-tools:visible, .seg:visible, .unit-switch:visible, .explorer:visible, .foot-nav:visible').count() == 0
             chart = page.locator('.chart').first
             expect(chart).to_be_visible()
             expect(chart).to_have_attribute('data-ready', '1')

@@ -167,3 +167,40 @@ export function reviseLaunchTexts(
     };
   });
 }
+
+/** The complete production programme inventory replaces the catalog's zero-pending sentence. */
+export function reviseProgrammeCatalog(value: unknown): unknown {
+  const used = new Set<number>();
+  const result = reviseValue(
+    value,
+    [
+      [
+        /За 0 от (\d+) бюджета програмите не са включени \(P03\)\./gu,
+        'Програмите за 2026 г. са включени за всички $1 ведомства. Историческите години са представени според разчетените таблици.',
+      ],
+      [
+        /Индекс на \d+ програми от програмните бюджети:/gu,
+        'Индекс на политиките и програмите от програмните бюджети:',
+      ],
+    ],
+    used,
+  );
+  if (used.size !== 2) throw new Error('Stale complete-programme catalog wording');
+  return result;
+}
+/** Final source description before the core and derived stages consume it. */
+export function reviseProgrammeSources(value: unknown): unknown {
+  const used = new Set<number>();
+  const result = reviseValue(
+    value,
+    [
+      [
+        'Общите суми съответстват на закона.',
+        'Таблиците са към законопроекта. Съпоставката с приетия закон и отклоненията в документите са показани във ведомствените файлове.',
+      ],
+    ],
+    used,
+  );
+  if (used.size !== 1) throw new Error('Stale programme source wording');
+  return result;
+}

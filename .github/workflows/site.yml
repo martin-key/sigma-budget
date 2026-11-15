@@ -32,6 +32,7 @@ jobs:
     uses: ./.github/workflows/security.yml
 
   coverage:
+    needs: [node-inputs]
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
@@ -68,8 +69,14 @@ jobs:
           python -m pip install --require-hashes -r tests/requirements-dev.lock -r pipeline/requirements.lock
           python -m pip install --no-deps -e pipeline
           pnpm install --frozen-lockfile
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: registered-node-input-archive
+          path: ${{ runner.temp }}/registered-node-input-archive
+      - name: Restore the four pinned programme originals for independent checks
+        run: node scripts/restore-programme-test-inputs.mjs "$RUNNER_TEMP/registered-node-input-archive/registered-node-inputs.tar.gz"
       - name: Coverage gate self-tests
-        run: node --test scripts/check-coverage.test.mjs scripts/ci-gates.test.mjs scripts/ci-install-browser.test.mjs scripts/check-parity-reports.test.mjs
+        run: node --test scripts/check-coverage.test.mjs scripts/ci-gates.test.mjs scripts/ci-install-browser.test.mjs scripts/check-parity-reports.test.mjs scripts/restore-programme-test-inputs.test.mjs
       - name: Coverage baseline ratchet against target
         env:
           COVERAGE_BASE_REF: ${{ github.base_ref }}
@@ -157,6 +164,7 @@ jobs:
           if-no-files-found: error
 
   build:
+    needs: [node-inputs]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -177,6 +185,12 @@ jobs:
           python -m pip install --no-deps -e pipeline
           bash scripts/ci-install-browser.sh
           pnpm install --frozen-lockfile
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: registered-node-input-archive
+          path: ${{ runner.temp }}/registered-node-input-archive
+      - name: Restore the four pinned programme originals for independent checks
+        run: node scripts/restore-programme-test-inputs.mjs "$RUNNER_TEMP/registered-node-input-archive/registered-node-inputs.tar.gz"
       - name: Check repository formatting
         run: pnpm format:check
       - name: TypeScript
@@ -868,9 +882,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh api --hostname github.com repos/midt-bg/sigma-budget/releases/assets/745690741 -H 'Accept: application/octet-stream' > "$RUNNER_TEMP/registered-node-inputs.tar.gz"
-          printf '%s  %s\n' 'd57f633a7ea99e61a674d555e6c108347cb7d1c1db8defaf1dc1e9440d06ffbb' "$RUNNER_TEMP/registered-node-inputs.tar.gz" | sha256sum --check
-          test "$(stat -c '%s' "$RUNNER_TEMP/registered-node-inputs.tar.gz")" = 152552043
+          gh api --hostname github.com repos/midt-bg/sigma-budget/releases/assets/746880567 -H 'Accept: application/octet-stream' > "$RUNNER_TEMP/registered-node-inputs.tar.gz"
+          printf '%s  %s\n' '9717d7f91bbed7c5c6ced6e42d637820dfbdd2f6571579101c6489df91538a3f' "$RUNNER_TEMP/registered-node-inputs.tar.gz" | sha256sum --check
+          test "$(stat -c '%s' "$RUNNER_TEMP/registered-node-inputs.tar.gz")" = 153847296
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: registered-node-input-archive

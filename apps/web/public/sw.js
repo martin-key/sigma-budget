@@ -9,7 +9,9 @@
 // stored on install, so the fallback is there whatever page the visitor landed on (before, landing on /prihodi left /razhodi and / without a copy:
 // a network error offline). It is the bare shell, not the start page the server drew, so no other screen's text stands under the address.
 // V7-2: operator pages (/admin) and no-store answers are never kept, so nothing private outlives a sign-out; the new name drops older copies.
-const CACHE = 'bns-v7-2'; // its own cache name per address scheme (a v6 copy holds hash-era pages); the old cache is deleted on activate
+// V7-3: the head of the shell names the icons of СИГМА and no longer the old SVG icon. The shell is stored only on install, so the name changes
+// with it: an installed copy takes the new shell and drops the pages kept with the old head.
+const CACHE = 'bns-v7-3'; // its own cache name per address scheme (a v6 copy holds hash-era pages); the old cache is deleted on activate
 const START = () => new URL('app', self.registration.scope).href;
 self.addEventListener('install', (e) => {
   self.skipWaiting();

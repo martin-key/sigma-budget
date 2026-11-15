@@ -1,4 +1,4 @@
-// The check groups of a release (validation.json) as „Данни и проверка“ (S35) shows them: the group in plain Bulgarian, how many checks it
+// The check groups of a release (validation.json) as „Проверка на данните“ (S35) shows them: the group in plain Bulgarian, how many checks it
 // ran and the result. The technical summary of each group stays in validation.json, which the screen lists with the other files.
 const GROUPS = {
   INPUTS: 'Входните файлове и техните SHA-256',

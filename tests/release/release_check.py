@@ -371,7 +371,7 @@ def main(argv):
         page = b.decode("utf-8", "replace")
         revs = [e["revision"] for e in jbody(req("GET", base + "/api/releases?limit=50")[2]).get("items", [])]
         ok(s == 200 and 'data-view="ready"' in page and rid in page and 'id="s35-journal' in page and all(">%d<" % r in page for r in revs),
-           "„Данни и проверка“ (section 9.1) is drawn from the current release, with its files and the registry's journal (%d revisions)" % len(revs))
+           "„Проверка на данните“ (section 9.1) is drawn from the current release, with its files and the registry's journal (%d revisions)" % len(revs))
 
         if a.real:
             print("the release of budget build, published and reproduced from the Worker")

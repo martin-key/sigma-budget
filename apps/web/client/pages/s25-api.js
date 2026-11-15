@@ -352,7 +352,7 @@ function versionsBlock(ctx, M) {
     () => html`
     ${rows.length ? facts(rows, { cls: 's25-facts' }) : ''}
     <p>При използване на данните посочвай версията и датата „Данни към“ от блока ${code('meta')}.</p>
-    <p>Историята на изданията е в <a href="${href('proverka')}">„Данни и проверка“</a>.</p>
+    <p>Историята на изданията е в <a href="${href('proverka')}">„Проверка на данните“</a>.</p>
     <p>Кога излизат нови данни: виж <a href="${href('novo')}">„Какво ново?“</a>${feed && hasFile(feed) ? html` и RSS файла ${html`<a href="${href('api', {}, { set: feed.slug, to: 's25-read' })}">${code(feed.file)}</a>`}` : ''}.</p>`,
     { scan: true },
   );

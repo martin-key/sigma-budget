@@ -1,21 +1,9 @@
 import { expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { AboutContent } from './about-content';
-import { legendBody } from '../components/Status';
 import { TextState } from '../components/TextState';
 import { pendingState } from '../components/NarrativeUI';
 import { pendingState as legacyPending } from '../../client/ui/states.js';
-import core from './__fixtures__/core.json';
-
-it('removes planning sections and their links from the public about page', () => {
-  const html = renderToStaticMarkup(<AboutContent core={core} glossary={{}} />);
-  expect(html).not.toMatch(
-    /s26-roadmap|s26-questions|data-s26-demo|Пътна карта|работна група|Следващи стъпки|още не е извлечен/,
-  );
-  expect(html).toContain('Текстовете и данните');
-  expect(html).toContain('Още два слоя');
-  expect(html).toContain('Официални източници');
-});
+import { legendBody } from '../../client/ui/status.js';
 
 it('keeps pending identifiers while hiding acquisition notes and supplied future copy', () => {
   const title = 'Тестов показател';
@@ -36,7 +24,7 @@ it('keeps pending identifiers while hiding acquisition notes and supplied future
   }
   expect(states[0]).toContain('data-pending-id="P01"');
   expect(states[1]).toContain('data-pending-id="P01"');
-  const legend = renderToStaticMarkup(legendBody());
+  const legend = String(legendBody()); // the status legend of «Методология» (apps/web/client/pages/s24-danni.js)
   expect(legend).toContain('Няма данни');
   expect(legend).not.toMatch(/Предстои|Примерни данни|не са извлечени/);
 });

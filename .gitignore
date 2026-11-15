@@ -50,21 +50,40 @@ Thumbs.db
 wrangler.local.jsonc
 pipeline/environments.local.json
 
-# Сглобеният сайт (apps/web/scripts/build.py), сглобеното SSR приложение (react-router build) и локалното състояние на wrangler
-dist/
-build/
+# Генерираният изход се игнорира само там, където инструментите го пишат. Голо име на папка (build/, dist/, coverage/) би скрило
+# и изходни папки със същото име, например packages/ingest/src/build/: нов файл там не би стигнал до Git. Пазачът е
+# apps/web/workers/repository-ignore.test.ts.
+# Сглобеното SSR приложение (react-router build и pnpm build:release, apps/web/react-router.config.ts)
+/apps/web/build/
+# Компилираните TypeScript пакети (tsc -p tsconfig.build.json, outDir dist)
+/apps/*/dist/
+/packages/*/dist/
+# Покритието от pnpm test -- --coverage (vitest.shared.ts, reportsDirectory ./coverage); в корена — при vitest, пуснат оттам
+/apps/*/coverage/
+/packages/*/coverage/
+/coverage/
+# Сводката на pnpm check:coverage (scripts/check-coverage.mjs); в CI се качва като artifact „coverage“, затова не се следи
+/coverage-summary.md
+# Изходът от по-старата подредба в корена: статичният сайт (apps/web/scripts/ssr_parity.py --dist dist) и SSR build
+/dist/
+/build/
+# Изходът на setuptools за Python пакета (pip wheel ./pipeline, python -m build); изходната папка е pipeline/budget_pipeline/build/
+/pipeline/build/
+/pipeline/dist/
+# Генерираните типове на React Router и локалното състояние на wrangler (имена на инструменти, не на изходни папки)
 .react-router/
 .wrangler/
-work/
-
-data/cache/
+# Локалните бележки и разписките на операторските команди (apps/etl/src/release-operator.ts: work/ts-operator-receipts)
+/work/
 
 *.egg-info/
 
-# Turbo task cache
+# Turbo task cache (в корена и във всеки workspace)
 .turbo/
-coverage/
 
 !data/originals/state_budget/
 !data/originals/fiscal_quarterly/
 !data/originals/taxes-subsectors-acquisition.json
+
+!data/originals/debt/
+!data/originals/debt-issues-acquisition.json

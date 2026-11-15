@@ -52,7 +52,6 @@ DEMOS = ['loading', 'empty', 'error', 'pending']                     # the body 
 OFFLINE_DEMO = 'offline'                                             # the real screen + the offline banner
 FAMILIES = ['base', 'demo', 'period', 'user', 'prefs', 'tour', 'to', 'chrome', 'share', 'embed', 'gloss', 'tabs', 'png', 'views', 'selftest']   # Light palette only; OS preference regression is in visual_audit.py.
 DEFAULT_OFF = set()                                                  # families that run only when asked for (none now)
-STUB_TEXT = 'Този екран предстои да бъде изграден в прототипа'
 PREFS_KEY = 'bns.prefs.v1'
 THEME_SUFFIX = ' · СИГМА Бюджет'
 # console / network noise that is expected and not a defect of the site
@@ -61,6 +60,19 @@ IGNORE_CONSOLE = [
     re.compile(r'^Failed to load resource', re.I),                    # the HTTP status is reported through the response events
     re.compile(r'preloaded using link preload but not used', re.I),   # three font preloads; a screen may not use them within seconds
 ]
+# the «Бюджет» group of the menu, in the order the owner set (desktop dropdown, phone «Меню», footer); the two renamed screens
+BUDGET_MENU = ['Бюджет 2027', 'Годишната рамка', 'Разходи', 'Приходи', 'Кой харчи', 'Мерки', 'Прогноза', 'Общини', 'Пътят на бюджета']
+DATA_MENU = ['Методология', 'Проверка на данните', 'Отворени данни и API', 'Обратна връзка']
+# the notes of the retired «За проекта» page, now the end of the footer fine print, before the open code and СИГМА links
+FOOTER_NOTES = ['Речникът и поясненията са редакционни текстове, а не официални данни.', 'Без бисквитки и проследяване.']
+CODE_URL = 'https://github.com/midt-bg/sigma-budget'
+FOOTER_JS = r"""() => ({
+  groups: Object.fromEntries([...document.querySelectorAll('#footer details.foot-grp')].map(d => [d.querySelector('summary').textContent.trim(), [...d.querySelectorAll('li a')].map(a => a.textContent.trim())])),
+  legend: !!document.querySelector('#footer [data-action="legend"]'),
+  sigma: (document.querySelector('#footer .fine .sister-link') || {}).textContent || '',
+  fine: [...document.querySelectorAll('#footer .fine > *')].map(e => e.textContent.replace(/\s+/g, ' ').trim()),
+  code: (document.querySelector('#footer .fine a.code-link') || {}).href || ''
+})"""
 NEGATIVE_URLS = ['#/nyama-takava', '#/patevoditel/9', '#/prihodi/dds/x', '#/embed', '#/obshtina', '#/razhodi/a/b/c']
 
 # ------------------------------------------------------------------------------------------------------- findings (data)
@@ -145,7 +157,7 @@ async () => {
 }
 """
 
-# the generic audit of one rendered screen; o = {expect: route id|null, deep: bool, stub: bool}
+# the generic audit of one rendered screen; o = {expect: route id|null, deep: bool}
 AUDIT_JS = r"""
 async (o) => {
   const P = [], info = {};
@@ -220,9 +232,6 @@ async (o) => {
   }
   const bodyFs = parseFloat(getComputedStyle(document.body).fontSize);
   if (bodyFs < 15) add('font-size', 'warn', `body font size is ${bodyFs}px`);
-
-  // ---- stub?
-  info.stub = (view.textContent || '').includes(%STUB%);
 
   // ---- broken values in text and attributes
   const BADTXT = /(^|[^\p{L}\p{N}_.])(NaN|undefined|Infinity|null)(?![\p{L}\p{N}_])|\[object Object\]/u;
@@ -499,7 +508,7 @@ async (o) => {
   info.nodes = document.querySelectorAll('*').length;
   return { problems: P, info };
 }
-""".replace('%STUB%', json.dumps(STUB_TEXT)).replace('%LEAK%', '/private channel|частен канал/i')
+""".replace('%LEAK%', '/private channel|частен канал/i')
 # AUDIT_JS-END (the Python side follows)
 
 # ===================================================================================================== local web server
@@ -844,7 +853,7 @@ def merge_audits(a, b):
 
 
 def slim(info):
-    keep = ('route', 'view', 'title', 'h1', 'stub', 'bare', 'links', 'ext', 'rel', 'share', 'tabs', 'charts', 'nodes', 'gl', 'blocks',
+    keep = ('route', 'view', 'title', 'h1', 'bare', 'links', 'ext', 'rel', 'share', 'tabs', 'charts', 'nodes', 'gl', 'blocks',
             'mockBlocks', 'hasDetails')
     return {k: info.get(k) for k in keep}
 
@@ -859,7 +868,7 @@ def deep_pass(page):
     settle(page)
 
 
-# concrete numbers the plan fixes for the finished screens (checked only on screens that are no longer stubs). The plan block and the
+# concrete numbers the plan fixes for the finished screens (checked on screens that are ready). The plan block and the
 # S15 comparison follow the latest report in data/release/execution.json (expect); they were written in for August 2026.
 _PLAN, _CMP = expect.plan(), expect.compare()
 VALUE_CHECKS = {
@@ -922,7 +931,6 @@ def job_base(w, j):
     if j.get('shot'):
         SHOT_DIR.mkdir(parents=True, exist_ok=True)
         o.page.screenshot(path=str(SHOT_DIR / f'{j["shot"]}.png'))
-    stub = bool(a['info'].get('stub'))
     if j.get('deep'):
         deep_pass(o.page)
         a = merge_audits(a, o.page.evaluate(AUDIT_JS, {'expect': route, 'deep': True}))
@@ -931,10 +939,8 @@ def job_base(w, j):
     fs += problems_to_findings(a['problems'], route, cell, h)
     if w.opts.get('axe'):
         fs += axe_findings(o.page, w.opts['axe'], route, cell, h)
-    if stub:
-        fs.append(warn('stub', 'still a stub screen: generic checks only', route=route, cell=cell, url=h))
     vals = None
-    if not stub and a['info'].get('view') == 'ready' and not j.get('no_values'):
+    if a['info'].get('view') == 'ready' and not j.get('no_values'):
         vals = value_scan(o.page, route, pending_of(items), did_deep=bool(j.get('deep')))
     return fs, {'info': slim(a['info']), 'vals': vals}
 
@@ -1735,12 +1741,21 @@ def ch_popovers(w, cell, F, W, j, outs):
             esc_close('#btn-period', 'period (restricted screen)')
         page.evaluate("() => { location.hash = '#/razhodi'; }")
         wait_for(page, "() => { const a = document.querySelector('#view article.page'); return !!a && a.dataset.route === 'S07' && a.dataset.ready === '1'; }", timeout=6000)
-    # ---- Current (26.10, working-group feedback): the settings block is gone everywhere: no ⋯ popover, no footer settings button, no switches; «Легенда» stays as a footer entry
+    # ---- Current (26.10, working-group feedback): the settings block is gone everywhere: no ⋯ popover, no footer settings button, no switches
     if present(page, '#footer [data-action="settings"], [data-pref], #btn-more'):
         F('settings-gone', 'a settings control («Настройки», a [data-pref] switch or #btn-more) is still on the screen')
-    leg = page.evaluate("() => { const b = document.querySelector('#footer [data-action=\"legend\"]'); return b ? b.textContent.trim() : null; }")
-    if not leg or 'Легенда' not in leg:
-        F('settings-gone', f'the footer lost the «Легенда» entry (found {leg!r})')
+    # the owner removed the footer «Легенда» entry (the legend opens from the pages, see ch_mockbar); the СИГМА link stays in the fine print
+    foot = page.evaluate(FOOTER_JS)
+    if foot['legend']:
+        F('footer', 'the footer still has the «Легенда» entry (removed: the legend opens from the pages)')
+    if 'СИГМА' not in foot['sigma']:
+        F('footer', f'the footer fine print lost the СИГМА link (found {foot["sigma"]!r})')
+    if foot['groups'].get('Бюджет') != BUDGET_MENU:
+        F('footer', f'the footer «Бюджет» group is {foot["groups"].get("Бюджет")}, expected {BUDGET_MENU}')
+    if foot['groups'].get('Данни и проект') != DATA_MENU:
+        F('footer', f'the footer «Данни и проект» group is {foot["groups"].get("Данни и проект")}, expected {DATA_MENU}')
+    if foot['fine'][-4:-2] != FOOTER_NOTES or not foot['fine'][-2].startswith('Отворен код') or foot['code'] != CODE_URL:
+        F('footer', f'the footer fine print does not end with the notes, the open code link and СИГМА: {foot["fine"]} (code link {foot["code"]!r})')
     # an old stored value is never read: stale switches in localStorage must not turn anything on
     page.evaluate("() => localStorage.setItem('bns.prefs.v1', JSON.stringify({ onlyReal: true, perPerson: true, leva: true, sources: true }))")
     page.reload(wait_until='domcontentloaded')
@@ -1765,6 +1780,10 @@ def ch_popovers(w, cell, F, W, j, outs):
             links = page.evaluate("() => [...document.querySelectorAll('.popover[role=\"dialog\"] a[href^=\"#/\"]')].map(a => a.getAttribute('href'))")
             if not links:
                 F('header-nav', f'the dropdown of header group {i} has no links')
+            want = {2: BUDGET_MENU, 4: DATA_MENU}.get(i)
+            got = page.evaluate("() => [...document.querySelectorAll('.popover[role=\"dialog\"] a[href^=\"#/\"]')].map(a => a.textContent.trim())")
+            if want and got != want:
+                F('header-nav', f'the dropdown of header group {i} lists {got}, expected {want}')
             esc_close(sel, f'header group {i}')
     for gone in ('#btn-sources', '#btn-more', '#link-tax'):
         if present(page, gone):
@@ -1802,6 +1821,11 @@ def ch_phone(w, cell, F, W, j, outs):
         F('sheet', 'the phone «Меню» does not start with the red «Бюджет 2027» button')
     if st['links'] < 15:
         F('sheet', f'the "Още" sheet lists only {st["links"]} screens (expected the whole menu)')
+    drawer = page.evaluate("() => Object.fromEntries([...document.querySelectorAll('dialog.sheet[open] .more-grp')].map(g => [g.querySelector('h3').textContent.trim(), [...g.querySelectorAll('.more-list a')].map(a => a.textContent.trim())]))")
+    if drawer.get('Бюджет') != BUDGET_MENU:
+        F('sheet', f'the phone «Меню» lists the «Бюджет» group as {drawer.get("Бюджет")}, expected {BUDGET_MENU}')
+    if drawer.get('Данни и проект') != DATA_MENU:
+        F('sheet', f'the phone «Меню» lists the «Данни и проект» group as {drawer.get("Данни и проект")}, expected {DATA_MENU}')
     if st['users'] != 0 or st['themes'] != 0 or st['boxes']:   # Current (26.10): the whole «Настройки» block is gone from the drawer
         F('sheet', f'the phone menu still has settings (user types {st["users"]}, themes {st["themes"]}, toggles {st["boxes"]})')
     if not st['foc']:
@@ -1843,6 +1867,21 @@ def ch_phone(w, cell, F, W, j, outs):
             F('sheet-focus', f'after choosing a period the focus is on {act(page)["sig"]}, not back on #btn-period')
     else:
         F('sheet', 'the period button opens nothing on a phone')
+    # the narrowest phone (320px, the reflow width of WCAG 1.4.10): the magnifier and «Меню» keep 44px targets (they were 40px wide below
+    # 340px) and the tools stay clear of the wordmark
+    page.set_viewport_size({'width': 320, 'height': 800})
+    settle(page, 120)
+    hb = page.evaluate("""() => { const box = (s) => { const e = document.querySelector(s); if (!e || !e.getClientRects().length) return null; const r = e.getBoundingClientRect(); return { l: r.left, r: r.right, w: r.width, h: r.height }; };
+        return { brand: box('#topbar .brand'), period: box('#btn-period'), search: box('#btn-search'), menu: box('#btn-menu'), sw: document.documentElement.scrollWidth, vw: innerWidth }; }""")
+    for key in ('search', 'menu'):
+        b = hb[key]
+        if not b or b['w'] < 44 or b['h'] < 44:
+            F('target-size', f'at 320px the header #btn-{key} is {b and round(b["w"])}x{b and round(b["h"])}px (minimum 44x44)')
+    tools = [b for b in (hb['period'], hb['search'], hb['menu']) if b]
+    if hb['brand'] and tools and min(b['l'] for b in tools) < hb['brand']['r'] + 8:
+        F('layout', f'at 320px the header tools come within 8px of the wordmark (wordmark ends at {round(hb["brand"]["r"])}, tools start at {round(min(b["l"] for b in tools))})')
+    if hb['sw'] > hb['vw'] or max(b['r'] for b in tools) > hb['vw']:
+        F('layout', f'at 320px the header does not fit the viewport (scrollWidth {hb["sw"]}, tools end at {round(max(b["r"] for b in tools))})')
 
 
 RETIRED_NOTICE_JS = r"""() => {
@@ -1858,7 +1897,7 @@ RETIRED_NOTICE_JS = r"""() => {
 
 
 def ch_mockbar(w, cell, F, W, j, outs):
-    """The retired sample-data notice stays absent; the footer legend remains accessible."""
+    """The retired sample-data notice stays absent; the legend remains accessible from the pages (S24), not from the footer."""
     o = begin(w, cell, '#/', outs)
     if not o:
         return
@@ -1870,7 +1909,12 @@ def ch_mockbar(w, cell, F, W, j, outs):
             F('mockbar', f'retired sample-data notice returned {when}: {st}')
 
     absent('on a fresh visit')
-    legend = '#footer [data-action="legend"]'
+    page.evaluate("() => { location.hash = '#/danni'; }")
+    # S24 loads its catalogue before it is ready: the harness timeout, not a short fixed one
+    if not wait_for(page, "() => { const a = document.querySelector('#view article.page'); return !!a && a.dataset.route === 'S24' && a.dataset.ready === '1'; }", timeout=w.opts['timeout']):
+        F('legend', 'S24 did not open, so its legend button could not be tried')
+        return
+    legend = '#view .s24-status [data-action="legend"]'
     page.click(legend)
     if wait_there(page, 'dialog.sheet[open]'):
         statuses = page.locator('dialog.sheet[open] [data-st]').evaluate_all(
@@ -1880,9 +1924,9 @@ def ch_mockbar(w, cell, F, W, j, outs):
         page.keyboard.press('Escape')
         wait_gone(page, 'dialog.sheet')
         if not is_active(page, legend):
-            F('sheet-focus', f'after closing the legend the focus is on {act(page)["sig"]}, not its footer button')
+            F('sheet-focus', f'after closing the legend the focus is on {act(page)["sig"]}, not the S24 button that opened it')
     else:
-        F('legend', 'the footer legend button opens nothing')
+        F('legend', 'the legend button of S24 opens nothing')
     page.reload(wait_until='domcontentloaded')
     w.ready(page)
     absent('after reload')
@@ -3465,18 +3509,16 @@ def print_report(findings, args, d, stats):
                 urls = g['urls'] if args.verbose else g['urls'][:2]
                 out.append(f'    [{f.code}] {cells_label(g["cells"])}  {" ".join(urls)}'.rstrip() + (' ...' if len(g['urls']) > len(urls) else ''))
                 out.append(f'        {f.msg}')
-    stubs = sorted({f.route for f in warns if f.code == 'stub'}, key=route_key)
-    rest = [f for f in warns if f.code != 'stub']
-    if rest:
+    if warns:
         pend = defaultdict(set)
-        for f in rest:
+        for f in warns:
             if f.code == 'pending-data':
                 pend[f.msg.split(' -> ')[0]].add(f.route)
-        out.append(f'\nWARNINGS ({len(merged(rest))})')
+        out.append(f'\nWARNINGS ({len(merged(warns))})')
         if pend:
             out.append('  [pending-data] data files that are not there yet: ' + ', '.join(f'{p} ({len(r)} screens)' for p, r in sorted(pend.items())))
         by = defaultdict(list)
-        for g in merged([f for f in rest if f.code != 'pending-data']):
+        for g in merged([f for f in warns if f.code != 'pending-data']):
             by[g['f'].code].append(g)
         for code in sorted(by, key=lambda c: -len(by[c])):
             gs = by[code]
@@ -3484,22 +3526,19 @@ def print_report(findings, args, d, stats):
             out.append(f'  [{code}] x{len(gs)} on {", ".join(r or "general" for r in routes[:12])}{" ..." if len(routes) > 12 else ""}')
             for g in (gs if args.verbose else gs[:2]):
                 out.append(f'      {g["f"].route or "general"} {cells_label(g["cells"])}: {g["f"].msg}')
-    if stubs:
-        out.append(f'\nSTUBS ({len(stubs)}, generic checks only{" - counted as failures with --strict" if args.strict else ""}): ' + ' '.join(stubs))
     print('\n'.join(out))
 
 
 def run_summary(findings, args, d, stats, t0):
     nf = len(merged([f for f in findings if f.level == 'fail']))
-    nw = len(merged([f for f in findings if f.level == 'warn' and f.code != 'stub']))
-    ns = len({f.route for f in findings if f.code == 'stub'})
+    nw = len(merged([f for f in findings if f.level == 'warn']))
     infra = any(f.code in ('infrastructure', 'discover') for f in findings)
-    strict_fail = args.strict and (nw or ns)
+    strict_fail = args.strict and nw
     code = 2 if infra else (1 if (nf or strict_fail) else 0)
     nroutes = len({r['id'] for r in (d or {}).get('routes', [])}) if not args.route else len(select_routes(d['routes'], args.route))
     slow = sorted(stats['durs'], reverse=True)[:3]
     print(f'\nroutes {nroutes} · checks {stats["jobs"]} · browsers {stats["n"]} · {time.time() - t0:.0f} s · '
-          f'failures {nf} · warnings {nw} · stubs {ns}'
+          f'failures {nf} · warnings {nw}'
           + (' · slowest ' + ', '.join(f'{k} {v:.1f}s' for v, k in slow) if slow else ''))
     print('RESULT: ' + ('INFRASTRUCTURE ERROR' if infra else ('FAIL' if code else 'PASS')) + f' (exit {code})')
     return code
@@ -3540,7 +3579,7 @@ def main(argv=None):
         j = r['job']
         stats['durs'].append((r['dur'], f'{j.get("route", "")}/{j.get("kind")}/{j.get("cell", "")}'.strip('/')))
         extras.append((j, r['extra']))
-        ch = 'F' if any(f.level == 'fail' for f in fs) else ('w' if any(f.level == 'warn' and f.code not in ('stub', 'pending-data') for f in fs) else '.')
+        ch = 'F' if any(f.level == 'fail' for f in fs) else ('w' if any(f.level == 'warn' and f.code != 'pending-data' for f in fs) else '.')
         sys.stdout.write(ch)
         if stats['jobs'] % 100 == 0:
             sys.stdout.write(f' {stats["jobs"]}\n')

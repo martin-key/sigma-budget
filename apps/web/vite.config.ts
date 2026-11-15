@@ -1,4 +1,4 @@
-import { staticResponseHeaders } from './app/lib/security';
+import { staticResponseHeaders } from './app/lib/security.ts';
 import { writeFileSync } from 'node:fs';
 import { build as bundle, type Plugin as EsbuildPlugin } from 'esbuild';
 import { cpSync, rmSync } from 'node:fs';
@@ -6,7 +6,7 @@ import { resolve } from 'node:path';
 import { reactRouter } from '@react-router/dev/vite';
 import { cloudflare } from '@cloudflare/vite-plugin';
 import { defineConfig, type Plugin } from 'vite';
-import { copyCandidate, readCandidate, type Candidate } from './scripts/candidate-data';
+import { copyCandidate, readCandidate, type Candidate } from './scripts/candidate-data.ts';
 
 // An absolute candidate root (manifest.json, validation.json, receipt.json,
 // data/) selects an isolated local acceptance build. Default release is unchanged.

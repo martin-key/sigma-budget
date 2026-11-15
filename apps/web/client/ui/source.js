@@ -71,7 +71,7 @@ export function sourceCard(keys, o = {}) {
       ${s.url ? html`<p class="small"><a class="ext" href="${s.url}" target="_blank" rel="noopener noreferrer">Отвори източника ${icon('external', { size: 14 })}<span class="sr-only"> (в нов раздел)</span></a></p>` : ''}
     </section>`;
   });
-  return html`<div class="src-card">${o.asOf ? html`<p class="small"><strong>Данни към ${date(o.asOf)}</strong></p>` : ''}${items}<p class="small"><a href="#/danni">Данни и методика</a> · <a href="#/proverka">Данни и проверка</a>: изданието, оригиналите и SHA-256 им</p></div>`;
+  return html`<div class="src-card">${o.asOf ? html`<p class="small"><strong>Данни към ${date(o.asOf)}</strong></p>` : ''}${items}<p class="small"><a href="#/danni">Методология</a> · <a href="#/proverka">Проверка на данните</a>: изданието, оригиналите и SHA-256 им</p></div>`;
 }
 export function openSource(anchor, keys, o = {}) {
   return popover.open(anchor, {

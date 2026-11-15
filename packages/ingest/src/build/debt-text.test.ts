@@ -34,13 +34,16 @@ it('rejects changed and duplicated evidence', () => {
   q.find((x) => x.page === 144)!.body += '\n' + q.find((x) => x.page === 144)!.body;
   expect(() => parseDebtInterest(q)).toThrow(/matched 2 times/);
 });
-it.each(['%', '0x10%', '0b10%', '0o10%', '7 2%'])('rejects malformed debt percentage %s', (cell) => {
-  const input = pages();
-  const page = input.find((p) => p.page === 144)!;
-  expect(page.body).toContain('7,2%');
-  page.body = page.body.replace('7,2%', cell);
-  expect(() => parseDebtStructure(input)).toThrow(/invalid percent cell/);
-});
+it.each(['%', '0x10%', '0b10%', '0o10%', '7 2%'])(
+  'rejects malformed debt percentage %s',
+  (cell) => {
+    const input = pages();
+    const page = input.find((p) => p.page === 144)!;
+    expect(page.body).toContain('7,2%');
+    page.body = page.body.replace('7,2%', cell);
+    expect(() => parseDebtStructure(input)).toThrow(/invalid percent cell/);
+  },
+);
 it.each(['+7,2%', '.72e1%', '7_2e-1%'])('preserves valid Python decimal percentage %s', (cell) => {
   const input = pages();
   const page = input.find((p) => p.page === 144)!;

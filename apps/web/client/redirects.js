@@ -14,6 +14,7 @@
 //   /deystvie               → /              (the four actions are replaced by the start screen and the search)
 //   /patevoditel[/N]        → /5-minuti?to=<scene of step N>  (the guide is merged into «Бюджетът за 5 минути»: step 1 → scene 1, 2 → 2, 3 and 5 → 3,
 //                             4 → 5 (the measures), 6 → 6, 7 → 4; step 8 → /danaci, the calculator the guide ended with); /patevoditel/9 stays unknown
+//   /za-proekta             → /danni         (the «За проекта» page is gone: its notes are in the footer, the status legend is on «Методология»)
 const POK = { prihodi: 'rev', razhodi: 'exp.total', saldo: 'balance' };
 const GUIDE_SCENE = {
   1: 's04-scene1',
@@ -67,6 +68,7 @@ export function redirect(segs, query = {}) {
   if (a === 'razhodi' && !b && q.po === 'vedomstva')
     return { segs: ['vedomstva'], query: q.per ? { per: q.per } : {} };
   if (a === 'klasacii') return { segs: ['razhodi'], query: q.per ? { per: q.per } : {} };
+  if (a === 'za-proekta') return { segs: ['danni'], query: {} };
   return null;
 }
 

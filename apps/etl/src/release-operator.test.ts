@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { mkdtemp, rm } from 'node:fs/promises';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
-import { ReleaseClient, type HttpRequest } from '@sigma-budget/ingest/release-client';
+import { ReleaseClient, ReleaseError, type HttpRequest } from '@sigma-budget/ingest/release-client';
 import { makeRelease } from '../../../packages/ingest/test/support/release-package.js';
 import { releaseOperatorCli } from './release-operator.js';
 
@@ -77,6 +77,52 @@ describe('standalone release operator integration contract', () => {
     expect(requests).toHaveLength(1);
     expect(requests[0]!.headers).not.toHaveProperty('Cf-Access-Token');
     expect(await releaseOperatorCli(['status', '--environment', 'test'], deps)).toBe(0);
+  });
+  it('keeps default receipts in the ignored work/ of the repository, whatever the current folder', async () => {
+    const expected = resolve(import.meta.dirname, '../../..', 'work/ts-operator-receipts');
+    const seen: string[] = [];
+    const deps = {
+      credentialEnvironment: {},
+      stdout: () => {},
+      client: (options: ConstructorParameters<typeof ReleaseClient>[0]): ReleaseClient => {
+        seen.push(options.receiptDirectory);
+        throw new ReleaseError(6, 'stop before any request');
+      },
+    };
+    const original = process.cwd();
+    try {
+      for (const folder of [directory, resolve(import.meta.dirname, '..')]) {
+        process.chdir(folder);
+        expect(
+          await releaseOperatorCli(
+            ['status', '--environment', 'test', '--url', 'http://127.0.0.1:1'],
+            deps,
+          ),
+        ).toBe(6);
+      }
+    } finally {
+      process.chdir(original);
+    }
+    expect(seen).toEqual([expected, expected]);
+  });
+  it('lets an explicit --receipts replace the default directory', async () => {
+    const receipts = join(directory, 'receipts');
+    const seen: string[] = [];
+    const deps = {
+      credentialEnvironment: {},
+      stdout: () => {},
+      client: (options: ConstructorParameters<typeof ReleaseClient>[0]): ReleaseClient => {
+        seen.push(options.receiptDirectory);
+        throw new ReleaseError(6, 'stop before any request');
+      },
+    };
+    expect(
+      await releaseOperatorCli(
+        ['status', '--environment', 'test', '--url', 'http://127.0.0.1:1', '--receipts', receipts],
+        deps,
+      ),
+    ).toBe(6);
+    expect(seen).toEqual([receipts]);
   });
   it('requires explicit mutation consent and environment, rejects credential flags without reflecting values', async () => {
     const lines: string[] = [];

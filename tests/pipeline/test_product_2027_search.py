@@ -10,7 +10,12 @@ ROOT = Path(__file__).resolve().parents[2]
 class ProductSearchTest(unittest.TestCase):
     def test_historical_programme_values_keep_bill_publication_status(self):
         rows = _Rows()
-        _institutions(SimpleNamespace(out={}), rows)
+        # The Python builder is the frozen reference: exercise its original
+        # programme inputs, independently of production-only additions to D09.
+        historical = ROOT / 'packages/ingest/test/fixtures/wave13b/oracle'
+        inputs = {name: json.loads((historical / name).read_text())
+                  for name in ('ministries.json', 'programs.json')}
+        _institutions(SimpleNamespace(out=inputs), rows)
         self.assertEqual(len(rows.rows), 272)
         for row in rows.rows:
             self.assertEqual(row[4], 'Проект 2026')

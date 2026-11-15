@@ -11,6 +11,7 @@ import glob
 import os
 import re
 
+from budget_pipeline.validate.programme_supplements import has_supplements
 from budget_pipeline.validate.budget_tables import has_tax_contracts
 import budget_pipeline.validate.checks as L
 from budget_pipeline.validate.search_feed import MONTHS
@@ -61,7 +62,7 @@ def g_core(ctx):
         c.ok(set(s) <= {"title", "publisher", "url", "kind", "access", "note"}, "source %s: keys %s" % (k, sorted(s)))
     # --- pending blocks P01-P07
     routes = ctx.routes().routes
-    c.ok(sorted(core["pending"]) == ["P0%d" % i for i in range(1, 8) if (i != 5 or "2022" not in ex["data"]) and (i != 1 or not has_tax_contracts(ctx))], "pending ids %s" % sorted(core["pending"]))
+    c.ok(sorted(core["pending"]) == ["P0%d" % i for i in range(1, 8) if (i != 3 or not has_supplements(ctx)) and (i != 5 or "2022" not in ex["data"]) and (i != 6 or not has_debt_issues(ctx)) and (i != 1 or not has_tax_contracts(ctx))], "pending ids %s" % sorted(core["pending"]))
     for k, p in core["pending"].items():
         c.ok(p["status"] == "pending" and p["id"] == k and all(isinstance(p.get(x), str) and p[x].strip() for x in ("title", "reason", "expected")), "pending %s: shape" % k)
         c.ok(p["source"] and all(x in src for x in p["source"]), "pending %s: source keys" % k)
@@ -297,3 +298,11 @@ def g_catalog(ctx):
     c.fact("%d datasets (%d real, %d mock, %d pending) describe %d files; %d primary source files; %d screen/needs differences (warnings)" % (
         len(dss), real, mock, pend, len(on_disk), len(cat["files"]), warn))
     return c
+
+
+def has_debt_issues(ctx):
+    from budget_pipeline.validate.debt_issues import valid_debt_issues
+    try:
+        return valid_debt_issues(ctx.get('debt-issues.json'))
+    except FileNotFoundError:
+        return False

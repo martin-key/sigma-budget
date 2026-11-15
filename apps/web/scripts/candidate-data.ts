@@ -1,6 +1,6 @@
 // Vite loads this before workspace builds; use the shared verifier's source so
 // a clean checkout does not require ingest's generated dist to read its config.
-import { verifyNodeProof } from '../../../packages/ingest/src/release-client/node-proof';
+import { verifyNodeProof } from '../../../packages/ingest/src/release-client/node-proof.ts';
 // Local build input only. A validated candidate keeps its manifest/validation next
 // to data/; packaging it must not publish into the checkout's data/release.
 import { createHash } from 'node:crypto';

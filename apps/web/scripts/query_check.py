@@ -66,6 +66,11 @@ def main():
     bad, n = [], 0
     for route in metadata['routes']:
         rid, pattern, file = route['id'], route['pattern'], route['file']
+        if route.get('retired'):
+            # a retired id (docs/dev-guide.md, section 11) has no address and no page module by design; it cannot read a query
+            if pattern is not None or route['query'] or route['samples']:
+                bad.append('%s: a retired screen keeps an address, query keys or samples' % rid)
+            continue
         listed = set(route['query'])
         page = JS / 'pages' / (file + '.js')
         if not page.exists():
