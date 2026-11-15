@@ -249,13 +249,12 @@ jobs:
           for i in $(seq 1 60); do curl -sf -o /dev/null http://127.0.0.1:8814/robots.txt && break; sleep 1; done
           python -m tests.e2e.screens --url http://127.0.0.1:8814/
           python -m tests.e2e.visual_audit --url http://127.0.0.1:8814/
-          python -m tests.e2e.boot --url http://127.0.0.1:8814/
-          python -m tests.e2e.narrative_adoption --url http://127.0.0.1:8814/
-          python -m tests.e2e.security_headers --url http://127.0.0.1:8814/
+      - name: Early boot, server DOM adoption and cross-origin security (Playwright Test)
+        run: E2E_WORKER_URL=http://127.0.0.1:8814 pnpm test:e2e --project=worker boot.spec.ts narrative-adoption.spec.ts security-headers.spec.ts
       - name: Annual periods, aliases, SSR notices and stored preferences
-        run: python -m tests.e2e.period_matrix --url http://127.0.0.1:8814/
+        run: E2E_WORKER_URL=http://127.0.0.1:8814 pnpm test:e2e --project=worker period-matrix.spec.ts
       - name: Old addresses
-        run: python -m tests.e2e.redirects
+        run: pnpm test:e2e --project=static redirects.spec.ts
       - name: Tax calculator
         run: python -m tests.e2e.calc_check
       - name: Sharing and export
@@ -264,6 +263,15 @@ jobs:
         run: python -m tests.e2e.accept
       - name: Motion
         run: python -m tests.e2e.motion
+      # A failed test step prevents subsequent default-success test steps from
+      # running, so a later Playwright invocation cannot clean its failure traces.
+      - name: Upload failed Playwright traces and screenshots
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: e2e-failure-results
+          path: tmp/e2e-results
+          if-no-files-found: ignore
 
   release:
     # the release registry and the operator API (stage C) on the Worker with local D1 and R2, driven through the TypeScript operator

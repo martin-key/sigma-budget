@@ -261,3 +261,5 @@ Sandbox проверката изисква точно една самостоя
 `allow-*` изключения във всяка policy. Дублирани sandbox директиви се отхвърлят,
 включително permissive-first комбинации; следваща директива не поправя първата. Проверяват се и
 attachment, no-transform и пълната CSP на SSR документа.
+
+Публичното cross-origin четене, JSON 400, iframe embed и обикновените framing headers се проверяват в реален Chromium чрез `tests/e2e/worker/security-headers.spec.ts`. След build и стартиране на локалния Worker: `PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers E2E_WORKER_URL=http://127.0.0.1:8814 pnpm test:e2e --project=worker security-headers.spec.ts`. Consumer сървърът използва Worker порта + 2. SSR notices и периодите, приемането на server DOM, CSV изданието и ранният boot се проверяват от останалите Worker спецификации; `pnpm test:e2e --project=static redirects.spec.ts` проверява старите hash адреси. Тези проверки са част от блокиращия job `check`; Python помощните статични сървъри остават за следващите миграционни стъпки.

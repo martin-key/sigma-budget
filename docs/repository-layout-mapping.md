@@ -101,7 +101,7 @@
 | `tools/mock/prototype_sums.py`       | `pipeline/budget_pipeline/build/input_checksums.py`       |
 | `tools/mock/rebuild_v6.py`           | `pipeline/budget_pipeline/build/rebuild.py`               |
 | `tools/mock/redirects_v5.py`         | `reference/mock/redirects_v5.py`                          |
-| `tools/mock/redirects_v6.py`         | `tests/e2e/redirects.py`                                  |
+| `tools/mock/redirects_v6.py`         | `tests/e2e/static/redirects.spec.ts` (пренесен)           |
 | `tools/mock/run_all.sh`              | `pipeline/budget_pipeline/build/run_all.sh`               |
 | `tools/mock/share_check_v5.py`       | `reference/mock/share_check_v5.py`                        |
 | `tools/mock/share_check_v6.py`       | `tests/e2e/share_check.py`                                |

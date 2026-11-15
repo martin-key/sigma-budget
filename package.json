@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "echo \"Development artifact only. Deploy with pnpm build:release (Node + the pinned Playwright Chromium; see README).\" && turbo run build",
-    "typecheck": "turbo run typecheck",
+    "typecheck": "turbo run typecheck && tsc -p tests/e2e/tsconfig.json",
     "dev": "turbo run dev",
     "test": "turbo run test --concurrency=1",
     "registry:local": "pnpm --filter @sigma-budget/web registry:local",
@@ -26,7 +26,8 @@
     "validate:wave15-live": "pnpm --filter @sigma-budget/ingest... build && node packages/ingest/dist/validate/cli15.js --live --report tmp/ts-migration/candidates/15/live.json",
     "build:release": "node apps/web/scripts/build-release.ts",
     "check:coverage": "node scripts/check-coverage.mjs",
-    "format": "prettier --write . --ignore-unknown"
+    "format": "prettier --write . --ignore-unknown",
+    "test:e2e": "playwright test -c tests/e2e/playwright.config.ts"
   },
   "packageManager": "pnpm@10.33.0",
   "engines": {

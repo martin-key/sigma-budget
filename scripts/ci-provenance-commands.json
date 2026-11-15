@@ -11,8 +11,9 @@
     "pnpm exec playwright install --with-deps chromium",
     "python -m tests.e2e.screens --url http://127.0.0.1:8814/",
     "python -m tests.e2e.visual_audit --url http://127.0.0.1:8814/",
-    "python -m tests.e2e.narrative_adoption --url http://127.0.0.1:8814/",
-    "python -m tests.e2e.security_headers --url http://127.0.0.1:8814/",
+    "E2E_WORKER_URL=http://127.0.0.1:8814 pnpm test:e2e --project=worker boot.spec.ts narrative-adoption.spec.ts security-headers.spec.ts",
+    "E2E_WORKER_URL=http://127.0.0.1:8814 pnpm test:e2e --project=worker period-matrix.spec.ts",
+    "pnpm test:e2e --project=static redirects.spec.ts",
     "node tests/release/compat_check.mjs --env-url \"$STAGING_ORIGIN\"",
     "pnpm exec playwright install --with-deps chromium"
   ]
