@@ -68,8 +68,7 @@
 източници. Манифест с по-голям обект се отказва с `422`, преди да е изпратен и байт. Една заявка носи най-много `part_bytes` (16 MiB,
 `PART_BYTES` в `apps/web/workers/api/store.js`). По-голям обект, например архивът към законопроекта за бюджета с неговите 63 MB, се качва на
 части: R2 multipart upload в същия `uploads/<операция>/<sha256>`. След последната част сървърът проверява събрания обект като всяко друго
-качване. Така никоя заявка не стига до ограничението от 100 MB за тяло на заявка в плановете Free и Pro. Worker-ът чете и хешира обектите като
-поток и не държи цял обект в паметта: един isolate има 128 MB. Хеширането на голям обект иска процесорно време, повече от 10-те ms на Workers
+качване. Така никоя заявка не стига до ограничението от 100 MB за тяло на заявка в плановете Free и Pro. Операторският API проверява качените и преизползваните обекти като поток. Публичното пълно сваляне на обект над 16 MiB първо проверява SHA-256 като поток, после го отваря повторно и изпраща тялото като поток; HEAD не чете тялото. Range заявките се обслужват директно от R2. Малките обекти и JSON четенията се буферират. Един isolate има 128 MB. Хеширането на голям обект иска процесорно време, повече от 10-те ms на Workers
 Free; изданията и без това искат Workers Paid ([production-readiness.md](production-readiness.md)). Незавършено качване на части R2 трие
 само след 7 дни (правилото по подразбиране на bucket-а). `budget upload` и `budget publish` избират сами между `PUT` и части.
 
@@ -136,6 +135,8 @@ pnpm exec wrangler d1 create sigma-budget-staging-registry -c apps/web/wrangler.
 pnpm exec wrangler r2 bucket create sigma-budget-staging-objects -c apps/web/wrangler.jsonc
 pnpm exec wrangler d1 migrations apply DB --env staging --remote -c apps/web/wrangler.jsonc
 ```
+
+- Незавършените качвания на части се чистят от lifecycle правилото на bucket-а; проверява се с `wrangler r2 bucket lifecycle list <bucket>`.
 
 После: Access приложение за `/admin/*` с allow политика за операторите; `ACCESS_ISSUER` и `ACCESS_AUD` в `env.staging.vars`;
 `OPERATORS` като таен ключ на Worker-а (`pnpm exec wrangler secret put OPERATORS --env staging -c apps/web/wrangler.jsonc`), за да не са имейлите в публичното

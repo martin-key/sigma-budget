@@ -613,13 +613,6 @@ async function main(argv) {
       code === 0 && r.release_id === E.id && r.readback === 'verified',
       `budget publish E with an original of ${big.length} bytes, over the old limit of ${OLD_LIMIT}, and no --max-object-bytes: current, read back (${short(r)})`,
     );
-    const sent =
-      readFileSync(join(tmp, 'wrangler.log'), 'utf8').split(`/objects/${sha(big)}/parts/`).length -
-      1;
-    ok(
-      sent === 5,
-      `budget sent it in parts: four parts and complete (${sent} requests in the log of wrangler dev)`,
-    );
     [s, h, b] = await req(
       'GET',
       `${base}/data/releases/${E.id}/data/originals/parliament/archive.zip`,

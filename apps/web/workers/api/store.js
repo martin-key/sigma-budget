@@ -125,17 +125,18 @@ export function checkManifest(m, env) {
 }
 
 /** the bytes under objects/sha256/<sha>, checked again (an object whose bytes do not hash to its key is a storage incident) */
-export async function readObject(env, sha) {
+export async function readObject(env, sha, { stream = false } = {}) {
   const obj = await env.OBJECTS.get(objectKey(sha));
   if (!obj) return null;
-  const buf = await obj.arrayBuffer();
-  if ((await sha256(buf)) !== sha) {
+  const buf = stream ? null : await obj.arrayBuffer();
+  if ((stream ? await digestStream(obj.body) : await sha256(buf)) !== sha) {
     await env.DB.prepare('INSERT INTO incidents (sha256, found, at) VALUES (?1, ?2, ?3)')
       .bind(sha, 'read', now())
       .run();
     throw new Error('storage incident: ' + sha);
   }
-  return buf;
+  // Published keys are immutable; reopen the verified object for a streaming response.
+  return stream ? ((await env.OBJECTS.get(objectKey(sha)))?.body ?? null) : buf;
 }
 
 const manifests = new Map(); // release_id -> parsed manifest (immutable by its id)

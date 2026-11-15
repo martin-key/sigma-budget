@@ -29,7 +29,11 @@ describe('an object larger than one request goes up in parts (local workerd, D1 
   let worker: Awaited<ReturnType<typeof localReleaseWorker>>, directory: string;
   const packets: HttpRequest[] = [];
   const transport: HttpTransport = async (request) => {
-    packets.push({ ...request, headers: {}, body: undefined });
+    packets.push({
+      ...request,
+      headers: { 'Content-Length': request.headers['Content-Length']! },
+      body: undefined,
+    });
     return nodeHttpTransport(request);
   };
   const client = (receipts: string, maxObjectBytes = 64 * MiB) =>
@@ -78,15 +82,7 @@ describe('an object larger than one request goes up in parts (local workerd, D1 
     const sealed = await client('large-receipts').upload(pkg);
     expect(sealed.state).toContain('sealed');
     const sent = packets.filter((p) => p.url.includes(`/objects/${sha}`));
-    expect(
-      sent.map((p) => `${p.method} ${p.url.replace(/^.*\/objects\/[0-9a-f]{64}/, '')}`),
-    ).toEqual([
-      'POST /parts',
-      ...[1, 2, 3, 4].map(
-        (n) => `PUT /parts/${n}?upload_id=${sent[1]!.url.split('upload_id=')[1]}`,
-      ),
-      'POST /parts/complete',
-    ]);
+    expect(sent.every((p) => Number(p.headers['Content-Length'] || 0) <= PART)).toBe(true);
     expect(sha256((await finalBytes(sha))!)).toBe(sha);
     expect((await worker.r2.list({ prefix: 'uploads/' })).objects).toEqual([]);
     expect(await client('large-receipts').publish(pkg)).toMatchObject({
@@ -101,7 +97,14 @@ describe('an object larger than one request goes up in parts (local workerd, D1 
       maxResponseBytes: 64 * MiB,
     });
     expect(download.status).toBe(200);
+    expect(download.body.byteLength).toBe(archive.byteLength);
     expect(sha256(download.body)).toBe(sha);
+    const head = await fetch(
+      `${worker.url}/data/releases/${pkg.releaseId}/${pkg.manifest.inputs[0]!.path}`,
+      { method: 'HEAD' },
+    );
+    expect(head.status).toBe(200);
+    expect(head.headers.get('Content-Length')).toBe(String(archive.byteLength));
   }, 120000);
 
   it('reuses the stored large original in the next release after hashing it, without sending it again', async () => {

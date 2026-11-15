@@ -44,7 +44,7 @@ const client = new ReleaseClient({
   receiptDirectory: protectedReceiptDirectory,
   credentials: (environment) => providedAccessIdentity(environment),
   // transport: injectedHttpTransport,
-  // maxObjectBytes: 67108864, // само ако целевата среда действително е настроена така
+  // maxObjectBytes: 268435456, // по подразбиране 256 MiB, както на сървъра
 });
 await client.status();
 await client.upload({ release, originals });
@@ -91,6 +91,6 @@ BUDGET_OPERATOR_REPORT=/tmp/operator-archive-report.json \
 pnpm --filter @sigma-budget/ingest exec vitest run src/release-client/archive.test.ts
 ```
 
-На 2026-11-10 приетият candidate `f6e78e74fba37602840310934821f4a6d95872a0d19af2512ba4763fefe5ca0b` премина пълна offline проверка: manifest 81 852 bytes, 119 inputs, 70 outputs, 190 уникални обекта с manifest-а. Default 50 MiB отказва `data/originals/parliament/52-602-01-19.zip` с неговите 63 488 595 bytes. Отделен локален Worker с default 50 MiB върна HTTP 422 преди създаване на операция, въпреки client allowance 64 MiB. Само следващият локален тест зададе `MAX_OBJECT_BYTES=67108864` и същия client limit. Не е променен глобалният Worker default. От 13.11.2026 Worker-ът по подразбиране приема обекти до 256 MiB и качва по-големите от 16 MiB на части ([release.md](release.md), „Размери“), така че архивът минава и без `MAX_OBJECT_BYTES`.
+На 2026-11-10 приетият candidate `f6e78e74fba37602840310934821f4a6d95872a0d19af2512ba4763fefe5ca0b` премина пълна offline проверка: manifest 81 852 bytes, 119 inputs, 70 outputs, 190 уникални обекта с manifest-а. Default 50 MiB отказва `data/originals/parliament/52-602-01-19.zip` с неговите 63 488 595 bytes. Отделен локален Worker с default 50 MiB върна HTTP 422 преди създаване на операция, въпреки client allowance 64 MiB. Само следващият локален тест зададе `MAX_OBJECT_BYTES=67108864` и същия client limit. Не е променен глобалният Worker default. Worker-ът по подразбиране приема обекти до 256 MiB и качва по-големите от 16 MiB на части ([release.md](release.md), „Размери“), така че архивът минава и без `MAX_OBJECT_BYTES`.
 
 Реалните ZIP bytes бяха копирани в собствена временна директория и качени като input на малък тестов release. Upload, seal, final R2 read и public readback преминаха с SHA-256 `59efdf6503c8ea92c033c73b48a8b20d817d61711f8e8dfe5d37587253fe35d8`. Архивният протоколен тест отне 10 787 ms; Node process peak RSS беше 666 260 KiB. Това е локална функционална проверка на реалния архив с pinned Miniflare/workerd, не измерване на deployed Worker memory/CPU или цялостен full-registry upload. Workerd RSS не е измерен отделно. Реални Cloudflare auth, account API, deploy, upload, publish и recovery не са изпълнявани.

@@ -14,6 +14,7 @@ import {
 import { productionExecutor, decodeKfp } from '@sigma-budget/ingest/production';
 import {
   canonicalJson,
+  DEFAULT_OBJECT_LIMIT,
   ReleaseError,
   type HttpTransport,
 } from '@sigma-budget/ingest/release-client';
@@ -151,7 +152,8 @@ export async function productionCli(
       }
       if (['upload', 'publish', 'preflight'].includes(command!) && !m.has('--originals'))
         forwarded.push('--originals', root);
-      if (!m.has('--max-object-bytes')) forwarded.push('--max-object-bytes', '67108864');
+      if (!m.has('--max-object-bytes'))
+        forwarded.push('--max-object-bytes', String(DEFAULT_OBJECT_LIMIT));
       if (!m.has('--receipts')) forwarded.push('--receipts', operatorReceipts(root));
       return releaseOperatorCli([command!, ...forwarded], { ...deps.operator, stdout: out });
     }
