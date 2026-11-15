@@ -196,6 +196,7 @@ it('keeps new bill targets and explicit document choices separate', async () => 
   for (const address of [
     '/byudzhet-2027',
     '/byudzhet-2027?to=s34-bill',
+    '/byudzhet-2027?to=b27-more',
     '/byudzhet-2027?variant=billMc&to=s34-mc-budget',
     '/byudzhet-2027?dokument=bill&to=s34-ppd',
   ]) {

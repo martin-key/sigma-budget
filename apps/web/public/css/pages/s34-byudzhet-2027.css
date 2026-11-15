@@ -150,12 +150,6 @@
   text-transform: uppercase;
   color: var(--ink-soft);
 }
-/* the answer of the screen: two or three sentences at a readable width, in the ink colour */
-.page[data-route='S34'] .b27-answer {
-  max-width: 62ch;
-  font: 400 var(--fs-lede)/1.6 var(--font-sans);
-  color: var(--ink);
-}
 .page[data-route='S34'] .b27-note {
   max-width: 68ch;
 }

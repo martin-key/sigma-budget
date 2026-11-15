@@ -6,6 +6,7 @@ import { parse } from '../../client/data.js';
 import { requestState } from '../../client/store.js';
 import { build, frameHtml, resolve } from '../../client/render.js';
 import { tableData } from '../../client/ui/table.js';
+import { num } from '../../client/format.js';
 import { comparison, cellOf, COMPARE } from '../../client/budget-2027-compare.js';
 import { MEASURES_2027, measureText } from '../../client/measures-2027.js';
 
@@ -68,22 +69,26 @@ it('answers the main bill view with the key figures, the comparison and the capi
   expect(html).not.toMatch(/NaN|undefined/);
   // a sentence that ends with a year does not get a second full stop after „г.“
   expect(html).not.toMatch(/г\.\./);
-  for (const id of [
+  const order = [
     'b27-nakratko',
     'b27-sravnenie',
     'b27-kapitalovi',
-    'b27-prihodi',
-    'b27-razhodi',
-    'b27-merki',
-    'b27-vedomstva',
     's34-projects',
-    'b27-obshtini',
-    'b27-dalg',
-    's34-bill',
-  ])
-    expect(document.getElementById(id), id).not.toBeNull();
+    'b27-razhodi',
+    'b27-vedomstva',
+    'b27-more',
+  ];
+  const found = order.map((id) => document.getElementById(id));
+  order.forEach((id, i) => expect(found[i], id).not.toBeNull());
+  // headline figures first, then the comparison, the capital expenditure and the links last
+  for (let i = 1; i < found.length; i++)
+    expect(found[i - 1]!.compareDocumentPosition(found[i]!) & 4, order[i]).toBe(4);
+  // the blocks that other screens own are links now, not copies
+  for (const id of ['b27-prihodi', 'b27-merki', 'b27-obshtini', 'b27-dalg', 's34-bill'])
+    expect(document.getElementById(id), id).toBeNull();
   expect(document.querySelectorAll('#b27-nakratko .kpi')).toHaveLength(6);
   const table = tableData(scope.maps.table.get('b27-sravnenie-table'));
+  expect(table.rows).toHaveLength(19);
   const capex = table.rows.find((r: any) => r[0] === 'Капиталови разходи')!;
   const printed = annex3('Капиталови разходи');
   expect(capex.slice(2, 4)).toEqual([printed[1], printed[2]]);
@@ -96,16 +101,38 @@ it('answers the main bill view with the key figures, the comparison and the capi
   expect(list.rows.length).toBeGreaterThan(5);
 });
 
+it('leads to the screens that own the rest of the draft and keeps the 2027 period', async () => {
+  const { document } = await page('/byudzhet-2027');
+  const links = [...document.querySelectorAll('#b27-more a.link-card')].map((a) =>
+    a.getAttribute('href'),
+  );
+  for (const path of ['/prihodi', '/merki', '/vedomstva', '/obshtini', '/dalg', '/prognoza']) {
+    const href = links.find((h) => h?.split('?')[0].endsWith(path));
+    expect(href, path).toBeTruthy();
+    expect(new URL(href!, 'https://budget.test').searchParams.get('per'), path).toBe('2027.draft');
+  }
+  // article 1 line by line, the Council of Ministers variant and the October plan stay reachable
+  expect(links.some((h) => /\/vedomstvo\/art1\?/.test(h || ''))).toBe(true);
+  expect(links.some((h) => /variant=billMc/.test(h || ''))).toBe(true);
+  expect(links.some((h) => /dokument=plan/.test(h || ''))).toBe(true);
+  // one or two figures of the draft in a card, read from the release: the printed sums of the measures
+  const total = (t: string) =>
+    doc.forecast[t].find((r: any) => r.label === 'Общо:').cells['0'].value as number;
+  const measures = [...document.querySelectorAll('#b27-more a.link-card')].find((a) =>
+    a.getAttribute('href')?.includes('/merki'),
+  )!;
+  const sign = (v: number) => num(v, 1, { sign: true });
+  expect(measures.textContent).toContain(sign(total('II_7')));
+  expect(measures.textContent).toContain(sign(total('II_8')));
+});
+
 it.each([
   'b27-nakratko',
   'b27-sravnenie',
   'b27-kapitalovi',
-  'b27-prihodi',
   'b27-razhodi',
-  'b27-merki',
   'b27-vedomstva',
-  'b27-obshtini',
-  'b27-dalg',
+  'b27-more',
 ])(
   'keeps the overview section %s on the November bill, apart from the October plan',
   async (id) => {

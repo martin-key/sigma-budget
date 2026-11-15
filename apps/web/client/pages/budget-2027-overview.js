@@ -1,18 +1,19 @@
-// S34 · Бюджет 2027, the main view of the November bill (variant „Основен проект“): the answer first, then the comparison with 2026 and
-// 2025, the capital expenditure, where the money comes from and goes to, the measures, the institutions, the investment projects, the
-// municipalities, the debt and the state budget by article 1. Every number is read from the release (budget2027, outlook, revenue,
-// expenditure, ministries) or is a plain sum or difference of printed numbers that the text names. Block ids start with „b27-“: the
-// „s34-“ ids of the October plan stay that document's addresses (budget-documents.js).
+// S34 · Бюджет 2027, the main view of the November bill (variant „Основен проект“). It keeps what no other screen shows for the draft:
+// the six key figures against 2026, the comparison with 2026 and 2025, the capital expenditure by source and over 2024–2029, the investment
+// projects, the expenditure by function and the institution budgets against 2026. Everything else (revenue, measures, municipalities,
+// debt, the state budget by article 1, the forecast) is a short entry with one or two figures and a link to the screen that owns the data,
+// with the 2027 period kept. Every number is read from the release (budget2027, outlook, revenue, expenditure, ministries) or is a plain
+// sum or difference of printed numbers that the text names. Block ids start with „b27-“: the „s34-“ ids of the October plan stay that
+// document's addresses (budget-documents.js).
 import { html } from '../html.js';
 import { num, pct, money, NBSP, DASH, arrow } from '../format.js';
 import { block } from '../ui/block.js';
 import { kpi, kpiGrid } from '../ui/kpi.js';
 import { chart } from '../ui/chart.js';
-import { dataTable, tableData } from '../ui/table.js';
+import { dataTable } from '../ui/table.js';
 import { ranklist } from '../ui/ranklist.js';
 import { chips } from '../ui/chips.js';
 import { linkCard } from '../ui/cards.js';
-import { gl } from '../ui/gl.js';
 import { institutions, cellValue, headline, stateDebt, strictSum } from '../budget-2027.js';
 import {
   COMPARE,
@@ -24,10 +25,8 @@ import {
   periodHead,
   periodWord,
 } from '../budget-2027-compare.js';
-import { measureText } from '../measures-2027.js';
 import { periodByKey } from '../periods.js';
-import { byId } from '../routes.js';
-import { base, projectsBlocks, variantControl, publication, keep } from './bill-views.js';
+import { base, projectsBlocks, publication } from './bill-views.js';
 
 const ok = (v) => typeof v === 'number' && Number.isFinite(v);
 const yr = (y) => `${y}${NBSP}г.`;
@@ -47,12 +46,6 @@ const INSTITUTIONS = {
   label: 'Бюджети на ведомствата',
   long: 'Бюджети на ведомствата по законопроекта за ЗДБРБ, не е целият бюджет',
   note: 'не е целият бюджет',
-  gl: null,
-};
-const MUNICIPAL = {
-  key: 'municipal-transfers',
-  label: 'Трансфери към общините',
-  long: 'Трансфери от държавния бюджет към общинските бюджети',
   gl: null,
 };
 /** a short column head: „2025 · предв. отчет“, „2026 · очаквано“, „2027 · проект“ */
@@ -79,13 +72,10 @@ function onThisPage(ctx) {
     ['b27-nakratko', 'Накратко'],
     ['b27-sravnenie', 'Спрямо 2026 и 2025'],
     ['b27-kapitalovi', 'Капиталови разходи'],
-    ['b27-prihodi', 'Приходи'],
-    ['b27-razhodi', 'Разходи'],
-    ['b27-merki', 'Мерки'],
-    ['b27-vedomstva', 'Ведомства'],
     ['s34-projects', 'Инвестиционни проекти'],
-    ['b27-obshtini', 'Общини'],
-    ['b27-dalg', 'Дълг'],
+    ['b27-razhodi', 'Разходи по функции'],
+    ['b27-vedomstva', 'Ведомства'],
+    ['b27-more', 'Виж подробно'],
   ];
   return html`<nav class="b27-toc" aria-label="На тази страница">
     <p class="b27-toc-h">На тази страница</p>
@@ -112,29 +102,6 @@ function nakratko(ctx, m) {
     const c = m.byKey[id]?.change;
     return ok(c?.pct) ? { value: c.pct, d: 1, label: 'спрямо 2026' } : null;
   };
-  const answer =
-    ok(rev) && ok(exp) && ok(bal)
-      ? html`<p class="b27-answer">
-          През 2027 г. държавата планира да събере ${bn(rev)} и да похарчи ${bn(exp)}.
-          ${
-            bal < 0
-              ? html`Разликата е дефицит от ${bn(-bal)}, или ${pct(Math.abs(balNow.pctGdp), 1)} от
-              ${gl('bvp', 'БВП')}${
-                ok(balPrev?.pctGdp)
-                  ? html` (${pct(Math.abs(balPrev.pctGdp), 1)} очаквано за ${yr(2026)})`
-                  : ''
-              }.`
-              : html`Разликата е излишък от ${bn(bal)}.`
-          }
-          ${
-            ok(capex) && ok(capexPrev)
-              ? html`Капиталовите разходи са ${bn(capex)}: с ${bn(Math.abs(capex - capexPrev))}
-              ${moreLess(capex - capexPrev)} от очакваното за ${yr(2026)}`
-              : ''
-          }
-          ${ok(interest) ? html`За лихви по дълга отиват ${bn(interest)}.` : ''}
-        </p>`
-      : '';
   const tiles = kpiGrid(
     [
       kpi({
@@ -192,7 +159,12 @@ function nakratko(ctx, m) {
         delta: ok(change(debtNow, debtBefore).pct)
           ? { value: change(debtNow, debtBefore).pct, d: 1, label: 'спрямо края на 2026' }
           : null,
-        sub: ok(cellValue(debt?.pctGdp)) ? `${pct(cellValue(debt.pctGdp), 1)} от БВП` : '',
+        sub: [
+          ok(cellValue(debt?.pctGdp)) ? `${pct(cellValue(debt.pctGdp), 1)} от БВП` : '',
+          ok(debtBefore) ? `в края на ${yr(2026)}: ${bn(debtBefore)}` : '',
+        ]
+          .filter(Boolean)
+          .join(' · '),
       }),
     ],
     { label: 'Основни числа на проекта за 2027 г.' },
@@ -212,7 +184,7 @@ function nakratko(ctx, m) {
         ? `Бюджет 2027 (законопроект): приходи ${bn(rev)}, разходи ${bn(exp)}, ${bal < 0 ? 'дефицит' : 'излишък'} ${bn(Math.abs(bal))}, капиталови разходи ${bn(capex)}.`
         : undefined,
     },
-    body: html`<div class="stack">${answer}${tiles}</div>`,
+    body: tiles,
   });
 }
 
@@ -406,6 +378,7 @@ function kapitalovi(ctx, m) {
   const annex9 = doc.forecast?.annex9 || [];
   const municipal = annex9.find((r) => /Целева субсидия за капиталови разходи/.test(r.label));
   const municipalNow = cellValue(municipal?.cells?.['0']);
+  // S10 has no column for capital expenditure and S11 prints one budget at a time; the ranking of all budgets is only here
   const inst = capexByInstitution(ctx);
   const SHOWN = 8;
   const rest = inst.list.slice(SHOWN);
@@ -502,7 +475,10 @@ function kapitalovi(ctx, m) {
   });
 }
 
-/* ---------------------------------------------------------------- 4 · Приходи */
+/* ---------------------------------------------------------------- 4 · Инвестиционни проекти: projectsBlocks (pages/bill-views.js) */
+
+/* ---------------------------------------------------------------- 5 · Разходи по функции */
+// S07 shows the functions of 2027–2029; the change against the expected result of 2026 is only here.
 function twoYears(ctx, list, idPrefix) {
   const now = list.map((x) => x.now),
     before = list.map((x) => x.before);
@@ -518,7 +494,7 @@ function twoYears(ctx, list, idPrefix) {
     labelWidth: 'auto',
     labelOverflow: 'break',
     categories: list.map((x) => x.name),
-    categoryLabel: 'Вид',
+    categoryLabel: 'Функция',
     height: list.length * 62 + 60,
     series: [
       { name: periodHead(ctx.data, PREV), color: 'other', data: before },
@@ -535,57 +511,6 @@ function biggestMoves(list) {
   const down = [...moved].sort((a, b) => a.c.abs - b.c.abs)[0];
   return { up: up?.c.abs > 0 ? up : null, down: down?.c.abs < 0 ? down : null };
 }
-/** „приходите от …“: the group of revenue after the preposition */
-const FROM = {
-  dds: 'ДДС',
-  osiguritelni: 'осигуровки',
-  nedanachni: 'неданъчни източници',
-  pomoshti: 'помощи и дарения (основно европейски средства)',
-  ddfl: 'данъка върху доходите на физическите лица',
-  akcizi: 'акцизи',
-  korporativen: 'корпоративния данък',
-  drugi: 'други данъци и мита',
-};
-function prihodi(ctx) {
-  const rev = ctx.data.revenue;
-  const now = (rev?.byPeriod?.[DRAFT] || {}).groups || {},
-    before = (rev?.byPeriod?.[PREV] || {}).groups || {};
-  const list = (rev?.groups || [])
-    .map((g) => ({
-      id: g.id,
-      name: g.name,
-      now: cellValue(now[g.id]),
-      before: cellValue(before[g.id]),
-    }))
-    .filter((x) => ok(x.now))
-    .sort((a, b) => b.now - a.now);
-  if (!list.length) return '';
-  const spec = { ...twoYears(ctx, list, 'b27-prihodi'), title: 'Приходи по видове' };
-  const { up, down } = biggestMoves(list);
-  return block({
-    id: 'b27-prihodi',
-    title: 'Приходи: откъде идват парите',
-    scope: 'kfp',
-    ...draftStatus,
-    source: ['budget2027'],
-    asOf: ctx.data.budget2027?.publication,
-    sub: `Основните видове приходи през ${yr(2027)} спрямо очакваното за ${yr(2026)}`,
-    share: { period: `${PREV} / ${DRAFT}`, unit: 'млн. €', chart: spec.id },
-    body: html`<div class="stack">
-      <p class="b27-note">
-        ${up ? html`Най-много растат приходите от ${FROM[up.id] || up.name}: с ${bn(up.c.abs)} (${pct(up.c.pct, 1, { sign: true })}).` : ''}
-        ${down ? html` Най-много намаляват приходите от ${FROM[down.id] || down.name}: с ${bn(Math.abs(down.c.abs))} (${pct(down.c.pct, 1, { sign: true })}).` : ''}
-      </p>
-      ${chart(spec)}
-      <p class="b27-note small">
-        <a href="${ctx.href('S06', {}, { per: DRAFT })}">Всички приходи за 2027 г.</a> ·
-        <a href="${ctx.href('S12', {}, { per: DRAFT })}">Мерките, които променят приходите</a>
-      </p>
-    </div>`,
-  });
-}
-
-/* ---------------------------------------------------------------- 5 · Разходи */
 const FUNCTION_SHORT = {
   'Жилищно строителство, благоустройство, комунално стопанство и опазване на околната среда':
     'Жилища, благоустройство и околна среда',
@@ -614,7 +539,7 @@ function razhodi(ctx) {
   const low = (s) => s.charAt(0).toLowerCase() + s.slice(1);
   return block({
     id: 'b27-razhodi',
-    title: 'Разходи: за какво отиват парите',
+    title: 'Разходи по функции: за какво отиват парите',
     scope: 'kfp',
     ...draftStatus,
     source: ['budget2027'],
@@ -635,103 +560,8 @@ function razhodi(ctx) {
   });
 }
 
-/* ---------------------------------------------------------------- 6 · Мерки */
-function merki(ctx) {
-  const f = ctx.data.budget2027?.forecast || {};
-  const total = (t) => cellValue(f[t]?.find((r) => r.label === 'Общо:')?.cells?.['0']);
-  const all = ['II_7', 'II_8'].flatMap((t) =>
-    (f[t] || [])
-      .map((r, i) => ({ t, i, r, text: measureText(t, i, r.label), v: cellValue(r.cells?.['0']) }))
-      .filter((x) => x.r.label !== 'Общо:' && ok(x.v)),
-  );
-  const top = [...all].sort((a, b) => Math.abs(b.v) - Math.abs(a.v)).slice(0, 6);
-  const word = (x) =>
-    x.t === 'II_7'
-      ? x.v > 0
-        ? 'приходна мярка · повече приходи'
-        : 'приходна мярка · по-малко приходи'
-      : x.v > 0
-        ? 'разходна мярка · повече разходи'
-        : 'разходна мярка · по-малко разходи';
-  const count = (t) => (f[t] || []).filter((r) => r.label !== 'Общо:').length;
-  const rev = total('II_7'),
-    exp = total('II_8');
-  const list = (key) => ctx.href('S12', {}, { per: DRAFT, spisak: key });
-  // the bars show the size of the effect; the CSV keeps its sign
-  const csv = () =>
-    tableData({
-      columns: [
-        { key: 'name', label: 'Мярка' },
-        { key: 'kind', label: 'Вид' },
-        { key: 'table', label: 'Таблица' },
-        { key: 'v', label: 'Ефект през 2027 г.', unit: 'млн. €', num: true, d: 1 },
-      ],
-      rows: top.map((x) => ({
-        name: x.text?.name || x.r.label,
-        kind: word(x),
-        table: x.t.replace('_', '-'),
-        v: x.v,
-      })),
-    });
-  return block({
-    id: 'b27-merki',
-    title: 'Мерки в бюджета',
-    scope: {
-      key: 'fiscal-measures',
-      label: 'Фискални мерки',
-      long: 'Приходни и разходни мерки по АСБП 2027–2029',
-    },
-    ...draftStatus,
-    source: ['budget2027'],
-    asOf: ctx.data.budget2027?.publication,
-    sub: 'Новите промени в данъците, осигуровките и разходите, с които МФ разчита бюджета. Сумите са промяната спрямо предходната година.',
-    share: { period: DRAFT, unit: 'млн. €', table: csv },
-    body: html`<div class="stack">
-      ${kpiGrid(
-        [
-          kpi({
-            label: 'Приходни мерки през 2027 г.',
-            value: signed(rev),
-            unit: 'млн. €',
-            sub: `${num(count('II_7'))} мерки, общо по Табл. II-7.`,
-            href: list('prihodni'),
-          }),
-          kpi({
-            label: 'Разходни мерки през 2027 г.',
-            value: signed(exp),
-            unit: 'млн. €',
-            sub: `${num(count('II_8'))} мерки, общо по Табл. II-8. ${ok(exp) ? (exp < 0 ? 'Нетно по-малко разходи.' : 'Нетно повече разходи.') : ''}`,
-            href: list('razhodni'),
-          }),
-        ],
-        { label: 'Сборове на мерките за 2027 г.' },
-      )}
-      <h3 class="b27-sub">Мерките с най-голям ефект през ${yr(2027)}</h3>
-      ${ranklist({
-        id: 'b27-merki-top',
-        caption: 'Ефект през 2027 г., млн. €',
-        ordered: true,
-        items: top.map((x) => ({
-          label: x.text?.name || x.r.label,
-          sub: word(x),
-          value: Math.abs(x.v),
-          raw: x.v,
-          href: ctx.href('S12', {}, { per: DRAFT, to: `s12-${x.t}-${x.i}-0` }),
-        })),
-        fmt: (_, it) => `${signed(it.raw)}${NBSP}млн.${NBSP}€`,
-        categoryLabel: 'Мярка',
-      })}
-      ${linkCard({
-        href: ctx.href('S12', {}, { per: DRAFT }),
-        kicker: 'Мерки в проекта за 2027',
-        title: `Всички ${num(count('II_7') + count('II_8'))} мерки, с откъси от мотивите`,
-        text: 'Сборове, приходни и разходни мерки, групирани и по закони.',
-      })}
-    </div>`,
-  });
-}
-
-/* ---------------------------------------------------------------- 7 · Ведомства */
+/* ---------------------------------------------------------------- 6 · Ведомства */
+// S10 lists the 47 budgets of the draft; the change against the 2026 law is only here.
 function vedomstva(ctx) {
   const doc = ctx.data.budget2027;
   const law = new Map((ctx.data.ministries?.items || []).map((i) => [String(i.id), i]));
@@ -797,151 +627,89 @@ function vedomstva(ctx) {
   );
 }
 
-/* ---------------------------------------------------------------- 8 · Общини */
-function obshtini(ctx) {
-  const rows = ctx.data.budget2027?.forecast?.annex9 || [];
-  const total = rows[0],
-    capital = rows.find((r) => /Целева субсидия за капиталови разходи/.test(r.label));
-  const at = (r, i) => cellValue(r?.cells?.[String(i)]);
-  if (!total) return '';
-  return base(
-    ctx,
-    'b27-obshtini',
-    'Трансфери към общините',
-    html`<div class="stack">
-      ${kpiGrid(
-        [
-          kpi({
-            label: 'Всички трансфери от държавния бюджет, 2027',
-            mln: ok(at(total, 0)) ? at(total, 0) / 1000 : null,
-            sub: `${yr(2028)}: ${bn(at(total, 1) / 1000)} · ${yr(2029)}: ${bn(at(total, 2) / 1000)}`,
-          }),
-          kpi({
-            label: 'От тях за капиталови разходи, 2027',
-            mln: ok(at(capital, 0)) ? at(capital, 0) / 1000 : null,
-            sub: `${yr(2028)}: ${bn(at(capital, 1) / 1000)} · ${yr(2029)}: ${bn(at(capital, 2) / 1000)}`,
-          }),
-        ],
-        { label: 'Трансфери към общините' },
-      )}
-      <p class="b27-note small">
-        <a href="${ctx.href('S20', {}, { per: DRAFT })}">Колко получава всяка от 265-те общини</a>
-      </p>
-    </div>`,
-    {
-      sub: 'Основните бюджетни взаимоотношения с общините по Приложение 9 към АСБП.',
-      scope: MUNICIPAL,
-      status: 'real',
-      statusLabel: 'Законопроект 2027 и прогноза 2028–2029',
-      share: { period: '2027.draft / 2028.forecast / 2029.forecast', unit: 'млн. €' },
-    },
-  );
-}
-
-/* ---------------------------------------------------------------- 9 · Дълг */
-function dalg(ctx) {
-  const doc = ctx.data.budget2027;
-  const d = stateDebt(doc, DRAFT),
-    before = stateDebt(doc, PREV);
-  const limit = doc?.debtLimits?.['67'];
-  if (!d) return '';
-  return block({
-    id: 'b27-dalg',
-    title: 'Държавен дълг',
-    scope: 'zdd',
-    ...draftStatus,
-    source: ['budget2027'],
-    asOf: doc.publication,
-    sub: 'Прогнозата на МФ за държавния дълг по Закона за държавния дълг и границата в законопроекта.',
-    share: { period: `${PREV} / ${DRAFT}`, unit: 'млн. €' },
-    body: html`<div class="stack">
-      ${kpiGrid(
-        [
-          kpi({
-            label: 'Дълг в края на 2027 г.',
-            mln: cellValue(d.total),
-            sub: `${pct(cellValue(d.pctGdp), 1)} от БВП`,
-          }),
-          kpi({
-            label: 'Дълг в края на 2026 г. (очаквано)',
-            mln: cellValue(before?.total),
-            sub: `${pct(cellValue(before?.pctGdp), 1)} от БВП`,
-          }),
-          kpi({
-            label: 'Максимален дълг по законопроекта (чл. 67)',
-            value: ok(limit?.value) ? num(limit.value, 1) : null,
-            unit: 'млрд. €',
-            sub: 'Горна граница в края на 2027 г., не прогноза.',
-          }),
-        ],
-        { label: 'Държавен дълг' },
-      )}
-      <p class="b27-note small">
-        <a href="${ctx.href('S17', {}, { per: DRAFT })}">Дългът, финансирането и границите в законопроекта</a>
-      </p>
-    </div>`,
-  });
-}
-
-/* ---------------------------------------------------------------- 10 · Държавен бюджет по чл. 1 */
-function chl1(ctx, b) {
-  return base(
-    ctx,
-    's34-bill',
-    'Държавен бюджет по чл. 1',
-    html`<div class="stack">
-      ${variantControl(ctx)}
-      ${kpiGrid(
-        ['I', 'II'].map((s, i) =>
-          kpi({
-            label: ['Приходи на държавния бюджет', 'Разходи на държавния бюджет'][i],
-            mln: ok(cellValue(headline(b, s))) ? cellValue(headline(b, s)) / 1000 : null,
-            sub: `${num(cellValue(headline(b, s)), 1)}${NBSP}хил.${NBSP}€, както е в законопроекта`,
-          }),
-        ),
-      )}
-      <p class="b27-note small">
-        Държавният бюджет е част от КФП. Разходите му не включват трансферите към общините, осигурителните
-        фондове и сметките за европейски средства, които са на отделен ред.
-        <a href="${ctx.href('S11', { code: 'art1' }, keep(ctx))}">Целият чл. 1 ред по ред</a>
-      </p>
-    </div>`,
-    { sub: 'Основен проект. Вариантът на Министерския съвет съдържа само чл. 1 и 2.' },
-  );
-}
-
-/* ---------------------------------------------------------------- 11 · Още */
-function more(ctx) {
+/* ---------------------------------------------------------------- 7 · Виж подробно */
+// The rest of the draft has its own screens: one card for each, with one or two figures of 2027 and a link that keeps the 2027 period.
+const mlnSigned = (v) => `${signed(v)}${NBSP}млн.${NBSP}€`;
+function more(ctx, doc, b) {
+  const per = { per: DRAFT };
+  const say = (text, ...values) => (values.every(ok) ? text : '');
+  // revenue: the biggest source (S06 shows them all and 2028–2029)
+  const groups = ctx.data.revenue?.byPeriod?.[DRAFT]?.groups || {};
+  const source = (ctx.data.revenue?.groups || [])
+    .map((g) => ({ name: g.name, value: cellValue(groups[g.id]) }))
+    .filter((x) => ok(x.value))
+    .sort((a, b2) => b2.value - a.value)[0];
+  // measures: the printed „Общо:“ rows of Tables II-7 and II-8
+  const f = doc.forecast || {};
+  const total = (t) => cellValue(f[t]?.find((r) => r.label === 'Общо:')?.cells?.['0']);
+  const revMeasures = total('II_7'),
+    expMeasures = total('II_8');
+  // institutions: the 47 budgets of articles 2–48
+  const items = institutions(doc, 'bill');
+  const spend = strictSum(items.map((i) => i.expenditure));
+  // municipalities: Annex 9, the total and the capital subsidy (хил. €)
+  const annex9 = f.annex9 || [];
+  const transfers = cellValue(annex9[0]?.cells?.['0']),
+    capital = cellValue(
+      annex9.find((r) => /Целева субсидия за капиталови разходи/.test(r.label))?.cells?.['0'],
+    );
+  const municipalities = (doc.municipal?.art52 || []).length;
+  // debt: the cap of article 67 (млрд. €), next to the forecast in the key figures above
+  const limit = doc.debtLimits?.['67']?.value;
+  // forecast: the balance of 2027 and 2029
+  const bal = cellOf(ctx.data, 'bal', DRAFT)?.value,
+    bal29 = cellOf(ctx.data, 'bal', '2029.forecast')?.value;
+  // article 1 (хил. €)
+  const stateRev = cellValue(headline(b, 'I')),
+    stateExp = cellValue(headline(b, 'II'));
   const cards = [
     [
-      ctx.href('S13', {}, { per: DRAFT }),
-      'Прогноза',
-      'Накъде вървим? 2027–2029',
-      'Прогнозата на МФ до 2029 г. и макрорамката.',
+      ctx.href('S06', {}, per),
+      'Приходи',
+      'Откъде идват парите?',
+      `${source ? say(`Най-голям източник: ${source.name}, ${bn(source.value)}. `, source.value) : ''}Всички видове приходи и прогнозата до 2029 г.`,
     ],
     [
-      ctx.href('S10', {}, { per: DRAFT }),
-      'Ведомства',
-      'Кой харчи? Бюджетите на ведомствата',
-      'Всички 47 бюджета по законопроекта, с търсене.',
-    ],
-    [
-      ctx.href('S12', {}, { per: DRAFT }),
+      ctx.href('S12', {}, per),
       'Мерки',
       'Мерки в проекта за 2027',
-      'Всяка мярка с откъс от мотивите.',
+      `${say(`Приходни мерки ${mlnSigned(revMeasures)}, разходни ${mlnSigned(expMeasures)} през ${yr(2027)} `, revMeasures, expMeasures)}Всяка мярка с откъс от мотивите.`,
     ],
     [
-      ctx.href('S20', {}, { per: DRAFT }),
+      ctx.href('S10', {}, per),
+      'Ведомства',
+      'Кой харчи? Бюджетите на ведомствата',
+      `${say(`${num(items.length)} бюджета с разходи ${bn(spend / 1000)}. `, spend)}Всеки бюджет по законопроекта, с търсене.`,
+    ],
+    [
+      ctx.href('S20', {}, per),
       'Общини',
       'Трансферите към всяка община',
-      '265 общини по чл. 52 и 53.',
+      `${say(`${bn(transfers / 1000)} от държавния бюджет през ${yr(2027)}, от тях ${bn(capital / 1000)} за капиталови разходи. `, transfers, capital)}${municipalities ? `${num(municipalities)} общини` : 'Всички общини'} по чл. 52 и 53.`,
     ],
     [
-      ctx.href('S17', {}, { per: DRAFT }),
+      ctx.href('S17', {}, per),
       'Дълг',
       'Колко дължим?',
-      'Дългът по ЗДД и границите за 2027 г.',
+      `${say(`Максимален дълг в края на ${yr(2027)} по законопроекта: ${num(limit, 1)}${NBSP}млрд.${NBSP}€. `, limit)}Прогнозата до 2029 г. и границите в законопроекта.`,
+    ],
+    [
+      ctx.href('S13', {}, per),
+      'Прогноза',
+      'Накъде вървим? 2027–2029',
+      `${say(bal < 0 && bal29 < 0 ? `Дефицит ${bn(-bal)} през ${yr(2027)} и ${bn(-bal29)} през ${yr(2029)} ` : `Салдо ${bn(bal)} през ${yr(2027)} и ${bn(bal29)} през ${yr(2029)} `, bal, bal29)}Прогнозата на МФ и макрорамката.`,
+    ],
+    [
+      ctx.href('S11', { code: 'art1' }, per),
+      'Държавен бюджет',
+      'Чл. 1 ред по ред',
+      `${say(`Приходи ${bn(stateRev / 1000)} и разходи ${bn(stateExp / 1000)}. `, stateRev, stateExp)}Разходите са без трансферите към други бюджети, които са на отделен ред.`,
+    ],
+    [
+      ctx.href('S34', {}, { variant: 'billMc' }),
+      'Вариант',
+      'Вариантът на Министерския съвет',
+      'Самостоятелният вариант съдържа само чл. 1 и 2.',
     ],
     [
       ctx.href('S34', {}, { dokument: 'plan' }),
@@ -950,8 +718,8 @@ function more(ctx) {
       'От 15.10.2026, по ЕСС 2010.',
     ],
   ];
-  return html`<section class="b27-more" aria-labelledby="b27-more-h">
-    <h2 class="b27-more-h" id="b27-more-h">Разгледай подробно</h2>
+  return html`<section class="b27-more" id="b27-more" aria-labelledby="b27-more-h">
+    <h2 class="b27-more-h" id="b27-more-h">Виж подробно</h2>
     <div class="grid grid-2">${cards.map(([href, kicker, title, text]) => linkCard({ href, kicker, title, text }))}</div>
   </section>`;
 }
@@ -970,22 +738,17 @@ export function overview(ctx, doc, b) {
       annual && ok(rev) && ok(exp) && ok(bal)
         ? `По законопроекта за 2027 г. приходите са ${bn(rev)}, разходите ${bn(exp)}, ${bal < 0 ? 'дефицитът' : 'излишъкът'} ${bn(Math.abs(bal))}${ok(m.at('bal')?.pctGdp) ? ` (${pct(Math.abs(m.at('bal').pctGdp), 1)} от БВП)` : ''}, а капиталовите разходи ${bn(capex)}.`
         : '',
-    lede: 'Проектът на бюджета за 2027 г. и прогнозата за 2028–2029 г., публикувани от Министерството на финансите на 06.11.2026. Колко пари влизат и излизат, какво се променя спрямо 2026 и 2025 г., капиталовите разходи, мерките, ведомствата и общините.',
+    lede: 'Проектът на бюджета за 2027 г. и прогнозата за 2028–2029 г., публикувани от Министерството на финансите на 06.11.2026. Основните числа, промяната спрямо 2026 и 2025 г. и капиталовите разходи; приходите, мерките, общините и дългът са на своите екрани.',
     context: html`<span>Законопроект, не е приет закон · МФ, 06.11.2026</span>`,
     body: html`
       ${onThisPage(ctx)}
       ${annual ? nakratko(ctx, m) : ''}
       ${annual ? sravnenie(ctx, m) : ''}
       ${annual ? kapitalovi(ctx, m) : ''}
-      ${annual ? prihodi(ctx) : ''}
-      ${annual ? razhodi(ctx) : ''}
-      ${merki(ctx)}
-      ${ctx.data.ministries ? vedomstva(ctx) : ''}
       ${projectsBlocks(ctx, doc)}
-      ${obshtini(ctx)}
-      ${dalg(ctx)}
-      ${chl1(ctx, b)}
-      ${more(ctx)}
+      ${annual ? razhodi(ctx) : ''}
+      ${ctx.data.ministries ? vedomstva(ctx) : ''}
+      ${more(ctx, doc, b)}
       ${publication(doc)}`,
   };
 }
