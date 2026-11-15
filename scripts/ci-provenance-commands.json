@@ -2,13 +2,13 @@
   ".github/workflows/site.yml": [
     "python -m pip install --require-hashes -r tests/requirements-dev.lock -r pipeline/requirements.lock",
     "python -m pip install --no-deps -e pipeline",
-    "python -m playwright install --with-deps chromium",
+    "pnpm exec playwright install --with-deps chromium",
     "python -m unittest discover -s tests/pipeline -t .",
     "python -m budget_pipeline.extract.budget_forecast_2027 --check",
     "python -m budget_pipeline.extract.budget_bill_2027 --check",
     "python -m pip install --require-hashes -r tests/requirements-dev.lock -r pipeline/requirements.lock",
     "python -m pip install --no-deps -e pipeline",
-    "python -m playwright install --with-deps chromium",
+    "pnpm exec playwright install --with-deps chromium",
     "python -m tests.e2e.screens --url http://127.0.0.1:8814/",
     "python -m tests.e2e.visual_audit --url http://127.0.0.1:8814/",
     "python -m tests.e2e.narrative_adoption --url http://127.0.0.1:8814/",
@@ -16,7 +16,6 @@
     "python -m pip install --require-hashes -r tests/requirements-dev.lock -r pipeline/requirements.lock",
     "python -m pip install --no-deps -e pipeline",
     "python3 -m tests.release.compat_check --env-url \"$STAGING_ORIGIN\"",
-    "python -m pip install --require-hashes -r tests/requirements-dev.lock",
-    "python -m playwright install --with-deps chromium"
+    "pnpm exec playwright install --with-deps chromium"
   ]
 }

@@ -8,8 +8,9 @@ export default defineConfig({
       'workers/**/*.{ts,js}',
       'public/sw.js',
       'scripts/candidate-data.ts',
+      'scripts/release-artifact.ts',
     ]),
     environment: 'node',
-    include: ['app/**/*.test.{ts,tsx}', 'workers/**/*.test.ts'],
+    include: ['app/**/*.test.{ts,tsx}', 'workers/**/*.test.ts', 'scripts/**/*.test.ts'],
   },
 });

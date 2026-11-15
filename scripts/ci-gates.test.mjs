@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 const workflow = readFileSync('.github/workflows/site.yml', 'utf8');
 test('one Node suite command and explicit deploy barrier', () => {
@@ -23,22 +23,34 @@ test('one Node suite command and explicit deploy barrier', () => {
 test('all independent Python and provenance commands survive the consolidation', () => {
   const evidence = JSON.parse(readFileSync('scripts/ci-provenance-commands.json', 'utf8'));
   for (const [path, commands] of Object.entries(evidence)) {
-    const current = readFileSync(path, 'utf8')
+    const raw = readFileSync(path, 'utf8')
       .split('\n')
-      .map((x) => x.trim().replace(/^- run: /, ''))
-      .map((x) =>
-        x === 'bash scripts/ci-install-browser.sh'
-          ? 'python -m playwright install --with-deps chromium'
-          : x,
-      );
+      .map((x) => x.trim().replace(/^(?:- )?run: /, ''));
+    const current = raw.map((x) =>
+      x === 'bash scripts/ci-install-browser.sh'
+        ? 'pnpm exec playwright install --with-deps chromium'
+        : x,
+    );
     for (const command of commands) assert.ok(current.includes(command), command);
-    const browserInstall = 'python -m playwright install --with-deps chromium';
+    const browserInstall = 'pnpm exec playwright install --with-deps chromium';
     assert.equal(
       current.filter((command) => command === browserInstall).length,
       commands.filter((command) => command === browserInstall).length,
       `${path}: every browser setup must retain the checked retry wrapper`,
     );
+    assert.ok(
+      !raw.some((command) => /playwright install/.test(command)),
+      `${path}: a browser setup outside the checked retry wrapper`,
+    );
   }
+  // the Python browser checks that remain run on the browser build the npm Playwright installs: both stay on one version
+  const lock = 'tests/requirements-dev.lock';
+  if (existsSync(lock))
+    assert.equal(
+      readFileSync(lock, 'utf8').match(/^playwright==(\S+)/m)?.[1],
+      JSON.parse(readFileSync('package.json', 'utf8')).devDependencies['@playwright/test'],
+      'the Python and the npm Playwright must share one Chromium build',
+    );
 });
 
 test('security covers other PR targets without duplicating main PR checks', () => {

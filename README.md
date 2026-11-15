@@ -32,7 +32,7 @@ pnpm dev -- --port 8814
 python3 -m apps.web.scripts.serve
 ```
 
-Зависимостите на Node се инсталират в корена с един `pnpm-lock.yaml` (pnpm workspace). `pnpm build` е build за локална разработка, без SEO обхода. Единственият вход за deploy артефакт е `pnpm build:release` (Python 3.12 с зависимостите и Chromium от следващия раздел). Той проверява екраните, генерира sitemap/llms/robots и кеш заглавките и маркира service worker за всяко сглобяване. За staging използвай `--env staging --noindex`; за production - `--origin https://<адрес>`.
+Зависимостите на Node се инсталират в корена с един `pnpm-lock.yaml` (pnpm workspace). `pnpm build` е build за локална разработка, без SEO обхода. Единственият вход за deploy артефакт е `pnpm build:release` (`apps/web/scripts/build-release.ts`, Node 24 и Chromium на закрепения в `package.json` Playwright от следващия раздел). Той проверява екраните, генерира sitemap/llms/robots и кеш заглавките и маркира service worker за всяко сглобяване. За staging използвай `--env staging --noindex`; за production - `--origin https://<адрес>`.
 
 Сглобеният сайт е в `apps/web/build/`. Клиентът се публикува под `/js/`, а данните от `data/release/` под `/data/`; публичните адреси са запазени. SSR чете текущото издание от D1/R2; без регистър използва включеното в сглобяването издание.
 
@@ -44,7 +44,7 @@ python3 -m apps.web.scripts.serve
 uv venv tmp/venv --python 3.12
 uv pip install --python tmp/venv/bin/python --require-hashes -r tests/requirements-dev.lock
 uv pip install --python tmp/venv/bin/python --no-deps -e pipeline
-PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers tmp/venv/bin/python -m playwright install chromium
+PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers pnpm exec playwright install chromium # същата версия на Playwright като в tests/requirements-dev.lock: един Chromium и за Python проверките
 uv venv tmp/venv-data --python 3.12
 uv pip install --python tmp/venv-data/bin/python --require-hashes -r pipeline/requirements.lock
 uv pip install --python tmp/venv-data/bin/python --no-deps -e pipeline
@@ -54,13 +54,13 @@ python -m budget_pipeline.validate.registry check
 ./budget-python validate --site # историческата публикувана снимка е неизменна
 python -m budget_pipeline.validate.datasets
 tmp/venv/bin/python -m tests.release.compat_check
-tmp/venv/bin/python -m apps.web.scripts.query_check
-PATH="$PWD/tmp/venv/bin:$PATH" PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers pnpm build:release --env staging --noindex
+pnpm --filter @sigma-budget/web test # и списъците на заявките на екраните (app/lib/query-lists.test.ts)
+PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers pnpm build:release --env staging --noindex
 # След това Worker-ът се стартира с pnpm dev; пълната проверка върви срещу него:
 PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers tmp/venv/bin/python -m tests.e2e.screens --url http://127.0.0.1:8814/
 ```
 
-Регресията за ранния мобилен tap се проверява с `python -m tests.e2e.boot --url http://127.0.0.1:8814/` срещу сглобения Worker. Release smoke проверките са `python -m unittest tests.release.test_build_artifact`; release командата проверява и действителния артефакт преди успех.
+Регресията за ранния мобилен tap се проверява с `python -m tests.e2e.boot --url http://127.0.0.1:8814/` срещу сглобения Worker. Файловете на артефакта (`sitemap.xml`, `robots.txt`, `llms.txt`, `_headers`, маркираният service worker) се проверяват от `apps/web/scripts/release-artifact.test.ts` в `pnpm test`; release командата проверява и действителния артефакт преди успех.
 
 Останалите браузърни проверки са `redirects.py`, `calc_check.py`, `share_check.py`, `accept.py` и `motion.py` в `tests/e2e/`. Те използват временния статичен сайт. `overlap.py` и `perf.py` проверяват припокриване и работа при ограничен процесор. Очакваните числа се четат от текущите данни чрез `expect.py`. Интеграционните проверки `tests/release/release_check.py` и `restore_drill.py` изискват Node, OpenSSL и локален Worker.
 

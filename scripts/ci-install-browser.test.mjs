@@ -14,7 +14,7 @@ for (const failures of [0, 2, 3]) {
       writeFileSync(join(root, 'count'), '0');
       writeFileSync(join(root, 'delays'), '');
       writeFileSync(
-        join(bin, 'python'),
+        join(bin, 'pnpm'),
         `#!/usr/bin/env bash
 set -euo pipefail
 printf '%s\\n' "$*" >> "$BROWSER_RETRY_STATE/args"
@@ -45,7 +45,7 @@ if (( count <= BROWSER_RETRY_FAILURES )); then exit 17; fi
       assert.equal(Number(readFileSync(join(root, 'count'), 'utf8')), attempts);
       assert.deepEqual(
         readFileSync(join(root, 'args'), 'utf8').trim().split('\n'),
-        Array(attempts).fill('-m playwright install --with-deps chromium'),
+        Array(attempts).fill('exec playwright install --with-deps chromium'),
       );
       assert.equal(readFileSync(join(root, 'delays'), 'utf8'), attempts === 1 ? '' : '15\n30\n');
     } finally {

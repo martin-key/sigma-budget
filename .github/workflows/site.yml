@@ -180,8 +180,9 @@ jobs:
         run: |
           python -m pip install --require-hashes -r tests/requirements-dev.lock -r pipeline/requirements.lock
           python -m pip install --no-deps -e pipeline
-          bash scripts/ci-install-browser.sh
           pnpm install --frozen-lockfile
+      - name: Install the Chromium of the pinned Playwright
+        run: bash scripts/ci-install-browser.sh
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: registered-node-input-archive
@@ -209,14 +210,10 @@ jobs:
           python -m budget_pipeline.extract.budget_bill_2027 --check
       - name: Compatibility of code and data (stage E)
         run: python -m tests.release.compat_check
-      - name: The query each screen is drawn and cached by (apps/web/client/routes.js)
-        run: python -m apps.web.scripts.query_check
       - name: Build the Worker for staging and check every screen
         env:
           ORIGIN: ${{ vars.STAGING_ORIGIN || 'https://sigma-budget.midt.bg' }}
         run: pnpm build:release --env staging --origin "$ORIGIN" --noindex
-      - name: Release artifact smoke tests
-        run: python -m unittest tests.release.test_build_artifact
       - name: The checks and the build leave data/release unchanged
         run: test -z "$(git status --porcelain -- data/release)" || { git status --short -- data/release; exit 1; }
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -249,8 +246,9 @@ jobs:
       - run: |
           python -m pip install --require-hashes -r tests/requirements-dev.lock -r pipeline/requirements.lock
           python -m pip install --no-deps -e pipeline
-          bash scripts/ci-install-browser.sh
           pnpm install --frozen-lockfile
+      - name: Install the Chromium of the pinned Playwright (the same browser build as the Python Playwright of tests/requirements-dev.lock)
+        run: bash scripts/ci-install-browser.sh
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: build
@@ -662,13 +660,8 @@ jobs:
         run: node scripts/restore-node-input-cache.mjs "$RUNNER_TEMP/registered-node-input-archive/registered-node-inputs.tar.gz" "$RUNNER_TEMP/registered-node-inputs"
       - name: Actual Node readers, complete rules, double build and local recorded-code replay
         run: node scripts/node-import-acceptance.mjs "$RUNNER_TEMP/registered-node-inputs" "$RUNNER_TEMP/node-acceptance" 2026-11-14
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
-        with:
-          python-version: '3.12'
-      - name: Provision the existing locked browser test tool (outside import runtime)
-        run: |
-          python -m pip install --require-hashes -r tests/requirements-dev.lock
-          bash scripts/ci-install-browser.sh
+      - name: Provision the Chromium of the pinned Playwright (outside import runtime)
+        run: bash scripts/ci-install-browser.sh
       - name: Package the fresh Node candidate and exercise its Worker and browser identity
         run: node scripts/node-candidate-site-acceptance.mjs "$RUNNER_TEMP/node-acceptance/candidate" "$RUNNER_TEMP/node-site"
       - name: Protected checkout state

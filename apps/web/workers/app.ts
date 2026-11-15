@@ -124,7 +124,7 @@ async function fallback(request: Request, env: Env, res: Response): Promise<Resp
 }
 
 /* data/feed.xml of a release links to a placeholder host (pipeline/budget_pipeline/build/feed.py: a reserved name that never resolves), as the hash
-   addresses of the prototype. apps/web/scripts/build.py writes the site's origin into the static copy (stamp_files); the stable address of a
+   addresses of the prototype. apps/web/scripts/release-artifact.ts writes the site's origin into the static copy (stampFiles); the stable address of a
    registry release gets the same links here. The file of the release itself (/data/releases/<id>/data/feed.xml) keeps its bytes. */
 const FEED = 'data/feed.xml';
 
@@ -168,7 +168,7 @@ async function dataFile(
   return encoded(request, new Response(request.method === 'HEAD' ? null : f.bytes, { headers }));
 }
 
-/* the headers that site/_headers (apps/web/scripts/build.py) gives the static files, for the documents the Worker draws. no-transform: a zone
+/* the headers that build/client/_headers (apps/web/scripts/release-artifact.ts) gives the static files, for the documents the Worker draws. no-transform: a zone
    feature that edits HTML on the way out (the Web Analytics beacon, Email Obfuscation, Rocket Loader) must not change the screens */
 function documentHeaders(
   res: Response,
