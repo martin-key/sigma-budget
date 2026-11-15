@@ -173,6 +173,22 @@ export function normPath(href: string): string | null {
   return p;
 }
 
+/** how long the crawl waits before it asks again for a document the Worker refused with 429 (the per-client limit on uncached renders,
+ * workers/release-rate-limit.ts): the Retry-After of the answer, in milliseconds. null when the crawl does not ask again: the answer is not
+ * 429, it names no whole number of seconds between 1 and 120, or the document was already asked for `tries` times. */
+export function renderLimitWait(
+  status: number,
+  retryAfter: string | null | undefined,
+  asked: number,
+  tries = 3,
+): number | null {
+  if (status !== 429 || asked >= tries) return null;
+  const text = (retryAfter ?? '').trim();
+  if (!/^[0-9]{1,3}$/.test(text)) return null;
+  const seconds = Number(text);
+  return seconds >= 1 && seconds <= 120 ? seconds * 1000 : null;
+}
+
 /** the start page and the sample address of every route, as the paths the crawl starts from */
 export function seedPaths(samples: readonly string[]): string[] {
   const seeds = new Set(

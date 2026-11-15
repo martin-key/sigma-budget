@@ -9,6 +9,7 @@ import {
   cleanText,
   gzSize,
   normPath,
+  renderLimitWait,
   seedPaths,
   stampFiles,
   writeExtras,
@@ -209,6 +210,31 @@ describe('the deploy artifact', () => {
 });
 
 describe('the crawl', () => {
+  it('asks again for a document refused by the render limit only as the answer allows', () => {
+    // the Worker answers 429 with Retry-After: 60 (workers/release-rate-limit.ts)
+    expect(renderLimitWait(429, '60', 1)).toBe(60000);
+    expect(renderLimitWait(429, ' 1 ', 2)).toBe(1000);
+    expect(renderLimitWait(429, '120', 2)).toBe(120000);
+    // the third answer counts whatever it is
+    expect(renderLimitWait(429, '60', 3)).toBeNull();
+    expect(renderLimitWait(429, '60', 1, 1)).toBeNull();
+    // no other status is asked for again
+    for (const status of [200, 301, 404, 500, 503])
+      expect(renderLimitWait(status, '60', 1)).toBeNull();
+    // without a usable Retry-After the refusal stands
+    for (const header of [
+      undefined,
+      null,
+      '',
+      '0',
+      '121',
+      '1.5',
+      '-1',
+      '1e2',
+      'Wed, 21 Oct 2026 07:28:00 GMT',
+    ])
+      expect(renderLimitWait(429, header, 1)).toBeNull();
+  });
   it.each([
     ['/razhodi/obrazovanie?per=x#y', '/razhodi/obrazovanie'],
     ['/razhodi/', '/razhodi'],

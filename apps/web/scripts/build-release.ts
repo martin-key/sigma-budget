@@ -41,6 +41,7 @@ import {
   pySplitLines,
   pyTail,
   readText,
+  renderLimitWait,
   ROOT,
   seedPaths,
   stampFiles,
@@ -136,6 +137,8 @@ class Crawl {
   readonly warns: [string, string][] = [];
   notFound: PageInfo | null = null;
   private busy = 0;
+  private limited = 0;
+  private refused = false;
   private readonly base: string;
   private readonly jobs: number;
   private readonly limit: number;
@@ -174,7 +177,25 @@ class Crawl {
     let ssr: ServerDocument;
     try {
       // the document as the server sends it, before any script runs
-      const raw = await page.request.get(address, { maxRedirects: 0 });
+      let raw = await page.request.get(address, { maxRedirects: 0 });
+      // the Worker limits the uncached renders of one client per minute and the crawl is one client: on 429 it waits as long as the answer
+      // says and asks again, at most three requests in one attempt at a screen. A document that is still refused after that is reported
+      // like any other status, and from then on the crawl does not wait again: a limit that never lets go ends in FAIL lines, not in the
+      // time limit of the job
+      for (let asked = 1; !this.refused; asked += 1) {
+        const wait = renderLimitWait(raw.status(), raw.headers()['retry-after'], asked);
+        if (wait === null) {
+          if (raw.status() === 429) this.refused = true;
+          break;
+        }
+        this.limited += 1;
+        if (this.limited === 1 || this.limited % 25 === 0)
+          console.log(
+            `  the render limit of the Worker: waiting ${wait / 1000} s (${this.limited} so far)`,
+          );
+        await sleep(wait);
+        raw = await page.request.get(address, { maxRedirects: 0 });
+      }
       const doc = await raw.text();
       const m = (rx: RegExp) => rx.exec(doc)?.[1] ?? '';
       ssr = {
