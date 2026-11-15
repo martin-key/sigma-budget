@@ -4,9 +4,10 @@ import { parseHTML } from 'linkedom';
 import { date } from '../../client/format.js';
 import { provideScope } from '../../client/env.js';
 import { parse } from '../../client/data.js';
-import { requestState } from '../../client/store.js';
+import { requestState, store } from '../../client/store.js';
 import { renderScreen } from './screen.server';
 import { revExpChart } from '../../client/pages/s13-prognoza.js';
+import { render as rankingView } from '../../client/pages/s19-klasacii.js';
 import { tableData } from '../../client/ui/table.js';
 import { csvFor } from '../../client/share.js';
 import { build, frameHtml, resolve } from '../../client/render.js';
@@ -443,3 +444,113 @@ for (const per of [
     });
   }
 }
+
+it.each(['2024.report', '2027.draft'])('names the KFP revenue scope for %s', async (per) => {
+  const document = await annualDocument('/prihodi?per=' + per);
+  expect(document.querySelector('article')!.textContent).toMatch(/приходи(те)? по КФП/i);
+  expect(document.querySelector('article')!.textContent).not.toMatch(
+    /приходите на държавата|Държавата планира да събере/,
+  );
+});
+
+it('names the KFP scope in the forecast and short overview', async () => {
+  const forecast = await annualDocument('/prognoza?per=2027.draft');
+  expect(forecast.getElementById('s13-b-rev-exp')!.textContent).toContain(
+    'Приходите и разходите по консолидираната фискална програма по години.',
+  );
+  const overview = await annualDocument('/5-minuti?per=2027.draft');
+  expect(overview.getElementById('s04-scene1')!.textContent).toContain(
+    'по КФП са планирани приходи от',
+  );
+  expect(overview.getElementById('s04-scene1')!.textContent).toContain(
+    'разходите по КФП са по-големи от приходите',
+  );
+});
+
+it.each([
+  ['2024.report', 'През 2024 г. приходите по КФП са', 'През 2024 г. разходите по КФП са'],
+  [
+    '2025.report',
+    'Според предварителния отчет приходите по КФП през 2025 г. са',
+    'Според предварителния отчет разходите по КФП през 2025 г. са',
+  ],
+  [
+    '2026.law',
+    'Според разчетите към закона за 2026 г. приходите по КФП са',
+    'Според разчетите към закона за 2026 г. разходите по КФП са',
+  ],
+  [
+    '2026.expected',
+    'Очакваните приходи по КФП през 2026 г. са',
+    'Очакваните разходи по КФП през 2026 г. са',
+  ],
+  [
+    '2027.draft',
+    'Според разчетите към законопроекта за 2027 г. приходите по КФП са',
+    'Според разчетите към законопроекта за 2027 г. разходите по КФП са',
+  ],
+  [
+    '2028.forecast',
+    'Прогнозните приходи по КФП през 2028 г. са',
+    'Прогнозните разходи по КФП през 2028 г. са',
+  ],
+  [
+    '2029.forecast',
+    'Прогнозните приходи по КФП през 2029 г. са',
+    'Прогнозните разходи по КФП през 2029 г. са',
+  ],
+])(
+  'states the publication status of revenue and expenditure in the lede for %s',
+  async (per, revenue, expenditure) => {
+    for (const [path, expected] of [
+      ['/prihodi', revenue],
+      ['/razhodi', expenditure],
+    ]) {
+      const document = await annualDocument(path + '?per=' + per);
+      expect(document.querySelector('.lede')!.textContent!.replace(/\s+/g, ' ')).toContain(
+        expected,
+      );
+    }
+  },
+);
+
+it.each([
+  ['2026.expected', 'Очакваните разходи по КФП'],
+  [
+    '2027.draft',
+    'Според разчетите към законопроекта за 2027\u00a0г. разходите по КФП за образование са',
+  ],
+  ['2028.forecast', 'Прогнозните разходи по КФП'],
+])('states the function expenditure status for %s', async (per, expected) => {
+  const document = await annualDocument('/razhodi/obrazovanie?per=' + per);
+  expect(document.querySelector('.lede')!.textContent).toContain(expected);
+});
+
+it('uses KFP in the beginner glossary link, share sentence and deficit explanations', async () => {
+  const document = await annualDocument('/5-minuti?per=2027.draft');
+  expect(document.querySelector('#s04-scene1 .s04-text a[data-gl="kfp"]')!.textContent).toBe('КФП');
+  const forecast = await annualDocument('/prognoza?per=2027.draft');
+  expect(forecast.getElementById('s13-b-deficit')!.textContent).toContain(
+    'Дефицитът по КФП: превишението на разходите над приходите по години.',
+  );
+  // /klasacii redirects to /razhodi; exercise the preserved module directly.
+  const ranking = parseHTML(
+    String(
+      rankingView({
+        data: { outlook: await load('outlook') },
+        core: await load('core'),
+        store,
+        period: { year: 2026 },
+        query: { tab: 'godini', kat: 'kfp', a: '2025', b: '2026' },
+        href: () => '/',
+      }),
+    ),
+  ).document;
+  expect(ranking.getElementById('s19-b-godini')!.textContent).toContain(
+    'Салдо с минус е дефицит: разходите по КФП са по-големи от приходите.',
+  );
+  const debt = await annualDocument('/dalg?per=2026.law');
+  expect(debt.querySelector('article')!.textContent).toContain(
+    'Когато разходите по КФП са по-големи от приходите',
+  );
+});

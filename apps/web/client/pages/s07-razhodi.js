@@ -1288,11 +1288,14 @@ export const lede = (ctx) => {
       pg = ok(eco.totalPg) ? `, или ${pct(eco.totalPg, 1)} от БВП` : '';
     const first =
       {
-        actual: `През ${yr(eco.year)} разходите на държавата са ${v}${pg}.`,
-        prelim: `Според предварителния отчет разходите през ${yr(eco.year)} са ${v}${pg}.`,
-        plan: `Държавата планира да похарчи ${v} през ${yr(eco.year)}${pg}.`,
-        forecast: `Според прогнозата разходите през ${yr(eco.year)} ще бъдат ${v}${pg}.`,
-      }[eco.kind0] ?? `Разходите през ${yr(eco.year)} са ${v}${pg}.`;
+        actual: `През ${yr(eco.year)} разходите по КФП са ${v}${pg}.`,
+        prelim: `Според предварителния отчет разходите по КФП през ${yr(eco.year)} са ${v}${pg}.`,
+        plan: `Планираните разходи по КФП през ${yr(eco.year)} са ${v}${pg}.`,
+        draft: `Според разчетите към законопроекта за ${yr(eco.year)} разходите по КФП са ${v}${pg}.`,
+        expected: `Очакваните разходи по КФП през ${yr(eco.year)} са ${v}${pg}.`,
+        law: `Според разчетите към закона за ${yr(eco.year)} разходите по КФП са ${v}${pg}.`,
+        forecast: `Прогнозните разходи по КФП през ${yr(eco.year)} са ${v}${pg}.`,
+      }[eco.kind0] ?? `Разходите по КФП през ${yr(eco.year)} са ${v}${pg}.`;
     const a = kfpModel(ctx)?.ranked[0];
     return a && ok(a.share)
       ? `${first} Най-голям дял има функцията „${a.label}“: ${pct(a.share, 1)} от разходите по функции.`

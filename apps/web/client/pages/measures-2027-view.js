@@ -32,6 +32,7 @@ const yr = (y) => `${y}${NBSP}г.`;
 const signed = (v) => (ok(v) ? num(v, 1, { sign: true }) : DASH);
 const YEARS = FRAMEWORK.map((k) => periodByKey(k).year);
 const TOTAL = 'Общо:';
+const LAWS_LABEL = 'Мерки по закони';
 const KIND = { II_7: 'revenue', II_8: 'expenditure' };
 const KIND_LABEL = { II_7: 'Приходна мярка', II_8: 'Разходна мярка' };
 const share = { period: FRAMEWORK.join(' / '), unit: 'млн. €' };
@@ -175,7 +176,7 @@ function revenuePanel(ctx, doc, list) {
     's12-II_7',
     'Приходни мерки 2027–2029',
     html`<div class="stack-lg">
-      ${group(`Повече приходи през ${yr(first)}`, 'Нови данъци, по-високи ставки, осигуровки и такси и по-добро събиране.', more)}
+      ${group(`Повече приходи през ${yr(first)}`, 'Нови данъци, по-високи ставки, осигуровки и такси и мерки за повишаване на събираемостта.', more)}
       ${group(`По-малко приходи през ${yr(first)}`, 'Облекчения и по-висок праг за регистрация по ЗДДС.', less)}
       ${group(`С ефект от ${yr(YEARS[1])}`, `За ${yr(first)} в таблицата няма сума.`, later)}
       ${t.html}
@@ -198,7 +199,7 @@ function expenditurePanel(ctx, doc, list) {
     'Разходни мерки 2027–2029',
     html`<div class="stack-lg">
       ${group(`Повече разходи през ${yr(first)}`, 'Заплати и социална подкрепа.', more)}
-      ${group(`По-малко разходи през ${yr(first)}`, 'Оптимизиране на персонала, по-строг контрол и по-малки плащания.', less)}
+      ${group(`По-малко разходи през ${yr(first)}`, 'Мерки за оптимизиране на разходите за персонал и за повишаване на ефективността на публичните разходи.', less)}
       ${t.html}
     </div>`,
     {
@@ -221,10 +222,10 @@ function lawsPanel(ctx, all) {
   const link = (m) => ctx.href('S12', {}, { per: ctx.period.key, to: anchor(m) });
   return block({
     id: 's12-27-zakoni',
-    title: 'Мерките по закони',
+    title: LAWS_LABEL,
     status: 'text',
     share: false,
-    sub: `Законите, които мотивите посочват за мерките. За ${plural(none, 'мярка', 'мерки')} мотивите не посочват закон.`,
+    sub: `Мерките от таблици II-7 и II-8 са подредени по закона, когато мотивите посочват такъв. За ${plural(none, 'мярка', 'мерки')} мотивите не посочват закон и те не са включени тук.`,
     body: html`<div class="m27-laws">${laws.map(
       ([law, list]) => html`<section class="m27-law">
         <h3 class="m27-group-h">${LAWS[law] || law}${LAWS[law] && LAWS[law] !== law ? html` <span class="m27-abbr">${law}</span>` : ''}</h3>
@@ -377,8 +378,8 @@ export function measuresView(ctx) {
           },
           {
             key: 'zakoni',
-            label: 'По закони',
-            count: lawCount,
+            label: LAWS_LABEL,
+            count: plural(lawCount, 'закон', 'закона'),
             body: lawsPanel(ctx, [...rev, ...exp]),
           },
         ],

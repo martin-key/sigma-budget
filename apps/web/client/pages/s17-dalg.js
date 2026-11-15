@@ -1251,7 +1251,7 @@ function financeBlock(M, F) {
     share: { embed: spec.id, text: finText(F) },
     body: html`${fb}
       <div class="s17-lead">
-        <p>Когато държавата похарчи повече, отколкото събере, разликата е ${gl('byudzheten-defitsit', 'дефицит')}. Парите за него идват от ${gl('nov-dalg-novo-zaemane', 'нов дълг')} и от други източници. Това се нарича финансиране.</p>
+        <p>Когато разходите по КФП са по-големи от приходите, разликата е ${gl('byudzheten-defitsit', 'дефицит')}. Парите за него идват от ${gl('nov-dalg-novo-zaemane', 'нов дълг')} и от други източници. Това се нарича финансиране.</p>
         <p>${finText(F)}</p>
       </div>
       ${chart(spec)}${oppNote(F)}
