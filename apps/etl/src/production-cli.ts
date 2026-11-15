@@ -24,6 +24,7 @@ import { safePath as safeDestination } from '@sigma-budget/ingest/readers/annual
 import { createRequire } from 'node:module';
 import { sourceOperatorCli, type SourceOperatorDependencies } from './source-operator.js';
 import { releaseOperatorCli, type OperatorCliDependencies } from './release-operator.js';
+import { operatorReceipts, REPOSITORY_ROOT } from './repository.js';
 import { locateManifest, materializeRemote, getBytes } from './manifest-location.js';
 
 export const PRODUCTION_USAGE = `Usage: budget <command> [options] (alias: budget-ts)
@@ -37,7 +38,8 @@ export const PRODUCTION_USAGE = `Usage: budget <command> [options] (alias: budge
   status | upload | publish | rollback --environment NAME [--url ORIGIN] (existing release operator options)
   prepare --inputs SNAPSHOT --out NEW_DIRECTORY --build-date YYYY-MM-DD [--programme-source archive|extracted]
   freshness (existing options)
-  --root defaults to the repository; --json emits machine-readable results.
+  --root defaults to this checkout of the repository, whatever the current folder; --json emits machine-readable results.
+  Release operator receipts go to <root>/work/ts-operator-receipts unless --receipts names another directory.
 New production builds are offline Node and require an explicit date. ./budget and budget-ts use this Node dispatcher; historical packages use ./budget-python.
 Historical manifests: budget-ts reproduce --manifest FILE --historical-python --env local|docker
 No restore subcommand: use the existing documented restore procedure/protocol.`;
@@ -90,7 +92,7 @@ export async function productionCli(
     }
     const [command, ...args] = argv,
       m = flags(args),
-      root = resolve(m.get('--root') ?? deps.root ?? process.cwd());
+      root = resolve(m.get('--root') ?? deps.root ?? REPOSITORY_ROOT);
     const get = (key: string, fallback?: string) => m.get(key) ?? fallback;
     const required = (key: string) => {
       const v = get(key);
@@ -150,6 +152,7 @@ export async function productionCli(
       if (['upload', 'publish', 'preflight'].includes(command!) && !m.has('--originals'))
         forwarded.push('--originals', root);
       if (!m.has('--max-object-bytes')) forwarded.push('--max-object-bytes', '67108864');
+      if (!m.has('--receipts')) forwarded.push('--receipts', operatorReceipts(root));
       return releaseOperatorCli([command!, ...forwarded], { ...deps.operator, stdout: out });
     }
     if (command === 'refetch') {

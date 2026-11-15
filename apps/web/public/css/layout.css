@@ -8,7 +8,8 @@
   border-image: linear-gradient(to top, var(--rule-soft) 1px, transparent 1px) fill 0 / /0 100vw;
 }
 
-/* ---- prototype notice (mock banner): a quiet warm strip, crimson hatch swatch ---- */
+/* ---- data notice strip (#mockbar, „Забележка за данните“): a quiet warm strip, crimson hatch swatch.
+   The screens still render the container, but it is empty and hidden (chrome bannerHtml has nothing to say). ---- */
 .mockbar {
   display: flex;
   align-items: flex-start;

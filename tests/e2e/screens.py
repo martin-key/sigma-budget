@@ -52,7 +52,6 @@ DEMOS = ['loading', 'empty', 'error', 'pending']                     # the body 
 OFFLINE_DEMO = 'offline'                                             # the real screen + the offline banner
 FAMILIES = ['base', 'demo', 'period', 'user', 'prefs', 'tour', 'to', 'chrome', 'share', 'embed', 'gloss', 'tabs', 'png', 'views', 'selftest']   # Light palette only; OS preference regression is in visual_audit.py.
 DEFAULT_OFF = set()                                                  # families that run only when asked for (none now)
-STUB_TEXT = 'Този екран предстои да бъде изграден в прототипа'
 PREFS_KEY = 'bns.prefs.v1'
 THEME_SUFFIX = ' · СИГМА Бюджет'
 # console / network noise that is expected and not a defect of the site
@@ -153,7 +152,7 @@ async () => {
 }
 """
 
-# the generic audit of one rendered screen; o = {expect: route id|null, deep: bool, stub: bool}
+# the generic audit of one rendered screen; o = {expect: route id|null, deep: bool}
 AUDIT_JS = r"""
 async (o) => {
   const P = [], info = {};
@@ -228,9 +227,6 @@ async (o) => {
   }
   const bodyFs = parseFloat(getComputedStyle(document.body).fontSize);
   if (bodyFs < 15) add('font-size', 'warn', `body font size is ${bodyFs}px`);
-
-  // ---- stub?
-  info.stub = (view.textContent || '').includes(%STUB%);
 
   // ---- broken values in text and attributes
   const BADTXT = /(^|[^\p{L}\p{N}_.])(NaN|undefined|Infinity|null)(?![\p{L}\p{N}_])|\[object Object\]/u;
@@ -507,7 +503,7 @@ async (o) => {
   info.nodes = document.querySelectorAll('*').length;
   return { problems: P, info };
 }
-""".replace('%STUB%', json.dumps(STUB_TEXT)).replace('%LEAK%', '/private channel|частен канал/i')
+""".replace('%LEAK%', '/private channel|частен канал/i')
 # AUDIT_JS-END (the Python side follows)
 
 # ===================================================================================================== local web server
@@ -852,7 +848,7 @@ def merge_audits(a, b):
 
 
 def slim(info):
-    keep = ('route', 'view', 'title', 'h1', 'stub', 'bare', 'links', 'ext', 'rel', 'share', 'tabs', 'charts', 'nodes', 'gl', 'blocks',
+    keep = ('route', 'view', 'title', 'h1', 'bare', 'links', 'ext', 'rel', 'share', 'tabs', 'charts', 'nodes', 'gl', 'blocks',
             'mockBlocks', 'hasDetails')
     return {k: info.get(k) for k in keep}
 
@@ -867,7 +863,7 @@ def deep_pass(page):
     settle(page)
 
 
-# concrete numbers the plan fixes for the finished screens (checked only on screens that are no longer stubs). The plan block and the
+# concrete numbers the plan fixes for the finished screens (checked on screens that are ready). The plan block and the
 # S15 comparison follow the latest report in data/release/execution.json (expect); they were written in for August 2026.
 _PLAN, _CMP = expect.plan(), expect.compare()
 VALUE_CHECKS = {
@@ -930,7 +926,6 @@ def job_base(w, j):
     if j.get('shot'):
         SHOT_DIR.mkdir(parents=True, exist_ok=True)
         o.page.screenshot(path=str(SHOT_DIR / f'{j["shot"]}.png'))
-    stub = bool(a['info'].get('stub'))
     if j.get('deep'):
         deep_pass(o.page)
         a = merge_audits(a, o.page.evaluate(AUDIT_JS, {'expect': route, 'deep': True}))
@@ -939,10 +934,8 @@ def job_base(w, j):
     fs += problems_to_findings(a['problems'], route, cell, h)
     if w.opts.get('axe'):
         fs += axe_findings(o.page, w.opts['axe'], route, cell, h)
-    if stub:
-        fs.append(warn('stub', 'still a stub screen: generic checks only', route=route, cell=cell, url=h))
     vals = None
-    if not stub and a['info'].get('view') == 'ready' and not j.get('no_values'):
+    if a['info'].get('view') == 'ready' and not j.get('no_values'):
         vals = value_scan(o.page, route, pending_of(items), did_deep=bool(j.get('deep')))
     return fs, {'info': slim(a['info']), 'vals': vals}
 
@@ -3509,18 +3502,16 @@ def print_report(findings, args, d, stats):
                 urls = g['urls'] if args.verbose else g['urls'][:2]
                 out.append(f'    [{f.code}] {cells_label(g["cells"])}  {" ".join(urls)}'.rstrip() + (' ...' if len(g['urls']) > len(urls) else ''))
                 out.append(f'        {f.msg}')
-    stubs = sorted({f.route for f in warns if f.code == 'stub'}, key=route_key)
-    rest = [f for f in warns if f.code != 'stub']
-    if rest:
+    if warns:
         pend = defaultdict(set)
-        for f in rest:
+        for f in warns:
             if f.code == 'pending-data':
                 pend[f.msg.split(' -> ')[0]].add(f.route)
-        out.append(f'\nWARNINGS ({len(merged(rest))})')
+        out.append(f'\nWARNINGS ({len(merged(warns))})')
         if pend:
             out.append('  [pending-data] data files that are not there yet: ' + ', '.join(f'{p} ({len(r)} screens)' for p, r in sorted(pend.items())))
         by = defaultdict(list)
-        for g in merged([f for f in rest if f.code != 'pending-data']):
+        for g in merged([f for f in warns if f.code != 'pending-data']):
             by[g['f'].code].append(g)
         for code in sorted(by, key=lambda c: -len(by[c])):
             gs = by[code]
@@ -3528,22 +3519,19 @@ def print_report(findings, args, d, stats):
             out.append(f'  [{code}] x{len(gs)} on {", ".join(r or "general" for r in routes[:12])}{" ..." if len(routes) > 12 else ""}')
             for g in (gs if args.verbose else gs[:2]):
                 out.append(f'      {g["f"].route or "general"} {cells_label(g["cells"])}: {g["f"].msg}')
-    if stubs:
-        out.append(f'\nSTUBS ({len(stubs)}, generic checks only{" - counted as failures with --strict" if args.strict else ""}): ' + ' '.join(stubs))
     print('\n'.join(out))
 
 
 def run_summary(findings, args, d, stats, t0):
     nf = len(merged([f for f in findings if f.level == 'fail']))
-    nw = len(merged([f for f in findings if f.level == 'warn' and f.code != 'stub']))
-    ns = len({f.route for f in findings if f.code == 'stub'})
+    nw = len(merged([f for f in findings if f.level == 'warn']))
     infra = any(f.code in ('infrastructure', 'discover') for f in findings)
-    strict_fail = args.strict and (nw or ns)
+    strict_fail = args.strict and nw
     code = 2 if infra else (1 if (nf or strict_fail) else 0)
     nroutes = len({r['id'] for r in (d or {}).get('routes', [])}) if not args.route else len(select_routes(d['routes'], args.route))
     slow = sorted(stats['durs'], reverse=True)[:3]
     print(f'\nroutes {nroutes} · checks {stats["jobs"]} · browsers {stats["n"]} · {time.time() - t0:.0f} s · '
-          f'failures {nf} · warnings {nw} · stubs {ns}'
+          f'failures {nf} · warnings {nw}'
           + (' · slowest ' + ', '.join(f'{k} {v:.1f}s' for v, k in slow) if slow else ''))
     print('RESULT: ' + ('INFRASTRUCTURE ERROR' if infra else ('FAIL' if code else 'PASS')) + f' (exit {code})')
     return code
@@ -3584,7 +3572,7 @@ def main(argv=None):
         j = r['job']
         stats['durs'].append((r['dur'], f'{j.get("route", "")}/{j.get("kind")}/{j.get("cell", "")}'.strip('/')))
         extras.append((j, r['extra']))
-        ch = 'F' if any(f.level == 'fail' for f in fs) else ('w' if any(f.level == 'warn' and f.code not in ('stub', 'pending-data') for f in fs) else '.')
+        ch = 'F' if any(f.level == 'fail' for f in fs) else ('w' if any(f.level == 'warn' and f.code != 'pending-data' for f in fs) else '.')
         sys.stdout.write(ch)
         if stats['jobs'] % 100 == 0:
             sys.stdout.write(f' {stats["jobs"]}\n')

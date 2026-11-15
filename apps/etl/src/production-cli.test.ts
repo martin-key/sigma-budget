@@ -181,3 +181,73 @@ it('dispatches named release operations with explicit dry-run semantics through 
   expect(calls.slice(1).every((c) => c[1].dryRun === true)).toBe(true);
   expect(calls[1][1].originals).toBe(f.root);
 });
+/** A dry-run upload through a fake client that records the root-derived paths the dispatcher chose. */
+async function operatorPaths(extra: string[], deps: { root?: string } = {}) {
+  const seen: { receipts: string; originals: string }[] = [];
+  let receipts = '';
+  const code = await productionCli(
+    [
+      'upload',
+      '--environment',
+      'owned',
+      '--url',
+      'https://owned.invalid',
+      '--release',
+      'candidate',
+      '--dry-run',
+      ...extra,
+    ],
+    {
+      ...deps,
+      write: () => {},
+      operator: {
+        credentialEnvironment: {},
+        client: (options: any) => {
+          receipts = options.receiptDirectory;
+          return {
+            environment: options.environment,
+            upload: async (o: any) => {
+              seen.push({ receipts, originals: o.originals });
+              return { dryRun: o.dryRun };
+            },
+          } as any;
+        },
+      },
+    },
+  );
+  expect(code).toBe(0);
+  return seen[0]!;
+}
+it('defaults --root to this checkout of the repository, whatever the current folder', async () => {
+  const repository = resolve(import.meta.dirname, '../../..');
+  const elsewhere = await mkdtemp(join(tmpdir(), 'production-cwd-'));
+  roots.push(elsewhere);
+  const original = process.cwd();
+  const seen: Awaited<ReturnType<typeof operatorPaths>>[] = [];
+  try {
+    for (const folder of [elsewhere, import.meta.dirname]) {
+      process.chdir(folder);
+      seen.push(await operatorPaths([]));
+    }
+  } finally {
+    process.chdir(original);
+  }
+  const expected = {
+    originals: repository,
+    receipts: join(repository, 'work/ts-operator-receipts'),
+  };
+  expect(seen).toEqual([expected, expected]);
+});
+it('keeps the receipts of an explicit --root in that copy unless --receipts names another directory', async () => {
+  const other = await mkdtemp(join(tmpdir(), 'production-root-'));
+  roots.push(other);
+  expect(await operatorPaths(['--root', other])).toEqual({
+    originals: other,
+    receipts: join(other, 'work/ts-operator-receipts'),
+  });
+  const receipts = join(other, 'operator-receipts');
+  expect(await operatorPaths(['--root', other, '--receipts', receipts])).toEqual({
+    originals: other,
+    receipts,
+  });
+});

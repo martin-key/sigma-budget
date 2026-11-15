@@ -41,6 +41,8 @@
 ./budget import-source --source kfp --file ~/Downloads/2026-EU\ funds_1026_BG_WEB.xls --out /outside/new/acquired
 ```
 
+`--root` е копието на хранилището, чиито `data/`, регистри и `pipeline/environments.json` командата използва. По подразбиране е коренът на копието, от което върви кодът, независимо от текущата папка.
+
 - **`build`** изнася един commit с `git archive`, без `.git` и без промените, които не са в него. Входовете (`data/originals`,
   `data/cache`, `data/cache/research`) се автентикират и копират само за четене в отделен Node export/scratch. Всеки вход се сверява с пина си
   (`data/originals.sha256` или `sha256` в регистъра); разлика спира сглобяването. Новото сглобяване не изпълнява Python или Docker. Историческият Python replay запазва старата фиксирана среда.
@@ -90,7 +92,7 @@
 ./budget rollback --release-id <по-ранно издание> --environment staging
 ```
 
-`publish` запазва `request_id` в `work/receipts/<release_id>.json` преди заявката. Ако отговорът се изгуби, пита `GET /admin/requests/:id`,
+`publish` запазва `request_id` в `work/ts-operator-receipts/<SHA-256 на средата>-<release_id>.json` под `--root` преди заявката (подробности в [release-client.md](release-client.md)). Ако отговорът се изгуби, пита `GET /admin/requests/:id`,
 а не публикува отново с нов ID. Накрая чете указателя, манифеста и един файл без кеш. Изходи: 4 отказан достъп, 5 конфликт на ревизии
 (някой е публикувал пръв), 6 непотвърдено публикуване. Достъпът: `cloudflared access login <адрес>/admin/operations`, или `BUDGET_ACCESS_TOKEN`, или service
 token в `CF_ACCESS_CLIENT_ID` и `CF_ACCESS_CLIENT_SECRET`. Токените не се печатат и не влизат в манифеста или в разписките.

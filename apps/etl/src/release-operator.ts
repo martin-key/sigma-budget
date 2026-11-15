@@ -1,5 +1,5 @@
-import { join, resolve } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import {
   credentialsFromEnvironment,
   preflightRelease,
@@ -8,6 +8,7 @@ import {
   type ClientOptions,
   type ReleaseEnvironment,
 } from '@sigma-budget/ingest/release-client';
+import { operatorReceipts, REPOSITORY_ROOT } from './repository.js';
 
 const usage = `Usage: node apps/etl/dist/release-operator.js <status|preflight|upload|publish|rollback>
   --environment <name> --url <https-origin> [--receipts <directory>]
@@ -19,10 +20,8 @@ const usage = `Usage: node apps/etl/dist/release-operator.js <status|preflight|u
 Protected process inputs: BUDGET_ACCESS_TOKEN, or CF_ACCESS_CLIENT_ID + CF_ACCESS_CLIENT_SECRET.
 No credential flags, home auth discovery, environment file loading or default environment.`;
 
-// apps/etl/src or apps/etl/dist -> repository root, whichever folder the command is started from.
-const root = resolve(fileURLToPath(new URL('../../../', import.meta.url)));
 /** Receipts stay in the ignored /work/ of this checkout unless --receipts names another directory. */
-export const DEFAULT_RECEIPT_DIRECTORY = join(root, 'work/ts-operator-receipts');
+export const DEFAULT_RECEIPT_DIRECTORY = operatorReceipts(REPOSITORY_ROOT);
 
 export interface OperatorCliDependencies {
   /** Parent may inject its existing environment registry after resolving it. */
