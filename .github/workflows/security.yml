@@ -22,7 +22,7 @@ jobs:
       - name: Static analysis (semgrep)
         run: |
           semgrep scan --config .semgrep/security.yml --metrics=off --error --strict
-          python scripts/security-scanner-check.py semgrep semgrep
+          sh scripts/security-scanner-check.sh semgrep semgrep
 
   dependencies-and-secrets:
     runs-on: ubuntu-latest
@@ -40,12 +40,13 @@ jobs:
           echo "${GITLEAKS_SHA256}  $RUNNER_TEMP/gitleaks.tar.gz" | sha256sum -c -
           tar -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP" gitleaks
           "$RUNNER_TEMP/gitleaks" dir . --redact --no-banner
-          python3 scripts/security-scanner-check.py gitleaks "$RUNNER_TEMP/gitleaks"
 
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'
+      - name: Secret scan negative controls (gitleaks)
+        run: node scripts/security-scanner-check.mjs gitleaks "$RUNNER_TEMP/gitleaks"
       - run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Dependency advisory gate (all severities)
         run: pnpm audit --audit-level=low

@@ -243,7 +243,15 @@ Semgrep използва digest-pinned образ като СИГМА и пре�
 стандартни правила; точните публични стойности `2028.forecast` и `2029.forecast`
 са документирани false positives в `.gitleaks.toml`, без изключване на файлове. Допълнителните изключения обхващат само 11 точни, прегледани SHA-256
 стойности в пет конкретни frozen provenance/capture файла и точните имена на две
-липсващи полета от KeyError в един validation oracle. Dependabot предлага обновявания на SHA pins
+липсващи полета от KeyError в един validation oracle.
+След всяко сканиране отрицателни контроли доказват, че скенерът наистина блокира:
+във временна папка се поставят известни опасни образци и синтетична тестова тайна,
+включително във файлове с пътищата на петте frozen файла с изключения в `.gitleaks.toml`,
+и скенерът трябва да завърши с находка, а на безопасния образец - без. Контролата за
+Semgrep е POSIX `sh` (`scripts/security-scanner-check.sh`), защото образът на Semgrep
+няма Node; тази за gitleaks е `scripts/security-scanner-check.mjs` и изисква в изхода
+да има отчетена находка, защото gitleaks завършва с код 1 и при собствена грешка.
+Dependabot предлага обновявания на SHA pins
 за GitHub Actions за преглед. За merge protection трябва да са required двата
 security job-а; staging deploy зависи от security workflow-а.
 
