@@ -15,7 +15,7 @@ it('an aborted navigation never becomes a successful editorial fallback', async 
       throw new DOMException('superseded', 'AbortError');
     },
   };
-  await expect(textModel('S26', {}, {}, reader)).rejects.toMatchObject({ name: 'AbortError' });
+  await expect(textModel('S30', {}, {}, reader)).rejects.toMatchObject({ name: 'AbortError' });
 });
 it('missing optional editorial data leaves a usable model on the selected release', async () => {
   const reader: ReleaseReader = {
@@ -24,7 +24,7 @@ it('missing optional editorial data leaves a usable model on the selected releas
       throw new Error('unavailable');
     },
   };
-  const model = await textModel('S26', {}, {}, reader);
+  const model = await textModel('S30', {}, {}, reader);
   expect(model.core).toEqual({});
   expect(model.release).toEqual(release);
   expect(model.view).toBe('ready');

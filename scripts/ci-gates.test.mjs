@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 const workflow = readFileSync('.github/workflows/site.yml', 'utf8');
 test('one Node suite command and explicit deploy barrier', () => {
@@ -23,25 +23,34 @@ test('one Node suite command and explicit deploy barrier', () => {
 test('all independent Python and provenance commands survive the consolidation', () => {
   const evidence = JSON.parse(readFileSync('scripts/ci-provenance-commands.json', 'utf8'));
   for (const [path, commands] of Object.entries(evidence)) {
-    const current = readFileSync(path, 'utf8')
+    const raw = readFileSync(path, 'utf8')
       .split('\n')
-      .map((x) => x.trim().replace(/^- run: /, ''))
-      .map((x) =>
-        x === 'bash scripts/ci-install-browser.sh'
-          ? 'python -m playwright install --with-deps chromium'
-          : x,
-      );
+      .map((x) => x.trim().replace(/^(?:- )?run: /, ''));
+    const current = raw.map((x) =>
+      x === 'bash scripts/ci-install-browser.sh'
+        ? 'pnpm exec playwright install --with-deps chromium'
+        : x,
+    );
     for (const command of commands) assert.ok(current.includes(command), command);
-    const browserInstall = 'python -m playwright install --with-deps chromium';
+    const browserInstall = 'pnpm exec playwright install --with-deps chromium';
     assert.equal(
       current.filter((command) => command === browserInstall).length,
       commands.filter((command) => command === browserInstall).length,
       `${path}: every browser setup must retain the checked retry wrapper`,
     );
+    assert.ok(
+      !raw.some((command) => /playwright install/.test(command)),
+      `${path}: a browser setup outside the checked retry wrapper`,
+    );
   }
-  const wave = readFileSync('.github/workflows/wave15b-validation.yml', 'utf8');
-  assert.match(wave, /workflow_call:/);
-  assert.doesNotMatch(wave, /vitest run/);
+  // the Python browser checks that remain run on the browser build the npm Playwright installs: both stay on one version
+  const lock = 'tests/requirements-dev.lock';
+  if (existsSync(lock))
+    assert.equal(
+      readFileSync(lock, 'utf8').match(/^playwright==(\S+)/m)?.[1],
+      JSON.parse(readFileSync('package.json', 'utf8')).devDependencies['@playwright/test'],
+      'the Python and the npm Playwright must share one Chromium build',
+    );
 });
 
 test('security covers other PR targets without duplicating main PR checks', () => {
@@ -72,7 +81,7 @@ test('merged boot and route modules remain inside formatting and production cove
   const modules = [
     'client/chrome-boot.js',
     'app/migration/screens.ts',
-    ...['S14', 'S16', 'S25', 'S26', 'S30', 'S35'].map((id) => `app/migration/screen-${id}.tsx`),
+    ...['S14', 'S16', 'S25', 'S30', 'S35'].map((id) => `app/migration/screen-${id}.tsx`),
   ];
   for (const file of modules) {
     assert.ok(
@@ -140,4 +149,25 @@ test('coverage CI checks the target baseline with history and env refs before ru
     COVERAGE_BASE_SHA: '${{ github.event.before }}',
   });
   assert.ok(gate < job.steps.findIndex((step) => step.run === 'pnpm test -- --coverage'));
+});
+
+test('the Node suites run without a Python interpreter', () => {
+  const { parse } = createRequire(new URL('../packages/ingest/package.json', import.meta.url))(
+    'yaml',
+  );
+  const job = parse(workflow).jobs.coverage;
+  assert.ok(!job.steps.some((step) => /setup-(python|uv)@/.test(step.uses ?? '')));
+  assert.ok(!job.steps.some((step) => /\b(python[\d.]*|pip\d*|uv)\b/.test(step.run ?? '')));
+  for (const name of [job, ...job.steps].flatMap((part) => Object.keys(part.env ?? {})))
+    assert.ok(!name.startsWith('PYTHON'), `coverage still sets ${name}`);
+  const turbo = JSON.parse(readFileSync('turbo.json', 'utf8'));
+  for (const name of [
+    ...(turbo.globalEnv ?? []),
+    ...(turbo.globalPassThroughEnv ?? []),
+    ...Object.values(turbo.tasks ?? {}).flatMap((task) => [
+      ...(task.env ?? []),
+      ...(task.passThroughEnv ?? []),
+    ]),
+  ])
+    assert.ok(!name.startsWith('PYTHON'), `Turbo still passes ${name}`);
 });

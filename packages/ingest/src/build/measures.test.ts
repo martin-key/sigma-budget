@@ -26,6 +26,6 @@ it('retains Part VIII legal quotations without inferring effective dates', () =>
   const result = buildMeasures(input, excerpts(), '2026-11-08');
   if (!Array.isArray(result.items)) throw new Error('Missing measures');
   const law = result.items.find((item) => object(item) && item.id === 'p8-1');
-  expect(law).toMatchObject({quote: input.part8.items[0]!.quote});
+  expect(law).toMatchObject({ quote: input.part8.items[0]!.quote });
   expect(law).not.toHaveProperty('from');
 });

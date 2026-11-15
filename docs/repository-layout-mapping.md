@@ -94,9 +94,9 @@
 | `tools/mock/mock_lib.py`             | `pipeline/budget_pipeline/build/example_support.py`       |
 | `tools/mock/motion_v6.py`            | `tests/e2e/motion.py`                                     |
 | `tools/mock/overlap_v6.py`           | `tests/e2e/overlap.py`                                    |
-| `tools/mock/perf_v6.py`              | `tests/e2e/perf.py`                                       |
+| `tools/mock/perf_v6.py`              | `tests/e2e/perf.py` (премахнат)                           |
 | `tools/mock/png_probe_v5.py`         | `reference/mock/png_probe_v5.py`                          |
-| `tools/mock/png_probe_v6.py`         | `tests/e2e/png_probe.py`                                  |
+| `tools/mock/png_probe_v6.py`         | `tests/e2e/png_probe.py` (премахнат)                      |
 | `tools/mock/prototype.sha256`        | `data/originals.sha256`                                   |
 | `tools/mock/prototype_sums.py`       | `pipeline/budget_pipeline/build/input_checksums.py`       |
 | `tools/mock/rebuild_v6.py`           | `pipeline/budget_pipeline/build/rebuild.py`               |
@@ -106,10 +106,10 @@
 | `tools/mock/share_check_v5.py`       | `reference/mock/share_check_v5.py`                        |
 | `tools/mock/share_check_v6.py`       | `tests/e2e/share_check.py`                                |
 | `tools/mock/shot_v5.py`              | `reference/mock/shot_v5.py`                               |
-| `tools/mock/shot_v6.py`              | `tests/e2e/shot.py`                                       |
+| `tools/mock/shot_v6.py`              | `tests/e2e/shot.py` (премахнат)                           |
 | `tools/mock/shots_v2.py`             | `reference/mock/shots_v2.py`                              |
 | `tools/mock/sweep_v5.py`             | `reference/mock/sweep_v5.py`                              |
-| `tools/mock/sweep_v6.py`             | `tests/e2e/sweep.py`                                      |
+| `tools/mock/sweep_v6.py`             | `tests/e2e/sweep.py` (премахнат)                          |
 | `tools/mock/v5_data_active.py`       | `pipeline/budget_pipeline/build/active_data.py`           |
 | `tools/mock/v5_wording.py`           | `pipeline/budget_pipeline/build/wording.py`               |
 | `tools/mock/validate_data.py`        | `pipeline/budget_pipeline/validate/base.py`               |

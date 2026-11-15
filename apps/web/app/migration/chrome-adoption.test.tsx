@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 import { URL as NodeURL } from 'node:url';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { chromeDOM, chromeTree } from './chrome-tree';
+import { currentFooter, currentNavigation } from '../routes/launch-copy-test-helper';
 
 vi.mock('react-dom/client', async (importOriginal) => {
   const actual = await importOriginal<typeof client>();
@@ -23,7 +24,12 @@ vi.mock('../lib/legacy', async (importOriginal) => ({
 import core from '../routes/__fixtures__/core.json';
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-const frozen = readFileSync(new NodeURL('../routes/__fixtures__/S26.html', import.meta.url), 'utf8')
+// A capture of S25: its chrome is that of every screen (the capture of the retired S26 is kept only as history).
+const frozen = currentFooter(
+  currentNavigation(
+    readFileSync(new NodeURL('../routes/__fixtures__/S25.html', import.meta.url), 'utf8'),
+  ),
+)
   // The launch chrome removes the prototype badge, preserving the frozen capture.
   .replace(/<span class="badge-mock"[^>]*>[\s\S]*?<\/span>/, '')
   .replace(/<span class="theme-pick"[\s\S]*?<\/span>/, '')
@@ -67,11 +73,11 @@ for (const [id, focus] of [
     focused.focus();
     expect(document.activeElement).toBe(focused);
     const options = {
-      route: byId.S26,
-      periods: byId.S26.periods,
+      route: byId.S25,
+      periods: byId.S25.periods,
       wide: true,
-      cur: 'S26',
-      from: 'za-proekta',
+      cur: 'S25',
+      from: 'api',
     };
     await act(async () => refreshChrome(options));
     expect(document.activeElement).toBe(focused);
@@ -101,7 +107,7 @@ for (const [id, focus] of [
   });
 }
 
-for (const selector of ['.sister-link', '[data-action="legend"]']) {
+for (const selector of ['.sister-link', '.code-link']) {
   it(`footer retains ${selector} focus when core data is late and then arrives`, async () => {
     document.documentElement.innerHTML = frozen
       .replace(/^<!doctype html>\s*/i, '')
@@ -111,11 +117,11 @@ for (const selector of ['.sister-link', '[data-action="legend"]']) {
     const focused = document.querySelector<HTMLElement>(`#footer ${selector}`)!;
     focused.focus();
     const options = {
-      route: byId.S26,
-      periods: byId.S26.periods,
+      route: byId.S25,
+      periods: byId.S25.periods,
       wide: true,
-      cur: 'S26',
-      from: 'za-proekta',
+      cur: 'S25',
+      from: 'api',
     };
     for (const ready of [false, true]) {
       coreState.ready = ready;

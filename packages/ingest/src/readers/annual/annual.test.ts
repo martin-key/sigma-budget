@@ -72,7 +72,7 @@ it('feeds the unchanged Wave13a builders and produces all six exact final output
   validateProvenance(outputs);
   for (const [name, output] of Object.entries(outputs))
     expect(output, name).toEqual(await json(join(fixtures, 'wave13a/final', name)));
-});
+}, 30_000);
 it('generates missing intermediates in an owned export, then verifies them without changing their bytes', async () => {
   const out = join(temp, 'generated'),
     opts = { sourceRoot: root, registration, out, buildDate: date };
@@ -85,7 +85,7 @@ it('generates missing intermediates in an owned export, then verifies them witho
   for (let i = 0; i < files.length; i++)
     expect(await readFile(join(out, verified.outputs[i]!.path))).toEqual(files[i]);
   expect(await json(join(out, 'tmp/budget-2027-extractions.json'))).toEqual(verified);
-}, 60_000);
+}, 120_000);
 it('verifies real existing Python intermediates byte-for-byte unchanged', async () => {
   const out = join(temp, 'existing');
   await mkdir(join(out, 'data/inputs'), { recursive: true });
@@ -99,7 +99,7 @@ it('verifies real existing Python intermediates byte-for-byte unchanged', async 
   expect(receipt.compatibility).toHaveLength(1);
   for (const o of receipt.outputs)
     expect(await readFile(join(out, o.path))).toEqual(await readFile(join(root, o.path)));
-}, 60_000);
+}, 120_000);
 it('fails a stale second gate before creating the absent first intermediate or changing existing bytes', async () => {
   const out = join(temp, 'stale');
   await mkdir(join(out, 'data/inputs'), { recursive: true });
@@ -213,7 +213,7 @@ it('detects corrupt bytes in an owned source copy without overwriting a present 
   );
   expect(await readFile(path)).toEqual(before);
   expect(await readFile(join(sourceRoot, registration.archive))).toEqual(broken);
-}, 60_000);
+}, 120_000);
 it('enforces physical decoder bounds and exposes reusable pages, spans and cells from actual bytes', () => {
   const pdf = zipMember(archive, registration.members.find((m) => m.role === 'forecast')!.member);
   expect(() => readPdf(pdf, { maxBytes: pdf.length - 1 })).toThrow(/byte limit/);

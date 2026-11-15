@@ -211,6 +211,8 @@ export function numeric(ctx: Context): Check {
     noise = 0;
   for (const f of ctx.jsonFiles()) {
     const doc = ctx.get(f);
+    const programmeContract =
+      /^ministries\/(0100|1800|2300|7400)\.json$/.test(f) && isPublishedDataset(f, doc);
     const budgetContract =
       ['state-budget.json', 'kfp-subsectors.json'].includes(f) && isPublishedDataset(f, doc);
     const bad: Record<string, string[]> = {};
@@ -223,6 +225,11 @@ export function numeric(ctx: Context): Check {
         nulls++;
         if (
           !NULL_OK.some(([file, re]) => file === f && re.test(pat)) &&
+          !(
+            programmeContract &&
+            (/^\$\.sourceAudit\.rows\[\]\.values\[\]$/.test(pat) ||
+              /^\$\.(total|policies).*\.2026\[\]$/.test(pat))
+          ) &&
           !(budgetContract && /^\$\.tables\[\]\.rows\[\]\.(source|eur)\[\]$/.test(pat))
         )
           add('null', p);

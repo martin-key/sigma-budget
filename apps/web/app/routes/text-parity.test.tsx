@@ -7,9 +7,6 @@ import { MigratedScreen, safeJSON } from '../migration/registry';
 import core from './__fixtures__/core.json';
 import glossary from './__fixtures__/glossary.json';
 import type { TextScreenModel } from '../lib/screen-state';
-import { build, frameHtml } from '../../client/render.js';
-import { byId } from '../lib/legacy';
-import { index as glossaryIndex, link as linkTerms } from '../../client/glossary-scan.js';
 // The route descriptions are source input to the frozen migration oracle too.
 vi.mock('../lib/routes.json', async () => ({
   default: JSON.parse(
@@ -63,7 +60,7 @@ function semantics(html: string, checkTargets = true) {
   };
 }
 describe('frozen main 26f82ea, same release', () => {
-  for (const screen of ['S26', 'S30'] as const)
+  for (const screen of ['S30'] as const)
     it(`${screen} preserves ordered text, headings and link destinations with current data disclosures`, async () => {
       const model: TextScreenModel = {
         screen,
@@ -76,42 +73,7 @@ describe('frozen main 26f82ea, same release', () => {
       const html = renderToStaticMarkup(
         <MigratedScreen model={model} navigation={{ go() {}, announce() {} }} />,
       );
-      let expected = fixture(screen);
-      if (screen === 'S26') {
-        const url = new URL('/za-proekta', 'https://sigma-budget.my-data.bg');
-        const scope = {
-          url,
-          origin: url.origin,
-          data: new Map<string, unknown>([
-            ['core', core],
-            ['glossary', glossary],
-          ]),
-          state: requestState(null),
-          load: async (name: string) => (name === 'core' ? core : glossary),
-        };
-        provideScope(() => scope);
-        expected = String(frameHtml(await build(byId.S26, {}, {})));
-        const legacyDoc = parseHTML(`<html><body>${expected}</body></html>`).document;
-        linkTerms(legacyDoc.querySelector('article'), glossaryIndex(glossary));
-        expected = legacyDoc.querySelector('article')!.outerHTML.replaceAll('href="#/', 'href="/');
-        expect(html).not.toContain('няколкото стойности');
-        expect(html).not.toContain('data-s26-demo');
-        expect(html).toContain('Официални източници');
-        const actualDoc = parseHTML(html).document,
-          oldDoc = parseHTML(
-            // The data have no separate licence: they are public official documents.
-            fixture(screen).replace(
-              /<p>Лицензът на данните още не е избран\.[\s\S]*?<\/p>/,
-              '<p>Данните са публични: идват от официални документи и нямат отделен лиценз.</p>',
-            ),
-          ).document;
-        // Roadmap and working-group credits are intentionally retired; keep the open-data oracle.
-        for (const id of ['s26-open']) {
-          const section = (d: Document) =>
-            `<article>${d.getElementById(id)!.closest('section')!.outerHTML}</article>`;
-          expect(semantics(section(actualDoc), false)).toEqual(semantics(section(oldDoc), false));
-        }
-      }
+      const expected = fixture(screen);
       expect(semantics(html)).toEqual(semantics(expected));
     });
   it('seed cannot terminate its inert script', () =>
@@ -122,10 +84,7 @@ import { renderScreen } from '../lib/screen.server';
 import { provideScope } from '../../client/env.js';
 import { requestState } from '../../client/store.js';
 afterEach(() => provideScope(() => null));
-for (const [screen, path, status] of [
-  ['S26', '/za-proekta', 200],
-  ['S30', '/nyama-takava-stranitsa', 404],
-] as const) {
+for (const [screen, path, status] of [['S30', '/nyama-takava-stranitsa', 404]] as const) {
   it(`${screen} preserves frozen metadata, canonical, JSON-LD and status`, async () => {
     const url = new URL(path, 'https://sigma-budget.my-data.bg');
     const scope = {
@@ -160,7 +119,7 @@ for (const [screen, path, status] of [
   });
 }
 
-for (const screen of ['S26', 'S30'] as const)
+for (const screen of ['S30'] as const)
   for (const view of ['loading', 'empty', 'error', 'pending'] as const) {
     it(`${screen} ${view} state preserves frozen screen semantics`, () => {
       const model: TextScreenModel = {

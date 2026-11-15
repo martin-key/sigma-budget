@@ -1,4 +1,9 @@
-import { publicOrganization, finalPendingCopy, finalApiCopy } from './launch-copy-test-helper';
+import {
+  publicOrganization,
+  finalPendingCopy,
+  finalApiCopy,
+  currentScreenNames,
+} from './launch-copy-test-helper';
 import { rejectReactKeyWarnings } from './metadata-test-warnings';
 import { createHash } from 'node:crypto';
 import { expect, it, afterEach } from 'vitest';
@@ -78,7 +83,7 @@ for (const c of manifest.cases) {
     // The public group heading now covers the 2027 publication too. Keep the
     // original captured HTML and its checksums intact.
     // SECURITY-06 intentionally replaces the unresolved CORS statement; preserve the frozen capture.
-    const frozen = fixture(c.file)
+    const frozen = currentScreenNames(fixture(c.file))
       // Pending catalogue entries no longer have public pages or a missing-files notice.
       .replace(/<p class="small muted">Още 7 набора нямат файл,[\s\S]*?<\/p>/, '')
       .replace(/ За 4 от 46 бюджета програмите предстоят \([\s\S]*?P03<\/a>\)\./g, '')

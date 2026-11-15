@@ -66,7 +66,7 @@ function identity(node: ReactElement<ChromeProps>): string {
     if (value != null) return `${tag}[${attribute}=${String(value)}]`;
   }
   // Anonymous wrappers inherit their first element's identity. In particular,
-  // late core data must not move the footer's sister link or legend control.
+  // late core data must not move the footer's sister link.
   const children = Array.isArray(node.props.children) ? node.props.children : [node.props.children];
   const child = children.find((item): item is ReactElement<ChromeProps> =>
     isValidElement<ChromeProps>(item),

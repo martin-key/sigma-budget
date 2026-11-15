@@ -126,3 +126,13 @@ it('every published dataset passport omits internal and future-data copy', async
     expect(article.querySelector('a[href*="/danni/p0"]'), set.slug).toBeNull();
   }
 });
+
+it('keeps the debt forecast page and appends the dated bulletin snapshot without serializing its page object', async () => {
+  const document = await documentAt('/dalg');
+  const text = document.querySelector('article')!.textContent!;
+  expect(text).not.toContain('[object Object]');
+  expect(text).toContain('2027');
+  expect(text).toContain('XS2890436087');
+  expect(text).toContain('не е превалутирана');
+  expect(document.querySelector('#debt-issues-outstanding')).not.toBeNull();
+});

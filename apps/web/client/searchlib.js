@@ -537,8 +537,8 @@ const SCREEN_KW = {
   S20: 'общини карта трансфери',
   S24: 'данни източници набори методика каталог',
   S25: 'api json csv отворени данни файлове',
-  S26: 'проекта екип',
   S27: 'обратна връзка грешка предложение идея',
+  S35: 'проверка издание оригинали контролни суми sha-256 възпроизвеждане',
   S31: 'бвп икономика растеж потребление инвестиции износ внос макро отрасли сектори добавена стойност промишленост строителство търговия услуги селско стопанство',
 };
 // a required `:name` segment (not `:name?`, not `:name(regex)?`) means the screen cannot be opened without a parameter
@@ -548,7 +548,12 @@ function fromRoutes() {
   return ROUTES.filter(
     (r) => r.pattern && !needsParam(r) && !['S28', 'S29', 'S30'].includes(r.id),
   ).map((r) =>
-    entry('screens', r.title, { sub: r.desc, kw: SCREEN_KW[r.id] || '', href: routeHref(r.id) }),
+    // the menu name (r.short) is a word people search for too: S24 is «Откъде са данните?» in its heading and «Методология» in the menu
+    entry('screens', r.title, {
+      sub: r.desc,
+      kw: [r.short !== r.title ? r.short : '', SCREEN_KW[r.id]].filter(Boolean).join(' '),
+      href: routeHref(r.id),
+    }),
   );
 }
 

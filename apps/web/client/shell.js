@@ -13,7 +13,6 @@ import { byId, href as routeHref } from './routes.js';
 import { html, nextId } from './html.js';
 import { icon } from './icons.js';
 import { popover, sheet } from './ui/sheet.js';
-import { openLegend } from './ui/status.js';
 import { data } from './data.js';
 import { date } from './format.js';
 import { router } from './router.js';

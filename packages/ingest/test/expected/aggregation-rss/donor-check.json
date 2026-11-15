@@ -1,0 +1,24 @@
+{
+  "capturedWith": "Python 3.12.14",
+  "command": "python3.12 test/fixtures/aggregation-rss/generate_oracle.py --check",
+  "donorSha256": "2e3a11cc4aa4424470141ba027172b5fda9910f8de8431da054a8e89466e66ed",
+  "casesSha256": "82e3f36f7408efcca7e4657bc5bc0c896825a27e55cde9e37d87218e9931337e",
+  "oracles": [
+    {
+      "case": "escaping",
+      "sha256": "343247ccff4f884aa5d6f999931b5ea8188195b027883d1f0bd2a9f4e1573fc6"
+    },
+    {
+      "case": "limit-and-override",
+      "sha256": "4cd8d2f03c17c15bd26bab53105c6c1927715289fb0d761615f4252195dd1011"
+    },
+    {
+      "case": "empty",
+      "sha256": "54b365175877bbaed228af18d1620638578ea30a56555db7545ec0536a29847f"
+    },
+    {
+      "case": "numeric-date",
+      "sha256": "9075323b6cd6b1dc952578d05797f82fcb93f8d463b07f95e56fdf5116cd350b"
+    }
+  ]
+}

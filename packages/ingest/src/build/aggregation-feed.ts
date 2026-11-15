@@ -396,5 +396,8 @@ export function buildFeed(input: FeedInput) {
     highlights: h,
     sentences,
   };
-  return { feed, rss: buildRss(feed, input.baseUrl ?? DEFAULT_RSS_ORIGIN, input.buildDate, input.siteName) };
+  return {
+    feed,
+    rss: buildRss(feed, input.baseUrl ?? DEFAULT_RSS_ORIGIN, input.buildDate, input.siteName),
+  };
 }

@@ -1,0 +1,129 @@
+{
+  "capturedWith": "Python 3.12.14",
+  "command": "python3.12 test/fixtures/catalog/synthetic_primary.py",
+  "sample": {
+    "manifest": {
+      "nap/a.pdf": {
+        "url": "https://example.invalid/%D0%B0%200.pdf?q=x",
+        "http_status": 200,
+        "sha256": "a94efe42b12aeb799b6be6fed321adf3f560dc2aa3ae757acf00fa1dc7f79c20",
+        "bytes": 11,
+        "retrieved": "2026-11-08T10:00:00"
+      },
+      "dv/b.html": {
+        "url": "https://example.invalid/%D0%B0%201.pdf?q=x",
+        "http_status": 200,
+        "sha256": "7063bde79a73ff8ee5996c863a9ea368a96cd9ceff9076608dc7d605354780bb",
+        "bytes": 11,
+        "retrieved": "2026-11-08T10:00:00"
+      }
+    },
+    "manifestFiles": [
+      ["nap/a.pdf", "A", ["nap"], ["rates"]],
+      ["dv/b.html", "B", ["zdb"], ["law"]]
+    ],
+    "rawFacts": {
+      "nap/a.pdf": {
+        "bytes": 11
+      },
+      "asbp/UMTBF-2026-2028-motivi.pdf": {
+        "bytes": 13,
+        "sha256": "7e65a25c513fecdd155e495c117f622a9ce00e35bef63b9b74048160c46b49ce"
+      },
+      "kfp_2026/month.xls": {
+        "bytes": 13
+      }
+    },
+    "cacheFacts": {
+      "sample.xlsx": {
+        "bytes": 15,
+        "sha256": "0f6b1c8ce021afd55ac98ebb6cacdcec9fa361b5a9c97ec8198d1cae4955e714"
+      }
+    },
+    "sebraBase": "https://example.invalid/",
+    "sebraCache": [["sample.xlsx", "a%20b.xlsx", "01.01.2026"]],
+    "historicalGva": [],
+    "kfpPage": "https://example.invalid/kfp",
+    "execution": {
+      "data": {
+        "2026": {
+          "files": [
+            {
+              "file": "month.xls",
+              "month": 1,
+              "sha256": "33d167a3d9b615b1036fdc71fb012d2d85be192d100454bbf9fd35f357614dba"
+            },
+            {
+              "file": "absent.xls",
+              "month": 2,
+              "sha256": "5ad38304b535c2987dbd24657c1a11b884984ff600d9f389deb0d4e634fee792"
+            }
+          ]
+        }
+      }
+    },
+    "expected": [
+      {
+        "name": "а 0.pdf",
+        "title": "A",
+        "url": "https://example.invalid/%D0%B0%200.pdf?q=x",
+        "sha256": "a94efe42b12aeb799b6be6fed321adf3f560dc2aa3ae757acf00fa1dc7f79c20",
+        "bytes": 11,
+        "retrieved": "2026-11-08",
+        "source": ["nap"],
+        "usedBy": ["rates"],
+        "role": "source"
+      },
+      {
+        "name": "b.html",
+        "title": "B",
+        "url": "https://example.invalid/%D0%B0%201.pdf?q=x",
+        "sha256": "7063bde79a73ff8ee5996c863a9ea368a96cd9ceff9076608dc7d605354780bb",
+        "bytes": 11,
+        "retrieved": "2026-11-08",
+        "source": ["zdb"],
+        "usedBy": ["law"],
+        "role": "source"
+      },
+      {
+        "name": "UMTBF-2026-2028-motivi.pdf",
+        "title": "Мотиви към законопроекта: PDF версия (проект от юни 2026 г.)",
+        "sha256": "7e65a25c513fecdd155e495c117f622a9ce00e35bef63b9b74048160c46b49ce",
+        "bytes": 13,
+        "source": ["asbp"],
+        "usedBy": ["outlook", "revenue", "expenditure", "measures", "debt", "components"],
+        "role": "source",
+        "note": "Първоначалната версия на мотивите; адресът, от който е изтеглена, не е записан, затова няма връзка. Контролната сума позволява да сравниш своето копие."
+      },
+      {
+        "name": "a b.xlsx",
+        "title": "СЕБРА: дневно обобщение на МИДТ за 01.01.2026 г.",
+        "url": "https://example.invalid/a%20b.xlsx",
+        "sha256": "0f6b1c8ce021afd55ac98ebb6cacdcec9fa361b5a9c97ec8198d1cae4955e714",
+        "bytes": 15,
+        "source": ["sebra"],
+        "usedBy": ["sebra"],
+        "role": "source"
+      },
+      {
+        "name": "month.xls",
+        "title": "КФП: месечен отчет към края на януари 2026 г. (xls)",
+        "page": "https://example.invalid/kfp",
+        "sha256": "33d167a3d9b615b1036fdc71fb012d2d85be192d100454bbf9fd35f357614dba",
+        "bytes": 13,
+        "source": ["kfp"],
+        "usedBy": ["execution"],
+        "role": "source"
+      },
+      {
+        "name": "absent.xls",
+        "title": "КФП: месечен отчет към края на февруари 2026 г. (xls)",
+        "page": "https://example.invalid/kfp",
+        "sha256": "5ad38304b535c2987dbd24657c1a11b884984ff600d9f389deb0d4e634fee792",
+        "source": ["kfp"],
+        "usedBy": ["execution"],
+        "role": "source"
+      }
+    ]
+  }
+}

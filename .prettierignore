@@ -1,6 +1,11 @@
 **/node_modules/**
-**/build/**
-**/dist/**
+# Generated output, anchored to where the tools write it (as in .gitignore). A bare build/ or dist/ would also skip
+# live source folders such as packages/ingest/src/build/; apps/web/workers/repository-ignore.test.ts guards this.
+apps/web/build/
+apps/*/dist/
+packages/*/dist/
+/build/
+/dist/
 **/.react-router/**
 **/.wrangler/**
 **/.turbo/**
@@ -17,5 +22,7 @@ reference/**
 # Vendored assets retain upstream bytes.
 **/vendor/**
 # Coverage is generated evidence, not maintained source.
-**/coverage/**
-coverage-summary.md
+apps/*/coverage/
+packages/*/coverage/
+/coverage/
+/coverage-summary.md

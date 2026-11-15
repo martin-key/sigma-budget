@@ -34,7 +34,7 @@ pnpm exec wrangler d1 migrations apply DB --remote -c apps/web/wrangler.jsonc
 
 ```bash
 git switch --detach <commit> && pnpm install --frozen-lockfile
-PATH="$PWD/tmp/venv/bin:$PATH" PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers pnpm build:release --origin https://<адрес>   # build/ с проверка на всеки екран
+pnpm exec playwright install chromium && pnpm build:release --origin https://<адрес>   # build/ с проверка на всеки екран
 python3 -m tests.release.compat_check
 pnpm exec wrangler deploy -c apps/web/build/server/wrangler.json
 pnpm exec wrangler secret put OPERATORS -c apps/web/wrangler.jsonc                            # след deploy-а: таен ключ не може да носи името на променлива (код 10053)

@@ -5,7 +5,7 @@ import { P02_TITLE, P02_REASON, P02_EXPECTED } from './launch-texts.js';
 import differences from '../validate/kfp-source-differences.json' with { type: 'json' };
 
 /** Resolutions are shared by core, catalog, feed and search before graph construction. */
-export const RESOLVED_PENDING = new Set(['P01', 'P05']);
+export const RESOLVED_PENDING = new Set(['P01', 'P03', 'P05', 'P06']);
 export function resolveProductionPending<T>(pending: Record<string, T>): Record<string, T> {
   return Object.fromEntries(
     Object.entries(pending)

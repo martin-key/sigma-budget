@@ -50,9 +50,9 @@ export const TABS = SECTIONS;
 export const NAV_GROUPS: [string, string[]][] = [
   ['Начало', ['S01', 'S04', 'S03']],
   ['Изпълнение', ['S15', 'S16']],
-  ['Бюджет', ['S07', 'S06', 'S10', 'S12', 'S13', 'S34', 'S14', 'S20', 'S05']],
+  ['Бюджет', ['S34', 'S05', 'S07', 'S06', 'S10', 'S12', 'S13', 'S20', 'S14']],
   ['Данъци и контекст', ['S18', 'S17', 'S31']],
-  ['Данни и проект', ['S24', 'S35', 'S25', 'S26', 'S27']],
+  ['Данни и проект', ['S24', 'S35', 'S25', 'S27']],
 ];
 /* The sister platform (spec §2.2): visible, but after the screens of the site: the last item of «Данни и проект», the phone «Меню» and the footer. */
 // the address of the original СИГМА is configuration (docs/approach-specification.md, section 2.2): <meta name="sigma-url"> in the page,
@@ -73,14 +73,19 @@ export const SIGMA = {
     return sigmaHref();
   },
 };
-export const sigmaLink = (cls: string) => (
+// a link to another site: a new tab (also out of an embed frame), named as such for screen readers
+const outLink = (cls: string, href: string, label: string) => (
   <>
-    <a className={cls} href={SIGMA.href} target="_blank" rel="noopener">
-      {SIGMA.label}
+    <a className={cls} href={href} target="_blank" rel="noopener">
+      {label}
       <span className="sr-only"> (друг сайт, в нов раздел)</span>
     </a>
   </>
-); // a new tab: also out of an embed frame
+);
+export const sigmaLink = (cls: string) => outLink(cls, SIGMA.href, SIGMA.label);
+/* the public repository of the site: in the fine print of the footer, next to СИГМА */
+export const CODE = { label: 'Отворен код', href: 'https://github.com/midt-bg/sigma-budget' };
+export const codeLink = (cls: string) => outLink(cls, CODE.href, CODE.label);
 const rootId = (r: WebRoute): string => (r.parent ? rootId(byId[r.parent]) : r.id);
 export const rootOf = (r: WebRoute) => byId[rootId(r)];
 export const groupOf = (route: WebRoute) => {
@@ -323,10 +328,10 @@ export function footerHtml(o: { wide?: boolean; cur?: string; from?: string } = 
           <span>
             Данни от официални източници. Законопроектите, прогнозите и отчетите са обозначени.
           </span>
+          <span>Речникът и поясненията са редакционни текстове, а не официални данни.</span>
+          <span>Без бисквитки и проследяване.</span>
+          <span>{codeLink('code-link')}</span>
           <span>{sigmaLink('sister-link')}</span>
-          <button type="button" className="link-btn" data-action="legend">
-            Легенда: какво означават белезите
-          </button>
         </div>
       </div>
     </>

@@ -28,6 +28,24 @@ sources:
   - 'minfin.bg answers 403 to automatic requests: every report is downloaded by a person and imported with python -m budget_pipeline.sources.originals
     import, which checks the sheet, the period and the unit'
   - the MF release of 02.11.2026 uses a September 2025 base 0.9 млн. € above the archived report (docs/data-sources.md, section 4.1)
+- id: debt-issues
+  title: 'Държавен дълг: месечен бюлетин за септември 2026'
+  publisher: Министерство на финансите
+  page: https://www.minfin.bg/bg/statistics/20
+  access: browser-only
+  acquisition: import
+  format: pdf
+  parser: packages/ingest/src/production/debt-issues.ts
+  period: '2026-09-30'
+  unit: EUR; USD
+  live: false
+  files:
+  - path: data/originals/debt/Bulletin_GovDebt_09-2026_bg.pdf
+    title: 'Месечен бюлетин за септември 2026'
+  - path: data/originals/debt-issues-acquisition.json
+    title: 'URL, SHA-256 и придобиване чрез Firefox'
+  limitations:
+  - 'USD емисията не е превалутирана; няма годишен погасителен график.'
 - id: state-budget
   title: 'Държавен бюджет: месечни данъци и изпълнение'
   publisher: Министерство на финансите

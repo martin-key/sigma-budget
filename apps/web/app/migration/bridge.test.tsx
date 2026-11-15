@@ -2,7 +2,8 @@
 import { act } from 'react';
 import { renderToString } from 'react-dom/server';
 import { afterEach, expect, it, vi } from 'vitest';
-import glossary from '../routes/__fixtures__/glossary.json';
+import inputs from '../routes/__fixtures__/metadata-inputs.json';
+import { textModel } from '../lib/screens/text';
 import { MigratedScreen } from './registry';
 import { mount, dispose } from './bridge';
 import type { TextScreenModel } from '../lib/screen-state';
@@ -48,17 +49,27 @@ it('adopts the server subtree and React owns search; unmount releases the view',
   document.getElementById('view')!.innerHTML = '<article>legacy</article>';
   expect(document.querySelector('article')!.textContent).toBe('legacy');
 });
-it('S26 shows official-data context and retains glossary navigation without prototype demos', async () => {
+it('a React screen hands a glossary term to the glossary navigation', async () => {
   const navigation = { go: vi.fn(), announce: vi.fn(), openGlossary: vi.fn() };
+  const docs: Record<string, unknown> = inputs;
+  const s25 = await textModel(
+    'S25',
+    {},
+    {},
+    {
+      release: model.release,
+      load: async <T,>(name: string) => {
+        if (!(name in docs)) throw Error(name);
+        return docs[name] as T;
+      },
+    },
+  );
   document.body.innerHTML = '<div id="view"></div>';
   await act(async () => {
-    await mount({ ...model, screen: 'S26', glossary }, navigation);
+    await mount(s25, navigation);
   });
-  expect(document.querySelector('[data-s26-demo]')).toBeNull();
-  expect(document.querySelector('[data-st="mock"]')).toBeNull();
-  expect(document.body.textContent).toContain('Официални източници');
-  expect(document.body.textContent).toContain('прогнозата за 2028–2029 г.');
   const term = document.querySelector<HTMLAnchorElement>('a[data-gl]')!;
+  expect(term).not.toBeNull();
   act(() => term.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true })));
   expect(navigation.openGlossary).toHaveBeenCalledWith(term, term.dataset.gl);
 });

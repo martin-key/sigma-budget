@@ -4,7 +4,7 @@ set -euo pipefail
 # Retry dependency/network setup only. Each attempt is bounded; the final
 # non-zero status remains fatal. Playwright/apt keep their signature checks.
 for attempt in 1 2 3; do
-  if timeout --kill-after=10s 300s python -m playwright install --with-deps chromium; then
+  if timeout --kill-after=10s 300s pnpm exec playwright install --with-deps chromium; then
     exit 0
   else
     status=$?

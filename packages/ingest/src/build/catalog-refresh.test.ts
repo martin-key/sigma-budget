@@ -1,4 +1,4 @@
-import { execFileSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import {
   catalogCounts,
@@ -8,7 +8,13 @@ import {
   type CatalogDocument,
 } from './catalog-refresh.js';
 
-const python = process.env.PYTHON312 ?? 'python3';
+// Sizes from Python 3.12 `gzip.compress(sample, 9, mtime=0)`, frozen once for the same samples.
+const frozenGzip = JSON.parse(
+  readFileSync(
+    new URL('../../test/expected/catalog-refresh/gzip-sizes.json', import.meta.url),
+    'utf8',
+  ),
+) as { sizes: number[] };
 const enc = (text: string) => Buffer.from(text);
 
 describe('catalog refresh', () => {
@@ -23,15 +29,7 @@ describe('catalog refresh', () => {
     catalogGzipSize(mutable);
     for (let i = 0; i < mutable.length; i++) mutable[i] = (i * 73 + (i >> 7)) & 255;
     samples.push(mutable);
-    const code =
-      'import sys,gzip,json,base64; assert sys.version_info[:2] == (3, 12); print(json.dumps([len(gzip.compress(base64.b64decode(s),9,mtime=0)) for s in json.load(sys.stdin)]))';
-    const expected = JSON.parse(
-      execFileSync(python, ['-c', code], {
-        input: JSON.stringify(samples.map((b) => b.toString('base64'))),
-        encoding: 'utf8',
-      }),
-    ) as number[];
-    expect(samples.map(catalogGzipSize)).toEqual(expected);
+    expect(samples.map(catalogGzipSize)).toEqual(frozenGzip.sizes);
   });
   it('reads changed owner bytes and keeps schema results independent', () => {
     const owner = enc('{"xx":0,"meta":{"source":["a"]}}');

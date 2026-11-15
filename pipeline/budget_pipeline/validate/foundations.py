@@ -7,6 +7,7 @@ from pathlib import Path as _Path
 ROOT = _Path(__file__).resolve().parents[3]
 import hashlib
 import os
+from budget_pipeline.validate.programme_supplements import valid_supplement
 import re
 
 import budget_pipeline.validate.checks as L
@@ -157,12 +158,13 @@ def g_numbers(ctx):
     biggest = 0.0
     for f in L.json_files():
         d = ctx.get(f)                                   # strict load: NaN / Infinity raise
+        programme_contract = f in ("ministries/0100.json","ministries/1800.json","ministries/2300.json","ministries/7400.json") and valid_supplement(d)
         budget_contract = f in ("state-budget.json", "kfp-subsectors.json") and valid_budget_tables(d, f)
         bad = {}
         for p, v in walk(d):
             if v is None:
                 nulls += 1
-                if not _allowed(NULL_OK, f, pattern(p)) and not (budget_contract and re.fullmatch(r"\$\.tables\[\]\.rows\[\]\.(source|eur)\[\]", pattern(p))):
+                if not _allowed(NULL_OK, f, pattern(p)) and not (programme_contract and (re.fullmatch(r"\$\.sourceAudit\.rows\[\]\.values\[\]",pattern(p)) or re.fullmatch(r"\$\.(total|policies).*\.2026\[\]",pattern(p)))) and not (budget_contract and re.fullmatch(r"\$\.tables\[\]\.rows\[\]\.(source|eur)\[\]", pattern(p))):
                     bad.setdefault("null", []).append(p)
             elif v == "":
                 empties += 1

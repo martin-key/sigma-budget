@@ -273,11 +273,17 @@
 .page[data-route='S12'] .m27-table:not([open]) > .disc-body {
   display: none;
 }
-/* the three lists fit a phone without a sideways scroll, whatever the font: a tab that does not fit goes to a second line */
+/* the three lists fit a phone without a sideways scroll, whatever the width of the system font: equal tabs whose names and counts wrap,
+   as on S27 */
 @media (max-width: 599px) {
   .page[data-route='S12'] .m27 .tab-list {
+    gap: var(--sp-3);
+  }
+  .page[data-route='S12'] .m27 .tab-list [role='tab'] {
+    flex: 1 1 0;
     flex-wrap: wrap;
-    column-gap: var(--sp-4);
-    row-gap: 0;
+    justify-content: center;
+    text-align: center;
+    white-space: normal;
   }
 }

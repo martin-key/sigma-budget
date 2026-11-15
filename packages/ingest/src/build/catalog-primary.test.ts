@@ -1,7 +1,11 @@
-import { execFileSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import { expect, it } from 'vitest';
 import { catalogUrlName, primaryFiles, type CatalogPrimaryInput } from './catalog-primary.js';
-const python = process.env.PYTHON312 ?? 'python3';
+// Outputs of the Python donor, frozen once with Python 3.12 (see each file's `command`).
+const frozen = (name: string) =>
+  JSON.parse(
+    readFileSync(new URL(`../../test/expected/catalog-primary/${name}`, import.meta.url), 'utf8'),
+  );
 const a = 'a'.repeat(64),
   b = 'b'.repeat(64),
   c = 'c'.repeat(64);
@@ -27,19 +31,14 @@ function input(): CatalogPrimaryInput {
   };
 }
 it('matches Python URL decoding including Unicode, invalid bytes, escaped slash and queries', () => {
-  const urls = [
+  const { urls, names } = frozen('url-names.json') as { urls: string[]; names: string[] };
+  expect(urls).toEqual([
     'https://x/%D0%B0%20b.pdf?q=%20',
     'https://x/a%2Fb',
     'https://x/%ff%ZZ',
     'https://x/кирилица+test?q=1',
-  ];
-  const code =
-    "import sys,json,urllib.parse; print(json.dumps([urllib.parse.unquote(u.split('?')[0].rsplit('/',1)[-1]) for u in json.load(sys.stdin)]))";
-  expect(urls.map(catalogUrlName)).toEqual(
-    JSON.parse(
-      execFileSync(python, ['-c', code], { input: JSON.stringify(urls), encoding: 'utf8' }),
-    ),
-  );
+  ]);
+  expect(urls.map(catalogUrlName)).toEqual(names);
 });
 it('uses observed size, omits absent optional KFP bytes, rejects corrupt manifests and duplicate hashes', () => {
   const x = input();
@@ -68,13 +67,7 @@ it('uses observed size, omits absent optional KFP bytes, rejects corrupt manifes
   });
 });
 it('matches the unchanged Python donor over a real synthetic filesystem', () => {
-  const script = new URL('../../test/fixtures/catalog/synthetic_primary.py', import.meta.url);
-  const sample = JSON.parse(
-    execFileSync(python, [script.pathname], {
-      encoding: 'utf8',
-      env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1' },
-    }),
-  );
+  const { sample } = frozen('synthetic-primary.json');
   const actual = primaryFiles({
     ...sample,
     rawFacts: new Map(Object.entries(sample.rawFacts)),

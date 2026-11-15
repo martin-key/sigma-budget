@@ -1061,8 +1061,10 @@ dialog.sheet.sheet-drawer .sheet-title {
   color: var(--crimson);
   font: 400 1.125rem/1 var(--font-serif);
 }
-/* the sister platform СИГМА (js/shell.js): after the screens of the site, in the quieter mono voice, with the arrow of a link to another site */
+/* the sister platform СИГМА (js/shell.js): after the screens of the site, in the quieter mono voice, with the arrow of a link to another site;
+   the link to the open code of the site (the footer) has the same voice */
 .sister-link,
+.code-link,
 .more-list a.sister-link {
   display: inline-flex;
   align-items: center;
@@ -1074,12 +1076,14 @@ dialog.sheet.sheet-drawer .sheet-title {
   color: var(--ink-mid);
   text-decoration: none;
 }
-.sister-link::after {
+.sister-link::after,
+.code-link::after {
   content: '↗';
   font-family: var(--font-sans);
   letter-spacing: 0;
 }
 .sister-link:hover,
+.code-link:hover,
 .more-list a.sister-link:hover {
   color: var(--crimson);
 }
@@ -1156,6 +1160,10 @@ h3.block-title {
   font: 400 var(--fs-xs)/1.4 var(--font-mono);
   letter-spacing: 0.04em;
   color: var(--ink-soft);
+}
+/* a status longer than a narrow phone (the 2027 bill with its forecast years) wraps inside its frame instead of widening the page */
+.block-tags .st {
+  white-space: normal;
 }
 /* the one block menu */
 .block-tools {

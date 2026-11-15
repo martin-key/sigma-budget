@@ -201,6 +201,8 @@ it('scopes the next annual catalogue to legacy arrays and the November byPeriod 
   expect(note.text).toContain('2026.expected е очаквано изпълнение');
   expect(note.text).toContain('2027.draft е проект');
   expect(note.text).toContain('2028.forecast и 2029.forecast са прогнози');
-  expect(note.text).toContain('Приходите и икономическите разходни редове са от Приложение 3 (стр. 191–192)');
+  expect(note.text).toContain(
+    'Приходите и икономическите разходни редове са от Приложение 3 (стр. 191–192)',
+  );
   expect(note.text).toContain('разходите по функции са от Табл. III-1 (стр. 73)');
 });

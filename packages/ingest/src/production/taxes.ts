@@ -152,7 +152,7 @@ export function readTaxDatasets(context: Readonly<ExecutionContext>) {
  * before core, catalog, search and publication read it; no post-publication file injection. */
 export function withProductionBudgets(
   stages: readonly GraphStage[],
-  datasets: ReturnType<typeof readTaxDatasets>,
+  datasets: Record<string, unknown>,
 ): GraphStage[] {
   const resolvedStages = stages.map((stage) => ({
     ...stage,

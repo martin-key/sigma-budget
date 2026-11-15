@@ -662,7 +662,7 @@ export function proofDisclosure(ctx, C) {
     title: 'Откъде са числата',
     body: html`<p>Всяко число тук е клетка от месечния отчет на МФ, лист „${p.sheet}“, колона ${col} (${SCOPE_NAME[C.scope] || C.scope}). Например ${PROOF_ROWS.map(([rid, label], i) => html`${i ? (i === PROOF_ROWS.length - 1 ? ' и ' : ', ') : ''}${label}: ${cell(rid)}`)}. „За месеца“ е разликата с отчета за предходния месец.</p>
       <ul class="s15-proof">${reports.map((r) => html`<li>${r.y}: отчетът към ${date(r.o.asOf, true)}${NBSP}г., файл <code>${r.o.file}</code>${r.o.unit === 'BGN' ? ' (в лева, превърнат в евро)' : ''}, SHA-256 <code class="s15-sha">${r.o.sha256}</code></li>`)}</ul>
-      ${rid ? html`<p>Издание на данните <code>${rid.slice(0, 12)}</code>: <a href="data/${rel.manifest.split('data/').pop()}">манифест</a> (оригинали, код, среда и SHA-256 на всеки файл) и <a href="${dataHref('execution-provenance')}">произход на всяко число</a> (JSON). Всеки може да го сглоби отново от оригиналите: <code class="s15-cmd">./budget reproduce --current ${siteUrl('/').replace(/\/$/, '')}</code>. Всичко за изданието: <a href="${ctx.href('proverka')}">„Данни и проверка“</a>.</p>` : ''}`,
+      ${rid ? html`<p>Издание на данните <code>${rid.slice(0, 12)}</code>: <a href="data/${rel.manifest.split('data/').pop()}">манифест</a> (оригинали, код, среда и SHA-256 на всеки файл) и <a href="${dataHref('execution-provenance')}">произход на всяко число</a> (JSON). Всеки може да го сглоби отново от оригиналите: <code class="s15-cmd">./budget reproduce --current ${siteUrl('/').replace(/\/$/, '')}</code>. Всичко за изданието: <a href="${ctx.href('proverka')}">„Проверка на данните“</a>.</p>` : ''}`,
   });
 }
 

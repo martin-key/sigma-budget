@@ -21,7 +21,7 @@ import { gl } from '../ui/gl.js';
 import { unitSwitch, bindUnitSwitch } from '../ui/unit-switch.js';
 
 // the four budgets whose programmes are still pending (P03) have no file: used only to spare a direct load a 404 before the index is cached
-const NO_FILE = ['0100', '1800', '2300', '7400'];
+const NO_FILE = [];
 export const needs = (ctx) => {
   if (isFramework(ctx)) return ['core', 'budget2027?'];
   const code = String(ctx?.params?.code ?? '');
@@ -158,7 +158,7 @@ function head(M) {
         : 'Програма';
   return {
     title: node.name,
-    eyebrow: `${word} · код ${node.code}`,
+    eyebrow: `${word} · код ${node.code}${node.printedCode && node.printedCode !== node.code ? ` · в документа: ${node.printedCode}` : ''}`,
     context,
     lede:
       node.level === 'policy'
@@ -176,7 +176,7 @@ const treeCols = () => [
     key: 'name',
     label: 'Програма',
     fmt: (v, r) =>
-      html`${v}${r.code ? html`<small class="s11-cell-sub">код ${r.code}</small>` : ''}`,
+      html`${v}${r.code ? html`<small class="s11-cell-sub">код ${r.code}${r.printedCode && r.printedCode !== r.code ? html` · в документа: ${r.printedCode}` : ''}</small>` : ''}`,
   },
   amountCol('total', 'Общо'),
   amountCol('prb', 'По бюджета на ведомството'),
@@ -186,6 +186,7 @@ const treeCols = () => [
 const rowOf = (M, q) => ({
   name: q.name,
   code: q.code,
+  printedCode: q.printedCode,
   total: val(q.values, 2026, 0),
   prb: val(q.values, 2026, 1),
   other: val(q.values, 2026, 2),
@@ -208,7 +209,9 @@ const programTable = (M, id, caption, e) =>
     columns: treeCols(),
     rows: e.programs.map((q) => rowOf(M, q)),
     total: totalOf(e),
-    note: 'Сборът на програмите на една политика е сумата на политиката. Не събирай политиките и програмите заедно: програмите са същите пари на по-дребно.',
+    note: M.file?.sourceContract
+      ? 'Сумите са отпечатаните стойности в оригинала. Разликите в сборовете са описани в бележките към ведомството. Не събирай политиките и програмите заедно.'
+      : 'Сборът на програмите на една политика е сумата на политиката. Не събирай политиките и програмите заедно: програмите са същите пари на по-дребно.',
   });
 
 /** the nine columns of one policy or programme in 2026, by level of expense */
@@ -364,6 +367,12 @@ function lawBlock(M) {
   });
 }
 
+function sourceNotes(M) {
+  return M.file?.notes?.length
+    ? html`<aside class="callout"><h3>Бележки към оригиналния документ</h3>${M.file.notes.map((note) => html`<p>${note}</p>`)}</aside>`
+    : '';
+}
+
 function policiesBlock(M) {
   const { ctx, m, doc, file, list } = M;
   if (M.pending) {
@@ -399,7 +408,7 @@ function policiesBlock(M) {
   const pols = list.filter((e) => e.level === 'policy'),
     solos = list.filter((e) => e.level === 'solo');
   const tier = doc.tiers?.[m.programs.tier];
-  const differs = m.programs.tier === 'program-budget-differs';
+  const differs = m.programs.tier === 'program-budget-differs' || file.check?.matchesLaw === false;
   return block({
     id: 's11-politiki',
     title: 'Политики и програми през 2026 г.',
@@ -504,7 +513,7 @@ function ministryBody(M) {
       ])}`,
   });
   return html`${unitSwitch(ctx, { name: 's11-unit', note: '„% от БВП“ е спрямо планирания БВП за 2026 г.' })}
-    ${summary}${M.differs ? lawBlock(M) : ''}${policiesBlock(M)}${M.file ? yearsBlock(M, 's11-godini', M.file.total) : ''}${docBlock(M)}`;
+    ${sourceNotes(M)}${summary}${M.differs ? lawBlock(M) : ''}${policiesBlock(M)}${M.file ? yearsBlock(M, 's11-godini', M.file.total) : ''}${docBlock(M)}`;
 }
 
 /* ---------------------------------------------------------------- a policy or a programme */
@@ -536,7 +545,7 @@ function nodeBody(M) {
   ];
   const has26 = !!v['2026'];
   return html`${unitSwitch(ctx, { name: 's11-unit', note: '„% от БВП“ е спрямо планирания БВП за 2026 г.' })}
-    ${block({
+    ${sourceNotes(M)}${block({
       id: 's11-obshto',
       title: 'Накратко',
       status: 'real',

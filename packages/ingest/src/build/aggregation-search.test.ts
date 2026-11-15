@@ -84,22 +84,18 @@ describe('search donor', () => {
     (input.out['outlook.json'] as any).meta.source = ['sebra', 'ec-oil', 'asbp'];
     expect(buildSearch(input)).toEqual(read('mutants/search-changed.json'));
   });
-  it.each(programCases)(
-    'preserves the donor program $field for JSON token $token',
-    (test) => {
-      const input = make(),
-        programs = input.out['programs.json'] as any,
-        column = programs.fields.indexOf(test.field);
-      programs.items[test.row][column] = '__numeric_identifier_token__';
-      input.out['programs.json'] = parsePythonJson(
-        JSON.stringify(programs).replace('"__numeric_identifier_token__"', test.token),
-      );
-      const actual = buildSearch(input).items;
-      if (test.expected === null)
-        expect(actual.find((row) => row[6] === test.href)).toBeUndefined();
-      else expect(actual.find((row) => row[6] === test.href)).toEqual(test.expected);
-    },
-  );
+  it.each(programCases)('preserves the donor program $field for JSON token $token', (test) => {
+    const input = make(),
+      programs = input.out['programs.json'] as any,
+      column = programs.fields.indexOf(test.field);
+    programs.items[test.row][column] = '__numeric_identifier_token__';
+    input.out['programs.json'] = parsePythonJson(
+      JSON.stringify(programs).replace('"__numeric_identifier_token__"', test.token),
+    );
+    const actual = buildSearch(input).items;
+    if (test.expected === null) expect(actual.find((row) => row[6] === test.href)).toBeUndefined();
+    else expect(actual.find((row) => row[6] === test.href)).toEqual(test.expected);
+  });
   it('matches Python truth, string and whitespace semantics', () => {
     const rows = new SearchRows();
     rows.add('indicators', 'Тест', '', [], '2026', 'real', '#/pari');

@@ -5,7 +5,7 @@ import type {
   LawDocument,
   MinistryDocument,
 } from './narrative-types';
-import { textModel } from './text';
+import { editorialBase } from './text';
 import { byId } from '../legacy';
 import { resolvePeriod } from '../../../client/periods.js';
 import { PERIODS, DEFAULT_PERIOD } from '../../../client/store.js';
@@ -15,7 +15,7 @@ export async function narrativeModel(
   query: Record<string, string>,
   reader: ReleaseReader,
 ): Promise<NarrativeModel> {
-  const editorial = await textModel('S26', params, query, reader);
+  const editorial = await editorialBase(params, query, reader);
   const defaultKey = screen === 'S14' ? '2026.law' : DEFAULT_PERIOD;
   const key = query.per == null ? defaultKey : resolvePeriod(query.per).resolved;
   const period = PERIODS.find((p) => p.key === key)!;

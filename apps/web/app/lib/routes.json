@@ -51,6 +51,21 @@
       }
     ],
     [
+      "S04",
+      "5-minuti",
+      "/5-minuti",
+      "s04-5-minuti",
+      "Бюджетът за 5 минути",
+      "learn",
+      "clock",
+      {
+        "short": "За 5 минути",
+        "next": ["S06", "S03"],
+        "desc": "Шест кратки сцени за бюджета; под всяка — връзки към точните екрани с подробности.",
+        "periods": "none"
+      }
+    ],
+    [
       "S03",
       "rechnik",
       "/rechnik/:term?",
@@ -67,18 +82,61 @@
       }
     ],
     [
-      "S04",
-      "5-minuti",
-      "/5-minuti",
-      "s04-5-minuti",
-      "Бюджетът за 5 минути",
-      "learn",
-      "clock",
+      "S15",
+      "izpalnenie",
+      "/izpalnenie/:sub(byudzheti)?",
+      "s15-izpalnenie",
+      "Месечни отчети",
+      "exec",
+      "gauge",
       {
-        "short": "За 5 минути",
-        "next": ["S06", "S03"],
-        "desc": "Шест кратки сцени за бюджета; под всяка — връзки към точните екрани с подробности.",
+        "query": ["mesec", "obhvat", "rez", "g1", "g2", "pera", "pokazatel", "ed", "prag", "pok"],
+        "short": "Месечни отчети",
+        "step": 6,
+        "next": ["S17"],
+        "periods": "none",
+        "samples": [
+          "#/izpalnenie",
+          "#/izpalnenie?mesec=1",
+          "#/izpalnenie?rez=mesec",
+          "#/izpalnenie?obhvat=nat",
+          "#/izpalnenie?g1=2024&g2=2025",
+          "#/izpalnenie/byudzheti"
+        ],
+        "desc": "Две години един до друг: колко е събрано и изразходвано до избрания месец."
+      }
+    ],
+    [
+      "S16",
+      "novo",
+      "/novo",
+      "s16-novo",
+      "Какво ново?",
+      "exec",
+      "newspaper",
+      {
+        "query": ["vid"],
+        "short": "Какво ново",
+        "next": ["S15"],
+        "desc": "Последните отчети, решения и данни.",
         "periods": "none"
+      }
+    ],
+    [
+      "S34",
+      "byudzhet-2027",
+      "/byudzhet-2027",
+      "s34-byudzhet-2027",
+      "Бюджет 2027",
+      "budget",
+      "fileText",
+      {
+        "short": "Бюджет 2027",
+        "next": ["S13"],
+        "periods": "none",
+        "samples": ["#/byudzhet-2027"],
+        "desc": "Законопроектът за държавния бюджет за 2027 г. и АСБП 2027–2029, публикувани от МФ на 06.11.2026. Проект, не приет закон.",
+        "query": ["variant", "dokument"]
       }
     ],
     [
@@ -99,29 +157,6 @@
           "#/pari?per=2027.draft",
           "#/pari?per=2029.forecast"
         ]
-      }
-    ],
-    [
-      "S06",
-      "prihodi",
-      "/prihodi/:source?",
-      "s06-prihodi",
-      "Откъде идват парите?",
-      "budget",
-      "trendingUp",
-      {
-        "query": ["sort", "dir", "izgled"],
-        "short": "Приходи",
-        "step": 2,
-        "next": ["S07"],
-        "samples": [
-          "#/prihodi",
-          "#/prihodi/dds",
-          "#/prihodi?per=2026.expected",
-          "#/prihodi?per=2027.draft",
-          "#/prihodi?per=2029.forecast"
-        ],
-        "desc": "Данъци, осигуровки, неданъчни приходи и помощи: кой колко носи."
       }
     ],
     [
@@ -166,6 +201,29 @@
           "#/razhodi/obrazovanie?per=2029.forecast"
         ],
         "desc": "Какво влиза във функцията и как се променя през годините."
+      }
+    ],
+    [
+      "S06",
+      "prihodi",
+      "/prihodi/:source?",
+      "s06-prihodi",
+      "Откъде идват парите?",
+      "budget",
+      "trendingUp",
+      {
+        "query": ["sort", "dir", "izgled"],
+        "short": "Приходи",
+        "step": 2,
+        "next": ["S07"],
+        "samples": [
+          "#/prihodi",
+          "#/prihodi/dds",
+          "#/prihodi?per=2026.expected",
+          "#/prihodi?per=2027.draft",
+          "#/prihodi?per=2029.forecast"
+        ],
+        "desc": "Данъци, осигуровки, неданъчни приходи и помощи: кой колко носи."
       }
     ],
     [
@@ -256,141 +314,6 @@
       }
     ],
     [
-      "S31",
-      "bvp",
-      "/bvp",
-      "s31-bvp",
-      "БВП: колко расте икономиката?",
-      "debt",
-      "barChart",
-      {
-        "query": ["y", "sy"],
-        "short": "БВП",
-        "next": ["S13"],
-        "periods": "all",
-        "samples": [
-          "#/bvp",
-          "#/bvp?per=2026.expected",
-          "#/bvp?per=2027.draft",
-          "#/bvp?per=2029.forecast"
-        ],
-        "desc": "Колко расте икономиката: БВП, потреблението, инвестициите, износът и вносът по години."
-      }
-    ],
-    [
-      "S34",
-      "byudzhet-2027",
-      "/byudzhet-2027",
-      "s34-byudzhet-2027",
-      "Бюджет 2027",
-      "budget",
-      "fileText",
-      {
-        "short": "Бюджет 2027",
-        "next": ["S13"],
-        "periods": "none",
-        "samples": ["#/byudzhet-2027"],
-        "desc": "Законопроектът за държавния бюджет за 2027 г. и АСБП 2027–2029, публикувани от МФ на 06.11.2026. Проект, не приет закон.",
-        "query": ["variant", "dokument"]
-      }
-    ],
-    [
-      "S14",
-      "zakon",
-      "/zakon",
-      "s14-zakon",
-      "Пътят на бюджета",
-      "budget",
-      "scale",
-      {
-        "short": "Пътят на бюджета",
-        "next": ["S15"],
-        "desc": "Как бюджетът за 2026 стига от внасянето до обнародването и какво се променя между проекта и приетия закон.",
-        "periods": ["2026.law"]
-      }
-    ],
-    [
-      "S15",
-      "izpalnenie",
-      "/izpalnenie/:sub(byudzheti)?",
-      "s15-izpalnenie",
-      "Месечни отчети",
-      "exec",
-      "gauge",
-      {
-        "query": ["mesec", "obhvat", "rez", "g1", "g2", "pera", "pokazatel", "ed", "prag", "pok"],
-        "short": "Месечни отчети",
-        "step": 6,
-        "next": ["S17"],
-        "periods": "none",
-        "samples": [
-          "#/izpalnenie",
-          "#/izpalnenie?mesec=1",
-          "#/izpalnenie?rez=mesec",
-          "#/izpalnenie?obhvat=nat",
-          "#/izpalnenie?g1=2024&g2=2025",
-          "#/izpalnenie/byudzheti"
-        ],
-        "desc": "Две години един до друг: колко е събрано и изразходвано до избрания месец."
-      }
-    ],
-    [
-      "S16",
-      "novo",
-      "/novo",
-      "s16-novo",
-      "Какво ново?",
-      "exec",
-      "newspaper",
-      {
-        "query": ["vid"],
-        "short": "Какво ново",
-        "next": ["S15"],
-        "desc": "Последните отчети, решения и данни.",
-        "periods": "none"
-      }
-    ],
-    [
-      "S17",
-      "dalg",
-      "/dalg",
-      "s17-dalg",
-      "Колко дължим?",
-      "debt",
-      "banknote",
-      {
-        "query": ["obhvat"],
-        "short": "Колко дължим",
-        "step": 7,
-        "next": ["S18"],
-        "samples": ["#/dalg", "#/dalg?obhvat=maastricht"],
-        "desc": "Държавният дълг по две методики и откъде се финансира дефицитът. Проект 2027 и АСБП 2027–2029; историческият закон за 2026 г. е отделен.",
-        "periods": [
-          "2024.report",
-          "2025.report",
-          "2026.law",
-          "2027.draft",
-          "2028.forecast",
-          "2029.forecast"
-        ]
-      }
-    ],
-    [
-      "S18",
-      "danaci",
-      "/danaci",
-      "s18-danaci",
-      "Моите данъци",
-      "tax",
-      "percent",
-      {
-        "step": 8,
-        "next": ["S24", "S01"],
-        "desc": "Колко внасяш ти от трудовата си заплата и къде отиват парите.",
-        "periods": ["2026.law"]
-      }
-    ],
-    [
       "S20",
       "obshtini",
       "/obshtini",
@@ -425,6 +348,83 @@
       }
     ],
     [
+      "S14",
+      "zakon",
+      "/zakon",
+      "s14-zakon",
+      "Пътят на бюджета",
+      "budget",
+      "scale",
+      {
+        "short": "Пътят на бюджета",
+        "next": ["S15"],
+        "desc": "Как бюджетът за 2026 стига от внасянето до обнародването и какво се променя между проекта и приетия закон.",
+        "periods": ["2026.law"]
+      }
+    ],
+    [
+      "S18",
+      "danaci",
+      "/danaci",
+      "s18-danaci",
+      "Моите данъци",
+      "tax",
+      "percent",
+      {
+        "step": 8,
+        "next": ["S24", "S01"],
+        "desc": "Колко внасяш ти от трудовата си заплата и къде отиват парите.",
+        "periods": ["2026.law"]
+      }
+    ],
+    [
+      "S17",
+      "dalg",
+      "/dalg",
+      "s17-dalg",
+      "Колко дължим?",
+      "debt",
+      "banknote",
+      {
+        "query": ["obhvat"],
+        "short": "Колко дължим",
+        "step": 7,
+        "next": ["S18"],
+        "samples": ["#/dalg", "#/dalg?obhvat=maastricht"],
+        "desc": "Държавният дълг по две методики и откъде се финансира дефицитът. Проект 2027 и АСБП 2027–2029; историческият закон за 2026 г. е отделен.",
+        "periods": [
+          "2024.report",
+          "2025.report",
+          "2026.law",
+          "2027.draft",
+          "2028.forecast",
+          "2029.forecast"
+        ]
+      }
+    ],
+    [
+      "S31",
+      "bvp",
+      "/bvp",
+      "s31-bvp",
+      "БВП: колко расте икономиката?",
+      "debt",
+      "barChart",
+      {
+        "query": ["y", "sy"],
+        "short": "БВП",
+        "next": ["S13"],
+        "periods": "all",
+        "samples": [
+          "#/bvp",
+          "#/bvp?per=2026.expected",
+          "#/bvp?per=2027.draft",
+          "#/bvp?per=2029.forecast"
+        ],
+        "desc": "Колко расте икономиката: БВП, потреблението, инвестициите, износът и вносът по години."
+      }
+    ],
+    [
       "S24",
       "danni",
       "/danni/:set?",
@@ -434,11 +434,26 @@
       "database",
       {
         "query": ["status", "ekran", "izvor", "q"],
-        "short": "Данни и методика",
+        "short": "Методология",
         "next": ["S25", "S01"],
         "samples": ["#/danni", "#/danni/execution"],
         "desc": "Каталог на наборите, източниците и методиката.",
         "periods": "none"
+      }
+    ],
+    [
+      "S35",
+      "proverka",
+      "/proverka",
+      "s35-proverka",
+      "Проверка на данните",
+      "ref",
+      "checkCircle",
+      {
+        "short": "Проверка на данните",
+        "next": ["S24", "S25"],
+        "periods": "none",
+        "desc": "Изданието на данните на сайта: оригиналите и файловете с SHA-256, кодът, проверките, как всеки го пресъздава и историята на изданията."
       }
     ],
     [
@@ -454,36 +469,6 @@
         "short": "Отворени данни и API",
         "next": ["S01"],
         "desc": "Файловете с данни, схемите и как да ги ползваш.",
-        "periods": "none"
-      }
-    ],
-    [
-      "S35",
-      "proverka",
-      "/proverka",
-      "s35-proverka",
-      "Данни и проверка",
-      "ref",
-      "checkCircle",
-      {
-        "short": "Данни и проверка",
-        "next": ["S24", "S25"],
-        "periods": "none",
-        "desc": "Изданието на данните на сайта: оригиналите и файловете с SHA-256, кодът, проверките, как всеки го пресъздава и историята на изданията."
-      }
-    ],
-    [
-      "S26",
-      "za-proekta",
-      "/za-proekta",
-      "s26-za-proekta",
-      "За проекта",
-      "ref",
-      "info",
-      {
-        "short": "За проекта",
-        "next": ["S27", "S01"],
-        "desc": "Какво е „СИГМА Бюджет“, кой го прави, откъде са данните и как работи.",
         "periods": "none"
       }
     ],
@@ -549,6 +534,21 @@
         "next": [],
         "nav": false,
         "desc": "Адресът не води до екран от сайта.",
+        "periods": "none"
+      }
+    ],
+    [
+      "S26",
+      "za-proekta",
+      null,
+      "s26-za-proekta",
+      "За проекта",
+      "ref",
+      "info",
+      {
+        "retired": true,
+        "next": [],
+        "nav": false,
         "periods": "none"
       }
     ]

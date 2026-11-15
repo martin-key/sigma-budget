@@ -71,7 +71,7 @@ def g_debt(ctx):
     c.ok(set(d) == {"meta", "defaultScope", "scopes", "latest", "zdd", "maastricht", "quarterly", "compare", "structure", "interest",
                     "guaranteed", "newDebt", "limits", "financing", "notes", "check"}, "debt keys %s" % sorted(d))
     m = d["meta"]
-    c.ok(m["id"] == "D13+D14" and m["status"] == "real" and m["source"] == ["asbp", "eurostat", "bnb"] and m["pending"] == ["P06"] and m["mock"] is False,
+    c.ok(m["id"] == "D13+D14" and m["status"] == "real" and m["source"] == ["asbp", "eurostat", "bnb"] and m["pending"] == ([] if has_issues(ctx) else ["P06"]) and m["mock"] is False,
          "meta id/status/source/pending/mock")
     # --- zdd: table VI-1
     z = d["zdd"]
@@ -246,3 +246,11 @@ def g_debt(ctx):
 GROUPS = (
     ("DEBT", g_debt, "debt.json: table VI-1 identities, Maastricht and quarterly series against each other, structure shares, legal limits"),
 )
+
+
+def has_issues(ctx):
+    from budget_pipeline.validate.debt_issues import valid_debt_issues
+    try:
+        return valid_debt_issues(ctx.get('debt-issues.json'))
+    except FileNotFoundError:
+        return False

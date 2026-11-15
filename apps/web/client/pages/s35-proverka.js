@@ -1,4 +1,4 @@
-// S35 · Данни и проверка · #/proverka · next S24, S25 · periods none
+// S35 · Проверка на данните · #/proverka · next S24, S25 · periods none
 // docs/approach-specification.md, section 9.1: the release this page uses and whether there is a newer one; period, coverage, gaps and known
 // limits; every original and every file with its name, format, size, SHA-256 and a download; the commit and the code of the processing, the
 // environment and the registry versions; the command that reproduces the release and the results of its checks; provenance and method; the

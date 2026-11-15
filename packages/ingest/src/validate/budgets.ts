@@ -1,3 +1,9 @@
+import {
+  programmeSupplementGuard,
+  programmeSupplementCounts,
+  supplementaryProgrammeCodes,
+  programmeEqual,
+} from '@sigma-budget/dataset-schema';
 /** Budget and programme validation, including all ministry files and their index. */
 import { pythonNumberAt, type PythonNumber } from '../common/numbers.js';
 import { Check, isnum, numbersIn, pyTruth } from './checks.js';
@@ -172,12 +178,43 @@ function progRows(d: any): Row[] {
     } else out.push(['program', '', pol]);
   return out;
 }
+function supplementDocuments(ctx: Context): any[] {
+  return supplementaryProgrammeCodes
+    .filter((i) => ctx.exists(`ministries/${i}.json`))
+    .map((i) => ctx.get(`ministries/${i}.json`));
+}
+function supplementCounts(ctx: Context) {
+  const m = ctx.get('ministries.json');
+  if (
+    !Array.isArray(m?.items) ||
+    !m.items.some((item: any) => item?.programs?.tier === 'source-verified')
+  )
+    return { budgets: 0, policies: 0, programs: 0, differ: 0 };
+  return programmeSupplementCounts(supplementDocuments(ctx));
+}
+function checkSupplement(c: Check, item: any, d: any): Row[] {
+  const valid = programmeSupplementGuard(d);
+  c.ok(valid, `ministries/${item.id}.json: independently verified programme source contract`);
+  c.ok(
+    valid &&
+      ['id', 'art', 'name', 'short', 'policiesKind'].every((k) => d[k] === item[k]) &&
+      d.check.zdbExp === item.expKhil &&
+      item.programs.tier === d.tier &&
+      item.programs.matchesLaw === d.check.matchesLaw &&
+      programmeEqual(item.programs.notes, d.notes) &&
+      item.programs.policyCount === d.policies.filter((p: any) => p.kind === 'policy').length &&
+      item.programs.count === d.sourceAudit.rows.filter((r: any) => r.kind === 'program').length,
+    `ministries/${item.id}.json: source contract vs agency summary/law`,
+  );
+  return valid ? progRows(d) : [];
+}
 export function budgets(ctx: Context): Check {
   const c = new Check('BUDGETS'),
     m = ctx.get('ministries.json'),
     law = ctx.get('law.json'),
     core = ctx.get('core.json'),
-    mm = required<any>(m, 'meta');
+    mm = required<any>(m, 'meta'),
+    supplement = supplementCounts(ctx);
   c.ok(
     same(pyIter(m), ['meta', 'totals', 'kinds', 'tiers', 'programTotals', 'scopeNote', 'items']),
     `ministries.json keys ${pyRepr(pyIter(m))}`,
@@ -186,7 +223,7 @@ export function budgets(ctx: Context): Check {
     pyItemAt(m, 'meta', 'id') === 'D08+D09' &&
       required<any>(mm, 'status') === 'real' &&
       required<any>(mm, 'unit') === 'хил. €' &&
-      same(required<any>(mm, 'pending'), ['P03']) &&
+      same(required<any>(mm, 'pending'), supplement.budgets === 4 ? [] : ['P03']) &&
       required<any>(mm, 'mock') === false,
     'meta id/status/unit/pending',
   );
@@ -200,7 +237,8 @@ export function budgets(ctx: Context): Check {
     (Array.isArray(required<any>(core, 'pending'))
       ? required<any>(core, 'pending')
       : pyDictKeysAt(core, 'pending').map((k) => pyItem(required<any>(core, 'pending'), k))
-    ).some((p: any) => required<any>(p, 'id') === 'P03'),
+    ).some((p: any) => required<any>(p, 'id') === 'P03') ===
+      (supplement.budgets !== 4),
     'core.pending has P03',
   );
   c.ok(
@@ -208,7 +246,14 @@ export function budgets(ctx: Context): Check {
     `kinds ${pyRepr(pyIterAt(m, 'kinds'))}`,
   );
   c.ok(
-    same(sorted(pyIterAt(m, 'tiers')), sorted(TIERS)) &&
+    same(
+      sorted(pyIterAt(m, 'tiers')),
+      sorted(
+        supplement.budgets === 4
+          ? [...TIERS.filter((t) => t !== 'pending'), 'source-verified']
+          : TIERS,
+      ),
+    ) &&
       pyDictKeysAt(m, 'tiers').every((k) => {
         const v = pyItem(required<any>(m, 'tiers'), k);
         return typeof v === 'string' && pyTruth(v);
@@ -407,7 +452,16 @@ export function budgets(ctx: Context): Check {
       (tiers.get(tierKey) ?? 0) + 1,
       pyHas(p, 'tier') ? pyReprAt(p, 'tier') : pyRepr('pending'),
     );
-    if (required<any>(p, 'status') === 'real') {
+    if (p.tier === 'source-verified') {
+      const file = `ministries/${i}.json`;
+      c.ok(
+        p.status === 'real' && p.file === file && ctx.exists(file) && pb == null,
+        `${w}: source-verified programme summary`,
+      );
+      if (ctx.exists(file)) checkSupplement(c, x, ctx.get(file));
+      polTotal += p.policyCount;
+      progTotal += p.count;
+    } else if (required<any>(p, 'status') === 'real') {
       const tier = required<string>(p, 'tier');
       c.ok(
         ['validated', 'program-budget-differs'].includes(tier) &&
@@ -523,19 +577,19 @@ export function budgets(ctx: Context): Check {
     differ = tiers.get('program-budget-differs') ?? 0,
     pending = tiers.get('pending') ?? 0;
   c.ok(
-    required<any>(pt, 'budgets') === validated + differ &&
-      required<any>(pt, 'budgets') === 42 &&
+    required<any>(pt, 'budgets') === validated + differ + supplement.budgets &&
+      required<any>(pt, 'budgets') === 42 + supplement.budgets &&
       required<any>(pt, 'pending') === pending &&
-      pending === 4 &&
-      required<any>(pt, 'differ') === differ &&
+      pending === 4 - supplement.budgets &&
+      required<any>(pt, 'differ') === differ + supplement.differ &&
       differ === 3,
     `programTotals ${pyRepr(pt)} vs tiers ${pyRepr(tiers)}`,
   );
   c.ok(
     required(pt, 'policies') === polTotal &&
-      polTotal === 82 &&
+      polTotal === 82 + supplement.policies &&
       required(pt, 'programs') === progTotal &&
-      progTotal === 190,
+      progTotal === 190 + supplement.programs,
     `programTotals policies/programs ${pyReprAt(pt, 'policies')}/${pyReprAt(pt, 'programs')} vs ${polTotal}/${progTotal}`,
   );
   c.ok(
@@ -551,13 +605,14 @@ export function budgets(ctx: Context): Check {
     `budgets without a 2025 total: ${pyRepr(noChange)}`,
   );
   c.fact(
-    `46 budgets: revenue ${fmt(pyPath(m, 'totals', 'revKhil'))}, expenditure ${fmt(pyPath(m, 'totals', 'expKhil'))} хил. €; program budgets: ${validated} validated / ${differ} differ from the law / ${pending} pending (P03); ${Number(required<any>(pt, 'policies'))} policies, ${Number(required<any>(pt, 'programs'))} programs`,
+    `46 budgets: revenue ${fmt(pyPath(m, 'totals', 'revKhil'))}, expenditure ${fmt(pyPath(m, 'totals', 'expKhil'))} хил. €; program budgets: ${validated} validated / ${differ + supplement.differ} differ from the law / ${pending} pending (P03); ${Number(required<any>(pt, 'policies'))} policies, ${Number(required<any>(pt, 'programs'))} programs`,
   );
   return c;
 }
 function checkFile(c: Check, ctx: Context, item: any, d: any): Row[] {
   const i = required<any>(item, 'id'),
     w = `ministries/${i}.json`;
+  if ('sourceContract' in d || d.tier === 'source-verified') return checkSupplement(c, item, d);
   c.ok(
     same(pyIter(d), [
       'meta',
@@ -825,7 +880,8 @@ function checkFile(c: Check, ctx: Context, item: any, d: any): Row[] {
 export function programs(ctx: Context): Check {
   const c = new Check('PROGRAMS'),
     m = ctx.get('ministries.json'),
-    pj = ctx.get('programs.json');
+    pj = ctx.get('programs.json'),
+    supplement = supplementCounts(ctx);
   const files = ctx
       .dataDirectory('ministries')
       .filter((f) => f.endsWith('.json'))
@@ -839,7 +895,7 @@ export function programs(ctx: Context): Check {
       .filter((x) => actual.includes(x) !== real.includes(x))
       .sort();
   c.ok(
-    same(actual, real) && real.length === 42,
+    same(actual, real) && real.length === 42 + supplement.budgets,
     `ministries/ holds ${files.length} files, ministries.json announces ${real.length}: ${pyRepr(diff)}`,
   );
   const by = byid(required<any>(m, 'items')),
@@ -874,7 +930,7 @@ export function programs(ctx: Context): Check {
   const rowsLength = pyLenAt(pj, 'items');
   const rows = pyIterAt(pj, 'items') as any[];
   c.ok(
-    rows.length === expect.size && rows.length === 272,
+    rows.length === expect.size && rows.length === 272 + supplement.policies + supplement.programs,
     `programs.json has ${rows.length} rows, the files ${expect.size} (272 expected)`,
   );
   const seen = pySet<string>(),
@@ -896,6 +952,23 @@ export function programs(ctx: Context): Check {
         required<any>(r, 'name') === required<any>(src, 'name'),
       `${w}: ministry/level/policy/name differ from the file`,
     );
+    if (supplementaryProgrammeCodes.includes(i))
+      c.ok(
+        programmeEqual(row, [
+          i,
+          src.code,
+          src.name,
+          lvl,
+          parent,
+          src.values['2026'][0],
+          -1,
+          -101,
+          0,
+          src.values['2026'][1],
+          -1,
+        ]),
+        `${w}: exact independently verified programme index cell`,
+      );
     const v = required<any>(src, 'values'),
       y26 = '2026' in v ? v['2026'][0] : -1,
       p26 = '2026' in v ? v['2026'][1] : -1,
@@ -942,7 +1015,7 @@ export function programs(ctx: Context): Check {
     `rows missing from programs.json: ${pyRepr(missing.slice(0, 5))}`,
   );
   c.ok(
-    same(levels, { policy: 82, program: 190 }),
+    same(levels, { policy: 82 + supplement.policies, program: 190 + supplement.programs }),
     `programs.json levels ${pyRepr(levels)} (82 policies, 190 programs expected)`,
   );
   c.fact(

@@ -14,6 +14,9 @@ importers:
         specifier: workspace:*
         version: link:apps/etl
     devDependencies:
+      '@playwright/test':
+        specifier: 1.64.1
+        version: 1.64.1
       '@react-router/dev':
         specifier: 7.18.4
         version: 7.18.4(@types/node@24.10.1)(lightningcss@1.33.0)(react-router@7.18.4(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(typescript@6.0.3)(vite@8.3.4(@types/node@24.10.1)(esbuild@0.28.2)(yaml@2.9.1))(wrangler@4.156.0(@cloudflare/workers-types@5.20261104.1)(@types/node@24.10.1))(yaml@2.9.1)
@@ -53,6 +56,18 @@ importers:
       '@sigma-budget/dataset-schema':
         specifier: workspace:*
         version: link:../../packages/dataset-schema
+      linkedom:
+        specifier: 0.18.14
+        version: 0.18.14
+      react:
+        specifier: 19.3.1
+        version: 19.3.1
+      react-dom:
+        specifier: 19.3.1
+        version: 19.3.1(react@19.3.1)
+      react-router:
+        specifier: 7.18.4
+        version: 7.18.4(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
     devDependencies:
       '@cloudflare/vite-plugin':
         specifier: 1.64.0
@@ -69,6 +84,9 @@ importers:
       '@types/node':
         specifier: 24.10.1
         version: 24.10.1
+      '@types/pako':
+        specifier: 2.0.4
+        version: 2.0.4
       '@types/react':
         specifier: 19.3.0
         version: 19.3.0
@@ -81,18 +99,9 @@ importers:
       jsdom:
         specifier: 27.4.0
         version: 27.4.0
-      linkedom:
-        specifier: 0.18.14
-        version: 0.18.14
-      react:
-        specifier: 19.3.1
-        version: 19.3.1
-      react-dom:
-        specifier: 19.3.1
-        version: 19.3.1(react@19.3.1)
-      react-router:
-        specifier: 7.18.4
-        version: 7.18.4(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      pako:
+        specifier: 2.1.0
+        version: 2.1.0
       typescript:
         specifier: 6.0.3
         version: 6.0.3
@@ -1363,6 +1372,14 @@ packages:
       {
         integrity: sha512-1Duyg48TdJNdyhEB8Xn1L36bT9Pv6GUtlKjHxOys8xkaF/rQq3XJE+bAurSK/AgIz5mGFsb77cn9Pb20+WCScw==,
       }
+
+  '@playwright/test@1.64.1':
+    resolution:
+      {
+        integrity: sha512-IaYGml/nSOiZWROfPtuIL7neuu9qDOZ3TNvNljUIrhDMxiGTgPjzj/g9p9RxpS2tSepPDRY+UwAaEeiKtUvIAg==,
+      }
+    engines: { node: '>=20' }
+    hasBin: true
 
   '@poppinss/colors@4.1.6':
     resolution:
@@ -2764,6 +2781,22 @@ packages:
         integrity: sha512-07Fys7iVx0X6TcviMOgogM1Lk33ZyqOezMnU79S+kffWqwolG/5W9V8EgQSeYCIfFTYVgssRbnH630Oa2+soBA==,
       }
 
+  playwright-core@1.64.1:
+    resolution:
+      {
+        integrity: sha512-BC4s8y6SEVA6Q1rSxZTto8hI1KUI3xXlHGZgvGqP4IqPdI/a6FX9H29IDNz7vKo9l21b6LfYosScPL6M3xxyDQ==,
+      }
+    engines: { node: '>=20' }
+    hasBin: true
+
+  playwright@1.64.1:
+    resolution:
+      {
+        integrity: sha512-HCrVhHr5QQuwYoswEUGTb7gGp522yflbv/ST8nF4sFWGuLjQCt17Q/EubpGGSNKYn1tsTCPZxqHhHCfVURu7UA==,
+      }
+    engines: { node: '>=20' }
+    hasBin: true
+
   postcss@8.5.32:
     resolution:
       {
@@ -3944,6 +3977,10 @@ snapshots:
 
   '@oxc-project/types@0.156.0': {}
 
+  '@playwright/test@1.64.1':
+    dependencies:
+      playwright: 1.64.1
+
   '@poppinss/colors@4.1.6':
     dependencies:
       kleur: 4.1.5
@@ -4765,6 +4802,12 @@ snapshots:
       confbox: 0.3.2
       exsolve: 1.2.0
       pathe: 2.0.3
+
+  playwright-core@1.64.1: {}
+
+  playwright@1.64.1:
+    dependencies:
+      playwright-core: 1.64.1
 
   postcss@8.5.32:
     dependencies:

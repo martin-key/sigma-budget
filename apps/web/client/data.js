@@ -83,7 +83,7 @@ function fetchJson(name) {
   const rid = pinnedRelease();
   if (name === 'releases/current' && rid) return Promise.resolve(releaseRecord(rid));
   if (RELEASE_FILE[name]) {
-    // the manifest and the checks of the visit's release (S35 „Данни и проверка“)
+    // the manifest and the checks of the visit's release (S35 „Проверка на данните“)
     const id = rid ? Promise.resolve(rid) : data.load('releases/current').then((c) => c.release_id);
     return id.then((i) =>
       fetchFile(name, new URL(`/data/releases/${i}/${RELEASE_FILE[name]}`, location.origin)),

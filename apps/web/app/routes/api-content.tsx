@@ -714,7 +714,7 @@ function versionsBlock(ctx: MetadataContext, M: Catalogue) {
         </p>
 
         <p>
-          Историята на изданията е в <a href={href('proverka')}>„Данни и проверка“</a>.
+          Историята на изданията е в <a href={href('proverka')}>„Проверка на данните“</a>.
         </p>
 
         <p>
