@@ -13,6 +13,7 @@ import { ranklist } from '../ui/ranklist.js';
 import { chips } from '../ui/chips.js';
 import { linkCard } from '../ui/cards.js';
 import { gl } from '../ui/gl.js';
+import { disclosure } from '../ui/disclosure.js';
 import { institutions, cellValue, headline, stateDebt, strictSum } from '../budget-2027.js';
 import {
   COMPARE,
@@ -85,7 +86,7 @@ function onThisPage(ctx) {
     ['b27-vedomstva', 'Ведомства'],
     ['s34-projects', 'Инвестиционни проекти'],
     ['b27-obshtini', 'Общини'],
-    ['b27-dalg', 'Дълг'],
+    ['b27-dalg', 'Дълг и лихви'],
   ];
   return html`<nav class="b27-toc" aria-label="На тази страница">
     <p class="b27-toc-h">На тази страница</p>
@@ -732,6 +733,35 @@ function merki(ctx) {
 }
 
 /* ---------------------------------------------------------------- 7 · Ведомства */
+/** Two bars per institution, 2026 under 2027, on one scale: the amount at the end of each bar and the change in % beside the pair.
+ *  Plain HTML, so the long names wrap on a phone and the numbers stay readable; the table below carries the same values and the CSV. */
+function pairBars(rows, { id, label, heads }) {
+  const max = Math.max(...rows.flatMap((r) => [r.before, r.now].filter(ok)));
+  const w = (x) => (ok(x) && max > 0 ? Number(((Math.max(0, x) / max) * 100).toFixed(1)) : 0);
+  const bar = (cls, x, head) =>
+    html`<span class="b27-pair-bar ${cls}"><span class="b27-pair-fill" style="width:${w(x)}%"></span><span class="b27-pair-v"><span class="sr-only">${head}: </span>${ok(x) ? num(x, 0) : DASH}</span></span>`;
+  return html`<figure class="b27-pairs" id="${id}">
+    <figcaption class="b27-pairs-key">
+      <span>${label}</span>
+      <span class="b27-pairs-legend" aria-hidden="true"
+        ><span class="b27-key b27-key-before"></span>${heads[0]}
+        <span class="b27-key b27-key-now"></span>${heads[1]}</span
+      >
+    </figcaption>
+    <ol class="b27-pair-list">
+      ${rows.map(
+        (r) => html`<li class="b27-pair">
+          <span class="b27-pair-name"><a href="${r._href}">${r.name}</a></span>
+          <span class="b27-pair-bars">${bar('b27-pair-before', r.before, heads[0])}${bar('b27-pair-now', r.now, heads[1])}</span>
+          <span class="b27-pair-pct"${ok(r.pct) && r.pct < 0 ? html` data-dir="down"` : ''}
+            ><span class="sr-only">Промяна: </span>${ok(r.pct) ? pct(r.pct, 0, { sign: true }) : DASH}</span
+          >
+        </li>`,
+      )}
+    </ol>
+  </figure>`;
+}
+
 function vedomstva(ctx) {
   const doc = ctx.data.budget2027;
   const law = new Map((ctx.data.ministries?.items || []).map((i) => [String(i.id), i]));
@@ -755,7 +785,7 @@ function vedomstva(ctx) {
     .filter((r) => ok(r.now))
     .sort((a, b) => b.now - a.now);
   if (!rows.length) return '';
-  const top = rows.slice(0, 12);
+  const top = rows.slice(0, 15);
   const grow = [...rows].filter((r) => ok(r.abs)).sort((a, b) => b.abs - a.abs)[0];
   return base(
     ctx,
@@ -770,18 +800,27 @@ function vedomstva(ctx) {
           </p>`
           : ''
       }
-      ${dataTable({
-        id: 'b27-vedomstva-table',
-        caption: 'Разходите на дванадесетте най-големи бюджета на ведомства, млн. евро',
-        columns: [
-          { key: 'name', label: 'Ведомство' },
-          { key: 'before', label: '2026 · закон', unit: 'млн. €', num: true, d: 1 },
-          { key: 'now', label: '2027 · законопроект', unit: 'млн. €', num: true, d: 1 },
-          { key: 'pct', label: 'Промяна, %', num: true, fmt: (x) => (ok(x) ? signed(x) : DASH) },
-          { key: 'code', label: 'Код', csvOnly: true },
-        ],
-        rows: top,
-        dense: true,
+      ${pairBars(top, {
+        id: 'b27-vedomstva-fig',
+        label: 'Разходи, млн. € · промяна спрямо 2026 г.',
+        heads: ['2026 · закон', '2027 · проект'],
+      })}
+      ${disclosure({
+        id: 'b27-vedomstva-d',
+        title: 'Таблица с точните стойности',
+        body: dataTable({
+          id: 'b27-vedomstva-table',
+          caption: 'Разходите на петнадесетте най-големи бюджета на ведомства, млн. евро',
+          columns: [
+            { key: 'name', label: 'Ведомство' },
+            { key: 'before', label: '2026 · закон', unit: 'млн. €', num: true, d: 1 },
+            { key: 'now', label: '2027 · законопроект', unit: 'млн. €', num: true, d: 1 },
+            { key: 'pct', label: 'Промяна, %', num: true, fmt: (x) => (ok(x) ? signed(x) : DASH) },
+            { key: 'code', label: 'Код', csvOnly: true },
+          ],
+          rows: top,
+          dense: true,
+        }),
       })}
       <p class="b27-note small">
         <a href="${ctx.href('S10', {}, { per: DRAFT })}">Всички ${num(rows.length)} ведомства</a> ·
@@ -839,42 +878,71 @@ function obshtini(ctx) {
 }
 
 /* ---------------------------------------------------------------- 9 · Дълг */
-function dalg(ctx) {
+// The debt and its price side by side: the stock at the end of the year and the interest paid on it, each with the change from 2026.
+function dalg(ctx, m) {
   const doc = ctx.data.budget2027;
   const d = stateDebt(doc, DRAFT),
     before = stateDebt(doc, PREV);
   const limit = doc?.debtLimits?.['67'];
   if (!d) return '';
+  const debtNow = cellValue(d.total),
+    debtBefore = cellValue(before?.total),
+    debtC = change(debtNow, debtBefore);
+  const interest = m.v('exp.interest'),
+    interestBefore = m.v('exp.interest', PREV),
+    interestC = change(interest, interestBefore),
+    interestGdp = m.at('exp.interest')?.pctGdp;
+  const vs2026 = (c, label) => (ok(c.pct) ? { value: c.pct, d: 1, label } : null);
+  const note =
+    ok(interestC.abs) && ok(interestC.pct)
+      ? html`<p class="b27-note">
+          Лихвите по дълга през ${yr(2027)} са ${bn(interest)}: с ${bn(Math.abs(interestC.abs))}
+          ${moreLess(interestC.abs)} (${pct(interestC.pct, 1, { sign: true })}) от очакваното за
+          ${yr(2026)}${
+            ok(debtC.pct)
+              ? html`, докато дългът ${debtC.pct >= 0 ? 'расте' : 'намалява'} с
+                ${pct(Math.abs(debtC.pct), 1)}`
+              : ''
+          }.
+        </p>`
+      : '';
   return block({
     id: 'b27-dalg',
-    title: 'Държавен дълг',
+    title: 'Държавен дълг и лихви',
     scope: 'zdd',
     ...draftStatus,
-    source: ['budget2027'],
+    source: ['budget2027', ...(ok(interest) ? ['asbp'] : [])],
     asOf: doc.publication,
-    sub: 'Прогнозата на МФ за държавния дълг по Закона за държавния дълг и границата в законопроекта.',
+    sub: 'Прогнозата на МФ за държавния дълг по Закона за държавния дълг, лихвите по КФП и границата в законопроекта.',
     share: { period: `${PREV} / ${DRAFT}`, unit: 'млн. €' },
     body: html`<div class="stack">
+      ${note}
       ${kpiGrid(
         [
           kpi({
             label: 'Дълг в края на 2027 г.',
-            mln: cellValue(d.total),
-            sub: `${pct(cellValue(d.pctGdp), 1)} от БВП`,
+            mln: debtNow,
+            delta: vs2026(debtC, 'спрямо края на 2026'),
+            sub: `${pct(cellValue(d.pctGdp), 1)} от БВП · края на ${yr(2026)}: ${bn(debtBefore)} (${pct(cellValue(before?.pctGdp), 1)} от БВП, очаквано)`,
           }),
-          kpi({
-            label: 'Дълг в края на 2026 г. (очаквано)',
-            mln: cellValue(before?.total),
-            sub: `${pct(cellValue(before?.pctGdp), 1)} от БВП`,
-          }),
+          ok(interest)
+            ? kpi({
+                label: 'Лихви по дълга през 2027 г.',
+                gl: 'lihva',
+                mln: interest,
+                pctGdp: interestGdp,
+                delta: vs2026(interestC, 'спрямо 2026'),
+                sub: `${ok(interestGdp) ? `${pct(interestGdp, 1)} от БВП · ` : ''}${yr(2026)}: ${bn(interestBefore)} (очаквано)`,
+              })
+            : '',
           kpi({
             label: 'Максимален дълг по законопроекта (чл. 67)',
             value: ok(limit?.value) ? num(limit.value, 1) : null,
             unit: 'млрд. €',
             sub: 'Горна граница в края на 2027 г., не прогноза.',
           }),
-        ],
-        { label: 'Държавен дълг' },
+        ].filter(Boolean),
+        { label: 'Държавен дълг и лихви' },
       )}
       <p class="b27-note small">
         <a href="${ctx.href('S17', {}, { per: DRAFT })}">Дългът, финансирането и границите в законопроекта</a>
@@ -983,7 +1051,7 @@ export function overview(ctx, doc, b) {
       ${ctx.data.ministries ? vedomstva(ctx) : ''}
       ${projectsBlocks(ctx, doc)}
       ${obshtini(ctx)}
-      ${dalg(ctx)}
+      ${dalg(ctx, m)}
       ${chl1(ctx, b)}
       ${more(ctx)}
       ${publication(doc)}`,

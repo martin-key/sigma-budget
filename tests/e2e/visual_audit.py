@@ -86,6 +86,10 @@ def main():
             assert page.locator('#b27-nakratko .kpi').count() == 6
             expect(page.locator('#b27-sravnenie-table')).to_be_visible()
             expect(page.locator('#b27-kapitalovi-fig')).to_be_visible()
+            # The institutions as paired bars on the phone: 2026 and 2027 with the amount and the change, no table to scroll.
+            assert page.locator('#b27-vedomstva-fig .b27-pair').count() == 15
+            expect(page.locator('#b27-vedomstva-table')).to_be_hidden()
+            expect(page.locator('#b27-dalg .kpi', has_text='Лихви по дълга')).to_be_visible()
             # Investment projects: three year totals, a chart by institution, the top ten (project + three years) and a searchable full list.
             assert page.locator('#s34-projects .kpi').count() == 3
             expect(page.locator('#s34-projects-by-institution-fig')).to_be_visible()
