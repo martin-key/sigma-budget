@@ -58,7 +58,7 @@ describe('raw GISCO and oblast reducer responsibilities', () => {
       await writeFile(join(root, 'raw.csv'), csv);
       await writeFile(join(root, 'raw.geojson'), geo);
       const python = execFileSync(
-        'python3',
+        process.env.PYTHON312 ?? 'python3',
         [
           '-c',
           [
@@ -76,7 +76,8 @@ describe('raw GISCO and oblast reducer responsibilities', () => {
         ],
         {
           cwd: resolve('../..'),
-          env: { PATH: '/usr/bin:/bin', PYTHONPATH: 'pipeline' },
+          // PATH is inherited so that a bare PYTHON312 (CI sets `python`) resolves as in the other differential tests.
+          env: { PATH: process.env.PATH, PYTHONPATH: 'pipeline' },
           encoding: 'utf8',
           maxBuffer: 8 * 1024 * 1024,
         },

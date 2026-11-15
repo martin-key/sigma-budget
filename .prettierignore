@@ -25,4 +25,4 @@ reference/**
 apps/*/coverage/
 packages/*/coverage/
 /coverage/
-coverage-summary.md
+/coverage-summary.md

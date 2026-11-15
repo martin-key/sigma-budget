@@ -53,6 +53,7 @@ const GENERATED = [
   'apps/web/coverage/coverage-summary.json',
   'packages/ingest/coverage/coverage-summary.json',
   'coverage/coverage-summary.json',
+  'coverage-summary.md',
   'pipeline/build/lib/budget_pipeline/cli.py',
   'pipeline/dist/budget_pipeline-1.0.0-py3-none-any.whl',
   'apps/web/.react-router/types/root.ts',

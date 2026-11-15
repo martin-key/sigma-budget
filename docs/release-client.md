@@ -62,7 +62,7 @@ await preflightRelease({ release, originals, maxObjectBytes });
 
 ## Прекъсване, повторение и ревизии
 
-Receipts по подразбиране са в `work/ts-operator-receipts`, отделно от build receipt-а. Името включва SHA-256 на environment name + origin и release ID. Съдържанието също проверява тази самоличност. Директорията трябва да е операторски контролирана, отделна от candidate и source `data/`. Старите Python receipts не се преизползват автоматично.
+Receipts по подразбиране са в `work/ts-operator-receipts` в корена на копието на хранилището, от което върви командата, независимо от текущата папка и от `--root` (`/work/` е в `.gitignore`), отделно от build receipt-а. Изричен `--receipts` ги премества. Името включва SHA-256 на environment name + origin и release ID. Съдържанието също проверява тази самоличност. Директорията трябва да е операторски контролирана, отделна от candidate и source `data/`. Старите Python receipts не се преизползват автоматично.
 
 Записът е временен файл с mode `0600`, `fsync`, atomic rename и directory `fsync`. Един процес държи directory lock за конкретния environment/release. Lock-ът се освобождава във `finally`. След принудително прекратен процес оставащият `.json.lock` трябва да се отстрани ръчно само след проверка, че процесът е спрял; клиентът не гадае дали lock е стар.
 

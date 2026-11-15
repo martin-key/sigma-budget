@@ -8,7 +8,7 @@
 
 ## Coverage baseline
 
-`coverage-baseline.json` съдържа измерените начални lines/branches проценти за всеки workspace с тестова команда. `coverage-summary.md` показва също functions/statements. Ниското покритие се отчита честно; базата не е твърдение за достатъчност на тестовете.
+`coverage-baseline.json` съдържа измерените начални lines/branches проценти за всеки workspace с тестова команда. `pnpm check:coverage` записва в корена файла `coverage-summary.md`, който показва също functions/statements. Той е генериран изход: не се следи в Git (`.gitignore`), а CI го качва като artifact `coverage` заедно с `coverage-summary.json` отчетите на workspace-ите. Ниското покритие се отчита честно; базата не е твърдение за достатъчност на тестовете.
 
 Включени са всички производствени TS/JS файлове в `src` и CLI launcher-ите в `bin`, както и изрично `apps/etl/publication-documents/prepare.mjs`, а за web - `app`, `client`, `workers`, service worker и candidate-data adapter, дори когато никой тест не ги импортира. Изключени са само тестове, декларации и fixture директории. CLI subprocess изпълненията проверяват реалната компилирана граница, но V8 отчетът на родителския Vitest процес не приписва тяхното покритие на изходния TypeScript.
 

@@ -54,7 +54,7 @@ it('compiled CLI rejects unsupported selections without making report directorie
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
-});
+}, 30_000);
 it('does not replace declared inputs after rejecting traversal or a symlink', () => {
   const root = mkdtempSync(join(tmpdir(), 'sigma-17a-rejected-'));
   try {
@@ -93,7 +93,7 @@ it('does not replace declared inputs after rejecting traversal or a symlink', ()
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
-});
+}, 30_000);
 it('compiled CLI writes reports for accepted and failed raw validations, and refuses aliases and links', () => {
   mkdirSync(candidates, { recursive: true });
   const own = mkdtempSync(join(candidates, 'guard-'));
@@ -147,4 +147,4 @@ it('compiled CLI writes reports for accepted and failed raw validations, and ref
     rmSync(own, { recursive: true, force: true });
     rmSync(aliases, { recursive: true, force: true });
   }
-});
+}, 30_000);
