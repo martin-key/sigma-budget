@@ -1161,6 +1161,10 @@ h3.block-title {
   letter-spacing: 0.04em;
   color: var(--ink-soft);
 }
+/* a status longer than a narrow phone (the 2027 bill with its forecast years) wraps inside its frame instead of widening the page */
+.block-tags .st {
+  white-space: normal;
+}
 /* the one block menu */
 .block-tools {
   grid-column: 2;
