@@ -62,7 +62,7 @@ PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers tmp/venv/bin/python -m tests.e2e.s
 
 Регресията за ранния мобилен tap се проверява с `python -m tests.e2e.boot --url http://127.0.0.1:8814/` срещу сглобения Worker. Файловете на артефакта (`sitemap.xml`, `robots.txt`, `llms.txt`, `_headers`, маркираният service worker) се проверяват от `apps/web/scripts/release-artifact.test.ts` в `pnpm test`; release командата проверява и действителния артефакт преди успех.
 
-Останалите браузърни проверки са `redirects.py`, `calc_check.py`, `share_check.py`, `accept.py` и `motion.py` в `tests/e2e/`. Те използват временния статичен сайт. `overlap.py` и `perf.py` проверяват припокриване и работа при ограничен процесор. Очакваните числа се четат от текущите данни чрез `expect.py`. Интеграционните проверки `tests/release/release_check.py` и `restore_drill.py` изискват Node, OpenSSL и локален Worker.
+Останалите браузърни проверки са `redirects.py`, `calc_check.py`, `share_check.py`, `accept.py` и `motion.py` в `tests/e2e/`. Те използват временния статичен сайт. `overlap.py` проверява припокриванията. Очакваните числа се четат от текущите данни чрез `expect.py`. Интеграционните проверки `tests/release/release_check.py` и `restore_drill.py` изискват Node, OpenSSL и локален Worker.
 
 ## Данни и издания
 

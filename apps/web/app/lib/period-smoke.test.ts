@@ -298,9 +298,10 @@ for (const [per, attribution] of [
     ['/prognoza', '#s13-sum'],
     ['/prihodi', '#s06-notes'],
     ['/razhodi', '#s07-notes'],
+    ['/razhodi?po=vid', '#s07-notes'],
   ]) {
     it(`attributes ${path} to the selected ${per} record`, async () => {
-      const document = await annualDocument(`${path}?per=${per}`);
+      const document = await annualDocument(`${path}${path.includes('?') ? '&' : '?'}per=${per}`);
       const text = document.querySelector(
         per === '2026.law' && path !== '/prognoza'
           ? `${path === '/prihodi' ? '#s06' : '#s07'}-annual-coverage`
@@ -308,6 +309,9 @@ for (const [per, attribution] of [
       )?.textContent;
       expect(text).toContain(attribution);
       expect(text).not.toContain('Приетият закон може да се различава от проекта');
+      expect(document.querySelector('article')?.textContent).not.toContain(
+        'Приетият закон може да се различава от проекта',
+      );
       if (!per.endsWith('report')) expect(text).toContain('06.11.2026');
     });
   }
@@ -319,21 +323,25 @@ for (const [per, attribution] of [
     expect(sector?.textContent).toContain('част от историческите оригинали липсват');
     expect(sector?.textContent).toContain('Версия на източника: 07.10.2026');
     expect(sector?.textContent).toContain('Придобиване: 09.10.2026');
-    expect(sector?.querySelector('a[href*="proverka"]')?.getAttribute('href')).toContain(
-      's35-coverage',
+    const link = [...(sector?.querySelectorAll('a') ?? [])].find(
+      (a) => a.textContent?.trim() === 'Ограничения на изданието',
     );
+    expect(link?.getAttribute('href')).toBe('/proverka?to=s35-coverage');
   });
 }
 it('scopes the displayed catalogue note without mutating its release', async () => {
   const originalCatalog = structuredClone(await load('catalog'));
   const document = await annualDocument('/danni');
-  expect(document.querySelector('article')?.textContent).toContain(
+  const note = document.querySelector('.s24-item[data-id="two-versions"]');
+  for (const phrase of [
     'само за старите масиви към проекта за 2026',
-  );
-  expect(document.querySelector('article')?.textContent).toContain(
     '2026.expected е очаквано изпълнение',
-  );
-  expect(document.querySelector('article')?.textContent).toContain('2027.draft е проект');
+    '2027.draft е проект',
+    '2028.forecast и 2029.forecast са прогнози',
+    'Табл. III-1 (стр. 73)',
+    'Приложение 3 (стр. 191–192)',
+  ])
+    expect(note?.textContent).toContain(phrase);
   expect(await load('catalog')).toEqual(originalCatalog);
 });
 
