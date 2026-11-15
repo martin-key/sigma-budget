@@ -8,7 +8,7 @@ import glossary from './__fixtures__/glossary.json';
 
 afterEach(() => provideScope(() => null));
 it('uses the public product name in the document and metadata without a working-group credit', async () => {
-  const url = new URL('https://sigma-budget.my-data.bg/za-proekta');
+  const url = new URL('https://sigma-budget.my-data.bg/vrazka');
   const docs: Record<string, unknown> = { core, glossary };
   provideScope(() => ({
     url,

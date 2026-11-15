@@ -98,8 +98,9 @@ export function chainOf(r) {
   return out;
 }
 
-if (typeof window !== 'undefined') {
-  window.__ROUTES__ = ROUTES.map((r) => ({
+/** the route table the browser checks walk (window.__ROUTES__): only screens that exist, so a retired id is never visited */
+export const browserRoutes = () =>
+  ROUTES.filter((r) => !r.retired).map((r) => ({
     id: r.id,
     key: r.key,
     pattern: r.pattern,
@@ -114,4 +115,5 @@ if (typeof window !== 'undefined') {
     periods: r.periods,
     samples: r.samples,
   }));
-}
+
+if (typeof window !== 'undefined') window.__ROUTES__ = browserRoutes();

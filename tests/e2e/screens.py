@@ -62,11 +62,16 @@ IGNORE_CONSOLE = [
 ]
 # the «Бюджет» group of the menu, in the order the owner set (desktop dropdown, phone «Меню», footer); the two renamed screens
 BUDGET_MENU = ['Бюджет 2027', 'Годишната рамка', 'Разходи', 'Приходи', 'Кой харчи', 'Мерки', 'Прогноза', 'Общини', 'Пътят на бюджета']
-DATA_MENU = ['Методология', 'Проверка на данните', 'Отворени данни и API', 'За проекта', 'Обратна връзка']
+DATA_MENU = ['Методология', 'Проверка на данните', 'Отворени данни и API', 'Обратна връзка']
+# the notes of the retired «За проекта» page, now the end of the footer fine print, before the open code and СИГМА links
+FOOTER_NOTES = ['Речникът и поясненията са редакционни текстове, а не официални данни.', 'Без бисквитки и проследяване.']
+CODE_URL = 'https://github.com/midt-bg/sigma-budget'
 FOOTER_JS = r"""() => ({
   groups: Object.fromEntries([...document.querySelectorAll('#footer details.foot-grp')].map(d => [d.querySelector('summary').textContent.trim(), [...d.querySelectorAll('li a')].map(a => a.textContent.trim())])),
   legend: !!document.querySelector('#footer [data-action="legend"]'),
-  sigma: (document.querySelector('#footer .fine .sister-link') || {}).textContent || ''
+  sigma: (document.querySelector('#footer .fine .sister-link') || {}).textContent || '',
+  fine: [...document.querySelectorAll('#footer .fine > *')].map(e => e.textContent.replace(/\s+/g, ' ').trim()),
+  code: (document.querySelector('#footer .fine a.code-link') || {}).href || ''
 })"""
 NEGATIVE_URLS = ['#/nyama-takava', '#/patevoditel/9', '#/prihodi/dds/x', '#/embed', '#/obshtina', '#/razhodi/a/b/c']
 
@@ -1749,6 +1754,8 @@ def ch_popovers(w, cell, F, W, j, outs):
         F('footer', f'the footer «Бюджет» group is {foot["groups"].get("Бюджет")}, expected {BUDGET_MENU}')
     if foot['groups'].get('Данни и проект') != DATA_MENU:
         F('footer', f'the footer «Данни и проект» group is {foot["groups"].get("Данни и проект")}, expected {DATA_MENU}')
+    if foot['fine'][-4:-2] != FOOTER_NOTES or not foot['fine'][-2].startswith('Отворен код') or foot['code'] != CODE_URL:
+        F('footer', f'the footer fine print does not end with the notes, the open code link and СИГМА: {foot["fine"]} (code link {foot["code"]!r})')
     # an old stored value is never read: stale switches in localStorage must not turn anything on
     page.evaluate("() => localStorage.setItem('bns.prefs.v1', JSON.stringify({ onlyReal: true, perPerson: true, leva: true, sources: true }))")
     page.reload(wait_until='domcontentloaded')

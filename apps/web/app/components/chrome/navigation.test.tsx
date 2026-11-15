@@ -8,9 +8,10 @@ import { describe, expect, it } from 'vitest';
 import * as legacy from '../../../client/chrome.js';
 import { ROUTES } from '../../lib/routes';
 import { NAV_GROUPS, footerHtml } from './chrome';
+import { FOOTER_NOTES } from '../../routes/launch-copy-test-helper';
 
 // The navigation the owner set: two screens renamed (their addresses stay), the «Бюджет» group in this order, and a footer without the
-// legend entry. The browser side (dropdowns, phone «Меню», 44px targets at 320px) is checked in tests/e2e/screens.py (ch_popovers, ch_phone).
+// legend entry and without «За проекта», whose notes are now in its fine print. The browser side (dropdowns, phone «Меню», 44px targets at 320px) is checked in tests/e2e/screens.py (ch_popovers, ch_phone).
 const BUDGET = ['S34', 'S05', 'S07', 'S06', 'S10', 'S12', 'S13', 'S20', 'S14'];
 const BUDGET_NAMES = [
   'Бюджет 2027',
@@ -126,9 +127,44 @@ describe('the footer', () => {
         'Методология',
         'Проверка на данните',
         'Отворени данни и API',
-        'За проекта',
         'Обратна връзка',
       ]);
+  });
+
+  it('carries the notes of the retired «За проекта» page and the open code link just before СИГМА, in both chromes', () => {
+    for (const doc of [footer(), legacyFooter()]) {
+      const fine = doc.querySelector('.fine')!;
+      const items = [...fine.children].map((c) => c.textContent?.replace(/\s+/g, ' ').trim());
+      expect(items.slice(-4)).toEqual([
+        ...FOOTER_NOTES,
+        'Отворен код (друг сайт, в нов раздел)',
+        'СИГМА — обществени поръчки (друг сайт, в нов раздел)',
+      ]);
+      const code = fine.querySelector('a.code-link')!;
+      expect(code.getAttribute('href')).toBe('https://github.com/midt-bg/sigma-budget');
+      expect(code.getAttribute('target')).toBe('_blank');
+      expect(code.getAttribute('rel')).toBe('noopener');
+      expect(code.querySelector('.sr-only')?.textContent).toBe(' (друг сайт, в нов раздел)');
+      // the wording about the publisher comes from the owner separately: the footer makes no claim about the status of the site
+      expect(fine.textContent).not.toMatch(
+        /официален сайт|неофициал|независим|граждан|прототип|министерств|МИДТ|издател/i,
+      );
+    }
+  });
+
+  it('is the same markup in the React and the legacy chrome (elements, attributes and text)', () => {
+    const shape = (doc: Document) =>
+      [...doc.querySelectorAll('.footer-in, .footer-in *')].map((el) => [
+        el.tagName,
+        [...el.attributes].map((a) => `${a.name}=${a.value}`).sort(),
+        [...el.childNodes]
+          .filter((n) => n.nodeType === 3)
+          .map((n) => n.textContent)
+          .join('')
+          .replace(/\s+/g, ' ')
+          .trim(),
+      ]);
+    expect(shape(footer())).toEqual(shape(legacyFooter()));
   });
 });
 

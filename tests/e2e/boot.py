@@ -106,7 +106,7 @@ async def early_preferences(browser, url):
     print('PASS search before React')
 
 async def cancelled_seo(browser, url):
-    for pattern in ['**/screen-S26-*.js', '**/text-*.js']:
+    for pattern in ['**/screen-S25-*.js', '**/text-*.js']:
         context = await browser.new_context(service_workers='block')
         page = await context.new_page()
         requested, release, completed = asyncio.Event(), asyncio.Event(), asyncio.Event()
@@ -119,7 +119,7 @@ async def cancelled_seo(browser, url):
         try:
             await page.goto(url.rstrip('/') + '/', wait_until='domcontentloaded')
             await page.wait_for_selector('article[data-ready="1"]')
-            await page.evaluate("import('/js/router.js').then(m => m.router.go('/za-proekta'))")
+            await page.evaluate("import('/js/router.js').then(m => m.router.go('/api'))")
             await asyncio.wait_for(requested.wait(), 10)
             await page.evaluate("import('/js/router.js').then(m => m.router.go('/razhodi'))")
             await page.wait_for_selector('article[data-route="S07"][data-ready="1"]')
@@ -138,7 +138,7 @@ async def cancelled_seo(browser, url):
 async def check(url):
     async with async_playwright() as p:
         browser = await p.chromium.launch()
-        for route, phase in [(route, phase) for route in ['/', '/razhodi', '/za-proekta'] for phase in ['domcontentloaded', 'commit']]:
+        for route, phase in [(route, phase) for route in ['/', '/razhodi', '/api'] for phase in ['domcontentloaded', 'commit']]:
             context = await browser.new_context(viewport={'width': 390, 'height': 844}, has_touch=True, is_mobile=True, service_workers='block')
             page = await context.new_page()
             # Keep React unavailable until AFTER the first menu interaction.
@@ -169,7 +169,7 @@ async def check(url):
             assert not errors, errors
             await context.close()
             print(f'PASS first tap {route} at {phase}')
-        for route, screen in [('/za-proekta', 'S26'), ('/nyama-takava', 'S30'), ('/api', 'S25'), ('/proverka', 'S35'), ('/zakon', 'S14'), ('/novo', 'S16')]:
+        for route, screen in [('/nyama-takava', 'S30'), ('/api', 'S25'), ('/proverka', 'S35'), ('/zakon', 'S14'), ('/novo', 'S16')]:
             context = await browser.new_context(service_workers='block')
             page = await context.new_page()
             loaded = set()

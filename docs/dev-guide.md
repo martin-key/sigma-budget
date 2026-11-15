@@ -4,7 +4,7 @@
 
 Новият код е TypeScript. Workspace-ът е описан в [README](../README.md); общите правила са в [AGENTS.md](../AGENTS.md). За обработката на данни `./budget` стартира Node CLI в `apps/etl/` и пакетите за обработка в `packages/ingest/`. Python пътят е исторически и референтен.
 
-Маршрутите са в `apps/web/app/routes.ts`. Мигрираните екрани S26, S25, S35, S14 и S16 имат отделни route модули, а S30 използва `not-found.tsx`. Модулите използват loader, headers и компоненти; моделите и React представянето се свързват чрез `apps/web/app/migration/registry.tsx`. За нова работа следвай съществуващите модули и тестовете им. Останалите маршрути използват общия `screen.tsx` и стария renderer.
+Маршрутите са в `apps/web/app/routes.ts`. Мигрираните екрани S25, S35, S14 и S16 имат отделни route модули, а S30 използва `not-found.tsx`. Модулите използват loader, headers и компоненти; моделите и React представянето се свързват чрез `apps/web/app/migration/registry.tsx`. За нова работа следвай съществуващите модули и тестовете им. Останалите маршрути използват общия `screen.tsx` и стария renderer.
 
 ## Поддръжка на старите екрани
 
@@ -906,11 +906,13 @@ export const styles = ['s06-prihodi'];       // зарежда css/pages/s06-pri
 | S24 | `danni`         | `#/danni/:set?`                       | `pages/s24-danni.js`                     | Откъде са данните?       | ref            | none                  | S25,S01       | `#/danni` `#/danni/execution`                               |
 | S25 | `api`           | `#/api`                               | `pages/s25-api.js`                       | Отворени данни и API     | ref            | none                  | S01           | `#/api`                                                     |
 | S35 | `proverka`      | `#/proverka`                          | `pages/s35-proverka.js`                  | Проверка на данните      | ref            | none                  | S24,S25       | `#/proverka`                                                |
-| S26 | `za-proekta`    | `#/za-proekta`                        | `pages/s26-za-proekta.js`                | За проекта               | ref            | none                  | S27,S01       | `#/za-proekta`                                              |
+| S26 | `za-proekta`    | — (оттеглен, без адрес)               | —                                        | За проекта               | ref            | none                  |               | —                                                           |
 | S27 | `vrazka`        | `#/vrazka`                            | `pages/s27-vrazka.js`                    | Обратна връзка           | ref            | none                  | S01           | `#/vrazka`                                                  |
 | S28 | `tarsene`       | `#/tarsene`                           | `pages/s28-tarsene.js`                   | Търсене                  | util           | none                  | S02,S01       | `#/tarsene` `#/tarsene?q=%D0%94%D0%94%D0%A1`                |
 | S29 | `embed`         | `#/embed/:chart`                      | `pages/s29-embed.js`                     | Вграден изглед           | util           | none                  |               | `#/embed/selftest` `#/embed/neznajna.grafika`               |
 | S30 | `ne-e-namereno` | `#(404)`                              | `pages/s30-404.js`                       | Няма такава страница     | util           | none                  |               |                                                             |
+
+**S26 е оттеглен.** Екранът „За проекта“ го няма: `/za-proekta` пренасочва с 301 към `/danni` (`apps/web/client/redirects.js`), а бележките му са в долния край на сайта. Записът в `apps/web/app/lib/routes.json` (`retired: true`, без адрес и извън менюто) пази само идентификатора, докато следващото редовно издание на данните махне S26 от `screens` на `core` в `data/datasets.yaml`; тогава записът се изтрива.
 
 Колони: **Периоди** `all` = поддържа се всеки период; `none` = изборът на период е скрит за екрана (редът за периода не се показва); списък = само тези периоди (за останалите обвивката показва празно състояние). **Група** `start budget exec debt phase2 ref util` (страничната навигация; числото е стъпката от водения път). `S29` е гола рамка (без елементи на обвивката); `S30` няма шаблон (отговаря на всеки непознат хеш).
 

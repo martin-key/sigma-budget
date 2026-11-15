@@ -44,7 +44,7 @@ class RouteCatalogue(unittest.TestCase):
         matcher = Routes()
         self.assertEqual(matcher.match("#/prihodi/dds?year=2026"), "S06")
         self.assertEqual(matcher.match("#/vedomstvo/0200/0200.01.00"), "S11")
-        self.assertEqual(matcher.match("#/za-proekta"), "S26")
+        self.assertIsNone(matcher.match("#/za-proekta"))  # S26 is retired: no address (the site redirects it to /danni)
         self.assertIsNone(matcher.match("#/nema-takav-ekran"))
         for href in editorial.SEE.values():
             self.assertIsNotNone(editorial.match_href(editorial.parse_routes(), href), href)

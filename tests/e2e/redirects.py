@@ -36,6 +36,9 @@ CASES = [
     ("#/patevoditel/4", "S04", "/5-minuti", {"to": "s04-scene5"}, []),
     ("#/patevoditel/7", "S04", "/5-minuti", {"to": "s04-scene4"}, []),
     ("#/patevoditel/8", "S18", "/danaci", {}, []),
+    # «За проекта» (S26) is retired: its notes are in the footer, the status legend is on «Методология»
+    ("#/za-proekta", "S24", "/danni", {}, []),
+    ("#/za-proekta?to=s26-legend", "S24", "/danni", {}, ["to"]),
 ]
 
 

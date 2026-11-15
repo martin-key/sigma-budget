@@ -8,16 +8,12 @@ import { html } from '../../../client/html.js';
 import { byId } from '../legacy';
 import { toHref } from '../../../client/loc.js';
 
-export async function textModel(
-  screen: TextScreenModel['screen'],
+/** The part every text screen shares: core and glossary of the release (both optional) and the demo view. */
+export async function editorialBase(
   params: Record<string, string>,
   query: Record<string, string>,
   reader: ReleaseReader,
-): Promise<TextScreenModel> {
-  if (screen === 'S14' || screen === 'S16')
-    return (await import('./narrative')).narrativeModel(screen, params, query, reader);
-  if (screen === 'S25' || screen === 'S35')
-    return (await import('./metadata')).metadataModel(screen, params, query, reader);
+) {
   let core: EditorialCore = {},
     glossary: unknown = {};
   try {
@@ -35,7 +31,20 @@ export async function textModel(
   const view: TextView = ['loading', 'empty', 'error', 'pending'].includes(query.demo)
     ? (query.demo as TextView)
     : 'ready';
-  return { screen, params, query, view, core, glossary, release: reader.release };
+  return { params, query, view, core, glossary, release: reader.release };
+}
+
+export async function textModel(
+  screen: TextScreenModel['screen'],
+  params: Record<string, string>,
+  query: Record<string, string>,
+  reader: ReleaseReader,
+): Promise<TextScreenModel> {
+  if (screen === 'S14' || screen === 'S16')
+    return (await import('./narrative')).narrativeModel(screen, params, query, reader);
+  if (screen === 'S25' || screen === 'S35')
+    return (await import('./metadata')).metadataModel(screen, params, query, reader);
+  return { screen, ...(await editorialBase(params, query, reader)) };
 }
 /** Shared by the server and the temporary navigation adapter; no screen renderer. */
 export async function textMetadata(model: TextScreenModel) {

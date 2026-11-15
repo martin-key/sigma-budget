@@ -37,6 +37,30 @@ export function currentNavigation(html: string) {
     });
 }
 
+// The owner retired «За проекта» (S26, its address redirects to «Методология»): the footer has no entry for it, and the fine print carries
+// the notes the page used to give, just before the СИГМА link. Historical captures keep the old footer; adapt exactly these parts and
+// fail if one is not found.
+export const FOOTER_NOTES = [
+  'Речникът и поясненията са редакционни текстове, а не официални данни.',
+  'Без бисквитки и проследяване.',
+];
+export function currentFooter(html: string) {
+  const entry = /<li><a href="\/za-proekta" data-route="S26"[^>]*>За проекта<\/a><\/li>/;
+  const sigma = /(\s*)(<span><a class="sister-link")/;
+  if (!entry.test(html) || !sigma.test(html))
+    throw new Error('the capture has no «За проекта» footer entry or СИГМА link');
+  return html
+    .replace(entry, '')
+    .replace(
+      sigma,
+      (_, space: string, link: string) =>
+        FOOTER_NOTES.map((note) => `${space}<span>${note}</span>`).join('') +
+        `${space}<span><a class="code-link" href="https://github.com/midt-bg/sigma-budget" target="_blank" rel="noopener">Отворен код<span class="sr-only"> (друг сайт, в нов раздел)</span></a></span>` +
+        space +
+        link,
+    );
+}
+
 // Only the shared missing-data presentation changes; preserve headings, links and controls.
 export function finalPendingCopy(html: string) {
   const { document } = parseHTML(html.replaceAll('Предстои', 'Няма данни'));

@@ -16,7 +16,6 @@ export default [
           toPath(r.pattern!),
           (
             {
-              S26: 'routes/za-proekta.tsx',
               S25: 'routes/api.tsx',
               S35: 'routes/proverka.tsx',
               S14: 'routes/zakon.tsx',

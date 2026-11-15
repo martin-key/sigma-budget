@@ -473,21 +473,6 @@
       }
     ],
     [
-      "S26",
-      "za-proekta",
-      "/za-proekta",
-      "s26-za-proekta",
-      "За проекта",
-      "ref",
-      "info",
-      {
-        "short": "За проекта",
-        "next": ["S27", "S01"],
-        "desc": "Какво е „СИГМА Бюджет“, кой го прави, откъде са данните и как работи.",
-        "periods": "none"
-      }
-    ],
-    [
       "S27",
       "vrazka",
       "/vrazka",
@@ -549,6 +534,21 @@
         "next": [],
         "nav": false,
         "desc": "Адресът не води до екран от сайта.",
+        "periods": "none"
+      }
+    ],
+    [
+      "S26",
+      "za-proekta",
+      null,
+      "s26-za-proekta",
+      "За проекта",
+      "ref",
+      "info",
+      {
+        "retired": true,
+        "next": [],
+        "nav": false,
         "periods": "none"
       }
     ]

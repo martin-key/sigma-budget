@@ -54,17 +54,22 @@ def main():
         page.add_init_script("""document.addEventListener('readystatechange', () => {
           if(document.readyState === 'interactive') window.initialHeading = document.querySelector('h1');
         });""")
-        response = page.goto(base + '/za-proekta')
+        # the retired «За проекта» address is answered with a permanent redirect to «Методология»
+        response = page.goto(base + '/za-proekta?to=s26-legend')
+        assert response.status == 200 and urlsplit(response.url).path == '/danni' and not urlsplit(response.url).query, response.url
+        assert response.request.redirected_from and response.request.redirected_from.response().status == 301
+        page.wait_for_selector('article[data-route="S24"][data-ready="1"]')
+        requests.clear()
+        response = page.goto(base + '/api')
         assert response.status == 200
         page.wait_for_selector('article.page[data-ready="1"]')
         assert page.evaluate('window.initialHeading === document.querySelector("h1")'), 'SSR heading was replaced'
         assert not any('/data/core.json' in url or '/data/glossary.json' in url for url in requests), 'editorial seed refetched'
-        assert page.locator('[data-s26-demo]').count() == 0
-        anchors = page.locator('nav.s26-toc a[href]').evaluate_all('(links) => links.map(link => link.getAttribute("href"))')
-        assert len(anchors) == 6
+        anchors = page.locator('nav.s25-toc a[href]').evaluate_all('(links) => links.map(link => link.getAttribute("href"))')
+        assert len(anchors) == 4
         for address in anchors:
             target = parse_qs(urlsplit(address).query)['to'][0]
-            page.locator('nav.s26-toc a[href="' + address + '"]').click()
+            page.locator('nav.s25-toc a[href="' + address + '"]').click()
             page.wait_for_function("""id => {
                 const heading = document.getElementById(id);
                 if (!heading || document.activeElement !== heading) return false;
@@ -74,7 +79,7 @@ def main():
         page.locator('a[href="/prihodi"]').first.click()
         page.wait_for_selector('article[data-route="S06"][data-ready="1"]')
         page.go_back()
-        page.wait_for_selector('article[data-route="S26"][data-ready="1"]')
+        page.wait_for_selector('article[data-route="S25"][data-ready="1"]')
         response = page.goto(base + '/nyama-takava-stranitsa')
         assert response.status == 404
         page.wait_for_selector('article[data-route="S30"][data-ready="1"]')
@@ -85,7 +90,7 @@ def main():
         assert 'q=%D0%94%D0%94%D0%A1+' in page.url
         assert not errors, errors
         browser.close()
-    print('React bridge: 9 screen checks, 4 chrome focus cases, 9 S26 anchor transitions passed; 0 browser/hydration errors')
+    print('React bridge: 9 screen checks, 4 chrome focus cases, 1 redirect, 4 S25 anchor transitions passed; 0 browser/hydration errors')
 
 
 if __name__ == '__main__':

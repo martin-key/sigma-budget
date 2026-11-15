@@ -1,6 +1,6 @@
 import type { ReleaseReader } from '../release-types';
 import type { MetadataModel, Catalogue } from './metadata-types';
-import { textModel } from './text';
+import { editorialBase } from './text';
 import * as C from '../../../client/catalog.js';
 export async function metadataModel(
   screen: MetadataModel['screen'],
@@ -8,7 +8,7 @@ export async function metadataModel(
   query: Record<string, string>,
   reader: ReleaseReader,
 ): Promise<MetadataModel> {
-  const editorial = await textModel('S26', params, query, reader);
+  const editorial = await editorialBase(params, query, reader);
   const model: MetadataModel = {
     ...editorial,
     screen,
