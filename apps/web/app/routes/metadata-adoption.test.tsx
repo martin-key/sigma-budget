@@ -192,7 +192,20 @@ for (const [set, file] of [
     expect(container.querySelector('.s25-actions a[download]')?.getAttribute('href')).toBe(path);
     for (const code of ['curl', 'py', 'js'])
       expect(container.querySelector(`#s25-c-${code}`)?.textContent).toContain(url);
-    expect(container.querySelector('#s25-read')?.textContent).not.toContain(
+    expect(container.querySelector('#s25-read')?.closest('section')?.textContent).not.toContain(
       `${release.origin}/data/${file}`,
     );
   });
+
+it('a set of several JSON files is described as JSON, with JSON examples', async () => {
+  const model = await textModel('S25', {}, { set: 'ministries-programs' }, { release, load });
+  const container = document.createElement('div');
+  container.innerHTML = renderToString(
+    <MigratedScreen model={model} navigation={{ go() {}, announce() {} }} />,
+  );
+  const read = container.querySelector('#s25-read')?.closest('section');
+  expect(read?.textContent).not.toContain('RSS 2.0');
+  expect(read?.querySelector('#s25-d-meta')).not.toBeNull();
+  expect(container.querySelector('#s25-c-py')?.textContent).toContain('json.load(r)');
+  expect(container.querySelector('#s25-c-js')?.textContent).toContain('res.json()');
+});

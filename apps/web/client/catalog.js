@@ -203,7 +203,8 @@ function normSet(d, i) {
     slug,
     file,
     stem: stemOf(file),
-    ext: extOf(file),
+    // a set of several files has no file of its own: its parts share one format
+    ext: extOf(file || parts[0]?.file),
     template: str(d.fileTemplate),
     title: str(d.title).trim() || slug,
     // Retire future-data sentences from the public description until the next release.
