@@ -55,7 +55,7 @@ A new Node executor is never applied under an old Python commit label.
 | `prepare`                                              | Offline actual fiscal, annual and publication reader preparation, including nested ZIP/7z archives, in separate owned output directories.                                                     |
 | scoped `build --scope ...`, `parity`, `wave13b-live`   | Existing frozen migration/reference commands, separate from the production build.                                                                                                             |
 
-There is no `restore` subcommand. The existing operator procedure and protocol restore scenarios remain in `docs/operator-guide.md`, `tests/release/release_check.py` and `tests/release/restore_drill.py`.
+There is no `restore` subcommand. The existing operator procedure and protocol restore scenarios remain in `docs/operator-guide.md`, `tests/release/release_check.mjs` and `tests/release/restore_drill.mjs`, which drive this TypeScript operator.
 
 ## Finite required acceptance and CI inputs
 

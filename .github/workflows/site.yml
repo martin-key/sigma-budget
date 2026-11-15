@@ -7,7 +7,7 @@
 # There is no develop branch. This workflow never deploys to production: production comes later, by hand (docs/production-procedure.md).
 # The staging deployment needs the repository secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID and the variable STAGING_ORIGIN
 # (the staging Worker's address). Without the secrets the deploy step is skipped; with them but without STAGING_ORIGIN it fails, because
-# the compatibility check of the code against the current release (tests/release/compat_check.py) needs that address.
+# the compatibility check of the code against the current release (tests/release/compat_check.mjs) needs that address.
 name: site
 
 on:
@@ -199,7 +199,7 @@ jobs:
           python -m budget_pipeline.extract.budget_forecast_2027 --check
           python -m budget_pipeline.extract.budget_bill_2027 --check
       - name: Compatibility of code and data (stage E)
-        run: python -m tests.release.compat_check
+        run: node tests/release/compat_check.mjs
       - name: Build the Worker for staging and check every screen
         env:
           ORIGIN: ${{ vars.STAGING_ORIGIN || 'https://sigma-budget.midt.bg' }}
@@ -266,28 +266,23 @@ jobs:
         run: python -m tests.e2e.motion
 
   release:
-    # the release registry and the operator API (stage C) on the Worker with local D1 and R2: acceptance scenarios 3, 4, 5, 6 and 9, rollback
-    # and the public API, with synthetic releases (tests/release/release_check.py; docs/release.md); the restore drill of scenario 10
-    # (tests/release/restore_drill.py; docs/operator-guide.md)
+    # the release registry and the operator API (stage C) on the Worker with local D1 and R2, driven through the TypeScript operator
+    # (./budget): acceptance scenarios 3, 4, 5, 6 and 9, rollback, the public API and the deploy's compatibility check, with synthetic
+    # releases (tests/release/release_check.mjs; docs/release.md); the restore drill of scenario 10 (tests/release/restore_drill.mjs;
+    # docs/operator-guide.md)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
-        with:
-          python-version: '3.12'
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: |
-          python -m pip install --require-hashes -r tests/requirements-dev.lock -r pipeline/requirements.lock
-          python -m pip install --no-deps -e pipeline
-      - run: python -m unittest tests.release.test_response_headers
-      - run: python -m tests.release.release_check
-      - run: python -m tests.release.restore_drill
+      - run: node --test tests/release/compat_check.test.mjs tests/release/release_lib.test.mjs
+      - run: node tests/release/release_check.mjs
+      - run: node tests/release/restore_drill.mjs
 
   data-image:
     # the pinned environment of the data processing (pipeline/Dockerfile): it must build from its digest and hash-locked
@@ -357,13 +352,13 @@ jobs:
             echo "::notice::Cloudflare secrets are not set: skipping the deployment."
             exit 0
           fi
-          # the new code must read the release that is current on staging (tests/release/compat_check.py; no release yet passes). Without the
+          # the new code must read the release that is current on staging (tests/release/compat_check.mjs; no release yet passes). Without the
           # address that check cannot run, and the code is not deployed unchecked
           if [ -z "$STAGING_ORIGIN" ]; then
             echo "::error::The variable STAGING_ORIGIN is not set: the compatibility check cannot run, so nothing is deployed."
             exit 1
           fi
-          python3 -m tests.release.compat_check --env-url "$STAGING_ORIGIN"
+          node tests/release/compat_check.mjs --env-url "$STAGING_ORIGIN"
           pnpm exec wrangler deploy -c apps/web/build/server/wrangler.json      # built with CLOUDFLARE_ENV=staging: the staging Worker, D1 and R2
 
   common-parity:

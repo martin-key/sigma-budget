@@ -14,6 +14,7 @@ import {
   safeRelative,
   sha256,
 } from './files.js';
+import { RELEASE_COMPATIBILITY } from './contracts.js';
 import { exportCommit, verifyExport, type ExportedCommit } from './export.js';
 import {
   mime,
@@ -251,7 +252,7 @@ async function makeManifest(
         : {}),
     },
     compatibility: {
-      execution: ['execution/1', 'execution/2'],
+      execution: [...RELEASE_COMPATIBILITY.execution],
       readers: 'release-client preflightRelease and apps/web/scripts/candidate-data.ts',
     },
   }) as unknown as ReleaseManifest;

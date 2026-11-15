@@ -1,3 +1,4 @@
+import { RELEASE_COMPATIBILITY } from '../release-build/contracts.js';
 import { verifyNodeProof } from './node-proof.js';
 import { join, resolve } from 'node:path';
 import { fileFacts, listFiles, readSafeBytes, safeDirectory, sha256 } from './files.js';
@@ -74,7 +75,7 @@ export function parseManifest(
   if (
     m.data_schema.execution !== undefined &&
     (typeof m.data_schema.execution !== 'string' ||
-      !['execution/1', 'execution/2'].includes(m.data_schema.execution))
+      !RELEASE_COMPATIBILITY.execution.includes(m.data_schema.execution))
   )
     throw new ReleaseError(2, 'Unsupported execution data schema');
   const paths = new Set<string>();

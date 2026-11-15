@@ -13,9 +13,7 @@
     "python -m tests.e2e.visual_audit --url http://127.0.0.1:8814/",
     "python -m tests.e2e.narrative_adoption --url http://127.0.0.1:8814/",
     "python -m tests.e2e.security_headers --url http://127.0.0.1:8814/",
-    "python -m pip install --require-hashes -r tests/requirements-dev.lock -r pipeline/requirements.lock",
-    "python -m pip install --no-deps -e pipeline",
-    "python3 -m tests.release.compat_check --env-url \"$STAGING_ORIGIN\"",
+    "node tests/release/compat_check.mjs --env-url \"$STAGING_ORIGIN\"",
     "pnpm exec playwright install --with-deps chromium"
   ]
 }
