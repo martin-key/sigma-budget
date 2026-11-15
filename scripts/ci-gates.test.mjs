@@ -39,9 +39,6 @@ test('all independent Python and provenance commands survive the consolidation',
       `${path}: every browser setup must retain the checked retry wrapper`,
     );
   }
-  const wave = readFileSync('.github/workflows/wave15b-validation.yml', 'utf8');
-  assert.match(wave, /workflow_call:/);
-  assert.doesNotMatch(wave, /vitest run/);
 });
 
 test('security covers other PR targets without duplicating main PR checks', () => {

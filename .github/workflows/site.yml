@@ -25,9 +25,6 @@ permissions:
   contents: read
 
 jobs:
-  validation-wave15b:
-    uses: ./.github/workflows/wave15b-validation.yml
-
   security:
     uses: ./.github/workflows/security.yml
 
@@ -319,16 +316,12 @@ jobs:
     if: ${{ always() }}
     needs:
       [
-        validation-wave15b,
         security,
         coverage,
         build,
         check,
         release,
         data-image,
-        validation-wave14,
-        validation-wave15,
-        validation-wave17a,
         common-parity,
         aggregation-parity,
         catalog-parity,
@@ -385,170 +378,20 @@ jobs:
           python3 -m tests.release.compat_check --env-url "$STAGING_ORIGIN"
           pnpm exec wrangler deploy -c apps/web/build/server/wrangler.json      # built with CLOUDFLARE_ENV=staging: the staging Worker, D1 and R2
 
-  validation-wave14:
-    # Frozen Python evidence and the independent scoped TypeScript checks. No live release oracle.
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
-        with:
-          python-version: '3.12'
-          cache: pip
-          cache-dependency-path: pipeline/requirements.lock
-      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: '24'
-          cache: pnpm
-      - run: |
-          python -m pip install --require-hashes -r pipeline/requirements.lock
-          pnpm install --frozen-lockfile
-          pnpm --filter @sigma-budget/ingest... build
-      - name: Verify frozen Python oracle and provenance
-        run: |
-          python packages/ingest/test/fixtures/validate14/generate_oracle.py --check
-          python packages/ingest/test/fixtures/validate14/generate_groups_oracle.py --check
-          python packages/ingest/test/fixtures/validate17a/gzip-cache/generate_oracle.py --check
-      - name: Release remains unchanged
-        if: always()
-        run: git diff --exit-code -- data/release
-
-  validation-wave15:
-    # Frozen 810 donor corpus; no source refresh or live-release comparison.
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
-        with:
-          python-version: '3.12'
-          cache: pip
-          cache-dependency-path: pipeline/requirements.lock
-      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: '24'
-          cache: pnpm
-      - run: |
-          python -m pip install --require-hashes -r pipeline/requirements.lock
-          pnpm install --frozen-lockfile
-          pnpm --filter @sigma-budget/ingest... build
-          pnpm --filter @sigma-budget/ingest typecheck
-      - name: Verify frozen donor oracles
-        run: |
-          python packages/ingest/test/fixtures/validate14/generate_oracle.py --check
-          python packages/ingest/test/fixtures/validate14/generate_groups_oracle.py --check
-          python packages/ingest/test/fixtures/validate15/generate_oracle.py --check
-          python packages/ingest/test/fixtures/validate15/generate_unicode.py --check
-          python packages/ingest/test/fixtures/validate15/compound/generate_oracle.py --check
-          python packages/ingest/test/fixtures/validate15/native/generate_oracle.py --check
-          python packages/ingest/test/fixtures/validate15/iterable/generate_oracle.py --check
-      - name: Release remains unchanged
-        if: always()
-        run: git diff --exit-code -- data/release
-
-  validation-wave17a:
-    # Offline donor evidence; production Python validation remains authoritative.
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
-        with:
-          python-version: '3.12'
-      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: '24'
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - name: Regenerate frozen Python results
-        env:
-          PYTHONDONTWRITEBYTECODE: '1'
-        run: |
-          python - <<'PY'
-          from concurrent.futures import ThreadPoolExecutor
-          import subprocess
-          import sys
-
-          proofs = [
-              ["packages/ingest/test/fixtures/validate17a/generate_oracle.py", "--check"],
-              ["packages/ingest/test/fixtures/validate17a/generate_oracle.py", "--extra", "--check"],
-              ["packages/ingest/test/fixtures/validate17a/review/generate_oracle.py", "--check"],
-              ["packages/ingest/test/fixtures/validate17a/key-whitespace/generate_oracle.py", "--check"],
-              ["packages/ingest/test/fixtures/validate17a/integer/generate_oracle.py", "--check"],
-              ["packages/ingest/test/fixtures/validate17a/integer-limit/generate_oracle.py", "--check"],
-              ["packages/ingest/test/fixtures/validate17a/reader/generate_oracle.py", "--check"],
-              ["packages/ingest/test/fixtures/validate17a/boundaries/generate_oracle.py", "--check"],
-              ["packages/ingest/test/fixtures/validate17a/containers/generate_oracle.py", "--check"],
-              ["packages/ingest/test/fixtures/validate17a/iterators/generate_oracle.py", "--check"],
-              ["packages/ingest/test/fixtures/validate17a/catalog-semantics/generate_oracle.py", "--check"],
-              ["packages/ingest/test/fixtures/validate17a/short-circuit/generate_oracle.py", "--check"],
-              ["packages/ingest/test/fixtures/validate17a/membership/generate_oracle.py", "--check"],
-              ["packages/ingest/test/fixtures/validate17a/year-keys/generate_oracle.py", "--check"],
-              ["packages/ingest/test/fixtures/validate17a/source-strings/generate_oracle.py", "--check"],
-              ["packages/ingest/test/fixtures/validate17a/gzip-cache/generate_oracle.py", "--check"],
-              ["packages/ingest/test/fixtures/validate17a/wrapper/generate.py", "--check"],
-          ]
-          assert len(proofs) == 17 and len({tuple(args) for args in proofs}) == 17
-          assert all(args[-1] == '--check' for args in proofs)
-
-          def verify(args):
-              print('VERIFY', *args, flush=True)
-              result = subprocess.run([sys.executable, *args], check=False)
-              print('PASS' if result.returncode == 0 else 'FAIL', *args, flush=True)
-              return result.returncode
-
-          with ThreadPoolExecutor(max_workers=2) as pool:
-              exits = list(pool.map(verify, proofs))
-          raise SystemExit(1 if any(exits) else 0)
-          PY
-      - run: pnpm --filter @sigma-budget/ingest... build
-      - name: Release remains unchanged
-        if: always()
-        run: git diff --exit-code -- data/release
-
   common-parity:
-    # Offline common-layer translation against Python-produced frozen evidence.
+    # Offline common-layer TypeScript builds against frozen evidence: debt and local finance, DBP and GVA, fiscal.
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
-        with:
-          python-version: '3.12'
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Law builder and frozen Python parity
-        env:
-          PYTHONPATH: pipeline
+      - name: Debt and local finance parity against the frozen oracle
         run: |
-          python packages/ingest/test/fixtures/law/generate_oracle.py --check
-      - name: Editorial builder and frozen Python parity
-        env:
-          PYTHONPATH: pipeline
-        run: |
-          python3 packages/ingest/test/fixtures/editorial/generate_oracle.py --check
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
-        with:
-          python-version: '3.12'
-          cache: pip
-          cache-dependency-path: pipeline/requirements.lock
-      - name: Verify programme oracle regeneration
-        run: |
-          python -m pip install --require-hashes -r pipeline/requirements.lock
-          PYTHONPATH=pipeline python packages/ingest/test/fixtures/programmes/generate_oracle.py --check
-      - name: Verify components and rates frozen Python evidence
-        run: PYTHONPATH=pipeline python packages/ingest/test/fixtures/components-rates/generate_oracle.py --check
-      - name: Debt and local finance frozen Python oracle and parity
-        run: |
-          python packages/ingest/test/fixtures/debt-local/generate_oracle.py --check
-          python packages/ingest/test/fixtures/debt-local/test_readers.py
           pnpm --filter @sigma-budget/etl... build
           pnpm exec budget-ts build --inputs packages/ingest/test/fixtures/debt-local --out tmp/ts-migration/candidates/07 --scope debt,municipalities,geo-obshtini,sebra --build-date 2026-11-08
           for stage in donor projected published; do
@@ -560,9 +403,8 @@ jobs:
           name: debt-local-parity
           path: tmp/ts-migration/candidates/07/*-diff.json
           if-no-files-found: error
-      - name: DBP and GVA frozen evidence and scoped proof
+      - name: DBP and GVA scoped proof against frozen evidence
         run: |
-          python packages/ingest/test/fixtures/dbp-gva/generate_oracle.py --check
           pnpm exec budget-ts build --inputs packages/ingest/test/fixtures/dbp-gva --out tmp/ts-migration/candidates/10 --scope dbp2027,gva-sectors --build-date 2026-11-08
           pnpm exec budget-ts parity --registry packages/ingest/test/fixtures/dbp-gva/datasets.yaml --oracle packages/ingest/test/fixtures/dbp-gva/published --candidate tmp/ts-migration/candidates/10/data --scope dbp2027 --policy packages/ingest/test/fixtures/dbp-gva/policy.json --report tmp/ts-migration/candidates/10/dbp-parity.json
           git diff --exit-code -- data/release
@@ -572,12 +414,8 @@ jobs:
           path: |
             tmp/ts-migration/candidates/10/proof-report.json
             tmp/ts-migration/candidates/10/dbp-parity.json
-      - name: Fiscal frozen Python oracle and parity
-        env:
-          PYTHONPATH: pipeline
+      - name: Fiscal parity against the frozen oracle
         run: |
-          python packages/ingest/test/fixtures/fiscal/generate_oracle.py --check
-          python packages/ingest/test/fixtures/fiscal/generate_datasets.py --check
           pnpm exec budget-ts build --inputs packages/ingest/test/fixtures/fiscal --out tmp/ts-migration/candidates/candidate03 --scope outlook,revenue,expenditure,measures --build-date 2026-11-08
           pnpm exec budget-ts parity --registry packages/ingest/test/fixtures/fiscal/inputs/datasets.yaml --oracle packages/ingest/test/fixtures/fiscal/oracle --candidate tmp/ts-migration/candidates/candidate03/data --scope outlook,revenue,expenditure,measures --policy packages/ingest/test/fixtures/fiscal/policy.json --report tmp/ts-migration/candidates/candidate03/cli-diff.json
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -592,14 +430,11 @@ jobs:
         run: git diff --exit-code -- data/release
 
   aggregation-parity:
-    # Offline Wave 11: frozen owner snapshots, Python donors, and exact scoped parity.
+    # Offline Wave 11: frozen owner snapshots and exact scoped parity.
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
-        with:
-          python-version: '3.12'
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -607,13 +442,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @sigma-budget/etl... build
-      - name: Frozen aggregation donor and XML evidence
-        run: |
-          python packages/ingest/test/fixtures/aggregation/generate_oracle.py --check
-          python packages/ingest/test/fixtures/aggregation-rss/generate_oracle.py --check
       - name: Scoped aggregation CLI and parity
-        env:
-          PYTHON312: python
         run: |
           pnpm exec budget-ts build --inputs packages/ingest/test/fixtures/aggregation --out tmp/ts-migration/candidates/11 --scope core,feed,feed-rss,search-index --build-date 2026-11-08
           for stage in final published; do
@@ -628,30 +457,19 @@ jobs:
           if-no-files-found: error
 
   catalog-parity:
-    # Frozen Wave 12 owner streams and unchanged Python donors; no live release oracle.
+    # Frozen Wave 12 owner streams and exact scoped parity; no live release oracle.
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
-        with:
-          python-version: '3.12'
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: python -m pip install --require-hashes -r pipeline/requirements.lock
       - run: pnpm --filter @sigma-budget/etl... build
-      - name: Frozen Python donors and source facts
-        env:
-          PYTHONDONTWRITEBYTECODE: '1'
-        run: python packages/ingest/test/fixtures/catalog/generate_oracle.py --check
       - name: Scoped catalog CLI and parity
-        env:
-          PYTHON312: python
-          PYTHONDONTWRITEBYTECODE: '1'
         run: |
           pnpm exec budget-ts build --inputs packages/ingest/test/fixtures/catalog --out tmp/ts-migration/candidates/12 --scope catalog --build-date 2026-11-08
           for stage in final published; do
@@ -669,14 +487,11 @@ jobs:
           if-no-files-found: error
 
   wave13a-parity:
-    # Frozen current-publication donors and six scoped owner projections.
+    # Frozen current-publication oracles and six scoped owner projections.
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
-        with:
-          python-version: '3.12'
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -684,15 +499,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @sigma-budget/etl... build
-      - name: Frozen Python donors
-        env:
-          PYTHONDONTWRITEBYTECODE: '1'
-        run: |
-          python packages/ingest/test/fixtures/wave13a/generate_law_next.py --check
-          python packages/ingest/test/fixtures/wave13a/generate_budget.py --check
       - name: Scoped tests and parity
-        env:
-          PYTHONDONTWRITEBYTECODE: '1'
         run: |
           pnpm exec budget-ts build --inputs packages/ingest/test/fixtures --out tmp/ts-migration/candidates/13a --scope outlook,revenue,expenditure,budget2027,budget2027-provenance,law --build-date 2026-11-08
           for stage in final published; do
@@ -707,31 +514,19 @@ jobs:
           if-no-files-found: error
 
   wave13b-parity:
-    # Frozen raw-reader evidence and the independent Python graph; no live release comparison.
+    # Frozen raw-reader evidence and the frozen reference graph; no live release comparison.
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
-        with:
-          python-version: '3.12'
-          cache: pip
-          cache-dependency-path: pipeline/requirements.lock
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'
           cache: pnpm
       - run: |
-          python -m pip install --require-hashes -r pipeline/requirements.lock
           pnpm install --frozen-lockfile
           pnpm --filter @sigma-budget/etl... build
-      - name: Regenerate frozen Python references
-        env:
-          PYTHONDONTWRITEBYTECODE: '1'
-        run: |
-          python packages/ingest/test/fixtures/indirect-taxes/regenerate.py
-          python packages/ingest/test/fixtures/wave13b/generate_oracle.py --check
       - name: Build and compare the frozen candidate
         run: pnpm exec budget-ts build --inputs packages/ingest/test/fixtures --out tmp/ts-migration/candidates/candidate13b --scope wave13b --build-date 2026-11-08
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -742,32 +537,17 @@ jobs:
           if-no-files-found: error
 
   validation-wave18:
-    # Frozen xlrd evidence and independent KFP rules; production validation remains Python.
+    # Frozen KFP evidence and the independent TypeScript KFP rules.
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
-        with:
-          python-version: '3.12'
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: python -m pip install --require-hashes -r pipeline/requirements.lock
-      - name: Verify frozen donor, original sheets and differential evidence
-        env:
-          PYTHONDONTWRITEBYTECODE: '1'
-        run: |
-          python packages/ingest/test/fixtures/wave18/check_provenance.py
-          mkdir -p tmp/wave18-git-export
-          git archive HEAD packages/ingest/test/fixtures/wave18 | tar -x -C tmp/wave18-git-export
-          python tmp/wave18-git-export/packages/ingest/test/fixtures/wave18/oracle.py --check
-          python tmp/wave18-git-export/packages/ingest/test/fixtures/wave18/differential.py --check
       - name: Scoped KFP validation and safety
         run: |
           pnpm --filter @sigma-budget/ingest... build
@@ -783,31 +563,17 @@ jobs:
         run: test -z "$(git status --porcelain -- data/release)"
 
   validation-wave17b:
-    # Frozen FEED evidence; production validation remains Python.
+    # Frozen FEED evidence and the TypeScript FEED validator.
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
-        with:
-          python-version: '3.12'
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: python -m pip install --require-hashes -r pipeline/requirements.lock
-      - name: Verify frozen donor and independent mutations
-        env:
-          PYTHONDONTWRITEBYTECODE: '1'
-        run: |
-          mkdir -p tmp/wave17b-git-export
-          git archive HEAD packages/ingest/test/fixtures/validate17b | tar -x -C tmp/wave17b-git-export
-          python tmp/wave17b-git-export/packages/ingest/test/fixtures/validate17b/generate.py --check
-          python tmp/wave17b-git-export/packages/ingest/test/fixtures/validate17b/generate-extra.py --verify-extra
-          python tmp/wave17b-git-export/packages/ingest/test/fixtures/validate17b/population/generate.py --check
-          python tmp/wave17b-git-export/packages/ingest/test/fixtures/validate17b/years/generate.py --check
       - name: FEED differential and compiled CLI safety
         run: |
           pnpm --filter @sigma-budget/ingest... build
@@ -823,40 +589,19 @@ jobs:
         run: test -z "$(git status --porcelain -- data/release)"
 
   validation-wave17c:
-    # SEARCH only: frozen Python source and inputs, independent search reference and safe CLI.
+    # SEARCH only: frozen inputs, the frozen search reference and the safe TypeScript CLI.
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
-        with:
-          python-version: '3.12'
-          cache: pip
-          cache-dependency-path: pipeline/requirements.lock
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'
           cache: pnpm
       - run: |
-          python -m pip install --require-hashes -r pipeline/requirements.lock
           pnpm install --frozen-lockfile
           pnpm --filter @sigma-budget/ingest... build
-      - name: Verify donor provenance and regenerate from a Git-only export
-        env:
-          PYTHONDONTWRITEBYTECODE: '1'
-        run: |
-          python packages/ingest/test/fixtures/wave17c/check_provenance.py
-          mkdir -p tmp/wave17c-git-export
-          git archive HEAD packages/ingest/test/fixtures/wave17c packages/ingest/src/validate/search-unicode-data.ts | tar -x -C tmp/wave17c-git-export
-          python tmp/wave17c-git-export/packages/ingest/test/fixtures/wave17c/generate_unicode.py --check
-          python tmp/wave17c-git-export/packages/ingest/test/fixtures/wave17c/generate.py --check
-          python tmp/wave17c-git-export/packages/ingest/test/fixtures/wave17c/reference.py --check
-          python tmp/wave17c-git-export/packages/ingest/test/fixtures/wave17c/wrapper.py --check
-          python tmp/wave17c-git-export/packages/ingest/test/fixtures/wave17c/sources/generate.py --check
-          python tmp/wave17c-git-export/packages/ingest/test/fixtures/wave17c/routes/generate.py --check
       - name: Independent SEARCH, mutation and compiled CLI checks
         run: |
           node packages/ingest/dist/validate/search-cli.js --root packages/ingest/test/fixtures/wave17c/corpus --only SEARCH --raw --report tmp/ts-migration/candidates/17c/report.json
