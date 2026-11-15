@@ -9,8 +9,8 @@
    names. The brand artwork of СИГМА is used under the same licence: sigma-logo.svg (the logo in the header; logo.svg
    there), favicon.ico, favicon-16.png, favicon-32.png and apple-touch-icon.png are unchanged copies of the files in
    apps/web/public of СИГМА, and icon-192.png, icon-512.png and og.png are drawn from its mark (logo-icon.svg there,
-   kept unchanged as apps/web/scripts/sigma-mark.svg in the repository of СИГМА Бюджет). СИГМА Бюджет is not СИГМА
-   and is not an official site.
+   kept unchanged as apps/web/scripts/sigma-mark.svg in the repository of СИГМА Бюджет). СИГМА Бюджет is a separate
+   project from СИГМА.
 
    MIT License
 
