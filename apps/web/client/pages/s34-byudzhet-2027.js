@@ -1,4 +1,5 @@
 import { billOverview, mountProjectSearch } from './bill-views.js';
+import { overview } from './budget-2027-overview.js';
 import { periodByKey } from '../periods.js';
 import { isBudgetPlan } from '../budget-documents.js';
 // S34 · Бюджет 2027 (проект) · #/byudzhet-2027 · next S13 · periods none
@@ -18,8 +19,11 @@ import { gl } from '../ui/gl.js';
 import { byId } from '../routes.js';
 import { num, pct, delta, money, moneyParts, date, NBSP } from '../format.js';
 
+// The November bill also reads the КФП of 2025–2029 (outlook, revenue, expenditure) and the 2026 institution budgets (ministries) for its comparisons.
 export const needs = (ctx) =>
-  isBudgetPlan(ctx.query) ? ['core', 'dbp2027', 'budget2027?'] : ['core', 'budget2027?'];
+  isBudgetPlan(ctx.query)
+    ? ['core', 'dbp2027', 'budget2027?']
+    : ['core', 'budget2027?', 'outlook?', 'revenue?', 'expenditure?', 'ministries?'];
 export const styles = ['s34-byudzhet-2027'];
 
 /* ---------------------------------------------------------------- helpers */
@@ -695,7 +699,10 @@ function missingBlock(ctx, f) {
 
 /* ---------------------------------------------------------------- the screen */
 export function render(ctx) {
-  if (!isBudgetPlan(ctx.query)) return billOverview({ ...ctx, period: periodByKey('2027.draft') });
+  if (!isBudgetPlan(ctx.query)) {
+    const bill = { ...ctx, period: periodByKey('2027.draft') };
+    return billOverview(bill, (doc, article1) => overview(bill, doc, article1));
+  }
   const f = fx(ctx);
   const when = date(f.d.doc.date);
   return {
