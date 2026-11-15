@@ -8,6 +8,7 @@ import { preflightRelease } from './package.js';
 import { ReleaseClient } from './client.js';
 import { nodeHttpTransport } from './transport.js';
 import { sha256 } from './files.js';
+import type { HttpRequest } from './types.js';
 
 // Opt-in real input acceptance. Paths are supplied explicitly; no auth/config files are read.
 const candidate = process.env.BUDGET_OPERATOR_CANDIDATE;
@@ -47,8 +48,8 @@ it.skipIf(!candidate || !originals)(
       await copyFile(join(source, archive.path), join(sample.originals, archive.path));
       sample.manifest.inputs = [{ ...archive }];
       sample.releaseId = await writeManifest(sample.release, sample.manifest);
-      // A larger client allowance cannot override a server still configured at 50 MiB.
-      worker = await localReleaseWorker();
+      // A larger client allowance cannot override a server configured at the old 50 MiB.
+      worker = await localReleaseWorker(52428800);
       const defaultServerClient = new ReleaseClient({
         environment: { name: 'archive-default-local', url: worker.url },
         receiptDirectory: join(directory, 'default-server-receipts'),
@@ -64,14 +65,25 @@ it.skipIf(!candidate || !originals)(
       });
       await worker.mf.dispose();
       worker = undefined;
-      worker = await localReleaseWorker(maxObjectBytes);
+      // The default limit of every environment that does not set MAX_OBJECT_BYTES; the archive goes up in 16 MiB parts.
+      worker = await localReleaseWorker();
+      const packets: HttpRequest[] = [];
       const client = new ReleaseClient({
         environment: { name: 'archive-owned-local', url: worker.url },
         receiptDirectory: join(directory, 'receipts'),
         maxObjectBytes,
         credentials: () => ({ accessToken: worker!.token() }),
+        transport: (request) => {
+          packets.push({ ...request, headers: {}, body: undefined });
+          return nodeHttpTransport(request);
+        },
       });
       const sealed = await client.upload(sample);
+      expect(
+        packets.filter(
+          (p) => p.method === 'PUT' && p.url.includes(`/objects/${archive.sha256}/parts/`),
+        ),
+      ).toHaveLength(4);
       expect(sealed.state).toContain('sealed');
       // Hash the final R2 object, not only a returned digest/size or a temporary upload.
       const stored = await worker.r2.get('objects/sha256/' + archive.sha256);
@@ -101,9 +113,10 @@ it.skipIf(!candidate || !originals)(
         archive: { path: archive.path, bytes: archive.bytes, sha256: archive.sha256 },
         defaultObjectLimit: 52428800,
         defaultPreflight: 'refused',
-        defaultServerWith64MiBClient: 'HTTP 422 manifest refused before creating an operation',
+        serverAt50MiBWith64MiBClient: 'HTTP 422 manifest refused before creating an operation',
         localObjectLimit: maxObjectBytes,
-        localUpload: 'verified',
+        serverObjectLimit: 'the Worker default (256 MiB)',
+        localUpload: 'verified, in 4 parts of 16 MiB',
         localSeal: 'validated',
         finalR2Hash: archive.sha256,
         publicReadbackHash: archive.sha256,

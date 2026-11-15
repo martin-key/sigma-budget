@@ -15,6 +15,7 @@ interface LocalD1 {
 interface LocalR2 {
   get(key: string): Promise<{ arrayBuffer(): Promise<ArrayBuffer> } | null>;
   put(key: string, value: Uint8Array): Promise<unknown>;
+  list(options?: { prefix?: string }): Promise<{ objects: { key: string }[] }>;
 }
 interface LocalWorker {
   ready: Promise<URL>;
@@ -22,8 +23,9 @@ interface LocalWorker {
   getD1Database(name: string): Promise<LocalD1>;
   getR2Bucket(name: string): Promise<LocalR2>;
 }
-/** Uses the exact Miniflare/workerd already pinned through Wrangler, no new dependency. */
-export async function localReleaseWorker(maxObjectBytes = 50 * 1024 * 1024) {
+/** Uses the exact Miniflare/workerd already pinned through Wrangler, no new dependency. Without maxObjectBytes the Worker has its
+ * default limit, as every environment that does not set MAX_OBJECT_BYTES. */
+export async function localReleaseWorker(maxObjectBytes?: number) {
   const require = createRequire(import.meta.url);
   const wranglerRequire = createRequire(require.resolve('wrangler/package.json'));
   const { Miniflare, convertV4MiniflareOptions } = wranglerRequire('miniflare') as {
@@ -73,7 +75,7 @@ export async function localReleaseWorker(maxObjectBytes = 50 * 1024 * 1024) {
           keys: [{ ...publicKey.export({ format: 'jwk' }), kid, alg: 'RS256', use: 'sig' }],
         }),
         OPERATORS: 'operator@example.invalid',
-        MAX_OBJECT_BYTES: String(maxObjectBytes),
+        ...(maxObjectBytes === undefined ? {} : { MAX_OBJECT_BYTES: String(maxObjectBytes) }),
       },
       outboundService: () =>
         new Response('External network disabled in release-client tests', { status: 503 }),

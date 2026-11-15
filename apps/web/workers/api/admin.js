@@ -1,8 +1,14 @@
 // The operator API (docs/approach-specification.md, sections 7.1, 7.2 and 8.2). Every route needs an operator of this environment (access.js).
-//   POST /admin/operations                        body: the exact bytes of manifest.json -> operation_id, release_id and the objects the
-//                                                  server still needs (the manifest itself is stored and checked at once)
-//   PUT  /admin/operations/:op/objects/:sha256     the bytes of one object listed in the manifest; the server reads them back from R2 and
-//                                                  checks the size and SHA-256 before the object gets its content-addressed key
+//   POST /admin/operations                        body: the exact bytes of manifest.json -> operation_id, release_id, part_bytes and the
+//                                                  objects the server still needs (the manifest itself is stored and checked at once)
+//   PUT  /admin/operations/:op/objects/:sha256     the bytes of one object listed in the manifest, at most part_bytes; the server reads
+//                                                  them back from R2 and checks the size and SHA-256 before the object gets its
+//                                                  content-addressed key
+//   An object larger than part_bytes goes up in parts instead (an R2 multipart upload; store.js, PART_BYTES):
+//   POST /admin/operations/:op/objects/:sha256/parts                  -> upload_id, part_bytes and the number of parts
+//   PUT  /admin/operations/:op/objects/:sha256/parts/:n?upload_id=…   part n of 1..parts: part_bytes bytes, the last part the rest -> etag
+//   POST /admin/operations/:op/objects/:sha256/parts/complete         {upload_id, parts: [{part, etag}, …]} -> the parts become one
+//                                                                      object, read back and checked like the bytes of a PUT
 //   POST /admin/operations/:op/seal                every object verified -> the candidate is registered and the operation is closed
 //   GET  /admin/operations/:op                     the state of an operation, to resume an upload
 //   POST /admin/publish                            {release_id, expected_revision, request_id, kind: publish|rollback} -> one guarded
@@ -13,63 +19,100 @@
 import { operator } from './access.js';
 import {
   HEX64,
+  PART_BYTES,
   SUPPORTED,
   checkManifest,
   current,
+  digestStream,
   json,
   maxBytes,
   now,
   objectKey,
   primary,
   sha256,
+  sized,
   uploadKey,
 } from './store.js';
 
 const MANIFEST_LIMIT = 4 * 1024 * 1024;
+const COMPLETE_LIMIT = 1024 * 1024; // the list of parts and their etags
 const OPEN_LIMIT = 20; // open operations per operator (section 10.2: limits of size and rate)
 const REQUEST_ID = /^[A-Za-z0-9-]{16,64}$/;
 
-/** verify the bytes under uploads/<op>/<sha>, then give them their final key; an existing final object is reused only if it hashes to it */
-async function promote(env, op, sha, bytes) {
-  const tmp = await env.OBJECTS.get(uploadKey(op, sha));
-  if (!tmp) return { ok: false, status: 409, error: 'nothing uploaded for ' + sha };
-  const buf = await tmp.arrayBuffer();
-  if (buf.byteLength !== bytes || (await sha256(buf)) !== sha) {
-    await env.OBJECTS.delete(uploadKey(op, sha)); // a wrong upload cannot reserve the key or block the next attempt
-    return {
-      ok: false,
-      status: 422,
-      error: `the bytes do not match: ${buf.byteLength} bytes, sha256 ${await sha256(buf)}`,
-    };
-  }
-  const final = await env.OBJECTS.get(objectKey(sha));
-  if (final) {
-    const fb = await final.arrayBuffer();
-    if ((await sha256(fb)) !== sha) {
-      await env.DB.prepare(
-        'INSERT INTO incidents (sha256, found, operation_id, at) VALUES (?1, ?2, ?3, ?4)',
-      )
-        .bind(sha, 'promote', op, now())
-        .run();
-      return {
-        ok: false,
-        status: 500,
-        error: 'storage incident: the object under ' + sha + ' does not hash to it',
-      };
-    }
-  } else {
-    await env.OBJECTS.put(objectKey(sha), buf, { sha256: sha, customMetadata: { sha256: sha } }); // R2 checks the sha256 on write
-    const back = await env.OBJECTS.get(objectKey(sha));
-    if (!back || (await sha256(await back.arrayBuffer())) !== sha)
-      return { ok: false, status: 500, error: 'the stored object does not read back' };
-  }
-  await env.OBJECTS.delete(uploadKey(op, sha));
+/** the length a request declares for its body, or null; the body itself is held to the length the manifest lists (sized) */
+function declared(request) {
+  const v = request.headers.get('Content-Length');
+  return v !== null && /^\d{1,15}$/.test(v) ? Number(v) : null;
+}
+
+/** the size and SHA-256 of the bytes under a key, read as a stream: a large object is never held in memory */
+async function stored(env, key) {
+  const obj = await env.OBJECTS.get(key);
+  return obj && { bytes: obj.size, sha256: await digestStream(obj.body) };
+}
+
+async function incident(env, op, sha) {
+  await env.DB.prepare(
+    'INSERT INTO incidents (sha256, found, operation_id, at) VALUES (?1, ?2, ?3, ?4)',
+  )
+    .bind(sha, 'promote', op, now())
+    .run();
+  return {
+    ok: false,
+    status: 500,
+    error: 'storage incident: the object under ' + sha + ' does not hash to it',
+  };
+}
+
+async function verified(env, op, sha) {
   await env.DB.prepare(
     'UPDATE operation_objects SET verified = 1 WHERE operation_id = ?1 AND sha256 = ?2',
   )
     .bind(op, sha)
     .run();
   return { ok: true };
+}
+
+/** verify the bytes under uploads/<op>/<sha>, then give them their final key; an existing final object is reused only if it hashes to it */
+async function promote(env, op, sha, bytes) {
+  const tmp = await stored(env, uploadKey(op, sha));
+  if (!tmp) return { ok: false, status: 409, error: 'nothing uploaded for ' + sha };
+  if (tmp.bytes !== bytes || tmp.sha256 !== sha) {
+    await env.OBJECTS.delete(uploadKey(op, sha)); // a wrong upload cannot reserve the key or block the next attempt
+    return {
+      ok: false,
+      status: 422,
+      error: `the bytes do not match: ${tmp.bytes} bytes, sha256 ${tmp.sha256}`,
+    };
+  }
+  const final = await stored(env, objectKey(sha));
+  if (final) {
+    if (final.bytes !== bytes || final.sha256 !== sha) return incident(env, op, sha);
+  } else {
+    try {
+      // a stream from the upload to the final key; R2 checks the sha256 on write
+      const src = await env.OBJECTS.get(uploadKey(op, sha));
+      await env.OBJECTS.put(objectKey(sha), src.body, {
+        sha256: sha,
+        customMetadata: { sha256: sha },
+      });
+    } catch {
+      return { ok: false, status: 500, error: 'the object was not stored under its key' };
+    }
+    const back = await stored(env, objectKey(sha));
+    if (!back || back.bytes !== bytes || back.sha256 !== sha)
+      return { ok: false, status: 500, error: 'the stored object does not read back' };
+  }
+  await env.OBJECTS.delete(uploadKey(op, sha));
+  return verified(env, op, sha);
+}
+
+/** an object already under its final key needs no upload if it hashes to the key; one that does not is a storage incident */
+async function reuse(env, op, sha, bytes) {
+  const have = await stored(env, objectKey(sha));
+  return have && have.bytes === bytes && have.sha256 === sha
+    ? verified(env, op, sha)
+    : incident(env, op, sha);
 }
 
 async function objectsOf(env, op) {
@@ -129,11 +172,7 @@ async function startOperation(request, env, who) {
   for (const o of objects) {
     const have = await env.OBJECTS.head(objectKey(o.sha256));
     if (have && have.size === o.bytes) {
-      await env.OBJECTS.put(
-        uploadKey(op, o.sha256),
-        await (await env.OBJECTS.get(objectKey(o.sha256))).arrayBuffer(),
-      );
-      const q = await promote(env, op, o.sha256, o.bytes);
+      const q = await reuse(env, op, o.sha256, o.bytes);
       if (!q.ok) return json({ error: q.error }, q.status);
     }
   }
@@ -142,6 +181,7 @@ async function startOperation(request, env, who) {
     {
       operation_id: op,
       release_id: rid,
+      part_bytes: PART_BYTES,
       objects: objs.length,
       needed: objs
         .filter((o) => !o.verified)
@@ -151,7 +191,8 @@ async function startOperation(request, env, who) {
   );
 }
 
-async function putObject(request, env, op, sha, who) {
+/** an object of an open operation of this operator, or the response that refuses the request; a verified one needs nothing more */
+async function listed(env, op, sha, who) {
   const row = await env.DB.prepare(
     'SELECT o.state, o.operator, x.bytes, x.verified FROM operations o JOIN operation_objects x ON x.operation_id = o.operation_id WHERE o.operation_id = ?1 AND x.sha256 = ?2',
   )
@@ -162,14 +203,107 @@ async function putObject(request, env, op, sha, who) {
   if (row.state !== 'open')
     return json({ error: 'the operation is sealed: a change needs a new candidate' }, 409);
   if (row.verified) return json({ sha256: sha, verified: true, already: true });
-  const len = Number(request.headers.get('Content-Length') || -1);
+  return row;
+}
+
+const partsOf = (bytes) => Math.ceil(bytes / PART_BYTES);
+const answer = (p, sha) =>
+  p.ok ? json({ sha256: sha, verified: true }) : json({ error: p.error }, p.status);
+
+async function putObject(request, env, op, sha, who) {
+  const row = await listed(env, op, sha, who);
+  if (row instanceof Response) return row;
+  const len = declared(request) ?? row.bytes;
   if (len > maxBytes(env)) return json({ error: 'larger than the limit of ' + maxBytes(env) }, 413);
-  const buf = await request.arrayBuffer();
-  if (buf.byteLength > maxBytes(env))
-    return json({ error: 'larger than the limit of ' + maxBytes(env) }, 413);
-  await env.OBJECTS.put(uploadKey(op, sha), buf);
-  const p = await promote(env, op, sha, row.bytes);
-  return p.ok ? json({ sha256: sha, verified: true }) : json({ error: p.error }, p.status);
+  if (len > PART_BYTES)
+    return json(
+      {
+        error: `larger than one request of ${PART_BYTES} bytes: send it in parts`,
+        part_bytes: PART_BYTES,
+      },
+      413,
+    );
+  if (len !== row.bytes)
+    return json(
+      { error: `the bytes do not match: ${len} bytes, the manifest lists ${row.bytes}` },
+      422,
+    );
+  try {
+    await env.OBJECTS.put(uploadKey(op, sha), sized(request.body, row.bytes));
+  } catch {
+    return json({ error: `the body is not the ${row.bytes} bytes the manifest lists` }, 422);
+  }
+  return answer(await promote(env, op, sha, row.bytes), sha);
+}
+
+/** a multipart upload of one object into uploads/<op>/<sha>: nothing of it is public before complete has read it back */
+async function beginParts(env, op, sha, who) {
+  const row = await listed(env, op, sha, who);
+  if (row instanceof Response) return row;
+  if (row.bytes === 0) return json({ error: 'an empty object goes up with one PUT' }, 400);
+  const upload = await env.OBJECTS.createMultipartUpload(uploadKey(op, sha));
+  return json(
+    { sha256: sha, upload_id: upload.uploadId, part_bytes: PART_BYTES, parts: partsOf(row.bytes) },
+    201,
+  );
+}
+
+async function putPart(request, env, op, sha, n, url, who) {
+  const row = await listed(env, op, sha, who);
+  if (row instanceof Response) return row;
+  const parts = partsOf(row.bytes);
+  const k = /^[1-9]\d{0,4}$/.test(n) ? Number(n) : 0;
+  if (k < 1 || k > parts) return json({ error: `the object has parts 1 to ${parts}` }, 404);
+  const id = url.searchParams.get('upload_id') || '';
+  if (!id || id.length > 1024) return json({ error: 'upload_id is missing' }, 400);
+  const size = k < parts ? PART_BYTES : row.bytes - (parts - 1) * PART_BYTES;
+  const len = declared(request) ?? size;
+  if (len > PART_BYTES) return json({ error: `larger than one part of ${PART_BYTES} bytes` }, 413);
+  if (len !== size) return json({ error: `part ${k} has ${size} bytes, not ${len}` }, 422);
+  try {
+    const upload = env.OBJECTS.resumeMultipartUpload(uploadKey(op, sha), id);
+    const part = await upload.uploadPart(k, sized(request.body, size));
+    return json({ sha256: sha, part: k, etag: part.etag });
+  } catch (e) {
+    return e instanceof TypeError // the body had another length (sized)
+      ? json({ error: `part ${k} is not ${size} bytes` }, 422)
+      : json({ error: 'no such multipart upload of ' + sha + ': begin it again' }, 409);
+  }
+}
+
+async function completeParts(request, env, op, sha, who) {
+  const row = await listed(env, op, sha, who);
+  if (row instanceof Response) return row;
+  if ((declared(request) ?? 0) > COMPLETE_LIMIT)
+    return json({ error: 'the list of parts is larger than ' + COMPLETE_LIMIT }, 413);
+  let b;
+  try {
+    b = await request.json();
+  } catch {
+    return json({ error: 'the body is not JSON' }, 400);
+  }
+  const parts = partsOf(row.bytes);
+  if (
+    typeof b?.upload_id !== 'string' ||
+    !b.upload_id ||
+    !Array.isArray(b.parts) ||
+    b.parts.length !== parts ||
+    b.parts.some((p, i) => p?.part !== i + 1 || typeof p.etag !== 'string' || !p.etag)
+  )
+    return json(
+      { error: `complete needs upload_id and the etags of parts 1 to ${parts}, in order` },
+      400,
+    );
+  try {
+    await env.OBJECTS.resumeMultipartUpload(uploadKey(op, sha), b.upload_id).complete(
+      b.parts.map((p) => ({ partNumber: p.part, etag: p.etag })),
+    );
+  } catch {
+    // a completion whose reply was lost has left the object in uploads/: its hash decides below, as for any upload
+    if (!(await env.OBJECTS.head(uploadKey(op, sha))))
+      return json({ error: 'the parts do not complete the object: upload them again' }, 409);
+  }
+  return answer(await promote(env, op, sha, row.bytes), sha);
 }
 
 async function seal(env, op, who) {
@@ -376,14 +510,23 @@ export async function adminApi(request, env, url) {
       const objs = await objectsOf(env, op);
       return json({
         ...o,
+        part_bytes: PART_BYTES,
         objects: objs.length,
         needed: objs
           .filter((x) => !x.verified)
           .map((x) => ({ sha256: x.sha256, bytes: x.bytes, role: x.role })),
       });
     }
-    if (m === 'PUT' && parts[3] === 'objects' && HEX64.test(parts[4] || '') && parts.length === 5)
-      return putObject(request, env, op, parts[4], who.operator);
+    if (parts[3] === 'objects' && HEX64.test(parts[4] || '')) {
+      const sha = parts[4];
+      if (m === 'PUT' && parts.length === 5) return putObject(request, env, op, sha, who.operator);
+      if (parts[5] === 'parts' && parts.length === 6 && m === 'POST')
+        return beginParts(env, op, sha, who.operator);
+      if (parts[5] === 'parts' && parts[6] === 'complete' && parts.length === 7 && m === 'POST')
+        return completeParts(request, env, op, sha, who.operator);
+      if (parts[5] === 'parts' && parts.length === 7 && m === 'PUT')
+        return putPart(request, env, op, sha, parts[6], url, who.operator);
+    }
     if (m === 'POST' && parts[3] === 'seal' && parts.length === 4)
       return seal(env, op, who.operator);
   }

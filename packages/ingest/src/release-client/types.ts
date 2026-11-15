@@ -98,6 +98,8 @@ export const REQUEST_ID = /^[A-Za-z0-9-]{16,64}$/;
 export const OPERATION_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 export const MANIFEST_LIMIT = 4 * 1024 * 1024;
 export const DEFAULT_OBJECT_LIMIT = 50 * 1024 * 1024;
+/** R2 multipart: every part but the last has at least 5 MiB, so a server's part_bytes is never smaller */
+export const MIN_PART_BYTES = 5 * 1024 * 1024;
 export const record = (value: unknown): value is Record<string, unknown> =>
   !!value && typeof value === 'object' && !Array.isArray(value);
 export const revision = (value: unknown): value is number =>
