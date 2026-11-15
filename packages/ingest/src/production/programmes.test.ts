@@ -173,10 +173,11 @@ it('strict shared validators reject a single changed source or index cell', () =
   expect(programs(ctx).problems.length).toBeGreaterThan(0);
 });
 
-it('registers the exact production producer without accepting arbitrary TS modules', async () => {
+it('registers the exact production producer by path, never by a command', async () => {
   const { script } = await import('../validate/registry.js');
   expect(script('packages/ingest/src/production/programmes.ts')).toBe(
     'packages/ingest/src/production/programmes.ts',
   );
-  expect(() => script('packages/ingest/src/production/unregistered.ts')).toThrow();
+  expect(() => script('node packages/ingest/src/production/programmes.ts')).toThrow();
+  expect(() => script('python -m budget_pipeline.extract.program_budgets_2026')).toThrow();
 });

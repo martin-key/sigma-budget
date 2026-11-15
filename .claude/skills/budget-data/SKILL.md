@@ -121,7 +121,8 @@ git add data/originals/kfp_2026/ pipeline/budget_pipeline/extract/kfp_full.py pi
 git commit -m "data(kfp): pin the October 2026 report and its headline"
 ./budget build --build-date ГГГГ-ММ-ДД --site
 ./budget validate --site
-python -m budget_pipeline.validate.registry check
+pnpm --filter @sigma-budget/ingest build
+node packages/ingest/dist/validate/cli.js --live --only REGISTRY
 ```
 
 - `budget build` сглобява commit-а в образа на `pipeline/Dockerfile` (без docker: в `tmp/venv-data`). Той пуска `rebuild.py`: `kfp_full.py`, строителите и слоя v5/v6 (`wording.py`, `active_data.py`, `apply_sources.py`, `catalog_refresh.py`) в реда, който дава публикуваните файлове. С `--site` слага данните в `data/release`, а манифеста на изданието в `data/release/releases/`.

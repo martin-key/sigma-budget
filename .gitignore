@@ -49,6 +49,7 @@ Thumbs.db
 # Собствените среди: адресите и id-тата на твоя Cloudflare акаунт (docs/release.md, „Среди“)
 wrangler.local.jsonc
 pipeline/environments.local.json
+apps/etl/environments.local.json
 
 # Генерираният изход се игнорира само там, където инструментите го пишат. Голо име на папка (build/, dist/, coverage/) би скрило
 # и изходни папки със същото име, например packages/ingest/src/build/: нов файл там не би стигнал до Git. Пазачът е

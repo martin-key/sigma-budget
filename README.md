@@ -50,7 +50,8 @@ uv pip install --python tmp/venv-data/bin/python --require-hashes -r pipeline/re
 uv pip install --python tmp/venv-data/bin/python --no-deps -e pipeline
 
 pnpm typecheck
-python -m budget_pipeline.validate.registry check
+pnpm --filter @sigma-budget/ingest build
+node packages/ingest/dist/validate/cli.js --live --only REGISTRY
 ./budget-python validate --site # историческата публикувана снимка е неизменна
 python -m budget_pipeline.validate.datasets
 node tests/release/compat_check.mjs

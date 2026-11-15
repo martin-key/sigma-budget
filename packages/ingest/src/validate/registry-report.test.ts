@@ -164,7 +164,7 @@ for (const alias of [false, true])
           make(root, 'data/originals.sha256', sha + '  data/inputs/seed.txt\n');
           make(root, 'data/release/item.json', '{"meta":{"status":"real"}}');
           make(root, 'data/release/catalog.json', '{"datasets":[],"files":[]}');
-          make(root, 'pipeline/budget_pipeline/example.py', 'ok = True\n');
+          make(root, 'apps/example/src/producer.ts', 'export const ok = true;\n');
           make(root, 'docs/schema.md', 'schema');
           make(root, report, sentinel);
           const sources = {
@@ -184,7 +184,7 @@ for (const alias of [false, true])
                 {
                   id: 'item',
                   status: 'real',
-                  producer: 'python -m budget_pipeline.example',
+                  producer: 'apps/example/src/producer.ts',
                   inputs: ['src'],
                   schema: 'docs/schema.md',
                   scope: 'test',

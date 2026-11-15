@@ -6,7 +6,7 @@ from collections import Counter
 from decimal import Decimal
 from pathlib import Path
 
-ORACLE_PATH = Path(__file__).with_name("fixtures") / "budget_2027_cells.json"
+ORACLE_PATH = Path(__file__).resolve().parents[3] / "packages/ingest/src/validate/fixtures/budget_2027_cells.json"
 
 
 def load_oracles():

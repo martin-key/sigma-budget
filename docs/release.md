@@ -41,7 +41,7 @@
 ./budget import-source --source kfp --file ~/Downloads/2026-EU\ funds_1026_BG_WEB.xls --out /outside/new/acquired
 ```
 
-`--root` е копието на хранилището, чиито `data/`, регистри и `pipeline/environments.json` командата използва. По подразбиране е коренът на копието, от което върви кодът, независимо от текущата папка.
+`--root` е копието на хранилището, чиито `data/`, регистри и `apps/etl/environments.json` командата използва. По подразбиране е коренът на копието, от което върви кодът, независимо от текущата папка.
 
 - **`build`** изнася един commit с `git archive`, без `.git` и без промените, които не са в него. Входовете (`data/originals`,
   `data/cache`, `data/cache/research`) се автентикират и копират само за четене в отделен Node export/scratch. Всеки вход се сверява с пина си
@@ -82,7 +82,7 @@
 | `POST /admin/publish`                       | `{release_id, expected_revision, request_id, kind: publish\|rollback}`.                 |
 | `GET /admin/requests/:request_id`           | Резултатът на публикуване, чийто отговор се е изгубил.                                  |
 
-**Командите.** Средата винаги се казва изрично; няма такава по подразбиране (`pipeline/environments.json`). Преди промяна командата показва
+**Командите.** Средата винаги се казва изрично; няма такава по подразбиране (`apps/etl/environments.json`). Преди промяна командата показва
 средата, текущото издание с ревизията и новото издание и пита (`--yes` пропуска въпроса, `--dry-run` не пише нищо).
 
 ```bash
@@ -126,15 +126,15 @@ pnpm exec wrangler d1 migrations apply DB --env staging --remote -c apps/web/wra
 
 После: Access приложение за `/admin/*` с allow политика за операторите; `ACCESS_ISSUER` и `ACCESS_AUD` в `env.staging.vars`;
 `OPERATORS` като таен ключ на Worker-а (`pnpm exec wrangler secret put OPERATORS --env staging -c apps/web/wrangler.jsonc`), за да не са имейлите в публичното
-хранилище; адресът на staging в `pipeline/environments.json`. Production следва същите стъпки по-късно, ръчно (етап E).
+хранилище; адресът на staging в `apps/etl/environments.json`. Production следва същите стъпки по-късно, ръчно (етап E).
 
 Zero Trust организацията има нужда от метод за вход (**Integrations → Identity providers**: One-time PIN или Cloudflare); без него
 страницата на Access казва, че няма методи за вход. `OPERATORS` съдържа имейла, който Access записва в токена: при вход с Cloudflare
 това е имейлът на Cloudflare акаунта, не непременно служебният. Пропуснат ли е, Access пуска заявката, а Worker-ът отговаря `403`
 „not an operator of this environment“.
 
-**Своя среда.** Средата на организацията е в `apps/web/wrangler.jsonc` и `pipeline/environments.json`. Среда в собствен акаунт (например за проба)
-не влиза в git: `apps/web/wrangler.local.jsonc` е копие на `apps/web/wrangler.jsonc` с id-тата и адреса на акаунта, а `pipeline/environments.local.json`
+**Своя среда.** Средата на организацията е в `apps/web/wrangler.jsonc` и `apps/etl/environments.json`. Среда в собствен акаунт (например за проба)
+не влиза в git: `apps/web/wrangler.local.jsonc` е копие на `apps/web/wrangler.jsonc` с id-тата и адреса на акаунта, а `apps/etl/environments.local.json`
 добавя или заменя среди за `budget`. Двата файла са в `.gitignore`. Сглобяването го чете от `WRANGLER_CONFIG`, а командите на
 wrangler получават `-c apps/web/wrangler.local.jsonc`:
 
@@ -174,7 +174,7 @@ Access приложението покрива само `/admin/*`: сайтът
 - **Сървърният HTML е екранът преди браузъра.** Графиките (ECharts), картата на общините с избраната община и бутоните за PNG се
   добавят в браузъра. Текстът, таблиците, връзките на екрана и връзките към речника (`apps/web/client/glossary-scan.js`, същите правила като в
   браузъра) са в HTML-а от сървъра; `apps/web/scripts/ssr_parity.py` сравнява двата.
-- **Не всичко се сглобява от оригиналите.** `coverage` и `python -m budget_pipeline.validate.registry check` казват кои набори се пренасят от git, без
+- **Не всичко се сглобява от оригиналите.** `coverage` и `node packages/ingest/dist/validate/cli.js --live --only REGISTRY` казват кои набори се пренасят от git, без
   да се сглобяват (речникът, пътеводителят, примерните набори, `gva-sectors`, `dbp2027`), и кои междинни файлове нямат работещ производител.
 - **`refetch` на страниците на Държавен вестник дава `changed`**, защото балансьорът на натоварването вгражда в страницата нов
   токен при всяко сваляне. Текстът на законите е същият. Разликата се отчита, не се крие.

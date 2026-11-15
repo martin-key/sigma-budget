@@ -26,7 +26,7 @@ pnpm exec wrangler d1 migrations apply DB --remote -c apps/web/wrangler.jsonc
       единствената врата към `/admin/*`), `SITE_ORIGIN`, `FEEDBACK_EMAIL`, `SIGMA_URL`, `NOINDEX` празно.
 - [ ] Access: self-hosted приложение за `<адрес>/admin/*` с Allow политика за операторите; `ACCESS_ISSUER` (`https://<team>.cloudflareaccess.com`)
       и `ACCESS_AUD` (Application Audience tag) в `apps/web/wrangler.jsonc`.
-- [ ] `pipeline/environments.json`: `production.url` е адресът.
+- [ ] `apps/etl/environments.json`: `production.url` е адресът.
 
 ## 2. Първо качване на кода
 

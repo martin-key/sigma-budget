@@ -610,12 +610,12 @@ def cmd_import_source(a):
     return (EXIT_OK if r.returncode == 0 else EXIT_INVALID), {"imported": a.file, "exit": r.returncode}
 
 def environment(name):
-    envs = json.loads((ROOT / "pipeline" / "environments.json").read_text(encoding="utf-8"))
-    local = ROOT / "pipeline" / "environments.local.json"  # your own account's environments, not in git
+    envs = json.loads((ROOT / "apps" / "etl" / "environments.json").read_text(encoding="utf-8"))
+    local = ROOT / "apps" / "etl" / "environments.local.json"  # your own account's environments, not in git
     if local.exists():
         envs.update(json.loads(local.read_text(encoding="utf-8")))
     if name not in envs or name.startswith("_"):
-        raise Fail(EXIT_INVALID, "no environment %r in pipeline/environments.json or pipeline/environments.local.json" % name)
+        raise Fail(EXIT_INVALID, "no environment %r in apps/etl/environments.json or apps/etl/environments.local.json" % name)
     url = os.environ.get("BUDGET_%s_URL" % name.upper()) or envs[name].get("url")
     if not url:
         raise Fail(EXIT_INVALID, "%s is not provisioned yet: %s" % (name, envs[name].get("note")))
@@ -903,7 +903,7 @@ def main(argv):
     st.add_argument("--environment", required=True)
     for name in ("upload", "publish", "rollback"):
         p = sub.add_parser(name)
-        p.add_argument("--environment", required=True, help="pipeline/environments.json; no default, production is always named")
+        p.add_argument("--environment", required=True, help="apps/etl/environments.json; no default, production is always named")
         if name == "rollback":
             p.add_argument("--release-id", required=True)
         else:

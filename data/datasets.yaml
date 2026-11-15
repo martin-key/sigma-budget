@@ -6,7 +6,9 @@ datasets:
   status: real
   files:
   - data/release/outlook.json
-  producer: python -m budget_pipeline.build.fiscal (build_outlook)
+  producer: packages/ingest/src/build/fiscal.ts
+  layers:
+  - packages/ingest/src/build/fiscal-annual.ts
   inputs:
   - data/originals/asbp/asbp_tables.json
   - data/cache/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json
@@ -24,17 +26,20 @@ datasets:
   period: 2024–2029
   scope: 'КФП and сектор „Държавно управление“ (S.13): macro framework and fiscal targets'
   unit: млн. €
-  rebuild: python -m budget_pipeline.build.rebuild --build-date 2026-11-05
+  rebuild: ./budget build
   checked: '2026-11-05'
   limitations:
-  - reads pdf_pages_clean.json, which asbp_pages.py makes from the asbp PDF (pinned in data/sources.yaml)
+  - reads pdf_pages_clean.json, which the TypeScript ASBP reader makes from the asbp PDF (pinned in data/sources.yaml)
 - id: gva-sectors
   catalogId: D31
   title: 'Икономиката по отрасли: добавена стойност и БВП 2019–2025'
   status: real
   files:
   - data/release/gva-sectors.json
-  producer: python -m budget_pipeline.build.gva_sectors
+  producer:
+    repository: https://github.com/midt-bg/sigma-budget
+    commit: 378453f28a2b48104b682a5218f19f72e651ecae
+    path: pipeline/budget_pipeline/build/gva_sectors.py
   inputs:
   - eurostat
   - outlook
@@ -55,7 +60,9 @@ datasets:
   status: real
   files:
   - data/release/revenue.json
-  producer: python -m budget_pipeline.build.fiscal (build_revenue)
+  producer: packages/ingest/src/build/fiscal.ts
+  layers:
+  - packages/ingest/src/build/fiscal-annual.ts
   inputs:
   - data/originals/asbp/asbp_tables.json
   - data/inputs/budget_forecast_2027.json
@@ -67,7 +74,7 @@ datasets:
   period: 2024–2029
   scope: КФП, Приложение 3
   unit: млн. €
-  rebuild: python -m budget_pipeline.build.rebuild --build-date 2026-11-05
+  rebuild: ./budget build
   checked: '2026-11-05'
   limitations: []
 - id: expenditure
@@ -76,7 +83,9 @@ datasets:
   status: real
   files:
   - data/release/expenditure.json
-  producer: python -m budget_pipeline.build.fiscal (build_expenditure)
+  producer: packages/ingest/src/build/fiscal-expenditure.ts
+  layers:
+  - packages/ingest/src/build/fiscal-annual.ts
   inputs:
   - data/originals/asbp/asbp_tables.json
   - data/inputs/cofog_bg.json
@@ -93,7 +102,7 @@ datasets:
   period: 2015–2029
   scope: КФП by function (COFOG), Приложение 3
   unit: млн. €
-  rebuild: python -m budget_pipeline.build.rebuild --build-date 2026-11-05
+  rebuild: ./budget build
   checked: '2026-11-05'
   limitations:
   - data/inputs/cofog_bg.json and kfp_functions_2026.json have no producer (spec, section 4)
@@ -103,7 +112,7 @@ datasets:
   status: real
   files:
   - data/release/components.json
-  producer: python -m budget_pipeline.build.components (build_components)
+  producer: packages/ingest/src/build/components.ts
   inputs:
   - execution
   - law
@@ -120,7 +129,7 @@ datasets:
   period: 2024–2028
   scope: the constituent budgets of the КФП
   unit: хил. €
-  rebuild: python -m budget_pipeline.build.rebuild --build-date 2026-11-05
+  rebuild: ./budget build
   checked: '2026-11-05'
   limitations:
   - data/inputs/kfp_components_2026.json needs the missing July WEB_2 original; see docs/reproducibility.md
@@ -237,7 +246,7 @@ datasets:
   status: real
   files:
   - data/release/measures.json
-  producer: python -m budget_pipeline.build.measures (build_measures)
+  producer: packages/ingest/src/build/measures.ts
   inputs:
   - data/inputs/measures_2026.json
   - data/inputs/measure_excerpts.json
@@ -249,7 +258,7 @@ datasets:
   period: 2026–2028
   scope: КФП, discretionary measures of the 2026 budget
   unit: млн. €
-  rebuild: python -m budget_pipeline.build.rebuild --build-date 2026-11-05
+  rebuild: ./budget build
   checked: '2026-11-05'
   limitations:
   - data/inputs/measures_2026.json has no producer (spec, section 4)
@@ -259,7 +268,7 @@ datasets:
   status: real
   files:
   - data/release/law.json
-  producer: python -m budget_pipeline.build.law (build_law)
+  producer: packages/ingest/src/build/law.ts
   inputs:
   - budget2027
   - ministries
@@ -275,17 +284,17 @@ datasets:
   period: 2025-07-17 … 2026-07-31
   scope: 'the three 2026 budget laws: bill against adopted law'
   unit: хил. €
-  rebuild: python -m budget_pipeline.build.rebuild --build-date 2026-11-05
+  rebuild: ./budget build
   checked: '2026-11-05'
   limitations:
-  - 'the parliament API is live: a change in its counts stops the build until reviewed (law.py)'
+  - 'the parliament API is live: a change in its counts stops the build until reviewed (packages/ingest/src/build/law-evidence.ts)'
 - id: execution
   catalogId: D06
   title: Месечно изпълнение на КФП
   status: real
   files:
   - data/release/execution.json
-  producer: python -m budget_pipeline.extract.kfp_full
+  producer: packages/ingest/src/readers/execution/producer.ts
   inputs:
   - kfp
   - data/originals/asbp/asbp_tables.json
@@ -302,7 +311,7 @@ datasets:
   period: 2022-01 … 2026-09
   scope: КФП, national budget and EU funds, cash basis
   unit: млн. €
-  rebuild: python -m budget_pipeline.build.rebuild --build-date 2026-11-05
+  rebuild: ./budget build
   checked: '2026-11-05'
   limitations:
   - Adopted-law denominators from MF annex 1; unavailable detailed and national/EU denominators are absent.
@@ -312,7 +321,7 @@ datasets:
   status: real
   files:
   - data/release/execution-provenance.json
-  producer: python -m budget_pipeline.extract.kfp_full
+  producer: packages/ingest/src/readers/execution/producer.ts
   inputs:
   - kfp
   - data/originals/asbp/asbp_tables.json
@@ -323,7 +332,7 @@ datasets:
   screens:
   - S15
   scope: every number of execution.json, and the plan for 2026
-  rebuild: python -m budget_pipeline.build.rebuild --build-date 2026-11-05
+  rebuild: ./budget build
   checked: '2026-11-05'
   limitations:
   - No adopted-law national/EU plan split in annex 1.
@@ -333,7 +342,7 @@ datasets:
   status: real
   files:
   - data/release/debt.json
-  producer: python -m budget_pipeline.build.debt (build_debt)
+  producer: packages/ingest/src/build/debt.ts
   inputs:
   - bnb
   - eurostat
@@ -350,7 +359,7 @@ datasets:
   period: 2015–2028
   scope: government debt (ЗДД) and Maastricht debt (S.13)
   unit: млн. €
-  rebuild: python -m budget_pipeline.build.rebuild --build-date 2026-11-05
+  rebuild: ./budget build
   checked: '2026-11-05'
   limitations:
   - data/inputs/debt_gdp.json has no producer; debt_stock.json is a snapshot of an earlier Eurostat answer
@@ -360,7 +369,7 @@ datasets:
   status: real
   files:
   - data/release/rates.json
-  producer: python -m budget_pipeline.build.rates (build_rates)
+  producer: packages/ingest/src/build/rates.ts
   inputs:
   - bill
   - nap
@@ -372,7 +381,7 @@ datasets:
   period: '2026'
   scope: taxes and social security contributions in force in 2026
   unit: '%'
-  rebuild: python -m budget_pipeline.build.rebuild --build-date 2026-11-05
+  rebuild: ./budget build
   checked: '2026-11-05'
   limitations:
   - the NAP table (data/originals/nap/) is downloaded only from Bulgaria; from elsewhere nra.bg may serve a CAPTCHA page
@@ -382,7 +391,7 @@ datasets:
   status: real
   files:
   - data/release/municipalities.json
-  producer: python -m budget_pipeline.build.municipalities (build_municipalities)
+  producer: packages/ingest/src/build/municipalities.ts
   inputs:
   - eurostat
   - gisco
@@ -396,17 +405,18 @@ datasets:
   period: '2026'
   scope: transfers from the state budget to the 265 municipalities
   unit: хил. €
-  rebuild: python -m budget_pipeline.build.rebuild --build-date 2026-11-05
+  rebuild: ./budget build
   checked: '2026-11-05'
   limitations:
-  - municipal_transfers_2026.json and population.json come from build_src.py, which no longer reproduces them
+  - municipal_transfers_2026.json is a frozen output of the retired Python producer (each build checks it against the adopted law);
+    population.json comes from build_src.py, which no longer reproduces it
 - id: geo-obshtini
   catalogId: D20
   title: Граници на общините (GeoJSON)
   status: real
   files:
   - data/release/geo/obshtini.json
-  producer: python -m budget_pipeline.build.municipalities (build_municipalities)
+  producer: packages/ingest/src/build/municipalities.ts
   inputs:
   - eurostat
   - gisco
@@ -419,7 +429,7 @@ datasets:
   - S21
   period: '2024'
   scope: municipal borders and population (LAU)
-  rebuild: python -m budget_pipeline.build.rebuild --build-date 2026-11-05
+  rebuild: ./budget build
   checked: '2026-11-05'
   limitations:
   - the borders are simplified from the GISCO GeoJSON, which is streamed and not kept
@@ -429,7 +439,9 @@ datasets:
   status: real
   files:
   - data/release/glossary.json
-  producer: python -m budget_pipeline.build.frozen_editorial
+  producer: packages/ingest/src/build/editorial.ts
+  layers:
+  - packages/ingest/src/build/aggregation-layers.ts
   inputs:
   - data/inputs/editorial/glossary.json
   schema: docs/data-spec.md
@@ -438,7 +450,7 @@ datasets:
   - S06
   - S07
   scope: editorial
-  rebuild: python -m budget_pipeline.build.rebuild
+  rebuild: ./budget build
   limitations:
   - Published editorial snapshot; original supplied raw text unavailable.
 - id: guide
@@ -447,14 +459,14 @@ datasets:
   status: real
   files:
   - data/release/guide.json
-  producer: python -m budget_pipeline.build.frozen_editorial
+  producer: packages/ingest/src/build/editorial.ts
   inputs:
   - data/inputs/editorial/guide.json
   schema: docs/data-spec.md
   screens:
   - S04
   scope: editorial
-  rebuild: python -m budget_pipeline.build.rebuild
+  rebuild: ./budget build
   limitations:
   - Published editorial snapshot; original supplied raw text unavailable.
 - id: core
@@ -463,11 +475,9 @@ datasets:
   status: real
   files:
   - data/release/core.json
-  producer: python -m budget_pipeline.build.core (build_core)
+  producer: packages/ingest/src/build/aggregation-core.ts
   layers:
-  - python -m budget_pipeline.build.wording
-  - python -m budget_pipeline.build.active_data
-  - python -m budget_pipeline.build.apply_sources
+  - packages/ingest/src/build/aggregation-layers.ts
   inputs:
   - execution
   - expenditure
@@ -512,7 +522,7 @@ datasets:
   period: 2024–2028
   scope: 'the shell of the site: figures copied from the datasets'
   unit: млн. €
-  rebuild: python -m budget_pipeline.build.rebuild --build-date 2026-11-05
+  rebuild: ./budget build
   checked: '2026-11-05'
   limitations:
   - 'after build_core: the v5 wording, the v5 removal of СЕБРА and the generated sets, and the four S34 sources of v6 (layers)'
@@ -522,9 +532,9 @@ datasets:
   status: real
   files:
   - data/release/feed.json
-  producer: python -m budget_pipeline.build.feed (build_feed)
+  producer: packages/ingest/src/build/aggregation-feed.ts
   layers:
-  - python -m budget_pipeline.build.active_data
+  - packages/ingest/src/build/aggregation-layers.ts
   inputs:
   - budget2027
   - debt
@@ -541,7 +551,7 @@ datasets:
   - S16
   period: 2026-01-31 … 2026-11-06
   scope: the site
-  rebuild: python -m budget_pipeline.build.rebuild --build-date 2026-11-05
+  rebuild: ./budget build
   checked: '2026-11-05'
   limitations: []
 - id: feed-rss
@@ -550,9 +560,9 @@ datasets:
   status: real
   files:
   - data/release/feed.xml
-  producer: python -m budget_pipeline.build.feed (build_feed)
+  producer: packages/ingest/src/build/aggregation-rss.ts
   layers:
-  - python -m budget_pipeline.build.active_data
+  - packages/ingest/src/build/aggregation-layers.ts
   inputs:
   - debt
   - eurostat
@@ -568,7 +578,7 @@ datasets:
   - S16
   period: 2026-01-31 … 2026-11-06
   scope: the site
-  rebuild: python -m budget_pipeline.build.rebuild --build-date 2026-11-05
+  rebuild: ./budget build
   checked: '2026-11-05'
   limitations: []
 - id: search-index
@@ -577,10 +587,9 @@ datasets:
   status: real
   files:
   - data/release/search-index.json
-  producer: python -m budget_pipeline.build.search (search)
+  producer: packages/ingest/src/build/aggregation-search.ts
   layers:
-  - python -m budget_pipeline.build.wording
-  - python -m budget_pipeline.build.active_data
+  - packages/ingest/src/build/aggregation-layers.ts
   inputs:
   - execution
   - glossary
@@ -591,7 +600,7 @@ datasets:
   screens:
   - S28
   scope: the site
-  rebuild: python -m budget_pipeline.build.rebuild --build-date 2026-11-05
+  rebuild: ./budget build
   checked: '2026-11-05'
   limitations:
   - 'after search: the v5 wording and removals (layers)'
@@ -601,11 +610,10 @@ datasets:
   status: real
   files:
   - data/release/catalog.json
-  producer: python -m budget_pipeline.build.catalog (catalog)
+  producer: packages/ingest/src/build/catalog-build.ts
   layers:
-  - python -m budget_pipeline.build.wording
-  - python -m budget_pipeline.build.active_data
-  - python -m budget_pipeline.build.catalog_refresh
+  - packages/ingest/src/build/catalog-layers.ts
+  - packages/ingest/src/build/catalog-refresh.ts
   inputs:
   - asbp
   - components
@@ -633,10 +641,10 @@ datasets:
   - S24
   - S25
   scope: the site
-  rebuild: python -m budget_pipeline.build.rebuild --build-date 2026-11-05
+  rebuild: ./budget build
   checked: '2026-11-05'
   limitations:
-  - 'after catalog: the v5 wording and removals and catalog_refresh.py (layers)'
+  - 'after catalog: the v5 wording and removals and catalog-refresh.ts (layers)'
 - id: p02
   catalogId: P02
   title: Месечни данни за ДОО, НЗОК и общините
@@ -677,13 +685,13 @@ datasets:
   status: real
   files:
   - data/release/sebra.json
-  producer: python -m budget_pipeline.build.payments (build_sebra)
+  producer: packages/ingest/src/build/sebra.ts
   inputs:
   - midt-sebra
   schema: docs/data-spec.md
   screens: []
   scope: МИДТ only, 27–31.08.2026
-  rebuild: python -m budget_pipeline.build.rebuild --build-date 2026-11-05
+  rebuild: ./budget build
   checked: '2026-11-05'
   limitations:
   - 'built, but neither listed in catalog.json nor loaded by a screen: three days of one ministry, kept for phase 2'
@@ -693,14 +701,14 @@ datasets:
   status: real
   files:
   - data/release/dbp2027.json
-  producer: python -m budget_pipeline.build.budget_plan
+  producer: packages/ingest/src/build/dbp-gva.ts
   inputs:
   - data/cache/research/dbp-2027/dbp2027_figures.json
   - dbp2027
   schema: docs/data-spec.md
   screens: []
   scope: сектор „Държавно управление“ (S.13), ESA 2010
-  rebuild: python -m budget_pipeline.build.rebuild
+  rebuild: ./budget build
   limitations:
   - not listed in catalog.json (the catalog screen would change)
 - id: releases
@@ -709,14 +717,14 @@ datasets:
   status: real
   files:
   - data/release/releases/*
-  producer: python -m budget_pipeline.cli (build --site)
+  producer: packages/ingest/src/release-build/lifecycle.ts
   inputs:
   - every output of the release
   schema: docs/release.md
   screens:
   - S15
   scope: 'the release of data/release: manifest.json and validation.json of every release, current.json points to the current one'
-  rebuild: python -m budget_pipeline.cli build --build-date 2026-11-05 --site
+  rebuild: ./budget build --site
   checked: '2026-11-05'
   limitations:
   - 'the manifest is not in catalog.json: it lists the sha256 of the catalog, and the catalog would have to list the manifest'
@@ -727,7 +735,7 @@ datasets:
   status: real
   files:
   - data/release/budget2027.json
-  producer: python -m budget_pipeline.build.budget_2027
+  producer: packages/ingest/src/build/budget-2027.ts
   inputs:
   - budget2027
   - data/inputs/budget_forecast_2027.json
@@ -737,7 +745,7 @@ datasets:
   period: 2026–2029
   scope: MF publication 2026-11-06; bill and forecast are separate
   unit: хил. € / млн. € / %
-  rebuild: python -m budget_pipeline.build.rebuild --build-date 2026-11-08
+  rebuild: ./budget build
   limitations:
   - Draft bill for 2027; forecasts for 2028–2029. No complete programme archive or individual municipal allocations for forecast years.
 - id: budget2027-provenance
@@ -746,7 +754,7 @@ datasets:
   status: real
   files:
   - data/release/budget2027-provenance.json
-  producer: python -m budget_pipeline.build.budget_2027
+  producer: packages/ingest/src/build/budget-2027.ts
   inputs:
   - budget2027
   - data/inputs/budget_forecast_2027.json
@@ -756,7 +764,7 @@ datasets:
   period: 2026–2029
   scope: MF publication 2026-11-06; bill and forecast are separate
   unit: хил. € / млн. € / %
-  rebuild: python -m budget_pipeline.build.rebuild --build-date 2026-11-08
+  rebuild: ./budget build
   limitations:
   - Draft bill for 2027; forecasts for 2028–2029. No complete programme archive or individual municipal allocations for forecast years.
 - id: indirect-tax-parameters
@@ -765,7 +773,7 @@ datasets:
   status: real
   files:
   - data/release/indirect-tax-parameters.json
-  producer: python -m budget_pipeline.build.indirect_taxes
+  producer: packages/ingest/src/build/indirect-taxes.ts
   inputs:
   - ec-oil
   - excise-law
@@ -777,7 +785,7 @@ datasets:
   screens:
   - S18
   scope: България; ставки и датирани наблюдения, без потребителски тегла
-  rebuild: python -m budget_pipeline.build.rebuild
+  rebuild: ./budget build
   limitations:
   - Цените са исторически справки; изчисленията са сценарий. Без LPG и периоди преди 01.08.2026.
 

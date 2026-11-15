@@ -142,8 +142,8 @@ export async function productionCli(
       const environment = required('--environment'),
         forwarded = pass();
       if (!m.has('--url')) {
-        let envs = JSON.parse(await readFile(join(root, 'pipeline/environments.json'), 'utf8'));
-        const local = join(root, 'pipeline/environments.local.json');
+        let envs = JSON.parse(await readFile(join(root, 'apps/etl/environments.json'), 'utf8'));
+        const local = join(root, 'apps/etl/environments.local.json');
         if (existsSync(local)) envs = { ...envs, ...JSON.parse(await readFile(local, 'utf8')) };
         if (typeof envs[environment]?.url !== 'string')
           throw new ReleaseError(2, 'Named environment is not provisioned');

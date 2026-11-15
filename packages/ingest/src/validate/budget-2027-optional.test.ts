@@ -34,7 +34,7 @@ for (const test of cases)
         mkdirSync(dirname(target), { recursive: true });
         copyFileSync(join(fixtures, 'wave13a/published', name + '.json'), target);
       }
-      const cells = join(root, 'pipeline/budget_pipeline/validate/fixtures/budget_2027_cells.json');
+      const cells = join(root, 'packages/ingest/src/validate/fixtures/budget_2027_cells.json');
       mkdirSync(dirname(cells), { recursive: true });
       copyFileSync(
         join(

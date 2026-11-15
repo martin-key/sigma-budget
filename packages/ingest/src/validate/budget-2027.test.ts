@@ -28,7 +28,7 @@ beforeAll(() => {
   );
   copy(
     'validate15b/donor/budget_pipeline/validate/fixtures/budget_2027_cells.json',
-    'pipeline/budget_pipeline/validate/fixtures/budget_2027_cells.json',
+    'packages/ingest/src/validate/fixtures/budget_2027_cells.json',
   );
 });
 afterAll(() => rmSync(root, { recursive: true, force: true }));

@@ -295,6 +295,7 @@ export function validateProduction(
           onCheck: () => c.n++,
         });
         for (const p of registry.errors) c.fail(p);
+        for (const note of registry.notes ?? []) c.fact(note);
         c.fact(
           'Registry inspected recorded export inventory; lifecycle owns releases/current.json after package hashing',
         );

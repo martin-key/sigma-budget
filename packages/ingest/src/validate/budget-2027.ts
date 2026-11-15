@@ -561,7 +561,7 @@ export function budget2027(ctx: Context): Check {
     'bill: exact source variants, periods, units and coverage',
   );
   const oracle = JSON.parse(
-    read('pipeline/budget_pipeline/validate/fixtures/budget_2027_cells.json').toString('utf8'),
+    read('packages/ingest/src/validate/fixtures/budget_2027_cells.json').toString('utf8'),
   );
   checkOutputOracles(check, ctx, oracle.cells);
   checkLawIdentities(check, ctx);
