@@ -94,11 +94,8 @@ sources:
   files:
   - path: data/originals/asbp/UMTBF-2026-2028-motivi.pdf
     title: Мотиви и АСБП 2026–2028, PDF of the MF
-  - path: data/originals/asbp/UMTBF-2026-2028-motivi.source.json
-    title: acquisition record of the PDF (who supplied it, from where, when)
-    acquired: '2026-11-08'
   limitations:
-  - the acquisition record UMTBF-2026-2028-motivi.source.json is pinned but not on the machines checked on 05.11.2026
+  - the acquisition record UMTBF-2026-2028-motivi.source.json is not on the machines checked on 05.11.2026 and 15.11.2026, so it is not pinned
   - a second version of the tables is in the bill (parliament 52-602-01-19.docx); the two differ in small rows, at most 4.3 млн. € (docs/data-sources.md,
     section 4.2)
 - id: bill
@@ -171,7 +168,7 @@ sources:
   - path: data/originals/dv/zdb2026_dv69_idMat245041.html
     url: https://dv.parliament.bg/DVWeb/showMaterialDV.jsp?idMat=245041
     title: Закон за държавния бюджет на РБ за 2026 г., ДВ бр. 69 от 31.07.2026
-    acquired: '2026-11-08'
+    acquired: '2026-11-10'
 - id: zbdoo
   title: Закон за бюджета на държавното обществено осигуряване за 2026 г.
   publisher: Народно събрание; Държавен вестник, бр. 68 от 28.07.2026 г.
@@ -187,7 +184,7 @@ sources:
   - path: data/originals/dv/zbdoo2026_dv68_idMat244982.html
     url: https://dv.parliament.bg/DVWeb/showMaterialDV.jsp?idMat=244982
     title: Закон за бюджета на ДОО за 2026 г., ДВ бр. 68 от 28.07.2026
-    acquired: '2026-11-08'
+    acquired: '2026-11-10'
 - id: zbnzok
   title: Закон за бюджета на Националната здравноосигурителна каса за 2026 г.
   publisher: Народно събрание; Държавен вестник, бр. 68 от 28.07.2026 г.
@@ -203,7 +200,7 @@ sources:
   - path: data/originals/dv/zbnzok2026_dv68_idMat244981.html
     url: https://dv.parliament.bg/DVWeb/showMaterialDV.jsp?idMat=244981
     title: Закон за бюджета на НЗОК за 2026 г., ДВ бр. 68 от 28.07.2026
-    acquired: '2026-11-08'
+    acquired: '2026-11-10'
 - id: nap
   title: 'НАП: размер на осигурителните вноски за 2026 г. и разпределението им (изх. ВК-30-10237 от 12.08.2026 г.)'
   publisher: Национална агенция за приходите
