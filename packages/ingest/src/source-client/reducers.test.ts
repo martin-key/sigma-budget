@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import { readFile, mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
-import { execFileSync } from 'node:child_process';
 import {
   GISCO_CSV,
   GISCO_GEOJSON,
@@ -16,6 +15,17 @@ import {
 import { SourceClient } from './client.js';
 import { sha256 } from './files.js';
 const fixtureRoot = resolve('test/fixtures/debt-local/inputs');
+const expectedRoot = resolve('test/expected/source-client-reducers');
+/**
+ * `JSON.stringify` with the default `json.dumps` separators (`, ` and `: `). It does not reproduce Python's float formatting
+ * (`12.0`, `1e-05`): the rows compared here have no integral floats and no exponent forms. If such a value appears, the hash
+ * below fails although the rows are equal, never the other way round.
+ */
+const pythonJson = (value: unknown) =>
+  JSON.stringify(value).replace(
+    /("(?:[^"\\]|\\.)*")|([:,])/g,
+    (_m, text, sep) => text ?? (sep === ':' ? ': ' : ', '),
+  );
 async function rawFromReduced() {
   // Synthetic raw reconstruction for algorithm/orchestration tests only. Never historical evidence.
   const saved = JSON.parse(
@@ -51,42 +61,15 @@ describe('raw GISCO and oblast reducer responsibilities', () => {
     expect(reduced).toEqual(saved);
     expect(reduced.populationSum).toBe(6445481);
   });
-  it('compares actual Python donor reduction steps against finite synthetic raw bytes', async () => {
+  it('compares the reduction with the frozen Python donor output for the same synthetic raw bytes', async () => {
     const { csv, geo } = await rawFromReduced();
-    const root = await mkdtemp(join(tmpdir(), 'sigma-source-reducer-oracle-'));
-    try {
-      await writeFile(join(root, 'raw.csv'), csv);
-      await writeFile(join(root, 'raw.geojson'), geo);
-      const python = execFileSync(
-        process.env.PYTHON312 ?? 'python3',
-        [
-          '-c',
-          [
-            'import sys, json, io',
-            'from pathlib import Path',
-            'from budget_pipeline.sources import boundaries as b',
-            'root=Path(sys.argv[1])',
-            'b._open=lambda url, **kwargs: io.BytesIO((root/("raw.csv" if url==b.LAU_CSV else "raw.geojson")).read_bytes())',
-            'rows=b.fetch_csv()',
-            'geoms=b.fetch_geometry({r["id"] for r in rows})',
-            'for r in rows: r["rings"]=geoms[r["id"]]',
-            'print(json.dumps(rows,ensure_ascii=False))',
-          ].join('\n'),
-          root,
-        ],
-        {
-          cwd: resolve('../..'),
-          // PATH is inherited so that a bare PYTHON312 (CI sets `python`) resolves as in the other differential tests.
-          env: { PATH: process.env.PATH, PYTHONPATH: 'pipeline' },
-          encoding: 'utf8',
-          maxBuffer: 8 * 1024 * 1024,
-        },
-      );
-      // Donor writes one progress line before the JSON, but never performs HTTP here.
-      expect(reduceGisco(csv, geo).items).toEqual(JSON.parse(python.trim().split('\n').at(-1)!));
-    } finally {
-      await rm(root, { recursive: true, force: true });
-    }
+    const frozen = JSON.parse(
+      await readFile(join(expectedRoot, 'gisco-donor-reduction.json'), 'utf8'),
+    );
+    const items = reduceGisco(csv, geo).items;
+    expect(items).toHaveLength(frozen.rows);
+    // The donor printed `json.dumps(rows, ensure_ascii=False)`; reproduce those exact bytes.
+    expect(sha256(Buffer.from(pythonJson(items)))).toBe(frozen.outputSha256);
   });
   it('rejects missing geometry, duplicate identity, bad CSV and incomplete country count', async () => {
     const { csv, geo } = await rawFromReduced();

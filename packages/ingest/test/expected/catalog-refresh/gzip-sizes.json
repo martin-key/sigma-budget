@@ -1,0 +1,5 @@
+{
+  "capturedWith": "Python 3.12.14",
+  "command": "len(gzip.compress(sample, 9, mtime=0))",
+  "sizes": [20, 23, 63, 2240, 464]
+}

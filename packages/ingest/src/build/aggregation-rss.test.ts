@@ -1,7 +1,6 @@
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { spawnSync } from 'node:child_process';
 import { describe, expect, it } from 'vitest';
 import { buildRss, editorialSiteName, rssDate, type RssFeed } from './aggregation-rss.js';
 
@@ -9,12 +8,31 @@ const fixture = resolve(import.meta.dirname, '../../test/fixtures/aggregation-rs
 const siteName = editorialSiteName(
   JSON.parse(readFileSync(resolve(fixture, '../aggregation/inputs/glossary.json'), 'utf8')),
 );
+// `generate_oracle.py --check` (Python 3.12) confirmed once that the frozen donor regenerates every
+// oracle byte for byte; these hashes pin exactly the donor, cases and oracles it confirmed.
+const donorCheck = JSON.parse(
+  readFileSync(
+    resolve(import.meta.dirname, '../../test/expected/aggregation-rss/donor-check.json'),
+    'utf8',
+  ),
+) as {
+  donorSha256: string;
+  casesSha256: string;
+  oracles: { case: string; sha256: string }[];
+};
+const oracleSha256 = new Map(donorCheck.oracles.map((o) => [o.case, o.sha256]));
+const sha256 = (file: string) => createHash('sha256').update(readFileSync(file)).digest('hex');
 const cases = JSON.parse(readFileSync(join(fixture, 'cases.json'), 'utf8')) as Record<
   string,
   { base: string; feed: RssFeed }
 >;
 
 describe('RSS donor serializer', () => {
+  it('uses the donor, cases and oracles confirmed by the Python donor check', () => {
+    expect(sha256(join(fixture, 'donor/feed.py'))).toBe(donorCheck.donorSha256);
+    expect(sha256(join(fixture, 'cases.json'))).toBe(donorCheck.casesSha256);
+    expect(donorCheck.oracles.map((o) => o.case).sort()).toEqual(Object.keys(cases).sort());
+  });
   it.each(Object.entries(cases))(
     'matches Python UTF-8 bytes and XML semantics: %s',
     (name, input) => {
@@ -23,21 +41,7 @@ describe('RSS donor serializer', () => {
         xml: string;
       };
       expect(Buffer.from(xml)).toEqual(Buffer.from(oracle.xml));
-      const dir = mkdtempSync(join(tmpdir(), 'rss-parity-'));
-      try {
-        const file = join(dir, 'candidate.xml');
-        writeFileSync(file, xml);
-        const python = process.env.PYTHON312 || 'python3.12';
-        const result = spawnSync(
-          python,
-          [join(fixture, 'generate_oracle.py'), '--check', '--compare', file, '--case', name],
-          { encoding: 'utf8' },
-        );
-        expect(result.error?.message ?? result.stderr).toBe('');
-        expect(result.status).toBe(0);
-      } finally {
-        rmSync(dir, { recursive: true, force: true });
-      }
+      expect(sha256(join(fixture, 'oracle', `${name}.json`))).toBe(oracleSha256.get(name));
     },
   );
   it('matches Python integer date tokens', () => {

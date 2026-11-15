@@ -10,7 +10,7 @@
     "coverage-baseline.json",
     "coverage-exceptions.json"
   ],
-  "globalEnv": ["CLOUDFLARE_ENV", "WRANGLER_CONFIG", "PYTHON312"],
+  "globalEnv": ["CLOUDFLARE_ENV", "WRANGLER_CONFIG"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
@@ -44,7 +44,6 @@
     }
   },
   "globalPassThroughEnv": [
-    "PYTHONPATH",
     "WAVE14_PARITY_REPORT",
     "WAVE15_PARITY_REPORT",
     "WAVE15_COMPOUND_REPORT",

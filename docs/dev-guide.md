@@ -1090,9 +1090,9 @@ pnpm dev
 
 ### Входове за `pnpm test`
 
-В чисто копие на хранилището липсват два входа, които CI подготвя преди `pnpm test`. Без тях тестовете на `packages/ingest` пропадат.
+В чисто копие на хранилището липсва един вход, който CI подготвя преди `pnpm test`. Без него част от тестовете на `packages/ingest` пропадат.
 
-Първият вход са четирите програмни PDF-а в `data/originals/program_budgets/`, описани в `packages/dataset-schema/src/programme-references.json`. Те не са в Git. CI ги възстановява от одобрения архив на хранилището (`scripts/registered-node-inputs.json`) със стъпката `Restore the four pinned programme originals`. Архивът е draft release asset и за свалянето му е нужен достъп за писане до хранилището:
+Входът са четирите програмни PDF-а в `data/originals/program_budgets/`, описани в `packages/dataset-schema/src/programme-references.json`. Те не са в Git. CI ги възстановява от одобрения архив на хранилището (`scripts/registered-node-inputs.json`) със стъпката `Restore the four pinned programme originals`. Архивът е draft release asset и за свалянето му е нужен достъп за писане до хранилището:
 
 ```sh
 mkdir -p tmp/ci-inputs
@@ -1103,11 +1103,7 @@ node scripts/restore-programme-test-inputs.mjs tmp/ci-inputs/registered-node-inp
 
 Скриптът проверява размера и SHA-256 на архива и на всеки PDF и не презаписва съществуващ оригинал. Първото изпълнение отпечатва `{"restored":4,"unchanged":0}`, а следващите `{"restored":0,"unchanged":4}`.
 
-Вторият вход е Python 3.12. Диференциалните тестове викат интерпретатора от `PYTHON312`, а без него системния `python3` или `python3.12`; системният `python3` може да е друга версия. Тогава например `catalog-refresh.test.ts` спира на `assert sys.version_info[:2] == (3, 12)`. Ползва се средата `tmp/venv-data` от [README](../README.md) („Среда и проверки“) със същия `PYTHONPATH` като в CI:
-
-```sh
-PYTHON312=$PWD/tmp/venv-data/bin/python PYTHONPATH=$PWD/pipeline pnpm test
-```
+Python не е нужен за `pnpm test`. Диференциалните тестове сравняват със замразени Python резултати в `packages/ingest/test/expected/` и не стартират интерпретатор.
 
 Python командите остават действащи. След сглобяване на пакетите JSON наборите се сравняват по избран обхват:
 
