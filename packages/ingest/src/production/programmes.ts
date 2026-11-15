@@ -20,8 +20,9 @@ import type { ExecutionContext } from '../release-build/types.js';
 import type { GraphStage } from '../build/graph.js';
 import { readProgrammeSupplement, type programmeLayouts } from './programme-reader.js';
 
-/** MuPDF producer, independently checked against the PDFMiner source transcription.
- * Python tests regenerate the shared reference from these exact pinned bytes.
+/** Compare the MuPDF producer with the committed reference decoded earlier by PDFMiner.
+ * Runtime binds that reference to the pinned bytes; it does not run PDFMiner.
+ * build's retained unittest discover runs test_programme_supplements.py to regenerate and check it.
  */
 export function verifyProgrammeSource(source: ProgrammeSource, bytes: Uint8Array) {
   const reference = programmeReferences[source.code];

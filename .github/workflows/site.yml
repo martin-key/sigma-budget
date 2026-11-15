@@ -156,6 +156,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      # The complete legacy unittest suite still re-decodes independent PDF references and checks live site content.
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: '3.12'
@@ -189,15 +190,10 @@ jobs:
           pnpm exec budget-ts freshness
       - name: Check the source and dataset registries
         run: node packages/ingest/dist/validate/cli.js --live --only REGISTRY
-      - name: Check the unchanged historical Python publication against its manifest
-        run: ./budget-python validate --site
-      - name: Validate the data
-        run: python -m budget_pipeline.validate.datasets
-      - name: Check frozen 2027 budget extractions
-        run: |
-          python -m unittest discover -s tests/pipeline -t .
-          python -m budget_pipeline.extract.budget_forecast_2027 --check
-          python -m budget_pipeline.extract.budget_bill_2027 --check
+      - name: Check committed annual provenance API responses and membership
+        run: node tests/release/budget_provenance_check.mjs
+      - name: All pipeline regressions, independent PDF references and live site content
+        run: python -m unittest discover -s tests/pipeline -t .
       - name: Compatibility of code and data (stage E)
         run: node tests/release/compat_check.mjs
       - name: Build the Worker for staging and check every screen
@@ -662,6 +658,8 @@ jobs:
           path: ${{ runner.temp }}/registered-node-input-archive
       - name: Authenticate the reviewed archive and every registered input
         run: node scripts/restore-node-input-cache.mjs "$RUNNER_TEMP/registered-node-input-archive/registered-node-inputs.tar.gz" "$RUNNER_TEMP/registered-node-inputs"
+      - name: Validate the committed release manifest and complete current TypeScript rules
+        run: ./budget check-site --inputs "$RUNNER_TEMP/registered-node-inputs"
       - name: Actual Node readers, complete rules, double build and local recorded-code replay
         run: node scripts/node-import-acceptance.mjs "$RUNNER_TEMP/registered-node-inputs" "$RUNNER_TEMP/node-acceptance" 2026-11-14
       - name: Provision the Chromium of the pinned Playwright (outside import runtime)

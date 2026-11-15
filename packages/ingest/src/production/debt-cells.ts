@@ -3,9 +3,9 @@ import { readFileSync } from 'node:fs';
 import { isDeepStrictEqual } from 'node:util';
 import reference from './debt-cell-reference.json' with { type: 'json' };
 
-/** PDFMiner's independent source transcription, never the MuPDF generator output.
- * Python tests regenerate this entire reference from the pinned original.
- * The SHA binds the cached decoding to the exact source bytes in this run.
+/** Compare published cells with the committed reference decoded earlier by PDFMiner.
+ * Runtime checks the pinned source SHA; it does not re-decode that source with PDFMiner.
+ * build's retained unittest discover runs test_debt_issues.py to regenerate and check the reference.
  */
 export function verifyDebtCells(document: unknown, source: string): void {
   const sha = createHash('sha256').update(readFileSync(source)).digest('hex');

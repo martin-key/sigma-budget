@@ -186,6 +186,11 @@ function counter(records: any[]): Map<string, number> {
   }
   return result;
 }
+/** Compare published cells/provenance with the committed hand-transcribed oracle.
+ * This function does not re-open the PDF. Direct verification with the separate
+ * fitz reader remains in test_output_oracles.py, run by build's unittest discover.
+ * Legacy diagnostic labels below describe the oracle's origin and stay stable for parity.
+ */
 export function checkOutputOracles(check: Check, ctx: Context, oracles: any[]): void {
   const index = ctx.get('budget2027-provenance.json');
   for (const oracle of oracles) {

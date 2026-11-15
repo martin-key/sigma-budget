@@ -1,4 +1,4 @@
-/** Test/diagnostic-only entry point. Production continues to use Python validation. */
+/** Scoped diagnostic entry point. Complete production rules run in production/validation.ts. */
 import { isAbsolute, relative, resolve, sep } from 'node:path';
 import { realpathSync } from 'node:fs';
 import { captureInputPaths, Context, safePath } from './context.js';

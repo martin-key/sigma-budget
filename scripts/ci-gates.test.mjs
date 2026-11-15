@@ -20,7 +20,7 @@ test('one Node suite command and explicit deploy barrier', () => {
   for (const job of jobs) assert.ok(deps.includes(job), `missing gate ${job}`);
   assert.match(workflow, /if: \$\{\{ always\(\) \}\}[\s\S]*Every validation must succeed/);
 });
-test('all independent Python and provenance commands survive the consolidation', () => {
+test('all retained provenance and browser commands stay in CI', () => {
   const evidence = JSON.parse(readFileSync('scripts/ci-provenance-commands.json', 'utf8'));
   for (const [path, commands] of Object.entries(evidence)) {
     const raw = readFileSync(path, 'utf8')
@@ -51,6 +51,65 @@ test('all independent Python and provenance commands survive the consolidation',
       JSON.parse(readFileSync('package.json', 'utf8')).devDependencies['@playwright/test'],
       'the Python and the npm Playwright must share one Chromium build',
     );
+});
+
+test('committed release checks use Node after authenticating the input snapshot', () => {
+  const { parse } = createRequire(new URL('../packages/ingest/package.json', import.meta.url))(
+    'yaml',
+  );
+  const jobs = parse(workflow).jobs;
+  for (const name of ['node-import']) {
+    const job = jobs[name];
+    assert.ok(!job.steps.some((step) => /setup-(python|uv)@/.test(step.uses ?? '')));
+    assert.ok(!job.steps.some((step) => /\b(python[\d.]*|pip\d*|uv)\b/.test(step.run ?? '')));
+  }
+  const steps = jobs['node-import'].steps;
+  const compile = steps.findIndex(
+    (step) => step.run === 'pnpm --filter @sigma-budget/etl... build',
+  );
+  const restore = steps.findIndex((step) =>
+    step.run?.startsWith('node scripts/restore-node-input-cache.mjs '),
+  );
+  const validate = steps.findIndex(
+    (step) => step.run === './budget check-site --inputs "$RUNNER_TEMP/registered-node-inputs"',
+  );
+  assert.ok(compile >= 0 && restore > compile && validate > restore);
+  assert.equal(steps[validate].if, undefined);
+  assert.ok(!steps[validate]['continue-on-error']);
+  const provenance = jobs.build.steps.find(
+    (step) => step.run === 'node tests/release/budget_provenance_check.mjs',
+  );
+  assert.ok(provenance);
+  assert.equal(provenance.if, undefined);
+  assert.ok(!provenance['continue-on-error']);
+  // Browser e2e and the historical data image still need Python until their later ports.
+  assert.ok(jobs.check.steps.some((step) => step.uses?.startsWith('actions/setup-python@')));
+});
+
+test('the full pipeline suite retains Python and authenticated programme originals in build', () => {
+  const { parse } = createRequire(new URL('../packages/ingest/package.json', import.meta.url))(
+    'yaml',
+  );
+  const job = parse(workflow).jobs.build;
+  assert.ok(job.needs.includes('node-inputs'));
+  const steps = job.steps;
+  assert.ok(steps.some((step) => step.uses?.startsWith('actions/setup-python@')));
+  const tools = steps.findIndex((step) =>
+    step.run?.includes(
+      'python -m pip install --require-hashes -r tests/requirements-dev.lock -r pipeline/requirements.lock',
+    ),
+  );
+  const restore = steps.findIndex(
+    (step) =>
+      step.run ===
+      'node scripts/restore-programme-test-inputs.mjs "$RUNNER_TEMP/registered-node-input-archive/registered-node-inputs.tar.gz"',
+  );
+  const tests = steps.findIndex(
+    (step) => step.run === 'python -m unittest discover -s tests/pipeline -t .',
+  );
+  assert.ok(tools >= 0 && restore > tools && tests > restore);
+  assert.equal(steps[tests].if, undefined);
+  assert.ok(!steps[tests]['continue-on-error']);
 });
 
 test('the build job checks the registries with the TypeScript validator after building it', () => {

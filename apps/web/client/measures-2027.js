@@ -2,10 +2,10 @@
 // The amounts are NOT here: every effect is read from budget2027.json (forecast.II_7 / forecast.II_8). This file only adds, for each
 // printed row in the same order, a short plain title, one plain sentence, the area it touches, the law the motives name for it and the
 // paragraph of the motives (section 3.3, pp. 44–50) that explains it, word for word.
-// tests/pipeline/test_measures_2027_text.py checks every entry against the pinned PDF and the release: the quote is verbatim on its pages,
+// packages/ingest/src/validate/measures-2027-text.test.ts checks every entry against the pinned PDF and the release: the quote is verbatim on its pages,
 // `starts` begins the printed row, `tablePage` is the page of the row's cells in budget2027-provenance.json, a named law is in the quote
 // or the row, and every number in `name` and `text` appears in the quote or the printed row.
-// The module has no imports: the Python test reads it with Node.
+// The module has no imports. The retained Python suite also runs test_measures_2027_text.py with its separate fitz read.
 
 /** full names of the laws as the motives spell them (pp. 44–49) */
 export const LAWS = Object.freeze({
