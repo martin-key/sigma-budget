@@ -215,3 +215,100 @@
     min-width: 10rem;
   }
 }
+
+/* ---- ministries: 2026 and 2027 as paired horizontal bars, the amount at the end of each bar and the change beside them */
+.page[data-route='S34'] .b27-pairs {
+  margin: 0;
+}
+.page[data-route='S34'] .b27-pairs-key {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--sp-2) var(--sp-4);
+  margin-bottom: var(--sp-3);
+  color: var(--ink-soft);
+  font-size: var(--fs-xs);
+}
+.page[data-route='S34'] .b27-pairs-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+}
+.page[data-route='S34'] .b27-key {
+  display: inline-block;
+  width: 0.9em;
+  height: 0.9em;
+}
+.page[data-route='S34'] .b27-key-now {
+  margin-left: var(--sp-3);
+}
+.page[data-route='S34'] :is(.b27-key-before, .b27-pair-before .b27-pair-fill) {
+  background: var(--series-other);
+}
+.page[data-route='S34'] :is(.b27-key-now, .b27-pair-now .b27-pair-fill) {
+  background: var(--series-3);
+}
+.page[data-route='S34'] .b27-pair-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.page[data-route='S34'] .b27-pair {
+  display: grid;
+  grid-template-columns: minmax(9rem, 16rem) minmax(0, 1fr) 3.5rem;
+  grid-template-areas: 'name bars pct';
+  align-items: center;
+  gap: var(--sp-1) var(--sp-3);
+  padding: var(--sp-2) 0;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.page[data-route='S34'] .b27-pair-name {
+  grid-area: name;
+  text-align: right;
+  line-height: 1.3;
+}
+.page[data-route='S34'] .b27-pair-bars {
+  grid-area: bars;
+  display: grid;
+  gap: 3px;
+}
+.page[data-route='S34'] .b27-pair-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+.page[data-route='S34'] .b27-pair-fill {
+  display: block;
+  flex: none;
+  height: 0.95rem;
+  max-width: calc(100% - 4.5ch);
+}
+.page[data-route='S34'] .b27-pair-v {
+  flex: none;
+  font: 500 var(--fs-xs)/1 var(--font-mono);
+  color: var(--ink-mid);
+  font-variant-numeric: tabular-nums;
+}
+.page[data-route='S34'] .b27-pair-now .b27-pair-v {
+  font-weight: 700;
+  color: var(--ink);
+}
+.page[data-route='S34'] .b27-pair-pct {
+  grid-area: pct;
+  text-align: right;
+  font: 500 var(--fs-s)/1 var(--font-mono);
+  color: var(--ink-mid);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 599px) {
+  /* the name above its bars: long names wrap over the full width and the bars keep the room */
+  .page[data-route='S34'] .b27-pair {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 'name pct' 'bars bars';
+  }
+  .page[data-route='S34'] .b27-pair-name {
+    text-align: left;
+  }
+}
