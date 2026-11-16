@@ -38,6 +38,25 @@ export async function rateLimitReleaseRead(
   );
 }
 
+/** MCP calls (apps/web/workers/mcp/handler.ts) use the same limiter under their own key: the session the server gave the client, else its
+ * address. The assistants call from a few shared addresses of their providers, so the address alone would make all their users one client.
+ * Like release reads it fails closed in production (the tools read the registry). Returns the status to answer with, or null. */
+export async function rateLimitMcp(
+  request: Request,
+  env: Pick<Env, 'RELEASE_RATE_LIMITER' | 'ENVIRONMENT'>,
+  session: string | null,
+): Promise<429 | 503 | null> {
+  const closed = env.ENVIRONMENT === 'production' ? 503 : null;
+  if (!env.RELEASE_RATE_LIMITER) return closed;
+  const client = session || request.headers.get('CF-Connecting-IP')?.trim() || 'unknown-client';
+  try {
+    return (await env.RELEASE_RATE_LIMITER.limit({ key: 'mcp:' + client })).success ? null : 429;
+  } catch {
+    console.warn('release_rate_limit_unavailable');
+    return closed;
+  }
+}
+
 /** Uncached screen renders use the same per-client limiter under their own key, so a burst of new search
  * addresses cannot keep the renderer busy. Unlike release reads it fails open: a missing or failing binding
  * never takes the public pages down (the per-isolate render cap still applies). */
