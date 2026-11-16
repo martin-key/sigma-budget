@@ -92,7 +92,7 @@ describe('repository ignore rules', () => {
   it('keep frozen evidence and generated output outside Prettier', async () => {
     for (const path of [
       'pipeline/budget_pipeline/build/core.py',
-      'reference/README.md',
+      'packages/ingest/test/fixtures/fiscal/policy.json',
       'packages/ingest/test/fixtures/catalog/policy.json',
       'apps/web/app/routes/__fixtures__/core.json',
       'data/release/core.json',

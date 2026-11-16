@@ -16,9 +16,8 @@ packages/ingest/src/production/historical/**
 # Frozen donors, oracles and byte-comparison fixtures (never reformat).
 **/fixtures/**
 **/__fixtures__/**
-# Historical Python pipeline and design/source references are replay evidence.
+# Historical Python pipeline is replay evidence.
 pipeline/**
-reference/**
 # The operator environments moved byte for byte from pipeline/ (exempt there); the release operator reads them as they are.
 apps/etl/environments.json
 # Vendored assets retain upstream bytes.
