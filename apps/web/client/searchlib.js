@@ -387,6 +387,7 @@ export function entry(group, title, o = {}) {
     nl: lat(nn),
     tl: lat(t),
     mag: mag(o.value),
+    ...(o.citation ? { citation: o.citation } : {}),
   };
 }
 
@@ -474,6 +475,7 @@ export function annualSearch(outlook, revenue, expenditure) {
       entry('indicators', title, {
         value: cell.unit === 'млн. €' ? money(cell.value) : pct(cell.value, 1),
         period: String(p.year),
+        citation: { source: p.sourceRefs, asOf: p.publication, unit: cell.unit },
         stage: `${{ law: 'Закон', expected: 'Очаквано', draft: 'Проект', forecast: 'Прогноза' }[p.status]} ${p.year}`,
         sub: `МФ, публикация ${p.publication}`,
         kw: PERIODS.find((x) => x.key === p.periodKey)?.label,

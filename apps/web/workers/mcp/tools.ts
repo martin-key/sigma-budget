@@ -11,6 +11,7 @@ import {
   load,
   metaOf,
   pageUrl,
+  pageCitations,
   screenUrl,
   sources,
   type CatalogSet,
@@ -22,7 +23,7 @@ import { FORMATS, GENERIC } from './formats';
 /** the screens a set appears on: the site's own mapping (app/lib/dataset-screens.json, as client/catalog.js), else an older catalogue's */
 const screensOf = (s: CatalogSet): string[] =>
   (datasetScreens as Record<string, string[]>)[s.slug] ?? s.screens ?? [];
-import { entriesOf, search } from './search';
+import { citationsOf, entriesOf, search } from './search';
 import { fit, resolve, ArgError, DEFAULT_LIMIT, MAX_LIMIT } from './slice';
 
 type Args = Record<string, unknown>;
@@ -79,6 +80,7 @@ async function searchTool(ctx: Ctx, args: Args) {
   const query = text(args, 'query', { max: MAX_QUERY, required: true });
   const { results, fuzzy } = await search(ctx, query);
   return {
+    release_id: ctx.data.releaseId,
     results,
     ...(fuzzy ? { note: 'Точно съвпадение няма: това са най-близките резултати.' } : {}),
   };
@@ -173,7 +175,7 @@ async function fetchTool(ctx: Ctx, args: Args) {
       : [];
     return {
       id,
-      title: route?.title || entries[0]!.title,
+      title: entries[0]?.title || route!.title,
       text: [
         route?.desc || '',
         ...entries.map((e) => {
@@ -186,8 +188,23 @@ async function fetchTool(ctx: Ctx, args: Args) {
       ]
         .filter(Boolean)
         .join('\n'),
+      values: await Promise.all(
+        entries
+          .filter((e) => e.value)
+          .map(async (e) => ({
+            title: e.title,
+            value: e.value,
+            citations: await citationsOf(ctx, e),
+          })),
+      ),
       url: pageUrl(ctx, key),
-      metadata: { release_id: rid, kind: 'page', screen: route?.id, datasets: sets },
+      metadata: {
+        release_id: rid,
+        kind: 'page',
+        screen: route?.id,
+        datasets: sets,
+        citations: await pageCitations(ctx, key),
+      },
     };
   }
   throw new ArgError(
@@ -203,6 +220,7 @@ async function listDatasets(ctx: Ctx, args: Args) {
       `Няма група „${group}“. Групите са: ${cat.groups.map((g) => g.id).join(', ')}.`,
     );
   const sets = cat.datasets.filter((s) => !group || s.group === group);
+  const c = await core(ctx);
   return {
     release_id: ctx.data.releaseId,
     groups: cat.groups,
@@ -213,6 +231,7 @@ async function listDatasets(ctx: Ctx, args: Args) {
           slug: s.slug,
           title: s.title,
           group: s.group,
+          sources: sources(c, s.source),
           status: s.status,
           ...(s.period ? { period: s.period } : {}),
           ...(s.asOf ? { asOf: s.asOf } : {}),
@@ -338,7 +357,7 @@ async function getData(ctx: Ctx, args: Args) {
     ...head,
     ...(part ? { part } : {}),
     path: path || '/',
-    meta,
+    meta: { ...meta, ...(period?.publication ? { asOf: period.publication } : {}) },
     ...(period
       ? {
           period: {
@@ -386,10 +405,11 @@ async function explainNumber(ctx: Ctx, args: Args) {
   const inputs = await inputsOf(ctx);
   const b = BUDGET_RECORD.exec(record);
   if (b) {
-    const p = await load<{ documents?: Record<string, Json>; entries?: Record<string, Json> }>(
-      ctx,
-      'budget2027-provenance',
-    );
+    const p = await load<{
+      meta?: Json;
+      documents?: Record<string, Json>;
+      entries?: Record<string, Json>;
+    }>(ctx, 'budget2027-provenance');
     const entry = p.entries?.[b[1]!];
     if (!entry) throw new ArgError('Няма такъв запис в произхода на законопроекта.');
     const [file, pointer] = String(entry.output || '').split('#');
@@ -409,6 +429,8 @@ async function explainNumber(ctx: Ctx, args: Args) {
       ...entry,
       document,
       source: sourceOf(archive),
+      asOf: p.meta?.asOf,
+      page_url: screenUrl(ctx, 'S24', { set: 'budget2027' }),
     };
   }
   const [, block, y, mm, col, row] = EXECUTION_RECORD.exec(record)!;
@@ -426,12 +448,26 @@ async function explainNumber(ctx: Ctx, args: Args) {
     ex[block!] as Record<string, Record<string, Record<string, unknown[]>>> | undefined
   )?.[y!]?.[col!]?.[row!];
   const value = series?.[Number(mm) - 1];
-  if (value === undefined)
-    throw new ArgError('Тази стойност я няма в изпълнението на това издание.');
+  const head = {
+    release_id: rid,
+    record,
+    page_url: screenUrl(ctx, 'S15'),
+  };
+  if (value === undefined || value === null)
+    return {
+      ...head,
+      status: 'pending',
+      value: null,
+      reason: 'Тази стойност още не е включена в изпълнението на текущото издание.',
+      note: pendingNote,
+    };
+  const original = p.originals?.[`${y}-${mm}`];
+  const input = inputs.get(String(original?.sha256 ?? ''));
   if (block === 'monthly')
     return {
-      release_id: rid,
-      record,
+      ...head,
+      asOf: original?.asOf,
+      source: sourceOf(input),
       value,
       unit: ex.contract?.money?.unit,
       rule: p.rules?.monthly,
@@ -442,11 +478,9 @@ async function explainNumber(ctx: Ctx, args: Args) {
           : null,
       ].filter(Boolean),
     };
-  const original = p.originals?.[`${y}-${mm}`];
-  const input = inputs.get(String(original?.sha256 ?? ''));
   return {
-    release_id: rid,
-    record,
+    ...head,
+    asOf: original?.asOf,
     verified: !!input,
     value,
     unit: ex.contract?.money?.unit,
@@ -507,6 +541,7 @@ export const TOOLS = [
     ),
     outputSchema: anything(
       {
+        release_id: { type: 'string' },
         results: {
           type: 'array',
           items: anything(
@@ -516,7 +551,7 @@ export const TOOLS = [
         },
         note: { type: 'string' },
       },
-      ['results'],
+      ['release_id', 'results'],
     ),
     annotations: { title: 'Търсене в данните', ...ANNOTATIONS },
   },
@@ -524,20 +559,21 @@ export const TOOLS = [
     name: 'fetch',
     title: 'Отваряне на резултат',
     description:
-      'Връща пълния текст на резултат от `search` по неговия id: определение на понятие, описание на набор, бележка за данните или числата на страница от сайта. Всеки отговор има адрес и източник за цитиране.',
+      'Връща пълния текст на резултат от `search` по неговия id: определение на понятие, описание на набор, бележка за данните или числата на страница от сайта. Всеки отговор има издание и адрес; числата са придружени от източници, дати и единици, когато са налични в изданието.',
     inputSchema: object(
       { id: str('Id от `search`, например term:byudzhet или dataset:execution.') },
       ['id'],
     ),
     outputSchema: anything(
       {
+        release_id: { type: 'string' },
         id: { type: 'string' },
         title: { type: 'string' },
         text: { type: 'string' },
         url: { type: 'string' },
         metadata: { type: 'object' },
       },
-      ['id', 'title', 'text', 'url'],
+      ['release_id', 'id', 'title', 'text', 'url'],
     ),
     annotations: { title: 'Отваряне на резултат', ...ANNOTATIONS },
   },
@@ -643,7 +679,7 @@ const failure = (message: string): ToolResult => ({
  *  model can read and correct, a failure to read the release says so. Nothing of the arguments reaches the log. */
 export async function call(ctx: Ctx, name: string, args: Args): Promise<ToolResult> {
   try {
-    const out = await HANDLERS[name]!(ctx, args);
+    const out = { release_id: ctx.data.releaseId, ...(await HANDLERS[name]!(ctx, args)) };
     return { content: [{ type: 'text', text: JSON.stringify(out) }], structuredContent: out };
   } catch (e) {
     if (e instanceof ArgError) return failure(e.message);

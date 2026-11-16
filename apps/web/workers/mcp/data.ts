@@ -1,6 +1,8 @@
 // The release the MCP tools read (apps/web/workers/mcp/handler.ts): the files of the current release, exactly as the screens get them
 // (apps/web/workers/release-data.ts: the release packaged with the build), parsed once per isolate and release, and the
 // addresses a tool answer links to, so the model can cite the page and the file of every number.
+import { screenOf } from '../../client/searchlib.js';
+import datasetScreens from '../../app/lib/dataset-screens.json' with { type: 'json' };
 import { internal } from '../../client/loc.js';
 import { href } from '../../client/routes.js';
 import type { ReleaseData } from '../release-data';
@@ -136,4 +138,33 @@ export function metaOf(file: unknown) {
   if (Array.isArray(m.pending) && m.pending.length) out.pending = m.pending;
   if (m.mock) out.mock = true;
   return out;
+}
+
+/** Citation metadata stays grouped by dataset: one page can combine different dates and units. */
+export async function pageCitations(ctx: Ctx, address: string) {
+  const route = screenOf(address) as { id: string } | null;
+  if (!route) return [];
+  const [cat, c] = await Promise.all([catalog(ctx), core(ctx)]);
+  const periodKey = new URL(pageUrl(ctx, address)).searchParams.get('per');
+  return Promise.all(
+    cat.datasets
+      .filter((s) =>
+        ((datasetScreens as Record<string, string[]>)[s.slug] ?? s.screens ?? []).includes(
+          route.id,
+        ),
+      )
+      .map(async (s) => {
+        let meta: { source?: unknown; asOf?: unknown } = s;
+        const name = fileName(s);
+        if (periodKey && name) {
+          const file = await load<{ byPeriod?: Record<string, Record<string, unknown>> }>(
+            ctx,
+            name,
+          );
+          const period = file.byPeriod?.[periodKey];
+          if (period) meta = { ...meta, source: period.sourceRefs, asOf: period.publication };
+        }
+        return { slug: s.slug, sources: sources(c, meta.source), asOf: meta.asOf, unit: s.unit };
+      }),
+  );
 }

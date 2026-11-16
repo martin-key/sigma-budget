@@ -18,9 +18,32 @@ import {
 } from '../../client/searchlib.js';
 import { internal } from '../../client/loc.js';
 import { PendingError } from '../../client/data.js';
-import { catalog, load, pageUrl, type Ctx } from './data';
+import { catalog, load, pageUrl, pageCitations, core, sources, type Ctx } from './data';
 
-export type Entry = ReturnType<typeof entry> & { id?: string };
+export type Entry = ReturnType<typeof entry> & {
+  id?: string;
+  citation?: { source?: unknown; asOf?: string; unit?: string };
+};
+
+export async function citationsOf(ctx: Ctx, e: Entry) {
+  if (e.citation)
+    return [
+      {
+        sources: sources(await core(ctx), e.citation.source),
+        asOf: e.citation.asOf,
+        unit: e.citation.unit,
+      },
+    ];
+  const citations = await pageCitations(ctx, e.href);
+  const period = new URL(pageUrl(ctx, e.href)).searchParams.get('per');
+  const selected =
+    period && /^202[7-9]\.(draft|forecast)$/.test(period)
+      ? citations.filter((c) => c.slug === 'budget2027')
+      : citations;
+  // Index values are formatted for display, sometimes in millions while the dataset is in thousands.
+  const unit = /(?:млн\.|хил\.)\s*€|%/.exec(e.value)?.[0].replace(/\s+/g, ' ');
+  return selected.map((c) => ({ ...c, ...(unit ? { unit } : {}) }));
+}
 
 const KIND: Record<string, string> = { notes: 'Бележки за данните' };
 const kindOf = (group: string) => KIND[group] || groupLabel(group);
@@ -106,6 +129,7 @@ export interface Result {
   text?: string;
   value?: string;
   status?: string;
+  citations?: Awaited<ReturnType<typeof citationsOf>>;
 }
 
 /** the best results for a query, one per id; `fuzzy`: nothing matched exactly, these are the near misses */
@@ -126,7 +150,7 @@ export async function search(ctx: Ctx, query: string, limit = 10) {
       url: pageUrl(ctx, e.href),
       kind: kindOf(e.group),
       ...(line ? { text: line } : {}),
-      ...(e.value ? { value: e.value } : {}),
+      ...(e.value ? { value: e.value, citations: await citationsOf(ctx, e) } : {}),
       ...(e.status !== 'real' ? { status: e.status } : {}),
     });
     if (results.length >= limit) break;

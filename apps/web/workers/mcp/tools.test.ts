@@ -58,6 +58,7 @@ it('answers with structured content and the same JSON as text', async () => {
 describe('search and fetch', () => {
   it('finds figures, terms and notes, one result per id, with page addresses', async () => {
     const { out } = await run('search', { query: 'ДДС' });
+    expect(out.release_id).toBe(ctx.data.releaseId);
     const ids = out.results.map((r: Out) => r.id);
     expect(ids.length).toBeGreaterThan(0);
     expect(new Set(ids).size).toBe(ids.length);
@@ -100,7 +101,24 @@ describe('search and fetch', () => {
       r.id.startsWith('page:/obshtina/'),
     );
     const page = (await run('fetch', { id: hit.id })).out;
+    expect(hit.citations).toContainEqual(
+      expect.objectContaining({
+        slug: 'budget2027',
+        asOf: '2026-11-06',
+        unit: 'млн. €',
+        sources: expect.arrayContaining([expect.objectContaining({ id: 'budget2027' })]),
+      }),
+    );
+    expect(page.title).toBe('Пловдив');
     expect(page.text).toMatch(/Пловдив/);
+    expect(page.metadata.citations).toContainEqual(
+      expect.objectContaining({
+        slug: 'municipalities',
+        asOf: '2026-07-31',
+        unit: 'хил. €',
+        sources: expect.arrayContaining([expect.objectContaining({ id: 'zdb' })]),
+      }),
+    );
     expect(page.metadata.datasets).toContain('municipalities');
     const screen = (await run('fetch', { id: 'page:/izpalnenie' })).out;
     expect(screen.metadata.screen).toBe('S15');
@@ -245,7 +263,14 @@ describe('get_data', () => {
 describe('explain_number', () => {
   it('finds the cell of a monthly value and checks its original against the manifest', async () => {
     const { out } = await run('explain_number', { record: 'data/2026-09/kfp/rev' });
-    expect(out).toMatchObject({ verified: true, sheet: 'стартова', cell: 'B11', unit: 'млн. €' });
+    expect(out).toMatchObject({
+      verified: true,
+      sheet: 'стартова',
+      cell: 'B11',
+      unit: 'млн. €',
+      page_url: ORIGIN + '/izpalnenie',
+      asOf: '2026-09-30',
+    });
     expect(typeof out.value).toBe('string');
     expect(out.original).toMatchObject({
       asOf: '2026-09-30',
@@ -268,6 +293,8 @@ describe('explain_number', () => {
       value: 30942719.3,
       unit: 'хил. €',
       provenance: id,
+      page_url: ORIGIN + '/danni/budget2027',
+      asOf: '2026-11-06',
     });
     expect(out.page).toBeDefined();
     expect(out.document).toMatchObject({ archive: expect.any(String) });
@@ -284,10 +311,19 @@ describe('explain_number', () => {
     const { out } = await run('explain_number', { record: 'data/2026-09/kfp/rev' }, diskCtx(bare));
     expect(out).toMatchObject({ verified: false, cell: 'B11', source: null });
   });
+  it('returns pending with a reason for an unpublished execution value', async () => {
+    const { out } = await run('explain_number', { record: 'data/2026-10/kfp/rev' });
+    expect(out).toMatchObject({
+      release_id: ctx.data.releaseId,
+      status: 'pending',
+      value: null,
+      reason: expect.stringMatching(/още не е включена/),
+      page_url: ORIGIN + '/izpalnenie',
+    });
+  });
   it('explains a record that is not one', async () => {
     await fails('explain_number', { record: 'rev' }, /data\/2026-09\/kfp\/rev/);
     await fails('explain_number', { record: 'budget2027/' + '0'.repeat(24) }, /Няма такъв запис/);
-    await fails('explain_number', { record: 'data/2026-12/kfp/rev' }, /няма в изпълнението/);
   });
 });
 
@@ -298,7 +334,7 @@ it('says a release that cannot be read is unavailable, and logs no argument', as
   const broken = diskRelease({
     releaseId: 'broken',
     async load(name) {
-      throw new LoadError(name, 'R2 down');
+      throw new LoadError(name, 'Asset unavailable');
     },
   });
   const res = await call(diskCtx(broken), 'search', { query: 'тайна-заявка-42' });

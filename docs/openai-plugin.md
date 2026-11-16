@@ -35,7 +35,7 @@ MCP сървърът на сайта (`POST /mcp`, [спецификацията
 
 > СИГМА Бюджет дава на ChatGPT достъп до данните за държавния бюджет на България: законопроекта за 2027 г., закона за 2026 г., средносрочната прогноза до 2029 г., месечните отчети за изпълнението на консолидираната фискална програма, бюджетите на ведомствата и програмите им, трансферите за общините, дълга, данъците и осигуровките.
 >
-> Числата идват от официалните документи на Министерството на финансите, НСИ и Евростат, както ги публикува сайтът. Всеки отговор носи източника, датата, мерната единица и връзка към страницата на сайта. За всяко число от законопроекта и от месечните отчети може да се види откъде е взето: документът, страницата или листът и клетката.
+> Числата идват от официалните документи на Министерството на финансите, НСИ и Евростат, както ги публикува сайтът. Всеки успешен отговор носи `release_id`. Числата имат източник, дата и мерна единица, когато са налични в изданието, и връзка към страницата на сайта. При няколко набора метаданните са групирани по набор в `citations`. Обясненията за методиката и капаните имат издание и URL, но нямат дата на източник. За всяко число от законопроекта и от месечните отчети може да се види откъде е взето: документът, страницата или листът и клетката.
 >
 > Данните, които още не са публикувани, се показват като липсващи, а не като нули. Приложението само чете публични данни: не иска вход и не записва въпросите.
 
@@ -43,7 +43,7 @@ English translation (Translations):
 
 > SIGMA Budget gives ChatGPT access to Bulgaria's state budget data: the 2027 budget bill, the 2026 budget law, the medium-term forecast to 2029, the monthly execution reports of the consolidated fiscal programme, the budgets and programmes of the ministries, the transfers to municipalities, public debt, taxes and social contributions.
 >
-> The figures come from the official documents of the Ministry of Finance, the National Statistical Institute and Eurostat, as published by the site. Every answer carries its source, date, unit and a link to the page of the site. For every figure of the bill and of the monthly reports the original can be traced: the document, the page or sheet and the cell.
+> The figures come from the official documents of the Ministry of Finance, the National Statistical Institute and Eurostat, as published by the site. Every successful answer carries `release_id`. Figures include their source, date and unit where available in the release, and a link to the site page. For pages combining datasets, citation metadata is grouped by dataset in `citations`. Methodology and trap explanations carry a release id and URL, but no source date. For every figure of the bill and of the monthly reports the original can be traced: the document, the page or sheet and the cell.
 >
 > Data that is not yet published is shown as missing, never as zero. The app only reads public data: it needs no sign-in and does not store questions.
 
