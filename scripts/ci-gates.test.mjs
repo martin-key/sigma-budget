@@ -82,8 +82,8 @@ test('committed release checks use Node after authenticating the input snapshot'
   assert.ok(provenance);
   assert.equal(provenance.if, undefined);
   assert.ok(!provenance['continue-on-error']);
-  // Browser e2e and the historical data image still need Python until their later ports.
-  assert.ok(jobs.check.steps.some((step) => step.uses?.startsWith('actions/setup-python@')));
+  // The historical data image retains its Python preparation in build.
+  assert.ok(jobs.build.steps.some((step) => step.uses?.startsWith('actions/setup-python@')));
 });
 
 test('the full pipeline suite retains Python and authenticated programme originals in build', () => {

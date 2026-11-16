@@ -28,7 +28,7 @@ pnpm dev -- --port 8814
 # http://127.0.0.1:8814/
 
 # Браузърната част без SSR; временната директория съчетава public/, client/ и data/release/
-python3 -m apps.web.scripts.serve
+node apps/web/scripts/serve.ts
 ```
 
 Зависимостите на Node се инсталират в корена с един `pnpm-lock.yaml` (pnpm workspace). `pnpm build` е build за локална разработка, без SEO обхода. Единственият вход за deploy артефакт е `pnpm build:release` (`apps/web/scripts/build-release.ts`, Node 24 и Chromium на закрепения в `package.json` Playwright от следващия раздел). Той проверява екраните, генерира sitemap/llms/robots и кеш заглавките и маркира service worker за всяко сглобяване. За staging използвай `--env staging --noindex`; за production - `--origin https://<адрес>`.
@@ -43,7 +43,7 @@ python3 -m apps.web.scripts.serve
 uv venv tmp/venv --python 3.12
 uv pip install --python tmp/venv/bin/python --require-hashes -r tests/requirements-dev.lock -r pipeline/requirements.lock
 uv pip install --python tmp/venv/bin/python --no-deps -e pipeline
-PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers pnpm exec playwright install chromium # същата версия на Playwright като в tests/requirements-dev.lock: един Chromium и за Python проверките
+PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers pnpm exec playwright install chromium
 
 pnpm typecheck
 pnpm --filter @sigma-budget/etl... build
@@ -62,7 +62,7 @@ PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers pnpm build:release --env staging -
 # В отделен терминал стартирайте Worker-а:
 pnpm exec wrangler dev -c apps/web/build/server/wrangler.json --ip 127.0.0.1 --port 8814
 # Пълната проверка върви срещу него:
-PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers tmp/venv/bin/python -m tests.e2e.screens --url http://127.0.0.1:8814/
+PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers E2E_WORKER_URL=http://127.0.0.1:8814 pnpm test:e2e --project=worker
 ```
 
 Регресията за ранния мобилен tap се проверява с `E2E_WORKER_URL=http://127.0.0.1:8814 pnpm test:e2e --project=worker boot.spec.ts` срещу сглобения Worker. Файловете на артефакта (`sitemap.xml`, `robots.txt`, `llms.txt`, `_headers`, маркираният service worker) се проверяват от `apps/web/scripts/release-artifact.test.ts` в `pnpm test`; release командата проверява и действителния артефакт преди успех.

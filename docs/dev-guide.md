@@ -35,7 +35,7 @@
 5. Низовете са **текст**. Разметка се получава само с `html\`…\``. Виж 3.5 (правилото, на което се спъват всички).
 6. Парите се пазят в **милиони евро** (`mln`). Печатай ги с `money()`/`view.amount()`; никога не форматирай число на ръка.
 7. Всичко примерно (измислено) носи `mock:true`/`status:'mock'` и е със щриховка ▨ и надпис „Примерни данни“. Компонентите го правят, когато им подадеш флага. Число без източник и без флаг е грешка.
-8. Провери работата си: `PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers tmp/venv/bin/python -m tests.e2e.screens --route S06` (раздел 14).
+8. Провери работата си: `E2E_WORKER_URL=http://127.0.0.1:8814 pnpm test:e2e --project=worker screens-base.spec.ts --grep S06` (раздел 14).
 9. Екраните се рисуват наново, когато се смени период, обхват или единица: **`render` трябва да е чиста функция**, а предпочитанията се четат от `ctx.store` в момента на рисуването.
 10. Публичен сайт: никъде под `apps/web/` няма имена на членове на групата, няма споменаване на чат платформи, няма цитати от вътрешни обсъждания. Авторството е общо („Работна група „Бюджет на светло“).
 
@@ -58,7 +58,7 @@
 ```
 (корен на хранилището)
   docs/plan.md  docs/data-spec.md  docs/example-datasets.md  docs/dev-guide.md
-  tests/e2e/screens.py       (SHELL)   проверката
+  tests/e2e/worker/screens-*.spec.ts       (SHELL)   проверката
   apps/web/
     index.html                  (SHELL)   скелетът на обвивката + CSP
     sw.js                       (SHELL)   минимална заготовка на service worker
@@ -983,23 +983,6 @@ html`<a href="${ctx.href('funkciya', { fn:'obrazovanie' })}">Образован�
 
 ## 14. Пускане на проверките
 
-```bash
-# от корена на хранилището; средата е tmp/venv, а Chromium е в tmp/pw-browsers (и двете са извън git — виж .gitignore)
-PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers tmp/venv/bin/python -m tests.e2e.screens --route S06            # един екран, всички негови примерни адреси
-PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers tmp/venv/bin/python -m tests.e2e.screens --route S06 --shots    # + снимки на екрана в tmp/render-check/
-PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers tmp/venv/bin/python -m tests.e2e.screens --quick               # финалната проверка, около минута: всеки маршрут, първият пример, 1280 px и 400 px, светла тема
-PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers tmp/venv/bin/python -m tests.e2e.screens                       # всичко: 1280 и 400 px × светла и тъмна
-PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers tmp/venv/bin/python -m tests.e2e.screens --url http://127.0.0.1:8000/   # вече пуснат сървър
-```
-
-`--route` приема id (`S06`) или ключ (`prihodi`). Проверката пуска собствен локален сървър върху `apps/web/`. Изходен код 0 само когато всичко е зелено. Пътищата до `apps/web/` и до папката със снимки се изчисляват в началото на скрипта (`ROOT`, `SITE`, `SHOT_DIR`) — вижте бележката за разположението в `README.md`.
-
-Какво проверява за всеки маршрут × размер × тема: няма грешки или изключения в конзолата (404 за липсващ файл `/data/…` е само предупреждение „предстоящ файл с данни“); няма `NaN`/`undefined`/`Infinity`/`null`/`[object Object]` в текста или SVG; няма хоризонтално превъртане на страницата (освен вътре в `.table-wrap`); точно един `h1`; `document.title` се е променил; фокусът е на `h1` след навигация; целта на „Следва“ съществува; `?demo=loading|empty|error|pending|offline` рисува правилния компонент за състояние; ключовете в `data-src` съществуват в `core.sources`; всяка повърхност `[data-mock]` има значка или щриховка; примерните блокове са означени в текста за споделяне/CSV/PNG.
-
-> **Версии.** Командите в този раздел са писани за `check_mock.py` (версия v1, таг `mock-v1`). За последното дърво на `apps/web/` (v6) ползвайте `tests/e2e/screens.py` със същите опции и `./budget check-site --inputs /path/to/registered-node-inputs`; на по-старите тагове — съответния `check_mock_vN.py`.
-
-`check_mock.py` има още семейства проверки (period, user, prefs, tour, `?to=`, chrome, share, embed, glossary, tabs, theme); документацията в началото на файла ги изброява заедно с всяка опция. `-v` отпечатва всяка находка с всичките ѝ клетки и адреси. Предупрежденията никога не карат пускането да пропадне; `--only base --route S06` е най-бързият цикъл за един екран. За да видиш страницата, добави `--shots` (по един PNG за всяко зареждане, имената се преизползват).
-
 Браузърните проверки се изпълняват чрез `pnpm test:e2e` от корена. След `pnpm build:release --env staging --noindex` стартирайте `pnpm exec wrangler dev -c apps/web/build/server/wrangler.json --ip 127.0.0.1 --port 8814`, а в друг терминал:
 
 ```bash
@@ -1010,7 +993,7 @@ PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers pnpm test:e2e --project=static
 Име на спецификация (например `period-matrix.spec.ts`) може да се добави като филтър. `tests/e2e/playwright.config.ts` разделя двата targets без дублиране на проверки; `fixtures.ts` управлява статичния сървър и изисква изричен `E2E_WORKER_URL` за Worker. Всеки тест получава чист browser context, освен изрично споделените в самата проверка страници. Старите адреси се обхождат с отделни страници в един общ context, с изолирано състояние. Общите route gates, ограничени event waits и CSV download helper са в `fixtures.ts` и `helpers.ts`. Няма автоматични retries; всеки отказ блокира CI, а trace и снимките са в `tmp/e2e-results`. Спецификациите се добавят в `worker/` или `static/` според оригиналния target. Не се използват production V8 thresholds за browser спецификациите.
 
 Визуалният одит и контрастът се изпълняват последователно в job `check` срещу
-сглобения Worker (Chromium), непосредствено след screens:
+сглобения Worker (Chromium):
 
 ```bash
 E2E_WORKER_URL=http://127.0.0.1:8814 pnpm test:e2e --project=worker visual-audit.spec.ts
@@ -1049,7 +1032,7 @@ Service worker (`sw.js`, кеш `bns-v5-11`) използва `fetch(req, { cach
 
 ## 15. Споделени файлове: правила и записване
 
-Споделено = всичко под `apps/web/`, освен собствените ти `js/pages/sNN-*.js` и `css/pages/sNN-*.css`, плюс това ръководство и `tests/e2e/screens.py`.
+Споделено = всичко под `apps/web/`, освен собствените ти `js/pages/sNN-*.js` и `css/pages/sNN-*.css`, плюс това ръководство и `tests/e2e/worker/screens-*.spec.ts`.
 
 1. Позволено ти е само да **добавяш** към споделен файл: нов експорт, нова функция, нов блок CSS правила, нова икона, нов ред в маршрутите, нов файл-компонент. **Никога не преименувай, не махай и не променяй поведението на нещо съществуващо.** Ползвай инструмента за редакция със закотвена вмъкване (добавяй в края, под коментар-банер `/* ── added by S06 ── */`); никога не презаписвай цял споделен файл (други автори го редактират едновременно) и препрочети редовете точно преди редакцията.
 2. **Записвай всяка такава редакция** с един добавен ред в дневника на работата:
@@ -1087,7 +1070,7 @@ Service worker (`sw.js`, кеш `bns-v5-11`) използва `fetch(req, { cach
 | `pages/s28-tarsene.js` (страницата за търсене)                                     | готов                                     | раздели 5.27 и 18                                                                                                                                                                               |
 | `pages/s29-embed.js` (+ `css/pages/s29-embed.css`)                                 | готов                                     | раздел 7.5; `share.embedHash` приема `embedParams`, `block({share:{embedParams}})` го предава; `errorState({link:false})`                                                                       |
 | `pages/s30-404.js` (+ `css/pages/s30-404.css`)                                     | готов                                     | раздел 11: подзаглавието назовава поисканния адрес (и след `ctx.notFound()`), после поле за търсене (`[data-search-field]`, Enter → `#/tarsene?q=`) и шест връзки; нормална рамка, без „Следва“ |
-| `tests/e2e/screens.py`                                                             | готов                                     | раздел 14; `--quick` е финалната проверка                                                                                                                                                       |
+| `tests/e2e/worker/screens-*.spec.ts`                                               | готов                                     | раздел 14; Playwright Test е финалната проверка                                                                                                                                                 |
 | `apps/web/public/dev/components.html` (витрина на компонентите, без маршрут)       | не е направена                            | отпаднала при замразяването на обхвата; живите примери са екраните S28 / S29 / S30 и коментарът в началото на всеки `js/ui/*.js`                                                                |
 
 ---

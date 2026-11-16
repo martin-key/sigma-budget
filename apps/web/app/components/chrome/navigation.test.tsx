@@ -11,7 +11,7 @@ import { NAV_GROUPS, footerHtml } from './chrome';
 import { FOOTER_NOTES } from '../../routes/launch-copy-test-helper';
 
 // The navigation the owner set: two screens renamed (their addresses stay), the «Бюджет» group in this order, and a footer without the
-// legend entry and without «За проекта», whose notes are now in its fine print. The browser side (dropdowns, phone «Меню», 44px targets at 320px) is checked in tests/e2e/screens.py (ch_popovers, ch_phone).
+// legend entry and without «За проекта», whose notes are now in its fine print. The browser side (dropdowns, phone «Меню», 44px targets at 320px) is checked in tests/e2e/worker/screens-shell.spec.ts.
 const BUDGET = ['S34', 'S05', 'S07', 'S06', 'S10', 'S12', 'S13', 'S20', 'S14'];
 const BUDGET_NAMES = [
   'Бюджет 2027',

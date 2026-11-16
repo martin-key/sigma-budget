@@ -219,21 +219,14 @@ jobs:
       PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/tmp/pw-browsers # the checks look there first (redirects and others set it as their default)
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
-        with:
-          python-version: '3.12'
-          cache: pip
-          cache-dependency-path: tests/requirements-dev.lock
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'
           cache: pnpm
       - run: |
-          python -m pip install --require-hashes -r tests/requirements-dev.lock -r pipeline/requirements.lock
-          python -m pip install --no-deps -e pipeline
           pnpm install --frozen-lockfile
-      - name: Install the Chromium of the pinned Playwright (the same browser build as the Python Playwright of tests/requirements-dev.lock)
+      - name: Install the Chromium of the pinned Playwright
         run: bash scripts/ci-install-browser.sh
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
@@ -243,11 +236,12 @@ jobs:
         run: |
           pnpm exec wrangler dev -c apps/web/build/server/wrangler.json --ip 127.0.0.1 --port 8814 --persist-to "$RUNNER_TEMP/state" > "$RUNNER_TEMP/wrangler.log" 2>&1 &
           for i in $(seq 1 60); do curl -sf -o /dev/null http://127.0.0.1:8814/robots.txt && break; sleep 1; done
-          python -m tests.e2e.screens --url http://127.0.0.1:8814/
           E2E_WORKER_URL=http://127.0.0.1:8814 pnpm test:e2e --project=worker visual-audit.spec.ts
           E2E_WORKER_URL=http://127.0.0.1:8814 pnpm test:e2e --project=worker light-contrast.spec.ts
       - name: Screen audits, states, variants and checker self-test (Playwright Test)
         run: E2E_WORKER_URL=http://127.0.0.1:8814 pnpm test:e2e --project=worker screens-base.spec.ts screens-demo.spec.ts screens-variants.spec.ts screens-selftest.spec.ts
+      - name: Screen navigation, sharing, shell, glossary, tabs and views
+        run: E2E_WORKER_URL=http://127.0.0.1:8814 pnpm test:e2e --project=worker screens-tour.spec.ts screens-sharing.spec.ts screens-shell.spec.ts screens-glossary.spec.ts screens-tabs.spec.ts screens-views.spec.ts
       - name: Early boot, server DOM adoption and cross-origin security (Playwright Test)
         run: E2E_WORKER_URL=http://127.0.0.1:8814 pnpm test:e2e --project=worker boot.spec.ts narrative-adoption.spec.ts security-headers.spec.ts
       - name: Annual periods, aliases, SSR notices and stored preferences
