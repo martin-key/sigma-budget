@@ -4,6 +4,7 @@ import { num, money, date, plural } from '../format.js';
 import { block } from '../ui/block.js';
 import { dataTable, updateRows, tableData } from '../ui/table.js';
 import { chart } from '../ui/chart.js';
+import { ranklist } from '../ui/ranklist.js';
 import { kpi, kpiGrid } from '../ui/kpi.js';
 import { emptyState, errorState } from '../ui/states.js';
 import { field, textInput, selectInput } from '../ui/forms.js';
@@ -707,13 +708,8 @@ const printedSum = (cells) => {
 };
 const toMln = (v) => (v == null ? null : v / 1000);
 // "Министерство на транспорта и съобщенията/Национална компания „…“" → the company that carries out the project
-const shortInstitution = (name) =>
-  (name.includes('/') ? name.slice(name.indexOf('/') + 1) : name)
-    .replace(/^Национална компания /, 'НК ')
-    .replace(/^Държавно предприятие /, 'ДП ')
-    .replace(/^Министерство на /, 'М-во на ')
-    .replace(/^“/, '„')
-    .trim();
+const executor = (name) =>
+  (name.includes('/') ? name.slice(name.indexOf('/') + 1) : name).replace(/^“/, '„').trim();
 const projectCells = (r) => FRAMEWORK.map((_, i) => r.cells[i]);
 const projectColumns = (unit, d) => [
   {
@@ -756,28 +752,21 @@ export function projectsBlocks(ctx, doc) {
     .map(([name, cells]) => ({ name, value: printedSum(cells) }))
     .filter((x) => x.value != null)
     .sort((a, b) => b.value - a.value);
-  const SHOWN = 6;
-  const others = printedSum(ranked.slice(SHOWN).map((x) => ({ value: x.value })));
-  const parts = [
-    ...ranked.slice(0, SHOWN),
-    ...(others == null ? [] : [{ name: 'Други ведомства', value: others }]),
+  // The same list as „Капиталови разходи по ведомства“ on this page; a name opens the full list searched for it.
+  const SHOWN = 8;
+  const rest = ranked.slice(SHOWN);
+  const others = printedSum(rest.map((x) => ({ value: x.value })));
+  const items = [
+    ...ranked.slice(0, SHOWN).map((x) => ({
+      label: executor(x.name),
+      value: toMln(x.value),
+      href: ctx.href('S34', {}, { q: executor(x.name), to: 's34-all-projects' }),
+    })),
+    ...(others == null
+      ? []
+      : [{ label: `Други ${num(rest.length)} ведомства`, value: toMln(others) }]),
   ];
   const top = ranked[0];
-  const spec = {
-    id: 's34-projects-by-institution',
-    title: 'По ведомства, 2027',
-    type: 'barh',
-    unit: 'млн. €',
-    d: 0,
-    categories: parts.map((x) =>
-      x.name === 'Други ведомства' ? x.name : shortInstitution(x.name),
-    ),
-    series: [{ name: '2027', color: '--exp', data: parts.map((x) => toMln(x.value)) }],
-    // Long ministry names wrap instead of being cut: room for up to three lines per bar.
-    labelWidth: 'auto',
-    labelOverflow: 'break',
-    height: 60 * parts.length + 40,
-  };
   const biggest = [...projects]
     .sort((a, b) => (printedSum(projectCells(b)) ?? 0) - (printedSum(projectCells(a)) ?? 0))
     .slice(0, 10);
@@ -801,7 +790,15 @@ export function projectsBlocks(ctx, doc) {
           </p>`
         : ''
     }
-    ${chart(spec)}
+    <h3>Проектите по ведомства, 2027 г.</h3>
+    ${ranklist({
+      id: 's34-projects-by-institution',
+      caption: 'Сборът на сумите за 2027 г. на проектите на всяко ведомство, млн. €',
+      items,
+      fmt: (x) => money(x, { scale: 'mln', d: 1 }),
+      categoryLabel: 'Ведомство',
+      unitLabel: 'млн. €',
+    })}
     <h3>Най-големите проекти</h3>
     <p class="small muted">Подредени по сумата за трите години, в милиони евро.</p>
     ${dataTable({

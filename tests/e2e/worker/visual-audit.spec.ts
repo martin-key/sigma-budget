@@ -136,7 +136,7 @@ test.describe('tablet tables and Budget 2027', () => {
         page.locator(`#b27-more a.link-card[href*="${path}?"][href*="per=2027.draft"]`),
       ).toHaveCount(1);
     await expect(page.locator('#s34-projects .kpi')).toHaveCount(3);
-    await expect(page.locator('#s34-projects-by-institution-fig')).toBeVisible();
+    await expect(page.locator('#s34-projects-by-institution')).toBeVisible();
     const projects = page.locator('#s34-projects-table');
     await expect(projects).toBeVisible();
     await expect(projects.locator('thead th')).toHaveCount(4);
