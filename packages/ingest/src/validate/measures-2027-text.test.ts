@@ -1,13 +1,14 @@
 import { beforeAll, expect, it } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
-import { pathToFileURL } from 'node:url';
 import { zipMember } from '../build/annual-lineage.js';
 import { readPdf } from '../readers/pdf/index.js';
 import { sha256 } from '../readers/annual/index.js';
 
 type Entry = {
   id: string;
+  table: string;
+  row: number;
   starts: string;
   name: string;
   text: string;
@@ -32,13 +33,18 @@ let provenance: any;
 const pages = new Map<number, string>();
 const json = async (path: string) => JSON.parse(await readFile(join(root, path), 'utf8'));
 beforeAll(async () => {
-  const loaded = await import(pathToFileURL(join(root, 'apps/web/client/measures-2027.js')).href);
+  const loaded = await json('data/inputs/measures_2027.json');
   measures = loaded.MEASURES_2027;
   laws = loaded.LAWS;
   release = await json('data/release/budget2027.json');
   provenance = await json('data/release/budget2027-provenance.json');
   const bytes = zipMember(
-    await readFile(join(root, 'data/originals/budget_2027/ZDBRB-2027.zip')),
+    await readFile(
+      join(
+        process.env.BUDGET_BUILD_ACCEPTED_INPUTS ?? root,
+        'data/originals/budget_2027/ZDBRB-2027.zip',
+      ),
+    ),
     member,
   );
   expect(provenance.documents.forecast.member).toBe(member);
@@ -49,7 +55,7 @@ beforeAll(async () => {
 }, 120_000);
 function each() {
   return Object.entries(measures).flatMap(([table, entries]) =>
-    entries.map((entry, i) => ({ table, entry, row: release.forecast[table][i] })),
+    entries.map((entry) => ({ table, entry, row: release.forecast[entry.table][entry.row] })),
   );
 }
 function assertQuote(entry: Entry) {
@@ -67,6 +73,14 @@ it('has one unique editorial entry for each printed measure, excluding the total
     const rows = release.forecast[table];
     expect(rows.at(-1).label, table).toBe('Общо:');
     expect(entries, table).toHaveLength(rows.length - 1);
+    expect(
+      entries.map((e) => e.row),
+      table,
+    ).toEqual(rows.slice(0, -1).map((_: unknown, i: number) => i));
+    expect(
+      entries.every((e) => e.table === table),
+      table,
+    ).toBe(true);
     ids.push(...entries.map((e) => e.id));
   }
   expect(new Set(ids).size).toBe(ids.length);

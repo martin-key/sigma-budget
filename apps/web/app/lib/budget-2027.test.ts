@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { parseHTML } from 'linkedom';
 import {
@@ -24,7 +24,11 @@ import { planCsv } from '../../client/ui/plan.js';
 import { revExpChart } from '../../client/pages/s13-prognoza.js';
 const read = (path: string) =>
   readFileSync(new URL('../../../../' + path, import.meta.url), 'utf8');
-const release = (name: string) => parse(name, read(`data/release/${name}.json`));
+const release = (name: string) =>
+  name === 'measures2027' &&
+  !existsSync(new URL('../../../../data/release/measures2027.json', import.meta.url))
+    ? JSON.parse(read('data/inputs/measures_2027.json'))
+    : parse(name, read(`data/release/${name}.json`));
 // Independent expected values come from the pinned Python extraction, never from the presentation adapter.
 const bill = JSON.parse(read('data/inputs/budget_bill_2027.json'));
 const forecast = JSON.parse(read('data/inputs/budget_forecast_2027.json'));

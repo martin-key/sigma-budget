@@ -461,3 +461,27 @@ export function buildMeasures(
   };
   return result as unknown as Record<string, Json>;
 }
+
+export interface Measures2027Source {
+  LAWS: Record<string, string>;
+  MEASURES_2027: Record<
+    string,
+    { table: string; row: number; starts: string; [key: string]: Json }[]
+  >;
+}
+export function buildMeasures2027(input: Measures2027Source, budget: any, date: string) {
+  for (const entries of Object.values(input.MEASURES_2027))
+    for (const entry of entries) {
+      if (!budget.forecast[entry.table]?.[entry.row]?.label.startsWith(entry.starts))
+        throw new Error('2027 measure row differs: ' + entry.table + ':' + entry.row);
+    }
+  return {
+    meta: metadata('D39', 'Мерки в бюджета за 2027 г.', date, {
+      source: ['budget2027'],
+      sourceNote: 'АСБП 2027–2029, таблици II-7 и II-8 и мотиви, стр. 44–50',
+      asOf: '2026-11-06',
+      unit: 'млн. €',
+    }),
+    ...input,
+  };
+}

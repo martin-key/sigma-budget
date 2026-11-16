@@ -844,3 +844,17 @@ datasets:
   limitations:
   - 'Емисия XS2890436087 е в USD и не е превалутирана. Общият EUR сбор не може да бъде сверен без курс, който липсва в бюлетина.'
   - 'Отпечатана е матуритетна структура по срокове; годишен погасителен график не е включен.'
+
+- id: measures2027
+  catalogId: D39
+  title: 'Мерки в бюджета за 2027 г.'
+  status: real
+  files: [data/release/measures2027.json]
+  producer: packages/ingest/src/build/measures.ts
+  inputs: [budget2027, data/inputs/measures_2027.json]
+  schema: docs/data-spec.md
+  screens: [S12]
+  period: 2027–2029
+  scope: България
+  rebuild: ./budget build
+  limitations: ['Текстове по законопроекта; сумите са в budget2027.json.']

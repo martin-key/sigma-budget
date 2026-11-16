@@ -1,3 +1,5 @@
+import { buildMeasures2027 } from '../build/measures.js';
+import { catalogCounts, refreshCatalog } from '../build/catalog-refresh.js';
 import { readProductionProgrammes, withProductionProgrammes } from './programmes.js';
 import { readDebtIssues, registerDebtCatalog } from './debt-issues.js';
 import { mkdir, writeFile, cp, readFile } from 'node:fs/promises';
@@ -61,6 +63,39 @@ export async function executeRelease(context: Readonly<ExecutionContext>): Promi
     streams: Map<string, Uint8Array>;
   };
   if (!publication?.streams.size) throw new Error('Production graph did not publish outputs');
+  const texts = JSON.parse(
+    await readFile(join(context.exportRoot, 'data/inputs/measures_2027.json'), 'utf8'),
+  );
+  const budget = JSON.parse(Buffer.from(publication.streams.get('budget2027.json')!).toString());
+  const measures = buildMeasures2027(texts, budget, context.buildDate);
+  publication.streams.set('measures2027.json', Buffer.from(JSON.stringify(measures) + '\n'));
+  const catalog = JSON.parse(Buffer.from(publication.streams.get('catalog.json')!).toString());
+  catalog.datasets.push({
+    id: 'D39',
+    slug: 'measures2027',
+    title: measures.meta.title,
+    description: 'Текстове на мерките от АСБП 2027–2029',
+    group: 'fiscal',
+    status: 'real',
+    eager: false,
+    contains: [],
+    mock: false,
+    asOf: '2026-11-06',
+    mediaType: 'application/json',
+    source: ['budget2027'],
+    screens: ['S12'],
+    file: 'data/measures2027.json',
+    format: 'JSON',
+    period: '2027–2029',
+  });
+  publication.streams.set('catalog.json', Buffer.from(JSON.stringify(catalog) + '\n'));
+  const refreshed = refreshCatalog({
+    catalog,
+    ownerBytes: publication.streams,
+    registry: prepared.input.layers.registry,
+    activeRoutes: prepared.input.layers.activeRoutes,
+  }).catalog;
+  publication.streams.set('catalog.json', Buffer.from(JSON.stringify(refreshed) + '\n'));
   for (const [path, bytes] of publication.streams) {
     if (path.startsWith('releases/'))
       throw new Error('Lifecycle metadata must not be produced by the graph');

@@ -250,6 +250,25 @@ export const datasetGuards = {
     next: record,
     pending: array,
   }),
+  'measures2027.json': shape({
+    meta: metaGuard,
+    LAWS: mapOf(string),
+    MEASURES_2027: mapOf(
+      list(
+        shape({
+          id: string,
+          starts: string,
+          name: string,
+          text: string,
+          quote: string,
+          table: string,
+          row: number,
+          page: number,
+          tablePage: number,
+        }),
+      ),
+    ),
+  }),
   'measures.json': shape({
     meta: metaGuard,
     document: record,
