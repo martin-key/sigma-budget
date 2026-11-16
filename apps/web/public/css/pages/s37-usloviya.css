@@ -5,7 +5,16 @@
 .page[data-route='S37'] .legal-block + .legal-block {
   margin-top: 2rem;
 }
+.page[data-route='S37'] .legal h2 {
+  margin-bottom: 0.5rem;
+}
+.page[data-route='S37'] .legal p + p,
+.page[data-route='S37'] .legal p + ul,
+.page[data-route='S37'] .legal ul + p {
+  margin-top: 0.75rem;
+}
 .page[data-route='S37'] .legal ul {
+  margin-top: 0.5rem;
   padding-left: 1.25rem;
 }
 .page[data-route='S37'] .legal li + li {
