@@ -2,6 +2,7 @@ import { resolvePeriod, DEFAULT_PERIOD } from './periods.js';
 import { toHref } from './loc.js';
 import { ROUTES, GROUPS } from '../app/lib/routes.ts';
 export { ROUTES, GROUPS } from '../app/lib/routes.ts';
+export { default as DATASET_SCREENS } from '../app/lib/dataset-screens.json' with { type: 'json' };
 export { SCREEN_QUERY, screenQuery, screenSearch } from '../app/lib/query-params.ts';
 export const byId = Object.fromEntries(ROUTES.map((r) => [r.id, r]));
 export const byKey = Object.fromEntries(ROUTES.map((r) => [r.key, r]));

@@ -1,4 +1,3 @@
-import datasetScreens from '../app/lib/dataset-screens.json' with { type: 'json' };
 // Catalogue helpers shared by S24 „Откъде са данните?“ and S25 „Отворени данни и API“ (written by G5). Pure: no DOM, no render state; the only fetch is loadMeta, and it goes through data.load.
 // Input: data/catalog.json (DATA_SPEC §3.20, built by packages/ingest/src/build/catalog-build.ts). Every optional field may be missing: a thinner or older catalogue
 // still gives a usable model, and a malformed entry is dropped instead of breaking the page.
@@ -22,7 +21,7 @@ import datasetScreens from '../app/lib/dataset-screens.json' with { type: 'json'
 //   yearSpan(p) · periodYears(M) · coversYear(set, y)   the years a period reaches ([2024, 2028]), the years any set covers (newest first), and whether a set covers a year (FB4: the „Период“ filter of ПРОВЕРИ)
 //   rich(text, M)             text from the catalogue -> SafeHtml: escaped, with `code`, „slug“ (a set of the catalogue) and P01..P07 (a pending set) as links or <code>
 import { ROOT } from './loc.js';
-import { ROUTES, byId, href as routeHref } from './routes.js';
+import { ROUTES, byId, href as routeHref, DATASET_SCREENS as datasetScreens } from './routes.js';
 import { esc, raw } from './html.js';
 import { date, num, monthYear, NBSP } from './format.js';
 import { data, PendingError } from './data.js';
