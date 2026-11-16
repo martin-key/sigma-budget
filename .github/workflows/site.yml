@@ -249,6 +249,8 @@ jobs:
         run: E2E_WORKER_URL=http://127.0.0.1:8814 pnpm test:e2e --project=worker boot.spec.ts narrative-adoption.spec.ts security-headers.spec.ts
       - name: Annual periods, aliases, SSR notices and stored preferences
         run: E2E_WORKER_URL=http://127.0.0.1:8814 pnpm test:e2e --project=worker period-matrix.spec.ts
+      - name: Current-bill lists, shared units and navigation
+        run: E2E_WORKER_URL=http://127.0.0.1:8814 pnpm test:e2e --project=worker public-bill-lists.spec.ts share-units.spec.ts react-bridge.spec.ts
       - name: Old addresses
         run: pnpm test:e2e --project=static redirects.spec.ts
       - name: Tax calculator

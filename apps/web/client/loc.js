@@ -22,19 +22,19 @@ export const ROOT = typeof document === 'undefined' ? SERVER_ROOT : new URL('../
 export const BASE = ROOT.pathname; // '/' when the site is served at the root of its host
 export const HASH = typeof window !== 'undefined' && !!window.__HASH_ROUTES__;
 
-/** '#/x?y' | '/x?y' | 'x?y' -> '/x?y' (the internal form; the base is not part of it) */
+/** '#/<път>?<заявка>' | '/x?y' | 'x?y' -> '/x?y' (the internal form; the base is not part of it) */
 export function internal(a) {
   let s = String(a ?? '').replace(/^#/, '');
   if (!HASH && BASE !== '/' && s.startsWith(BASE)) s = '/' + s.slice(BASE.length);
   return s.startsWith('/') ? s : '/' + s;
 }
-/** the link to an address in the active mode: '/x?y' -> '/x?y' (path mode) or '#/x?y' (hash mode) */
+/** the link to an address in the active mode: '/x?y' -> '/x?y' (path mode) or '#/<път>?<заявка>' (hash mode) */
 export const toHref = (a) => (HASH ? '#' : BASE.slice(0, -1)) + internal(a);
 /** a full URL for the address (share links, embed code, canonical) */
 export const absolute = (a, origin) =>
   new URL(toHref(a), origin || serverScope()?.origin || location.href).href;
 
-/** the current address, internal form '/x?y'. In path mode an old hash address (#/x) in the address bar wins: it is a link from V6 */
+/** the current address, internal form '/x?y'. In path mode an old hash address (#/<път>) in the address bar wins: it is a link from V6 */
 export function here() {
   const sc = serverScope();
   if (sc) return internal(sc.url.pathname).replace(/\/index\.html$/, '/') + sc.url.search; // the server: the request's address
@@ -74,7 +74,7 @@ export function isAppHref(h) {
 const NOT_SCREENS = /^\/(data\/|api\/releases(\/|$))/;
 export const isAppLink = (a) => !!a && isAppHref(a.getAttribute('href'));
 
-/** path mode: an old '#/x' link written by a page, a data file (search index, feed) or a component becomes '/x' in the DOM, so that
+/** path mode: an old '#/<път>' link written by a page, a data file (search index, feed) or a component becomes '/x' in the DOM, so that
  *  crawlers, „Open in new tab“ and the server's HTML all see the path; a file link relative to the root (data/core.json) becomes
  *  /data/core.json, which also holds on /danni/execution. Hash mode: nothing to do (every page is the root document). */
 const LINKS = 'a[href^="#/"],a[href^="data/"]';

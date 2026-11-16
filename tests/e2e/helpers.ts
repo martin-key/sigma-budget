@@ -19,3 +19,34 @@ export async function downloadBytes(download: Download): Promise<Buffer> {
   if (!path) throw new Error('Download did not produce a local file');
   return readFile(path);
 }
+
+/** RFC-style semicolon CSV: retain quoted newlines, double quotes and empty fields. */
+export function parseCsv(input: string): string[][] {
+  const rows: string[][] = [];
+  let row: string[] = [],
+    field = '',
+    quoted = false;
+  for (let i = 0; i < input.length; i++) {
+    const c = input[i];
+    if (c === '"') {
+      if (quoted && input[i + 1] === '"') {
+        field += '"';
+        i++;
+      } else quoted = !quoted;
+    } else if (c === ';' && !quoted) {
+      row.push(field);
+      field = '';
+    } else if ((c === '\n' || c === '\r') && !quoted) {
+      if (c === '\r' && input[i + 1] === '\n') i++;
+      row.push(field);
+      rows.push(row);
+      row = [];
+      field = '';
+    } else field += c;
+  }
+  if (field || row.length) {
+    row.push(field);
+    rows.push(row);
+  }
+  return rows;
+}

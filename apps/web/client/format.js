@@ -111,7 +111,7 @@ export function moneyLabel(mln) {
     ? `${sign}${num(abs / 1000, 2)} милиарда евро`
     : `${sign}${num(abs, 1)} милиона евро`;
 }
-/** parse "#/path?x=1&y=2" style query strings */
+/** parse "#/<път>?<заявка>" style query strings */
 export const parseQuery = (s) => Object.fromEntries(new URLSearchParams(s || ''));
 export const buildQuery = (o) => {
   const u = new URLSearchParams();

@@ -87,7 +87,7 @@
 | `tools/mock/guide_v6.py`             | `pipeline/budget_pipeline/build/guide.py`                 |
 | `tools/mock/gva_sectors_v5.py`       | `pipeline/budget_pipeline/build/gva_sectors.py`           |
 | `tools/mock/hrefs_v5.py`             | `reference/mock/hrefs_v5.py`                              |
-| `tools/mock/hrefs_v6.py`             | `tests/e2e/hrefs.py`                                      |
+| `tools/mock/hrefs_v6.py`             | `apps/web/scripts/hrefs.test.ts`                          |
 | `tools/mock/budget_law_parser.py`    | `pipeline/budget_pipeline/extract/budget_law_parser.py`   |
 | `tools/mock/mock_content.py`         | `pipeline/budget_pipeline/build/example_text.py`          |
 | `tools/mock/mock_labels.py`          | `pipeline/budget_pipeline/build/measure_labels.py`        |
@@ -147,10 +147,9 @@
 | `tools/release_check.py`             | `tests/release/release_check.py`                          |
 | `tools/restore_drill.py`             | `tests/release/restore_drill.py`                          |
 | `tools/site/build.py`                | `apps/web/scripts/build.py`                               |
-| `tools/site/make_images.py`          | `apps/web/scripts/make_images.py`                         |
+| `tools/site/make_images.py`          | `apps/web/scripts/make-images.ts`                         |
 | `tools/site/query_check.py`          | `apps/web/scripts/query_check.py`                         |
 | `tools/site/serve.py`                | `apps/web/scripts/serve.py`                               |
-| `tools/site/ssr_parity.py`           | `apps/web/scripts/ssr_parity.py`                          |
 
 Кешът от `tools/mock/cache/` и входовете от `tmp/research/` се намират съответно в `data/cache/` и `data/cache/research/`. Те са извън git. При този checkout няма локални файлове в старите кешове за преместване.
 

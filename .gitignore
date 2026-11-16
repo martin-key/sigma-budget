@@ -65,7 +65,6 @@ apps/etl/environments.local.json
 /coverage/
 # Сводката на pnpm check:coverage (scripts/check-coverage.mjs); в CI се качва като artifact „coverage“, затова не се следи
 /coverage-summary.md
-# Изходът от по-старата подредба в корена: статичният сайт (apps/web/scripts/ssr_parity.py --dist dist) и SSR build
 /dist/
 /build/
 # Изходът на setuptools за Python пакета (pip wheel ./pipeline, python -m build); изходната папка е pipeline/budget_pipeline/build/

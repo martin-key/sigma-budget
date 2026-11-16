@@ -1,6 +1,6 @@
 // The icons of the site are those of СИГМА: the white magnifier-„С“ with the map of Bulgaria on a deep-red tile. favicon.ico,
 // favicon-16/32.png and apple-touch-icon.png are byte copies of the files of СИГМА (apps/web/public of midt-bg/sigma); icon-192/512.png
-// and og.png are drawn by apps/web/scripts/make_images.py. The old bar-chart mark is gone from every live file.
+// and og.png are drawn by apps/web/scripts/make-images.ts. The old bar-chart mark is gone from every live file.
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
@@ -23,7 +23,7 @@ const COPIED_FROM_SIGMA = {
   'favicon-32.png': '67b02d5b7037b9c62c78b602edb6b45186db186fabb4846d7bb9ee05c373cbb2',
   'apple-touch-icon.png': '8a4ef887fb3cd6bbc345b5ceef9a07288c52465b07d3d8a2ea1d43353cf18f71',
 };
-// what apps/web/scripts/make_images.py drew; after a deliberate redraw the new sums go here
+// what apps/web/scripts/make-images.ts drew; after a deliberate redraw the new sums go here
 const DRAWN = {
   'icon-192.png': 'd1245ba0fb7d68cc7292f2e9e987727892c7cac5e275e83f1c2f39cf821d751e',
   'icon-512.png': 'c04282993118c45e916a0dd09c15363ad3e38cdf0d97955ec568066bb334c85a',
@@ -131,7 +131,7 @@ describe('the icons of СИГМА', () => {
     },
   );
 
-  it('the mark that make_images.py draws from is the unchanged logo-icon.svg of СИГМА', () => {
+  it('the mark that make-images.ts draws from is the unchanged logo-icon.svg of СИГМА', () => {
     const mark = readFileSync(
       fileURLToPath(new URL('../../scripts/sigma-mark.svg', import.meta.url)),
     );

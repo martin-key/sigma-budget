@@ -49,7 +49,7 @@ async function boot() {
   const coreP = data.load('core').catch(() => null);
   await Promise.race([coreP, wait(1500)]);
   motion.init();
-  watchLinks(); // path mode: old #/x links in pages and data become /x (js/loc.js)
+  watchLinks(); // path mode: old #/<път> links in pages and data become /x (js/loc.js)
   coreP.then(() => {
     shell.refreshFooter();
   });

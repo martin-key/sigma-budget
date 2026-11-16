@@ -85,7 +85,7 @@ export function canonQuery(q) {
   if (o.demo && !DEMOS.includes(o.demo)) delete o.demo;
   return o;
 }
-/** the screen of an address ('/x?y' or '#/x?y'): {route, params, query, canon, want, screen, found, segs}. `screen` is the address of
+/** the screen of an address ('/x?y' or '#/<път>?<заявка>'): {route, params, query, canon, want, screen, found, segs}. `screen` is the address of
  *  what the server draws for it: the canonical one with only the query of the screen (js/routes.js screenQuery) */
 export function resolve(address) {
   const raw = parseHash(address);

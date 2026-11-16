@@ -310,7 +310,7 @@ const focusKey = () => {
 async function render(kind) {
   const { route, params, query, want, segs, periodResolution } = resolve(here()); // an old address → the matching new screen, context kept (js/redirects.js)
   if (want !== hereHref() || (!HASH && location.hash.startsWith('#/')))
-    history.replaceState(history.state || { k: ++histK }, '', want); // path mode: an old #/x link becomes /x
+    history.replaceState(history.state || { k: ++histK }, '', want); // path mode: an old #/<път> link becomes /x
   const k = ensureKey();
   lastHref = location.href;
 
