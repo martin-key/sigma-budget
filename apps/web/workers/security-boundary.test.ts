@@ -203,10 +203,21 @@ it('takes POST only on /mcp, with the finalized headers of a non-public-data rou
   expect(res.headers.get('Cache-Control')).toBe('no-store');
   expect(res.headers.has('Content-Security-Policy')).toBe(true);
   expect(res.headers.has('Access-Control-Allow-Origin')).toBe(false);
+  const slash = await app.fetch(
+    new Request('https://budget.example/mcp/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body,
+    }),
+    env,
+    {} as ExecutionContext,
+  );
+  expect(slash.status, 'POST /mcp/').toBe(200);
   for (const [path, method, status, allow] of [
     ['/mcp', 'GET', 405, 'POST'],
     ['/mcp', 'PUT', 405, 'POST'],
-    ['/mcp/', 'POST', 405, 'GET, HEAD'],
+    ['/mcp/', 'GET', 405, 'POST'],
+    ['/mcpx', 'POST', 405, 'GET, HEAD'],
     ['/data/core.json', 'POST', 405, 'GET, HEAD'],
   ] as const) {
     const r = await app.fetch(

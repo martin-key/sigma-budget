@@ -91,9 +91,6 @@ export async function mcp(request: Request, env: Env, url: URL): Promise<Respons
         'X-Robots-Tag': 'noindex',
       },
     });
-  const version = request.headers.get('MCP-Protocol-Version');
-  if (version && !PROTOCOL_VERSIONS.includes(version))
-    return error(null, -32600, `Unsupported MCP-Protocol-Version: ${version.slice(0, 40)}`, 400);
   if (!/^application\/json\s*(;|$)/i.test(request.headers.get('Content-Type') || ''))
     return error(null, -32600, 'Content-Type must be application/json', 415);
   if (Number(request.headers.get('Content-Length') || 0) > MAX_BODY)
@@ -123,6 +120,17 @@ export async function mcp(request: Request, env: Env, url: URL): Promise<Respons
   if (!isObject(msg) || msg.jsonrpc !== '2.0') return error(null, -32600, 'Invalid Request', 400);
   const id = msg.id;
   const validId = typeof id === 'string' || (typeof id === 'number' && Number.isFinite(id));
+  // the version of a session is agreed in initialize (its body), so a client may send a newer one there and take this server's answer;
+  // every other message (a request, a notification, a response) with an unknown version is refused (OpenAI's client sends 2026-07-28
+  // with its first initialize, then the version it agreed)
+  const version = request.headers.get('MCP-Protocol-Version');
+  if (msg.method !== 'initialize' && version && !PROTOCOL_VERSIONS.includes(version))
+    return error(
+      validId ? id : null,
+      -32600,
+      `Unsupported MCP-Protocol-Version: ${version.slice(0, 40)}`,
+      400,
+    );
   if (typeof msg.method !== 'string')
     // a response of the client (to a request this server never sends) is accepted and dropped
     return validId && ('result' in msg || 'error' in msg)
