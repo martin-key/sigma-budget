@@ -9,7 +9,8 @@
 // registry and /data/releases/* is the release API (apps/web/workers/app.ts); what neither knows comes from the static files.
 // SITE_ORIGIN names the public address in canonical links (empty: the address of the request); NOINDEX "1" keeps an environment out of
 // search engines; SIGMA_URL is the address of the original СИГМА (docs/approach-specification.md, section 2.2); FEEDBACK_EMAIL is the
-// address of the feedback form (empty: the form keeps the message in the browser and says so).
+// address of the feedback form (empty: the form keeps the message in the browser and says so); OPENAI_APPS_CHALLENGE is the token of OpenAI's
+// domain check for the plugin directory, served at /.well-known/openai-apps-challenge (docs/openai-plugin.md; empty: 404).
 // The release registry (D1, binding DB, migrations/) and the objects (R2, binding OBJECTS) are one database and one bucket per environment
 // (docs/approach-specification.md, section 3.1). Provisioning is separate from the code deploy (docs/release.md, „Среди“): the database
 // ids below are filled in when the environment is created; until then `wrangler dev` uses local copies and a deploy fails on purpose.
@@ -41,7 +42,9 @@
       "simple": { "limit": 600, "period": 60 }
     }
   ],
-  "observability": { "enabled": true },
+  // no invocation logs: they would keep the request headers, the visitor's address among them, for up to 7 days (/poveritelnost, client/legal.js);
+  // what the Worker logs itself (console) has no personal data
+  "observability": { "enabled": true, "logs": { "invocation_logs": false } },
   "d1_databases": [
     {
       "binding": "DB",
@@ -59,7 +62,8 @@
     "SITE_ORIGIN": "https://sigma-budget.midt.bg",
     "SIGMA_URL": "https://sigma.midt.bg/",
     "FEEDBACK_EMAIL": "contact@midt.government.bg",
-    "NOINDEX": ""
+    "NOINDEX": "",
+    "OPENAI_APPS_CHALLENGE": ""
   },
   // staging (push to main, .github/workflows/site.yml): its own Worker, a build with --noindex.
   // The top level is production: CI never deploys it, that is a separate controlled procedure (docs/approach-specification.md, stage E).
@@ -100,7 +104,8 @@
         "SITE_ORIGIN": "",
         "SIGMA_URL": "https://sigma.midt.bg/",
         "FEEDBACK_EMAIL": "",
-        "NOINDEX": "1"
+        "NOINDEX": "1",
+        "OPENAI_APPS_CHALLENGE": ""
       }
     }
   }

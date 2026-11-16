@@ -169,7 +169,7 @@ async def check(url):
             assert not errors, errors
             await context.close()
             print(f'PASS first tap {route} at {phase}')
-        for route, screen in [('/nyama-takava', 'S30'), ('/api', 'S25'), ('/proverka', 'S35'), ('/zakon', 'S14'), ('/novo', 'S16')]:
+        for route, screen in [('/nyama-takava', 'S30'), ('/api', 'S25'), ('/proverka', 'S35'), ('/zakon', 'S14'), ('/novo', 'S16'), ('/poveritelnost', 'S36'), ('/usloviya', 'S37')]:
             context = await browser.new_context(service_workers='block')
             page = await context.new_page()
             loaded = set()

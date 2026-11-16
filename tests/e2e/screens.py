@@ -65,6 +65,7 @@ BUDGET_MENU = ['Бюджет 2027', 'Годишната рамка', 'Разхо
 DATA_MENU = ['Методология', 'Проверка на данните', 'Отворени данни и API', 'Обратна връзка']
 # the notes of the retired «За проекта» page, now the end of the footer fine print, before the open code and СИГМА links
 FOOTER_NOTES = ['Речникът и поясненията са редакционни текстове, а не официални данни.', 'Без бисквитки и проследяване.']
+FOOTER_LEGAL = ['Поверителност', 'Условия за ползване']  # S36, S37: the legal pages after the notes (client/legal.js)
 CODE_URL = 'https://github.com/midt-bg/sigma-budget'
 FOOTER_JS = r"""() => ({
   groups: Object.fromEntries([...document.querySelectorAll('#footer details.foot-grp')].map(d => [d.querySelector('summary').textContent.trim(), [...d.querySelectorAll('li a')].map(a => a.textContent.trim())])),
@@ -1754,7 +1755,7 @@ def ch_popovers(w, cell, F, W, j, outs):
         F('footer', f'the footer «Бюджет» group is {foot["groups"].get("Бюджет")}, expected {BUDGET_MENU}')
     if foot['groups'].get('Данни и проект') != DATA_MENU:
         F('footer', f'the footer «Данни и проект» group is {foot["groups"].get("Данни и проект")}, expected {DATA_MENU}')
-    if foot['fine'][-4:-2] != FOOTER_NOTES or not foot['fine'][-2].startswith('Отворен код') or foot['code'] != CODE_URL:
+    if foot['fine'][-6:-4] != FOOTER_NOTES or foot['fine'][-4:-2] != FOOTER_LEGAL or not foot['fine'][-2].startswith('Отворен код') or foot['code'] != CODE_URL:
         F('footer', f'the footer fine print does not end with the notes, the open code link and СИГМА: {foot["fine"]} (code link {foot["code"]!r})')
     # an old stored value is never read: stale switches in localStorage must not turn anything on
     page.evaluate("() => localStorage.setItem('bns.prefs.v1', JSON.stringify({ onlyReal: true, perPerson: true, leva: true, sources: true }))")

@@ -79,7 +79,7 @@ cloudflared access login https://<адрес>/admin/operations
 
 ## 6. Наблюдение
 
-`observability` е включено в `apps/web/wrangler.jsonc`: заявките и грешките на Worker-а се виждат в Cloudflare. Седмично: `./budget status`,
+`observability` е включено в `apps/web/wrangler.jsonc` без логове на заявките (`invocation_logs: false`): те биха пазили заглавките на всяка заявка, с IP адреса на посетителя, до 7 дни, а политиката за поверителност казва, че сайтът не пази IP адреси. В Cloudflare се виждат грешките и редовете, които Worker-ът записва сам, без лични данни. Седмично: `./budget status`,
 копие на регистъра, и `budget refetch --manifest` на текущото издание срещу официалните адреси.
 
 ## Подписи

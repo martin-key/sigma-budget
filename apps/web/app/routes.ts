@@ -1,4 +1,4 @@
-// One route for every screen of apps/web/client/routes.js (27), and a catch-all for the rest (an old address, a mistyped one: the 404 screen).
+// One route for every screen of apps/web/client/routes.js (29), and a catch-all for the rest (an old address, a mistyped one: the 404 screen).
 // They share one module: the screen comes from the address itself (apps/web/client/render.js resolve), so an old or non-canonical address is
 // redirected exactly as the browser rewrites it.
 import { type RouteConfig, index, route } from '@react-router/dev/routes';
@@ -20,6 +20,8 @@ export default [
               S35: 'routes/proverka.tsx',
               S14: 'routes/zakon.tsx',
               S16: 'routes/novo.tsx',
+              S36: 'routes/poveritelnost.tsx',
+              S37: 'routes/usloviya.tsx',
             } as Record<string, string>
           )[r.id] || SCREEN,
           { id: r.id },

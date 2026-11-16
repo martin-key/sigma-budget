@@ -25,6 +25,8 @@ export function PageFrame({
       S35: '',
       S14: 'бюджетът',
       S16: 'ново',
+      S36: '',
+      S37: '',
     }[model.screen],
     i = r.title.lastIndexOf(accent);
   const targets = r.next.map((id: string) => byId[id]);
