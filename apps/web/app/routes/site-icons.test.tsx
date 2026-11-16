@@ -207,7 +207,6 @@ describe('the icons of СИГМА', () => {
     const files = liveFiles();
     // the sweep reads the sources, also those in a folder named build
     expect(files).toContain('apps/web/app/root.tsx');
-    expect(files.some((rel) => rel.startsWith('packages/ingest/src/build/'))).toBe(true);
     const offenders = files.filter((rel) => {
       let text: string;
       try {

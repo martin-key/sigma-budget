@@ -1,93 +1,63 @@
 # СИГМА Бюджет
 
-СИГМА Бюджет е официален сайт и проект на МИДТ. Сайтът представя държавния бюджет на България на разбираем език и по официални данни. До числата стоят източникът, обхватът, статусът и датата. Примерните данни са означени като такива; неизвлечените данни се показват като „предстои“.
+СИГМА Бюджет е официален сайт и проект на МИДТ. Представя държавния бюджет на България на разбираем език и по официални данни. До числата стоят източникът, обхватът, статусът и датата.
 
-## Структура
+## Структура и локална среда
 
-```text
-apps/web/               React Router SSR, Worker, клиент и публични ресурси
-apps/etl/               Node CLI за обработка на данните
-packages/ingest/        придобиване, сглобяване и проверки на данни
-packages/dataset-schema/ схеми на наборите
-packages/test-support/  помощни средства за тестове
-data/                   входове и публикувано издание
-tests/                  браузърни и release проверки
-docs/                   спецификации и архитектурни решения
-```
+`apps/web/` съдържа React Router SSR, Cloudflare Worker, клиента и публичните ресурси. `data/release/` е закрепеното издание, `tests/` съдържа браузърните и release проверки, а `docs/` - документацията на сайта. Единственият workspace е `apps/web`; нужен е Node 24 и pnpm 10.33.0.
 
-Workspace-ът обхваща `apps/*` и `packages/*` и използва общия коренов `pnpm-lock.yaml`. `./budget` стартира Node CLI от `@sigma-budget/etl`, който използва `@sigma-budget/ingest`. Новият код е TypeScript. Насоките за маршрути и поддръжка на старите екрани са в [ръководството](docs/dev-guide.md), а общите правила за принос - в [AGENTS.md](AGENTS.md). [ADR 0003](docs/adr/0003-repository-layout.md) е историческо решение с отменени части.
-
-## Локално стартиране
-
-```bash
+```sh
 pnpm install --frozen-lockfile
 pnpm typecheck
 pnpm build
 pnpm dev -- --port 8814
 # http://127.0.0.1:8814/
-
-# Браузърната част без SSR; временната директория съчетава public/, client/ и data/release/
-node apps/web/scripts/serve.ts
 ```
 
-Зависимостите на Node се инсталират в корена с един `pnpm-lock.yaml` (pnpm workspace). `pnpm build` е build за локална разработка, без SEO обхода. Единственият вход за deploy артефакт е `pnpm build:release` (`apps/web/scripts/build-release.ts`, Node 24 и Chromium на закрепения в `package.json` Playwright от следващия раздел). Той проверява екраните, генерира sitemap/llms/robots и кеш заглавките и маркира service worker за всяко сглобяване. За staging използвай `--env staging --noindex`; за production - `--origin https://<адрес>`.
+Не се изискват оригинали, ETL или входни архиви. Сглобеният сайт е в `apps/web/build/`. Клиентът се публикува под `/js/`, а данните под `/data/`. SSR чете само включеното в build-а издание. Новият код е TypeScript; маршрутите и поддръжката на екраните са в [ръководството](docs/dev-guide.md), а конвенциите - в [AGENTS.md](AGENTS.md).
 
-Сглобеният сайт е в `apps/web/build/`. Клиентът се публикува под `/js/`, а данните от `data/release/` под `/data/`; публичните адреси са запазени. SSR чете само изданието, включено в сглобяването.
+## Проверки и сглобяване
 
-Нужни са Node 24 и pnpm 10.33.0. `pnpm test` пуска тестовете на TypeScript пакетите; програмните PDF-и, които тестовете изискват, се подготвят според раздел „Входове за `pnpm test`“ в [ръководството](docs/dev-guide.md). `./budget` изпълнява пълния Node импорт.
-
-## Среда и проверки
-
-```bash
-PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers pnpm exec playwright install chromium
-
+```sh
+pnpm format:check
 pnpm typecheck
-pnpm --filter @sigma-budget/etl... build
-node packages/ingest/dist/validate/cli.js --live --only REGISTRY
-# Одобреният входен архив се придобива според „Входове за pnpm test“ в docs/dev-guide.md.
-# Възстановяването изисква нова директория извън хранилището и удостоверява архива и входовете.
-node scripts/restore-node-input-cache.mjs /path/to/registered-node-inputs.tar.gz /tmp/registered-node-inputs
-./budget check-site --inputs /tmp/registered-node-inputs
+pnpm test -- --coverage
+pnpm check:coverage
+node --test scripts/ci-gates.test.mjs
+pnpm data:check
 node tests/release/compat_check.mjs
-pnpm --filter @sigma-budget/web test # и списъците на заявките на екраните (app/lib/query-lists.test.ts)
+pnpm build
+```
+
+`pnpm build` е локален build. Deploy артефактът се създава само чрез `pnpm build:release`, с Chromium на закрепената версия на Playwright:
+
+```sh
+PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers pnpm exec playwright install chromium
 PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers pnpm build:release --env staging --noindex
-# В отделен терминал стартирайте Worker-а:
 pnpm exec wrangler dev -c apps/web/build/server/wrangler.json --ip 127.0.0.1 --port 8814
-# Пълната проверка върви срещу него:
+# В отделен терминал:
 PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers E2E_WORKER_URL=http://127.0.0.1:8814 pnpm test:e2e --project=worker
-```
-
-Регресията за ранния мобилен tap се проверява с `E2E_WORKER_URL=http://127.0.0.1:8814 pnpm test:e2e --project=worker boot.spec.ts` срещу сглобения Worker. Файловете на артефакта (`sitemap.xml`, `robots.txt`, `llms.txt`, `_headers`, маркираният service worker) се проверяват от `apps/web/scripts/release-artifact.test.ts` в `pnpm test`; release командата проверява и действителния артефакт преди успех.
-
-Playwright Test конфигурацията е в `tests/e2e/playwright.config.ts`, до общите fixtures и спецификациите. След стартиране на Worker от горния пример:
-
-```bash
-PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers E2E_WORKER_URL=http://127.0.0.1:8814 pnpm test:e2e
-# Статичните проверки, без Worker:
 PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers pnpm test:e2e --project=static
-# Самостоятелен статичен сървър с path fallback:
-node apps/web/scripts/serve.ts --port 8000
 ```
 
-Проектът `worker` включва `boot.spec.ts`, `security-headers.spec.ts`, `narrative-adoption.spec.ts` и `period-matrix.spec.ts`, както и `visual-audit.spec.ts` и `light-contrast.spec.ts`. Проектът `static` изпълнява `redirects.spec.ts`, `calc.spec.ts`, `share.spec.ts`, `accept.spec.ts`, `overlap.spec.ts` и `motion.spec.ts` върху автоматично сглобените symlinks в `tmp/static-site`. Данните се четат от `data/release`, JavaScript - от `apps/web/build/client/js`; необходим е предварителен build.
+Playwright конфигурацията е в `tests/e2e/playwright.config.ts`. Worker проверките покриват SSR, ранния tap, навигацията, достъпността и екраните. Статичните проверки покриват старите адреси, калкулатора, споделянето, приемните числа, движението и припокриванията. При отказ се пазят traces. `build:release` проверява екраните, създава sitemap/llms/robots, кеш заглавките и версията на service worker. За production се подава `--origin https://<адрес>`.
 
-Командите и обхватът на визуалния одит и контраста са в [ръководството за разработка](docs/dev-guide.md).
+## Данни и публикуване
 
-Калкулаторът, споделянето, приемните числа, layout/keyboard матрицата, движението и припокриванията се проверяват с Playwright Test. Например `pnpm test:e2e --project=static calc.spec.ts` или `pnpm test:e2e --project=static accept.spec.ts overlap.spec.ts`. Независимите очаквания в `tests/e2e/expected.ts` използват release данните; заплатните изчисления са в цели центове, а процентните ставки - в базисни точки. Browser probes са типизирани функции, подавани директно на Playwright. При отказ се запазват traces.
+Оригиналите, регистрите, обработката и независимите проверки са в [midt-bg/sigma-budget-data](https://github.com/midt-bg/sigma-budget-data). Сайтът знае само формата на изданието и доставената с него JSON Schema; хранилището за данни не зависи от сайта.
 
-## Данни и издания
+След merge на data PR:
 
-`./budget` е входната команда за придобиване, сглобяване, проверка и възпроизвеждане на данните. Производствената среда е Node 24 с `pnpm-lock.yaml`. Издание, сглобено преди TypeScript обработката, се възпроизвежда чрез checkout на commit-а от `processing.code.commit` в манифеста и документацията на този commit. Оригиналите са в `data/originals/`; файловете на МФ остават в git, останалите се придобиват според [източниците](docs/data-sources.md). Ръчно поддържаните и замразените входове са в `data/inputs/`, а междинните резултати в игнорирания `data/cache/`.
+```sh
+pnpm data:pull --commit <пълен-sha>
+pnpm data:check
+```
 
-`./budget build --inputs /път/до/входовете --out /външна/нова/директория --build-date ГГГГ-ММ-ДД --site` сглобява издание от commit и записва данните и манифеста в `data/release/`. `./budget reproduce` го възпроизвежда и сравнява байтовете. Слоят за терминология чете замразените замени от `data/inputs/wording.json`, без историческите тагове; редът на строителите е запазен. Подробности: [издания](docs/release.md), [придобиване](docs/data-acquisition.md), [процедура за издание](docs/operator-guide.md).
+Командата изтегля анонимно и проверява изданието преди подмяна на `data/release/`; записва commit и release id в `data/release.lock.json`. Без `--commit` се избира текущият `main` на хранилището за данни. Копието и lock файлът се предлагат с PR, без ръчни промени в изданието.
 
-За изолиран build без запис в `data/release/` използвай [offline импорт и локален candidate сайт](docs/import-local.md). Двата readers за бюджет 2027 се проверяват автоматично при build; `BUDGET_CANDIDATE` избира валидирания пакет за assets и SSR.
+Merge към `main` публикува staging на `https://sigma-budget-staging.cf-midt.workers.dev`. След изрично одобрение от собственика таг `vX.Y.Z` върху commit от `main` публикува production на `https://sigma-budget.midt.bg` през GitHub Environment `production`. PR проверките не публикуват. Всяка среда използва собствен Cloudflare token. `/admin/*` връща `404`.
 
-GitHub Actions проверява PR и сглобява staging, без deploy. Push към `main` публикува staging на `https://sigma-budget-staging.cf-midt.workers.dev` при конфигурирани Cloudflare секрети, с `noindex`. Push на таг `vX.Y.Z` върху commit от `main` изпълнява всички проверки и публикува production след одобрение в GitHub Environment `production`. Staging и production (`https://sigma-budget.midt.bg`) са публично достъпни; `/admin/*` връща `404`. Всяка среда използва собствен Cloudflare token от своя GitHub Environment. Настройките и `wrangler rollback` са в [production процедурата](docs/production-procedure.md). Новото издание идва от `midt-bg/sigma-budget-data` с PR, който обновява `data/release/`, включително `releases/`; [процедура](docs/operator-guide.md). Конфигурацията е в `apps/web/wrangler.jsonc`; собствена среда използва игнориран `wrangler.local.jsonc`. Готовността е описана в [production-readiness](docs/production-readiness.md).
-
-## Документация
-
-[Спецификация](docs/approach-specification.md), [ръководство за разработка](docs/dev-guide.md), [данни](docs/data-spec.md), [формати на наборите](docs/example-datasets.md), [план](docs/plan.md) и [архитектурни решения](docs/adr/).
+Подробности: [формат и проверки](docs/release.md), [ново издание](docs/operator-guide.md), [production процедура](docs/production-procedure.md), [готовност](docs/production-readiness.md). Историческите решения са в [docs/adr/](docs/adr/).
 
 ## История и версии
 

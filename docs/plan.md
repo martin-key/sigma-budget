@@ -2,8 +2,8 @@
 
 Това е съкратено резюме на плана на сайта „СИГМА Бюджет“: цели, потребители, принципи, списък на екраните,
 данни, технически подход и етапи. Подробният работен план (над хиляда реда с описание на всеки екран) не е включен в хранилището;
-техническите детайли са в [`dev-guide.md`](dev-guide.md), формите на данните — в [`data-spec.md`](data-spec.md) и [`data-spec-mock.md`](example-datasets.md),
-а произходът на суровите данни — в [`data-sources.md`](data-sources.md).
+техническите детайли са в [`dev-guide.md`](dev-guide.md), формите на данните — в [`data-spec.md`](https://github.com/midt-bg/sigma-budget-data/blob/main/docs/data-spec.md) и [`data-spec-mock.md`](https://github.com/midt-bg/sigma-budget-data/blob/main/docs/example-datasets.md),
+а произходът на суровите данни — в [`data-sources.md`](https://github.com/midt-bg/sigma-budget-data/blob/main/docs/data-sources.md).
 
 ## 1. Цел
 

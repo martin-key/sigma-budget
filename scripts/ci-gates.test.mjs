@@ -45,79 +45,18 @@ test('all retained provenance and browser commands stay in CI', () => {
   }
 });
 
-test('committed release checks use Node after authenticating the input snapshot', () => {
-  const { parse } = createRequire(new URL('../packages/ingest/package.json', import.meta.url))(
-    'yaml',
-  );
-  const jobs = parse(workflow).jobs;
-  const steps = jobs['node-import'].steps;
-  const compile = steps.findIndex(
-    (step) => step.run === 'pnpm --filter @sigma-budget/etl... build',
-  );
-  const restore = steps.findIndex((step) =>
-    step.run?.startsWith('node scripts/restore-node-input-cache.mjs '),
-  );
-  const validate = steps.findIndex(
-    (step) => step.run === './budget check-site --inputs "$RUNNER_TEMP/registered-node-inputs"',
-  );
-  assert.ok(compile >= 0 && restore > compile && validate > restore);
-  assert.equal(steps[validate].if, undefined);
-  assert.ok(!steps[validate]['continue-on-error']);
-});
-
-test('the build job checks the registries with the TypeScript validator after building it', () => {
-  const build = workflow.slice(workflow.indexOf('\n  build:\n'));
-  const compile = build.indexOf('pnpm --filter @sigma-budget/etl... build');
-  const check = build.indexOf(
-    '- name: Check the source and dataset registries\n        run: node packages/ingest/dist/validate/cli.js --live --only REGISTRY\n',
-  );
-  assert.ok(compile >= 0 && check > compile, 'the registry check runs on the built validator');
-  assert.doesNotMatch(workflow, /budget_pipeline\.validate\.registry/);
-});
-
-test('node-import checks the registries with the full history, so the historical producers are looked up', () => {
-  const { parse } = createRequire(new URL('../packages/ingest/package.json', import.meta.url))(
-    'yaml',
-  );
-  const job = parse(workflow).jobs['node-import'];
-  const checkout = job.steps.find((step) => step.uses?.startsWith('actions/checkout@'));
-  assert.equal(checkout.with['fetch-depth'], 0);
-  const built = job.steps.findIndex(
-    (step) => step.run === 'pnpm --filter @sigma-budget/etl... build',
-  );
-  const check = job.steps.findIndex((step) =>
-    step.run?.includes('node packages/ingest/dist/validate/cli.js --live --only REGISTRY'),
-  );
-  assert.ok(built >= 0 && check > built);
-  const run = job.steps[check].run;
-  // a skipped lookup fails the step, and so does a failing validator
-  assert.match(
-    run,
-    /if grep -q 'verification skipped' "\$RUNNER_TEMP\/registry\.json"; then\n(?:.*\n)*?\s*exit 1\n\s*fi/,
-  );
-  assert.match(run, /\|\| status=\$\?\n/);
-  assert.match(run, /\nexit "\$status"\n?$/);
-});
-
 test('security covers other PR targets without duplicating main PR checks', () => {
-  const { parse } = createRequire(new URL('../packages/ingest/package.json', import.meta.url))(
-    'yaml',
-  );
+  const { parse } = createRequire(
+    createRequire(new URL('../apps/web/package.json', import.meta.url)).resolve(
+      'vite/package.json',
+    ),
+  )('yaml');
   const site = parse(workflow);
   const security = parse(readFileSync('.github/workflows/security.yml', 'utf8'));
   assert.deepEqual(site.on.pull_request.branches, ['main']);
   assert.deepEqual(security.on.pull_request, { 'branches-ignore': ['main'] });
   assert.ok(Object.hasOwn(security.on, 'workflow_call'));
   assert.deepEqual(Object.keys(security.jobs).sort(), ['dependencies-and-secrets', 'semgrep']);
-});
-
-test('ETL coverage includes the standalone entry point and retains shared production globs', async () => {
-  const { default: config } = await import('../apps/etl/vitest.config.ts');
-  assert.deepEqual(config.test.coverage.include, [
-    'src/**/*.{ts,js}',
-    'bin/**/*.js',
-    'publication-documents/prepare.mjs',
-  ]);
 });
 
 test('merged boot and route modules remain inside formatting and production coverage', async () => {
@@ -148,9 +87,11 @@ test('merged boot and route modules remain inside formatting and production cove
 });
 
 test('coverage CI checks the target baseline with history and env refs before running suites', () => {
-  const { parse } = createRequire(new URL('../packages/ingest/package.json', import.meta.url))(
-    'yaml',
-  );
+  const { parse } = createRequire(
+    createRequire(new URL('../apps/web/package.json', import.meta.url)).resolve(
+      'vite/package.json',
+    ),
+  )('yaml');
   const job = parse(workflow).jobs.coverage;
   const checkout = job.steps.find((step) => step.uses?.startsWith('actions/checkout@'));
   assert.equal(checkout.with['fetch-depth'], 0);
@@ -207,9 +148,11 @@ test('every browser spec stays formatted, typechecked and strict in the independ
 });
 
 test('failed e2e diagnostics are uploaded before any later test invocation can clean them', () => {
-  const { parse } = createRequire(new URL('../packages/ingest/package.json', import.meta.url))(
-    'yaml',
-  );
+  const { parse } = createRequire(
+    createRequire(new URL('../apps/web/package.json', import.meta.url)).resolve(
+      'vite/package.json',
+    ),
+  )('yaml');
   const steps = parse(workflow).jobs.check.steps;
   const artifact = steps.find((step) => step.with?.name === 'e2e-failure-results');
   assert.ok(artifact);

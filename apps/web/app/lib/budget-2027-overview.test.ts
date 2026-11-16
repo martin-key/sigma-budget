@@ -10,16 +10,12 @@ import { selectPeriod } from '../../client/periods.js';
 import { INDICATORS, CAPEX_YEARS } from '../../client/budget-2027-compare.js';
 import { num, date, plural } from '../../client/format.js';
 import { chartSpec } from '../../client/ui/chart.js';
-import { comparison, cellOf, gdpOf, COMPARE } from '../../client/budget-2027-compare.js';
+import { cellOf, gdpOf, COMPARE } from '../../client/budget-2027-compare.js';
 import { measureText } from '../../client/measures-2027.js';
 
 const read = (path: string) =>
   readFileSync(new URL('../../../../' + path, import.meta.url), 'utf8');
 const release = (name: string) => parse(name, read(`data/release/${name}.json`));
-// Independent expected values: the pinned extraction of the АСБП 2027–2029 motives, not the presentation adapter.
-const forecast = JSON.parse(read('data/inputs/budget_forecast_2027.json'));
-const annex3 = (label: string) =>
-  forecast.tables.annex3_mln.rows.find((r: any) => r.label === label).values;
 const doc = release('budget2027');
 const texts = release('measures2027');
 const { MEASURES_2027 } = texts;
@@ -42,32 +38,6 @@ async function page(address: string, overrides: Record<string, any> = {}) {
   const html = String(frameHtml(vm));
   return { vm, scope, html, document: parseHTML(html).document };
 }
-
-it('compares the 2027 draft with the 2026 expected result from the same Annex 3', () => {
-  const data = Object.fromEntries(
-    ['outlook', 'revenue', 'expenditure'].map((n) => [n, release(n)]),
-  );
-  const rows = comparison(data);
-  const pairs: [string, string][] = [
-    ['rev', 'Приходи, помощи и дарения'],
-    ['exp', 'Общо разходи и Вноска в общия бюджет на ЕС'],
-    ['exp.capex', 'Капиталови разходи'],
-    ['exp.interest', 'Лихви'],
-    ['exp.personnel', 'Персонал'],
-  ];
-  for (const [id, label] of pairs) {
-    const row = rows.find((r) => r.id === id)!;
-    const printed = annex3(label);
-    expect(row.cells['2026.expected']?.value, id).toBe(printed[1]);
-    expect(row.cells['2027.draft']?.value, id).toBe(printed[2]);
-  }
-  // the 2025 column is the report every annual screen uses, never a forecast
-  expect(COMPARE[0]).toBe('2025.report');
-  const capex2025 = cellOf(data, 'exp.capex', '2025.report');
-  expect(capex2025?.vintage).toMatch(/^(actual|prelim)$/);
-  const balance = rows.find((r) => r.id === 'bal')!;
-  expect(balance.cells['2027.draft']?.value).toBe(annex3('Бюджетно салдо (+/-)')[2]);
-});
 
 it('answers the main bill view with the key figures, the comparison and the capital expenditure', async () => {
   const { vm, scope, html, document } = await page('/byudzhet-2027');
@@ -103,10 +73,14 @@ it('answers the main bill view with the key figures, the comparison and the capi
   const table = tableData(scope.maps.table.get('b27-sravnenie-table'));
   expect(table.rows).toHaveLength(19);
   const capex = table.rows.find((r: any) => r[0] === 'Капиталови разходи')!;
-  const printed = annex3('Капиталови разходи');
-  expect(capex.slice(2, 4)).toEqual([printed[1], printed[2]]);
+  const published = ['2026.expected', '2027.draft'].map(
+    (key) =>
+      release('expenditure').byPeriod[key].rows.find((r: any) => r.label === 'Капиталови разходи')
+        .cell.value,
+  );
+  expect(capex.slice(2, 4)).toEqual(published);
   // the change column is the plain difference of the two printed numbers
-  expect(capex[4]).toBe(Math.round((printed[2] - printed[1]) * 10) / 10);
+  expect(capex[4]).toBe(Math.round((published[1] - published[0]) * 10) / 10);
   expect((vm as { answer?: string }).answer).toContain('капиталовите разходи');
   // the capital expenditure of every institution budget, read from its own printed row
   const ranked = scope.maps.attached.get('b27-kapitalovi-vedomstva').table;

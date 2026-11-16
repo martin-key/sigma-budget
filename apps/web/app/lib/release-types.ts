@@ -1,4 +1,3 @@
-export type * from '@sigma-budget/dataset-schema';
 export interface ReleaseIdentity {
   id: string;
   dataBase: string;

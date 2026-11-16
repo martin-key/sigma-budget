@@ -1,29 +1,16 @@
-# Node (не е нужен за приложението, но може да се ползва за инструменти)
+# Node
 node_modules/
 
 # Браузъри на Playwright и снимки от проверките
 tmp/pw-browsers/
 render-check/
 
-# Суровите данни не се качват (docs/data-sources.md)…
-data/originals/*
+# Локални оригинали не се включват в сайта.
+data/originals/
 data/raw/
-# …освен файловете на МФ (minfin.bg): 33-те месечни отчета по КФП, PDF-а с АСБП и материалите за бюджет 2027, около 13 MB. С тях всеки може да сглоби данните
-# от чисто копие. Останалите източници се свалят автоматично (packages/ingest/src/source-client/) и остават извън Git.
-!data/originals/budget_2027/
-!data/originals/kfp_2022/
-!data/originals/kfp_2023/
-!data/originals/kfp-history-acquisition.json
-!data/originals/kfp_2024/
-!data/originals/kfp_2025/
-!data/originals/kfp_2026/
-!data/originals/asbp/
-data/originals/asbp/*
-!data/originals/asbp/UMTBF-2026-2028-motivi.pdf
 
 # Временни файлове и кешове
 tmp/
-data/cache/
 .tmp/
 *.log
 .DS_Store
@@ -40,19 +27,13 @@ Thumbs.db
 
 # Собствените среди: адресите и id-тата на твоя Cloudflare акаунт (docs/release.md, „Среди“)
 wrangler.local.jsonc
-apps/etl/environments.local.json
 
 # Генерираният изход се игнорира само там, където инструментите го пишат. Голо име на папка (build/, dist/, coverage/) би скрило
-# и изходни папки със същото име, например packages/ingest/src/build/: нов файл там не би стигнал до Git. Пазачът е
-# apps/web/workers/repository-ignore.test.ts.
+# и изходни папки със същото име.
 # Сглобеното SSR приложение (react-router build и pnpm build:release, apps/web/react-router.config.ts)
 /apps/web/build/
-# Компилираните TypeScript пакети (tsc -p tsconfig.build.json, outDir dist)
-/apps/*/dist/
-/packages/*/dist/
-# Покритието от pnpm test -- --coverage (vitest.shared.ts, reportsDirectory ./coverage); в корена — при vitest, пуснат оттам
-/apps/*/coverage/
-/packages/*/coverage/
+# Покритието от pnpm test -- --coverage
+/apps/web/coverage/
 /coverage/
 # Сводката на pnpm check:coverage (scripts/check-coverage.mjs); в CI се качва като artifact „coverage“, затова не се следи
 /coverage-summary.md
@@ -61,15 +42,6 @@ apps/etl/environments.local.json
 # Генерираните типове на React Router и локалното състояние на wrangler (имена на инструменти, не на изходни папки)
 .react-router/
 .wrangler/
-# Локалните бележки и разписките на операторските команди (apps/etl/src/release-operator.ts: work/ts-operator-receipts)
-/work/
 
 # Turbo task cache (в корена и във всеки workspace)
 .turbo/
-
-!data/originals/state_budget/
-!data/originals/fiscal_quarterly/
-!data/originals/taxes-subsectors-acquisition.json
-
-!data/originals/debt/
-!data/originals/debt-issues-acquisition.json

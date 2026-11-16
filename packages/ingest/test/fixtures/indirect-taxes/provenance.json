@@ -1,9 +1,0 @@
-{
-  "baseline": "027a262288c0b0ca4b188482a8b8da43bb378047",
-  "buildDate": "2026-11-08",
-  "mode": "frozen-python-reader-ir",
-  "files": {
-    "reader-ir.json": "a7333850711e590a433fb12bd118ce74c3f6cdf2b9e5f02623c7eb9bdfe0ee27",
-    "oracle.json": "adffb3ccd3be4536ca07aa86aaa67623137ed6cd779278fb3d025e9748ef6dc1"
-  }
-}

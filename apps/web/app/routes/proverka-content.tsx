@@ -14,6 +14,7 @@ import { siteUrl } from '../../client/seo.js';
 import { dataHref } from '../../client/data.js';
 import { sizeLabel } from '../../client/catalog.js';
 import { checkRows } from '../../client/check-groups.js';
+import { reproductionCommand } from '../../client/reproduce.js';
 const ext = (url: string, label: ReactNode) => (
   <a className="ext" href={url} target="_blank" rel="noopener noreferrer">
     {label}
@@ -372,7 +373,7 @@ function codeBlock(m: Manifest) {
   );
 }
 
-function checksBlock(v: Validation | undefined) {
+function checksBlock(rid: string, m: Manifest, v: Validation | undefined) {
   const groups = v?.groups || [];
   const origin = siteUrl('/').replace(/\/$/, '');
   return block(
@@ -413,22 +414,16 @@ function checksBlock(v: Validation | undefined) {
       </p>
 
       <pre className="s35-cmd">
-        <code>
-          {'git clone '}
-          {REPO}
-          {'.git && cd sigma-budget\n./budget reproduce --current '}
-          {origin}
-          {' --originals /път/до/входовете'}
-        </code>
+        <code>{reproductionCommand(m, rid, origin)}</code>
       </pre>
 
       <p>
         {
-          'Командата чете манифеста на текущото издание, проверява локалните входни файлове и сравнява пресъздадените изходи с публикуваните байтове. Изходът е '
+          'Командата проверява входните файлове и сравнява пресъздадените изходи с това издание. Изходът е '
         }
         <code lang="en">{'reproduced byte for byte'}</code>
         {' или списък с разликите. Подробности: '}
-        {ext(`${REPO}/blob/main/docs/release.md`, 'docs/release.md')}
+        {ext(`${DATA_REPO}/blob/main/docs/release.md`, 'docs/release.md')}
         {'.'}
       </p>
     </>,
@@ -498,7 +493,7 @@ export function render(ctx: MetadataContext) {
         {coverageBlock(m)}
         {filesBlock(rid, m)}
         {codeBlock(m)}
-        {checksBlock(ctx.data['release/validation'])}
+        {checksBlock(rid, m, ctx.data['release/validation'])}
         {provenanceBlock()}
         {historyBlock()}
       </>

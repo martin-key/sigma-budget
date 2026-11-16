@@ -12,7 +12,6 @@
     "@cloudflare/vite-plugin": "1.64.0",
     "@cloudflare/workers-types": "5.20261104.1",
     "@react-router/dev": "7.18.4",
-    "@sigma-budget/ingest": "workspace:*",
     "@types/pako": "2.0.4",
     "@types/node": "24.10.1",
     "@types/react": "19.3.0",
@@ -27,7 +26,6 @@
   },
   "type": "module",
   "dependencies": {
-    "@sigma-budget/dataset-schema": "workspace:*",
     "linkedom": "0.18.14",
     "react": "19.3.1",
     "react-dom": "19.3.1",

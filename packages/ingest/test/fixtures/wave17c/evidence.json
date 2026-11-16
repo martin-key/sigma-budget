@@ -1,8 +1,0 @@
-{
-  "inventory.json": "eaa76e9de3135fa5ffe78057cb6d080f9e7b82c99b08ec397dcb0e7752edb2aa",
-  "differential.json": "fd6540ed1d6b4c711964ed0c61c467d73e4acbabe5ea0e41082e729b85d0e468",
-  "reference.json": "b779fcf071c8abd4583e956af92d9fec83f7b9c1a1862183fc3ddde3373858aa",
-  "wrapper.json": "76c0c92a0ee9fff97c5084c1282d697b587b246c7073cf439b7f68996e23205f",
-  "README.md": "c22909dbfd1a3df755c9801dbfce92783a5cace8735b442aa2bf3eec79bc9e2f",
-  "../../../src/validate/search-unicode-data.ts": "7701da90decd4e44e860d32ada484a4d502c426899850bc7b58d014b05c764be"
-}

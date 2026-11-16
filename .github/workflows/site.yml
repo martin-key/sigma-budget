@@ -1,5 +1,5 @@
 # Checks, build and deployment of the site (README „Сглобяване и публикуване“; docs/adr/0002-react-router-ssr.md).
-#   pull request to main             -> the registries, data validation, the TypeScript check, the build of the Worker (React Router SSR)
+#   pull request to main             -> offline release integrity, the TypeScript check, the build of the Worker (React Router SSR)
 #                                       with every screen checked as the server sends it and as the browser shows it, the browser checks of the
 #                                       app (screens against the built Worker) and local release compatibility
 #   push to main                     -> the same, then deploy the built Worker to staging (noindex)
@@ -68,7 +68,7 @@ jobs:
     uses: ./.github/workflows/security.yml
 
   coverage:
-    needs: [node-inputs]
+    needs: [target]
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -82,14 +82,8 @@ jobs:
           cache: pnpm
       - name: Install tools
         run: pnpm install --frozen-lockfile
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
-        with:
-          name: registered-node-input-archive
-          path: ${{ runner.temp }}/registered-node-input-archive
-      - name: Restore the four pinned programme originals for independent checks
-        run: node scripts/restore-programme-test-inputs.mjs "$RUNNER_TEMP/registered-node-input-archive/registered-node-inputs.tar.gz"
       - name: Coverage gate self-tests
-        run: node --test scripts/check-coverage.test.mjs scripts/ci-gates.test.mjs scripts/ci-install-browser.test.mjs scripts/restore-programme-test-inputs.test.mjs
+        run: node --test scripts/check-coverage.test.mjs scripts/ci-gates.test.mjs scripts/ci-install-browser.test.mjs
       - name: Coverage baseline ratchet against target
         env:
           COVERAGE_BASE_REF: ${{ github.base_ref }}
@@ -99,7 +93,7 @@ jobs:
         run: pnpm test -- --coverage
       - name: Node tests leave protected inputs unchanged
         if: always()
-        run: test -z "$(git status --porcelain -- data packages/ingest/test/fixtures packages/ingest/test/expected apps/web/app/routes/__fixtures__)"
+        run: test -z "$(git status --porcelain -- data apps/web/app/routes/__fixtures__)"
       - name: Per-workspace regression gate
         run: pnpm check:coverage
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -109,7 +103,6 @@ jobs:
           path: |
             coverage-summary.md
             apps/*/coverage/coverage-summary.json
-            packages/*/coverage/coverage-summary.json
           if-no-files-found: error
 
   build:
@@ -132,12 +125,8 @@ jobs:
         run: pnpm format:check
       - name: TypeScript
         run: pnpm typecheck
-      - name: Warn when the monthly КФП report is overdue (never fails)
-        run: |
-          pnpm --filter @sigma-budget/etl... build
-          pnpm exec budget-ts freshness
-      - name: Check the source and dataset registries
-        run: node packages/ingest/dist/validate/cli.js --live --only REGISTRY
+      - name: Offline pinned release integrity
+        run: pnpm data:check
       - name: Compatibility of code and data (stage E)
         run: node tests/release/compat_check.mjs
       - name: Build the Worker for the target and check every screen
@@ -235,7 +224,7 @@ jobs:
 
   required-validation:
     if: ${{ always() }}
-    needs: [target, security, coverage, build, check, release, node-inputs, node-import]
+    needs: [target, security, coverage, build, check, release]
     runs-on: ubuntu-latest
     steps:
       - name: Every validation must succeed
@@ -330,83 +319,3 @@ jobs:
         env:
           ORIGIN: ${{ steps.deployment-origin.outputs.origin }}
         run: node scripts/check-deployment.mjs --origin "$ORIGIN"
-
-  node-inputs:
-    needs: [target]
-    # Draft assets need push access. This job runs no checkout or project code;
-    # the token is exposed only to the fixed download, then all bytes are pinned.
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      contents: write
-    steps:
-      - name: Download only the approved repository-owned CI archive
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh api --hostname github.com repos/midt-bg/sigma-budget/releases/assets/746880567 -H 'Accept: application/octet-stream' > "$RUNNER_TEMP/registered-node-inputs.tar.gz"
-          printf '%s  %s\n' '9717d7f91bbed7c5c6ced6e42d637820dfbdd2f6571579101c6489df91538a3f' "$RUNNER_TEMP/registered-node-inputs.tar.gz" | sha256sum --check
-          test "$(stat -c '%s' "$RUNNER_TEMP/registered-node-inputs.tar.gz")" = 153847296
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: registered-node-input-archive
-          path: ${{ runner.temp }}/registered-node-inputs.tar.gz
-          compression-level: 0
-          retention-days: 1
-          if-no-files-found: error
-
-  node-import:
-    # Required actual-source acceptance. A missing restored snapshot fails; no core acceptance skip.
-    needs: [node-inputs]
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-        with:
-          fetch-depth: 0
-      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: '24'
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @sigma-budget/etl... build
-      - name: Check the registries against the full history (every historical producer exists at its commit)
-        # the build job checks the registries on a shallow checkout, where the commits of the historical producers cannot be looked up
-        run: |
-          status=0
-          node packages/ingest/dist/validate/cli.js --live --only REGISTRY > "$RUNNER_TEMP/registry.json" || status=$?
-          cat "$RUNNER_TEMP/registry.json"
-          if grep -q 'verification skipped' "$RUNNER_TEMP/registry.json"; then
-            echo '::error::the historical producers were not checked against the Git history'
-            exit 1
-          fi
-          exit "$status"
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
-        with:
-          name: registered-node-input-archive
-          path: ${{ runner.temp }}/registered-node-input-archive
-      - name: Authenticate the reviewed archive and every registered input
-        run: node scripts/restore-node-input-cache.mjs "$RUNNER_TEMP/registered-node-input-archive/registered-node-inputs.tar.gz" "$RUNNER_TEMP/registered-node-inputs"
-      - name: Validate the committed release manifest and complete current TypeScript rules
-        run: ./budget check-site --inputs "$RUNNER_TEMP/registered-node-inputs"
-      - name: Actual Node readers, complete rules, double build and local recorded-code replay
-        run: node scripts/node-import-acceptance.mjs "$RUNNER_TEMP/registered-node-inputs" "$RUNNER_TEMP/node-acceptance" 2026-11-16
-      - name: Provision the Chromium of the pinned Playwright (outside import runtime)
-        run: bash scripts/ci-install-browser.sh
-      - name: Package the fresh Node candidate and exercise its Worker and browser identity
-        run: node scripts/node-candidate-site-acceptance.mjs "$RUNNER_TEMP/node-acceptance/candidate" "$RUNNER_TEMP/node-site"
-      - name: Protected checkout state
-        if: always()
-        run: test -z "$(git status --porcelain -- data packages/ingest/test/fixtures)"
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        if: always()
-        with:
-          name: node-import-acceptance
-          path: |
-            ${{ runner.temp }}/node-acceptance/acceptance.json
-            ${{ runner.temp }}/node-acceptance/candidate/manifest.json
-            ${{ runner.temp }}/node-acceptance/candidate/validation.json
-            ${{ runner.temp }}/node-acceptance/candidate/receipt.json
-            ${{ runner.temp }}/node-site/site-acceptance.json
-          if-no-files-found: error

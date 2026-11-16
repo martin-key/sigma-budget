@@ -1,5 +1,13 @@
 // Release postprocessing, independent of the browser crawl (build-release.ts).
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import {
+  cpSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { createHash } from 'node:crypto';
 import { join } from 'node:path';
@@ -57,35 +65,49 @@ describe('the deploy artifact', () => {
     const sha = (bytes: Buffer | string) => createHash('sha256').update(bytes).digest('hex');
     const sebra = Buffer.from('{"rows":[]}\n');
     const core = Buffer.from('{"value":42}\n');
-    const output = (path: string, bytes: Buffer) => ({ path, sha256: sha(bytes) });
+    const output = (path: string, bytes: Buffer) => ({
+      path,
+      bytes: bytes.length,
+      sha256: sha(bytes),
+    });
     const manifest = JSON.stringify({
+      format: 1,
+      manifest_schema: 'budget-release/1',
       outputs: [output('data/sebra.json', sebra), output('data/core.json', core)],
     });
     // the release id is the SHA-256 of its manifest
     const id = sha(manifest);
     const archive = join(out, 'data/releases', id);
     mkdirSync(archive, { recursive: true });
-    writeFileSync(join(out, 'data/releases/current.json'), JSON.stringify({ release_id: id }));
+    writeFileSync(
+      join(out, 'data/releases/current.json'),
+      JSON.stringify({ release_id: id, format: 1 }),
+    );
     writeFileSync(join(archive, 'manifest.json'), manifest);
+    writeFileSync(join(archive, 'receipt.json'), JSON.stringify({ release_id: id }));
     writeFileSync(join(out, 'data/sebra.json'), sebra);
     writeFileSync(join(out, 'data/core.json'), core);
     preservePublishedOutputs(out);
     rmSync(join(out, 'data/sebra.json'));
     expect(() => checkPublishedOutputs(out)).not.toThrow();
     expect(readFileSync(join(archive, 'data/sebra.json'))).toEqual(sebra);
-    writeFileSync(join(out, 'data/core.json'), 'changed');
+    writeFileSync(join(out, 'data/core.json'), Buffer.alloc(core.length));
     expect(() => checkPublishedOutputs(out)).toThrow('sha256 mismatch: data/core.json');
     rmSync(join(out, 'data/core.json'));
     expect(() => checkPublishedOutputs(out)).toThrow('missing: data/core.json');
     writeFileSync(join(out, 'data/core.json'), core);
-    writeFileSync(join(archive, 'data/sebra.json'), 'changed archive');
+    writeFileSync(join(archive, 'data/sebra.json'), Buffer.alloc(sebra.length));
     expect(() => checkPublishedOutputs(out)).toThrow('sha256 mismatch: data/sebra.json');
     // a release the Worker could not serve does not pass: no outputs, or a pointer it would not accept
-    const empty = JSON.stringify({ outputs: [] });
+    const empty = JSON.stringify({ format: 1, manifest_schema: 'budget-release/1', outputs: [] });
     mkdirSync(join(out, 'data/releases', sha(empty)), { recursive: true });
     writeFileSync(join(out, 'data/releases', sha(empty), 'manifest.json'), empty);
     writeFileSync(
       join(out, 'data/releases/current.json'),
+      JSON.stringify({ release_id: sha(empty), format: 1 }),
+    );
+    writeFileSync(
+      join(out, 'data/releases', sha(empty), 'receipt.json'),
       JSON.stringify({ release_id: sha(empty) }),
     );
     expect(() => checkPublishedOutputs(out)).toThrow('lists no outputs');
@@ -94,6 +116,20 @@ describe('the deploy artifact', () => {
       JSON.stringify({ release_id: 'notahexid' }),
     );
     expect(() => checkPublishedOutputs(out)).toThrow('invalid release_id');
+  });
+
+  it('rejects a tampered historical manifest in the offline release check', () => {
+    const release = join(out, 'release');
+    cpSync(new URL('../../../data/release/', import.meta.url), release, { recursive: true });
+    expect(() => checkPublishedOutputs(out, release, true)).not.toThrow();
+    const manifest = join(
+      release,
+      'releases/7347b26bce61f36dbe22a40f7623ba35693649efdd920cd09585302a08712bdf/manifest.json',
+    );
+    writeFileSync(manifest, readFileSync(manifest, 'utf8') + ' ');
+    expect(() => checkPublishedOutputs(out, release, true)).toThrow(
+      'manifest.json differs from its release_id',
+    );
   });
 
   it('production and noindex', () => {
@@ -236,7 +272,10 @@ describe('the deploy artifact', () => {
     );
     const id = 'd'.repeat(64);
     mkdirSync(join(out, 'data/releases'), { recursive: true });
-    writeFileSync(join(out, 'data/releases/current.json'), JSON.stringify({ release_id: id }));
+    writeFileSync(
+      join(out, 'data/releases/current.json'),
+      JSON.stringify({ release_id: id, format: 1 }),
+    );
     const originalFeed = read('data/feed.xml'),
       originalCatalog = read('data/catalog.json');
     stampFiles(out, 'https://example.test', 'v1', 'abc1234');

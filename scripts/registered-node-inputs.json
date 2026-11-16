@@ -1,9 +1,0 @@
-{
-  "schema": "registered-ci-input-archive/1",
-  "repository": "midt-bg/sigma-budget",
-  "assetId": 746880567,
-  "bytes": 153847296,
-  "sha256": "9717d7f91bbed7c5c6ced6e42d637820dfbdd2f6571579101c6489df91538a3f",
-  "snapshot": "ecbe22a45e8b3300473218d0bfe0cd3f5b796dce1ceb6cecf65b9c48ff3bbb11",
-  "inputs": 179
-}
