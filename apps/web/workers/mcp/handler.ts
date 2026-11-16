@@ -91,9 +91,6 @@ export async function mcp(request: Request, env: Env, url: URL): Promise<Respons
         'X-Robots-Tag': 'noindex',
       },
     });
-  const version = request.headers.get('MCP-Protocol-Version');
-  if (version && !PROTOCOL_VERSIONS.includes(version))
-    return error(null, -32600, `Unsupported MCP-Protocol-Version: ${version.slice(0, 40)}`, 400);
   if (!/^application\/json\s*(;|$)/i.test(request.headers.get('Content-Type') || ''))
     return error(null, -32600, 'Content-Type must be application/json', 415);
   if (Number(request.headers.get('Content-Length') || 0) > MAX_BODY)
@@ -130,6 +127,11 @@ export async function mcp(request: Request, env: Env, url: URL): Promise<Respons
       : error(null, -32600, 'Invalid Request', 400);
   if (!('id' in msg)) return reply(null, 202); // a notification: notifications/initialized, notifications/cancelled …
   if (!validId) return error(null, -32600, 'Invalid Request: id', 400);
+  // the version of a session is agreed in initialize (its body), so a client may send a newer one there and take this server's answer; on
+  // any later request an unknown version is refused (OpenAI's client sends 2026-07-28 first, then the version it agreed)
+  const version = request.headers.get('MCP-Protocol-Version');
+  if (msg.method !== 'initialize' && version && !PROTOCOL_VERSIONS.includes(version))
+    return error(id, -32600, `Unsupported MCP-Protocol-Version: ${version.slice(0, 40)}`, 400);
   const params = isObject(msg.params) ? msg.params : {};
 
   switch (msg.method) {

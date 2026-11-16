@@ -45,6 +45,15 @@ describe('the protocol', () => {
     });
     expect(INSTRUCTIONS).toMatch(/не ги замествай с нула/);
   });
+  it('agrees the version in initialize even when the header names a newer one', async () => {
+    const res = await send(
+      post(rpc('initialize', { protocolVersion: '2026-07-28' }), {
+        'MCP-Protocol-Version': '2026-07-28',
+      }),
+    );
+    expect(res.status).toBe(200);
+    expect(((await res.json()) as any).result.protocolVersion).toBe(PROTOCOL_VERSIONS[0]);
+  });
   it('answers an unknown version with the newest one and keeps a valid session', async () => {
     const session = 'a'.repeat(32);
     const res = await send(
