@@ -17,7 +17,12 @@ import {
   type CatalogSet,
   type Ctx,
 } from './data';
+import datasetScreens from '../../app/lib/dataset-screens.json' with { type: 'json' };
 import { FORMATS, GENERIC } from './formats';
+
+/** the screens a set appears on: the site's own mapping (app/lib/dataset-screens.json, as client/catalog.js), else an older catalogue's */
+const screensOf = (s: CatalogSet): string[] =>
+  (datasetScreens as Record<string, string[]>)[s.slug] ?? s.screens ?? [];
 import { entriesOf, search } from './search';
 import { fit, resolve, ArgError, DEFAULT_LIMIT, MAX_LIMIT } from './slice';
 
@@ -165,7 +170,7 @@ async function fetchTool(ctx: Ctx, args: Args) {
     if (!entries.length && !route) throw new ArgError(`Няма страница „${key}“.`);
     const cat = await catalog(ctx);
     const sets = route
-      ? cat.datasets.filter((s) => s.screens?.includes(route.id)).map((s) => s.slug)
+      ? cat.datasets.filter((s) => screensOf(s).includes(route.id)).map((s) => s.slug)
       : [];
     return {
       id,

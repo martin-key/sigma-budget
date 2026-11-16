@@ -959,7 +959,7 @@ AI асистентите (Claude, ChatGPT) четат данните през `
 - **Логовете** имат само името на инструмента, изхода, времето и размера. Аргументите не се логват, защото носят текст от потребителя.
 - **Локална проверка**: `pnpm build`, после `pnpm dev -- --port 8814` и
   `curl -s -X POST http://127.0.0.1:8814/mcp -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'`.
-  Без регистър `explain_number` чете файловете за произход на изданието и отговаря с `verified: false`. С регистър проверката минава през публичния API и манифеста (`tests/release/release_check.py`).
+  Без регистър `explain_number` чете файловете за произход на изданието и отговаря с `verified: false`. С регистър проверката минава през публичния API и манифеста (`tests/release/release_check.mjs`).
 
 ---
 

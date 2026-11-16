@@ -1,5 +1,5 @@
 // explain_number with a registry: the record is checked by the public API against the manifest of the release
-// (apps/web/workers/api/api.js provenance); tests/release/release_check.py runs the same call against local D1 and R2.
+// (apps/web/workers/api/api.js provenance); tests/release/release_check.mjs runs the same call against local D1 and R2.
 import { expect, it, vi } from 'vitest';
 vi.mock('../api/api.js', () => ({ publicApi: vi.fn() }));
 import { publicApi } from '../api/api.js';
