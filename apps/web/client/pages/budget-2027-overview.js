@@ -14,6 +14,7 @@ import { dataTable } from '../ui/table.js';
 import { ranklist } from '../ui/ranklist.js';
 import { chips } from '../ui/chips.js';
 import { linkCard } from '../ui/cards.js';
+import { disclosure } from '../ui/disclosure.js';
 import { institutions, cellValue, headline, stateDebt, strictSum } from '../budget-2027.js';
 import {
   COMPARE,
@@ -576,6 +577,36 @@ function razhodi(ctx) {
 
 /* ---------------------------------------------------------------- 6 · Ведомства */
 // S10 lists the 47 budgets of the draft; the change against the 2026 law is only here.
+
+/** Two bars per institution, 2026 under 2027, on one scale: the amount at the end of each bar and the change in % beside the pair.
+ *  Plain HTML, so the long names wrap on a phone and the numbers stay readable; the table below carries the same values and the CSV. */
+function pairBars(rows, { id, label, heads }) {
+  const max = Math.max(...rows.flatMap((r) => [r.before, r.now].filter(ok)));
+  const w = (x) => (ok(x) && max > 0 ? Number(((Math.max(0, x) / max) * 100).toFixed(1)) : 0);
+  const bar = (cls, x, head) =>
+    html`<span class="b27-pair-bar ${cls}"><span class="b27-pair-fill" style="--w:${w(x)}"></span><span class="b27-pair-v"><span class="sr-only">${head}: </span>${ok(x) ? num(x, 0) : DASH}</span></span>`;
+  return html`<figure class="b27-pairs" id="${id}">
+    <figcaption class="b27-pairs-key">
+      <span>${label}</span>
+      <span class="b27-pairs-legend" aria-hidden="true"
+        ><span class="b27-key b27-key-before"></span>${heads[0]}
+        <span class="b27-key b27-key-now"></span>${heads[1]}</span
+      >
+    </figcaption>
+    <ol class="b27-pair-list">
+      ${rows.map(
+        (r) => html`<li class="b27-pair">
+          <span class="b27-pair-name"><a href="${r._href}">${r.name}</a></span>
+          <span class="b27-pair-bars">${bar('b27-pair-before', r.before, heads[0])}${bar('b27-pair-now', r.now, heads[1])}</span>
+          <span class="b27-pair-pct"${ok(r.pct) && r.pct < 0 ? html` data-dir="down"` : ''}
+            ><span class="sr-only">Промяна: </span>${ok(r.pct) ? pct(r.pct, 0, { sign: true }) : DASH}</span
+          >
+        </li>`,
+      )}
+    </ol>
+  </figure>`;
+}
+
 function vedomstva(ctx) {
   const doc = ctx.data.budget2027;
   const law = new Map((ctx.data.ministries?.items || []).map((i) => [String(i.id), i]));
@@ -599,7 +630,7 @@ function vedomstva(ctx) {
     .filter((r) => ok(r.now))
     .sort((a, b) => b.now - a.now);
   if (!rows.length) return '';
-  const top = rows.slice(0, 12);
+  const top = rows.slice(0, 15);
   const grow = [...rows].filter((r) => ok(r.abs)).sort((a, b) => b.abs - a.abs)[0];
   return base(
     ctx,
@@ -614,18 +645,27 @@ function vedomstva(ctx) {
           </p>`
           : ''
       }
-      ${dataTable({
-        id: 'b27-vedomstva-table',
-        caption: 'Разходите на дванадесетте най-големи бюджета на ведомства, млн. евро',
-        columns: [
-          { key: 'name', label: 'Ведомство' },
-          { key: 'before', label: '2026 · закон', unit: 'млн. €', num: true, d: 1 },
-          { key: 'now', label: '2027 · законопроект', unit: 'млн. €', num: true, d: 1 },
-          { key: 'pct', label: 'Промяна, %', num: true, fmt: (x) => (ok(x) ? signed(x) : DASH) },
-          { key: 'code', label: 'Код', csvOnly: true },
-        ],
-        rows: top,
-        dense: true,
+      ${pairBars(top, {
+        id: 'b27-vedomstva-fig',
+        label: 'Разходи, млн. € · промяна спрямо 2026 г.',
+        heads: ['2026 · закон', '2027 · проект'],
+      })}
+      ${disclosure({
+        id: 'b27-vedomstva-d',
+        title: 'Таблица с точните стойности',
+        body: dataTable({
+          id: 'b27-vedomstva-table',
+          caption: 'Разходите на петнадесетте най-големи бюджета на ведомства, млн. евро',
+          columns: [
+            { key: 'name', label: 'Ведомство' },
+            { key: 'before', label: '2026 · закон', unit: 'млн. €', num: true, d: 1 },
+            { key: 'now', label: '2027 · законопроект', unit: 'млн. €', num: true, d: 1 },
+            { key: 'pct', label: 'Промяна, %', num: true, fmt: (x) => (ok(x) ? signed(x) : DASH) },
+            { key: 'code', label: 'Код', csvOnly: true },
+          ],
+          rows: top,
+          dense: true,
+        }),
       })}
       <p class="b27-note small">
         <a href="${ctx.href('S10', {}, { per: DRAFT })}">Всички ${num(rows.length)} ведомства</a> ·

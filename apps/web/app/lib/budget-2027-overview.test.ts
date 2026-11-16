@@ -197,6 +197,30 @@ it('opens the list of a shared measure by its tab', async () => {
   expect(tab.getAttribute('aria-selected')).toBe('true');
 });
 
+it('compares the institutions as paired bars with the amount and the change', async () => {
+  const { document } = await page('/byudzhet-2027');
+  const fig = document.getElementById('b27-vedomstva-fig')!;
+  const pairs = [...fig.querySelectorAll('.b27-pair')];
+  expect(pairs).toHaveLength(15);
+  const widths: number[] = [];
+  for (const pair of pairs) {
+    expect(pair.querySelector('.b27-pair-name a')?.getAttribute('href')).toMatch(/\d/);
+    const values = pair.querySelectorAll('.b27-pair-v');
+    expect(values).toHaveLength(2);
+    expect(pair.querySelector('.b27-pair-pct')?.textContent).toMatch(/[+−]?\d+\s*%|—/);
+    for (const f of pair.querySelectorAll('.b27-pair-fill'))
+      widths.push(Number(/--w:([\d.]+)/.exec(f.getAttribute('style') || '')?.[1]));
+  }
+  expect(Math.max(...widths)).toBe(100);
+  expect(widths.every((w) => w >= 0 && w <= 100)).toBe(true);
+  // ordered by the 2027 amount, the exact values stay in the folded table
+  const now = pairs.map((p) =>
+    Number(p.querySelectorAll('.b27-pair-v')[1].lastChild!.textContent!.replace(/\D/g, '')),
+  );
+  expect(now).toEqual([...now].sort((a, b) => b - a));
+  expect(document.querySelector('#b27-vedomstva-d #b27-vedomstva-table')).not.toBeNull();
+});
+
 it('explains the GDP vintages, preliminary report and capital expenditure scope', async () => {
   const data = Object.fromEntries(
     ['outlook', 'revenue', 'expenditure'].map((n) => [n, release(n)]),
