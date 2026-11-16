@@ -64,9 +64,6 @@ const config = {
     SIGMA_URL: '',
     FEEDBACK_EMAIL: '',
     NOINDEX: '1',
-    ACCESS_ISSUER: '',
-    ACCESS_AUD: '',
-    SERVICE_TOKENS: '',
   },
 };
 const configPath = join(out, 'wrangler-source.json');

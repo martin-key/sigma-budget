@@ -11,10 +11,7 @@ export const strictSum = (cells) =>
 export function provenanceUrl(cell) {
   if (!cell?.provenance) return '';
   const base = dataHref('budget2027-provenance');
-  const release = /^\/data\/releases\/([a-f0-9]{64})\/data\//.exec(base);
-  return release
-    ? `/api/releases/${release[1]}/provenance/budget2027/${cell.provenance}`
-    : `${base}#${cell.provenance}`;
+  return `${base}#${cell.provenance}`;
 }
 export const headline = (budget, section) =>
   budget?.rows?.find((r) => r.no === section + '.')?.cell;

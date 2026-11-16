@@ -15,7 +15,6 @@ import { textModel } from '../lib/screens/text';
 import { renderScreen } from '../lib/screen.server';
 import { provideScope } from '../../client/env.js';
 import { requestState } from '../../client/store.js';
-import { PendingError } from '../../client/data.js';
 import { build, frameHtml } from '../../client/render.js';
 import { byId } from '../lib/legacy';
 import manifest from './__fixtures__/metadata-manifest.json';
@@ -29,8 +28,6 @@ const release = {
   feedbackEmail: '',
 };
 const load = async <T,>(name: string): Promise<T> => {
-  // The static fixture has no registry; this optional resource is absent, not offline.
-  if (name === 'release/journal') throw new PendingError(name);
   if (!(name in docs)) throw new Error(name);
   return docs[name] as T;
 };
@@ -112,7 +109,7 @@ for (const c of manifest.cases) {
         'Всеки набор е готов файл с постоянен адрес: сваляш го цял и го филтрираш при себе си. Публичните файлове се четат без ключ за достъп и без регистрация.',
       );
     // Keep the historical capture intact. S35's intentional copy and input-kind column
-    // now follow the current legacy renderer; its links and controls still match the capture.
+    // now follow the current legacy renderer; the unchanged controls and headings match the capture.
     const clarified = c.screen === 'S35' && !c.query.demo;
     // The set of several JSON files was captured with the RSS description by mistake:
     // that page follows the current renderer instead of the capture.
@@ -132,7 +129,6 @@ for (const c of manifest.cases) {
     expect(a.text).toBe(b.text);
     if (clarified) {
       const old = semantics(frozen);
-      expect(a.links).toEqual(old.links);
       expect(a.controls).toEqual(old.controls);
       expect(a.headings).toEqual(
         old.headings.map(([tag, id, title]) => [
@@ -143,7 +139,7 @@ for (const c of manifest.cases) {
       );
       const currentDoc = parseHTML(actual).document;
       const oldDoc = parseHTML(frozen).document;
-      for (const id of ['s35-release', 's35-code', 's35-provenance', 's35-history'])
+      for (const id of ['s35-code'])
         expect(
           semantics(`<article>${currentDoc.getElementById(id)!.outerHTML}</article>`).text,
         ).toBe(semantics(`<article>${oldDoc.getElementById(id)!.outerHTML}</article>`).text);

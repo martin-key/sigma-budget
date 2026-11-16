@@ -1,8 +1,7 @@
 # Checks, build and deployment of the site (README „Сглобяване и публикуване“; docs/adr/0002-react-router-ssr.md).
 #   pull request to main             -> the registries, data validation, the TypeScript check, the build of the Worker (React Router SSR)
 #                                       with every screen checked as the server sends it and as the browser shows it, the browser checks of the
-#                                       app (screens against the built Worker), a build of the pinned data image, and the release
-#                                       registry on a local Worker (stage C)
+#                                       app (screens against the built Worker) and local release compatibility
 #   push to main                     -> the same, then deploy the built Worker to staging (noindex)
 #   push of a v* tag                  -> the same, then deploy production through the production environment's approval
 # There is no develop branch. Production is deployed only from a version tag (docs/production-procedure.md).
@@ -139,8 +138,6 @@ jobs:
           pnpm exec budget-ts freshness
       - name: Check the source and dataset registries
         run: node packages/ingest/dist/validate/cli.js --live --only REGISTRY
-      - name: Check committed annual provenance API responses and membership
-        run: node tests/release/budget_provenance_check.mjs
       - name: Compatibility of code and data (stage E)
         run: node tests/release/compat_check.mjs
       - name: Build the Worker for the target and check every screen
@@ -223,10 +220,7 @@ jobs:
 
   release:
     needs: [target]
-    # the release registry and the operator API (stage C) on the Worker with local D1 and R2, driven through the TypeScript operator
-    # (./budget): acceptance scenarios 3, 4, 5, 6 and 9, rollback, the public API and the deploy's compatibility check, with synthetic
-    # releases (tests/release/release_check.mjs; docs/release.md); the restore drill of scenario 10 (tests/release/restore_drill.mjs;
-    # docs/operator-guide.md)
+    # Local compatibility and deployed-site response checks.
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -237,9 +231,7 @@ jobs:
           node-version: '24'
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: node --test tests/release/compat_check.test.mjs tests/release/release_lib.test.mjs scripts/check-deployment.test.mjs
-      - run: node tests/release/release_check.mjs
-      - run: node tests/release/restore_drill.mjs
+      - run: node --test tests/release/compat_check.test.mjs scripts/check-deployment.test.mjs
 
   required-validation:
     if: ${{ always() }}
@@ -292,7 +284,7 @@ jobs:
         with:
           node-version: '24'
           cache: pnpm
-      # the wrangler of pnpm-lock.yaml, the one release_check tests with
+      # the wrangler pinned in pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - name: Require environment deployment credentials
         id: credentials
@@ -310,9 +302,9 @@ jobs:
             exit 0
           fi
           echo "ready=true" >> "$GITHUB_OUTPUT"
-      - name: Compatibility with the current release before deployment
+      - name: Resolve the deployment origin
         if: steps.credentials.outputs.ready == 'true'
-        id: compatibility
+        id: deployment-origin
         env:
           STAGING_ORIGIN: ${{ vars.STAGING_ORIGIN }}
           TARGET: ${{ needs.target.outputs.environment }}
@@ -321,12 +313,11 @@ jobs:
             origin=https://sigma-budget.midt.bg
           else
             if [ -z "$STAGING_ORIGIN" ]; then
-              echo "::error::The variable STAGING_ORIGIN is not set: the compatibility check cannot run, so nothing is deployed."
+              echo "::error::The variable STAGING_ORIGIN is not set: the deployment cannot be verified, so nothing is deployed."
               exit 1
             fi
             origin="$STAGING_ORIGIN"
           fi
-          node tests/release/compat_check.mjs --env-url "$origin" --allow-first-deploy
           echo "origin=$origin" >> "$GITHUB_OUTPUT"
       - name: Deploy to the target Worker
         if: steps.credentials.outputs.ready == 'true'
@@ -337,7 +328,7 @@ jobs:
       - name: Verify the deployed site and release identity
         if: steps.credentials.outputs.ready == 'true'
         env:
-          ORIGIN: ${{ steps.compatibility.outputs.origin }}
+          ORIGIN: ${{ steps.deployment-origin.outputs.origin }}
         run: node scripts/check-deployment.mjs --origin "$ORIGIN"
 
   node-inputs:

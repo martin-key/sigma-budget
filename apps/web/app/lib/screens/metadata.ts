@@ -14,7 +14,6 @@ export async function metadataModel(
     screen,
     documents: {},
     failed: [],
-    registry: reader.release.dataBase.startsWith('/data/releases/'),
   };
   const load = async <T>(name: string, required = false): Promise<T | undefined> => {
     try {
@@ -51,7 +50,6 @@ export async function metadataModel(
     model.documents['releases/current'] = await load('releases/current', true);
     model.documents['release/manifest'] = await load('release/manifest', true);
     model.documents['release/validation'] = await load('release/validation');
-    if (model.registry) model.documents['release/journal'] = await load('release/journal');
     if (
       model.view === 'ready' &&
       !/^[0-9a-f]{64}$/.test(model.documents['releases/current']?.release_id || '')

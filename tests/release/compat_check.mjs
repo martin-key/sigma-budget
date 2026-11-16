@@ -1,18 +1,3 @@
-#!/usr/bin/env node
-// The compatibility of code and data (docs/approach-specification.md, sections 10.1 and 11, stage E).
-//
-//   node tests/release/compat_check.mjs                              the code against itself and against the releases in data/release/releases
-//   node tests/release/compat_check.mjs --env-url https://staging.…  also against the current release of an environment, before a deploy
-//
-// The code says which data contracts it reads in three places, and they must agree:
-//   apps/web/workers/api/store.js SUPPORTED                       what the Worker accepts in a manifest (it refuses to publish anything else)
-//   packages/ingest/src/release-build/contracts.ts                what a release built by this code declares (and the operator reads)
-//   apps/web/client/data.js parse                                 what the pages read: run here on the published execution.json, every
-//                                                                 amount must become a number
-// Then every release this code may meet must use a contract it reads: the releases published with the site, their execution.json, and
-// with --env-url the release that is current in an environment (a code deploy must not leave the screens unable to read the data on them).
-// --allow-first-deploy permits only missing-site responses before bootstrap; the deploy must then verify the public site identity.
-// Needs only Node 24 and the checkout: no build, no dependencies. Exit 0 when all agree, 1 when not, 2 when the environment cannot be read.
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { parseArgs } from 'node:util';
 
@@ -25,7 +10,6 @@ function ok(cond, msg) {
 }
 
 const json = (path) => JSON.parse(readFileSync(new URL(path, ROOT), 'utf8'));
-const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const names = (list) => (Array.isArray(list) ? list.join(', ') : String(list));
 
 /** apps/web/client/data.js parse('execution', text): how many amounts are not numbers after it (the pages compute with numbers) */
@@ -57,39 +41,21 @@ function checkManifest(m, where, sup) {
       );
 }
 
-async function read(url, timeoutMs) {
-  return fetch(url, {
-    headers: { 'User-Agent': 'compat-check' },
-    signal: AbortSignal.timeout(timeoutMs),
-  });
-}
-
 async function main(argv) {
   const { values } = parseArgs({
     args: argv,
     options: {
-      'env-url': { type: 'string' },
-      'allow-first-deploy': { type: 'boolean' },
       help: { type: 'boolean', short: 'h' },
     },
   });
   if (values.help) {
-    console.log('node tests/release/compat_check.mjs [--env-url <origin>] [--allow-first-deploy]');
+    console.log('node tests/release/compat_check.mjs');
     return 0;
   }
 
   console.log('the code');
-  const { SUPPORTED: w } = await import(new URL('apps/web/workers/api/store.js', ROOT).href);
-  const { RELEASE_COMPATIBILITY: b } = await import(
+  const { RELEASE_COMPATIBILITY: w } = await import(
     new URL('packages/ingest/src/release-build/contracts.ts', ROOT).href
-  );
-  ok(
-    Array.isArray(w?.execution) && w.execution.length > 0,
-    `apps/web/workers/api/store.js SUPPORTED names the execution contracts (${JSON.stringify(w)})`,
-  );
-  ok(
-    same(w, b),
-    `packages/ingest/src/release-build/contracts.ts declares the same contracts as the Worker accepts (${JSON.stringify(b)})`,
   );
   const ex = 'data/release/execution.json';
   const r = await clientParse(ex);
@@ -100,7 +66,7 @@ async function main(argv) {
   const schema = json(ex).contract?.schema;
   ok(
     (w?.execution ?? []).includes(`execution/${schema}`),
-    `data/release/execution.json is execution/${schema}, which the Worker accepts`,
+    `data/release/execution.json is execution/${schema}, which the code reads`,
   );
 
   console.log('the releases published with the site');
@@ -124,78 +90,6 @@ async function main(argv) {
     'releases/current.json names a release in data/release/releases',
   );
 
-  if (values['env-url']) {
-    const base = values['env-url'].replace(/\/+$/, '');
-    console.log('the current release of ' + base);
-    const firstDeploy = () => {
-      console.log(
-        '::warning::first deploy: the environment does not run the site yet, nothing to check against',
-      );
-      return finish();
-    };
-    let c;
-    try {
-      const res = await read(base + '/api/releases/current', 30_000);
-      const body = await res.text();
-      const parsed = (() => {
-        try {
-          return JSON.parse(body);
-        } catch {
-          return undefined;
-        }
-      })();
-      if (res.status === 404) {
-        // The Worker answers 404 with release_id: null while nothing is published; any other 404 is not this site.
-        const none = parsed;
-        if (none?.release_id !== null) {
-          if (values['allow-first-deploy']) return firstDeploy();
-          console.error(`cannot read ${base}/api/releases/current: HTTP 404, not from the Worker`);
-          return 2;
-        }
-        console.log('  —     no release is current there: nothing to read yet');
-        return finish();
-      }
-      if (
-        values['allow-first-deploy'] &&
-        ((res.status === 503 && body.trim().toLowerCase() === 'not deployed yet') ||
-          (!parsed && /(?:error code:\s*1\d{3}\b|<title>[^<]*error\s+1\d{3}\b)/i.test(body)))
-      )
-        return firstDeploy();
-      if (!res.ok) {
-        console.error(`cannot read ${base}/api/releases/current: HTTP ${res.status}`);
-        return 2;
-      }
-      c = parsed;
-    } catch (e) {
-      if (values['allow-first-deploy'] && ['ENOTFOUND', 'EAI_AGAIN'].includes(e?.cause?.code))
-        return firstDeploy();
-      console.error(
-        `cannot read ${base}/api/releases/current: ${e?.cause?.code ?? e?.message ?? e}`,
-      );
-      return 2;
-    }
-    if (
-      typeof c?.manifest !== 'string' ||
-      !c.manifest.startsWith('/') ||
-      typeof c.release_id !== 'string'
-    ) {
-      console.error(`cannot read ${base}/api/releases/current: not a release pointer`);
-      return 2;
-    }
-    let m;
-    try {
-      const res = await read(base + c.manifest, 60_000);
-      if (!res.ok) {
-        console.error(`cannot read ${base}${c.manifest}: HTTP ${res.status}`);
-        return 2;
-      }
-      m = await res.json();
-    } catch (e) {
-      console.error(`cannot read ${base}${c.manifest}: ${e?.cause?.code ?? e?.message ?? e}`);
-      return 2;
-    }
-    checkManifest(m, 'release ' + c.release_id.slice(0, 12), w);
-  }
   return finish();
 }
 

@@ -9,8 +9,6 @@ import { provideScope } from '../client/env.js';
 import { requestState } from '../client/store.js';
 import { renderScreen } from '../app/lib/screen.server';
 
-const store = vi.hoisted(() => ({ current: vi.fn(async () => null) }));
-vi.mock('./api/store.js', () => ({ ...store, manifestOf: vi.fn(), readObject: vi.fn() }));
 const temporary: string[] = [];
 const scratch = () => {
   const path = mkdtempSync(join(tmpdir(), 'budget-import-site-'));
@@ -56,7 +54,6 @@ function assets(root: string, missing = '') {
 
 afterEach(() => {
   vi.unstubAllGlobals();
-  store.current.mockClear();
   provideScope(() => null);
   for (const path of temporary.splice(0)) rmSync(path, { recursive: true, force: true });
 });
@@ -81,7 +78,6 @@ it('packages a validated candidate with one release identity and no checkout wri
     manifest_schema: 'budget-release/1',
   });
   expect(await selected.load('release/validation')).toMatchObject({ passed: true });
-  expect(store.current).not.toHaveBeenCalled();
   await expect(selected.load('unavailable-programme')).rejects.toMatchObject({
     name: 'PendingError',
   });
@@ -129,7 +125,6 @@ it('keeps the default bundled-release path when no candidate is selected', async
   );
   expect(selected.releaseId).toBe('d'.repeat(64));
   expect(await selected.load('core')).toEqual({ marker: 'default' });
-  expect(store.current).toHaveBeenCalledOnce();
 });
 
 it.skipIf(!process.env.BUDGET_IMPORT_CANDIDATE)(
@@ -186,6 +181,5 @@ it.skipIf(!process.env.BUDGET_IMPORT_CANDIDATE)(
         expect(result.doc.release.id).toBe(candidate.releaseId);
       }
     }
-    expect(store.current).not.toHaveBeenCalled();
   },
 );

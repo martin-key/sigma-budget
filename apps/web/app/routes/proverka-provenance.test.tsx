@@ -87,13 +87,22 @@ it('distinguishes preserved intermediates from source inputs without overstating
     const pendingRow = doc.querySelectorAll('#s35-sets tbody tr')[1]!;
     expect(pendingRow.lastElementChild!.textContent).toBe('—');
     expect(pendingRow.textContent).toContain('Отчетът не е публикуван от източника.');
+    expect(doc.querySelector('a[href="/api/releases"]')).toBeNull();
+    expect(
+      doc.querySelector(
+        'a[href="https://github.com/midt-bg/sigma-budget-data/tree/main/data/release/releases"]',
+      ),
+    ).not.toBeNull();
+    const outputs = (docs['release/manifest'] as { outputs: { path: string }[] }).outputs;
+    expect(
+      [...doc.querySelectorAll('#s35-out tbody a')].map((link) => link.getAttribute('href')),
+    ).toEqual(outputs.map((output) => `/data/releases/${release.id}/${output.path}`));
     const rows = [...doc.querySelectorAll('#s35-in tbody tr')];
     expect(rows).toHaveLength(4);
     rows.forEach((row, i) => {
       expect(row.children[1].textContent).toBe(files[i].label);
-      const link = row.querySelector('a')!;
-      expect(link.getAttribute('href')).toBe(`/data/releases/${release.id}/${files[i].path}`);
-      expect(link.getAttribute('download')).toBe(files[i].path.split('/').pop());
+      expect(row.querySelector('a')).toBeNull();
+      expect(row.children[0].textContent).toBe(files[i].path.split('/').pop());
       expect(row.querySelector('code')!.getAttribute('title')).toBe('a'.repeat(64));
     });
   }

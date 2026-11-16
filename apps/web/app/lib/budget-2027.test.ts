@@ -7,7 +7,6 @@ import {
   municipalRows,
   stateDebt,
   strictSum,
-  provenanceUrl,
   FRAMEWORK,
 } from '../../client/budget-2027.js';
 import { annualView } from '../../client/annual.js';
@@ -535,11 +534,6 @@ it('exports source IDs, full provenance links, selected period, units, release a
   expect(csv).toContain(';2027.draft;хил. €;');
   expect(csv).toContain(institutions(doc, 'billMc')[0].expenditure.provenance);
   expect(csv).toContain('/data/budget2027-provenance.json#');
-  const rid = 'a'.repeat(64);
-  provideScope(() => ({ dataBase: `/data/releases/${rid}/data/` }));
-  expect(provenanceUrl(doc.debtLimits['68'])).toBe(
-    `/api/releases/${rid}/provenance/budget2027/${doc.debtLimits['68'].provenance}`,
-  );
   const archive = readFileSync(
     new URL('../../../../data/originals/budget_2027/ZDBRB-2027.zip', import.meta.url),
   );

@@ -75,14 +75,6 @@ export interface ReleaseFile {
   bytes: number;
   sha256: string;
 }
-export interface JournalEntry {
-  release_id: string;
-  revision: number;
-  kind: string;
-  at: string;
-  role: string;
-  by: string;
-}
 export interface Validation {
   passed?: boolean;
   groups?: { group: string; status: string; summary: string }[];
@@ -94,14 +86,11 @@ export interface MetadataModel extends Omit<EditorialScreenModel, 'screen'> {
     'releases/current'?: { release_id?: string };
     'release/manifest'?: Manifest;
     'release/validation'?: Validation;
-    'release/journal'?: { items: JournalEntry[] } | null;
   };
   fileMeta?: { meta: FileMeta | null; state: string };
   failed: string[];
-  registry: boolean;
 }
 export interface MetadataContext {
-  newer?: string;
   origin?: string;
   dataBase?: string;
   data: MetadataModel['documents'];

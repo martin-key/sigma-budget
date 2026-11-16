@@ -2,8 +2,7 @@
 
 Кодът на „СИГМА Бюджет“ влиза в production само чрез push на таг `vX.Y.Z` върху commit от `main`, след одобрение в GitHub Environment `production`.
 Workflow-ът `.github/workflows/site.yml` изпълнява всички проверки, сглобява production артефакта и чак тогава допуска deploy.
-Първото пускане изисква изрично одобрение от собственика. Публикуването на данни остава отделна операторска стъпка в
-[ръководството на оператора](operator-guide.md).
+Първото пускане изисква изрично одобрение от собственика. Данните се включват в build-а по [процедурата за издание](operator-guide.md).
 
 Всяка стъпка има отговорник и се отбелязва в таблицата на края с дата и подпис.
 
@@ -15,14 +14,7 @@ Workflow-ът `.github/workflows/site.yml` изпълнява всички пр�
 
 ## 1. Средата е създадена; остава GitHub конфигурацията
 
-Production ресурсите вече съществуват: D1 `sigma-budget-registry` (`acfb23bb-310f-4064-a7f7-e6bff37db43e`, с приложени миграции),
-R2 `sigma-budget-objects` и Worker `sigma-budget` (placeholder до първия deploy).
-В горното ниво на `apps/web/wrangler.jsonc` са попълнени D1 id-то, custom domain `sigma-budget.midt.bg`, `workers_dev: false` и
-`preview_urls: false`; `production.url` в `apps/etl/environments.json` е `https://sigma-budget.midt.bg`.
-Staging ресурсите също са създадени, с приложени D1 миграции. Staging (`https://sigma-budget-staging.cf-midt.workers.dev`, с `noindex`)
-и production (`https://sigma-budget.midt.bg`) са публично достъпни, без Cloudflare Access gateway.
-
-`ACCESS_ISSUER` и `ACCESS_AUD` остават празни и в двете среди; без Access операторският API `/admin/*` остава изключен и връща `503`.
+Production използва Worker `sigma-budget`, custom domain `sigma-budget.midt.bg`, `workers_dev: false` и `preview_urls: false` от горното ниво на `apps/web/wrangler.jsonc`. Staging използва `https://sigma-budget-staging.cf-midt.workers.dev` с `noindex`. Данните се обслужват от build-а. Съществуващите D1 и R2 ресурси не се променят с тази процедура; собственикът решава отделно за тях.
 
 Еднократно собственикът настройва в GitHub:
 
@@ -43,12 +35,7 @@ Production build използва горното ниво на `wrangler.jsonc`,
 Deploy job-ът повтаря проверките за формат и история и отказва таг, който не е първи в `git tag -l 'v*' --sort=-v:refname`;
 за умишлено връщане на кода се използва `wrangler rollback`.
 
-Преди deploy отделна стъпка без Cloudflare secrets изпълнява
-`node tests/release/compat_check.mjs --env-url https://sigma-budget.midt.bg --allow-first-deploy`.
-Ако сайтът отговаря, реалното текущо издание се проверява както досега, а несъвместимост или нечетимо издание спира deploy-а.
-За първото качване, когато сайтът още не работи (DNS грешка, чужд `404`, Cloudflare error code или placeholder `503` с текст
-„not deployed yet“), се издава warning „first deploy: the environment does not run the site yet, nothing to check against“ и се продължава.
-Това не е пропускане на проверка на съществуващо издание.
+Преди deploy се проверяват локално кодът и включените издания с `node tests/release/compat_check.mjs`.
 
 Следва `pnpm exec wrangler deploy -c apps/web/build/server/wrangler.json`. После отделна публична GET проверка на `<origin>/`
 изисква `200` и `X-Release-Id`, равен на `release_id` от `data/release/releases/current.json`. Проверява се до три минути,
@@ -61,33 +48,27 @@ PR не публикува, а push към `main` публикува staging.
 
 - [ ] `curl -sI https://<адрес>/` → 200, `Content-Security-Policy`, `Strict-Transport-Security`, `Cache-Control` с `no-transform`, без `X-Robots-Tag: noindex`.
 - [ ] `https://<адрес>/robots.txt` позволява обхождане и назовава `sitemap.xml`; `https://<адрес>/nyama-takava` → 404.
-- [ ] `https://<адрес>/admin/operations` → `503` (операторският API е изключен).
-- [ ] `https://<адрес>/api/releases/current` → 404 „няма публикувано издание“ (регистърът е празен до стъпка 3).
+- [ ] `https://<адрес>/admin/operations` → `404`.
+- [ ] `https://<адрес>/api/releases/current` → 200 с `release_id` от `data/release/releases/current.json`.
 
 ## 3. Първото издание
 
-Публикуването на данни е отделна операторска стъпка по [ръководството на оператора](operator-guide.md) и не се изпълнява от deploy workflow-а.
-При текущите празни Access настройки операторското публикуване е недостъпно.
+Първото издание е включеното в build-а `data/release/`, заедно с `releases/`. Не е нужна допълнителна стъпка след deploy.
 
 ## 4. Следващо качване на кода
 
 1. Избира се commit от `main` с минал CI и се създава нов таг `vX.Y.Z`.
 2. Тагът се push-ва; workflow-ът изпълнява всички проверки и production build.
-3. След одобрение в `production` се проверяват тагът, историята и съвместимостта с текущото издание, после се публикува кодът.
-4. Изпълняват се проверките от стъпка 2. Данни се публикуват отделно по [ръководството на оператора](operator-guide.md).
+3. След одобрение в `production` се проверяват тагът, историята и съвместимостта с включеното издание, после се публикува кодът.
+4. Изпълняват се проверките от стъпка 2. Новите данни се включват чрез PR по [процедурата за издание](operator-guide.md).
 
 ## 5. Връщане назад
 
-| Какво      | Как                                                                                                                                           |
-| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| Кодът      | `pnpm exec wrangler deployments list -c apps/web/wrangler.jsonc`, после `pnpm exec wrangler rollback <version-id> -c apps/web/wrangler.jsonc` |
-| Данните    | `./budget rollback --release-id <по-ранно издание> --environment production`                                                                  |
-| Регистърът | D1 Time Travel или копие ([ръководството на оператора](operator-guide.md), раздел 6)                                                          |
+Кодът и данните се връщат заедно чрез `pnpm exec wrangler rollback <version-id> -c apps/web/wrangler.jsonc` след изрично одобрение. За промяна само на данните се подготвя PR с провереното копие на изданието.
 
 ## 6. Наблюдение
 
-`observability` е включено в `apps/web/wrangler.jsonc`: заявките и грешките на Worker-а се виждат в Cloudflare. Седмично: `./budget status --environment production`,
-копие на регистъра, и `budget refetch --manifest` на текущото издание срещу официалните адреси.
+`observability` е включено в `apps/web/wrangler.jsonc`: заявките и грешките на Worker-а се виждат в Cloudflare. Публичният `/api/releases/current` показва включеното издание. `budget refetch --manifest` сравнява оригиналите с официалните адреси.
 
 ## Подписи
 
@@ -98,4 +79,4 @@ PR не публикува, а push към `main` публикува staging.
 | 2. Кодът                 |            |      |        |
 | 3. Първото издание       |            |      |        |
 
-Всички команди тук се изпълняват от корена на хранилището. Конфигурацията за собствен акаунт е `apps/web/wrangler.local.jsonc`, до `apps/web/wrangler.jsonc`, така че относителните `main` и `migrations_dir` запазват значението си. За нея се използва `-c apps/web/wrangler.local.jsonc`, а при сглобяване - `WRANGLER_CONFIG=apps/web/wrangler.local.jsonc`. Vite разрешава тази променлива спрямо корена на хранилището. Deploy на сглобен сайт използва `-c apps/web/build/server/wrangler.json`.
+Всички команди тук се изпълняват от корена на хранилището. Конфигурацията за собствен акаунт е `apps/web/wrangler.local.jsonc`, до `apps/web/wrangler.jsonc`, така че относителните `main` запазват значението си. За нея се използва `-c apps/web/wrangler.local.jsonc`, а при сглобяване - `WRANGLER_CONFIG=apps/web/wrangler.local.jsonc`. Vite разрешава тази променлива спрямо корена на хранилището. Deploy на сглобен сайт използва `-c apps/web/build/server/wrangler.json`.

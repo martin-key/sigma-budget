@@ -5,20 +5,12 @@
 //   pnpm build:release --env staging --noindex && pnpm exec wrangler deploy -c apps/web/build/server/wrangler.json     # staging; production is deployed by a version tag through the production environment
 // The Vite plugin (@cloudflare/vite-plugin) sets the assets directory to the client build and picks the environment from CLOUDFLARE_ENV.
 // html_handling "auto-trailing-slash", not_found_handling "none": a path without a file goes to the Worker (every screen, the release API,
-// /admin/*). run_worker_first: every response crosses the shared header layer; the stable addresses /data/<file> follow the current release of the
-// registry and /data/releases/* is the release API (apps/web/workers/app.ts); what neither knows comes from the static files.
+// unknown paths). run_worker_first sends every response through the shared header layer.
+// All data files come from the release packaged with the site.
 // SITE_ORIGIN names the public address in canonical links (empty: the address of the request); NOINDEX "1" keeps an environment out of
 // search engines; SIGMA_URL is the address of the original СИГМА (docs/approach-specification.md, section 2.2); FEEDBACK_EMAIL is the
 // address of the feedback form (empty: the form keeps the message in the browser and says so).
-// The release registry (D1, binding DB, migrations/) and the objects (R2, binding OBJECTS) are one database and one bucket per environment
-// (docs/approach-specification.md, section 3.1). The resources exist and their database ids are filled in below.
-// Provisioning and migrations are separate from the code deploy (docs/release.md, „Среди“).
-// A deployment in your own account keeps its ids and hostname in wrangler.local.jsonc, which is not in git (docs/release.md, „Среди“).
-// ACCESS_ISSUER and ACCESS_AUD stay empty in both public environments; without Access, the operator API answers 503.
-// MAX_OBJECT_BYTES, not set here, is the largest object a release may have: 256 MiB by default (apps/web/workers/api/store.js). An object
-// over 16 MiB goes up in parts, so no request nears the request body limit of the plan (docs/release.md, „Размери“).
-// SERVICE_TOKENS lists the Access service tokens that may publish. OPERATORS, the operators' emails, is a Worker secret
-// (`pnpm exec wrangler secret put OPERATORS --env staging`), so the addresses stay out of this public repository.
+
 {
   "name": "sigma-budget",
   "routes": [{ "pattern": "sigma-budget.midt.bg", "custom_domain": true }],
@@ -41,19 +33,7 @@
     }
   ],
   "observability": { "enabled": true },
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "sigma-budget-registry",
-      "database_id": "acfb23bb-310f-4064-a7f7-e6bff37db43e",
-      "migrations_dir": "migrations"
-    }
-  ],
-  "r2_buckets": [{ "binding": "OBJECTS", "bucket_name": "sigma-budget-objects" }],
   "vars": {
-    "ACCESS_ISSUER": "",
-    "ACCESS_AUD": "",
-    "SERVICE_TOKENS": "",
     "ENVIRONMENT": "production",
     "SITE_ORIGIN": "https://sigma-budget.midt.bg",
     "SIGMA_URL": "https://sigma.midt.bg/",
@@ -77,19 +57,7 @@
       "routes": [],
       "workers_dev": true,
       "preview_urls": false,
-      "d1_databases": [
-        {
-          "binding": "DB",
-          "database_name": "sigma-budget-staging-registry",
-          "database_id": "611fe4a2-2313-475e-8991-74cb5dd5c398",
-          "migrations_dir": "migrations"
-        }
-      ],
-      "r2_buckets": [{ "binding": "OBJECTS", "bucket_name": "sigma-budget-staging-objects" }],
       "vars": {
-        "ACCESS_ISSUER": "",
-        "ACCESS_AUD": "",
-        "SERVICE_TOKENS": "",
         "ENVIRONMENT": "staging",
         "SITE_ORIGIN": "https://sigma-budget-staging.cf-midt.workers.dev",
         "SIGMA_URL": "https://sigma.midt.bg/",

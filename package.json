@@ -7,7 +7,6 @@
     "typecheck": "turbo run typecheck && tsc -p tests/e2e/tsconfig.json",
     "dev": "turbo run dev",
     "test": "turbo run test --concurrency=1",
-    "registry:local": "pnpm --filter @sigma-budget/web registry:local",
     "format:check": "prettier --check . --ignore-unknown",
     "validate:wave14": "pnpm --filter @sigma-budget/ingest... build && node packages/ingest/dist/validate/cli.js",
     "validate:wave14-live": "pnpm --filter @sigma-budget/ingest... build && node packages/ingest/dist/validate/cli.js --live --report tmp/ts-migration/candidates/14/live.json",

@@ -96,7 +96,7 @@ The lifecycle creates canonical JSON, deterministic validation, a byte-derived m
 
 `reproduceRelease` requires a recorded Node executor identity and exact Node runtime, re-exports the recorded commit, reruns it with its recorded date and authenticated snapshot, and compares the complete manifest ID and every output byte hash. It checks the recorded package's output and receipt integrity as well. A differing replay is removed before installation. A release built before the TypeScript pipeline is reproduced by checking out `processing.code.commit` from its manifest and following the documentation at that commit.
 
-There is no ZIP/report/pointer writer in this scope. Candidate metadata is inside the new owned directory; operator results go to stdout. Existing web packaging is reused only after package verification. The parent must apply the same destination preflight to any later archive, report or site-copy destination; it must never point such a writer at an authenticated source, manifest or checkout path. The release-client default is 256 MiB; uploads over 16 MiB use multipart transfer.
+There is no ZIP/report/pointer writer in this scope. Candidate metadata is inside the new owned directory; operator results go to stdout. Existing web packaging is reused only after package verification. The parent must apply the same destination preflight to any later archive, report or site-copy destination; it must never point such a writer at an authenticated source, manifest or checkout path. The release package validation default is 256 MiB per object.
 
 ## Standalone operator and checks
 

@@ -63,12 +63,6 @@ test('committed release checks use Node after authenticating the input snapshot'
   assert.ok(compile >= 0 && restore > compile && validate > restore);
   assert.equal(steps[validate].if, undefined);
   assert.ok(!steps[validate]['continue-on-error']);
-  const provenance = jobs.build.steps.find(
-    (step) => step.run === 'node tests/release/budget_provenance_check.mjs',
-  );
-  assert.ok(provenance);
-  assert.equal(provenance.if, undefined);
-  assert.ok(!provenance['continue-on-error']);
 });
 
 test('the build job checks the registries with the TypeScript validator after building it', () => {
