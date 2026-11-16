@@ -83,6 +83,10 @@ export function checkManifest(m, env) {
   };
   need(m && typeof m === 'object' && !Array.isArray(m), 'the manifest is not a JSON object');
   if (problems.length) return { problems, objects: [] };
+  need(
+    m.format === undefined || m.format === 1,
+    `Unknown release format: ${String(m.format)} (supported: 1)`,
+  );
   need(m.manifest_schema === MANIFEST_SCHEMA, `manifest_schema must be ${MANIFEST_SCHEMA}`);
   need(m.data_schema && typeof m.data_schema === 'object', 'data_schema is missing');
   for (const [k, ok] of Object.entries(SUPPORTED)) {

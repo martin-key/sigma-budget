@@ -738,3 +738,15 @@ datasets:
   scope: България
   rebuild: ./budget build
   limitations: ['Текстове по законопроекта; сумите са в budget2027.json.']
+
+- id: schema
+  catalogId: D40
+  title: 'JSON Schema на изданието'
+  status: real
+  files: [data/release/schema.json]
+  producer: packages/dataset-schema/src/index.ts
+  inputs: []
+  schema: docs/data-spec.md
+  scope: Публикувани JSON файлове
+  rebuild: ./budget build
+  limitations: ['Ръчните guards без обявена схема се представят с {}.']

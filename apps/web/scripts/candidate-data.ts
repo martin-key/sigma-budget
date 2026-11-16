@@ -45,6 +45,8 @@ export function readCandidate(directory: string): Candidate {
     const root = resolve(directory);
     const manifest = readFileSync(join(root, 'manifest.json'));
     const doc = JSON.parse(manifest.toString('utf8'));
+    if (doc.format !== undefined && doc.format !== 1)
+      fail(`Unknown release format: ${String(doc.format)} (supported: 1)`);
     if (doc.manifest_schema !== 'budget-release/1' || !Array.isArray(doc.outputs))
       fail('expected a budget build candidate with manifest_schema budget-release/1');
     const releaseId = hash(manifest);
@@ -118,6 +120,7 @@ export function copyCandidate(candidate: Candidate, destination: string) {
     join(target, 'releases/current.json'),
     JSON.stringify({
       release_id: candidate.releaseId,
+      format: 1,
       manifest: `data/releases/${candidate.releaseId}/manifest.json`,
       built: candidate.buildDate,
     }) + '\n',

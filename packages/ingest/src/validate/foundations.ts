@@ -147,7 +147,8 @@ export function envelope(ctx: Context): Check {
     }
     for (const p of m.pending || [])
       c.ok(pend.has(p), `${f}: meta.pending ${repr(p)} is not in core.pending`);
-    if (!f.startsWith('mock/'))
+    // JSON Schema property definitions describe statuses; they are not data envelopes.
+    if (!f.startsWith('mock/') && f !== 'schema.json')
       for (const [p, v] of walk(d)) {
         if (p === '$.meta' || !dict(v) || !('status' in v)) continue;
         if (p.startsWith('$.byPeriod.')) {

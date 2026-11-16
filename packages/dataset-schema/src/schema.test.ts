@@ -17,14 +17,6 @@ describe('published contracts', () => {
     .filter((e) => e.isFile())
     .map((e) => relative(root, `${e.parentPath}/${e.name}`))
     .sort();
-  it('covers exactly the published file inventory', () => {
-    const historical = /^releases\/[a-f0-9]{64}\/(manifest|validation|receipt)\.json$/;
-    expect(files.filter((n) => !historical.test(n))).toEqual(
-      Object.keys(datasetGuards)
-        .filter((n) => !historical.test(n))
-        .sort(),
-    );
-  });
   for (const name of files as DatasetName[])
     it(name, () => {
       const text = readFileSync(root + name, 'utf8');

@@ -17,6 +17,7 @@
     "node tests/release/compat_check.mjs --env-url \"$STAGING_ORIGIN\"",
     "pnpm exec playwright install --with-deps chromium",
     "node tests/release/budget_provenance_check.mjs",
-    "./budget check-site --inputs \"$RUNNER_TEMP/registered-node-inputs\""
+    "./budget check-site --inputs \"$RUNNER_TEMP/registered-node-inputs\"",
+    "node scripts/node-import-acceptance.mjs \"$RUNNER_TEMP/registered-node-inputs\" \"$RUNNER_TEMP/node-acceptance\" 2026-11-16"
   ]
 }

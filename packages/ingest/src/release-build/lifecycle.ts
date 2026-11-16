@@ -187,11 +187,12 @@ async function makeManifest(
     return row;
   });
   return clean({
+    format: 1,
     manifest_schema: 'budget-release/1',
     data_schema: {
       execution: execution.meta.schema,
       'execution-provenance': provenance.schema,
-      other: 'docs/data-spec.md',
+      other: 'data/schema.json',
     },
     provenance_format: provenance.schema,
     processing: {
@@ -366,6 +367,7 @@ export async function buildRelease(options: BuildReleaseOptions): Promise<BuildR
     // Reuse the accepted protocol parser before any producer sees an invalid path/size.
     parseManifest(
       jsonBytes({
+        format: 1,
         manifest_schema: 'budget-release/1',
         data_schema: {},
         processing: { code: { commit: exported.commit } },

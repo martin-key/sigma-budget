@@ -544,6 +544,7 @@ export async function installSite(root: string, candidate: string, releaseId: st
     temp,
     canonicalJson({
       release_id: releaseId,
+      format: 1,
       manifest: `data/releases/${releaseId}/manifest.json`,
       built: (manifest.processing.parameters as any).build_date,
     }) + '\n',

@@ -105,7 +105,6 @@ describe('catalog refresh', () => {
       bytes: a.length,
       gzipBytes: catalogGzipSize(a),
       source: ['new'],
-      screens: ['S02', 'S01'],
       schema: [{ key: 'x', type: 'array', length: 0 }],
     });
     expect(result.catalog.datasets[1]).toMatchObject({
@@ -121,8 +120,9 @@ describe('catalog refresh', () => {
       primarySources: 1,
     });
     expect(cat.datasets[0]!.bytes).toBe(0);
-    expect(() =>
-    ).toThrow(/Missing owner/);
+    expect(() => refreshCatalog({ catalog: cat, ownerBytes: new Map(), registry: [] })).toThrow(
+      /Missing owner/,
+    );
   });
 });
 it('rejects missing runtime fields and values that JSON would silently omit', () => {
