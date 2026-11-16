@@ -536,21 +536,6 @@
         "desc": "Адресът не води до екран от сайта.",
         "periods": "none"
       }
-    ],
-    [
-      "S26",
-      "za-proekta",
-      null,
-      "s26-za-proekta",
-      "За проекта",
-      "ref",
-      "info",
-      {
-        "retired": true,
-        "next": [],
-        "nav": false,
-        "periods": "none"
-      }
     ]
   ]
 }

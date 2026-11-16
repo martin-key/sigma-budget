@@ -93,7 +93,6 @@ export async function executeRelease(context: Readonly<ExecutionContext>): Promi
     catalog,
     ownerBytes: publication.streams,
     registry: prepared.input.layers.registry,
-    activeRoutes: prepared.input.layers.activeRoutes,
   }).catalog;
   publication.streams.set('catalog.json', Buffer.from(JSON.stringify(refreshed) + '\n'));
   for (const [path, bytes] of publication.streams) {

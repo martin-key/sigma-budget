@@ -521,14 +521,6 @@ export function core(ctx: Context): Check {
         ).every((x) => contains(src, x, kind(src, core, 'sources'))),
       `pending ${key}: source keys`,
     );
-    c.ok(
-      pyTruth(get(p, 'screens', kind(p, pending, key))) &&
-        iterable(
-          get(p, 'screens', kind(p, pending, key)),
-          kind(get(p, 'screens', kind(p, pending, key)), p, 'screens'),
-        ).every((x) => setContains(routes.ids, x)),
-      `pending ${key}: screens ${pstr(get(p, 'screens', kind(p, pending, key)), kind(get(p, 'screens', kind(p, pending, key)), p, 'screens'))}`,
-    );
   }
   const p04 = opt(pending, 'P04', {}, kind(pending, core, 'pending')),
     nas = get(nxt, 'asOf', kind(nxt, get(ex, 'pendingMonths'), 0)),
@@ -921,8 +913,7 @@ export function catalog(ctx: Context): Check {
   const c = new Check('CATALOG'),
     cat = ctx.get('catalog.json'),
     core = ctx.get('core.json'),
-    mins = ctx.get('ministries.json'),
-    routes = ctx.routes().ids;
+    mins = ctx.get('ministries.json');
   c.ok(
     sameSet(cat, ['meta', 'groups', 'counts', 'datasets', 'traps', 'methodology', 'files']),
     `catalog keys ${pyRepr(iterable(cat).sort())}`,
@@ -972,7 +963,6 @@ export function catalog(ctx: Context): Check {
         'group',
         'status',
         'source',
-        'screens',
         'eager',
         'contains',
         'mock',
@@ -981,8 +971,7 @@ export function catalog(ctx: Context): Check {
     c.ok(!missing.length, `${slText}: missing keys ${pyRepr(missing)}`);
     if (missing.length) continue;
     const status = get(d, 'status', kind(d, dss, __rowIndex0)),
-      source = get(d, 'source', kind(d, dss, __rowIndex0)),
-      screens = get(d, 'screens', kind(d, dss, __rowIndex0));
+      source = get(d, 'source', kind(d, dss, __rowIndex0));
     c.ok(
       ['real', 'mock', 'pending'].includes(status) &&
         contains(gids, get(d, 'group', kind(d, dss, __rowIndex0))) &&
@@ -995,12 +984,6 @@ export function catalog(ctx: Context): Check {
           contains(get(core, 'sources'), x, kind(get(core, 'sources'), core, 'sources')),
         ),
       `${slText}: source keys ${pstr(source, kind(source, d, 'source'))}`,
-    );
-    c.ok(
-      iterable(screens, kind(screens, d, 'screens')).every((x) => setContains(routes, x)) &&
-        len(screens, kind(screens, d, 'screens')) ===
-          uniq(iterable(screens, kind(screens, d, 'screens'))).length,
-      `${slText}: screens ${pstr(screens, kind(screens, d, 'screens'))}`,
     );
     c.ok(
       ['title', 'description'].every((x) => strField(get(d, x, kind(d, dss, __rowIndex0)))),
@@ -1025,7 +1008,6 @@ export function catalog(ctx: Context): Check {
       const p = get(pending, id, kind(pending, core, 'pending'));
       c.ok(
         equal(get(d, 'title', kind(d, dss, __rowIndex0)), get(p, 'title', kind(p, pending, id))) &&
-          equal(screens, get(p, 'screens', kind(p, pending, id))) &&
           equal(
             get(d, 'expected', kind(d, dss, __rowIndex0)),
             get(p, 'expected', kind(p, pending, id)),
@@ -1358,62 +1340,8 @@ export function catalog(ctx: Context): Check {
     [...kfpFiles].every(([key, sha]) => equal(dictGet(got, key), sha)),
     'the 19 KFP reports of execution.json must be listed with the same checksums',
   );
-  const needs = pageNeeds(ctx),
-    fileDs = new Map<string, any>();
-  for (const [__rowIndex7, d] of dss.entries()) {
-    if (pyTruth(opt(d, 'file', undefined, kind(d, dss, __rowIndex7))))
-      fileDs.set(get(d, 'file', kind(d, dss, __rowIndex7)), d);
-    for (const [__rowIndex8, pp] of iterable(
-      opt(d, 'parts', [], kind(d, dss, __rowIndex7)),
-      kind(opt(d, 'parts', []), d, 'parts'),
-    ).entries())
-      fileDs.set(get(pp, 'file', kind(pp, iterable(opt(d, 'parts', [])), __rowIndex8)), d);
-  }
-  let warn = 0;
-  for (const rid of Object.keys(needs).sort())
-    for (const nm of needs[rid]!) {
-      const fn = `data/${nm.replace(/\?+$/, '')}.json`,
-        d = fileDs.get(fn);
-      if (d === undefined) {
-        if (!ctx.exists(fn.slice(5))) {
-          c.warn(`${rid} needs '${nm}' but there is no such file in data/release`);
-          warn++;
-        }
-        continue;
-      }
-      if (
-        !contains(get(d, 'screens'), rid, kind(get(d, 'screens'), d, 'screens')) &&
-        get(d, 'id') !== 'core'
-      ) {
-        c.warn(
-          `${rid} reads ${pstr(get(d, 'slug'), kind(get(d, 'slug'), d, 'slug'))} but the catalog lists screens ${joinStrings(get(d, 'screens'), ',')} for it`,
-        );
-        warn++;
-      }
-    }
-  const pages = new Set(Object.keys(needs).filter((rid) => needs[rid]!.length > 0));
-  for (const [__rowIndex10, d] of dss.entries()) {
-    if (
-      get(d, 'id', kind(d, dss, __rowIndex10)) === 'core' ||
-      get(d, 'status', kind(d, dss, __rowIndex10)) === 'pending'
-    )
-      continue;
-    for (const rid of iterable(
-      get(d, 'screens', kind(d, dss, __rowIndex10)),
-      kind(get(d, 'screens', kind(d, dss, __rowIndex10)), d, 'screens'),
-    ))
-      if (
-        setContains(pages, rid) &&
-        !needs[rid]!.some((nm) => fileDs.get(`data/${nm.replace(/\?+$/, '')}.json`) === d)
-      ) {
-        c.warn(
-          `catalog lists ${pstr(rid)} for ${pstr(get(d, 'slug', kind(d, dss, __rowIndex10)), kind(get(d, 'slug'), d, 'slug'))} but that page's needs do not include it`,
-        );
-        warn++;
-      }
-  }
   c.fact(
-    `${dss.length} datasets (${real} real, ${mock} mock, ${pend} pending) describe ${disk.length} files; ${fs.length} primary source files; ${warn} screen/needs differences (warnings)`,
+    `${dss.length} datasets (${real} real, ${mock} mock, ${pend} pending) describe ${disk.length} files; ${fs.length} primary source files`,
   );
   return c;
 }

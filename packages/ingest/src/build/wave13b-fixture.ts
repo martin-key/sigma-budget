@@ -296,7 +296,6 @@ export async function loadWave13bFixture(path: string): Promise<Wave13bInput> {
       wording: json('aggregation/inputs/wording.json'),
       sourceGlue: authored.sourceGlue,
       registry: registry.datasets,
-      activeRoutes: routes.routes.map((r) => r[0]),
     },
   };
 }

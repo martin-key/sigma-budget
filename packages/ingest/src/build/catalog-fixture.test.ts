@@ -36,24 +36,10 @@ it('refreshes stale derived metadata from the candidate streams and registry', a
     catalog: cat,
     ownerBytes: streams,
     registry: state.registry,
-    activeRoutes: state.activeRoutes,
   });
   const expected = state.projected.datasets.find((x) => x.slug === 'revenue')!;
   expect(result.catalog.datasets.find((x) => x.slug === 'revenue')).toEqual(expected);
   expect(result.catalog.counts).toEqual(state.projected.counts);
-  const altered = state.registry.map((x) =>
-    x.id === 'revenue' ? { ...x, screens: ['S19', 'S04', 'S99'] } : x,
-  );
-  const changed = refreshCatalog({
-    catalog: state.projected,
-    ownerBytes: streams,
-    registry: altered,
-    activeRoutes: ['S04', 'S19'],
-  });
-  expect(changed.catalog.datasets.find((x) => x.slug === 'revenue')!.screens).toEqual([
-    'S19',
-    'S04',
-  ]);
 });
 
 it('shares the aggregation authored catalog definitions', async () => {
@@ -115,7 +101,6 @@ it('metadata audit independently detects stale lengths, gzip, schema, sources, s
     catalogBytes: Buffer.from(JSON.stringify(cat)),
     ownerBytes: fixtureBase.ownerBytes,
     registry: fixtureBase.registry,
-    activeRoutes: fixtureBase.activeRoutes,
   });
   const r = audit.reported.datasets.find((d) => d.slug === 'revenue')!,
     c = audit.computed.datasets.find((d) => d.slug === 'revenue')!;
@@ -123,7 +108,6 @@ it('metadata audit independently detects stale lengths, gzip, schema, sources, s
   expect(r.gzipBytes).not.toEqual(c.gzipBytes);
   expect(r.schema).not.toEqual(c.schema);
   expect(r.source).not.toEqual(c.source);
-  expect(r.screens).not.toEqual(c.screens);
   expect(audit.reported.counts).not.toEqual(audit.computed.counts);
   expect(audit.reported.datasets.find((d) => d.slug === 'expenditure')!.source).not.toEqual(
     audit.computed.datasets.find((d) => d.slug === 'expenditure')!.source,

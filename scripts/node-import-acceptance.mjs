@@ -269,7 +269,6 @@ try {
     const registry = require('yaml').parse(
         await readFile(join(root, 'data/datasets.yaml'), 'utf8'),
       ),
-      routes = JSON.parse(await readFile(join(root, 'apps/web/app/lib/routes.json'), 'utf8')),
       owners = new Map(),
       differences = [],
       metadata = [];
@@ -293,7 +292,6 @@ try {
       catalogBytes: owners.get('catalog.json'),
       ownerBytes: owners,
       registry: registry.datasets,
-      activeRoutes: routes.routes.map((r) => r[0]),
     });
     assert.deepEqual(audit.reported, audit.computed);
     await writeFile(

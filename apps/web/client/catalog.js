@@ -1,3 +1,4 @@
+import datasetScreens from '../app/lib/dataset-screens.json' with { type: 'json' };
 // Catalogue helpers shared by S24 „Откъде са данните?“ and S25 „Отворени данни и API“ (written by G5). Pure: no DOM, no render state; the only fetch is loadMeta, and it goes through data.load.
 // Input: data/catalog.json (DATA_SPEC §3.20, built by packages/ingest/src/build/catalog-build.ts). Every optional field may be missing: a thinner or older catalogue
 // still gives a usable model, and a malformed entry is dropped instead of breaking the page.
@@ -196,7 +197,7 @@ function normSet(d, i) {
       gz: isNum(p?.gzipBytes) ? p.gzipBytes : null,
     }))
     .filter((p) => p.file);
-  const screens = strs(d.screens);
+  const screens = strs(datasetScreens[d.slug]);
   return {
     i,
     id: str(d.id).trim(),

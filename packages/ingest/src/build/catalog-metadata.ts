@@ -13,7 +13,6 @@ function metadata(cat: CatalogDocument) {
       id: d.id,
       slug: d.slug,
       source: d.source,
-      screens: d.screens,
       ...('bytes' in d ? { bytes: d.bytes } : {}),
       ...('gzipBytes' in d ? { gzipBytes: d.gzipBytes } : {}),
       ...(d.schema ? { schema: d.schema } : {}),
@@ -26,7 +25,6 @@ export function auditCatalogMetadata(input: {
   catalogBytes: Uint8Array;
   ownerBytes: ReadonlyMap<string, Uint8Array>;
   registry: CatalogRefreshInput['registry'];
-  activeRoutes: CatalogRefreshInput['activeRoutes'];
 }) {
   const doc: unknown = JSON.parse(
     new TextDecoder('utf-8', { fatal: true }).decode(input.catalogBytes),
@@ -40,7 +38,6 @@ export function auditCatalogMetadata(input: {
     catalog: cat,
     ownerBytes: owners,
     registry: input.registry,
-    activeRoutes: input.activeRoutes,
   }).catalog;
   // Python refresh uses set equality for source; the audit also checks source order.
   for (const d of derived.datasets) {

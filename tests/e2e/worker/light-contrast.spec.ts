@@ -2,7 +2,7 @@ import { ROUTES } from '../../../apps/web/app/lib/routes.ts';
 import { test, expect } from '../audit-fixtures.ts';
 import { expandContent, measureContrast } from '../contrast.ts';
 
-const routes = ROUTES.filter((route) => !route.retired && !route.bare).map((route) => ({
+const routes = ROUTES.filter((route) => !route.bare).map((route) => ({
   id: route.id,
   path: (route.samples[0] ?? '/nyama-takava').replace(/^#/, ''),
 }));

@@ -18,7 +18,6 @@ export interface CatalogEntry {
   slug: string;
   status: string;
   source: string[];
-  screens: string[];
   file?: string | null;
   format?: string;
   parts?: CatalogPart[];
@@ -38,7 +37,6 @@ export interface CatalogRefreshInput {
   /** Exact bytes written for the owner files, relative to the data directory. */
   ownerBytes: ReadonlyMap<string, Uint8Array>;
   registry: readonly { id: string; screens?: readonly string[] }[];
-  activeRoutes: readonly string[];
 }
 
 interface CatalogShape {
@@ -176,17 +174,9 @@ export function refreshCatalog(input: CatalogRefreshInput): {
       typeof d.slug !== 'string' ||
       typeof d.status !== 'string' ||
       !Array.isArray(d.source) ||
-      d.source.some((s) => typeof s !== 'string') ||
-      !Array.isArray(d.screens) ||
-      d.screens.some((s) => typeof s !== 'string')
+      d.source.some((s) => typeof s !== 'string')
     )
       throw new Error('Invalid catalog entry');
-  }
-  const routes = new Set(input.activeRoutes);
-  const consumers = new Map<string, readonly string[]>();
-  for (const row of input.registry) {
-    if (consumers.has(row.id)) throw new Error(`Duplicate registry id: ${row.id}`);
-    consumers.set(row.id, row.screens ?? []);
   }
   const bytesFor = (file: string) => {
     if (
@@ -250,14 +240,7 @@ export function refreshCatalog(input: CatalogRefreshInput): {
         }
       }
     }
-    const declared = consumers.get(d.slug);
-    if (declared) {
-      const screens = declared.filter((id) => routes.has(id));
-      if (JSON.stringify(screens) !== JSON.stringify(d.screens)) {
-        d.screens = screens;
-        changes.push(`${d.slug}: screens`);
-      }
-    }
+    delete d.screens;
   }
   const counts = catalogCounts(cat);
   if (JSON.stringify(counts) !== JSON.stringify(cat.counts)) {

@@ -430,8 +430,7 @@ export async function loadProduction(
     gvaBytes = raw(gvaPath);
   if (sha256(gvaBytes) !== '8e3342db45caf3f3019bcf789d0f4655fd44ad3de1a1e746347d050e68571b9e')
     throw new Error('Historical GVA material changed');
-  const routes = json('apps/web/app/lib/routes.json'),
-    registry = yaml(raw('data/datasets.yaml').toString('utf8'));
+  const registry = yaml(raw('data/datasets.yaml').toString('utf8'));
   const executionBytes = bytesOf(executionResult.execution),
     provenanceBytes = bytesOf(executionResult.provenance);
   const input: Wave13bInput = {
@@ -494,7 +493,7 @@ export async function loadProduction(
         'guide.json': raw('data/inputs/editorial/guide.json'),
         'glossary.json': raw('data/inputs/editorial/glossary.json'),
       },
-      routes: loadEditorialRoutes(routes),
+      routes: loadEditorialRoutes(src('editorial/routes')),
     },
     plan: {
       figures: publication.outputs[PUBLICATION_PATHS.dbp] as any,
@@ -567,7 +566,6 @@ export async function loadProduction(
       wording: src('wording'),
       sourceGlue: aggregate.sourceGlue,
       registry: registry.datasets,
-      activeRoutes: routes.routes.map((r: any) => r[0]),
     },
   };
   return {

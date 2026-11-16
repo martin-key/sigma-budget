@@ -145,7 +145,12 @@ function modernExpectation(expected: any, renamed: [string, string][]): any {
       (m, [from, to]) => m.replaceAll(` ${from} does not exist`, ` ${to} does not exist`),
       message.replaceAll('pipeline/fixture-path.py', 'apps/etl/src/fixture-path.ts'),
     );
-  return { ...expected, errors: expected.errors.map(text) };
+  return {
+    ...expected,
+    errors: expected.errors
+      .filter((m: string) => !m.includes('screens differ from catalog.json'))
+      .map(text),
+  };
 }
 function capture(c: any) {
   return {
