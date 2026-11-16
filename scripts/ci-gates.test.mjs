@@ -6,7 +6,7 @@ const workflow = readFileSync('.github/workflows/site.yml', 'utf8');
 test('one Node suite command and explicit deploy barrier', () => {
   assert.equal((workflow.match(/run: pnpm test -- --coverage/g) || []).length, 1);
   assert.equal((workflow.match(/vitest run/g) || []).length, 0);
-  assert.match(workflow, /deploy:\n    needs: \[required-validation\]/);
+  assert.match(workflow, /deploy:\n    needs: \[required-validation, target\]/);
   const deps = workflow
     .match(/required-validation:[\s\S]*?needs:\s*\[([^\]]+)\]/)[1]
     .split(',')

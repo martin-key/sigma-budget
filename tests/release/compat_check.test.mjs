@@ -27,7 +27,7 @@ async function environment(routes, run) {
       return response.end('{"message":"няма публикувано издание","release_id":null,"revision":0}');
     }
     response.writeHead(route[0], { 'Content-Type': 'application/json' });
-    response.end(JSON.stringify(route[1]));
+    response.end(typeof route[1] === 'string' ? route[1] : JSON.stringify(route[1]));
   });
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
   try {
@@ -98,4 +98,58 @@ test('an environment that cannot be read stops the deploy with exit 2', async ()
   const closed = await environment({}, async (base) => base);
   [code, out] = await check(['--env-url', closed]);
   assert.equal(code, 2, out);
+});
+
+test('first deploy warns for a non-site 404, a Cloudflare error or the placeholder', async () => {
+  for (const response of [
+    [404, { error: 'not found' }],
+    [404, 'error code: 1042'],
+    [503, 'not deployed yet'],
+  ]) {
+    const [code, out] = await environment({ '/api/releases/current': response }, (base) =>
+      check(['--env-url', base, '--allow-first-deploy']),
+    );
+    assert.equal(code, 0, out);
+    assert.match(
+      out,
+      /::warning::first deploy: the environment does not run the site yet, nothing to check against/,
+    );
+  }
+});
+
+test('first deploy warns for a hostname that does not resolve', async () => {
+  const [code, out] = await check([
+    '--env-url',
+    'https://sigma-budget-test.invalid',
+    '--allow-first-deploy',
+  ]);
+  assert.equal(code, 0, out);
+  assert.match(out, /::warning::first deploy/);
+});
+
+test('first-deploy mode still rejects incompatible releases and unreadable site responses', async () => {
+  for (const [response, expected] of [
+    [pointer, 1],
+    [{ revision: 1 }, 2],
+  ]) {
+    const [code, out] = await environment(
+      {
+        '/api/releases/current': [200, response],
+        [pointer.manifest]: [200, manifest('execution/9')],
+      },
+      (base) => check(['--env-url', base, '--allow-first-deploy']),
+    );
+    assert.equal(code, expected, out);
+    assert.doesNotMatch(out, /::warning::first deploy/);
+  }
+  for (const response of [
+    [500, {}],
+    [503, 'temporarily unavailable'],
+  ]) {
+    const [code, out] = await environment({ '/api/releases/current': response }, (base) =>
+      check(['--env-url', base, '--allow-first-deploy']),
+    );
+    assert.equal(code, 2, out);
+    assert.doesNotMatch(out, /::warning::first deploy/);
+  }
 });

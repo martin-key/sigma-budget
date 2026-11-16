@@ -84,7 +84,7 @@ node apps/web/scripts/serve.ts --port 8000
 
 За изолиран build без запис в `data/release/` използвай [offline импорт и локален candidate сайт](docs/import-local.md). Двата readers за бюджет 2027 се проверяват автоматично при build; `BUDGET_CANDIDATE` избира валидирания пакет за assets и SSR.
 
-GitHub Actions проверява PR и сглобява staging. Push към main може да публикува сайта на staging при конфигурирани Cloudflare секрети. Production е отделна контролирана процедура. Конфигурацията е в `apps/web/wrangler.jsonc`; собствена среда използва игнориран `wrangler.local.jsonc`. Готовността е описана в [production-readiness](docs/production-readiness.md).
+GitHub Actions проверява PR и сглобява staging, без deploy. Push към `main` публикува staging на `https://sigma-budget-staging.cf-midt.workers.dev` при конфигурирани Cloudflare секрети, с `noindex`. Push на таг `vX.Y.Z` върху commit от `main` изпълнява всички проверки и публикува production след одобрение в GitHub Environment `production`. Staging и production (`https://sigma-budget.midt.bg`) са публично достъпни; без Access операторският API остава изключен (`503`). Всяка среда използва собствен Cloudflare token от своя GitHub Environment. Настройките и `wrangler rollback` са в [production процедурата](docs/production-procedure.md). Публикуването на данни остава отделна [операторска стъпка](docs/operator-guide.md). Конфигурацията е в `apps/web/wrangler.jsonc`; собствена среда използва игнориран `wrangler.local.jsonc`. Готовността е описана в [production-readiness](docs/production-readiness.md).
 
 ## Документация
 

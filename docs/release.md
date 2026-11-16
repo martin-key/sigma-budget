@@ -128,24 +128,18 @@ token в `CF_ACCESS_CLIENT_ID` и `CF_ACCESS_CLIENT_SECRET`. Токените н
 С `--real /outside/new/candidate` публикува и истинското издание и го пресъздава с `budget reproduce --current` от оригиналите, които сваля от
 самото издание.
 
-**Среди.** Създаването на среда е отделно от deploy-а на кода и иска Cloudflare акаунта (раздел 12):
+**Среди.** Създаването на ресурси е отделно от deploy-а на кода. Staging вече използва D1 `sigma-budget-staging-registry`
+(`611fe4a2-2313-475e-8991-74cb5dd5c398`, с приложени миграции), R2 `sigma-budget-staging-objects` и Worker `sigma-budget-staging`.
+Адресът е `https://sigma-budget-staging.cf-midt.workers.dev`, публичен, с `noindex`, без custom domain и preview URLs. Production (`https://sigma-budget.midt.bg`) също е публично достъпен.
+`ACCESS_ISSUER` и `ACCESS_AUD` остават празни и в двете среди; без Access операторският API `/admin/*` остава изключен и връща `503`.
+Адресът на staging е записан и в `apps/etl/environments.json`.
+Незавършените качвания на части се чистят от lifecycle правилото на bucket-а; проверява се с `wrangler r2 bucket lifecycle list <bucket>`.
 
-```bash
-pnpm exec wrangler d1 create sigma-budget-staging-registry -c apps/web/wrangler.jsonc          # id-то влиза в env.staging
-pnpm exec wrangler r2 bucket create sigma-budget-staging-objects -c apps/web/wrangler.jsonc
-pnpm exec wrangler d1 migrations apply DB --env staging --remote -c apps/web/wrangler.jsonc
-```
-
-- Незавършените качвания на части се чистят от lifecycle правилото на bucket-а; проверява се с `wrangler r2 bucket lifecycle list <bucket>`.
-
-После: Access приложение за `/admin/*` с allow политика за операторите; `ACCESS_ISSUER` и `ACCESS_AUD` в `env.staging.vars`;
-`OPERATORS` като таен ключ на Worker-а (`pnpm exec wrangler secret put OPERATORS --env staging -c apps/web/wrangler.jsonc`), за да не са имейлите в публичното
-хранилище; адресът на staging в `apps/etl/environments.json`. Production следва същите стъпки по-късно, ръчно (етап E).
-
-Zero Trust организацията има нужда от метод за вход (**Integrations → Identity providers**: One-time PIN или Cloudflare); без него
-страницата на Access казва, че няма методи за вход. `OPERATORS` съдържа имейла, който Access записва в токена: при вход с Cloudflare
-това е имейлът на Cloudflare акаунта, не непременно служебният. Пропуснат ли е, Access пуска заявката, а Worker-ът отговаря `403`
-„not an operator of this environment“.
+Push към `main` публикува staging; push на таг `vX.Y.Z` върху commit от `main` публикува production след всички проверки и одобрение
+в GitHub Environment `production`. Всяка среда има собствен Cloudflare token в своя GitHub Environment.
+Production D1 `sigma-budget-registry` (`acfb23bb-310f-4064-a7f7-e6bff37db43e`, с приложени миграции), R2 `sigma-budget-objects` и Worker `sigma-budget` също са създадени; top-level id-то и custom domain маршрутът са попълнени. Еднократните настройки, ограниченията за таговете
+и връщането на кода с `wrangler rollback` са в [production процедурата](production-procedure.md).
+Публикуването на данни остава отделна операторска стъпка.
 
 **Своя среда.** Средата на организацията е в `apps/web/wrangler.jsonc` и `apps/etl/environments.json`. Среда в собствен акаунт (например за проба)
 не влиза в git: `apps/web/wrangler.local.jsonc` е копие на `apps/web/wrangler.jsonc` с id-тата и адреса на акаунта, а `apps/etl/environments.local.json`
@@ -160,7 +154,6 @@ pnpm exec wrangler secret put OPERATORS --env staging -c apps/web/wrangler.local
 ```
 
 Таен ключ не може да носи името на обикновена променлива на качената версия (код 10053), затова `secret put` идва след deploy-а.
-Access приложението покрива само `/admin/*`: сайтът и публичният API остават отворени.
 
 ## Изданието в сайта
 
@@ -182,7 +175,7 @@ Access приложението покрива само `/admin/*`: сайтът
 
 ## Какво още не е направено
 
-- **Средите на организацията не са създадени.** Staging на midt-bg и production чакат Cloudflare акаунта (раздел 12). Целият поток е
+- **Първият deploy още предстои.** Staging и production ресурсите на midt-bg са създадени; операторският API остава изключен. Целият поток е
   проверен на staging в собствен акаунт (5–6 ноември 2026 г.): публикуване през Access, четене през публичния API, екраните от
   изданието в R2 и `budget reproduce --current` байт по байт от оригиналите, свалени от самото издание.
 - **Сървърният HTML е екранът преди браузъра.** Графиките (ECharts), картата на общините с избраната община и бутоните за PNG се

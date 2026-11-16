@@ -4,10 +4,10 @@
 #                                       app (screens against the built Worker), a build of the pinned data image, and the release
 #                                       registry on a local Worker (stage C)
 #   push to main                     -> the same, then deploy the built Worker to staging (noindex)
-# There is no develop branch. This workflow never deploys to production: production comes later, by hand (docs/production-procedure.md).
-# The staging deployment needs the repository secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID and the variable STAGING_ORIGIN
-# (the staging Worker's address). Without the secrets the deploy step is skipped; with them but without STAGING_ORIGIN it fails, because
-# the compatibility check of the code against the current release (tests/release/compat_check.mjs) needs that address.
+#   push of a v* tag                  -> the same, then deploy production through the production environment's approval
+# There is no develop branch. Production is deployed only from a version tag (docs/production-procedure.md).
+# Each GitHub Environment holds its own CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID secrets.
+# Staging also uses STAGING_ORIGIN. Missing staging secrets skip deployment with a notice; missing production secrets fail.
 name: site
 
 on:
@@ -15,17 +15,57 @@ on:
     branches: [main]
   push:
     branches: [main]
+    tags: ['v*']
   workflow_dispatch:
 
 concurrency:
   group: site-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
 
 jobs:
+  target:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.pick.outputs.environment }}
+    steps:
+      - id: pick
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF: ${{ github.ref }}
+        run: |
+          target=''
+          if [ "$EVENT_NAME" = push ]; then
+            if [[ "$REF" == refs/tags/v* ]]; then
+              target=production
+            elif [ "$REF" = refs/heads/main ]; then
+              target=staging
+            fi
+          fi
+          echo "environment=$target" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        if: steps.pick.outputs.environment == 'production'
+        with:
+          fetch-depth: 0
+      - name: Require a version tag on main for production
+        if: steps.pick.outputs.environment == 'production'
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Production requires a tag matching vX.Y.Z (numeric major, minor and patch)."
+            exit 1
+          fi
+          git fetch origin main
+          if ! git merge-base --is-ancestor HEAD origin/main; then
+            echo "::error::The tagged commit must be an ancestor of origin/main."
+            exit 1
+          fi
+
   security:
+    needs: [target]
     uses: ./.github/workflows/security.yml
 
   coverage:
@@ -74,6 +114,7 @@ jobs:
           if-no-files-found: error
 
   build:
+    needs: [target]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -102,10 +143,16 @@ jobs:
         run: node tests/release/budget_provenance_check.mjs
       - name: Compatibility of code and data (stage E)
         run: node tests/release/compat_check.mjs
-      - name: Build the Worker for staging and check every screen
+      - name: Build the Worker for the target and check every screen
         env:
-          ORIGIN: ${{ vars.STAGING_ORIGIN || 'https://sigma-budget.midt.bg' }}
-        run: pnpm build:release --env staging --origin "$ORIGIN" --noindex
+          TARGET: ${{ needs.target.outputs.environment }}
+          STAGING_ORIGIN: ${{ vars.STAGING_ORIGIN || 'https://sigma-budget-staging.cf-midt.workers.dev' }}
+        run: |
+          if [ "$TARGET" = production ]; then
+            pnpm build:release --origin https://sigma-budget.midt.bg
+          else
+            pnpm build:release --env staging --origin "$STAGING_ORIGIN" --noindex
+          fi
       - name: The checks and the build leave data/release unchanged
         run: test -z "$(git status --porcelain -- data/release)" || { git status --short -- data/release; exit 1; }
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -116,7 +163,7 @@ jobs:
 
   check:
     # The browser checks of the app (hash mode, the expected figures read from data/release/execution.json): all of them block, and the
-    # staging deployment waits for them. The full screens also covers 400 px and keyboard paths; it runs against the built Worker
+    # deployment waits for them. The full screens also covers 400 px and keyboard paths; it runs against the built Worker
     # (the screens drawn on the server, then taken over by the app), the others test the app on the composed static site in tmp/.
     needs: [build]
     runs-on: ubuntu-latest
@@ -175,6 +222,7 @@ jobs:
           if-no-files-found: ignore
 
   release:
+    needs: [target]
     # the release registry and the operator API (stage C) on the Worker with local D1 and R2, driven through the TypeScript operator
     # (./budget): acceptance scenarios 3, 4, 5, 6 and 9, rollback, the public API and the deploy's compatibility check, with synthetic
     # releases (tests/release/release_check.mjs; docs/release.md); the restore drill of scenario 10 (tests/release/restore_drill.mjs;
@@ -189,13 +237,13 @@ jobs:
           node-version: '24'
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: node --test tests/release/compat_check.test.mjs tests/release/release_lib.test.mjs
+      - run: node --test tests/release/compat_check.test.mjs tests/release/release_lib.test.mjs scripts/check-deployment.test.mjs
       - run: node tests/release/release_check.mjs
       - run: node tests/release/restore_drill.mjs
 
   required-validation:
     if: ${{ always() }}
-    needs: [security, coverage, build, check, release, node-inputs, node-import]
+    needs: [target, security, coverage, build, check, release, node-inputs, node-import]
     runs-on: ubuntu-latest
     steps:
       - name: Every validation must succeed
@@ -204,13 +252,37 @@ jobs:
         run: node -e 'const r=JSON.parse(process.env.RESULTS); if (!r.length || r.some(x => x !== "success")) process.exit(1)'
 
   deploy:
-    needs: [required-validation]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [required-validation, target]
+    if: needs.target.outputs.environment != ''
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    environment: staging
+    environment: ${{ needs.target.outputs.environment }}
+    concurrency:
+      group: deploy-${{ needs.target.outputs.environment }}
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+      - name: Require a version tag on main for production
+        if: needs.target.outputs.environment == 'production'
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Production requires a tag matching vX.Y.Z (numeric major, minor and patch)."
+            exit 1
+          fi
+          git fetch origin main --tags
+          if ! git merge-base --is-ancestor HEAD origin/main; then
+            echo "::error::The tagged commit must be an ancestor of origin/main."
+            exit 1
+          fi
+          highest=$(git tag -l 'v*' --sort=-v:refname | sed -n '1p')
+          if [ "$TAG" != "$highest" ]; then
+            echo "::error::Production requires the highest v* version tag ($highest). Use wrangler rollback for intentional rollbacks."
+            exit 1
+          fi
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: build
@@ -222,26 +294,54 @@ jobs:
           cache: pnpm
       # the wrangler of pnpm-lock.yaml, the one release_check tests with
       - run: pnpm install --frozen-lockfile
-      - name: Deploy to the staging Worker
+      - name: Require environment deployment credentials
+        id: credentials
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          STAGING_ORIGIN: ${{ vars.STAGING_ORIGIN }}
+          TARGET: ${{ needs.target.outputs.environment }}
         run: |
           if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            if [ "$TARGET" = production ]; then
+              echo "::error::Production Cloudflare secrets are not set: a version tag must deploy."
+              exit 1
+            fi
             echo "::notice::Cloudflare secrets are not set: skipping the deployment."
             exit 0
           fi
-          # the new code must read the release that is current on staging (tests/release/compat_check.mjs; no release yet passes). Without the
-          # address that check cannot run, and the code is not deployed unchecked
-          if [ -z "$STAGING_ORIGIN" ]; then
-            echo "::error::The variable STAGING_ORIGIN is not set: the compatibility check cannot run, so nothing is deployed."
-            exit 1
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+      - name: Compatibility with the current release before deployment
+        if: steps.credentials.outputs.ready == 'true'
+        id: compatibility
+        env:
+          STAGING_ORIGIN: ${{ vars.STAGING_ORIGIN }}
+          TARGET: ${{ needs.target.outputs.environment }}
+        run: |
+          if [ "$TARGET" = production ]; then
+            origin=https://sigma-budget.midt.bg
+          else
+            if [ -z "$STAGING_ORIGIN" ]; then
+              echo "::error::The variable STAGING_ORIGIN is not set: the compatibility check cannot run, so nothing is deployed."
+              exit 1
+            fi
+            origin="$STAGING_ORIGIN"
           fi
-          node tests/release/compat_check.mjs --env-url "$STAGING_ORIGIN"
-          pnpm exec wrangler deploy -c apps/web/build/server/wrangler.json      # built with CLOUDFLARE_ENV=staging: the staging Worker, D1 and R2
+          node tests/release/compat_check.mjs --env-url "$origin" --allow-first-deploy
+          echo "origin=$origin" >> "$GITHUB_OUTPUT"
+      - name: Deploy to the target Worker
+        if: steps.credentials.outputs.ready == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: pnpm exec wrangler deploy -c apps/web/build/server/wrangler.json
+      - name: Verify the deployed site and release identity
+        if: steps.credentials.outputs.ready == 'true'
+        env:
+          ORIGIN: ${{ steps.compatibility.outputs.origin }}
+        run: node scripts/check-deployment.mjs --origin "$ORIGIN"
 
   node-inputs:
+    needs: [target]
     # Draft assets need push access. This job runs no checkout or project code;
     # the token is exposed only to the fixed download, then all bytes are pinned.
     runs-on: ubuntu-latest
