@@ -317,14 +317,16 @@ export async function loadProduction(
           sha256(JSON.stringify(canonical(JSON.parse(raw(p).toString('utf8'))))) ===
             'a4b42f7bd2707fff43428c7b07e9d217452164225a4558fa466bcaaeee662e5c' &&
           sha256(JSON.stringify(canonical(value))) ===
-            '6601d4c430c1d5854e624dbc4434c124d543e14ce6cd4d33c12c7a275d77b95b'
+            'b6de157aa4a3b05a5ff9c399e45e1e74e6fbe15258e1303e87888e2dce441e07'
         )
           receipts.push({
             schema: 'dbp-exact-legacy-metadata/1',
             path: p,
             legacy: 'a4b42f7bd2707fff43428c7b07e9d217452164225a4558fa466bcaaeee662e5c',
-            fresh: '6601d4c430c1d5854e624dbc4434c124d543e14ce6cd4d33c12c7a275d77b95b',
+            fresh: 'b6de157aa4a3b05a5ff9c399e45e1e74e6fbe15258e1303e87888e2dce441e07',
             changes: [
+              'figures[m27.CUT10_FULL].label_bg',
+              'figures[m26.CUT10].label_bg',
               'meta.generated_by',
               'document.file',
               'basis_differences_vs_mock.mock_vs_dbp._source',
