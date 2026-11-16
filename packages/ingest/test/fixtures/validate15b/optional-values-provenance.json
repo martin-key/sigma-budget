@@ -1,8 +1,0 @@
-{
-  "inputs": {
-    "inventory.json": "9e34720663a7c2253f4d0639091e613271b3a0b00c17fd5e041660395c041788",
-    "source-methods-provenance.json": "0dcfadccd2c6359192d43d25ba7f076d84b87cb8698d5ce79332a699e106b811"
-  },
-  "oracleSha256": "ff795b6d5bf6bbddae0433faad00de5e8ee05912e3428eae1aec95aba87f6d03",
-  "cases": 6
-}

@@ -4,9 +4,7 @@
   "globalDependencies": [
     "tsconfig.base.json",
     "vitest.shared.ts",
-    "data/datasets.yaml",
     "data/release/**",
-    "data/inputs/**",
     "coverage-baseline.json",
     "coverage-exceptions.json"
   ],
@@ -25,17 +23,6 @@
     },
     "test": {
       "dependsOn": ["^build"],
-      "outputs": ["coverage/**"],
-      "cache": false
-    },
-    "@sigma-budget/ingest#test": {
-      "dependsOn": ["build"],
-      "outputs": ["coverage/**"],
-      "cache": false,
-      "passThroughEnv": ["BUDGET_BUILD_ACCEPTED_INPUTS"]
-    },
-    "@sigma-budget/etl#test": {
-      "dependsOn": ["build"],
       "outputs": ["coverage/**"],
       "cache": false
     },

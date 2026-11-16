@@ -1,14 +1,7 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { createHash } from 'node:crypto';
 import { parseHTML } from 'linkedom';
-import {
-  institutions,
-  municipalRows,
-  stateDebt,
-  strictSum,
-  FRAMEWORK,
-} from '../../client/budget-2027.js';
+import { institutions, stateDebt, strictSum, FRAMEWORK } from '../../client/budget-2027.js';
 import { annualView } from '../../client/annual.js';
 import { provideScope } from '../../client/env.js';
 import { parse } from '../../client/data.js';
@@ -24,9 +17,6 @@ import { revExpChart } from '../../client/pages/s13-prognoza.js';
 const read = (path: string) =>
   readFileSync(new URL('../../../../' + path, import.meta.url), 'utf8');
 const release = (name: string) => parse(name, read(`data/release/${name}.json`));
-// Independent expected values come from the pinned Python extraction, never from the presentation adapter.
-const bill = JSON.parse(read('data/inputs/budget_bill_2027.json'));
-const forecast = JSON.parse(read('data/inputs/budget_forecast_2027.json'));
 const doc = release('budget2027');
 const sourceIndex = release('budget2027-provenance');
 it.each([
@@ -431,30 +421,13 @@ it('uses the 2027 draft by default and preserves explicit reports, law, expected
   expect((await page('/obshtini?per=2026.law')).html).toContain('2026');
   expect((await page('/dalg?per=2026.law')).html).toContain('2026');
 });
-it('matches all 47 institution budgets to independent article headlines, including shifted articles', () => {
-  const items = institutions(doc);
-  expect(items).toHaveLength(47);
-  expect(new Set(items.map((i) => i.code)).size).toBe(47);
-  for (const item of items) {
-    expect(item.expenditure.value).toBe(bill.bill[item.article].headline.exp);
-    expect(item.revenue?.value ?? null).toBe(bill.bill[item.article].headline.rev);
-    expect(sourceIndex.entries[item.expenditure.provenance].variant).toBe('bill');
-  }
-  expect(items.find((i) => i.code === '3800')?.article).toBe(33);
-  expect(items.find((i) => i.code === '8600')?.article).toBe(48);
-  expect(items.find((i) => i.article === 32)?.code).toBe('art32');
-  const expected =
-    Object.entries<any>(bill.bill)
-      .filter(([a]) => +a >= 2)
-      .reduce((s, [, b]) => s + Math.round(b.headline.exp * 10), 0) / 10;
-  expect(strictSum(items.map((i) => i.expenditure))).toBe(expected);
-});
 it('keeps the sparse Council of Ministers variant separate and never fills absent articles', async () => {
   const items = institutions(doc, 'billMc');
   expect(items).toHaveLength(1);
   expect(items[0].article).toBe(2);
-  expect(items[0].expenditure.value).toBe(bill.billMc['2'].headline.exp);
-  expect(items[0].expenditure.value).not.toBe(bill.bill['2'].headline.exp);
+  expect(items[0].expenditure).toEqual(
+    doc.budgets.billMc['2'].rows.find((r: any) => r.no === 'II.').cell,
+  );
   expect(sourceIndex.entries[items[0].expenditure.provenance].variant).toBe('billMc');
   const missing = await page('/vedomstvo/1300?variant=billMc');
   expect(missing.html).toContain('Няма публикуван бюджет в този вариант');
@@ -463,29 +436,6 @@ it('keeps the sparse Council of Ministers variant separate and never fills absen
   expect(changed.html).toContain('чл. 33');
   expect(changed.html).toContain('охран');
 });
-it('matches all 265 municipalities by identity and both article allocations and printed totals', () => {
-  const rows = municipalRows(doc, release('municipalities'));
-  expect(rows).toHaveLength(265);
-  expect(rows.every((r: any) => r.id)).toBe(true);
-  expect(new Set(rows.map((r: any) => r.id)).size).toBe(265);
-  for (const row of rows) {
-    const original = bill.municipal.art52.rows.find(
-      (r: any) => r.name === row.name && r.region === row.region,
-    );
-    expect(row.cells.map((c: any) => c?.value ?? null)).toEqual(original.values);
-    const delegated = bill.municipal.art53.rows.find(
-      (r: any) => r.name === row.name && r.region === row.region,
-    );
-    expect(row.delegated.map((c: any) => c?.value ?? null)).toEqual(delegated.values);
-  }
-  for (let i = 0; i < 5; i++) {
-    expect(strictSum(rows.map((r: any) => r.cells[i]))).toBe(bill.municipal.art52.total[i]);
-    expect(doc.municipalTotals.art52[i].value).toBe(bill.municipal.art52.total[i]);
-  }
-  for (let i = 0; i < 10; i++)
-    expect(doc.municipalTotals.art53[i].value).toBe(bill.municipal.art53.total[i]);
-  expect(rows.find((r: any) => r.id === 'BLG03')?.cells[0].value).toBe(60265.9);
-});
 it('shows printed blanks as missing, never as a previous-year number or an inferred zero', () => {
   expect(strictSum([{ value: 1 }, undefined])).toBeNull();
   const incomplete = structuredClone(doc);
@@ -493,16 +443,7 @@ it('shows printed blanks as missing, never as a previous-year number or an infer
   expect(institutions(incomplete).find((i) => i.code === '1300')?.expenditure).toBeUndefined();
   expect(stateDebt({ forecast: {} }, '2027.draft')).toBeNull();
 });
-it('uses VI-1 forecast amounts and printed GDP ratios, with distinct bill article limits', async () => {
-  for (const [i, key] of FRAMEWORK.entries()) {
-    const d = stateDebt(doc, key)!;
-    expect(d.total?.value).toBe(forecast.tables.VI_1.rows[0].values[i + 2]);
-    expect(d.pctGdp?.value).toBe(forecast.tables.VI_1.rows[1].values[i + 2]);
-    expect(d.external?.value).toBe(forecast.tables.VI_1.rows[2].values[i + 2]);
-  }
-  expect(doc.debtLimits['66'].value).toBe(bill.articles['66'][0].amounts[0]);
-  expect(doc.debtLimits['67'].value).toBe(bill.articles['67'][0].amounts[0]);
-  expect(doc.debtLimits['68'].value).toBe(bill.articles['68'][0].amounts[0]);
+it('shows debt limits and distinguishes unavailable Maastricht periods', async () => {
   const d = await page('/dalg');
   expect(d.html).toContain('минимален фискален резерв');
   expect(d.html).toContain('максимален нов държавен дълг');
@@ -511,15 +452,15 @@ it('uses VI-1 forecast amounts and printed GDP ratios, with distinct bill articl
   expect(m.html).not.toContain('44 343');
   expect((await page('/dalg?per=2028.forecast')).html).toContain('граници само за 2027');
 });
-it('charts the primary 2027–2029 publication with independently extracted amounts and legal labels', async () => {
+it('charts the primary 2027–2029 release with legal labels', async () => {
   const { vm } = await page('/prognoza');
   expect((vm.ctx?.data as any).outlook.periodKeys).toEqual(FRAMEWORK);
   const chart = revExpChart(vm.ctx);
   expect(chart.categories).toEqual(['2027\nпроект', '2028\nпрогноза', '2029\nпрогноза']);
   const table = tableData(chart.table);
   for (const [i, row] of table.rows.entries()) {
-    expect(row[2]).toBe(forecast.tables.annex3_mln.rows[0].values[i + 2]);
-    expect(row[3]).toBe(forecast.tables.annex3_pct_gdp.rows[0].values[i + 2]);
+    expect(row[2]).toBe(release('outlook').byPeriod[FRAMEWORK[i]].series.revenue.value);
+    expect(row[3]).toBe(release('outlook').byPeriod[FRAMEWORK[i]].printedPctGdp.revenue.value);
     expect(sourceIndex.entries[row[4] as string].table).toBe('annex3_mln');
   }
   const historical = annualView(release('outlook'), 'outlook', release('outlook'), '2026.law');
@@ -534,12 +475,6 @@ it('exports source IDs, full provenance links, selected period, units, release a
   expect(csv).toContain(';2027.draft;хил. €;');
   expect(csv).toContain(institutions(doc, 'billMc')[0].expenditure.provenance);
   expect(csv).toContain('/data/budget2027-provenance.json#');
-  const archive = readFileSync(
-    new URL('../../../../data/originals/budget_2027/ZDBRB-2027.zip', import.meta.url),
-  );
-  expect(createHash('sha256').update(archive).digest('hex')).toBe(bill.source.sha256);
-  expect(sourceIndex.documents.bill.memberSha256).toBe(bill.source.memberSha256);
-  expect(sourceIndex.documents.forecast.memberSha256).toBe(forecast.source.pdf_sha256);
 });
 it('exposes missing programmes, absent future allocations and old releases explicitly', async () => {
   // The programme URL now uses a neutral unavailable-period explanation.
@@ -567,8 +502,8 @@ it('builds new institution navigation without calling historical programme model
 it('preserves the published measure blanks and signs in the 2027–2029 CSV', async () => {
   const { scope, html } = await page('/merki');
   const table = tableData(scope.maps.table.get('s12-II_7-table'));
-  expect(table.rows[0][2]).toBe(forecast.tables.II_7.rows[0].values[0]);
-  expect(table.rows[1][2]).toBe(forecast.tables.II_7.rows[0].values[1]);
+  expect(table.rows[0][2]).toBe(doc.forecast.II_7[0].cells['0'].value);
+  expect(table.rows[1][2]).toBe(doc.forecast.II_7[0].cells['1'].value);
   expect(table.rows[2][2]).toBe('');
   expect(html).toContain('Празна печатна клетка.');
   const csv = csvFor({ table, period: '2027–2029', unit: 'млн. €', source: ['budget2027'] });
@@ -596,7 +531,9 @@ it('does not append the main bill investment programme to the Council of Ministe
   expect(html).toContain('Няма отделни общински и инвестиционни приложения');
   const table = tableData(scope.maps.table.get('s34-mc-table'));
   const expense = table.rows.find((r: any) => r[0] === 'II. РАЗХОДИ');
-  expect(expense?.[1]).toBe(bill.billMc['1'].headline.exp);
+  expect(expense?.[1]).toBe(
+    doc.budgets.billMc['1'].rows.find((r: any) => r.no === 'II.').cell.value,
+  );
 });
 
 it('registers only visible municipal share blocks for detail and forecast routes', async () => {
@@ -610,7 +547,7 @@ it('registers only visible municipal share blocks for detail and forecast routes
 it('preserves municipal region-code URLs while reading only the 2027 allocations', async () => {
   const { scope } = await page('/obshtini?oblast=BLG');
   const rows = scope.maps.table.get('s20-bill-table').rows;
-  const original = bill.municipal.art52.rows.filter((r: any) => r.region === 'ОБЛАСТ БЛАГОЕВГРАД');
+  const original = doc.municipal.art52.filter((r: any) => r.region === 'ОБЛАСТ БЛАГОЕВГРАД');
   expect(rows).toHaveLength(original.length);
   // the bill's „ОБЛАСТ БЛАГОЕВГРАД“ is shown by the region name of the municipality identity
   expect(rows.every((r: any) => r.region === 'Благоевград')).toBe(true);

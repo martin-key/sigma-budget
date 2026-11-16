@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, appendFileSync, readdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, appendFileSync, readdirSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 
@@ -65,7 +65,8 @@ export function compareBaselines(baseline, base, exceptions, today) {
   const failures = [];
   for (const [workspace, targets] of Object.entries(base.workspaces)) {
     if (!baseline.workspaces[workspace]) {
-      failures.push(`${workspace}: existing baseline workspace removed`);
+      if (existsSync(`${workspace}/package.json`))
+        failures.push(`${workspace}: existing baseline workspace removed`);
       continue;
     }
     for (const metric of ['lines', 'branches']) {
@@ -135,7 +136,7 @@ function main(args, env) {
   if (args.includes('--update') && args.includes('--check-base'))
     throw new Error('Choose either --update or --check-base');
   const workspaces = ['apps', 'packages']
-    .flatMap((dir) => readdirSync(dir).map((name) => `${dir}/${name}`))
+    .flatMap((dir) => (existsSync(dir) ? readdirSync(dir).map((name) => `${dir}/${name}`) : []))
     .filter((dir) => {
       try {
         return JSON.parse(readFileSync(`${dir}/package.json`)).scripts?.test;

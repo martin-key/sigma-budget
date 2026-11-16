@@ -2,7 +2,7 @@
 
 ## Нова работа
 
-Новият код е TypeScript. Workspace-ът е описан в [README](../README.md); общите правила са в [AGENTS.md](../AGENTS.md). За обработката на данни `./budget` стартира Node CLI в `apps/etl/` и пакетите за обработка в `packages/ingest/`.
+Новият код е TypeScript. Workspace-ът е описан в [README](../README.md); общите правила са в [AGENTS.md](../AGENTS.md). Сайтът чете закрепеното издание от `data/release/`; обработката е в [хранилището за данни](https://github.com/midt-bg/sigma-budget-data/blob/main/README.md).
 
 Маршрутите са в `apps/web/app/routes.ts`. Мигрираните екрани S25, S35, S14 и S16 имат отделни route модули, а S30 използва `not-found.tsx`. Модулите използват loader, headers и компоненти; моделите и React представянето се свързват чрез `apps/web/app/migration/registry.tsx`. За нова работа следвай съществуващите модули и тестовете им. Останалите маршрути използват общия `screen.tsx` и стария renderer.
 
@@ -1109,34 +1109,9 @@ pnpm test
 pnpm dev
 ```
 
-### Входове за `pnpm test`
+### Проверки без обработка на данни
 
-В чисто копие на хранилището липсва един вход, който CI подготвя преди `pnpm test`. Без него част от тестовете на `packages/ingest` пропадат.
-
-Входът са четирите програмни PDF-а в `data/originals/program_budgets/`, описани в `packages/dataset-schema/src/programme-references.json`. Те не са в Git. CI ги възстановява от одобрения архив на хранилището (`scripts/registered-node-inputs.json`) със стъпката `Restore the four pinned programme originals`. Архивът е draft release asset и за свалянето му е нужен достъп за писане до хранилището:
-
-```sh
-mkdir -p tmp/ci-inputs
-gh api repos/midt-bg/sigma-budget/releases/assets/$(node -p "require('./scripts/registered-node-inputs.json').assetId") \
-  -H 'Accept: application/octet-stream' > tmp/ci-inputs/registered-node-inputs.tar.gz
-node scripts/restore-programme-test-inputs.mjs tmp/ci-inputs/registered-node-inputs.tar.gz
-```
-
-Скриптът проверява размера и SHA-256 на архива и на всеки PDF и не презаписва съществуващ оригинал. Първото изпълнение отпечатва `{"restored":4,"unchanged":0}`, а следващите `{"restored":0,"unchanged":4}`.
-
-Диференциалните Vitest тестове сравняват със замразени резултати в `packages/ingest/test/expected/`.
-
-Записаното издание се проверява с `./budget check-site --inputs /path/to/registered-node-inputs` (manifest, файлове и пълни текущи TypeScript правила). `validate --site` е отделна проверка чрез възпроизвеждане със записаните зависимости.
-
-`FixtureManifest` в `packages/test-support` съдържа `schema: 1`, пълна ревизия `baselineRevision`, дата `buildDate`, `inputs: [{path, sha256}]` и `datasets: [{id, eligibility, rationale}]`. Допустимите стойности за `eligibility` са `reproducible`, `frozen-only` и `unverified`. Resolver-ът проверява инвентара, ограничението на пътищата и контролните суми. Очакванията не се генерират от кандидата.
-
-### Косвени данъци след 08.11.2026 г.
-
-S12 чете проверените откъси направо от `measures`; S08 няма редакционни връзки към мерки. S18 зарежда `indirect-tax-parameters` и приема отделни разходи по ДДС 20%, 9% и 0%/освободени, литри и вид гориво, кутии и късове, действителни цени и дата. Цените от ЕК и НСИ са датирани, редактируеми справки. Липсващ вход дава null; липса на покупки се задава с 0. Годишното умножение е сценарий. „Само реални данни“ не скрива оценката върху официални параметри.
-
-S18 запазва отделни състояния за невалиден вход, липсващ вход и дата без проверени ставки. Грешката остава до полето с `aria-invalid`. Референтните цени се показват с десетична запетая и подходяща точност; до първата редакция сметката използва стойността от източника. След редакция използва въведената цена.
-
-Проверките на списъците, CSV, споделените мерни единици и навигацията са в `tests/e2e/worker/public-bill-lists.spec.ts`, `share-units.spec.ts` и `react-bridge.spec.ts`. Job `check` ги изпълнява с `E2E_WORKER_URL=http://127.0.0.1:8814 pnpm test:e2e --project=worker public-bill-lists.spec.ts share-units.spec.ts react-bridge.spec.ts`. `apps/web/scripts/hrefs.test.ts` проверява адресите в хранилището чрез web Vitest suite. `node apps/web/scripts/make-images.ts` генерира social card и app icons; байтовете зависят от Chromium и шрифтовете.
+`pnpm test -- --coverage` изпълнява web тестовете. Не се изискват оригинали, PDF-и или архив с входове. Следват `pnpm check:coverage`, `pnpm data:check` и `node tests/release/compat_check.mjs`. Браузърните проверки са описани в [README](../README.md).
 
 ## Издание с кода
 

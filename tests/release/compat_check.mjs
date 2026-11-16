@@ -55,7 +55,7 @@ async function main(argv) {
 
   console.log('the code');
   const { RELEASE_COMPATIBILITY: w } = await import(
-    new URL('packages/ingest/src/release-build/contracts.ts', ROOT).href
+    new URL('apps/web/scripts/release-compatibility.ts', ROOT).href
   );
   const ex = 'data/release/execution.json';
   const r = await clientParse(ex);

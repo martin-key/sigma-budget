@@ -10,6 +10,7 @@ import { siteUrl } from '../seo.js';
 import { dataHref } from '../data.js';
 import { sizeLabel } from '../catalog.js';
 import { checkRows } from '../check-groups.js';
+import { reproductionCommand } from '../reproduce.js';
 
 export const needs = ['releases/current', 'release/manifest', 'release/validation?'];
 export const styles = ['s35-proverka'];
@@ -195,7 +196,7 @@ function codeBlock(m) {
   );
 }
 
-function checksBlock(v) {
+function checksBlock(rid, m, v) {
   const groups = v?.groups || [];
   const origin = siteUrl('/').replace(/\/$/, '');
   return block(
@@ -220,9 +221,8 @@ function checksBlock(v) {
     }
     ${groups.length ? html`<p class="small muted">Техническото обобщение на всяка група (на английски) е във файла <code>validation.json</code> от списъка с файлове.</p>` : ''}
     <p>Изданието може да се пресъздаде от входните му файлове, включително запазените междинни данни, и всеки изходен файл да се сравни байт по байт. Нужни са кодът и локално копие на входните файлове:</p>
-    <pre class="s35-cmd"><code>git clone ${REPO}.git && cd sigma-budget
-./budget reproduce --current ${origin} --originals /път/до/входовете</code></pre>
-    <p>Командата чете манифеста на текущото издание, проверява локалните входни файлове и сравнява пресъздадените изходи с публикуваните байтове. Изходът е <code lang="en">reproduced byte for byte</code> или списък с разликите. Подробности: ${ext(`${REPO}/blob/main/docs/release.md`, 'docs/release.md')}.</p>`,
+    <pre class="s35-cmd"><code>${reproductionCommand(m, rid, origin)}</code></pre>
+    <p>Командата проверява входните файлове и сравнява пресъздадените изходи с това издание. Изходът е <code lang="en">reproduced byte for byte</code> или списък с разликите. Подробности: ${ext(`${DATA_REPO}/blob/main/docs/release.md`, 'docs/release.md')}.</p>`,
   );
 }
 
@@ -257,6 +257,6 @@ export function render(ctx) {
   return {
     lede: `Откъде са данните на тази страница: изданието ${short(rid)} с ${num(ins)} входни файла и ${num(outs)} файла, всеки с SHA-256, кодът, който ги сглобява, проверките и как всеки може да го пресъздаде.`,
     answer: `Данните са от издание ${short(rid)}: ${num(ins)} входни файла и ${num(outs)} файла с данни, сглобени от commit ${short(m.processing?.code?.commit)} и проверими байт по байт.`,
-    body: html`${releaseBlock(rid, m)}${coverageBlock(m)}${filesBlock(rid, m)}${codeBlock(m)}${checksBlock(ctx.data['release/validation'])}${provenanceBlock()}${historyBlock()}`,
+    body: html`${releaseBlock(rid, m)}${coverageBlock(m)}${filesBlock(rid, m)}${codeBlock(m)}${checksBlock(rid, m, ctx.data['release/validation'])}${provenanceBlock()}${historyBlock()}`,
   };
 }

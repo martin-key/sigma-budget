@@ -1,9 +1,7 @@
 **/node_modules/**
-# Generated output, anchored to where the tools write it (as in .gitignore). A bare build/ or dist/ would also skip
-# live source folders such as packages/ingest/src/build/; apps/web/workers/repository-ignore.test.ts guards this.
+# Generated site output.
 apps/web/build/
-apps/*/dist/
-packages/*/dist/
+apps/web/coverage/
 /build/
 /dist/
 **/.react-router/**
@@ -12,16 +10,11 @@ packages/*/dist/
 apps/web/app/routes/__fixtures__/**
 data/**
 tmp/**
-packages/ingest/src/production/historical/**
 # Frozen test inputs (never reformat).
 **/fixtures/**
 **/__fixtures__/**
-# The release operator reads the frozen environments byte for byte.
-apps/etl/environments.json
 # Vendored assets retain upstream bytes.
 **/vendor/**
 # Coverage is generated evidence, not maintained source.
-apps/*/coverage/
-packages/*/coverage/
 /coverage/
 /coverage-summary.md

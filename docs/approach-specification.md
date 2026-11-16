@@ -22,7 +22,7 @@
 - Не забраняваме подход, който постига нужното. Ако нещо не работи, пишем какво точно не работи.
 - Документите се обновяват заедно с кода.
 
-Подробностите са в [плана](plan.md), [договорите за данни](data-spec.md), [примерните набори](example-datasets.md), [източниците](data-sources.md) и [ръководството за екраните](dev-guide.md). Ако там процедура или забрана е по-строга от правилата горе, тя е препоръка. Формите на данните и конвенциите за кода важат, докато не ги променим заедно с кода.
+Подробностите са в [плана](plan.md), [договорите за данни](https://github.com/midt-bg/sigma-budget-data/blob/main/docs/data-spec.md), [примерните набори](https://github.com/midt-bg/sigma-budget-data/blob/main/docs/example-datasets.md), [източниците](https://github.com/midt-bg/sigma-budget-data/blob/main/docs/data-sources.md) и [ръководството за екраните](dev-guide.md). Ако там процедура или забрана е по-строга от правилата горе, тя е препоръка. Формите на данните и конвенциите за кода важат, докато не ги променим заедно с кода.
 
 ## 2. Продуктов обхват
 
@@ -196,16 +196,7 @@ Worker-ът избира текущото издание веднъж за ст�
 
 ### 8.1. CLI
 
-```sh
-# без акаунт в Cloudflare
-./budget collect --out /outside/new/acquisition
-./budget import-source --source <source-id> --file <файл> --out /outside/new/import
-./budget build --commit HEAD --inputs /outside/new/acquisition --out /outside/new/candidate --build-date 2026-11-10
-./budget validate --release /outside/new/candidate --inputs /outside/new/acquisition
-./budget reproduce --current <адрес на сайта> --originals /outside/new/acquisition
-./budget refetch --manifest <адрес на манифеста> --out /outside/new/refetch
-
-```
+Командите `./budget collect`, `import-source`, `build`, `validate`, `reproduce` и `refetch` се изпълняват в [хранилището за данни](https://github.com/midt-bg/sigma-budget-data/blob/main/docs/release.md). Тук готовото издание се приема с `pnpm data:pull --commit <sha>` и се проверява offline с `pnpm data:check`.
 
 ### 8.2. Публикуване чрез PR
 
@@ -300,7 +291,7 @@ CLI дава четим отчет и JSON. Различава успех, ра�
 
 ## 13. Референции
 
-- СИГМА Бюджет: [README](../README.md), [план](plan.md), [договори за данни](data-spec.md), [примерни набори](example-datasets.md), [източници](data-sources.md), [екрани](dev-guide.md).
+- СИГМА Бюджет: [README](../README.md), [план](plan.md), [договори за данни](https://github.com/midt-bg/sigma-budget-data/blob/main/docs/data-spec.md), [примерни набори](https://github.com/midt-bg/sigma-budget-data/blob/main/docs/example-datasets.md), [източници](https://github.com/midt-bg/sigma-budget-data/blob/main/docs/data-sources.md), [екрани](dev-guide.md).
 - Оригиналната СИГМА: [архитектура](https://github.com/midt-bg/sigma/blob/main/docs/architecture.md), [SSR и сигурност](https://github.com/midt-bg/sigma/blob/main/docs/adr/0001-rendering-and-security.md).
 - Cloudflare: [React Router на Workers](https://developers.cloudflare.com/workers/framework-guides/web-apps/react-router/), [Static Assets](https://developers.cloudflare.com/workers/static-assets/).
 

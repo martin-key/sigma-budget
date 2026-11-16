@@ -19,15 +19,6 @@ if (kind !== 'gitleaks' || !binary || rest.length) {
 // Public, fixed test data; chosen to exercise the detector, outside reviewed checksums.
 const controlValue = 'b1fe548869255ebb76ff76b0f5042749a8afaa501f44e7a64f306aa4b256d8c7';
 const samples = [['bad.txt', `api_key = "${controlValue}"`]];
-for (const name of [
-  'validate14/code-path-capture',
-  'validate15/compound/provenance',
-  'validate17a/provenance',
-  'validate15/oracle',
-  'wave13b/proof',
-]) {
-  samples.push([`packages/ingest/test/fixtures/${name}.json`, `{"api_key":"${controlValue}"}`]);
-}
 
 const target = mkdtempSync(join(tmpdir(), 'security-control-'));
 const scan = () => {

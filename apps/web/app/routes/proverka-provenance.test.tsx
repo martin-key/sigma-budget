@@ -107,3 +107,47 @@ it('distinguishes preserved intermediates from source inputs without overstating
     });
   }
 });
+
+it.each(['sigma-budget', 'sigma-budget-data'])(
+  'shows the recorded producer and revision for a release from %s',
+  async (repository) => {
+    const docs: Record<string, unknown> = structuredClone(inputs);
+    const commit = 'a'.repeat(40);
+    docs['release/manifest'] = {
+      ...inputs['release/manifest'],
+      processing: {
+        ...inputs['release/manifest'].processing,
+        code: { repository: `https://github.com/midt-bg/${repository}`, commit },
+      },
+    };
+    const load = async <T,>(name: string): Promise<T> => docs[name] as T;
+    const url = new URL('/proverka', release.origin);
+    provideScope(() => ({
+      url,
+      origin: url.origin,
+      data: new Map(),
+      state: requestState(null),
+      load,
+    }));
+    const model = await textModel('S35', {}, {}, { release, load });
+    for (const html of [
+      renderToString(<MigratedScreen model={model} navigation={{ go() {}, announce() {} }} />),
+      String(frameHtml(await build(byId.S35, {}, {}))),
+    ]) {
+      const document = parseHTML(html).document;
+      const command = document.querySelector('.s35-cmd')!.textContent!;
+      expect(command).toContain(`git clone https://github.com/midt-bg/${repository}.git`);
+      expect(command).toContain(`git checkout ${commit}`);
+      expect(command).toContain(
+        `./budget reproduce --manifest ${release.origin}/data/releases/${release.id}/manifest.json --originals`,
+      );
+      expect(
+        document
+          .querySelector('#s35-checks')!
+          .parentElement!.querySelector(
+            'a[href="https://github.com/midt-bg/sigma-budget-data/blob/main/docs/release.md"]',
+          ),
+      ).not.toBeNull();
+    }
+  },
+);
