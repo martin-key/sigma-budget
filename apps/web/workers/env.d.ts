@@ -17,6 +17,8 @@ interface Env {
   SIGMA_URL?: string;
   /** the address the feedback form writes to (apps/web/client/feedback.js); empty: the form keeps the message in the browser and says so */
   FEEDBACK_EMAIL?: string;
+  /** the token of OpenAI's domain check, served at /.well-known/openai-apps-challenge (docs/openai-plugin.md); empty: 404 */
+  OPENAI_APPS_CHALLENGE?: string;
   /** "1" keeps the environment out of search engines (staging) */
   NOINDEX?: string;
 }
