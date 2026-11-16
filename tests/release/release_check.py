@@ -328,6 +328,12 @@ def main(argv):
         for m_, path in (("POST", "/api/releases/current"), ("PUT", "/data/releases/%s/data/x.json" % A[2]), ("DELETE", "/data/releases/%s/manifest.json" % A[2])):
             s, _h, _b = req(m_, base + path, b"x")
             ok(s == 405, "%s %s: 405, no public route writes" % (m_, path.split("/")[1]))
+        s, h, b = req("POST", base + "/mcp", json.dumps({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}}).encode(),
+                      {"Content-Type": "application/json"})
+        ok(s == 200 and len(h.get("Mcp-Session-Id") or "") == 32 and jbody(b).get("result", {}).get("serverInfo", {}).get("name") == "sigma-budget",
+           "POST /mcp initialize: the MCP server of the Worker answers, with a session")
+        s, h, _b = req("GET", base + "/mcp")
+        ok(s == 405 and h.get("Allow") == "POST", "GET /mcp: 405, MCP takes POST only")
 
         print("one release on the screen (scenario 6)")
         cur = jbody(req("GET", base + "/api/releases/current")[2])
@@ -388,6 +394,13 @@ def main(argv):
             page = b.decode("utf-8", "replace")
             ok(s == 200 and h.get("X-Release-Id") == rid and 'data-view="ready"' in page and "/data/releases/%s/data/execution-provenance.json" % rid in page,
                "the monthly screen is drawn from the published release, and its provenance link is the file of that release")
+            call = {"jsonrpc": "2.0", "id": 1, "method": "tools/call",
+                    "params": {"name": "explain_number", "arguments": {"record": "data/2026-09/kfp/rev"}}}
+            s, h, b = req("POST", base + "/mcp", json.dumps(call).encode(), {"Content-Type": "application/json"})
+            mj = jbody(b).get("result", {}).get("structuredContent") or {}
+            ok(s == 200 and h.get("X-Release-Id") == rid and mj.get("verified") is True and mj.get("cell") == "B11"
+               and mj.get("value") == "33898.456" and "/data/releases/%s/" % rid in str(mj.get("original", {}).get("download")),
+               "MCP explain_number of data/2026-09/kfp/rev: the record of the published release, checked against its manifest")
             code, r = budget(["reproduce", "--current", base], dict(env))
             ok(code == 0 and r.get("verdict") == "reproduced byte for byte",
                "budget reproduce --current: the originals downloaded from the release, rebuilt byte for byte (%s)" % (r.get("verdict") or json.dumps(r)[:400]))

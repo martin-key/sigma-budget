@@ -10,6 +10,7 @@ import { money, pct } from './format.js';
 //   getIndex()                 -> Promise<{entries, hasIndex, groups}>   never rejects; the index file is optional (pending = screens + terms only)
 //   screenOf(href)             -> route | null   the screen a result opens (for „→ Екран“)
 //   countText(n) · hiddenText(n) · groupLabel(id) · POPULAR · MAX_QUERY
+//   entry · fromDoc · fromRoutes · fromGlossary · oldAnnual   the builders of getIndex(), also for the MCP search (apps/web/workers/mcp/search.ts)
 // An entry: {group, title, sub, value, period, status: real|mock|pending, href, w, nn, t, nl, tl, mag} (the last six are matching data).
 import { raw, esc } from './html.js';
 import { data } from './data.js';
@@ -367,7 +368,7 @@ const WEIGHT = {
 export const groupLabel = (id) => GROUP_LABEL[id] || 'Друго';
 const STATUSES = ['real', 'mock', 'pending'];
 
-function entry(group, title, o = {}) {
+export function entry(group, title, o = {}) {
   const name = String(title);
   const nn = norm(name);
   const t = norm(`${name} ${o.sub || ''} ${o.kw || ''} ${o.period || ''} ${groupLabel(group)}`);
@@ -435,7 +436,7 @@ export const metaOf = (e) => {
 
 const FIELDS = ['g', 'title', 'sub', 'value', 'period', 'status', 'href', 'kw'];
 /** the rows of data/search-index.json (DATA_SPEC 3.21); a row without a title or with a link that is not an in-app hash link is dropped */
-function fromDoc(doc) {
+export function fromDoc(doc) {
   if (!doc || !Array.isArray(doc.items)) return [];
   const groups = Array.isArray(doc.groups) ? doc.groups : [];
   const F = {};
@@ -512,7 +513,7 @@ export function annualSearch(outlook, revenue, expenditure) {
   }
   return entries;
 }
-const oldAnnual = (e) =>
+export const oldAnnual = (e) =>
   e.group === 'indicators' &&
   /бюджет 2026|КФП по (видове|функции|икономически вид), 2026|Макроикономическа прогноза, 2026/.test(
     e.sub,
@@ -544,7 +545,7 @@ const SCREEN_KW = {
 // a required `:name` segment (not `:name?`, not `:name(regex)?`) means the screen cannot be opened without a parameter
 const needsParam = (r) => r.pattern.split('/').some((s) => s.startsWith(':') && !s.endsWith('?'));
 /** the screens that can be opened as they are (not the search itself, the embed view and the 404) */
-function fromRoutes() {
+export function fromRoutes() {
   return ROUTES.filter(
     (r) => r.pattern && !needsParam(r) && !['S28', 'S29', 'S30'].includes(r.id),
   ).map((r) =>
@@ -565,7 +566,7 @@ const firstSentence = (s) => {
 const glossaryTitle = (t) =>
   t.abbr ? `${t.name || t.title} – ${t.abbr}` : t.title || t.name || t.slug;
 /** glossary terms (used until the index has its own „terms“ group) */
-function fromGlossary(doc) {
+export function fromGlossary(doc) {
   const terms = Array.isArray(doc?.terms) ? doc.terms.filter((t) => t && t.slug) : [];
   return terms.map((t) =>
     entry('terms', glossaryTitle(t), {

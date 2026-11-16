@@ -181,3 +181,40 @@ it('unknown packaged files still charge the limiter before any registry read', a
   expect(limit).toHaveBeenCalledOnce();
   expect(prepare).not.toHaveBeenCalled();
 });
+
+it('takes POST only on /mcp, with the finalized headers of a non-public-data route', async () => {
+  const env = {
+    ENVIRONMENT: 'local',
+    ASSETS: { fetch: async () => new Response('asset') },
+  } as unknown as Env;
+  const body = JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'initialize', params: {} });
+  const res = await app.fetch(
+    new Request('https://budget.example/mcp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body,
+    }),
+    env,
+    {} as ExecutionContext,
+  );
+  expect(res.status).toBe(200);
+  expect(res.headers.get('Mcp-Session-Id')).toMatch(/^[0-9a-f]{32}$/);
+  expect(res.headers.get('X-Robots-Tag')).toBe('noindex');
+  expect(res.headers.get('Cache-Control')).toBe('no-store');
+  expect(res.headers.has('Content-Security-Policy')).toBe(true);
+  expect(res.headers.has('Access-Control-Allow-Origin')).toBe(false);
+  for (const [path, method, status, allow] of [
+    ['/mcp', 'GET', 405, 'POST'],
+    ['/mcp', 'PUT', 405, 'POST'],
+    ['/mcp/', 'POST', 405, 'GET, HEAD'],
+    ['/data/core.json', 'POST', 405, 'GET, HEAD'],
+  ] as const) {
+    const r = await app.fetch(
+      new Request('https://budget.example' + path, { method }),
+      env,
+      {} as ExecutionContext,
+    );
+    expect(r.status, `${method} ${path}`).toBe(status);
+    expect(r.headers.get('Allow'), `${method} ${path}`).toBe(allow);
+  }
+});
