@@ -14,15 +14,6 @@ datasets:
   - data/cache/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json
   - data/inputs/budget_forecast_2027.json
   schema: docs/data-spec.md
-  screens:
-  - S04
-  - S05
-  - S06
-  - S07
-  - S08
-  - S13
-  - S17
-  - S31
   period: 2024–2029
   scope: 'КФП and сектор „Държавно управление“ (S.13): macro framework and fiscal targets'
   unit: млн. €
@@ -44,8 +35,6 @@ datasets:
   - eurostat
   - outlook
   schema: docs/data-spec.md
-  screens:
-  - S31
   period: 2019–2025
   scope: national economy (НСИ via Eurostat)
   unit: млн. €
@@ -67,10 +56,6 @@ datasets:
   - data/originals/asbp/asbp_tables.json
   - data/inputs/budget_forecast_2027.json
   schema: docs/data-spec.md
-  screens:
-  - S04
-  - S05
-  - S06
   period: 2024–2029
   scope: КФП, Приложение 3
   unit: млн. €
@@ -94,11 +79,6 @@ datasets:
   - data/cache/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json
   - data/inputs/budget_forecast_2027.json
   schema: docs/data-spec.md
-  screens:
-  - S04
-  - S05
-  - S07
-  - S08
   period: 2015–2029
   scope: КФП by function (COFOG), Приложение 3
   unit: млн. €
@@ -124,8 +104,6 @@ datasets:
   - zbdoo
   - zbnzok
   schema: docs/data-spec.md
-  screens:
-  - S15
   period: 2024–2028
   scope: the constituent budgets of the КФП
   unit: хил. €
@@ -145,13 +123,6 @@ datasets:
   - data/inputs/program_budgets_2026.json
   - data/cache/law_bill.json
   schema: docs/data-spec.md
-  screens:
-  - S05
-  - S07
-  - S08
-  - S10
-  - S11
-  - S14
   period: '2026'
   scope: state budget (ЗДБ), first-level spending units
   unit: хил. €
@@ -170,8 +141,6 @@ datasets:
   - data/inputs/program_budgets_2026.json
   - data/cache/law_bill.json
   schema: docs/data-spec.md
-  screens:
-  - S11
   period: 2023–2028
   scope: state budget, programme budgets of the spending units
   unit: хил. €
@@ -211,8 +180,6 @@ datasets:
   - data/inputs/program_budgets_2026.json
   - data/cache/law_bill.json
   schema: docs/data-spec.md
-  screens:
-  - S10
   period: 2025–2026
   scope: state budget, programmes
   unit: хил. €
@@ -251,10 +218,6 @@ datasets:
   - data/inputs/measures_2026.json
   - data/inputs/measure_excerpts.json
   schema: docs/data-spec.md
-  screens:
-  - S04
-  - S05
-  - S12
   period: 2026–2028
   scope: КФП, discretionary measures of the 2026 budget
   unit: млн. €
@@ -278,9 +241,6 @@ datasets:
   - zbnzok
   - zdb
   schema: docs/data-spec.md
-  screens:
-  - S11
-  - S14
   period: 2025-07-17 … 2026-07-31
   scope: 'the three 2026 budget laws: bill against adopted law'
   unit: хил. €
@@ -302,12 +262,6 @@ datasets:
   - data/inputs/budget_forecast_2027.json
   - data/inputs/budget_bill_2027.json
   schema: docs/data-spec.md
-  screens:
-  - S01
-  - S04
-  - S07
-  - S15
-  - S17
   period: 2022-01 … 2026-09
   scope: КФП, national budget and EU funds, cash basis
   unit: млн. €
@@ -329,8 +283,6 @@ datasets:
   - data/inputs/budget_forecast_2027.json
   - data/inputs/budget_bill_2027.json
   schema: docs/data-spec.md
-  screens:
-  - S15
   scope: every number of execution.json, and the plan for 2026
   rebuild: ./budget build
   checked: '2026-11-05'
@@ -353,9 +305,6 @@ datasets:
   - data/cache/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json
   - zdb
   schema: docs/data-spec.md
-  screens:
-  - S04
-  - S17
   period: 2015–2028
   scope: government debt (ЗДД) and Maastricht debt (S.13)
   unit: млн. €
@@ -376,8 +325,6 @@ datasets:
   - zbdoo
   - zbnzok
   schema: docs/data-spec.md
-  screens:
-  - S18
   period: '2026'
   scope: taxes and social security contributions in force in 2026
   unit: '%'
@@ -399,9 +346,6 @@ datasets:
   - data/inputs/population.json
   - data/cache/law_bill.json
   schema: docs/data-spec.md
-  screens:
-  - S20
-  - S21
   period: '2026'
   scope: transfers from the state budget to the 265 municipalities
   unit: хил. €
@@ -424,9 +368,6 @@ datasets:
   - data/inputs/population.json
   - data/cache/law_bill.json
   schema: docs/data-spec.md
-  screens:
-  - S20
-  - S21
   period: '2024'
   scope: municipal borders and population (LAU)
   rebuild: ./budget build
@@ -444,11 +385,8 @@ datasets:
   - packages/ingest/src/build/aggregation-layers.ts
   inputs:
   - data/inputs/editorial/glossary.json
+  - data/inputs/editorial/routes.json
   schema: docs/data-spec.md
-  screens:
-  - S03
-  - S06
-  - S07
   scope: editorial
   rebuild: ./budget build
   limitations:
@@ -462,9 +400,8 @@ datasets:
   producer: packages/ingest/src/build/editorial.ts
   inputs:
   - data/inputs/editorial/guide.json
+  - data/inputs/editorial/routes.json
   schema: docs/data-spec.md
-  screens:
-  - S04
   scope: editorial
   rebuild: ./budget build
   limitations:
@@ -492,33 +429,6 @@ datasets:
   - revenue
   - data/cache/law_bill.json
   schema: docs/data-spec.md
-  screens:
-  - S01
-  - S03
-  - S04
-  - S05
-  - S06
-  - S07
-  - S08
-  - S10
-  - S11
-  - S12
-  - S13
-  - S14
-  - S15
-  - S16
-  - S17
-  - S18
-  - S20
-  - S21
-  - S24
-  - S25
-  - S26
-  - S27
-  - S28
-  - S29
-  - S31
-  - S34
   period: 2024–2028
   scope: 'the shell of the site: figures copied from the datasets'
   unit: млн. €
@@ -547,8 +457,6 @@ datasets:
   - rates
   - sebra
   schema: docs/data-spec.md
-  screens:
-  - S16
   period: 2026-01-31 … 2026-11-06
   scope: the site
   rebuild: ./budget build
@@ -574,8 +482,6 @@ datasets:
   - rates
   - sebra
   schema: docs/data-spec.md
-  screens:
-  - S16
   period: 2026-01-31 … 2026-11-06
   scope: the site
   rebuild: ./budget build
@@ -597,8 +503,6 @@ datasets:
   - gva-sectors
   - indirect-tax-parameters
   schema: docs/data-spec.md
-  screens:
-  - S28
   scope: the site
   rebuild: ./budget build
   checked: '2026-11-05'
@@ -637,9 +541,6 @@ datasets:
   - sebra
   - indirect-tax-parameters
   schema: docs/data-spec.md
-  screens:
-  - S24
-  - S25
   scope: the site
   rebuild: ./budget build
   checked: '2026-11-05'
@@ -654,8 +555,6 @@ datasets:
   expected: Месечен бюджетен бюлетин на МФ (PDF), https://www.minfin.bg/bg/statistics/12
   sources:
   - minfin
-  screens:
-  - S15
 - id: p04
   catalogId: P04
   title: Отчетът към 31.10.2026 г. и следващите
@@ -665,9 +564,6 @@ datasets:
   expected: Месечна информация за КФП, minfin.bg
   sources:
   - minfin
-  screens:
-  - S15
-  - S16
 - id: p07
   catalogId: P07
   title: Съдържанието и ефектът на 69-те предложения между първо и второ четене
@@ -677,8 +573,6 @@ datasets:
   expected: Предложения за второ гласуване, parliament.bg
   sources:
   - parliament
-  screens:
-  - S14
 - id: sebra
   catalogId: null
   title: 'СЕБРА: дневни плащания на МИДТ'
@@ -689,7 +583,6 @@ datasets:
   inputs:
   - midt-sebra
   schema: docs/data-spec.md
-  screens: []
   scope: МИДТ only, 27–31.08.2026
   rebuild: ./budget build
   checked: '2026-11-05'
@@ -706,7 +599,6 @@ datasets:
   - data/cache/research/dbp-2027/dbp2027_figures.json
   - dbp2027
   schema: docs/data-spec.md
-  screens: []
   scope: сектор „Държавно управление“ (S.13), ESA 2010
   rebuild: ./budget build
   limitations:
@@ -721,8 +613,6 @@ datasets:
   inputs:
   - every output of the release
   schema: docs/release.md
-  screens:
-  - S15
   scope: 'the release of data/release: manifest.json and validation.json of every release, current.json points to the current one'
   rebuild: ./budget build --site
   checked: '2026-11-05'
@@ -741,7 +631,6 @@ datasets:
   - data/inputs/budget_forecast_2027.json
   - data/inputs/budget_bill_2027.json
   schema: docs/data-spec.md
-  screens: [S04, S05, S10, S11, S12, S13, S17, S20, S21, S34]
   period: 2026–2029
   scope: MF publication 2026-11-06; bill and forecast are separate
   unit: хил. € / млн. € / %
@@ -760,7 +649,6 @@ datasets:
   - data/inputs/budget_forecast_2027.json
   - data/inputs/budget_bill_2027.json
   schema: docs/data-spec.md
-  screens: [S04, S05, S10, S11, S12, S13, S17, S20, S21, S34]
   period: 2026–2029
   scope: MF publication 2026-11-06; bill and forecast are separate
   unit: хил. € / млн. € / %
@@ -782,8 +670,6 @@ datasets:
   - bill
   - data/inputs/indirect_tax_evidence.json
   schema: docs/data-spec.md
-  screens:
-  - S18
   scope: България; ставки и датирани наблюдения, без потребителски тегла
   rebuild: ./budget build
   limitations:
@@ -799,7 +685,6 @@ datasets:
   inputs:
   - state-budget
   schema: docs/data-spec.md
-  screens: [S06, S15, S35]
   period: 2025–2026
   scope: 'държавен бюджет'
   unit: млн. €
@@ -818,7 +703,6 @@ datasets:
   inputs:
   - kfp-subsectors
   schema: docs/data-spec.md
-  screens: [S06, S15, S35]
   period: 2024–2026
   scope: 'КФП, централно правителство, социалноосигурителни фондове и местни власти'
   unit: млн. €
@@ -835,7 +719,6 @@ datasets:
   producer: packages/ingest/src/production/debt-issues.ts
   inputs: [debt-issues]
   schema: docs/data-spec.md
-  screens: [S17, S35]
   period: '2026-09-30'
   scope: 'държавен дълг, по номинал, предварителни данни на МФ'
   unit: EUR; USD
@@ -844,3 +727,28 @@ datasets:
   limitations:
   - 'Емисия XS2890436087 е в USD и не е превалутирана. Общият EUR сбор не може да бъде сверен без курс, който липсва в бюлетина.'
   - 'Отпечатана е матуритетна структура по срокове; годишен погасителен график не е включен.'
+
+- id: measures2027
+  catalogId: D39
+  title: 'Мерки в бюджета за 2027 г.'
+  status: real
+  files: [data/release/measures2027.json]
+  producer: packages/ingest/src/build/measures.ts
+  inputs: [budget2027, data/inputs/measures_2027.json]
+  schema: docs/data-spec.md
+  period: 2027–2029
+  scope: България
+  rebuild: ./budget build
+  limitations: ['Текстове по законопроекта; сумите са в budget2027.json.']
+
+- id: schema
+  catalogId: D40
+  title: 'JSON Schema на изданието'
+  status: real
+  files: [data/release/schema.json]
+  producer: packages/dataset-schema/src/index.ts
+  inputs: [wg]
+  schema: docs/data-spec.md
+  scope: Публикувани JSON файлове
+  rebuild: ./budget build
+  limitations: ['Ръчните guards без обявена схема се представят с {}.']

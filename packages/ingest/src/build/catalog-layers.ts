@@ -10,7 +10,6 @@ export interface CatalogProjectionInput {
   wording: Readonly<Record<string, string>>;
   ownerBytes: ReadonlyMap<string, Uint8Array>;
   registry: CatalogRefreshInput['registry'];
-  activeRoutes: CatalogRefreshInput['activeRoutes'];
 }
 export function catalogWording(
   raw: CatalogDocument,
@@ -65,7 +64,6 @@ export function catalogFinalRefresh(
     catalog: cat,
     ownerBytes: streams,
     registry: input.registry,
-    activeRoutes: input.activeRoutes,
   }).catalog;
 }
 

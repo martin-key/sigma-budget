@@ -1,5 +1,4 @@
-// Shared screen catalogue: edit routes.json. Both the web app and the data pipeline
-// apply the defaults below. Legacy pages and React route modules consume the same metadata.
+// Shared site screen catalogue: edit routes.json. The web app applies defaults. Legacy pages and React route modules consume the same metadata.
 // The legacy facade exposes ROUTES as window.__ROUTES__ for browser checks.
 import catalogue from './routes.json' with { type: 'json' };
 
@@ -23,8 +22,6 @@ export interface WebRoute {
   short: string;
   query: string[];
   bare?: boolean;
-  /** kept only as an id that the current data release still names (see docs/dev-guide.md, section 11): no address, no screen */
-  retired?: boolean;
 }
 
 type RouteOptions = Partial<

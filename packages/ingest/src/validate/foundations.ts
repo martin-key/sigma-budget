@@ -147,7 +147,8 @@ export function envelope(ctx: Context): Check {
     }
     for (const p of m.pending || [])
       c.ok(pend.has(p), `${f}: meta.pending ${repr(p)} is not in core.pending`);
-    if (!f.startsWith('mock/'))
+    // JSON Schema property definitions describe statuses; they are not data envelopes.
+    if (!f.startsWith('mock/') && f !== 'schema.json')
       for (const [p, v] of walk(d)) {
         if (p === '$.meta' || !dict(v) || !('status' in v)) continue;
         if (p.startsWith('$.byPeriod.')) {
@@ -174,7 +175,7 @@ export function envelope(ctx: Context): Check {
   }
   for (const [pid, b] of Object.entries(core.pending) as [string, any][]) {
     c.ok(b.status === 'pending' && b.id === pid, `core.pending.${pid}: bad status or id`);
-    for (const k of ['title', 'reason', 'expected', 'source', 'screens'])
+    for (const k of ['title', 'reason', 'expected', 'source'])
       c.ok(truth(b[k]), `core.pending.${pid}: ${k} missing`);
   }
   c.fact(`${ctx.jsonFiles().length} json files (${counts.real} real, ${counts.mock} mock)`);

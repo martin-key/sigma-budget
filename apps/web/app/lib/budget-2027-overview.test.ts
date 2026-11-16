@@ -11,7 +11,7 @@ import { INDICATORS, CAPEX_YEARS } from '../../client/budget-2027-compare.js';
 import { num, date, plural } from '../../client/format.js';
 import { chartSpec } from '../../client/ui/chart.js';
 import { comparison, cellOf, gdpOf, COMPARE } from '../../client/budget-2027-compare.js';
-import { MEASURES_2027, measureText } from '../../client/measures-2027.js';
+import { measureText } from '../../client/measures-2027.js';
 
 const read = (path: string) =>
   readFileSync(new URL('../../../../' + path, import.meta.url), 'utf8');
@@ -21,6 +21,8 @@ const forecast = JSON.parse(read('data/inputs/budget_forecast_2027.json'));
 const annex3 = (label: string) =>
   forecast.tables.annex3_mln.rows.find((r: any) => r.label === label).values;
 const doc = release('budget2027');
+const texts = release('measures2027');
+const { MEASURES_2027 } = texts;
 
 afterEach(() => provideScope(() => null));
 async function page(address: string, overrides: Record<string, any> = {}) {
@@ -32,7 +34,8 @@ async function page(address: string, overrides: Record<string, any> = {}) {
     state: requestState(r.query.per),
     data: new Map(),
     maps: {} as Record<string, Map<string, any>>,
-    load: async (name: string) => overrides[name] ?? release(name),
+    load: async (name: string) =>
+      overrides[name] ?? (name === 'measures2027' ? texts : release(name)),
   };
   provideScope(() => scope);
   const vm = await build(r.route, r.params, r.query);
@@ -157,11 +160,11 @@ it('keeps one checked companion entry for every printed measure', () => {
     const rows = doc.forecast[table].filter((r: any) => r.label !== 'Общо:');
     expect(MEASURES_2027[table]).toHaveLength(rows.length);
     rows.forEach((r: any, i: number) =>
-      expect(measureText(table, i, r.label), r.label).not.toBeNull(),
+      expect(measureText(texts, table, i, r.label), r.label).not.toBeNull(),
     );
   }
   // a row that is not the same any more keeps its printed label and no title
-  expect(measureText('II_7', 0, 'Друга мярка')).toBeNull();
+  expect(measureText(texts, 'II_7', 0, 'Друга мярка')).toBeNull();
 });
 
 it('lays out every 2027 measure as a card with its three effects and a quote of the motives', async () => {

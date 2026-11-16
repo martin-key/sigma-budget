@@ -1,4 +1,9 @@
-export type Guard<T> = (value: unknown) => value is T;
+export type Schema = { [key: string]: any };
+export type Guard<T> = ((value: unknown) => value is T) & { schema?: Schema };
+export function described<T>(guard: Guard<T>, schema: Schema): Guard<T> {
+  return Object.assign(guard, { schema });
+}
+export const schemaOf = (guard: Guard<unknown>): Schema => guard.schema ?? {};
 export type Infer<G> = G extends Guard<infer T> ? T : never;
 export type Json = null | boolean | string | number | Json[] | { [key: string]: Json };
 export const object = (v: unknown): v is Record<string, unknown> =>
@@ -19,12 +24,27 @@ export const array: Guard<Json[]> = (v): v is Json[] => Array.isArray(v) && v.ev
 export function shape<S extends Record<string, Guard<unknown>>>(
   fields: S,
 ): Guard<{ [K in keyof S]: Infer<S[K]> } & Record<string, Json>> {
-  return (v): v is { [K in keyof S]: Infer<S[K]> } & Record<string, Json> =>
-    record(v) && Object.entries(fields).every(([k, guard]) => Object.hasOwn(v, k) && guard(v[k]));
+  return described(
+    (v): v is { [K in keyof S]: Infer<S[K]> } & Record<string, Json> =>
+      record(v) && Object.entries(fields).every(([k, guard]) => Object.hasOwn(v, k) && guard(v[k])),
+    {
+      type: 'object',
+      required: Object.keys(fields),
+      properties: Object.fromEntries(Object.entries(fields).map(([k, g]) => [k, schemaOf(g)])),
+    },
+  );
 }
 export const strings: Guard<string[]> = (v): v is string[] => Array.isArray(v) && v.every(string);
 export const status: Guard<'real' | 'mock' | 'pending'> = (v): v is 'real' | 'mock' | 'pending' =>
   v === 'real' || v === 'mock' || v === 'pending';
+Object.assign(string, { schema: { type: 'string' } });
+Object.assign(number, { schema: { type: 'number' } });
+Object.assign(boolean, { schema: { type: 'boolean' } });
+Object.assign(json, { schema: {} });
+Object.assign(record, { schema: { type: 'object' } });
+Object.assign(array, { schema: { type: 'array' } });
+Object.assign(strings, { schema: { type: 'array', items: { type: 'string' } } });
+Object.assign(status, { schema: { enum: ['real', 'mock', 'pending'] } });
 export const metaGuard = shape({
   id: string,
   title: string,
@@ -46,19 +66,38 @@ export function canonicalDecimal(v: unknown): CanonicalDecimal {
   return v;
 }
 export function list<T>(guard: Guard<T>): Guard<T[]> {
-  return (v): v is T[] => Array.isArray(v) && v.every(guard);
+  return described((v): v is T[] => Array.isArray(v) && v.every(guard), {
+    type: 'array',
+    items: schemaOf(guard),
+  });
 }
 export function literal<T extends string>(value: T): Guard<T> {
-  return (v): v is T => v === value;
+  return described((v): v is T => v === value, { const: value });
 }
 export const sha256: Guard<string> = (v): v is string => string(v) && /^[a-f0-9]{64}$/.test(v);
 export const nonnegativeInteger: Guard<number> = (v): v is number =>
   number(v) && Number.isSafeInteger(v) && v >= 0;
-export const releasePointerGuard = shape({
-  release_id: sha256,
-  manifest: string,
-  built: string,
-});
+// Historical budget-release/1 metadata predates the explicit format field.
+function formatEnvelope<T>(guard: Guard<T>): Guard<T> {
+  return described(
+    (value): value is T =>
+      guard(value) &&
+      object(value) &&
+      (!Object.hasOwn(value, 'format') ||
+        (number(value.format) && Number.isSafeInteger(value.format))),
+    {
+      ...schemaOf(guard),
+      properties: { ...schemaOf(guard).properties, format: { type: 'integer' } },
+    },
+  );
+}
+export const releasePointerGuard = formatEnvelope(
+  shape({
+    release_id: sha256,
+    manifest: string,
+    built: string,
+  }),
+);
 export const releaseInputGuard = shape({
   path: string,
   sha256,
@@ -85,22 +124,24 @@ export const releaseOutputGuard: Guard<
   Infer<typeof datasetOutputGuard> | Infer<typeof validationOutputGuard>
 > = (v): v is Infer<typeof datasetOutputGuard> | Infer<typeof validationOutputGuard> =>
   datasetOutputGuard(v) || validationOutputGuard(v);
-export const releaseManifestGuard = shape({
-  manifest_schema: literal('budget-release/1'),
-  provenance_format: literal('provenance/1'),
-  data_schema: record,
-  compatibility: shape({ execution: strings, readers: string }),
-  coverage: shape({ datasets: list(record) }),
-  inputs: list(releaseInputGuard),
-  outputs: list(releaseOutputGuard),
-  processing: shape({
-    code: record,
-    command: string,
-    environment: record,
-    parameters: record,
-    registries: record,
+export const releaseManifestGuard = formatEnvelope(
+  shape({
+    manifest_schema: literal('budget-release/1'),
+    provenance_format: literal('provenance/1'),
+    data_schema: record,
+    compatibility: shape({ execution: strings, readers: string }),
+    coverage: shape({ datasets: list(record) }),
+    inputs: list(releaseInputGuard),
+    outputs: list(releaseOutputGuard),
+    processing: shape({
+      code: record,
+      command: string,
+      environment: record,
+      parameters: record,
+      registries: record,
+    }),
   }),
-});
+);
 /** Build receipt that a local Node release installation keeps next to the manifest and validation report. */
 export const releaseReceiptGuard = shape({
   schema: literal('node-release-build/1'),
@@ -120,14 +161,22 @@ export type DatasetEnvelope<T extends Record<string, Json>> = T & {
   meta: Meta;
 };
 export function mapOf<T extends Json>(guard: Guard<T>): Guard<Record<string, T>> {
-  return (v): v is Record<string, T> => record(v) && Object.values(v).every(guard);
+  return described((v): v is Record<string, T> => record(v) && Object.values(v).every(guard), {
+    type: 'object',
+    additionalProperties: schemaOf(guard),
+  });
 }
 export function nullable<T>(guard: Guard<T>): Guard<T | null> {
-  return (v): v is T | null => v === null || guard(v);
+  return described((v): v is T | null => v === null || guard(v), {
+    anyOf: [{ type: 'null' }, schemaOf(guard)],
+  });
 }
 export function decimalPlaces(places: number): Guard<CanonicalDecimal> {
-  return (v): v is CanonicalDecimal =>
-    isCanonicalDecimal(v) && (v.split('.')[1]?.length ?? 0) === places;
+  return described(
+    (v): v is CanonicalDecimal =>
+      isCanonicalDecimal(v) && (v.split('.')[1]?.length ?? 0) === places,
+    { type: 'string' },
+  );
 }
 export const executionSchemas = {
   current: 'execution/2',
@@ -209,3 +258,5 @@ export const budgetProvenanceGuard: typeof budgetProvenanceShape = (
         Object.hasOwn(entry, key),
       ),
   );
+
+// Primitive contracts also describe guards embedded by the combinators above.

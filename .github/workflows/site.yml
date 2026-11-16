@@ -300,7 +300,7 @@ jobs:
       - name: Validate the committed release manifest and complete current TypeScript rules
         run: ./budget check-site --inputs "$RUNNER_TEMP/registered-node-inputs"
       - name: Actual Node readers, complete rules, double build and local recorded-code replay
-        run: node scripts/node-import-acceptance.mjs "$RUNNER_TEMP/registered-node-inputs" "$RUNNER_TEMP/node-acceptance" 2026-11-14
+        run: node scripts/node-import-acceptance.mjs "$RUNNER_TEMP/registered-node-inputs" "$RUNNER_TEMP/node-acceptance" 2026-11-16
       - name: Provision the Chromium of the pinned Playwright (outside import runtime)
         run: bash scripts/ci-install-browser.sh
       - name: Package the fresh Node candidate and exercise its Worker and browser identity

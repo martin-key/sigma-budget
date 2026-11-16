@@ -426,10 +426,6 @@ export function validateRegistry(root: string, options: RegistryOptions = {}): R
         c.status === d.status,
         `dataset ${did}: status ${d.status}, catalog.json says ${c.status}`,
       );
-      r.ok(
-        JSON.stringify(c.screens || []) === JSON.stringify(d.screens || []),
-        `dataset ${did}: screens differ from catalog.json`,
-      );
       for (const k of ['period', 'unit'])
         if (truth(c[k]))
           r.ok(

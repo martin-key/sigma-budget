@@ -21,7 +21,7 @@
 //   yearSpan(p) · periodYears(M) · coversYear(set, y)   the years a period reaches ([2024, 2028]), the years any set covers (newest first), and whether a set covers a year (FB4: the „Период“ filter of ПРОВЕРИ)
 //   rich(text, M)             text from the catalogue -> SafeHtml: escaped, with `code`, „slug“ (a set of the catalogue) and P01..P07 (a pending set) as links or <code>
 import { ROOT } from './loc.js';
-import { ROUTES, byId, href as routeHref } from './routes.js';
+import { ROUTES, byId, href as routeHref, DATASET_SCREENS as datasetScreens } from './routes.js';
 import { esc, raw } from './html.js';
 import { date, num, monthYear, NBSP } from './format.js';
 import { data, PendingError } from './data.js';
@@ -196,7 +196,7 @@ function normSet(d, i) {
       gz: isNum(p?.gzipBytes) ? p.gzipBytes : null,
     }))
     .filter((p) => p.file);
-  const screens = strs(d.screens);
+  const screens = strs(datasetScreens[d.slug]);
   return {
     i,
     id: str(d.id).trim(),

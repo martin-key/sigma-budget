@@ -28,7 +28,6 @@ it('computes catalog metadata from candidate bytes', () => {
     catalogBytes: streams.get('catalog.json')!,
     ownerBytes: streams,
     registry: fixture.layers.registry,
-    activeRoutes: fixture.layers.activeRoutes,
   });
   expect(audit.reported).toEqual(audit.computed);
 });

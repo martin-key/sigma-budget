@@ -100,13 +100,11 @@ describe('catalog refresh', () => {
         ['ministries/y.json', y],
       ]),
       registry: [{ id: 'a', screens: ['S02', 'S01', 'S03'] }],
-      activeRoutes: ['S01', 'S02'],
     });
     expect(result.catalog.datasets[0]).toMatchObject({
       bytes: a.length,
       gzipBytes: catalogGzipSize(a),
       source: ['new'],
-      screens: ['S02', 'S01'],
       schema: [{ key: 'x', type: 'array', length: 0 }],
     });
     expect(result.catalog.datasets[1]).toMatchObject({
@@ -122,9 +120,9 @@ describe('catalog refresh', () => {
       primarySources: 1,
     });
     expect(cat.datasets[0]!.bytes).toBe(0);
-    expect(() =>
-      refreshCatalog({ catalog: cat, ownerBytes: new Map(), registry: [], activeRoutes: [] }),
-    ).toThrow(/Missing owner/);
+    expect(() => refreshCatalog({ catalog: cat, ownerBytes: new Map(), registry: [] })).toThrow(
+      /Missing owner/,
+    );
   });
 });
 it('rejects missing runtime fields and values that JSON would silently omit', () => {
@@ -137,7 +135,6 @@ it('rejects missing runtime fields and values that JSON would silently omit', ()
     catalog: base,
     ownerBytes: new Map<string, Uint8Array>(),
     registry: [],
-    activeRoutes: [],
   };
   expect(() => refreshCatalog({ ...input, catalog: { ...base, extra: undefined } })).toThrow(
     /Invalid JSON/,

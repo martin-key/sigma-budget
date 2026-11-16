@@ -1,7 +1,7 @@
 // S12 for the framework periods (2027.draft, 2028.forecast, 2029.forecast): the measures of tables II-7 and II-8 of the АСБП 2027–2029,
 // laid out like the 2026 measures: the sums first, then one list per kind and one by law, each measure a card with its own title, its
 // effect in 2027, 2028 and 2029 and the paragraph of the motives that explains it. The amounts and blanks are the release's
-// (budget2027.json forecast.II_7 / II_8); titles, plain sentences and quotes are the checked companion in ../measures-2027.js.
+// (budget2027.json forecast.II_7 / II_8); titles, plain sentences and quotes are the checked companion in the release’s measures2027.json.
 // Every effect cell keeps the id the search links to (s12-II_7-<row>-<year index>); the printed table with the provenance of every cell
 // stays as the CSV of each list, folded under the cards.
 import { html } from '../html.js';
@@ -14,7 +14,7 @@ import { disclosure } from '../ui/disclosure.js';
 import { callout, facts } from '../ui/cards.js';
 import { gl } from '../ui/gl.js';
 import { FRAMEWORK, cellValue } from '../budget-2027.js';
-import { measureText, LAWS } from '../measures-2027.js';
+import { measureText } from '../measures-2027.js';
 import { periodByKey } from '../periods.js';
 import {
   base,
@@ -38,13 +38,14 @@ const KIND_LABEL = { II_7: 'Приходна мярка', II_8: 'Разходн�
 const share = { period: FRAMEWORK.join(' / '), unit: 'млн. €' };
 
 /** the measures of one table: printed row, its companion text, the three effects and the blank cells */
-function measuresOf(doc, table) {
+function measuresOf(doc, texts, table) {
   return (doc.forecast?.[table] || [])
     .map((row, i) => ({
       table,
       i,
       row,
-      text: measureText(table, i, row.label),
+      text: measureText(texts, table, i, row.label),
+      laws: texts?.LAWS || {},
       v: FRAMEWORK.map((_, k) => cellValue(row.cells?.[String(k)])),
       gaps: row.gaps || {},
     }))
@@ -91,6 +92,7 @@ function quote(m) {
   </details>`;
 }
 function card(m) {
+  const LAWS = m.laws;
   const t = m.text;
   const words = effectWords(m.table, m.v[0]);
   const lawKey = t?.law;
@@ -218,6 +220,7 @@ function lawsPanel(ctx, all) {
   const laws = [...byLaw].sort(
     (a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0], 'bg'),
   );
+  const LAWS = ctx.data.measures2027?.LAWS || {};
   const none = all.filter((m) => !m.text?.law).length;
   const link = (m) => ctx.href('S12', {}, { per: ctx.period.key, to: anchor(m) });
   return block({
@@ -307,9 +310,9 @@ function sums(doc, rev, exp, counts) {
   });
 }
 
-function howTo(doc) {
+function howTo(doc, texts) {
   const windfall = (doc.forecast?.II_7 || []).find(
-    (r, i) => measureText('II_7', i, r.label)?.id === 'svrahpechalba',
+    (r, i) => measureText(texts, 'II_7', i, r.label)?.id === 'svrahpechalba',
   );
   const w = windfall ? FRAMEWORK.map((_, k) => cellValue(windfall.cells?.[String(k)])) : [];
   const items = [
@@ -339,8 +342,8 @@ export function measuresView(ctx) {
         { href: ctx.href('S12', {}, { per: '2027.draft' }), title: 'Мерки в проекта за 2027' },
       ],
     };
-  const rev = measuresOf(doc, 'II_7'),
-    exp = measuresOf(doc, 'II_8');
+  const rev = measuresOf(doc, ctx.data.measures2027, 'II_7'),
+    exp = measuresOf(doc, ctx.data.measures2027, 'II_8');
   const counts = { II_7: rev.length, II_8: exp.length };
   const lawCount = new Set([...rev, ...exp].map((m) => m.text?.law).filter(Boolean)).size;
   const active = ['prihodni', 'razhodni', 'zakoni'].includes(ctx.query.spisak)
@@ -357,7 +360,7 @@ export function measuresView(ctx) {
         body: html`<p>Мерките са от таблици II-7 и II-8 на АСБП 2027–2029, публикувани от МФ на ${date(doc.publication)}. Народното събрание още не е приело бюджета.</p>`,
       })}
       ${sums(doc, totalOf(doc, 'II_7'), totalOf(doc, 'II_8'), counts)}
-      ${howTo(doc)}
+      ${howTo(doc, ctx.data.measures2027)}
       ${tabs({
         id: 's12-27-lists',
         label: 'Списъци с мерки',

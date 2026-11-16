@@ -60,6 +60,8 @@ export function parseManifest(
   if (bytes.byteLength > MANIFEST_LIMIT)
     throw new ReleaseError(2, `Manifest exceeds ${MANIFEST_LIMIT} bytes`);
   const m = parseJson(bytes);
+  if (record(m) && m.format !== undefined && m.format !== 1)
+    throw new ReleaseError(2, `Unknown release format: ${String(m.format)} (supported: 1)`);
   if (
     !record(m) ||
     m.manifest_schema !== 'budget-release/1' ||

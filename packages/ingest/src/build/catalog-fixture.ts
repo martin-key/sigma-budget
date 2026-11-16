@@ -108,7 +108,6 @@ export async function loadCatalogFixture(path: string, buildDate: string) {
     wording: json('inputs/wording.json')['catalog.json'],
     ownerBytes: final,
     registry: registry.datasets,
-    activeRoutes: routes.routes.map((r) => r[0]),
   });
   return {
     raw: built.catalog,
@@ -117,6 +116,5 @@ export async function loadCatalogFixture(path: string, buildDate: string) {
     ownerBytes: final,
     buildInput,
     registry: registry.datasets,
-    activeRoutes: routes.routes.map((r) => r[0]),
   };
 }

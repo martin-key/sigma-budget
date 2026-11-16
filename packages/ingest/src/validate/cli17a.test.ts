@@ -125,7 +125,7 @@ it('compiled CLI writes reports for accepted and failed raw validations, and ref
     expect(accepted.status).toBe('PASS');
     expect(accepted.completeValidation).toBe(false);
     expect(accepted.raw.flatMap((x: any) => x.problems)).toHaveLength(3);
-    expect(accepted.totals.warnings).toBe(15);
+    expect(accepted.totals.warnings).toBe(0);
     expect(run([...args, '--no-accepted']).status).toBe(1);
     expect(JSON.parse(readFileSync(out, 'utf8')).status).toBe('FAIL');
     const target = join(root, 'data/release/core.json'),

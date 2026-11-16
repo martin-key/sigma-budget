@@ -55,6 +55,10 @@ describe('strict offline package preflight', () => {
   });
   it('rejects traversal, duplicate paths, unsupported schemas, noncanonical manifests and limits', async () => {
     const pkg = await makeRelease(directory, 'paths');
+    pkg.manifest.format = 2;
+    await writeManifest(pkg.release, pkg.manifest);
+    await expect(preflightRelease(pkg)).rejects.toThrow('Unknown release format: 2');
+    pkg.manifest.format = 1;
     pkg.manifest.inputs[0]!.path = 'data/../outside';
     await writeManifest(pkg.release, pkg.manifest);
     await expect(preflightRelease(pkg)).rejects.toMatchObject({ code: 2 });

@@ -31,7 +31,8 @@
     "@sigma-budget/ingest#test": {
       "dependsOn": ["build"],
       "outputs": ["coverage/**"],
-      "cache": false
+      "cache": false,
+      "passThroughEnv": ["BUDGET_BUILD_ACCEPTED_INPUTS"]
     },
     "@sigma-budget/etl#test": {
       "dependsOn": ["build"],

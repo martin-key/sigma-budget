@@ -44,7 +44,7 @@ function keysOf(src: string): Set<string> {
   return found;
 }
 
-type Route = Pick<WebRoute, 'id' | 'pattern' | 'file' | 'query' | 'samples' | 'retired'>;
+type Route = Pick<WebRoute, 'id' | 'pattern' | 'file' | 'query' | 'samples'>;
 
 /** every problem of the query lists, and the number of screens whose page module was read */
 function queryProblems(
@@ -55,12 +55,6 @@ function queryProblems(
   const problems: string[] = [];
   let screens = 0;
   for (const route of routes) {
-    if (route.retired) {
-      // a retired id (docs/dev-guide.md, section 11) has no address and no page module by design; it cannot read a query
-      if (route.pattern !== null || route.query.length || route.samples.length)
-        problems.push(`${route.id}: a retired screen keeps an address, query keys or samples`);
-      continue;
-    }
     const src = page(route.file);
     if (src === null) {
       problems.push(`${route.id}: no page module apps/web/client/pages/${route.file}.js`);
@@ -157,11 +151,5 @@ describe('the query each screen is drawn and cached by', () => {
       problems: ['S99: no page module apps/web/client/pages/nyama.js'],
       screens: 0,
     });
-    const retired = route({ pattern: null, query: [], retired: true, file: 'nyama' });
-    expect(queryProblems([retired], SCREEN_QUERY, page)).toEqual({ problems: [], screens: 0 });
-    for (const kept of [{ pattern: '/staro' }, { query: ['po'] }, { samples: ['/staro'] }])
-      expect(queryProblems([{ ...retired, ...kept }], SCREEN_QUERY, page).problems).toEqual([
-        'S99: a retired screen keeps an address, query keys or samples',
-      ]);
   });
 });

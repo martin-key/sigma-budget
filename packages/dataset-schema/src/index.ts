@@ -6,6 +6,7 @@ export { budgetSourceCells } from './budget-source-cells.js';
 import { stateBudgetGuard, kfpSubsectorsGuard } from './budget-tables.js';
 import {
   shape,
+  schemaOf,
   optionalPeriods,
   budgetProvenanceGuard,
   list,
@@ -250,6 +251,25 @@ export const datasetGuards = {
     next: record,
     pending: array,
   }),
+  'measures2027.json': shape({
+    meta: metaGuard,
+    LAWS: mapOf(string),
+    MEASURES_2027: mapOf(
+      list(
+        shape({
+          id: string,
+          starts: string,
+          name: string,
+          text: string,
+          quote: string,
+          table: string,
+          row: number,
+          page: number,
+          tablePage: number,
+        }),
+      ),
+    ),
+  }),
   'measures.json': shape({
     meta: metaGuard,
     document: record,
@@ -393,6 +413,7 @@ export const datasetGuards = {
     note: string,
     items: array,
   }),
+  'schema.json': shape({ $schema: string, $defs: record }),
   'rates.json': shape({
     meta: metaGuard,
     scenarios: array,
@@ -479,4 +500,22 @@ export function isPublishedDataset(name: string, value: unknown): boolean {
     return shape({ groups: array, passed: boolean, result: string, tool: string })(value);
   if (/^releases\/[a-f0-9]{64}\/receipt\.json$/.test(name)) return releaseReceiptGuard(value);
   return Object.hasOwn(datasetGuards, name) && isDataset(name as DatasetName, value);
+}
+
+/** Contracts of all published JSON owners, with one shared ministry definition. */
+export function releaseSchema() {
+  const defs: Record<string, unknown> = {};
+  for (const [path, guard] of Object.entries(datasetGuards)) {
+    if (!path.endsWith('.json')) continue;
+    const key = path.startsWith('ministries/')
+      ? 'ministries/*.json'
+      : path.startsWith('releases/') && path.endsWith('/manifest.json')
+        ? 'releases/*/manifest.json'
+        : path.startsWith('releases/') && path.endsWith('/validation.json')
+          ? 'releases/*/validation.json'
+          : path;
+    defs[key] = schemaOf(guard);
+  }
+  defs['releases/*/receipt.json'] = releaseReceiptGuard.schema ?? {};
+  return { $schema: 'https://json-schema.org/draft/2020-12/schema', $defs: defs };
 }

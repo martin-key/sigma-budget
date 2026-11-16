@@ -86,7 +86,7 @@ export interface Wave13bInput {
     'out' | 'texts' | 'disk' | 'buildDate' | 'expectedMinistryFiles'
   >;
   layers: Pick<ScopeLayersInput, 'wording' | 'sourceGlue'> &
-    Pick<CatalogProjectionInput, 'registry' | 'activeRoutes'>;
+    Pick<CatalogProjectionInput, 'registry'>;
 }
 
 const jsonBytes = (value: unknown) => Buffer.from(JSON.stringify(value) + '\n');
@@ -427,7 +427,6 @@ export function wave13bStages(input: Wave13bInput): GraphStage[] {
         const catalog = catalogFinalRefresh(read('source-glue').catalog, {
           ownerBytes: streams,
           registry: input.layers.registry,
-          activeRoutes: input.layers.activeRoutes,
         });
         streams.set('catalog.json', jsonBytes(catalog));
         return {

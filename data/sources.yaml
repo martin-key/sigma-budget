@@ -246,7 +246,7 @@ sources:
     url: https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/gov_10q_ggdebt?geo=BG&na_item=GD&sector=S13&unit=MIO_EUR&unit=PC_GDP&sinceTimePeriod=2024-Q1
     title: Тримесечен дълг на сектор „Държавно управление“
   - path: data/cache/eurostat_pop_nuts3_bg.json
-    via: python -m budget_pipeline.sources.boundaries
+    via: packages/ingest/src/source-client/reducers.ts
     url: https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/demo_r_pjanaggr3
     title: population of the 28 oblasts (NUTS 3), reduced by packages/ingest/src/source-client/reducers.ts
     sha256: c5869aac65138237d190e14c0389f5688c8e5c85af72ac3edb3f5019cb19fc58
@@ -291,7 +291,7 @@ sources:
   live: false
   files:
   - path: data/cache/gisco_lau_bg.json
-    via: python -m budget_pipeline.sources.boundaries
+    via: packages/ingest/src/source-client/reducers.ts
     sha256: b9793b72951e164b5a2bcdbf3004ac13fdbb15a071d5164dfc1d658d58f76208
     url: https://gisco-services.ec.europa.eu/distribution/v2/lau/
     title: '265 municipalities: code, name, population, area, borders (streamed from the 100+ MB GeoJSON)'
@@ -392,23 +392,18 @@ sources:
     member: ZDBRB-2027/3-PZDBRB-2027.pdf
     sha256: 7d8dae763e9a69080f1c9a5e98666bd7dd08ca6162f1da9107de121170d5c119
 - id: wg
-  title: 'СИГМА Бюджет: редакционни текстове'
+  title: 'СИГМА Бюджет: авторски текстове и договори на данните'
   publisher: СИГМА Бюджет
-  access: supplied
-  acquisition: supplied
-  format: pdf, txt
-  parser: packages/ingest/src/build/editorial.ts
+  access: generated
+  acquisition: generated
+  format: pdf, txt, JSON Schema draft 2020-12
+  parser: packages/dataset-schema/src/index.ts
   live: false
-  files:
-  - path: tmp/guide/Budget-na-svetlo-rechnik-64-termina.pdf
-    title: the glossary of 64 terms, as supplied
-    pinned: false
-  - path: data/cache/research/guide/guide_raw.txt
-    title: the text of the guide, as supplied
-    pinned: false
+  files: []
   limitations:
-  - 'editorial texts of the working group: neither file is pinned or on the machines checked on 05.11.2026; glossary.json and guide.json
-    cannot be rebuilt until they are added with their sha256'
+  - 'schema.json is generated from the authored guards in packages/dataset-schema/src/index.ts; it uses no external input'
+  - 'current outputs are generated from versioned authored inputs and guards, not acquired from an external source'
+  - 'historical unpinned references: tmp/guide/Budget-na-svetlo-rechnik-64-termina.pdf and data/cache/research/guide/guide_raw.txt; neither is an input to the current build'
   - 'the glossary PDF was read only by the retired Python extractor (pipeline/budget_pipeline/extract/glossary.py at commit
     378453f28a2b48104b682a5218f19f72e651ecae); data/inputs/glossary.json was subsequently hand-edited in commits 7bd43e47 and 2793eefd'
 - id: ec-dbp
@@ -709,6 +704,16 @@ intermediates:
   - asbp
   reproducible: false
   note: no producer (spec, section 4)
+- path: data/inputs/editorial/routes.json
+  producer: null
+  inputs: []
+  reproducible: false
+  note: Authored historical link identities for guide and glossary; independent of site routes.
+- path: data/inputs/measures_2027.json
+  producer: null
+  inputs: [budget2027]
+  reproducible: false
+  note: Authored text verified against the pinned forecast PDF; amounts remain in budget2027.json.
 - path: data/inputs/measures_2026.json
   producer: null
   inputs:

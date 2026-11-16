@@ -218,7 +218,6 @@ export function buildCore(input: CoreInput) {
             reason: d.reason,
             expected: d.expected,
             source: [...d.source],
-            screens: [...d.screens],
           },
         ];
       }),

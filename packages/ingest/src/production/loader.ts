@@ -317,14 +317,16 @@ export async function loadProduction(
           sha256(JSON.stringify(canonical(JSON.parse(raw(p).toString('utf8'))))) ===
             'a4b42f7bd2707fff43428c7b07e9d217452164225a4558fa466bcaaeee662e5c' &&
           sha256(JSON.stringify(canonical(value))) ===
-            '6601d4c430c1d5854e624dbc4434c124d543e14ce6cd4d33c12c7a275d77b95b'
+            'b6de157aa4a3b05a5ff9c399e45e1e74e6fbe15258e1303e87888e2dce441e07'
         )
           receipts.push({
             schema: 'dbp-exact-legacy-metadata/1',
             path: p,
             legacy: 'a4b42f7bd2707fff43428c7b07e9d217452164225a4558fa466bcaaeee662e5c',
-            fresh: '6601d4c430c1d5854e624dbc4434c124d543e14ce6cd4d33c12c7a275d77b95b',
+            fresh: 'b6de157aa4a3b05a5ff9c399e45e1e74e6fbe15258e1303e87888e2dce441e07',
             changes: [
+              'figures[m27.CUT10_FULL].label_bg',
+              'figures[m26.CUT10].label_bg',
               'meta.generated_by',
               'document.file',
               'basis_differences_vs_mock.mock_vs_dbp._source',
@@ -430,8 +432,7 @@ export async function loadProduction(
     gvaBytes = raw(gvaPath);
   if (sha256(gvaBytes) !== '8e3342db45caf3f3019bcf789d0f4655fd44ad3de1a1e746347d050e68571b9e')
     throw new Error('Historical GVA material changed');
-  const routes = json('apps/web/app/lib/routes.json'),
-    registry = yaml(raw('data/datasets.yaml').toString('utf8'));
+  const registry = yaml(raw('data/datasets.yaml').toString('utf8'));
   const executionBytes = bytesOf(executionResult.execution),
     provenanceBytes = bytesOf(executionResult.provenance);
   const input: Wave13bInput = {
@@ -494,7 +495,7 @@ export async function loadProduction(
         'guide.json': raw('data/inputs/editorial/guide.json'),
         'glossary.json': raw('data/inputs/editorial/glossary.json'),
       },
-      routes: loadEditorialRoutes(routes),
+      routes: loadEditorialRoutes(src('editorial/routes')),
     },
     plan: {
       figures: publication.outputs[PUBLICATION_PATHS.dbp] as any,
@@ -567,7 +568,6 @@ export async function loadProduction(
       wording: src('wording'),
       sourceGlue: aggregate.sourceGlue,
       registry: registry.datasets,
-      activeRoutes: routes.routes.map((r: any) => r[0]),
     },
   };
   return {

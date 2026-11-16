@@ -23,12 +23,13 @@ const base: any = Object.fromEntries(
     ...readdirSync(join(fixture, 'ministries')).map((f) => 'ministries/' + f),
   ].map((f) => [f, JSON.parse(readFileSync(join(fixture, f), 'utf8'))]),
 );
+const originalsRoot = process.env.BUDGET_BUILD_ACCEPTED_INPUTS ?? root;
 const sources = Object.values(programmeReferences);
 const result = supplementBudgetFiles(base, sources);
 // The 190-page transport PDF measured 5.76s without coverage; allow its real decode, not a global timeout change.
 const inside = (b: Box, x: number, y: number) => b[0] <= x && x < b[2] && b[1] <= y && y < b[3];
 for (const source of sources) {
-  const bytes = readFileSync(join(root, 'data/originals/program_budgets', source.file)),
+  const bytes = readFileSync(join(originalsRoot, 'data/originals/program_budgets', source.file)),
     pdf = readPdf(bytes);
   it(
     'reads and independently verifies every source row ' + source.code,
@@ -39,7 +40,10 @@ for (const source of sources) {
       const doc = result[`ministries/${source.code}.json`];
       expect(programmeSupplementGuard(doc)).toBe(true);
       expect(() =>
-        verifyPublishedProgrammes(doc, join(root, 'data/originals/program_budgets', source.file)),
+        verifyPublishedProgrammes(
+          doc,
+          join(originalsRoot, 'data/originals/program_budgets', source.file),
+        ),
       ).not.toThrow();
     },
     20000,
@@ -83,7 +87,10 @@ for (const source of sources) {
           old = d.sourceAudit.rows[r].values[c];
         d.sourceAudit.rows[r].values[c] = old === null ? 0 : old + 1;
         expect(() =>
-          verifyPublishedProgrammes(d, join(root, 'data/originals/program_budgets', source.file)),
+          verifyPublishedProgrammes(
+            d,
+            join(originalsRoot, 'data/originals/program_budgets', source.file),
+          ),
         ).toThrow();
       }
   });
@@ -113,7 +120,9 @@ it('rejects incomplete, duplicate, changed or already-published supplements', ()
   changed[0]!.rows[0]!.values[0]!++;
   expect(() => supplementBudgetFiles(base, changed)).toThrow();
   expect(() => supplementBudgetFiles(result, sources)).toThrow();
-  const bytes = readFileSync(join(root, 'data/originals/program_budgets', sources[0]!.file));
+  const bytes = readFileSync(
+    join(originalsRoot, 'data/originals/program_budgets', sources[0]!.file),
+  );
   expect(() => verifyProgrammeSource({ ...sources[0]!, sourceSha256: 'bad' }, bytes)).toThrow();
   const temp = join(mkdtempSync(join(tmpdir(), 'p03-pin-')), 'source.pdf');
   writeFileSync(temp, bytes.subarray(1));

@@ -7,16 +7,18 @@ import type { Group } from './runner.js';
 /** Validate the published guide, independently of whether a new guide was built. */
 export const guideGroup: Group<Context> = {
   name: 'GUIDE',
-  description: 'Published guide steps and links against the current route catalogue',
+  description: 'Published guide steps and links against the authored editorial links',
   run(ctx) {
     const check = new Check('GUIDE');
     const guide = ctx.get('guide.json') as GuideDataset;
     const routes = loadEditorialRoutes(
-      JSON.parse(readFileSync(safePath(ctx.root, 'apps/web/app/lib/routes.json'), 'utf8')),
+      JSON.parse(readFileSync(safePath(ctx.root, 'data/inputs/editorial/routes.json'), 'utf8')),
     );
     const problems = checkGuide(guide, routes);
     check.ok(problems.length === 0, 'published guide: ' + problems.join('; '));
-    check.fact(`${guide.steps.length} published steps checked against the current routes`);
+    check.fact(
+      `${guide.steps.length} published steps checked against the authored editorial links`,
+    );
     return check;
   },
 };

@@ -1,6 +1,6 @@
 import { ROUTES } from '../../../apps/web/app/lib/routes.ts';
 import { PERIODS } from '../../../apps/web/client/periods.js';
-export const routes = ROUTES.filter((route) => !route.retired).map((route) => ({
+export const routes = ROUTES.map((route) => ({
   ...route,
   samples: route.samples.length ? route.samples : ['#/nyama-takava'],
 }));
