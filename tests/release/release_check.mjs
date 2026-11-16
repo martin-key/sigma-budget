@@ -10,7 +10,7 @@
 // and the operator (./budget), starts `wrangler dev` on it (node_modules, pnpm-lock.yaml) with a fresh local D1 and R2, applies
 // migrations/, and signs Cloudflare Access tokens with an RSA key made for the run (the Worker gets the public key as ACCESS_JWKS). Then:
 //   9  operator: no token, a foreign key, a wrong audience, an expired token and a person who is not an operator are refused
-//   3  damaged upload: wrong bytes, an object missing, an unsafe path, a too large object: nothing becomes current
+//   3  damaged upload: wrong bytes, an object missing, an unsafe path, a too large object or request: nothing becomes current
 //   —  `budget upload` and `budget publish` publish a candidate with one command and read it back
 //   4  interruption: the same publish again answers the first result without a second event; a new request on an old revision is refused
 //   5  two operators publish at the same moment on the same revision: one succeeds, the other gets 409 and nothing is overwritten
@@ -20,8 +20,12 @@
 //   E  tests/release/compat_check.mjs --env-url, the check the deploy runs, on the empty registry and on the current release
 //   6  one release: a screen is drawn from the current release and names it with its data base; the stable /data/<file> follows it;
 //      the edge cache keys a screen on the query it reads only and never keeps the 404 screen
+//   —  an original over the old limit of 50 MiB (the archive to the budget bill has 63 MB) goes up in parts of part_bytes: a wrong part
+//      or a damaged one is refused and takes no key; `budget publish` sends it in parts and the next release reuses it without sending it
+// The Worker runs with the default size limits (no MAX_OBJECT_BYTES), as every environment that does not set it.
 // Exit code 0 only when every check passes.
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -50,6 +54,14 @@ import {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const short = (v) => JSON.stringify(v).slice(0, 300);
+
+const MiB = 1024 * 1024;
+const PART = 16 * MiB; // PART_BYTES of apps/web/workers/api/store.js
+const OLD_LIMIT = 50 * MiB; // the default MAX_OBJECT_BYTES before large objects went up in parts
+const DEFAULT_LIMIT = 256 * MiB; // the default MAX_OBJECT_BYTES now
+
+/** n deterministic bytes that do not repeat: a stand-in for a large archive */
+const noise = (seed, n) => createHash('shake256', { outputLength: n }).update(seed).digest();
 
 /** the process environment of an operator: the Access token of one person, and no credential of the machine running the check */
 function operatorEnv(token) {
@@ -103,7 +115,7 @@ async function main(argv) {
       log: join(tmp, 'wrangler.log'),
       key,
       serviceTokens: 'ci-publisher',
-      maxObjectBytes: a.real ? 64 * 1024 * 1024 : 4096,
+      maxObjectBytes: null, // the default size limits
     });
     const { base } = worker;
     const alice = { 'Cf-Access-Jwt-Assertion': key.token({ email: 'alice@example.org' }) };
@@ -170,6 +182,13 @@ async function main(argv) {
       s === 422 && (jbody(b).problems ?? []).some((p) => p.includes('unsafe path')),
       'a manifest with ../ in a path: 422',
     );
+    const huge = JSON.parse(readFileSync(join(A.rel, 'manifest.json'), 'utf8'));
+    huge.inputs[0].bytes = DEFAULT_LIMIT + 1;
+    [s, h, b] = await req('POST', base + '/admin/operations', canonical(huge), json(alice));
+    ok(
+      s === 422 && (jbody(b).problems ?? []).some((p) => p.includes(`(limit ${DEFAULT_LIMIT})`)),
+      'a manifest that lists an object over MAX_OBJECT_BYTES (256 MiB by default): 422, before any byte is sent',
+    );
     [s, h, b] = await req(
       'POST',
       base + '/admin/operations',
@@ -178,8 +197,8 @@ async function main(argv) {
     );
     const op = jbody(b).operation_id;
     ok(
-      s === 201 && jbody(b).release_id === B.id,
-      'an operation for B, the manifest stored and checked at once',
+      s === 201 && jbody(b).release_id === B.id && jbody(b).part_bytes === PART,
+      'an operation for B, the manifest stored and checked at once; it names part_bytes, the most one request carries',
     );
     const target = B.manifest.outputs[0];
     [s] = await req(
@@ -191,16 +210,15 @@ async function main(argv) {
     ok(s === 422, 'wrong bytes for a listed sha256: 422, the key is not taken');
     [s] = await req('PUT', `${base}/admin/operations/${op}/objects/${'0'.repeat(64)}`, 'x', alice);
     ok(s === 404, 'an object the manifest does not list: 404');
-    if (!a.real) {
-      // with --real the limit is 64 MB: the real originals are larger than 4 KB
-      [s] = await req(
-        'PUT',
-        `${base}/admin/operations/${op}/objects/${target.sha256}`,
-        'x'.repeat(5000),
-        alice,
-      );
-      ok(s === 413, 'an object over MAX_OBJECT_BYTES: 413');
-    }
+    // the Worker answers from the declared length before it reads the body, so the request does not send 16 MiB first
+    [s, h, b] = await req('PUT', `${base}/admin/operations/${op}/objects/${target.sha256}`, 'x', {
+      ...alice,
+      'Content-Length': String(PART + 1),
+    });
+    ok(
+      s === 413 && jbody(b).part_bytes === PART,
+      'a PUT over one request (part_bytes): 413, larger objects go up in parts',
+    );
     [s, h, b] = await req('POST', `${base}/admin/operations/${op}/seal`, '{}', alice);
     ok(s === 409 && jbody(b).needed, 'seal with objects missing: 409, no candidate');
     [s] = await req(
@@ -515,6 +533,104 @@ async function main(argv) {
         revs.length > 0 &&
         revs.every((rev) => page.includes(`>${rev}<`)),
       `„Проверка на данните“ (section 9.1) is drawn from the current release, with its files and the registry's journal (${revs.length} revisions)`,
+    );
+
+    console.log('an original over the old limit of 50 MiB, in parts');
+    const two = noise('parts', PART + 5); // two parts: part_bytes and 5 bytes
+    const P = makeRelease(tmp, 'P', 'parts', groups, compatibility, undefined, {
+      'data/originals/parliament/parts.zip': two,
+    });
+    [s, h, b] = await req(
+      'POST',
+      base + '/admin/operations',
+      readFileSync(join(P.rel, 'manifest.json')),
+      json(alice),
+    );
+    const pop = jbody(b).operation_id;
+    ok(
+      s === 201 && (jbody(b).needed ?? []).some((o) => o.sha256 === sha(two)),
+      'an operation for P lists its original of two parts',
+    );
+    const obj = `${base}/admin/operations/${pop}/objects/${sha(two)}`;
+    [s, h, b] = await req('POST', obj + '/parts', '{}', alice);
+    let up = jbody(b);
+    ok(
+      s === 201 && up.parts === 2 && up.part_bytes === PART && !!up.upload_id,
+      'a multipart upload of it: two parts',
+    );
+    const part = (n, body, uid) =>
+      req(
+        'PUT',
+        `${obj}/parts/${n}?upload_id=${encodeURIComponent(uid ?? up.upload_id ?? '')}`,
+        body,
+        alice,
+      );
+    const etag = async (n, body) => jbody((await part(n, body))[2]).etag;
+    // small bodies: the Worker refuses these before it reads them
+    const refused = [];
+    for (const [n, body, uid] of [
+      [1, two.subarray(0, 5)],
+      [2, two.subarray(0, 6)],
+      [3, two.subarray(0, 5)],
+      [2, two.subarray(PART), 'not-an-upload'],
+    ])
+      refused.push((await part(n, body, uid))[0]);
+    ok(
+      refused.join(',') === '422,422,404,409',
+      `a part of the wrong size, a last part of the wrong size, a part the object does not have, a foreign upload: 422, 422, 404, 409 (${refused})`,
+    );
+    const joined = (uid, tags) =>
+      JSON.stringify({ upload_id: uid, parts: tags.map((etag, i) => ({ part: i + 1, etag })) });
+    // the last part has the right length and other bytes
+    let tags = [await etag(1, two.subarray(0, PART)), await etag(2, Buffer.from('xxxxx'))];
+    [s, h, b] = await req('POST', obj + '/parts/complete', joined(up.upload_id, tags), json(alice));
+    ok(
+      s === 422 && (jbody(b).error ?? '').includes('do not match'),
+      `a damaged part: the joined object does not hash, 422 (${jbody(b).error})`,
+    );
+    [s, h, b] = await req('POST', `${base}/admin/operations/${pop}/seal`, '{}', alice);
+    ok(
+      s === 409 && (jbody(b).needed ?? []).includes(sha(two)),
+      'seal: 409, the original is still needed',
+    );
+    up = jbody((await req('POST', obj + '/parts', '{}', alice))[2]);
+    tags = [await etag(1, two.subarray(0, PART)), await etag(2, two.subarray(PART))];
+    [s, h, b] = await req('POST', obj + '/parts/complete', joined(up.upload_id, tags), json(alice));
+    ok(
+      s === 200 && jbody(b).sha256 === sha(two) && jbody(b).verified === true,
+      'the right parts: verified under its key (the damaged one took no key, else this would be a storage incident)',
+    );
+
+    const big = noise('archive', OLD_LIMIT + 3 * MiB + 5); // over the old limit, like the 63 MB archive: four parts
+    const E = makeRelease(tmp, 'E', 'fifth', groups, compatibility, undefined, {
+      'data/originals/parliament/archive.zip': big,
+    });
+    [code, r] = await budget(
+      ['publish', '--release', E.rel, '--originals', E.orig, ...where, '--yes'],
+      env,
+    );
+    ok(
+      code === 0 && r.release_id === E.id && r.readback === 'verified',
+      `budget publish E with an original of ${big.length} bytes, over the old limit of ${OLD_LIMIT}, and no --max-object-bytes: current, read back (${short(r)})`,
+    );
+    [s, h, b] = await req(
+      'GET',
+      `${base}/data/releases/${E.id}/data/originals/parliament/archive.zip`,
+    );
+    ok(
+      s === 200 && b.length === big.length && sha(b) === sha(big),
+      `the original downloads whole from the release: ${b.length} bytes of its sha256`,
+    );
+    const F = makeRelease(tmp, 'F', 'sixth', groups, compatibility, undefined, {
+      'data/originals/parliament/archive.zip': big,
+    });
+    [code, r] = await budget(
+      ['upload', '--release', F.rel, '--originals', F.orig, ...where, '--yes'],
+      env,
+    );
+    ok(
+      code === 0 && r.objects === 4,
+      `budget upload F with the same original: the server hashes the stored one and reuses it; only the 4 new small files are sent (${short(r)})`,
     );
 
     if (a.real) {

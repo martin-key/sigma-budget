@@ -138,14 +138,23 @@ const MIME = {
   '.xls': 'application/vnd.ms-excel',
   '.html': 'text/html',
   '.xml': 'application/rss+xml',
+  '.zip': 'application/zip',
 };
 
 /**
  * A small release folder as `budget build` writes it (manifest.json, receipt.json, validation.json with every required validation group,
- * one data file per dataset) and its originals (an xls-like and an HTML original). The Node proof is built here from its contract, not
- * by the code under test, so the operator's own checks decide whether it is accepted.
+ * one data file per dataset) and its originals (an xls-like and an HTML original, and the originals in `extra`). The Node proof is built
+ * here from its contract, not by the code under test, so the operator's own checks decide whether it is accepted.
  */
-export function makeRelease(root, name, text, groups, compatibility, commit = 'a'.repeat(40)) {
+export function makeRelease(
+  root,
+  name,
+  text,
+  groups,
+  compatibility,
+  commit = 'a'.repeat(40),
+  extra = {},
+) {
   const rel = join(root, 'rel-' + name),
     orig = join(root, 'orig-' + name);
   const feed = Buffer.from(
@@ -179,6 +188,7 @@ export function makeRelease(root, name, text, groups, compatibility, commit = 'a
       Buffer.from(text.repeat(8)),
     ]),
     'data/originals/dv/law.html': Buffer.from(`<html><script>alert(1)</script>${text}</html>`),
+    ...extra,
   };
   for (const [p, b] of Object.entries(files)) {
     mkdirSync(dirname(join(rel, p)), { recursive: true });
@@ -304,7 +314,10 @@ export function wrangler(args) {
   return spawnSync(WRANGLER, args, { cwd: ROOT, encoding: 'utf8' });
 }
 
-/** the built Worker under `wrangler dev` on a persisted state folder; stop() ends the process group it started, nothing else */
+/**
+ * the built Worker under `wrangler dev` on a persisted state folder; stop() ends the process group it started, nothing else.
+ * maxObjectBytes null leaves MAX_OBJECT_BYTES unset: the default size limits of every environment that does not set it.
+ */
 export async function startWorker({ state, port, log, key, maxObjectBytes = 4096, serviceTokens }) {
   const base = `http://127.0.0.1:${port}`;
   const vars = [
@@ -313,7 +326,7 @@ export async function startWorker({ state, port, log, key, maxObjectBytes = 4096
     'OPERATORS:' + OPERATORS,
     ...(serviceTokens ? ['SERVICE_TOKENS:' + serviceTokens] : []),
     'ACCESS_JWKS:' + JSON.stringify({ keys: [key.jwk] }),
-    'MAX_OBJECT_BYTES:' + maxObjectBytes,
+    ...(maxObjectBytes === null ? [] : ['MAX_OBJECT_BYTES:' + maxObjectBytes]),
   ];
   const out = createWriteStream(log);
   const dev = spawn(

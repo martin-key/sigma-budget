@@ -6,7 +6,16 @@
 //   GET /api/releases/:id/datasets/:dataset           the files of one dataset of the release, with the release ID and the schema
 //   GET /api/releases/:id/provenance/<record>         where one number comes from: data/2026-09/kfp/rev -> the original, sheet and cell
 // An unknown or never published release, or a file the manifest does not list, is 404: there is no fallback to another release.
-import { HEX64, current, isPublic, json, manifestOf, objectKey, readObject } from './store.js';
+import {
+  HEX64,
+  PART_BYTES,
+  current,
+  isPublic,
+  json,
+  manifestOf,
+  objectKey,
+  readObject,
+} from './store.js';
 import { pseudonym } from './access.js';
 
 // no-transform: a release file is served with exactly the bytes of its sha256. Without it a zone feature that edits HTML on the way out
@@ -74,7 +83,16 @@ async function serveObject(request, env, rid, entry) {
       headers: { ...headers, 'Content-Range': `bytes ${start}-${end}/${size}` },
     });
   }
-  const buf = await readObject(env, entry.sha256); // read whole and checked again: an object that does not hash to its key is not served
+  const large = entry.bytes > PART_BYTES;
+  if (large && request.method === 'HEAD') {
+    if (!(await env.OBJECTS.head(objectKey(entry.sha256))))
+      return json({ error: 'object missing' }, 500);
+    return new Response(null, {
+      headers: enc ? headers : { ...headers, 'Content-Length': String(entry.bytes) },
+    });
+  }
+  // Verify before serving; large objects are hashed as a stream, then reopened for the response.
+  const buf = await readObject(env, entry.sha256, { stream: large });
   if (!buf) return json({ error: 'object missing' }, 500);
   return new Response(request.method === 'HEAD' ? null : buf, {
     headers: enc ? headers : { ...headers, 'Content-Length': String(entry.bytes) },
