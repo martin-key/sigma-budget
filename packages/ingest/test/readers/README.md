@@ -1,6 +1,6 @@
 # Offline document and saved API readers
 
-These are Node-only production readers for registered, pinned files. They do not acquire sources, change pins, calculate the registry's transitive input closure, run Python, or replace the current production dispatch. The package exports two independent entry points:
+These are Node-only production readers for registered, pinned files. They do not acquire sources, change pins, or calculate the registry's transitive input closure. The package exports two independent entry points:
 
 ```ts
 import {
@@ -49,7 +49,7 @@ Parliament input supports the observed array of file objects and a constrained l
 
 ## Standalone command
 
-Build first, then invoke the standalone module with real paths. The root CLI and Python default remain unchanged.
+Build first, then invoke the standalone module with real paths. The root CLI composes readers through production dispatch.
 
 ```sh
 pnpm --filter @sigma-budget/etl... build
@@ -92,9 +92,3 @@ node packages/ingest/test/readers/real-inputs.mjs \
   --input-root /path/to/acquired-snapshot \
   --report tmp/raw-reader-evidence/real-inputs.json
 ```
-
-On 2026-11-10 this reread the supplied originals read-only from `/home/user/work/sigma-budget`. All 22 checks passed, including full ordered block equality for three DV laws (1009/207/154 blocks), the actual DOCX (2604 blocks, 45 physical tables, 3683 rows), both BNB series, six Eurostat snapshots, three Parliament bills, GISCO/oblast caches, and owned real-byte corruptions. All eight standalone CLI kinds also succeeded on real inputs, retained exact source bytes, rejected existing outputs and cleaned up their test outputs. Actual legal inputs pass the existing rates/social/assumptions reducers against archived Python expectations. Existing debt/municipality/geometry builders match their archived donor outputs with the freshly read scoped inputs and explicitly preserved other inputs. Input hashes are checked again afterward. No runtime invokes Python.
-
-`docx-expectation.json` was independently generated with the pinned stdlib Python donor from the actual pinned DOCX, comparing every ordered block and every physical table/cell/merge through canonical hashes. `generate-docx-expectation.py` is TEST-only, refuses unpinned input/donor bytes and writes a new expectation file exclusively. The other archived fixtures/donors were only read, never regenerated or edited. These are scoped proofs; PR40's overall import acceptance remains inherited evidence, not an execution claim here.
-
-Missing historical Eurostat vintages, the unavailable original GISCO stream, absent historical authored inputs and programme archives remain documented evidence gaps. The package does not claim fresh regeneration of those inputs, XLS/XLSX/SEBRA decoding, PDF decoding, final `law_bill.json` comparison generation, a complete release build, unified dispatch, full validation or Python replacement acceptance. Subsequent integration must assemble these reader results with the separately owned workbook/PDF APIs and the existing builders/registry orchestration.

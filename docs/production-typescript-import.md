@@ -1,6 +1,6 @@
 # Registered TypeScript production import
 
-`budget-ts build` now assembles the registered current sources, executes the existing `wave13bStages` graph, runs all 26 domain groups plus REGISTRY, and packages the actual outputs through the release-build lifecycle. `./budget` is the normal Node dispatcher, keeping compiled workspace tools current through Turbo. `./budget-python` preserves the historical Python launcher byte for byte. The existing scoped fixture commands remain reproducibility tests; the production dispatcher never calls their assemblers or expected outputs.
+`budget-ts build` now assembles the registered current sources, executes the existing `wave13bStages` graph, runs all 26 domain groups plus REGISTRY, and packages the actual outputs through the release-build lifecycle. `./budget` is the normal Node dispatcher, keeping compiled workspace tools current through Turbo. The existing scoped fixture commands remain reproducibility tests; the production dispatcher never calls their assemblers or expected outputs.
 
 ```sh
 pnpm install --frozen-lockfile
@@ -33,14 +33,7 @@ The Node process has bounded runtime/output and filesystem permissions restricte
 
 The graph emits no old `releases/current.json` seed. The registry checker accounts for that one lifecycle-owned metadata route explicitly, using the recorded export inventory rather than checkout Git metadata. The candidate site generates the new pointer after hashing the manifest. Every active owner/file and catalogue size/gzip fact comes from generated or explicitly preserved bytes; the functional artifact count is derived from the registry and manifest.
 
-New Node candidates require complete executed validation and a receipt binding the manifest, executor, snapshot, validation and output inventory. The package client and `BUDGET_CANDIDATE` reader enforce this contract without weakening path/hash checks. SSR and browser metadata retain one release ID. Historical Python manifests remain on their recorded Python replay path:
-
-```sh
-PYTHON312=/path/to/pinned/python3.12 pnpm exec budget-ts reproduce \
-  --manifest /historical/manifest.json --historical-python --env local
-```
-
-A new Node executor is never applied under an old Python commit label.
+New Node candidates require complete executed validation and a receipt binding the manifest, executor, snapshot, validation and output inventory. The package client and `BUDGET_CANDIDATE` reader enforce this contract without weakening path/hash checks. SSR and browser metadata retain one release ID.
 
 ## Normal command map
 
@@ -53,19 +46,16 @@ A new Node executor is never applied under an old Python commit label.
 | `source-status`, `drift`, `freshness`                  | Local source/pin/freshness diagnostics and reviewed drift.                                                                                                                                    |
 | `status`, `upload`, `publish`, `rollback`, `preflight` | Existing release-client protocol, named environment, guarded credentials, stable request IDs, CAS, resumable uploads, lost-response/readback behavior. No remote operation is implicit.       |
 | `prepare`                                              | Offline actual fiscal, annual and publication reader preparation, including nested ZIP/7z archives, in separate owned output directories.                                                     |
-| scoped `build --scope ...`, `parity`, `wave13b-live`   | Existing frozen migration/reference commands, separate from the production build.                                                                                                             |
 
 There is no `restore` subcommand. The existing operator procedure and protocol restore scenarios remain in `docs/operator-guide.md`, `tests/release/release_check.mjs` and `tests/release/restore_drill.mjs`, which drive this TypeScript operator.
 
 ## Finite required acceptance and CI inputs
 
 ```sh
-node scripts/node-import-acceptance.mjs /acquired-snapshot /owned/new-acceptance 2026-11-10 /accepted-python-candidate
+node scripts/node-import-acceptance.mjs /acquired-snapshot /owned/new-acceptance 2026-11-10
 node scripts/node-candidate-site-acceptance.mjs /owned/new-acceptance/candidate /owned/new-site-proof
 ```
 
-The first script requires actual inputs, two builds and local reproduction with identical IDs and all package bytes. It executes independent number/provenance/unit mutations, missing raw, stale intermediate and failed-stage rejection. Optional Python comparison checks every JSON value and RSS byte under the existing exact-money/source policy; only independently audited byte-derived catalogue sizes are classified separately. The site script requires a fresh Node receipt, builds in an owned Git export, serves an owned ephemeral loopback Worker and checks representative SSR/assets, actual Chromium dataset identity and the registered execution CSV. Chromium must already be provisioned; the script installs nothing, blocks external browser requests and cleans up its own processes.
+The first script requires actual inputs, two builds and local reproduction with identical IDs and all package bytes. It executes independent number/provenance/unit mutations, missing raw, stale intermediate and failed-stage rejection. The site script requires a fresh Node receipt, builds in an owned Git export, serves an owned ephemeral loopback Worker and checks representative SSR/assets, actual Chromium dataset identity and the registered execution CSV. Chromium must already be provisioned; the script installs nothing, blocks external browser requests and cleans up its own processes.
 
-The required `node-inputs` job downloads the approved repository-owned draft release asset. Draft access requires `contents: write`, restricted to that small job: it has no checkout, dependency installation or project-code execution, and the token is passed only to a fixed GitHub download command. It checks the literal archive digest and size before passing an Actions artifact to `node-import`. The importer retains the workflow default `contents: read`, receives no token, and `scripts/restore-node-input-cache.mjs` makes a private copy authenticated against `scripts/registered-node-inputs.json`, then verifies every registered input and the snapshot identity before installation. A missing archive, changed byte, registry mismatch or invalid input fails the job. No live fiscal fetch, acceptance skip or fixture fallback exists. The draft remains unpublished CI storage. `scripts/prepare-node-input-cache.mjs` prepares a replacement snapshot for review; the fixed bootstrap digest must change with its descriptor. Existing frozen proofs (including the same 17/max-two proof pool), data-image, release/restore jobs, triggers and deployment guards remain; deployment additionally waits for this acceptance. Source drift invokes the normal Node source command.
-
-Independent component acceptances are inherited evidence. Whole-integration acceptance, final CI readiness and any merge remain parent-owned. No live source refresh, Cloudflare authentication, provisioning, upload, publish, rollback, deployment or recovery is part of local acceptance.
+For the authenticated CI archive and replacement procedure, see [release.md](release.md#входен-архив-за-ci).

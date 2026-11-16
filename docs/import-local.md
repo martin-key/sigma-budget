@@ -1,6 +1,6 @@
 # Offline импорт и локален сайт от candidate
 
-`./budget` използва Node 24 и фиксираните workspace зависимости. Новите издания изпълняват реалните четци, общия TypeScript граф и всичките 26 групи + REGISTRY. `./budget-python` е отделният launcher за исторически Python издания и референтните тестове. Нужни са вече придобити оригинали и кешове според регистрите; offline build не сваля източници.
+`./budget` използва Node 24 и фиксираните workspace зависимости. Новите издания изпълняват реалните четци, общия TypeScript граф и всичките 26 групи + REGISTRY. Нужни са вече придобити оригинали и кешове според регистрите; offline build не сваля източници.
 
 От корена на хранилището:
 
@@ -12,7 +12,7 @@ pnpm install --frozen-lockfile
 BUDGET_CANDIDATE=/absolute/new/candidate pnpm --filter @sigma-budget/web... build
 ```
 
-Входната директория съдържа `data/originals/` и `data/cache/`. Изходът е нова директория извън checkout-а с `data/`, `manifest.json`, `validation.json` и `receipt.json`. Няма запис в checkout `data/release/`, remote pointer или публикуване. Само изричното `build --site` записва локалните checkout данни. Launcher-ът използва Turbo, за да построи променения код и да използва кешираните workspace инструменти; не инсталира зависимости и не избира Python като fallback.
+Входната директория съдържа `data/originals/` и `data/cache/`. Изходът е нова директория извън checkout-а с `data/`, `manifest.json`, `validation.json` и `receipt.json`. Няма запис в checkout `data/release/`, remote pointer или публикуване. Само изричното `build --site` записва локалните checkout данни. Launcher-ът използва Turbo, за да построи променения код и да използва кешираните workspace инструменти; не инсталира зависимости.
 
 ## Извличане и свежест
 
@@ -39,6 +39,6 @@ node scripts/node-import-acceptance.mjs /absolute/path/to/acquired-inputs /absol
 node scripts/node-candidate-site-acceptance.mjs /absolute/new/acceptance/candidate /absolute/new/site-proof
 ```
 
-Проверката включва реалните четци и всички правила, два build-а, API и default CLI възпроизвеждане, откази при повредени данни и сайта. Няма skip при липсващи оригинали. Python donor тестовете остават отделна историческа референция; старите манифести се възпроизвеждат с `./budget-python` или изрично `--historical-python`.
+Проверката включва реалните четци и всички правила, два build-а, API и default CLI възпроизвеждане, откази при повредени данни и сайта. Няма skip при липсващи оригинали. Издание, сглобено преди TypeScript обработката, се възпроизвежда чрез checkout на commit-а от `processing.code.commit` в манифеста и документацията на този commit.
 
 Историческите GVA/Eurostat, някои стари междинни и редакционни входове остават запазени с ограниченията в [reproducibility.md](reproducibility.md). Липсващият пълен програмен архив за 2027–2029 не се регенерира. Разликите между публикуваните vintages, sparse вариантът `billMc`, празните клетки и точните единици се запазват. Пълното изпълнение на правилата не удостоверява deployment, live refresh или възстановяване на липсващи исторически оригинали.

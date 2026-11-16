@@ -1,9 +1,6 @@
 # Offline annual PDF preparation
 
-This package decodes the actual supplied 2027 ZIP/PDF bytes in Node. It completes
-both `sources.prepare_inputs.prepare_budget_2027` generation/freshness gates and
-feeds the existing `buildWave13a` builders. It does not change production dispatch,
-the Python path, shared validator Context, registry pins, fixtures or published data.
+This package decodes the actual supplied 2027 ZIP/PDF bytes in Node. It generates or verifies the annual intermediates and feeds the existing `buildWave13a` builders.
 
 ## Production orchestration API
 
@@ -92,11 +89,7 @@ The pinned Node/WASM engine is `mupdf@1.26.4`, selected from the
 [official Artifex API](https://mupdfjs.readthedocs.io/en/latest/reference.html) and
 [structured text documentation](https://mupdfjs.readthedocs.io/en/latest/classes/StructuredText.html).
 Its package declares AGPL-3.0-or-later licensing; it is a Node-only ETL dependency,
-not imported through the ingest root export or by the Worker. The independent
-Python environment pins PyMuPDF 1.26.5 / MuPDF 1.26.10. On these two supplied PDFs,
-all exposed extraction fields and all 4,248 validation checks match exactly after
-ordering checks by name; no cross-engine numerical or geometry allowance was
-needed. Only comparison-method attribution and serialization differ.
+not imported through the ingest root export or by the Worker.
 
 This is support for the supplied 201-page forecast and 159-page bill, not an OCR
 engine, arbitrary future PDF/table-layout guarantee, or source recovery facility.
@@ -105,35 +98,3 @@ explicitly blank units remain null. The two printed GDP vintages retain their
 existing documented discrepancy. Partial proposed limits, sparse `billMc`, 265
 municipalities in both views and all 226 project rows remain distinct source facts.
 Absent historical originals remain evidence limitations.
-
-## Verification
-
-```sh
-pnpm exec vitest run \
-  packages/ingest/src/readers/annual/annual.test.ts \
-  apps/etl/src/prepare-annual.test.ts \
-  packages/ingest/src/build/wave13a.test.ts \
-  apps/etl/src/wave13a-build.test.ts --maxWorkers=1
-pnpm --filter @sigma-budget/etl... typecheck
-pnpm --filter @sigma-budget/etl... build
-```
-
-The tests decode tracked actual source bytes, compare both complete independent
-Python intermediates, and feed the existing builders for all six exact Wave13a
-outputs. They cover generation, existing freshness, stale second-gate atomicity,
-corrupt owned sources, wrong members/pins, precise cell/text/unit/geometry/null
-mutations, decoder bounds, real CLI paths/date and filesystem restrictions.
-Temporary test directories are removed in `finally`/`afterAll`.
-
-For an independent fresh Python TEST oracle, run the locked Python environment:
-
-```sh
-/path/to/locked-python packages/ingest/test/annual-python-expectations.py \
-  --out /path/to/absent-owned-evidence
-```
-
-The test helper pins donor hashes, re-extracts actual PDFs with the independent
-Python implementation, checks the complete intermediates and records its output
-hashes. It is never called by TypeScript runtime readers. Existing Wave13a final
-fixtures are inherited expected results; the new raw PDF decoding, preparation,
-corruption/bounds tests and fresh donor execution are new evidence.

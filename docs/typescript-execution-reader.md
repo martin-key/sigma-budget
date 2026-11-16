@@ -2,14 +2,10 @@
 
 This Node-only package reads actual pinned BIFF `.xls` and OOXML `.xlsx` bytes.
 It produces the complete monthly `execution.json` and
-`execution-provenance.json` without running Python. It adds an
+`execution-provenance.json`. It adds an
 `execution-reader-evidence.json` receipt containing original file hashes, raw
 unit strings, used cell coordinates and hashes, cache/blank/missing counts,
 known source differences and the prepared annual input boundary.
-
-Python remains the production default. This module does not change the root
-CLI, shared validation context, build graph or release data. Later integration
-must connect these APIs to the existing graph and complete validation.
 
 ## Operational APIs
 
@@ -119,58 +115,10 @@ The example abbreviates the report list; the supplied publication needs all
 33 real monthly files. Forecast and bill may refer to the same pinned archive.
 These fields accept real snapshot paths, not an expected-output JSON file.
 
-## Evidence and boundaries
-
-Own checks use all 33 tracked original XLS reports under the existing wave18
-input closure. All 7,128 effective cells are compared to independently saved
-xlrd 2.0.2 sheet captures. Both complete output documents match the existing
-published JSON content, including all money strings and lineage fields.
-The exact sparse law map, cumulative/monthly series, annual availability,
-rounding and known exceptions are therefore covered by full-document comparisons.
-
-`packages/ingest/test/readers/execution-donor.py` is a separate **test-only**
-Python 3.12/xlrd 2.0.2 generator. It verifies pinned donor module hashes, reads
-actual frozen originals, writes only a new explicit owned directory and records
-input/output hashes. It never substitutes captured grids for XLS decoding.
-Comparison is parsed JSON equality: Python's `11.0` versus JavaScript's `11`
-number spelling is not a monetary difference. The Node outputs are byte
-identical across repeated builds of the same inputs/date.
-
-The three tracked SEBRA workbooks are compared with saved independent row
-readings. For available external originals, run the explicit additional check:
+The workbook-reader acceptance command runs separately against actual originals after `pnpm --filter @sigma-budget/ingest... build`:
 
 ```sh
-node packages/ingest/test/readers/workbook-acceptance.mjs \
-  --originals /path/to/data/originals \
-  --out /path/to/new-owned-report.json
+node packages/ingest/test/readers/workbook-acceptance.mjs --originals ROOT --out NEW_REPORT.json
 ```
 
-It verifies source pins, compares the complete EC `Sheet1`, `Excise duties`
-and `VAT` scalar grids plus SEBRA's `Sheet1` with independent saved Python
-reader evidence, and confirms the originals' hashes afterward. Missing required
-originals fail this command; they are never counted as a skipped PASS. These EC
-files are available in the existing acquisition checkout but are not added to
-this worktree or silently downloaded by tests.
-
-Saved captures and published documents are inherited test expectations. The
-new Node decoding, independent donor regeneration, corruption/label/unit/blank/
-identity/pin/missing/stale failures, CLI deterministic-output checks and output
-safety checks are own execution evidence. Tests remove their owned temporary
-files. Existing frozen fixtures and donors remain unchanged.
-
-Annual data is a deliberate integration boundary: this module verifies
-prepared annual JSON and original archive/member hashes, **not physical PDF
-extraction or freshness**. `annualBoundary.rawPdfDecoded` is false, with the
-five prepared input pins in the file-based receipt. The separate annual PDF
-preparation stage must establish that freshness before production graph wiring.
-Missing historical originals remain limitations; no synthetic replacements
-are generated here. The unit is million EUR in execution and EUR in the SEBRA
-source; the workbook engine does not invent conversions or source dates.
-
-The reader dependency is the official [SheetJS 0.20.3 Node distribution](https://docs.sheetjs.com/docs/getting-started/installation/nodejs/),
-pinned by URL and lockfile integrity. Formula/cache and stub handling follow
-its [cell model](https://docs.sheetjs.com/docs/csf/cell/) and
-[read options](https://docs.sheetjs.com/docs/api/parse-options/).
-[Saxes 6.0.0](https://github.com/lddubeau/saxes) parses OOXML relationships and
-exact scalar tokens; external entities/DOCTYPE are rejected. Both dependencies
-are used only behind the Node reader subpaths, with no Worker imports.
+`ROOT` is the restored inputs' `data/originals/` directory. `NEW_REPORT.json` must be a new file with an existing parent directory. The command checks EC `Sheet1`, `Excise duties` and `VAT`, SEBRA `Sheet1`, source SHA-256 and unchanged original bytes. A missing original fails the command; it is not skipped.

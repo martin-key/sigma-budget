@@ -79,7 +79,7 @@ cloudflared access login https://<адрес>/admin/operations
 
 ## 6. Наблюдение
 
-`observability` е включено в `apps/web/wrangler.jsonc`: заявките и грешките на Worker-а се виждат в Cloudflare. Седмично: `./budget status`,
+`observability` е включено в `apps/web/wrangler.jsonc`: заявките и грешките на Worker-а се виждат в Cloudflare. Седмично: `./budget status --environment production`,
 копие на регистъра, и `budget refetch --manifest` на текущото издание срещу официалните адреси.
 
 ## Подписи

@@ -1,7 +1,7 @@
 # Издание на данните и командата `budget`
 
 Изданието е проверим пакет от данните на сайта (раздели 6.3, 6.4, 7 и 8 на [спецификацията](approach-specification.md)). Прави го командата
-`budget` (`apps/etl/src/production-cli.ts`, обвивка `./budget` в корена на хранилището). За исторически Python манифести се използва `./budget-python`; точният Node договор е в [production-typescript-import.md](production-typescript-import.md). Етап B сглобява, проверява и пресъздава изданието. Етап C го качва в R2,
+`budget` (`apps/etl/src/production-cli.ts`, обвивка `./budget` в корена на хранилището). Издание, сглобено преди TypeScript обработката, се възпроизвежда чрез checkout на commit-а от `processing.code.commit` в манифеста и документацията на този commit. Етап B сглобява, проверява и пресъздава изданието. Етап C го качва в R2,
 записва го в регистъра в D1 и го прави текущо през операторския API (раздел „Публикуване“).
 
 ## Какво има в изданието
@@ -22,7 +22,7 @@
 | Блок                                                  | Съдържание                                                                                                                                                                                                                                                              |
 | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `manifest_schema`, `data_schema`, `provenance_format` | Версиите на формата на манифеста, на договорите на данните (`execution/2`) и на индекса на произхода.                                                                                                                                                                   |
-| `processing`                                          | Точният commit/export, Node runtime, lock/compiler/executor хешовете, датата, регистрите и автентикираният snapshot. Историческите Python манифести запазват собствените Docker/lock метаданни.                                                                         |
+| `processing`                                          | Точният commit/export, Node runtime, lock/compiler/executor хешовете, датата, регистрите и автентикираният snapshot.                                                                                                                                                    |
 | `inputs`                                              | Всеки файл, който сглобяването чете и не е в git: път, източник (`data/sources.yaml`), начин на придобиване, адрес на файла или на страницата, период, кога е получен, MIME, байтове и SHA-256. Междинните файлове казват производителя си и дали той ги възпроизвежда. |
 | `outputs`                                             | Всеки файл на изданието: път, набор (`data/datasets.yaml`), MIME, байтове и SHA-256, включително `validation.json`.                                                                                                                                                     |
 | `coverage`                                            | Всеки набор със статуса, периода и обхвата си, дали това издание го сглобява наново, ограниченията му, предстоящите набори с причината и входовете, които липсват.                                                                                                      |
@@ -31,8 +31,8 @@
 ## Командите
 
 ```bash
-./budget build --inputs /path/to/inputs --out /outside/new/candidate --build-date 2026-11-10
-./budget build --inputs /path/to/inputs --out /outside/new/site-candidate --build-date 2026-11-10 --site
+./budget build --commit HEAD --inputs /path/to/inputs --out /outside/new/candidate --build-date 2026-11-10
+./budget build --commit HEAD --inputs /path/to/inputs --out /outside/new/site-candidate --build-date 2026-11-10 --site
 ./budget validate --release /outside/new/candidate --inputs /path/to/inputs # манифестът, байтовете и SHA-256 на всеки файл, проверките на данните
 ./budget reproduce --manifest /outside/new/candidate/manifest.json --originals /path/to/inputs
 ./budget reproduce --current https://sigma-budget.midt.bg --originals /път/до/оригиналите
@@ -45,7 +45,7 @@
 
 - **`build`** изнася един commit с `git archive`, без `.git` и без промените, които не са в него. Входовете (`data/originals`,
   `data/cache`, `data/cache/research`) се автентикират и копират само за четене в отделен Node export/scratch. Всеки вход се сверява с пина си
-  (`data/originals.sha256` или `sha256` в регистъра); разлика спира сглобяването. Новото сглобяване не изпълнява Python или Docker. Историческият Python replay запазва старата фиксирана среда.
+  (`data/originals.sha256` или `sha256` в регистъра); разлика спира сглобяването.
 - **`validate`** отказва издание, в което файл липсва, не е в манифеста или има други байтове.
 - **`reproduce`** първо проверява, че оригиналите от манифеста са налице и със същия SHA-256. После сглобява commit-а на манифеста и
   сравнява всеки изход. С `--current` разрешава указателя на сайта веднъж и проверява точно това издание. Изтегля и публикуваните файлове
@@ -247,7 +247,7 @@ CI блокира при всички advisory нива (`pnpm audit --audit-lev
 преди инсталирането на зависимости и редактира намерените стойности в лога.
 Semgrep използва digest-pinned образ като СИГМА и преглеждани локални правила
 в `.semgrep/security.yml` за динамично изпълнение, shell команди, SQL интерполация,
-изключена JWT проверка и опасна десериализация в JavaScript/TypeScript/Python.
+изключена JWT проверка и опасна десериализация в JavaScript/TypeScript.
 Обхватът са всички файлове, които Git следи: `.semgrepignore` заменя вградения
 списък на Semgrep с голи имена на папки (`build/`, `test/`, `tests/` и други), който
 пропускаше живи изходни папки като `packages/ingest/src/build/`.
@@ -276,3 +276,35 @@ Sandbox проверката изисква точно една самостоя
 attachment, no-transform и пълната CSP на SSR документа.
 
 Публичното cross-origin четене, JSON 400, iframe embed и обикновените framing headers се проверяват в реален Chromium чрез `tests/e2e/worker/security-headers.spec.ts`. След build и стартиране на локалния Worker: `PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers E2E_WORKER_URL=http://127.0.0.1:8814 pnpm test:e2e --project=worker security-headers.spec.ts`. Consumer сървърът използва Worker порта + 2. SSR notices и периодите, приемането на server DOM, CSV изданието и ранният boot се проверяват от останалите Worker спецификации; `pnpm test:e2e --project=static redirects.spec.ts` проверява старите hash адреси. Тези проверки са част от блокиращия job `check`; статичният сървър за браузърните тестове е `apps/web/scripts/serve.ts`.
+
+## Входен архив за CI
+
+Задължителният job `node-inputs` сваля одобрения архив от непубликувано издание в хранилището. Само този job има `contents: write` за достъп до draft asset; не изпълнява код от проекта. Проверява фиксираните размер и SHA-256 преди предаването към останалите jobs. `scripts/restore-node-input-cache.mjs` проверява архива, всеки регистриран вход и идентичността на snapshot спрямо `scripts/registered-node-inputs.json`. Липсващ архив, променени байтове или несъответстващ регистър спират проверката.
+
+За подмяна първо се подготвя нова удостоверена снимка от придобитите входове. `prepare-node-input-cache.mjs` експортира `HEAD`, затова се изпълнява върху commit с точно целевите регистри и pins:
+
+```sh
+pnpm --filter @sigma-budget/ingest... build
+node scripts/prepare-node-input-cache.mjs /path/to/acquired-inputs /outside/new/ci-inputs
+```
+
+Резултатът `authenticated-inputs.json` в новата директория съдържа `snapshot`, `inputs` и `registries`. В `scripts/registered-node-inputs.json` се пренасят `snapshot.sha256` като `snapshot` и броят на елементите в `inputs` като `inputs`; това не е броят файлове от произволен архивен опис. Скриптът копира удостоверените входове под `data/originals/` и `data/cache/`.
+
+Преди пакетиране се проверява, че подготвеното дърво съдържа и четирите програмни PDF-а `data/originals/program_budgets/{0100,1800,2300,7400}_*.pdf` с точните имена и SHA-256 от `packages/dataset-schema/src/programme-references.json`. Те са необходими и на `scripts/restore-programme-test-inputs.mjs`: скриптът проверява архива и всеки избран член и възстановява само тези четири оригинала за тестовете, без презаписване на различни байтове.
+
+Архивира се директорията `data/` от подготвеното дърво, така че тя да е на корена на архива:
+
+```sh
+tar -czf /outside/new/registered-node-inputs.tar.gz -C /outside/new/ci-inputs data
+sha256sum /outside/new/registered-node-inputs.tar.gz
+```
+
+Размерът на архива трябва да е най-много 256 MiB. След преглед архивът се качва като asset на непубликуваното draft release в `midt-bg/sigma-budget`; качването дава новия `assetId`. В descriptor-а се записват този ID, точният размер в байтове и SHA-256 на архива. Същите три стойности се обновяват в job `node-inputs` на `.github/workflows/site.yml`. Архивът остава непубликувано CI хранилище; не се придобиват живи източници и няма резервен път към fixtures.
+
+В окончателния клон descriptor-ът и променените регистри/pins се внасят заедно в един commit: restore също експортира `HEAD` и сверява входния брой и snapshot спрямо неговите регистри. Проверява се с нова външна директория:
+
+```sh
+node scripts/restore-node-input-cache.mjs /outside/new/registered-node-inputs.tar.gz /outside/new/restored-inputs
+```
+
+Когато са променени само метаданни в `data/sources.yaml` или `data/datasets.yaml`, без промяна на входните байтове и инвентара, не се качва нов архив. Отново се изпълнява подготовката върху commit с целевите регистри; след потвърждение за същия брой входове в descriptor-а се обновява само `snapshot` от новия `snapshot.sha256`. `assetId`, `bytes`, `sha256` и `inputs`, както и трите фиксирани стойности в workflow, остават същите. Restore изчислява snapshot наново от входовете и регистрите на `HEAD`, а не чете стария `authenticated-inputs.json` от архива. Новият descriptor и регистрите отново се внасят заедно в един commit и се проверяват със съществуващия одобрен архив.
