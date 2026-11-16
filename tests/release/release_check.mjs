@@ -428,6 +428,20 @@ async function main(argv) {
       [s] = await req(method, base + path, 'x');
       ok(s === 405, `${method} ${path.split('/')[1]}: 405, no public route writes`);
     }
+    [s, h, b] = await req(
+      'POST',
+      base + '/mcp',
+      JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'initialize', params: {} }),
+      { 'Content-Type': 'application/json' },
+    );
+    ok(
+      s === 200 &&
+        /^[0-9a-f]{32}$/.test(h.get('Mcp-Session-Id') || '') &&
+        jbody(b)?.result?.serverInfo?.name === 'sigma-budget',
+      'POST /mcp initialize: the MCP server of the Worker answers, with a session',
+    );
+    [s, h] = await req('GET', base + '/mcp');
+    ok(s === 405 && h.get('Allow') === 'POST', 'GET /mcp: 405, MCP takes POST only');
 
     console.log('E the compatibility check of the deploy');
     [code, text] = compat(base);
@@ -658,6 +672,27 @@ async function main(argv) {
           page.includes('data-view="ready"') &&
           page.includes(`/data/releases/${realId}/data/execution-provenance.json`),
         'the monthly screen is drawn from the published release, and its provenance link is the file of that release',
+      );
+      [s, h, b] = await req(
+        'POST',
+        base + '/mcp',
+        JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'tools/call',
+          params: { name: 'explain_number', arguments: { record: 'data/2026-09/kfp/rev' } },
+        }),
+        { 'Content-Type': 'application/json' },
+      );
+      const mcp = jbody(b)?.result?.structuredContent;
+      ok(
+        s === 200 &&
+          h.get('X-Release-Id') === realId &&
+          mcp?.verified === true &&
+          mcp.cell === 'B11' &&
+          mcp.value === '33898.456' &&
+          String(mcp.original?.download).includes(`/data/releases/${realId}/`),
+        'MCP explain_number of data/2026-09/kfp/rev: the record of the published release, checked against its manifest',
       );
       [code, r] = await budget(['reproduce', '--current', base], env);
       ok(

@@ -2,6 +2,8 @@
 interface Env {
   ASSETS: Fetcher;
   RELEASE_RATE_LIMITER?: RateLimit;
+  /** the ceiling of MCP calls per address (apps/web/workers/release-rate-limit.ts rateLimitMcp) */
+  MCP_RATE_LIMITER?: RateLimit;
   DB: D1Database;
   OBJECTS: R2Bucket;
   ENVIRONMENT: string;

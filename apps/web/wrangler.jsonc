@@ -38,6 +38,12 @@
       "name": "RELEASE_RATE_LIMITER",
       "namespace_id": "2001",
       "simple": { "limit": 120, "period": 60 }
+    },
+    // POST /mcp: the ceiling per address, above the share of one session on RELEASE_RATE_LIMITER (docs/release.md)
+    {
+      "name": "MCP_RATE_LIMITER",
+      "namespace_id": "2004",
+      "simple": { "limit": 600, "period": 60 }
     }
   ],
   "observability": { "enabled": true },
@@ -70,6 +76,11 @@
           "name": "RELEASE_RATE_LIMITER",
           "namespace_id": "2002",
           "simple": { "limit": 120, "period": 60 }
+        },
+        {
+          "name": "MCP_RATE_LIMITER",
+          "namespace_id": "2005",
+          "simple": { "limit": 600, "period": 60 }
         }
       ],
       // Public staging on sigma-budget-staging.cf-midt.workers.dev, without a custom domain or preview URL.

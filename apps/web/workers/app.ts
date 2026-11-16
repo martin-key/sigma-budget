@@ -2,7 +2,8 @@ import { screenCacheKey } from '../app/lib/cache';
 // The Worker of the site (docs/adr/0002-react-router-ssr.md). Every response crosses the security finalizer;
 // static files are fetched through ASSETS, while the Worker handles:
 //   /admin/*                            the operator API (apps/web/workers/api/admin.js), behind Cloudflare Access and checked again there
-//   anything but GET and HEAD           405: the public routes never write
+//   /mcp                                the MCP server for AI assistants (apps/web/workers/mcp/handler.ts): POST of JSON-RPC, read-only
+//   anything else but GET and HEAD      405: the public routes never write
 //   /api/releases*, /data/releases/*    the public, read-only release API (apps/web/workers/api/api.js)
 //   /data/<file>                        the stable address of a data file: the file of the current release (registry), else the static one
 //                                       (apps/web/wrangler.jsonc assets.run_worker_first sends these here before the static files)
@@ -12,6 +13,7 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import { createRequestHandler } from 'react-router';
 import { adminApi } from './api/admin.js';
 import { publicApi } from './api/api.js';
+import { mcp } from './mcp/handler';
 import { provideScope } from '../client/env.js';
 import { requestState } from '../client/store.js';
 import { screenSearch } from '../app/lib/query-params';
@@ -193,6 +195,7 @@ function documentHeaders(
 async function dispatch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
   const url = new URL(request.url);
   if (url.pathname.startsWith('/admin/')) return adminApi(request, env, url);
+  if (url.pathname === '/mcp') return mcp(request, env, url);
   if (request.method !== 'GET' && request.method !== 'HEAD') {
     return new Response('Method not allowed', { status: 405, headers: { Allow: 'GET, HEAD' } });
   }

@@ -262,6 +262,12 @@ describe('SECURITY-09 release rate limit', () => {
     });
     expect(namespaces).toEqual(['2001', '2002']);
     expect(new Set(namespaces).size).toBe(2);
+    const mcp = [config, config.env.staging].map((c) => {
+      const binding = c.ratelimits.find((b: { name: string }) => b.name === 'MCP_RATE_LIMITER');
+      expect(binding.simple).toEqual({ limit: 600, period: 60 });
+      return binding.namespace_id;
+    });
+    expect(mcp).toEqual(['2004', '2005']);
     expect(config.name).toBe('sigma-budget');
     expect(config.vars.ENVIRONMENT).toBe('production');
     expect(config.vars.SITE_ORIGIN).toBe('https://sigma-budget.midt.bg');
