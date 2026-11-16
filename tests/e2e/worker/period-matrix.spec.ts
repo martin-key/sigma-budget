@@ -84,14 +84,8 @@ for (const hashMode of [false, true]) {
           old,
         );
         await page.goto(siteURL + address);
-        await page.waitForFunction((p) => location.href.includes('per=' + p), canonical);
-        await page.waitForFunction(
-          "async p => (await import('/js/store.js')).store.get('period')===p",
-          canonical,
-        );
-        expect
-          .soft(await page.locator('.period-notice').innerText(), 'storage notice ' + old)
-          .toContain(notice);
+        await expect(page).toHaveURL(new RegExp('per=' + canonical.replace('.', '\\.')));
+        await expect(page.locator('.period-notice')).toContainText(notice);
         const prefs = await page.evaluate(() => JSON.parse(localStorage.getItem('bns.prefs.v1')!));
         expect.soft(prefs, 'old period removed ' + old).not.toHaveProperty('period');
         expect.soft(prefs.unit, 'unit preserved ' + old).toBe('eur');

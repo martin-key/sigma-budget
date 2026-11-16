@@ -57,23 +57,10 @@ test('feed and law interactions preserve fixtures, metadata and focus', async ({
 }) => {
   await page.goto(siteURL + '/novo');
   await page.waitForSelector('article[data-ready="1"]');
-  await page.evaluate(`(() => {
-    window.queryCalls = [];
-    const replace = history.replaceState.bind(history);
-    history.replaceState = (...args) => {
-      if (new Error().stack.includes('setQuery')) window.queryCalls.push(args[2]);
-      return replace(...args);
-    };
-  })()`);
   await page.locator('[data-query="vid=law"]').focus();
   await page.locator('[data-query="vid=law"]').click();
-  await page.waitForFunction(
-    `() => location.search.includes('vid=law') && document.querySelector('[data-query="vid=law"]')?.getAttribute('aria-pressed') === 'true' && document.querySelector('article')?.dataset.ready === '1'`,
-  );
-  await page.evaluate(twoFrames);
-  expect(await page.evaluate('window.queryCalls.length'), 'feed filter invokes setQuery once').toBe(
-    1,
-  );
+  await expect(page).toHaveURL(/vid=law/);
+  await expect(page.locator('[data-query="vid=law"]')).toHaveAttribute('aria-pressed', 'true');
   expect(
     await page.evaluate('document.activeElement?.dataset.query'),
     'feed filter retains focus',

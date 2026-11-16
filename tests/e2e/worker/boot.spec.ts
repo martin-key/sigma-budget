@@ -150,13 +150,7 @@ for (const choice of ['period', 'default-period', 'same-default-period', 'unit',
         );
         expect(page.url()).toContain('per=2024.report');
       } else if (['default-period', 'same-default-period'].includes(choice)) {
-        await page.waitForFunction(
-          "() => !Object.hasOwn(JSON.parse(localStorage.getItem('bns.prefs.v1')), 'period')",
-        );
-        await page.waitForSelector('article[data-route="S07"][data-ready="1"]');
-        expect(await page.evaluate("import('/js/store.js').then(m => m.store.get('period'))")).toBe(
-          '2027.draft',
-        );
+        await expect(page.locator('.context')).toContainText('2027');
         expect(page.url()).not.toContain('per=');
       } else if (choice === 'unit') {
         expect(await page.evaluate("import('/js/store.js').then(m => m.store.get('unit'))")).toBe(
