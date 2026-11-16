@@ -244,7 +244,8 @@ jobs:
           pnpm exec wrangler dev -c apps/web/build/server/wrangler.json --ip 127.0.0.1 --port 8814 --persist-to "$RUNNER_TEMP/state" > "$RUNNER_TEMP/wrangler.log" 2>&1 &
           for i in $(seq 1 60); do curl -sf -o /dev/null http://127.0.0.1:8814/robots.txt && break; sleep 1; done
           python -m tests.e2e.screens --url http://127.0.0.1:8814/
-          python -m tests.e2e.visual_audit --url http://127.0.0.1:8814/
+          E2E_WORKER_URL=http://127.0.0.1:8814 pnpm test:e2e --project=worker visual-audit.spec.ts
+          E2E_WORKER_URL=http://127.0.0.1:8814 pnpm test:e2e --project=worker light-contrast.spec.ts
       - name: Screen audits, states, variants and checker self-test (Playwright Test)
         run: E2E_WORKER_URL=http://127.0.0.1:8814 pnpm test:e2e --project=worker screens-base.spec.ts screens-demo.spec.ts screens-variants.spec.ts screens-selftest.spec.ts
       - name: Early boot, server DOM adoption and cross-origin security (Playwright Test)

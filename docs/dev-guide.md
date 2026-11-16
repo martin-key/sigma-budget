@@ -1009,6 +1009,32 @@ PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers pnpm test:e2e --project=static
 
 Име на спецификация (например `period-matrix.spec.ts`) може да се добави като филтър. `tests/e2e/playwright.config.ts` разделя двата targets без дублиране на проверки; `fixtures.ts` управлява статичния сървър и изисква изричен `E2E_WORKER_URL` за Worker. Всеки тест получава чист browser context, освен изрично споделените в самата проверка страници. Старите адреси се обхождат с отделни страници в един общ context, с изолирано състояние. Общите route gates, ограничени event waits и CSV download helper са в `fixtures.ts` и `helpers.ts`. Няма автоматични retries; всеки отказ блокира CI, а trace и снимките са в `tmp/e2e-results`. Спецификациите се добавят в `worker/` или `static/` според оригиналния target. Не се използват production V8 thresholds за browser спецификациите.
 
+Визуалният одит и контрастът се изпълняват последователно в job `check` срещу
+сглобения Worker (Chromium), непосредствено след screens:
+
+```bash
+E2E_WORKER_URL=http://127.0.0.1:8814 pnpm test:e2e --project=worker visual-audit.spec.ts
+E2E_WORKER_URL=http://127.0.0.1:8814 pnpm test:e2e --project=worker light-contrast.spec.ts
+```
+
+Визуалният одит съдържа 11 теста за мобилните мерки и стойностите им, deep link
+и CSV, експертната таблица, обзора и търсенето на инвестиционни проекти,
+заглавието на отделна мярка, печат без интерактивни контроли със запазена графика,
+уникалните landmarks и липсата на хоризонтално преливане на 412 px.
+Той допуска service worker; контрастът го блокира. Не се задават touch/mobile флагове.
+
+Контрастните случаи се генерират от `apps/web/app/lib/routes.ts`: първият sample
+на всеки действащ non-bare маршрут, включително not-found, при 1280×900 и 400×800.
+Текущите 26 маршрута дават 52 теста, общо 63 с визуалния одит. Отварят се details,
+без да се посещават неактивните табове. След готовността на видимите графики,
+шрифтовете и изображенията `contrast.ts` събира типизирани DOM данни и изчислява
+контраста независимо от приложението: 4.5:1 за малки chart labels и placeholders,
+3:1 за големи labels и граници на полета. Цветът на SVG текста се чете от `fill`.
+Екран без етикети на графики и без полета няма какво да се мери и минава; всяко нарушение е отказ.
+Всеки контрастен случай има JSON attachment с измерванията и нарушителите.
+`audit-fixtures.ts` споделя навигацията и еднократното изчакване за готов article,
+а `helpers.ts` съдържа общия CSV parser.
+
 `forbidOnly: true`, `retries: 0` и CI guard-ът за всяка `tests/e2e/**/*.spec.ts` предотвратяват селективно или пропуснато изпълнение. Конфигурацията запазва външен `PLAYWRIGHT_BROWSERS_PATH`, иначе използва `tmp/pw-browsers`. При неуспех в job `check` директорията с traces и screenshots се качва като `e2e-failure-results`; след отказ следващите обичайни тестови стъпки не се изпълняват и не могат да я изчистят.
 
 `node apps/web/scripts/serve.ts --port 8000` стартира статичния вариант самостоятелно; `--dir` избира директория. File/path/embed маршрутизацията, MIME, HEAD и 404 отговорите са покрити от `apps/web/scripts/serve.test.ts`.

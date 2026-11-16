@@ -45,7 +45,7 @@ CELLS = {
     '400-light': dict(w=400, h=800, scheme='light', touch=True),
 }
 QUICK_CELLS = ['1280-light', '400-light']
-FAMILIES = ['tour', 'to', 'chrome', 'share', 'embed', 'gloss', 'tabs', 'png', 'views']   # Light palette only; OS preference regression is in visual_audit.py.
+FAMILIES = ['tour', 'to', 'chrome', 'share', 'embed', 'gloss', 'tabs', 'png', 'views']   # Light palette only.
 DEFAULT_OFF = set()                                                  # families that run only when asked for (none now)
 THEME_SUFFIX = ' · СИГМА Бюджет'
 # console / network noise that is expected and not a defect of the site

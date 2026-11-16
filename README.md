@@ -78,7 +78,9 @@ PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers pnpm test:e2e --project=static
 node apps/web/scripts/serve.ts --port 8000
 ```
 
-Проектът `worker` включва `boot.spec.ts`, `security-headers.spec.ts`, `narrative-adoption.spec.ts` и `period-matrix.spec.ts`. Проектът `static` изпълнява `redirects.spec.ts`, `calc.spec.ts`, `share.spec.ts`, `accept.spec.ts`, `overlap.spec.ts` и `motion.spec.ts` върху автоматично сглобените symlinks в `tmp/static-site`. Данните се четат от `data/release`, JavaScript - от `apps/web/build/client/js`; необходим е предварителен build.
+Проектът `worker` включва `boot.spec.ts`, `security-headers.spec.ts`, `narrative-adoption.spec.ts` и `period-matrix.spec.ts`, както и `visual-audit.spec.ts` и `light-contrast.spec.ts`. Проектът `static` изпълнява `redirects.spec.ts`, `calc.spec.ts`, `share.spec.ts`, `accept.spec.ts`, `overlap.spec.ts` и `motion.spec.ts` върху автоматично сглобените symlinks в `tmp/static-site`. Данните се четат от `data/release`, JavaScript - от `apps/web/build/client/js`; необходим е предварителен build.
+
+Командите и обхватът на визуалния одит и контраста са в [ръководството за разработка](docs/dev-guide.md).
 
 Калкулаторът, споделянето, приемните числа, layout/keyboard матрицата, движението и припокриванията се проверяват с Playwright Test. Например `pnpm test:e2e --project=static calc.spec.ts` или `pnpm test:e2e --project=static accept.spec.ts overlap.spec.ts`. Независимите очаквания в `tests/e2e/expected.ts` използват release данните; заплатните изчисления са в цели центове, а процентните ставки - в базисни точки. Browser probes са типизирани функции, подавани директно на Playwright. При отказ се запазват traces.
 

@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test, expect } from '../fixtures.ts';
-import { downloadBytes } from '../helpers.ts';
+import { downloadBytes, parseCsv } from '../helpers.ts';
 import { ROOT } from '../../../apps/web/scripts/serve.ts';
 test.use({ serviceWorkers: 'allow' });
 
@@ -178,33 +178,3 @@ test('feed and law interactions preserve fixtures, metadata and focus', async ({
     await expectedContext.close();
   }
 });
-/** RFC-style semicolon CSV: retain quoted newlines, double quotes and empty fields. */
-function parseCsv(input: string): string[][] {
-  const rows: string[][] = [];
-  let row: string[] = [],
-    field = '',
-    quoted = false;
-  for (let i = 0; i < input.length; i++) {
-    const c = input[i];
-    if (c === '"') {
-      if (quoted && input[i + 1] === '"') {
-        field += '"';
-        i++;
-      } else quoted = !quoted;
-    } else if (c === ';' && !quoted) {
-      row.push(field);
-      field = '';
-    } else if ((c === '\n' || c === '\r') && !quoted) {
-      if (c === '\r' && input[i + 1] === '\n') i++;
-      row.push(field);
-      rows.push(row);
-      row = [];
-      field = '';
-    } else field += c;
-  }
-  if (field || row.length) {
-    row.push(field);
-    rows.push(row);
-  }
-  return rows;
-}
