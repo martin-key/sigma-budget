@@ -584,7 +584,7 @@ function pairBars(rows, { id, label, heads }) {
   const max = Math.max(...rows.flatMap((r) => [r.before, r.now].filter(ok)));
   const w = (x) => (ok(x) && max > 0 ? Number(((Math.max(0, x) / max) * 100).toFixed(1)) : 0);
   const bar = (cls, x, head) =>
-    html`<span class="b27-pair-bar ${cls}"><span class="b27-pair-fill" style="width:${w(x)}%"></span><span class="b27-pair-v"><span class="sr-only">${head}: </span>${ok(x) ? num(x, 0) : DASH}</span></span>`;
+    html`<span class="b27-pair-bar ${cls}"><span class="b27-pair-fill" style="--w:${w(x)}"></span><span class="b27-pair-v"><span class="sr-only">${head}: </span>${ok(x) ? num(x, 0) : DASH}</span></span>`;
   return html`<figure class="b27-pairs" id="${id}">
     <figcaption class="b27-pairs-key">
       <span>${label}</span>

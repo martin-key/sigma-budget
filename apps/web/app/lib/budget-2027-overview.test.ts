@@ -209,7 +209,7 @@ it('compares the institutions as paired bars with the amount and the change', as
     expect(values).toHaveLength(2);
     expect(pair.querySelector('.b27-pair-pct')?.textContent).toMatch(/[+−]?\d+\s*%|—/);
     for (const f of pair.querySelectorAll('.b27-pair-fill'))
-      widths.push(Number(/width:([\d.]+)%/.exec(f.getAttribute('style') || '')?.[1]));
+      widths.push(Number(/--w:([\d.]+)/.exec(f.getAttribute('style') || '')?.[1]));
   }
   expect(Math.max(...widths)).toBe(100);
   expect(widths.every((w) => w >= 0 && w <= 100)).toBe(true);

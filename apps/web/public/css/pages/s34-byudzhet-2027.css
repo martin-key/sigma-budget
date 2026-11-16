@@ -282,7 +282,8 @@
   display: block;
   flex: none;
   height: 0.95rem;
-  max-width: calc(100% - 4.5ch);
+  /* one scale for every bar: the room for the amount is taken off before the share, not clipped from the longest bars */
+  width: calc((100% - 3.75rem) * var(--w) / 100);
 }
 .page[data-route='S34'] .b27-pair-v {
   flex: none;
