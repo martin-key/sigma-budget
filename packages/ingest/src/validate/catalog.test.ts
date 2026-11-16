@@ -11,9 +11,8 @@ import {
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
-import { afterAll, describe, expect, it } from 'vitest';
-import { runWave17a, applyWave17aExceptions, WAVE17A_REMAINING } from './wave17a.js';
-import { writeValidationReport } from './report.js';
+import { describe, expect, it } from 'vitest';
+import { runWave17a, applyWave17aExceptions } from './wave17a.js';
 import { core, catalog } from './catalog.js';
 import { Context } from './context.js';
 const base = new URL('../../test/fixtures/validate17a/', import.meta.url);
@@ -75,23 +74,6 @@ function mutate(root: string, op: any) {
   }
 }
 const evidence: { name: string; status: string; groups: Record<string, unknown> }[] = [];
-afterAll(() => {
-  if (process.env.WAVE17A_PARITY_REPORT)
-    writeValidationReport(
-      new URL('../../../../', import.meta.url).pathname,
-      process.env.WAVE17A_PARITY_REPORT,
-      JSON.stringify(
-        {
-          scope: 'wave17a',
-          completeValidation: false,
-          unported: WAVE17A_REMAINING,
-          scenarios: evidence,
-        },
-        null,
-        2,
-      ) + '\n',
-    );
-});
 function capture(fn: (c: Context) => any, ctx: Context): any {
   try {
     const c = fn(ctx);
@@ -103,7 +85,7 @@ function capture(fn: (c: Context) => any, ctx: Context): any {
     };
   }
 }
-describe('CORE and CATALOG frozen Python differential', () => {
+describe('CORE and CATALOG findings for defective corpus', () => {
   // Cold full-corpus CORE + CATALOG baseline measured 5.43s with V8 coverage.
   // Keep the default limit for the remaining differential scenarios.
   for (const test of cases)
@@ -160,7 +142,7 @@ describe('CORE and CATALOG frozen Python differential', () => {
     );
 });
 
-describe('complete vintage-key CLI outcomes from the Python wrapper', () => {
+describe('complete vintage-key validation findings through the CLI', () => {
   const outcomes = load('year-keys/wrapper-oracle.json');
   for (const test of cases.filter((item) => item.complete))
     it(test.name, () => {
@@ -198,7 +180,7 @@ describe('complete vintage-key CLI outcomes from the Python wrapper', () => {
     });
 });
 
-it('matches the unchanged Python production wrapper on the frozen baseline and exposes raw findings', () => {
+it('reports baseline validation findings and exposes raw findings', () => {
   const root = mkdtempSync(join(tmpdir(), 'sigma-17a-wrap-'));
   try {
     cpSync(new URL('corpus/', base), root, { recursive: true });

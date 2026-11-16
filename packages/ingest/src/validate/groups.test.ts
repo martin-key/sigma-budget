@@ -12,13 +12,12 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
-import { afterAll, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { parseYaml } from '../io/registry.js';
 import { Context, safePath } from './context.js';
 import { envelope, glossary, inputs, numeric, privacy, sizes } from './foundations.js';
 import { validateRegistry } from './registry.js';
 import { applyExceptions, UNPORTED_GROUPS } from './runner.js';
-import { writeValidationReport } from './report.js';
 
 const home = new URL('../../test/fixtures/validate14/', import.meta.url);
 const load = (p: string): any => JSON.parse(readFileSync(new URL(p, home), 'utf8'));
@@ -88,9 +87,9 @@ function prepare(root: string, ops: any[]): string[] {
 }
 /** The frozen corpus predates TypeScript producers. Before REGISTRY runs, each retired `python -m`
  * producer, parser or layer is replaced by a stand-in TypeScript path that exists exactly when the
- * donor module was tracked in the frozen corpus. Each prototype `historical_producer` becomes a historical producer at the
- * corpus baseline commit. The oracle's messages get the same replacement, and every other registry
- * rule is still compared with the donor. */
+ * historical module was tracked in the frozen corpus. Each prototype `historical_producer` becomes a historical producer at the
+ * corpus baseline commit. The expected messages get the same replacement, and every other registry
+ * rule is still compared with the expected findings. */
 const BASELINE = '05d6f6eeca9991468f3c94c3c9c26e87d5b0fae0';
 function modernize(root: string, trackedPaths: Set<string>): [string, string][] {
   const renamed = new Map<string, string>();
@@ -159,26 +158,7 @@ function capture(c: any) {
 }
 const evidence: { scenario: string; status: 'PASS' | 'FAIL'; groups: Record<string, unknown> }[] =
   [];
-afterAll(() => {
-  const report = process.env.WAVE14_PARITY_REPORT;
-  if (!report) return;
-  const repo = new URL('../../../../', import.meta.url).pathname;
-  writeValidationReport(
-    repo,
-    report,
-    JSON.stringify(
-      {
-        scope: 'wave14',
-        completeValidation: false,
-        unported: UNPORTED_GROUPS,
-        scenarios: evidence,
-      },
-      null,
-      2,
-    ) + '\n',
-  );
-});
-describe('frozen Python wave14 corpus', () => {
+describe('validator findings for the defective corpus', () => {
   for (const test of cases)
     it(
       test.name,
@@ -198,7 +178,7 @@ describe('frozen Python wave14 corpus', () => {
               const { notes, ...checked } = validateRegistry(root, {
                 trackedPaths: [...trackedPaths],
               });
-              // This copied corpus has no .git. Check the new diagnostic separately; all donor
+              // This copied corpus has no .git. Check the new diagnostic separately; all expected
               // errors, ownership and closure results retain the exact comparison below.
               expect(notes).toEqual([
                 'Historical producer commit/path verification skipped: exported tree has no Git history',

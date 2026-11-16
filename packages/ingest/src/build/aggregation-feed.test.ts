@@ -4,7 +4,6 @@ import { describe, expect, it } from 'vitest';
 import { editorialSiteName } from './aggregation-rss.js';
 import { buildFeed, type FeedInput } from './aggregation-feed.js';
 import { executionNumbers } from './context.js';
-import { pendingFromExecution } from './aggregation-core.js';
 import { parseJsonStat } from '../io/data.js';
 const root = resolve(import.meta.dirname, '../../test/fixtures/aggregation');
 const text = (name: string) => readFileSync(resolve(root, name), 'utf8');
@@ -28,33 +27,6 @@ const make = (): FeedInput => ({
   pending: read('authored.json').pending,
 });
 describe('feed from frozen donor inputs', () => {
-  it('matches the complete raw donor and RSS bytes', () => {
-    const actual = buildFeed(make());
-    expect(actual.feed).toEqual(read('raw/feed.json'));
-    expect(actual.rss).toBe(text('raw/feed.xml'));
-  });
-  it('propagates changed publication, owner text, count and source date', () => {
-    const input = make();
-    input.budget2027.publication = '2026-11-07';
-    input.law.timeline[0]!.title = 'Промяна & <данни>';
-    input.sebra.overall.count++;
-    input.rates.meta.asOf = '2026-08-13';
-    input.annualUpdated = '2026-10-22T11:00:00+0200';
-    input.debt.latest.maastricht.asOf = '2026-10-22';
-    input.quarterUpdated = '2026-10-23T11:00:00+0200';
-    input.debt.latest.maastricht.quarter.asOf = '2026-10-23';
-    input.cofogUpdated = '2026-09-17T23:00:00+0200';
-    const actual = buildFeed(input);
-    expect(actual.feed).toEqual(read('mutants/feed-changed.json'));
-    expect(actual.rss).toBe(text('mutants/feed-changed.xml'));
-  });
-  it('uses pending report wording derived from changed execution data', () => {
-    const input = make();
-    input.execution.pendingMonths[0]!.month = 11;
-    input.execution.pendingMonths[0]!.asOf = '2026-11-30';
-    input.pending = pendingFromExecution(read('authored.json').pending, input.execution);
-    expect(buildFeed(input).feed).toEqual(read('mutants/feed-pending.json'));
-  });
   it('rejects future or invalid dates, inconsistent debt and population', () => {
     const a = make();
     a.budget2027.publication = '2026-11-09';

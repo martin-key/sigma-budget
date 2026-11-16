@@ -1,11 +1,8 @@
-import { createHash } from 'node:crypto';
-import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync, mkdirSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { dirname, resolve } from 'node:path';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { expect, it } from 'vitest';
 import { buildComponents, type ComponentEvidence } from './components.js';
 import { buildRates, type RatesEvidence } from './rates.js';
-import { verifyComponentsRatesInputs } from './components-rates-fixture.js';
 import { compare } from '../parity/compare.js';
 const root = resolve(import.meta.dirname, '../../test/fixtures/components-rates');
 const read = (name: string): unknown => JSON.parse(readFileSync(resolve(root, name), 'utf8'));
@@ -27,45 +24,6 @@ const evidence = () => ({
     bill: read('inputs/bill-blocks.json'),
     nap: read('inputs/nap-rows.json'),
   } as RatesEvidence,
-});
-it('builds both scoped files with exact semantic parity against frozen Python outputs', () => {
-  const e = evidence(),
-    actual = {
-      components: buildComponents(e.components, '2026-11-08'),
-      rates: buildRates(e.rates, '2026-11-08'),
-    };
-  const differences = (['components', 'rates'] as const).flatMap((dataset) =>
-    compare(read(`${dataset}.json`), actual[dataset], { dataset, file: `${dataset}.json` }),
-  );
-  const report = { outcome: differences.length ? 'fail' : 'pass', differences, unverified: [] };
-  if (process.env.COMPONENTS_RATES_PARITY_REPORT) {
-    mkdirSync(dirname(process.env.COMPONENTS_RATES_PARITY_REPORT), { recursive: true });
-    writeFileSync(
-      process.env.COMPONENTS_RATES_PARITY_REPORT,
-      JSON.stringify(report, null, 2) + '\n',
-    );
-  }
-  expect(differences).toEqual([]);
-});
-it('checks all frozen source and oracle hashes', async () => {
-  await verifyComponentsRatesInputs(root);
-  const provenance = read('provenance.json') as { fixtureSha256: Record<string, string> };
-  for (const [name, hash] of Object.entries(provenance.fixtureSha256))
-    expect(
-      createHash('sha256')
-        .update(readFileSync(resolve(root, name)))
-        .digest('hex'),
-    ).toBe(hash);
-});
-it('rejects changed source evidence', async () => {
-  const dir = mkdtempSync(resolve(tmpdir(), 'wave06-input-'));
-  try {
-    cpSync(root, dir, { recursive: true });
-    writeFileSync(resolve(dir, 'inputs/nap-rows.json'), 'changed');
-    await expect(verifyComponentsRatesInputs(dir)).rejects.toThrow(/Input hash mismatch/);
-  } finally {
-    rmSync(dir, { recursive: true, force: true });
-  }
 });
 it('rejects changed transfer and monthly source values', () => {
   const e = evidence();

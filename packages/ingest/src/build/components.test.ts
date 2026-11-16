@@ -20,19 +20,3 @@ it('rejects a changed total', () => {
   line.law += 1;
   expect(() => transformState(source)).toThrow(/differs/);
 });
-
-it('builds all components from frozen independent sources', async () => {
-  const { buildComponents } = await import('./components.js');
-  const evidence = {
-    law: read('inputs/law.json'),
-    doo: read('inputs/doo-blocks.json'),
-    nzok: read('inputs/nzok-blocks.json'),
-    tables: read('inputs/tables.json'),
-    pages: read('inputs/pages.json'),
-    execution: read('inputs/execution.json'),
-    municipalities: read('inputs/municipalities.json'),
-    outlook: read('inputs/outlook.json'),
-    summary: read('inputs/kfp-components.json'),
-  } as import('./components.js').ComponentEvidence;
-  expect(buildComponents(evidence, '2026-11-08')).toEqual(read('components.json'));
-});

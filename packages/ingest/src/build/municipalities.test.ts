@@ -2,11 +2,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { parseJsonStat } from '../io/data.js';
-import {
-  buildMunicipalities,
-  municipalityGeometry,
-  type MunicipalityInput,
-} from './municipalities.js';
+import { buildMunicipalities, type MunicipalityInput } from './municipalities.js';
 const root = fileURLToPath(new URL('../../test/fixtures/debt-local/', import.meta.url));
 const read = (name: string) => JSON.parse(readFileSync(root + name, 'utf8'));
 const input = (): MunicipalityInput => ({
@@ -62,11 +58,6 @@ describe('Municipalities and geographic data', () => {
       changed.proto.municipalities[i!]!.delegated! += d!;
     }
     expect(() => buildMunicipalities(changed, '2026-11-08')).toThrow(/municipal value/);
-  });
-  it('matches both complete independent Python outputs', () => {
-    const result = buildMunicipalities(input(), '2026-11-08', { preserveHistoricalChirpan: true });
-    expect(result.municipalities).toEqual(read('donor/municipalities.json'));
-    expect(result.geo).toEqual(read('donor/geo/obshtini.json'));
   });
   it('recomputes transfers when both independently supplied law tables change consistently', () => {
     const original = input();

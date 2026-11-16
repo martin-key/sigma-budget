@@ -13,7 +13,7 @@ for (const capture of captures.reports) {
   evidence.reports[`${capture.year}/${capture.filename}`] = capture;
   (evidence.filesByYear[capture.year] ??= []).push(capture.filename);
 }
-it('matches all results of the unchanged donor with present and absent originals', () => {
+it('matches all results of the validator with present and absent originals', () => {
   const ctx = new Context(root);
   expect(JSON.parse(JSON.stringify(kfp(ctx, evidence)))).toEqual(expected.present);
   expect(
@@ -23,7 +23,7 @@ it('matches all results of the unchanged donor with present and absent originals
 
 const differential = JSON.parse(readFileSync(`${root}/differential.json`, 'utf8'));
 for (const scenario of differential.cases) {
-  it(`matches independent donor mutation: ${scenario.name}`, () => {
+  it(`matches independent input mutation: ${scenario.name}`, () => {
     const ctx = new Context(root);
     const inputOps = scenario.ops.filter((op: any) => op.kind === 'input' || op.kind === 'encoded');
     if (inputOps.length) {

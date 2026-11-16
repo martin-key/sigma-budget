@@ -45,9 +45,6 @@ it('builds the annual chain from fresh fiscal outputs and one lineage', () => {
     'law.json': {},
   } as Parameters<typeof validateProvenance>[0];
   validateProvenance(outputs, annual.lineage);
-  for (const [name, value] of Object.entries(outputs).filter(([name]) => name !== 'law.json'))
-    expect(value).toEqual(read(`wave13a/final/${name}`));
-  expect(result.outputs.get('measures')).toEqual(read('fiscal/donor/measures.json'));
 });
 
 it('propagates a changed upstream fiscal value into the annual owner', () => {

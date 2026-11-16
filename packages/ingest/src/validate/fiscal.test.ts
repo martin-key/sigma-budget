@@ -9,7 +9,7 @@ const home = new URL('../../test/fixtures/validate15/', import.meta.url);
 const cases = JSON.parse(readFileSync(new URL('cases.json', home), 'utf8'));
 const oracle = JSON.parse(readFileSync(new URL('oracle.json', home), 'utf8'));
 
-describe('Fiscal frozen Python donor', () => {
+describe('fiscal validator findings for defective inputs', () => {
   for (const name of [
     'baseline-missing-original',
     'annex-gdp',

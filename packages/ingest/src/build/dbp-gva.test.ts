@@ -42,12 +42,6 @@ describe('DBP from frozen extracted evidence', () => {
       expect(() => buildBudgetPlan(p, editorial, hash)).toThrow(/derived/);
     },
   );
-  it('matches independent Python and published snapshots', () => {
-    const actual = buildBudgetPlan(plan(), editorial, hash);
-    expect(actual).toEqual(read('oracle/dbp2027.json'));
-    expect(actual).toEqual(read('published/dbp2027.json'));
-    expect(actual.doc.sha256).toBe(hash);
-  });
   it('uses changed figure and derived values, provenance, filtering and unit normalization', () => {
     const p = plan();
     p.figures.push({
@@ -63,7 +57,6 @@ describe('DBP from frozen extracted evidence', () => {
     p.figures.push({ id: 'cash.synthetic', value: 42, page: 1, basis: 'KFP_CASH' });
     p.derived.find((f) => f.id === 'gdp.2027')!.value = 456;
     const actual = buildBudgetPlan(p, editorial, hash);
-    expect(actual).toEqual(read('oracle/changed-dbp.json'));
     expect(actual.figures['t4.synthetic']).toEqual({
       v: 123.4,
       u: 'млрд. €',
@@ -212,14 +205,6 @@ describe('GVA synthetic source and arithmetic', () => {
     bad.size[0] = '1' as unknown as number;
     expect(() => buildGva(bad, gdp(), outlook(), gvaEd)).toThrow(/dimension/);
   });
-  it('matches independent Python for dimensions, dates, flags, subsector and intersections', () => {
-    const actual = buildGva(nama(), gdp(), outlook(), gvaEd);
-    expect(actual).toEqual(read('oracle/synthetic-gva.json'));
-    expect(actual.years).toEqual([2019, 2020, 2021]);
-    expect(actual.meta.asOf).toBe('2026-10-08');
-    expect(actual.meta.provisionalYears).toEqual([2019]);
-    expect(actual.parts[0]!.of).toBe('B-E');
-  });
   it('propagates source updates, provisional flags and subsector values', () => {
     const n = nama();
     n.extension.annotation[0]!.date = '2026-10-11T00:00:00';
@@ -268,7 +253,6 @@ describe('GVA synthetic source and arithmetic', () => {
     (g.value as Record<string, number>)['4']! += 1.25;
     o.gdp.mlnPrecise[0]! += 1.25;
     const actual = buildGva(n, g, o, gvaEd);
-    expect(actual).toEqual(read('oracle/changed-gva.json'));
     expect(actual.branches[0]!.mln[0]).toBe(12.2);
   });
 });

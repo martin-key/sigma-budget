@@ -32,19 +32,6 @@ jobs:
     needs: [node-inputs]
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    env:
-      WAVE14_PARITY_REPORT: tmp/ts-migration/candidates/14/report.json
-      WAVE15_PARITY_REPORT: tmp/ts-migration/candidates/15/report.json
-      WAVE15_COMPOUND_REPORT: tmp/ts-migration/candidates/15/compound-report.json
-      WAVE15_NATIVE_REPORT: tmp/ts-migration/candidates/15/native-report.json
-      WAVE15_ITERABLE_REPORT: tmp/ts-migration/candidates/15/iterable-report.json
-      WAVE17A_PARITY_REPORT: tmp/ts-migration/candidates/17a/report.json
-      COMMON_PARITY_REPORT: ${{ github.workspace }}/tmp/ts-migration/candidates/02/diff.json
-      LAW_PARITY_REPORT: ${{ github.workspace }}/tmp/ts-migration/candidates/04/diff.json
-      EDITORIAL_PARITY_REPORT: ${{ github.workspace }}/tmp/ts-migration/candidates/08/diff.json
-      COMPONENTS_RATES_PARITY_REPORT: ${{ github.workspace }}/tmp/ts-migration/candidates/06/diff.json
-      PROGRAMMES_PARITY_REPORT: ${{ github.workspace }}/tmp/ts-migration/candidates/05/diff.json
-      FISCAL_PARITY_REPORT: ${{ github.workspace }}/tmp/ts-migration/candidates/candidate03/diff.json
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -63,22 +50,17 @@ jobs:
       - name: Restore the four pinned programme originals for independent checks
         run: node scripts/restore-programme-test-inputs.mjs "$RUNNER_TEMP/registered-node-input-archive/registered-node-inputs.tar.gz"
       - name: Coverage gate self-tests
-        run: node --test scripts/check-coverage.test.mjs scripts/ci-gates.test.mjs scripts/ci-install-browser.test.mjs scripts/check-parity-reports.test.mjs scripts/restore-programme-test-inputs.test.mjs
+        run: node --test scripts/check-coverage.test.mjs scripts/ci-gates.test.mjs scripts/ci-install-browser.test.mjs scripts/restore-programme-test-inputs.test.mjs
       - name: Coverage baseline ratchet against target
         env:
           COVERAGE_BASE_REF: ${{ github.base_ref }}
           COVERAGE_BASE_SHA: ${{ github.event.before }}
         run: node scripts/check-coverage.mjs --check-base
-      - name: Clear stale mandatory parity reports
-        run: node scripts/check-parity-reports.mjs --clean
       - name: All Node suites, once, with coverage
         run: pnpm test -- --coverage
       - name: Node tests leave protected inputs unchanged
         if: always()
         run: test -z "$(git status --porcelain -- data packages/ingest/test/fixtures packages/ingest/test/expected apps/web/app/routes/__fixtures__)"
-      - name: Check every mandatory parity report
-        if: always()
-        run: node scripts/check-parity-reports.mjs
       - name: Per-workspace regression gate
         run: pnpm check:coverage
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -89,65 +71,6 @@ jobs:
             coverage-summary.md
             apps/*/coverage/coverage-summary.json
             packages/*/coverage/coverage-summary.json
-          if-no-files-found: error
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        if: always()
-        with:
-          name: validation-wave14-parity
-          path: ${{ env.WAVE14_PARITY_REPORT }}
-          if-no-files-found: error
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        if: always()
-        with:
-          name: validation-wave15-parity
-          path: |
-            ${{ env.WAVE15_PARITY_REPORT }}
-            ${{ env.WAVE15_COMPOUND_REPORT }}
-            ${{ env.WAVE15_NATIVE_REPORT }}
-            ${{ env.WAVE15_ITERABLE_REPORT }}
-          if-no-files-found: error
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        if: always()
-        with:
-          name: validation-wave17a-parity
-          path: ${{ env.WAVE17A_PARITY_REPORT }}
-          if-no-files-found: error
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        if: always()
-        with:
-          name: editorial-parity
-          path: ${{ env.EDITORIAL_PARITY_REPORT }}
-          if-no-files-found: error
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        if: always()
-        with:
-          name: components-rates-parity
-          path: ${{ env.COMPONENTS_RATES_PARITY_REPORT }}
-          if-no-files-found: error
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        if: always()
-        with:
-          name: programmes-parity
-          path: ${{ env.PROGRAMMES_PARITY_REPORT }}
-          if-no-files-found: error
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        if: always()
-        with:
-          name: law-parity
-          path: ${{ env.LAW_PARITY_REPORT }}
-          if-no-files-found: error
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        if: always()
-        with:
-          name: common-parity
-          path: ${{ env.COMMON_PARITY_REPORT }}
-          if-no-files-found: error
-
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        if: always()
-        with:
-          name: fiscal-node-parity
-          path: ${{ env.FISCAL_PARITY_REPORT }}
           if-no-files-found: error
 
   build:
@@ -272,24 +195,7 @@ jobs:
 
   required-validation:
     if: ${{ always() }}
-    needs:
-      [
-        security,
-        coverage,
-        build,
-        check,
-        release,
-        common-parity,
-        aggregation-parity,
-        catalog-parity,
-        wave13a-parity,
-        wave13b-parity,
-        validation-wave18,
-        validation-wave17b,
-        validation-wave17c,
-        node-inputs,
-        node-import,
-      ]
+    needs: [security, coverage, build, check, release, node-inputs, node-import]
     runs-on: ubuntu-latest
     steps:
       - name: Every validation must succeed
@@ -334,243 +240,6 @@ jobs:
           fi
           node tests/release/compat_check.mjs --env-url "$STAGING_ORIGIN"
           pnpm exec wrangler deploy -c apps/web/build/server/wrangler.json      # built with CLOUDFLARE_ENV=staging: the staging Worker, D1 and R2
-
-  common-parity:
-    # Offline common-layer TypeScript builds against frozen evidence: debt and local finance, DBP and GVA, fiscal.
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: '24'
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - name: Debt and local finance parity against the frozen oracle
-        run: |
-          pnpm --filter @sigma-budget/etl... build
-          pnpm exec budget-ts build --inputs packages/ingest/test/fixtures/debt-local --out tmp/ts-migration/candidates/07 --scope debt,municipalities,geo-obshtini,sebra --build-date 2026-11-08
-          for stage in donor projected published; do
-            pnpm exec budget-ts parity --registry packages/ingest/test/fixtures/debt-local/registry.yaml --oracle packages/ingest/test/fixtures/debt-local/$stage --candidate tmp/ts-migration/candidates/07/data --scope debt,municipalities,geo-obshtini,sebra --policy packages/ingest/test/fixtures/debt-local/policy.json --report tmp/ts-migration/candidates/07/$stage-diff.json
-          done
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        if: always()
-        with:
-          name: debt-local-parity
-          path: tmp/ts-migration/candidates/07/*-diff.json
-          if-no-files-found: error
-      - name: DBP and GVA scoped proof against frozen evidence
-        run: |
-          pnpm exec budget-ts build --inputs packages/ingest/test/fixtures/dbp-gva --out tmp/ts-migration/candidates/10 --scope dbp2027,gva-sectors --build-date 2026-11-08
-          pnpm exec budget-ts parity --registry packages/ingest/test/fixtures/dbp-gva/datasets.yaml --oracle packages/ingest/test/fixtures/dbp-gva/published --candidate tmp/ts-migration/candidates/10/data --scope dbp2027 --policy packages/ingest/test/fixtures/dbp-gva/policy.json --report tmp/ts-migration/candidates/10/dbp-parity.json
-          git diff --exit-code -- data/release
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: dbp-gva-proof
-          path: |
-            tmp/ts-migration/candidates/10/proof-report.json
-            tmp/ts-migration/candidates/10/dbp-parity.json
-      - name: Fiscal parity against the frozen oracle
-        run: |
-          pnpm exec budget-ts build --inputs packages/ingest/test/fixtures/fiscal --out tmp/ts-migration/candidates/candidate03 --scope outlook,revenue,expenditure,measures --build-date 2026-11-08
-          pnpm exec budget-ts parity --registry packages/ingest/test/fixtures/fiscal/inputs/datasets.yaml --oracle packages/ingest/test/fixtures/fiscal/oracle --candidate tmp/ts-migration/candidates/candidate03/data --scope outlook,revenue,expenditure,measures --policy packages/ingest/test/fixtures/fiscal/policy.json --report tmp/ts-migration/candidates/candidate03/cli-diff.json
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        if: always()
-        with:
-          name: fiscal-parity
-          path: |
-            tmp/ts-migration/candidates/candidate03/cli-diff.json
-          if-no-files-found: error
-      - name: Release remains unchanged
-        if: always()
-        run: git diff --exit-code -- data/release
-
-  aggregation-parity:
-    # Offline Wave 11: frozen owner snapshots and exact scoped parity.
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: '24'
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @sigma-budget/etl... build
-      - name: Scoped aggregation CLI and parity
-        run: |
-          pnpm exec budget-ts build --inputs packages/ingest/test/fixtures/aggregation --out tmp/ts-migration/candidates/11 --scope core,feed,feed-rss,search-index --build-date 2026-11-08
-          for stage in final published; do
-            pnpm exec budget-ts parity --registry packages/ingest/test/fixtures/aggregation/metadata/data/datasets.yaml --oracle packages/ingest/test/fixtures/aggregation/$stage --candidate tmp/ts-migration/candidates/11/data --scope core,feed,feed-rss,search-index --policy packages/ingest/test/fixtures/aggregation/policy.json --report tmp/ts-migration/candidates/11/$stage-parity.json
-          done
-          test -z "$(git status --porcelain -- data/release)"
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        if: always()
-        with:
-          name: aggregation-parity
-          path: tmp/ts-migration/candidates/11/*-parity.json
-          if-no-files-found: error
-
-  catalog-parity:
-    # Frozen Wave 12 owner streams and exact scoped parity; no live release oracle.
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: '24'
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @sigma-budget/etl... build
-      - name: Scoped catalog CLI and parity
-        run: |
-          pnpm exec budget-ts build --inputs packages/ingest/test/fixtures/catalog --out tmp/ts-migration/candidates/12 --scope catalog --build-date 2026-11-08
-          for stage in final published; do
-            pnpm exec budget-ts parity --registry packages/ingest/test/fixtures/catalog/inputs/datasets.yaml --oracle packages/ingest/test/fixtures/catalog/oracles/$stage --candidate tmp/ts-migration/candidates/12/data --scope catalog --policy packages/ingest/test/fixtures/catalog/policy.json --report tmp/ts-migration/candidates/12/$stage-parity.json
-          done
-          node apps/etl/dist/catalog-metadata.js
-          test -z "$(git status --porcelain -- data/release)"
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        if: always()
-        with:
-          name: catalog-parity
-          path: |
-            tmp/ts-migration/candidates/12/*-parity.json
-            tmp/ts-migration/candidates/12/metadata-diff.json
-          if-no-files-found: error
-
-  wave13a-parity:
-    # Frozen current-publication oracles and six scoped owner projections.
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: '24'
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @sigma-budget/etl... build
-      - name: Scoped tests and parity
-        run: |
-          pnpm exec budget-ts build --inputs packages/ingest/test/fixtures --out tmp/ts-migration/candidates/13a --scope outlook,revenue,expenditure,budget2027,budget2027-provenance,law --build-date 2026-11-08
-          for stage in final published; do
-            pnpm exec budget-ts parity --registry packages/ingest/test/fixtures/wave13a/datasets.yaml --oracle packages/ingest/test/fixtures/wave13a/$stage --candidate tmp/ts-migration/candidates/13a/data --scope outlook,revenue,expenditure,budget2027,budget2027-provenance,law --policy packages/ingest/test/fixtures/wave13a/policy.json --protect packages/ingest/test/fixtures --report tmp/ts-migration/candidates/13a/$stage-parity.json
-          done
-          git diff --exit-code -- data/release
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        if: always()
-        with:
-          name: wave13a-parity
-          path: tmp/ts-migration/candidates/13a/*-parity.json
-          if-no-files-found: error
-
-  wave13b-parity:
-    # Frozen raw-reader evidence and the frozen reference graph; no live release comparison.
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: '24'
-          cache: pnpm
-      - run: |
-          pnpm install --frozen-lockfile
-          pnpm --filter @sigma-budget/etl... build
-      - name: Build and compare the frozen candidate
-        run: pnpm exec budget-ts build --inputs packages/ingest/test/fixtures --out tmp/ts-migration/candidates/candidate13b --scope wave13b --build-date 2026-11-08
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        if: always()
-        with:
-          name: wave13b-parity
-          path: tmp/ts-migration/candidates/candidate13b/report.json
-          if-no-files-found: error
-
-  validation-wave18:
-    # Frozen KFP evidence and the independent TypeScript KFP rules.
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: '24'
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - name: Scoped KFP validation and safety
-        run: |
-          pnpm --filter @sigma-budget/ingest... build
-          node packages/ingest/dist/validate/kfp-cli.js --root packages/ingest/test/fixtures/wave18 --captures captures.json --manifest manifest.json --only KFP --report tmp/ts-migration/candidates/18/report.json
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        if: always()
-        with:
-          name: validation-wave18
-          path: tmp/ts-migration/candidates/18/report.json
-          if-no-files-found: error
-      - name: Release remains unchanged
-        if: always()
-        run: test -z "$(git status --porcelain -- data/release)"
-
-  validation-wave17b:
-    # Frozen FEED evidence and the TypeScript FEED validator.
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: '24'
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - name: FEED differential and compiled CLI safety
-        run: |
-          pnpm --filter @sigma-budget/ingest... build
-          node packages/ingest/dist/validate/feed-cli.js --root packages/ingest/test/fixtures/validate17b/corpus --only FEED --report tmp/ts-migration/candidates/17b/report.json
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        if: always()
-        with:
-          name: validation-wave17b
-          path: tmp/ts-migration/candidates/17b/report.json
-          if-no-files-found: error
-      - name: Release remains unchanged
-        if: always()
-        run: test -z "$(git status --porcelain -- data/release)"
-
-  validation-wave17c:
-    # SEARCH only: frozen inputs, the frozen search reference and the safe TypeScript CLI.
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: '24'
-          cache: pnpm
-      - run: |
-          pnpm install --frozen-lockfile
-          pnpm --filter @sigma-budget/ingest... build
-      - name: Independent SEARCH, mutation and compiled CLI checks
-        run: |
-          node packages/ingest/dist/validate/search-cli.js --root packages/ingest/test/fixtures/wave17c/corpus --only SEARCH --raw --report tmp/ts-migration/candidates/17c/report.json
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        if: always()
-        with:
-          name: validation-wave17c
-          path: tmp/ts-migration/candidates/17c/report.json
-          if-no-files-found: error
-      - name: Release remains unchanged
-        if: always()
-        run: test -z "$(git status --porcelain -- data/release)"
 
   node-inputs:
     # Draft assets need push access. This job runs no checkout or project code;

@@ -46,7 +46,7 @@ const cases = JSON.parse(readFileSync(join(fixtures, 'validate15b/oracle.json'),
 // Source mutations rebuild annual lineage before validation: measured 5.24–5.33s
 // with V8 coverage on the shared audit host; scoped 15s integration budget.
 it.each(cases)(
-  'matches the unchanged donor: $mutation.name',
+  'matches the validator: $mutation.name',
   ({ mutation, result }) => {
     if (mutation.file) {
       const path = join(root, 'data/release', mutation.file);
@@ -231,7 +231,7 @@ const helpers = JSON.parse(readFileSync(join(fixtures, 'validate15b/helpers.json
   }[];
 };
 it.each(helpers.oracles)(
-  'matches donor PDF oracle helper: $name',
+  'matches PDF validation helper findings: $name',
   async ({ docs, oracles, result }) => {
     const { checkOutputOracles } = await import('./budget-2027.js');
     const { Check } = await import('./checks.js');
@@ -254,7 +254,7 @@ it.each(helpers.oracles)(
     expect(output.groups[0]).toEqual(result);
   },
 );
-it.each(helpers.laws)('matches donor decimal boundary: $name', async ({ docs, result }) => {
+it.each(helpers.laws)('matches decimal boundary findings: $name', async ({ docs, result }) => {
   const { checkLawIdentities } = await import('./budget-2027.js');
   const { Check } = await import('./checks.js');
   const ctx = { get: (name: string) => docs[name] } as Context;
@@ -264,7 +264,7 @@ it.each(helpers.laws)('matches donor decimal boundary: $name', async ({ docs, re
 });
 
 it.each(helpers.archives)(
-  'matches donor on $name checksum failure, including stale bytes at the same path',
+  'reports expected findings on $name checksum failure, including stale bytes at the same path',
   ({ name, problem }) => {
     const zipPath = join(root, 'data/originals/budget_2027/ZDBRB-2027.zip');
     const inputPath = join(root, 'data/inputs/budget_forecast_2027.json');
@@ -303,7 +303,7 @@ it.each(helpers.archives)(
 );
 
 it.each(helpers.identities)(
-  'matches donor independent source identity: $name',
+  'matches independent source identity findings: $name',
   async ({ name, kind, path, value, result }) => {
     const { forecastIdentities, billIdentities, municipalIdentities } =
       await import('./budget-2027.js');
@@ -323,7 +323,7 @@ it.each(helpers.identities)(
 );
 
 it.each(helpers.sourceCases)(
-  'matches donor on independent source mutation: $name',
+  'reports expected findings on independent source mutation: $name',
   ({ path, value, problem }) => {
     const filename = join(root, 'data/inputs/budget_forecast_2027.json');
     const forecast = JSON.parse(readFileSync(filename, 'utf8'));

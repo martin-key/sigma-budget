@@ -1,6 +1,6 @@
 # Registered TypeScript production import
 
-`budget-ts build` now assembles the registered current sources, executes the existing `wave13bStages` graph, runs all 26 domain groups plus REGISTRY, and packages the actual outputs through the release-build lifecycle. `./budget` is the normal Node dispatcher, keeping compiled workspace tools current through Turbo. The existing scoped fixture commands remain reproducibility tests; the production dispatcher never calls their assemblers or expected outputs.
+`budget-ts build` now assembles the registered current sources, executes the existing `wave13bStages` graph, runs all 26 domain groups plus REGISTRY, and packages the actual outputs through the release-build lifecycle. `./budget` is the normal Node dispatcher, keeping compiled workspace tools current through Turbo.
 
 ```sh
 pnpm install --frozen-lockfile

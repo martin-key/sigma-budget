@@ -7,7 +7,7 @@ import { budgets, programs } from './budgets.js';
 const home = new URL('../../test/fixtures/validate15/', import.meta.url),
   cases = JSON.parse(readFileSync(new URL('cases.json', home), 'utf8')),
   oracle = JSON.parse(readFileSync(new URL('oracle.json', home), 'utf8'));
-describe('budget and programme frozen Python donor', () => {
+describe('budget and programme validator findings for defective inputs', () => {
   for (const [name, group] of [
     ['baseline-missing-original', 'BUDGETS'],
     ['baseline-missing-original', 'PROGRAMS'],

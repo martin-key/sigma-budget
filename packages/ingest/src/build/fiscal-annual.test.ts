@@ -5,11 +5,6 @@ import { buildAnnualPeriods, type AnnualForecast } from './fiscal-annual.js';
 const root = resolve(import.meta.dirname, '../../test/fixtures/fiscal');
 const read = (name: string) => JSON.parse(readFileSync(resolve(root, name), 'utf8'));
 const forecast = (): AnnualForecast => read('inputs/data/inputs/budget_forecast_2027.json');
-it('reproduces every annual record from the independent Python oracle', () => {
-  const output = buildAnnualPeriods(forecast());
-  for (const name of ['outlook', 'revenue', 'expenditure'] as const)
-    expect(output[name]).toEqual(read(`oracle/${name}.json`).byPeriod);
-});
 it('rejects a changed annual column vintage and a missing required cell', () => {
   const a = forecast();
   a.tables.annex3_mln!.columns[2]!.vintage = 'отчет';

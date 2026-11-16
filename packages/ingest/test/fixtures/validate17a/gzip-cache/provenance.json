@@ -1,9 +1,0 @@
-{
-  "inputs": {
-    "provenance.json": "b99aaf1754f4d6ab8b052cb9c291827a8ce488996dfad5b1bbe0678eb74af30f"
-  },
-  "outputs": {
-    "oracle.json": "c1ec2ce911f31751d7a25cbca3e4ca62e8ddb4303368661f0f0cdd41f2f85d93"
-  },
-  "cases": 309
-}

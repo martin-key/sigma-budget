@@ -1,5 +1,5 @@
 import type { Json } from '@sigma-budget/dataset-schema';
-import { buildOutlook, buildRevenue, type FiscalEvidence } from './fiscal.js';
+import { buildOutlook, buildRevenue } from './fiscal.js';
 import { buildExpenditure, type ExpenditureEvidence } from './fiscal-expenditure.js';
 import { buildMeasures, type MeasureSource, type MeasureExcerpts } from './measures.js';
 import { buildAnnualPeriods, type AnnualForecast } from './fiscal-annual.js';
@@ -38,7 +38,4 @@ export function projectFiscalPublished(
     },
     'measures.json': structuredClone(donor['measures.json']),
   };
-}
-export function buildFiscal(input: FiscalBuildInput, date: string): FiscalOutputs {
-  return projectFiscalPublished(buildFiscalDonor(input, date), input.forecast);
 }

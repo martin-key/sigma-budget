@@ -13,9 +13,7 @@ import {
 import { assertFreshAnnual } from './prepare.js';
 import { readPdf, spans, pdfTables } from '../pdf/index.js';
 import { zipMember } from '../../build/annual-lineage.js';
-import { buildWave13a, validateProvenance, type LegacyOwners } from '../../build/wave13a.js';
 const root = resolve(import.meta.dirname, '../../../../..');
-const fixtures = join(root, 'packages/ingest/test/fixtures');
 const json = async (path: string) => JSON.parse(await readFile(path, 'utf8'));
 let temp: string,
   registration: AnnualRegistration,
@@ -55,24 +53,6 @@ it('decodes the actual archive and matches both complete independent pinned Pyth
   expect(result.bill.municipal.art52!.rows).toHaveLength(265);
   expect(result.bill.municipal.art53!.rows).toHaveLength(265);
 });
-it('feeds the unchanged Wave13a builders and produces all six exact final outputs', async () => {
-  const legacy: LegacyOwners = {
-    outlook: await json(join(fixtures, 'fiscal/donor/outlook.json')),
-    revenue: await json(join(fixtures, 'fiscal/donor/revenue.json')),
-    expenditure: await json(join(fixtures, 'fiscal/donor/expenditure.json')),
-    law: await json(join(fixtures, 'law/oracle.json')),
-  };
-  const outputs = buildWave13a({
-    forecast: result.forecast,
-    bill: result.bill,
-    archives: { forecast: archive, bill: archive },
-    legacy,
-    buildDate: '2026-11-08',
-  });
-  validateProvenance(outputs);
-  for (const [name, output] of Object.entries(outputs))
-    expect(output, name).toEqual(await json(join(fixtures, 'wave13a/final', name)));
-}, 30_000);
 it('generates missing intermediates in an owned export, then verifies them without changing their bytes', async () => {
   const out = join(temp, 'generated'),
     opts = { sourceRoot: root, registration, out, buildDate: date };

@@ -1,7 +1,7 @@
 import { isPublishedDataset } from '@sigma-budget/dataset-schema';
 /** Independent ports of validate/{debt,local_finance}.py at 3424bc998c726d6d511d4284295c54c50c42d099.
  * These rules inspect published datasets, not the corresponding production builders.
- * Original-source and additional safety checks are separate APIs; see debt-local/README.md.
+ * Original-source and additional safety checks are separate APIs; see packages/ingest/src/validate/debt-local/README.md.
  */
 import { isDeepStrictEqual as eq } from 'node:util';
 import { Check, fmt, isnum, pyRepr, pyTruth } from './checks.js';

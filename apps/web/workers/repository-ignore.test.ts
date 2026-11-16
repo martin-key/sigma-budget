@@ -36,7 +36,6 @@ const matchesAtAnyDepth = (rule: string) => !rule.startsWith('/') || /(^|\/)\*\*
 const SOURCE = [
   'packages/ingest/src/build/new-builder.ts',
   'packages/ingest/src/build/new-builder.test.ts',
-  'packages/ingest/test/fixtures/wave13b/reference/build/new-builder.json',
   'apps/web/app/build/screen.ts',
   'packages/ingest/src/dist/reader.ts',
   'packages/ingest/src/coverage/rule.ts',

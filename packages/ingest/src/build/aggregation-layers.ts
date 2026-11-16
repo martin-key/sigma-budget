@@ -119,14 +119,6 @@ export function aggregationSourceGlue(
 }
 
 /** The ordered, scope-limited parts of wording, active_data and apply_sources. */
-export function projectAggregation(input: ScopeLayersInput): Aggregation {
-  return aggregationSourceGlue(
-    aggregationActive(aggregationWording(input, input.wording)),
-    input.sourceGlue,
-  );
-}
-
-/** The source glue also extends a historical 64-term glossary, when needed. */
 export function glossarySourceGlue(glossary: any, terms: readonly any[]): any {
   const result = structuredClone(glossary);
   if (result.terms.some((term: any) => term.slug === 'ess-2010')) return result;

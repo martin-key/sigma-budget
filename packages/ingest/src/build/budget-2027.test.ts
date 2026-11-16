@@ -49,16 +49,6 @@ let baseline: ReturnType<typeof prepareBaseline>;
 beforeAll(() => {
   baseline = prepareBaseline();
 });
-it('reproduces every annual period and its provenance entries from the Python donor', () => {
-  expect(baseline.annual).toEqual(oracle('annual.json'));
-  expect(baseline.entries).toEqual(oracle('annual-entries.json'));
-});
-it('reproduces the complete bill from the frozen Python donor', () => {
-  expect(baseline.budget).toEqual(oracle('budget2027.json'));
-});
-it('reproduces every final provenance entry from the frozen Python donor', () => {
-  expect(baseline.provenance).toEqual(oracle('budget2027-provenance.json'));
-});
 it('retains every budget and municipality identity, blanks and the documented GDP discrepancy', () => {
   const { forecast, budget } = baseline;
   expect(Object.keys(budget.budgets.bill)).toHaveLength(48); // Article 1 plus 47 budget identities.

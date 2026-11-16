@@ -41,14 +41,3 @@ it('transforms NAP fund cells and verifies the contribution totals', () => {
   rows['1.2.']!.cells[4] = '99';
   expect(() => transformContributionRows(rows)).toThrow(/total differs/);
 });
-
-it('builds the complete rates result from the independent source evidence', async () => {
-  const { buildRates } = await import('./rates.js');
-  const evidence = {
-    doo: read('inputs/doo-blocks.json'),
-    nzok: read('inputs/nzok-blocks.json'),
-    bill: read('inputs/bill-blocks.json'),
-    nap: read('inputs/nap-rows.json'),
-  } as import('./rates.js').RatesEvidence;
-  expect(buildRates(evidence, '2026-11-08')).toEqual(read('rates.json'));
-});

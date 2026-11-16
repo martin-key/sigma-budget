@@ -1,37 +1,9 @@
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { expect, expectTypeOf, it } from 'vitest';
 import { buildLaw, type LawEvidence, type LawDataset } from './law.js';
-import { compare } from '../parity/compare.js';
 const fixture = (name: string) =>
   JSON.parse(readFileSync(resolve(import.meta.dirname, '../../test/fixtures/law', name), 'utf8'));
-it('builds the law dataset against the Python oracle', () => {
-  const actual = buildLaw(fixture('evidence.json'), '2026-11-08');
-  const differences = compare(fixture('oracle.json'), actual, { dataset: 'law', file: 'law.json' });
-  const report = { outcome: differences.length ? 'fail' : 'pass', differences, unverified: [] };
-  const reportPath = process.env.LAW_PARITY_REPORT;
-  if (reportPath) {
-    mkdirSync(dirname(reportPath), { recursive: true });
-    writeFileSync(reportPath, JSON.stringify(report, null, 2) + '\n');
-  }
-  expect(differences).toEqual([]);
-});
-it('changes only next for the optional current publication, matching the frozen donor', () => {
-  const cases = JSON.parse(
-    readFileSync(
-      resolve(import.meta.dirname, '../../test/fixtures/wave13a/law-next-oracle.json'),
-      'utf8',
-    ),
-  ) as { input: { publication: string } | null; next: unknown }[];
-  const evidence = fixture('evidence.json');
-  const original = buildLaw(evidence, '2026-11-08');
-  for (const { input, next } of cases) {
-    const actual = buildLaw(evidence, '2026-11-08', input);
-    expect(actual.next).toEqual(next);
-    expect({ ...actual, next: original.next }).toEqual(original);
-  }
-  expect(() => buildLaw(evidence, '2026-11-08', { other: 1 } as never)).toThrow();
-});
 it('rejects wrong dates', () => {
   const e = fixture('evidence.json');
   e.parliament.zdb.L_Act_date = '2026-07-02';

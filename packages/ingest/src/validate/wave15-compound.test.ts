@@ -3,12 +3,11 @@ import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:f
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { isDeepStrictEqual } from 'node:util';
-import { afterAll, expect, it } from 'vitest';
+import { expect, it } from 'vitest';
 import { Context } from './context.js';
 import { parseOrderedPythonJson } from './ordered-json.js';
 import { pyDict, pyEqual, pySortedTuples, pyTupleAt, pythonRepr } from './python-error.js';
 import { wave15Groups } from './wave15.js';
-import { writeValidationReport } from './report.js';
 
 const home = new URL('../../test/fixtures/validate15/', import.meta.url),
   load = (file: string): any => JSON.parse(readFileSync(new URL('compound/' + file, home), 'utf8')),
@@ -37,7 +36,7 @@ function wrapped(group: string, observation: any): any {
     : observation;
 }
 for (const test of cases)
-  it('matches complete donor and compiled CLI outcomes for ' + test.name, () => {
+  it('matches expected validator and compiled CLI findings for ' + test.name, () => {
     const root = mkdtempSync(join(tmpdir(), 'sigma-compound-'));
     try {
       cpSync(new URL('corpus/', home), root, { recursive: true });
@@ -89,7 +88,7 @@ const vectors = parseOrderedPythonJson(
   readFileSync(new URL('compound/tuple-oracle.json', home), 'utf8'),
 ) as any[];
 for (const [index, test] of vectors.entries())
-  it('matches native Python tuple dictionaries and ordering ' + index, () => {
+  it('matches tuple dictionaries and ordering ' + index, () => {
     const actual = result(() => {
       const a = pyTupleAt(test.first, [0, 1]),
         b = pyTupleAt(test.second, [0, 1]),
@@ -105,15 +104,3 @@ for (const [index, test] of vectors.entries())
     });
     expect(actual).toEqual(test.result);
   });
-afterAll(() => {
-  if (process.env.WAVE15_COMPOUND_REPORT)
-    writeValidationReport(
-      repo,
-      process.env.WAVE15_COMPOUND_REPORT,
-      JSON.stringify(
-        { scope: 'wave15-compound', completeValidation: false, scenarios: evidence },
-        null,
-        2,
-      ) + '\n',
-    );
-});

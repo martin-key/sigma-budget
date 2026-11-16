@@ -1,4 +1,4 @@
-import { object, json, type Json } from '@sigma-budget/dataset-schema';
+import { type Json } from '@sigma-budget/dataset-schema';
 export interface PrecisionRule {
   dataset: string;
   pointer: string;
@@ -18,39 +18,6 @@ export interface Policy {
   accepted: AcceptedDifference[];
 }
 export const exactPolicy: Policy = { precision: [], accepted: [] };
-export function parsePolicy(v: unknown): Policy {
-  if (!object(v) || !Array.isArray(v.precision) || !Array.isArray(v.accepted))
-    throw new Error('Policy requires precision and accepted arrays');
-  for (const r of v.precision) {
-    if (
-      !object(r) ||
-      typeof r.dataset !== 'string' ||
-      !r.dataset ||
-      typeof r.pointer !== 'string' ||
-      (r.pointer !== '' && !r.pointer.startsWith('/')) ||
-      !Number.isInteger(r.decimals) ||
-      Number(r.decimals) < 0 ||
-      Number(r.decimals) > 12 ||
-      typeof r.unit !== 'string' ||
-      !r.unit
-    )
-      throw new Error('Invalid precision rule');
-  }
-  for (const r of v.accepted) {
-    if (
-      !object(r) ||
-      !['dataset', 'file', 'pointer', 'rationale'].every((k) => typeof r[k] === 'string') ||
-      !(r.rationale as string).trim() ||
-      (r.pointer !== '' && !(r.pointer as string).startsWith('/')) ||
-      !Object.hasOwn(r, 'expected') ||
-      !Object.hasOwn(r, 'actual') ||
-      !json(r.expected) ||
-      !json(r.actual)
-    )
-      throw new Error('Invalid accepted difference');
-  }
-  return v as unknown as Policy;
-}
 export function matches(pattern: string, pointer: string): boolean {
   const a = pattern.split('/'),
     b = pointer.split('/');

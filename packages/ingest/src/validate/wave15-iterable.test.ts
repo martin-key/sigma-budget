@@ -3,10 +3,9 @@ import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:f
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { isDeepStrictEqual } from 'node:util';
-import { afterAll, expect, it } from 'vitest';
+import { expect, it } from 'vitest';
 import { Context } from './context.js';
 import { wave15Groups, WAVE15_UNPORTED } from './wave15.js';
-import { writeValidationReport } from './report.js';
 const home = new URL('../../test/fixtures/validate15/', import.meta.url);
 const load = (f: string): any => JSON.parse(readFileSync(new URL('iterable/' + f, home), 'utf8'));
 const cases = load('cases.json'),
@@ -20,7 +19,7 @@ function wrap(name: string, value: any) {
     : value;
 }
 for (const test of cases)
-  it('matches iterable donor boundaries ' + test.name, () => {
+  it('matches iterable input boundaries ' + test.name, () => {
     const root = mkdtempSync(join(tmpdir(), 'sigma-iterable-')),
       item = { name: test.name, status: 'FAIL', full: test.full };
     try {
@@ -88,20 +87,3 @@ for (const test of cases)
       rmSync(root, { recursive: true, force: true });
     }
   });
-afterAll(() => {
-  if (process.env.WAVE15_ITERABLE_REPORT)
-    writeValidationReport(
-      repo,
-      process.env.WAVE15_ITERABLE_REPORT,
-      JSON.stringify(
-        {
-          scope: 'wave15-iterable',
-          completeValidation: false,
-          unported: WAVE15_UNPORTED,
-          scenarios: evidence,
-        },
-        null,
-        2,
-      ) + '\n',
-    );
-});

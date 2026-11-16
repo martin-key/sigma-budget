@@ -75,10 +75,10 @@ for (const test of cases)
     afterAll(() => {
       if (root) rmSync(root, { recursive: true, force: true });
     });
-    it('matches the numeric donor in process', () => {
+    it('matches the expected validation findings in process', () => {
       expect(budget2027(new Context(root))).toEqual(test.result);
     });
-    it('matches the numeric donor through the compiled CLI', () => {
+    it('matches the expected validation findings through the compiled CLI', () => {
       const run = spawnSync(process.execPath, [cli, '--root', root], {
         cwd: root,
         encoding: 'utf8',

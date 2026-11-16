@@ -329,48 +329,12 @@ export function alignGuideLinks(g: GuideDataset, routes: EditorialRoute[]): Guid
   return result;
 }
 
-const renamed: Record<number, [string, string | null, string | null]> = {
-  1: [
-    'Държавният бюджет на достъпен език',
-    'Виж колко приходи са събрани и колко средства са изразходвани до последния месечен отчет, и как това се сравнява със същия период на миналата година. Когато разходите надвишават приходите, разликата е дефицит.',
-    null,
-  ],
-  6: [
-    'Месечни отчети',
-    'Виж към коя дата са данните, колко приходи са събрани и колко средства са изразходвани. Сравни две години един до друг за един и същ период.',
-    'Следва: провери колко от годината е събрано и изразходвано.',
-  ],
-  8: ['Моите данъци', null, null],
-};
-const NOTE =
-  'Текстът на пътеводителя на работна група „Бюджет на светло“ е дословно от оригинала: въведение, осем стъпки и „Преди да използваш или споделиш число“. Препратките към екраните на сайта са добавени. В тази версия имената на екраните в стъпки 1, 6 и 8 следват преименуваните екрани („Държавният бюджет на достъпен език“, „Месечни отчети“, „Моите данъци“), а уводът на стъпки 1 и 6 е съобразен с тях. Пътеводителят вече не е отделен екран: бележките „На какво да внимаваш“ и петте проверки се показват в „Бюджетът за 5 минути“.';
 const sample = (pattern: string) =>
   '#/' +
   pattern
     .split('/')
     .filter((x) => x && !x.startsWith(':'))
     .join('/');
-export function applyGuide(g: GuideDataset): GuideDataset {
-  const result = structuredClone(g),
-    steps = new Map<number, GuideStep>(result.steps.map((s) => [s.n, s]));
-  for (const [key, [label, intro, prevNext]] of Object.entries(renamed)) {
-    const n = Number(key),
-      s = need(steps.get(n), `step ${n}`),
-      pos = s.title.indexOf('„');
-    if (pos < 0) throw new Error('Guide title missing quote');
-    s.title = s.title.slice(0, pos) + `„${label}“`;
-    s.screen.label = label;
-    if (intro) s.intro = intro;
-    if (n > 1) {
-      const previous = need(steps.get(n - 1), `step ${n - 1}`);
-      const next = need(previous.next, 'previous.next');
-      next.title = s.title;
-      if (prevNext) next.text = prevNext;
-    }
-  }
-  result.meta.sourceNote = NOTE;
-  return result;
-}
 export function checkGuide(g: GuideDataset, routes: EditorialRoute[]): string[] {
   const problems: string[] = [],
     steps = need(g.steps, 'guide.steps');

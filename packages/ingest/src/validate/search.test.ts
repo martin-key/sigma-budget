@@ -8,7 +8,7 @@ const fixture = fileURLToPath(new URL('../../test/fixtures/wave17c', import.meta
 const corpus = `${fixture}/corpus`;
 const cases = JSON.parse(readFileSync(`${fixture}/differential.json`, 'utf8')).cases;
 for (const test of cases) {
-  it(`SEARCH donor: ${test.name}`, () => {
+  it(`SEARCH validation findings: ${test.name}`, () => {
     const ctx = new Context(corpus);
     const original = ctx.text.bind(ctx);
     const docs: Record<string, any> = {};

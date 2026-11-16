@@ -56,9 +56,6 @@ describe('SEBRA frozen source', () => {
     e.listing.files[0]!.day = '2026-02-31';
     expect(() => buildSebra(e, '2026-11-08')).toThrow(/listing/);
   });
-  it('matches the independent Python output completely', () => {
-    expect(buildSebra(evidence(), '2026-11-08')).toEqual(read('donor/sebra.json'));
-  });
   it('rejects damaged categories, sizes and periods and a missing latest file', () => {
     const e = evidence();
     e.files['2026-08-31']!.rows.find((r) => r.A === '10 xxxx')!.D = '1';

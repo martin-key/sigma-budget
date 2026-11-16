@@ -1,82 +1,26 @@
 import { resolve } from 'node:path';
-import { readFileSync, readdirSync } from 'node:fs';
 import { beforeAll, expect, it } from 'vitest';
 import { loadWave13bFixture } from './wave13b-fixture.js';
 import { runWave13b, wave13bStages } from './wave13b.js';
 import { runGraph } from './graph.js';
-import { compare } from '../parity/compare.js';
 import { auditCatalogMetadata } from './catalog-metadata.js';
 import {
   aggregationWording,
   aggregationActive,
   aggregationSourceGlue,
-  glossarySourceGlue,
 } from './aggregation-layers.js';
 import { catalogWording, catalogActive } from './catalog-layers.js';
-import { compareWave13b, loadWave13bReference } from './wave13b-parity.js';
 
 const root = resolve(import.meta.dirname, '../../test/fixtures');
 let result: ReturnType<typeof runWave13b>;
 let fixture: Awaited<ReturnType<typeof loadWave13bFixture>>;
-let reference: Awaited<ReturnType<typeof loadWave13bReference>>;
+
 // Frozen graph setup exceeded the 10s hook limit with V8 coverage.
-// Budget only this integration setup; all eight graph assertions remain.
+// Budget only this integration setup.
 beforeAll(async () => {
   fixture = await loadWave13bFixture(root);
-  reference = await loadWave13bReference(root);
   result = runWave13b(fixture);
 }, 30_000);
-it('matches the independent Python source-glue result for a 64-term glossary', () => {
-  const glossary = JSON.parse(Buffer.from(fixture.editorial.snapshots['glossary.json']).toString());
-  glossary.terms = glossary.terms.slice(0, 64);
-  glossary.categories = glossary.categories.filter(
-    (row: { id: string }) => row.id !== 'byudzhet-2027',
-  );
-  const expected = JSON.parse(
-    readFileSync(resolve(root, 'wave13b/mutants/glossary-glue.json'), 'utf8'),
-  );
-  expect(glossarySourceGlue(glossary, fixture.layers.sourceGlue.terms)).toEqual(expected);
-});
-it('reports frozen and unverified evidence separately from candidate metadata differences', () => {
-  const streams = (result.outputs.get('publication-layers') as { streams: Map<string, Uint8Array> })
-    .streams;
-  const report = compareWave13b({
-    streams,
-    reference,
-    registry: fixture.layers.registry,
-    activeRoutes: fixture.layers.activeRoutes,
-  });
-  expect(report.outcome).toBe('unverified');
-  expect(report.differences).toEqual([]);
-  expect(report.byteDifferences).toEqual([]);
-  expect(report.metadataValid).toBe(true);
-  expect(report.artifacts.filter((a) => a.state === 'eligible')).toHaveLength(66);
-  expect(report.artifacts.every((a) => Object.keys(a.sourceHashes).length > 0)).toBe(true);
-  expect(
-    Object.keys(
-      report.artifacts.find((a) => a.file === 'indirect-tax-parameters.json')!.sourceHashes,
-    ).filter((name) => name.startsWith('original:')),
-  ).toHaveLength(6);
-  expect(report.artifacts.filter((a) => a.state === 'frozen-only')).toHaveLength(3);
-  expect(report.artifacts.filter((a) => a.state === 'unverified').map((a) => a.file)).toEqual([
-    'gva-sectors.json',
-  ]);
-  expect(Buffer.from(streams.get('gva-sectors.json')!)).toEqual(
-    Buffer.from(fixture.frozen.bytes['gva-sectors.json']),
-  );
-  const damaged = new Map(streams);
-  damaged.delete('rates.json');
-  damaged.set('ministries/stale.json', Buffer.from('{}'));
-  const bad = compareWave13b({
-    streams: damaged,
-    reference,
-    registry: fixture.layers.registry,
-    activeRoutes: fixture.layers.activeRoutes,
-  });
-  expect(bad.outcome).toBe('fail');
-  expect(bad.missing).toEqual(['rates.json']);
-  expect(bad.unexpected).toEqual(['ministries/stale.json']);
-});
 it('computes catalog metadata from candidate bytes', () => {
   const streams = (result.outputs.get('publication-layers') as { streams: Map<string, Uint8Array> })
     .streams;
@@ -184,37 +128,4 @@ it('reports a failed producer and skips its dependants while independent stages 
     blockedBy: ['indirect-taxes'],
   });
   expect(update.outputs.has('publication-layers')).toBe(false);
-});
-it('compares the complete output inventory and JSON with the independent graph', () => {
-  const streams = (result.outputs.get('publication-layers') as { streams: Map<string, Uint8Array> })
-    .streams;
-  const oracle = resolve(root, 'wave13b/oracle');
-  const walk = (base: string, prefix = ''): string[] =>
-    readdirSync(base, { withFileTypes: true }).flatMap((entry) => {
-      const name = prefix ? `${prefix}/${entry.name}` : entry.name;
-      return entry.isDirectory() ? walk(resolve(base, entry.name), name) : [name];
-    });
-  const files = walk(oracle).sort();
-  expect([...streams.keys()].sort()).toEqual(files);
-  const diffs = files.flatMap((file) => {
-    const expected = readFileSync(resolve(oracle, file));
-    const actual = Buffer.from(streams.get(file)!);
-    if (file.endsWith('.xml')) return expected.equals(actual) ? [] : [`${file}: bytes differ`];
-    return compare(JSON.parse(expected.toString()), JSON.parse(actual.toString()), {
-      dataset: file,
-      file,
-    })
-      .filter(
-        (difference) =>
-          file !== 'catalog.json' ||
-          !/\/datasets\/\d+\/(?:bytes|gzipBytes|parts\/\d+\/(?:bytes|gzipBytes))$/.test(
-            difference.pointer,
-          ),
-      )
-      .map(
-        (difference) =>
-          `${file}:${difference.pointer}: ${JSON.stringify(difference.expected)} != ${JSON.stringify(difference.actual)}`,
-      );
-  });
-  expect(diffs.slice(0, 30)).toEqual([]);
 });

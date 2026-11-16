@@ -1127,13 +1127,7 @@ node scripts/restore-programme-test-inputs.mjs tmp/ci-inputs/registered-node-inp
 
 Диференциалните Vitest тестове сравняват със замразени резултати в `packages/ingest/test/expected/`.
 
-Записаното издание се проверява с `./budget check-site --inputs /path/to/registered-node-inputs` (manifest, файлове и пълни текущи TypeScript правила). `validate --site` е отделна проверка чрез възпроизвеждане със записаните зависимости. След сглобяване на пакетите JSON наборите се сравняват по избран обхват:
-
-```sh
-pnpm exec budget-ts parity --oracle data/release --candidate tmp/candidate --scope outlook,revenue --policy tmp/policy.json --report tmp/parity.json
-```
-
-Началната политика за точно сравнение е `{"precision":[],"accepted":[]}`. Примерно правило за точност е `{"dataset":"outlook","pointer":"/gdp/*","decimals":1,"unit":"million EUR"}`; `*` съвпада с един сегмент от JSON Pointer. Правилата следват публикуваната точност. Бройките, идентификаторите, годините и целочислените парични единици остават точни. Прието различие задава `dataset`, `file`, `pointer`, `expected`, `actual` и непразно основание `rationale`; структурни разлики и невалидни числа не могат да се приемат. Изходните кодове са 0 (успех), 1 (неприето различие или невалидно извикване) и 2 (липсващи доказателства). Адаптерите за останалите формати предстоят; техните обхвати връщат `unverified`.
+Записаното издание се проверява с `./budget check-site --inputs /path/to/registered-node-inputs` (manifest, файлове и пълни текущи TypeScript правила). `validate --site` е отделна проверка чрез възпроизвеждане със записаните зависимости.
 
 `FixtureManifest` в `packages/test-support` съдържа `schema: 1`, пълна ревизия `baselineRevision`, дата `buildDate`, `inputs: [{path, sha256}]` и `datasets: [{id, eligibility, rationale}]`. Допустимите стойности за `eligibility` са `reproducible`, `frozen-only` и `unverified`. Resolver-ът проверява инвентара, ограничението на пътищата и контролните суми. Очакванията не се генерират от кандидата.
 

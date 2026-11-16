@@ -9,13 +9,11 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
-import { afterAll, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { Context } from './context.js';
 import { annex3, expenditure, measures, revenue } from './fiscal.js';
 import { law } from './law.js';
 import { budgets, programs } from './budgets.js';
-import { writeValidationReport } from './report.js';
-import { WAVE15_UNPORTED } from './wave15.js';
 const home = new URL('../../test/fixtures/validate15/', import.meta.url),
   cases = JSON.parse(readFileSync(new URL('cases.json', home), 'utf8')),
   oracle = JSON.parse(readFileSync(new URL('oracle.json', home), 'utf8'));
@@ -29,24 +27,7 @@ const groups: Record<string, (ctx: Context) => any> = {
   PROGRAMS: programs,
 };
 const evidence: any[] = [];
-afterAll(() => {
-  if (process.env.WAVE15_PARITY_REPORT)
-    writeValidationReport(
-      new URL('../../../../', import.meta.url).pathname,
-      process.env.WAVE15_PARITY_REPORT,
-      JSON.stringify(
-        {
-          scope: 'wave15',
-          completeValidation: false,
-          unported: WAVE15_UNPORTED,
-          scenarios: evidence,
-        },
-        null,
-        2,
-      ) + '\n',
-    );
-});
-describe('Wave15 frozen donor comparisons', () => {
+describe('fiscal and budget validator findings for defective corpus', () => {
   for (const test of cases)
     for (const group of test.groups)
       it(`${test.name} ${group}`, () => {

@@ -13,7 +13,7 @@ apps/web/app/routes/__fixtures__/**
 data/**
 tmp/**
 packages/ingest/src/production/historical/**
-# Frozen donors, oracles and byte-comparison fixtures (never reformat).
+# Frozen test inputs (never reformat).
 **/fixtures/**
 **/__fixtures__/**
 # The release operator reads the frozen environments byte for byte.

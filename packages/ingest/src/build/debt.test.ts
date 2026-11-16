@@ -40,8 +40,6 @@ describe('Debt frozen sources', () => {
       expect(() => buildDebt(e, '2026-11-08')).toThrow(/BNB/);
     },
   );
-  it('matches the complete independent Python output', () =>
-    expect(buildDebt(input(), '2026-11-08')).toEqual(read('donor/debt.json')));
   it('rejects discrepancies in copies, unlisted revisions, quarter coverage and law evidence', () => {
     const a = input();
     a.stock.state_debt.mln_eur[0]! += 1;

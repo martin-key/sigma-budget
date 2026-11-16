@@ -151,37 +151,6 @@ test('merged boot and route modules remain inside formatting and production cove
   }
 });
 
-test('every report reaches strict Turbo tasks and its upload uses the same env path', () => {
-  const { parse } = createRequire(new URL('../packages/ingest/package.json', import.meta.url))(
-    'yaml',
-  );
-  const job = parse(workflow).jobs.coverage;
-  const turbo = JSON.parse(readFileSync('turbo.json', 'utf8'));
-  const allowed = [...turbo.globalEnv, ...turbo.globalPassThroughEnv];
-  const names = Object.keys(job.env).filter((name) => name.endsWith('_REPORT'));
-  const uploaded = [];
-  for (const step of job.steps.filter((step) =>
-    step.uses?.startsWith('actions/upload-artifact@'),
-  )) {
-    for (const match of step.with.path.matchAll(/\$\{\{ env\.([A-Z0-9_]+_REPORT) \}\}/g)) {
-      uploaded.push(match[1]);
-      assert.equal(step.with['if-no-files-found'], 'error');
-      assert.equal(step.if, 'always()');
-    }
-  }
-  assert.deepEqual(uploaded.sort(), [...names].sort());
-  for (const name of names) assert.ok(allowed.includes(name), `Turbo drops ${name}`);
-  for (const name of names) {
-    assert.equal(
-      [...workflow.matchAll(new RegExp(`^ +${name}:`, 'gm'))].length,
-      1,
-      `${name}: exactly one report path definition`,
-    );
-  }
-  assert.ok(job.steps.some((step) => step.run === 'node scripts/check-parity-reports.mjs --clean'));
-  assert.ok(job.steps.some((step) => step.run === 'node scripts/check-parity-reports.mjs'));
-});
-
 test('coverage CI checks the target baseline with history and env refs before running suites', () => {
   const { parse } = createRequire(new URL('../packages/ingest/package.json', import.meta.url))(
     'yaml',

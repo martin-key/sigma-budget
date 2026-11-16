@@ -16,7 +16,7 @@ const oracle = {
   ...JSON.parse(readFileSync(fixture + 'extra-oracle.json', 'utf8')),
 };
 for (const scenario of cases)
-  it(`donor FEED ${scenario.name}`, () => {
+  it(`FEED validation findings ${scenario.name}`, () => {
     const root = mkdtempSync(join(tmpdir(), 'feed-parity-'));
     try {
       cpSync(fixture + 'corpus', root, { recursive: true });

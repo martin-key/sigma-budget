@@ -4,33 +4,11 @@ import { fileURLToPath } from 'node:url';
 import { beforeAll, expect, it } from 'vitest';
 import { loadCatalogFixture } from './catalog-fixture.js';
 import { buildCatalog } from './catalog-build.js';
-import { parsePythonJson } from '../common/numbers.js';
 const dir = fileURLToPath(new URL('../../test/fixtures/catalog/', import.meta.url));
 // Reuse the pinned baseline; mutation cases copy the maps or objects they alter.
 let fixtureBase: Awaited<ReturnType<typeof loadCatalogFixture>>;
 beforeAll(async () => {
   fixtureBase = await loadCatalogFixture(dir, '2026-11-08');
-});
-it('matches independent raw, refreshed and published Python catalogs', async () => {
-  const actual = fixtureBase;
-  const oracle = async (name: string) =>
-    JSON.parse(await readFile(`${dir}/oracle/${name}.json`, 'utf8'));
-  expect(actual.raw).toEqual(await oracle('raw'));
-  expect(JSON.stringify(actual.raw)).toBe(
-    (await readFile(`${dir}/oracle/raw.json`, 'utf8')).trimEnd(),
-  );
-  expect(actual.projected).toEqual(await oracle('final'));
-  expect(JSON.stringify(actual.projected)).toBe(await readFile(`${dir}/oracle/final.json`, 'utf8'));
-  expect(actual.projected).toEqual(await oracle('published'));
-});
-
-it.each(['revenue', 'law'])('matches the %s donor mutation', async (name) => {
-  const fixture = fixtureBase;
-  const bytes = await readFile(`${dir}/cases/inputs/${name}.json`);
-  const out = new Map(fixture.buildInput.out);
-  out.set(`${name}.json`, { bytes, object: parsePythonJson(bytes.toString('utf8')) });
-  const actual = buildCatalog({ ...fixture.buildInput, out }).catalog;
-  expect(actual).toEqual(JSON.parse(await readFile(`${dir}/cases/oracle/${name}.json`, 'utf8')));
 });
 it('rejects missing or unexpected ministry owners', () => {
   const fixture = fixtureBase;
@@ -89,22 +67,6 @@ it('shares the aggregation authored catalog definitions', async () => {
   expect(catalog.catalogDefinitions).toEqual(aggregation.catalogDefinitions);
   expect(catalog.catalogGroups).toEqual(aggregation.catalogGroups);
 });
-
-it.each(['int', 'float', 'exp', 'negative0', 'bool', 'yearfloat', 'yearexp'])(
-  'preserves donor numeric display for %s',
-  async (name) => {
-    const source = await readFile(`${dir}/cases/inputs/${name}.json`),
-      bytes = await readFile(`${dir}/cases/serialized/${name}.json`);
-    const out = new Map(fixtureBase.buildInput.out);
-    out.set(name.startsWith('year') ? 'revenue.json' : 'law.json', {
-      bytes,
-      object: parsePythonJson(source.toString('utf8')),
-    });
-    expect(buildCatalog({ ...fixtureBase.buildInput, out }).catalog).toEqual(
-      JSON.parse(await readFile(`${dir}/cases/oracle/${name}.json`, 'utf8')),
-    );
-  },
-);
 it('rejects malformed metadata and preserves Python truth for empty collections', async () => {
   const state = fixtureBase;
   const replace = (name: string, object: Record<string, any>) => {

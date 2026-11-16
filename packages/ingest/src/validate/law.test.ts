@@ -7,7 +7,7 @@ import { law } from './law.js';
 const base = new URL('../../test/fixtures/validate15/', import.meta.url);
 const cases = JSON.parse(readFileSync(new URL('cases.json', base), 'utf8'));
 const oracle = JSON.parse(readFileSync(new URL('oracle.json', base), 'utf8'));
-describe('LAW frozen Python donor', () => {
+describe('law validator findings for defective inputs', () => {
   for (const name of [
     'baseline-missing-original',
     'law-article',

@@ -1,9 +1,0 @@
-{
-  "baseline": "05d6f6eeca9991468f3c94c3c9c26e87d5b0fae0",
-  "files": {
-    "execution.json": "e9c75d84bb575c3a0287c0a7a56828b473bd53498336ce6d45cfbc6333533200",
-    "contract.json": "bc0105b7b1dfc195ba9a25a2c711fd703a200078864ce9ac9dbc20e3c9d4590b",
-    "oracle.json": "dec45f9c59bfd6b720fef7f70e1a1c333eba0cc19495a83aec34a4f25385d986",
-    "synthetic-execution.json": "982e6d965cc4a54ac0151c4efe09567bccd246beeedfc80b10765281886c545d"
-  }
-}

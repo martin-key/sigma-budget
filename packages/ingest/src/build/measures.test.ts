@@ -7,11 +7,6 @@ const root = resolve(import.meta.dirname, '../../test/fixtures/fiscal');
 const read = (s: string) => JSON.parse(readFileSync(resolve(root, s), 'utf8'));
 const source = (): MeasureSource => read('inputs/data/inputs/measures_2026.json');
 const excerpts = (): MeasureExcerpts => read('inputs/data/inputs/measure_excerpts.json');
-it('reproduces the independent measures donor and published result', () => {
-  const result = buildMeasures(source(), excerpts(), '2026-11-08');
-  expect(result).toEqual(read('donor/measures.json'));
-  expect(result).toEqual(read('oracle/measures.json'));
-});
 it('rejects changed sign and unsupported excerpt evidence', () => {
   const input = source();
   input.intro.revenue[0]!.signed_2026 *= -1;

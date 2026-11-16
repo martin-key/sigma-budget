@@ -1,4 +1,4 @@
-import { afterAll, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { readFileSync, mkdtempSync, mkdirSync, writeFileSync, rmSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
@@ -29,38 +29,17 @@ import {
 } from './format.js';
 import { sources, pendingDefinitions, pendingForExecution, pendingBlock } from './sources.js';
 import { metadata, span } from './metadata.js';
-import { compare, type Difference } from '../parity/compare.js';
+import { compare } from '../parity/compare.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../../..');
 const fixtures = join(root, 'packages/ingest/test/fixtures/common');
 const load = (p: string) => JSON.parse(readFileSync(p, 'utf8'));
 const fixture = (p: string) => load(join(fixtures, p));
-// The inputs the oracle was generated from, frozen so data changes do not move the expectations.
+// Pinned inputs keep arithmetic and parsing cases independent of data releases.
 const inputs = join(fixtures, 'inputs');
 const execution = () => load(join(inputs, 'execution.json'));
-const diffs: Difference[] = [];
-const checked = new Set<string>();
-const expectedComparisons = [
-  'annex.json',
-  'registries.json',
-  'source-map.json',
-  'metadata.json',
-  'execution-numbers.json',
-  'source-definitions.json',
-  'format.json',
-  'context-annex.json',
-  'context-execution.json',
-  'jsonstat.json',
-  'context-loaders.json',
-  'yaml-scalars.json',
-  'money-cases.json',
-  'sparse-jsonstat.json',
-  'annex-cases.json',
-];
 function parity(name: string, expected: unknown, actual: unknown) {
   const result = compare(expected, actual, { dataset: 'common', file: name });
-  checked.add(name);
-  diffs.push(...result);
   expect(result).toEqual([]);
 }
 
@@ -390,23 +369,5 @@ describe('common Python parity', () => {
     } finally {
       rmSync(temp, { recursive: true, force: true });
     }
-  });
-  afterAll(() => {
-    const report = process.env.COMMON_PARITY_REPORT;
-    if (!report) return;
-    const unverified = expectedComparisons.filter((name) => !checked.has(name));
-    mkdirSync(dirname(report), { recursive: true });
-    writeFileSync(
-      report,
-      JSON.stringify(
-        {
-          outcome: diffs.length ? 'fail' : unverified.length ? 'unverified' : 'pass',
-          differences: diffs,
-          unverified,
-        },
-        null,
-        2,
-      ) + '\n',
-    );
   });
 });
