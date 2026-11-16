@@ -22,7 +22,7 @@ const usage = `Usage: release-build-operator <build|validate|reproduce>
   validate: --release CANDIDATE --inputs CANONICAL_SOURCE_ROOT
   build/reproduce: --entry COMMITTED_NODE_ENTRY --executor-id ID (unless injected by parent)
   [--max-object-bytes INTEGER]
-Offline only. Historical Python releases use budget reproduce. No default source/executor/fixture.`;
+Offline only. For historical releases, check out the commit in processing.code.commit to replay them. No default source/executor/fixture.`;
 export async function releaseBuildOperatorCli(
   args: string[],
   dependencies: ReleaseBuildOperatorDependencies = {},

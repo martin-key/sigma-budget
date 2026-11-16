@@ -10,7 +10,7 @@ describe('isolated offline release build operator', () => {
     expect(await releaseBuildOperatorCli(['--help'], { stdout: (text) => output.push(text) })).toBe(
       0,
     );
-    expect(output.join('\n')).toContain('Historical Python releases use budget reproduce');
+    expect(output.join('\n')).toContain('check out the commit in processing.code.commit');
   });
   it.each([
     ['build'],

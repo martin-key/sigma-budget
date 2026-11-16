@@ -23,7 +23,7 @@ const OK_NAME = /^[A-Za-z0-9_-]+(\/[A-Za-z0-9_-]+)*$/;
 const cache = new Map(); // name -> Promise<json>
 const done = new Map(); // name -> json (sync access after resolve)
 
-// execution.json, contract v2 (pipeline/budget_pipeline/validate/execution_contract.py): money as decimal strings ("33898.456"), percentages as numbers. The pages
+// execution.json, contract v2 (packages/ingest/src/validate/execution-contract.ts): money as decimal strings ("33898.456"), percentages as numbers. The pages
 // compute with numbers, so the loader turns the money into numbers once; the file as published stays on `canonical` (not enumerable),
 // for the exports, which must carry the published decimals (docs/approach-specification.md, section 6.1). Version 1 passes unchanged.
 const COLS = ['kfp', 'nat', 'eu'];

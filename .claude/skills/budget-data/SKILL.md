@@ -5,181 +5,74 @@ description: Обновява данните на сайта от публичн
 
 # Обновяване на данните
 
-Skill-ът води администратора през месечния цикъл от `docs/data-acquisition.md` (раздели 6 и 7). Пуска скриптовете на хранилището и обяснява на прост език какво са направили. Резултатът е клон и PR към github.com/midt-bg/sigma-budget с `data/release/*.json`, сглобени от скриптовете.
+Води администратора от публичните източници до клон и PR към `main` на midt-bg/sigma-budget с издание на СИГМА Бюджет, сглобено чрез `./budget` (Node 24 и pnpm 10.33.0).
 
-## Правила, които важат винаги
+## Правила
 
-- **Числата ги вадят само скриптовете.** Не пиши и не поправяй число на ръка в `data/release/`, `data/inputs/` или в кода. Единственото изключение са заглавните числа за независимата проверка (стъпка 5), които казва човекът.
-- **Начинът на сваляне е свободен.** Днес файловете от minfin.bg ги сваля човекът в своя браузър, защото скрипт не минава проверката на Cloudflare. Ако има работещ автоматичен начин, източникът минава от `import` на `fetch` в `data/sources.yaml`. Задължителни са оригиналните байтове, sha256, адресът и датата. Бисквитки и токени не влизат в хранилището.
-- **Не опреснявай живите източници без нужда.** Такива са API на Народното събрание, страницата на МИДТ, Eurostat, БНБ и Държавен вестник. Когато се променят, проверките в строителите спират сглобяването. Сваляй само липсващото, освен ако човекът изрично иска нова версия.
-- **Работи само в отделен клон.** Отделяй го от `main` на midt-bg/sigma-budget. PR-ът е към `main`. Не push-вай в основния клон, не сливай и не публикувай: решават CI и човек.
-- **Не разхлабвай проверка, която спира.** Покажи какво се е променило в източника и предложи поправка в кода с тест, като отделна промяна.
+- Числата се извличат и сглобяват само от скриптовете. Не поправяй ръчно `data/release/` или извлечени стойности. Независимите заглавни числа по-долу се преписват от провереното съобщение на МФ, а не от парсера.
+- Администраторът сваля файловете от minfin.bg в своя браузър. Skill-ът не заобикаля проверката на Cloudflare. При CAPTCHA от друг източник също поискай ръчно сваляне; не променяй заглавки или адреси за заобикаляне. Бисквитки и токени не влизат в хранилището.
+- Не опреснявай живите източници без изрично искане. Променен отговор изисква преглед на pin-а; не отслабвай проверка, която спира сглобяването.
+- Работи в отделен клон от актуалния `main`. Отвори PR към `main`; не сливай и не публикувай. Следвай `AGENTS.md` за комити, поверителност и издания.
 
-## 0. Подготовка (веднъж на машина)
-
-Средата за обработката е отделна от `tmp/venv`: тя държи PyMuPDF 1.26.5, а 2.0 не чете програмните бюджети. Инсталира се от lockfile-а с хешовете:
+## Подготовка и състояние
 
 ```bash
-uv venv tmp/venv-data --python 3.12
-uv pip install --python tmp/venv-data/bin/python --require-hashes -r pipeline/requirements.lock
-uv pip install --python tmp/venv-data/bin/python --no-deps -e pipeline
+pnpm install --frozen-lockfile
+./budget --help
+./budget source-status
+./budget freshness
 ```
 
-Без uv: `python3.12 -m venv tmp/venv-data && tmp/venv-data/bin/pip install --require-hashes -r pipeline/requirements.lock`.
+`source-status` описва наличните, липсващите и променените входове; не валидира числата. Обясни липсите и следващия отчет по КФП. За работа с архив използвай вече възстановено и удостоверено дърво с входове според `docs/dev-guide.md`, раздел „Входове за pnpm test“.
 
-Същата среда има и като образ, по digest: `docker build -t sigma-budget-data pipeline`. Тогава всяка команда `tmp/venv-data/bin/python …` по-долу става `docker run --rm -v "$PWD":/repo sigma-budget-data python …`. Образът е референтната среда: в него `rebuild.py` дава `data/release` байт по байт.
-
-Клон за промяната, кръстен по периода. Командите приемат, че midt-bg/sigma-budget е remote `upstream`, а твоят fork е `origin`. Ако имаш права за запис в midt-bg и работиш направо в него, пиши `origin` вместо `upstream`.
+По-долу `INPUTS` е абсолютният път до това дърво, `NEXT_INPUTS` е нова директория извън хранилището, `FILE` е сваленият файл, а `CANDIDATE` е друга нова външна директория. Не поставяй изходите вътре във входовете.
 
 ```bash
-git fetch upstream
-git switch -c data/kfp-2026-10 upstream/main
+./budget source-status --source-root "$INPUTS"
 ```
 
-## 1. Какво има и какво липсва
+## Ръчен отчет по КФП
+
+Посочи на администратора страницата https://www.minfin.bg/bg/statistics/5, точния период и файла, който да свали в Downloads или `tmp/sources/inbox/`. За мотивите и АСБП страницата е https://www.minfin.bg/bg/legislation1/609. Изчакай свалянето.
+
+Първо провери импорта без запис, после създай snapshot:
 
 ```bash
-python -m budget_pipeline.sources.originals status
+./budget import-source --source-root "$INPUTS" --source kfp --file "$FILE" --out "$NEXT_INPUTS" --dry-run
+./budget import-source --source-root "$INPUTS" --source kfp --file "$FILE" --out "$NEXT_INPUTS"
+./budget source-status --source-root "$NEXT_INPUTS"
 ```
 
-Обясни на човека кое липсва, кое е различно и кой е следващият отчет по КФП.
+Импортът разпознава познат файл по SHA-256, а нов месечен XLS по листа, периода и единицата. Създава отделно дърво с входове, `snapshot.json` и receipts; не променя регистрите или `data/originals.sha256`. Прегледай `proposedPins`, адреса, периода и оригиналните байтове. За коригирана версия на вече наличен месец използвай `--replace` само след потвърждение, че ревизията трябва да влезе; старите pin-ове се запазват като история.
 
-Ако липсва целият архив, например на нова машина, поискай архива на суровите файлове от работната група и го внеси. Файловете се разпознават по sha256:
+Поискай от администратора приходите, разходите с вноската в бюджета на ЕС и салдото от съобщението на МФ, в млн. € с един десетичен знак. Добави проверения месец в `EXECUTION_HEADLINES` в `packages/ingest/src/readers/execution/producer.ts`. Физическата структура на отчета е в `readers/execution/report.ts` и `layout.ts`; не променяй reader-а само за да приеме различни числа.
+
+След преглед добави новия pin в `data/originals.sha256`, запази точните байтове на отчета на регистрирания път в `data/originals/kfp_2026/` и опиши източника в `docs/data-sources.md`. Комитни кода, пиновете и оригинала преди сглобяване: build чете записания commit, а не незаписаните промени.
+
+Reader-ите за законите, мотивите и програмните архиви са закрепени към документите за 2026/2027 г.; за нов закон, нова прогноза или нов архив няма общ операторски път и е необходима отделна промяна на TypeScript reader-ите и регистрацията.
+
+## Сглобяване и проверка
+
+Датата е изричен параметър, например `BUILD_DATE=2026-11-16`; избери действителната дата на сглобяването.
 
 ```bash
-python -m budget_pipeline.sources.originals import /път/до/архива/
+./budget build --commit HEAD --inputs "$NEXT_INPUTS" --out "$CANDIDATE" --build-date "$BUILD_DATE"
+./budget validate --release "$CANDIDATE" --inputs "$NEXT_INPUTS"
 ```
 
-## 2. Откъде може да се тегли от тази мрежа
+Build изпълнява offline TypeScript обработката от записания commit с проверени входове. Прегледай candidate-а преди запис в публикуваната директория. За release PR повтори build с нова външна директория за `--out` и `--site`; това инсталира изданието и манифеста в `data/release/`. После:
 
 ```bash
-python -m budget_pipeline.sources.access_probe
+./budget check-site --inputs "$NEXT_INPUTS"
 ```
 
-Днес minfin.bg дава `challenge`, затова файловете от него се свалят ръчно. nra.bg и data.egov.bg минават само от България.
+Обясни новия месец, ревизиите за минали периоди, необичайните промени и засегнатите файлове. Не поправяй генерираните данни на ръка. При грешка покажи причината и необходимата следваща промяна.
 
-## 3. Отворените източници: само липсващото
-
-`status` отпечатва точната команда за липсващите автоматични файлове. Пусни нея и после отново `status`: всеки файл трябва да е „наличен“.
-
-Ако за `nap/` дойде страница вместо PDF (CAPTCHA), не опитвай с други заглавки или адреси. Помоли човека да го свали в браузъра от nra.bg и го внеси със `import`; файлът се разпознава по sha256.
-
-## 4. Ръчните файлове от minfin.bg
-
-За всеки липсващ ръчен файл и за новия месец по КФП кажи на администратора точно:
-
-- **страницата:** https://www.minfin.bg/bg/statistics/5 за КФП или https://www.minfin.bg/bg/legislation1/609 за мотивите и АСБП;
-- **кой файл:** например отчетът „към 30.09.2026“, днес `2026-EU funds_0926_BG_WEB.xls`;
-- **къде да го сложи:** в `tmp/sources/inbox/` или да го остави в Downloads.
-
-Изчакай човека. После:
-
-```bash
-python -m budget_pipeline.sources.originals import ~/Downloads/2026-EU\ funds_0926_BG_WEB.xls
-```
-
-Без аргумент `import` чете `tmp/sources/inbox/`. Скриптът проверява листа, периода от клетка A3 и единицата. Записва файла под името, което очакват скриптовете, добавя реда му в `data/originals.sha256` и пише запис за придобиване в `tmp/sources/ACQUISITIONS.jsonl`. Ако за месеца вече има файл, а новият е коригирана версия (`_1`, `_2`), пусни с `--replace`: старата версия отива в `tmp/sources/replaced/`.
-
-## 5. Независимата проверка на заглавните числа (при нов месец по КФП)
-
-Помоли човека да прочете три числа от съобщението на МФ за изпълнението на КФП към края на месеца. Ако съобщението още го няма, може да ги прочете от файла, отворен в Excel. Числата са в млн. €, с един знак след десетичната запетая:
-
-- приходите;
-- разходите заедно с вноската в бюджета на ЕС;
-- бюджетното салдо.
-
-Впиши ги точно както ги каже човекът, като нов ред за месеца:
-
-- в `REFERENCE` в `pipeline/budget_pipeline/extract/kfp_full.py`;
-- в `HEADLINES` в `pipeline/budget_pipeline/validate/execution_reports.py`.
-
-Не ги взимай от изхода на парсера: смисълът им е да проверят парсера.
-
-## 6. Извличане: само когато суровите входове са нови
-
-Пусни с `tmp/venv-data/bin/python` само екстракторите, чийто вход е нов или чийто изход `status` отчита като липсващ:
-
-| Екстрактор                                            | Кога                                                                                                 |
-| ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `pipeline/budget_pipeline/extract/dv_laws.py`         | нов закон или изменение в Държавен вестник                                                           |
-| `pipeline/budget_pipeline/extract/program_budgets.py` | нов архив към законопроекта                                                                          |
-| `pipeline/budget_pipeline/extract/asbp_tables.py`     | нов PDF с мотивите и АСБП                                                                            |
-| `pipeline/budget_pipeline/extract/asbp_pages.py`      | нов PDF с мотивите или липсва `data/cache/research/mf-umtbf-2026-2028/extracts/pdf_pages_clean.json` |
-| `pipeline/budget_pipeline/extract/bill.py`            | нов законопроект или нов закон                                                                       |
-
-Новият месец по КФП не иска нито един от тях.
-
-## 7. Сглобяване и проверка
-
-Изданието се сглобява от commit (`docs/release.md`). Затова първо запиши промените в кода и пиновете: заглавните числа от стъпка 5,
-датата на сглобяване по-долу, редът на новия отчет в `data/originals.sha256` (`import` го добави) и редът му в
-`docs/data-sources.md` (стъпка 9). Файловете от minfin.bg са в git (`data/originals/kfp_*/` и `asbp/`), затова новият отчет влиза в същия commit. Останалите сурови файлове не са в git: сглобяването ги чете от локалното копие и сверява всеки с пина му от commit-а.
-
-```bash
-git add data/originals/kfp_2026/ pipeline/budget_pipeline/extract/kfp_full.py pipeline/budget_pipeline/validate/execution_reports.py pipeline/budget_pipeline/build/data_io.py pipeline/budget_pipeline/validate/checks.py pipeline/budget_pipeline/build/editorial.py pipeline/budget_pipeline/build/example_support.py \
-  data/originals.sha256 docs/data-sources.md
-git commit -m "data(kfp): pin the October 2026 report and its headline"
-./budget build --build-date ГГГГ-ММ-ДД --site
-./budget validate --site
-pnpm --filter @sigma-budget/ingest build
-node packages/ingest/dist/validate/cli.js --live --only REGISTRY
-```
-
-- `budget build` сглобява commit-а в образа на `pipeline/Dockerfile` (без docker: в `tmp/venv-data`). Той пуска `rebuild.py`: `kfp_full.py`, строителите и слоя v5/v6 (`wording.py`, `active_data.py`, `apply_sources.py`, `catalog_refresh.py`) в реда, който дава публикуваните файлове. С `--site` слага данните в `data/release`, а манифеста на изданието в `data/release/releases/`.
-- Отпечатва `release_id` и `missingInputs`. Кажи на човека кои входове липсват и кои набори засягат.
-- **Производствен вход.** Използвай `./budget build`, който изпълнява цялата последователност `python -m budget_pipeline.build.rebuild`. Историческият shell ред не е вход към текущото сглобяване.
-- **Датата на сглобяване** е денят на сглобяването и влиза във всеки файл. Сложи същата дата като стойност по подразбиране на `BUILD_DATE` в `pipeline/budget_pipeline/build/data_io.py`, `checks.py`, `editorial.py` и `example_support.py`. Иначе CI ще отхвърли новите дати.
-- `budget validate --site` е същата проверка като в CI: манифестът, SHA-256 на всеки файл и `datasets.py`. Трябва да завърши с код 0.
-- `registry.py check` сверява `data/sources.yaml` и `data/datasets.yaml` с хранилището, също като в CI. Новият месец по КФП не иска промяна в регистрите: шаблонът `kfp_2026/*.xls` го покрива. Нов вид източник или нов файл в `data/release` иска запис там.
-
-Ако нещо спре, прочети грешката, обясни я и спри (виж правилата).
-
-Групата INPUTS сравнява суровите файлове с `data/originals.sha256`. Ако в стъпка 3 е свалено нещо, `MANIFEST.json` и опреснените живи източници ще се различават. Това е очаквано: обясни го на човека. Не обновявай редовете им в `originals.sha256`, освен ако новата версия наистина влиза в сглобяването.
-
-## 8. Преглед на промените
-
-```bash
-git status --short
-git diff --stat
-```
-
-Обясни на прост език, без политически оценки:
-
-- **новият месец:** заглавните числа спрямо предишния месец и спрямо плана (`data/release/execution.json`, блок `latest`);
-- **ревизиите:** стойности за минали месеци, които са се променили в `execution.json`. Изброй ги, защото МФ понякога коригира стари отчети;
-- **необичайните промени:** месечна промяна на ред, много по-голяма от обичайната за него;
-- **засегнатите файлове на сайта.**
-
-## 9. Документация
-
-- В `docs/data-sources.md`, раздел 4.1, добави реда, който `import` отпечата, в таблицата на годината. Обнови и броя отчети в заглавието на таблицата.
-- `data/originals.sha256` вече е обновен от `import`.
-
-## 10. PR
-
-```bash
-git add data/release
-git commit -m "data(kfp): add the October 2026 report"
-```
-
-Кодът и пиновете вече са в commit-а от стъпка 7; манифестът на изданието казва неговия хеш. Затова направи стъпка 9 преди 7. После:
-
-```bash
-git push -u origin HEAD
-gh pr create --repo midt-bg/sigma-budget --base main --head "$(gh api user -q .login):$(git branch --show-current)"
-```
-
-Клонът отива във fork-а (`origin`), а PR-ът е към `main` на midt-bg.
-
-В описанието на PR напиши:
-
-- кои файлове са влезли: име, sha256, режим (`auto`, `auto-bg` или `import`) и откъде;
-- `release_id` и кои проверки са минали;
-- какво се променя на сайта;
-- какво остава.
+В PR посочи файловете, адресите, SHA-256, `release_id`, резултатите от проверките и оставащите липси. Release PR се слива с merge commit съгласно `AGENTS.md`.
 
 ## Справка
 
-- `docs/data-acquisition.md`: защо процесът е такъв, трите режима на придобиване и планът.
-- `docs/data-sources.md`: всички източници с адрес, размер и sha256.
-- `docs/data-spec.md`: формата на `data/release/*.json`.
+- `docs/data-acquisition.md`: придобиване и snapshots.
+- `docs/import-local.md`: offline импорт и candidate сайт.
+- `docs/data-sources.md`: източници и контролни суми.
+- `docs/data-spec.md`: формат на публикуваните набори.

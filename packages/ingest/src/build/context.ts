@@ -116,7 +116,7 @@ export class BuildContext {
       const p = join(this.paths.release, 'execution.json');
       if (!existsSync(p))
         throw new Error(
-          'data/release/execution.json is missing: run pipeline/budget_pipeline/extract/kfp_full.py first',
+          'data/release/execution.json is missing: prepare execution data with packages/ingest/src/readers/execution/producer.ts first',
         );
       return executionNumbers(read(p));
     });

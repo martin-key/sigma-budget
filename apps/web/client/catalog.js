@@ -1,5 +1,5 @@
 // Catalogue helpers shared by S24 „Откъде са данните?“ and S25 „Отворени данни и API“ (written by G5). Pure: no DOM, no render state; the only fetch is loadMeta, and it goes through data.load.
-// Input: data/catalog.json (DATA_SPEC §3.20, built by pipeline/budget_pipeline/build/catalog.py). Every optional field may be missing: a thinner or older catalogue
+// Input: data/catalog.json (DATA_SPEC §3.20, built by packages/ingest/src/build/catalog-build.ts). Every optional field may be missing: a thinner or older catalogue
 // still gives a usable model, and a malformed entry is dropped instead of breaking the page.
 //   model(cat, sources?)      -> M    the normalised catalogue, cached per catalogue object (and per `core.sources`, which feeds the search text):
 //                                      {meta, counts, sets, bySlug, groups, screens, sourceKeys, traps, methods, files, find(key), src(key)}

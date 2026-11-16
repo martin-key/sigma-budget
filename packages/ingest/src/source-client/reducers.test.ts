@@ -124,7 +124,7 @@ describe('raw GISCO and oblast reducer responsibilities', () => {
                 {
                   path: giscoPath,
                   url: LAU_BASE,
-                  via: 'python -m budget_pipeline.sources.boundaries',
+                  via: 'packages/ingest/src/source-client/reducers.ts',
                   sha256: sha256(oldGisco),
                 },
               ],
@@ -136,7 +136,7 @@ describe('raw GISCO and oblast reducer responsibilities', () => {
                 {
                   path: oblastPath,
                   url: OBLAST_BASE,
-                  via: 'python -m budget_pipeline.sources.boundaries',
+                  via: 'packages/ingest/src/source-client/reducers.ts',
                   sha256: sha256(oldOblast),
                 },
               ],

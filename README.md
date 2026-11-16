@@ -10,13 +10,12 @@ apps/etl/               Node CLI за обработка на данните
 packages/ingest/        придобиване, сглобяване и проверки на данни
 packages/dataset-schema/ схеми на наборите
 packages/test-support/  помощни средства за тестове
-pipeline/               историческа и референтна Python обработка
 data/                   входове и публикувано издание
 tests/                  браузърни и release проверки
 docs/                   спецификации и архитектурни решения
 ```
 
-Workspace-ът обхваща `apps/*` и `packages/*` и използва общия коренов `pnpm-lock.yaml`. `./budget` стартира Node CLI от `@sigma-budget/etl`, който използва `@sigma-budget/ingest`; `./budget-python` и `pipeline/` са за историческо възпроизвеждане и справки. Новият код е TypeScript. Насоките за маршрути и поддръжка на старите екрани са в [ръководството](docs/dev-guide.md), а общите правила за принос - в [AGENTS.md](AGENTS.md). [ADR 0003](docs/adr/0003-repository-layout.md) е историческо решение с отменени части.
+Workspace-ът обхваща `apps/*` и `packages/*` и използва общия коренов `pnpm-lock.yaml`. `./budget` стартира Node CLI от `@sigma-budget/etl`, който използва `@sigma-budget/ingest`. Новият код е TypeScript. Насоките за маршрути и поддръжка на старите екрани са в [ръководството](docs/dev-guide.md), а общите правила за принос - в [AGENTS.md](AGENTS.md). [ADR 0003](docs/adr/0003-repository-layout.md) е историческо решение с отменени части.
 
 ## Локално стартиране
 
@@ -35,14 +34,11 @@ node apps/web/scripts/serve.ts
 
 Сглобеният сайт е в `apps/web/build/`. Клиентът се публикува под `/js/`, а данните от `data/release/` под `/data/`; публичните адреси са запазени. SSR чете текущото издание от D1/R2; без регистър използва включеното в сглобяването издание.
 
-Нужни са Node 24 и pnpm 10.33.0. `pnpm test` пуска тестовете на TypeScript пакетите; програмните PDF-и, които тестовете изискват, се подготвят според раздел „Входове за `pnpm test`“ в [ръководството](docs/dev-guide.md). Сравнението `budget-ts parity` и фикстурите са описани в [ръководството за разработка](docs/dev-guide.md); `./budget` изпълнява пълния Node импорт. `./budget-python` е отделната команда за исторически Python издания и референтни проверки.
+Нужни са Node 24 и pnpm 10.33.0. `pnpm test` пуска тестовете на TypeScript пакетите; програмните PDF-и, които тестовете изискват, се подготвят според раздел „Входове за `pnpm test`“ в [ръководството](docs/dev-guide.md). Сравнението `budget-ts parity` и фикстурите са описани в [ръководството за разработка](docs/dev-guide.md); `./budget` изпълнява пълния Node импорт.
 
 ## Среда и проверки
 
 ```bash
-uv venv tmp/venv --python 3.12
-uv pip install --python tmp/venv/bin/python --require-hashes -r tests/requirements-dev.lock -r pipeline/requirements.lock
-uv pip install --python tmp/venv/bin/python --no-deps -e pipeline
 PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers pnpm exec playwright install chromium
 
 pnpm typecheck
@@ -52,9 +48,6 @@ node packages/ingest/dist/validate/cli.js --live --only REGISTRY
 # Възстановяването изисква нова директория извън хранилището и удостоверява архива и входовете.
 node scripts/restore-node-input-cache.mjs /path/to/registered-node-inputs.tar.gz /tmp/registered-node-inputs
 ./budget check-site --inputs /tmp/registered-node-inputs
-# Пълният Python regression suite още пази независимите PDFMiner проверки и действащо съдържание:
-node scripts/restore-programme-test-inputs.mjs /path/to/registered-node-inputs.tar.gz
-tmp/venv/bin/python -m unittest discover -s tests/pipeline -t .
 node tests/release/budget_provenance_check.mjs
 node tests/release/compat_check.mjs
 pnpm --filter @sigma-budget/web test # и списъците на заявките на екраните (app/lib/query-lists.test.ts)
@@ -85,7 +78,7 @@ node apps/web/scripts/serve.ts --port 8000
 
 ## Данни и издания
 
-`./budget` е входната команда за придобиване, сглобяване, проверка и възпроизвеждане на данните. Производствената среда е Node 24 с `pnpm-lock.yaml`. Python 3.12 и образът `docker build -t sigma-budget-data pipeline` остават за историческо възпроизвеждане и референтните тестове. Оригиналите са в `data/originals/`; файловете на МФ остават в git, останалите се придобиват според [източниците](docs/data-sources.md). Ръчно поддържаните и замразените входове са в `data/inputs/`, а междинните резултати в игнорирания `data/cache/`.
+`./budget` е входната команда за придобиване, сглобяване, проверка и възпроизвеждане на данните. Производствената среда е Node 24 с `pnpm-lock.yaml`. Историческо Python издание се възпроизвежда от commit-а в `processing.code.commit` на манифеста. Оригиналите са в `data/originals/`; файловете на МФ остават в git, останалите се придобиват според [източниците](docs/data-sources.md). Ръчно поддържаните и замразените входове са в `data/inputs/`, а междинните резултати в игнорирания `data/cache/`.
 
 `./budget build --inputs /път/до/входовете --out /външна/нова/директория --build-date ГГГГ-ММ-ДД --site` сглобява издание от commit и записва данните и манифеста в `data/release/`. `./budget reproduce` го възпроизвежда и сравнява байтовете. Слоят за терминология чете замразените замени от `data/inputs/wording.json`, без историческите тагове; редът на строителите е запазен. Подробности: [издания](docs/release.md), [придобиване](docs/data-acquisition.md), [операторско ръководство](docs/operator-guide.md).
 

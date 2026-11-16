@@ -1,4 +1,4 @@
-/** SEARCH validation only. Source: pipeline/budget_pipeline/validate/search_feed.py. */
+/** SEARCH validation only. */
 import { pythonNumberAt } from '../common/numbers.js';
 import { parseSearchJson } from './search-json.js';
 import { Check, fmt, isnum, pyRepr as baseRepr, pyTruth } from './checks.js';

@@ -37,8 +37,7 @@ const functions: Record<string, (ctx: Context) => any> = {
 function prepare(root: string, ops: any[]): string[] {
   cpSync(corpus, root, { recursive: true });
   for (const rel of tracked) {
-    if (!['pipeline/', 'apps/', 'tests/', '.github/', 'docs/'].some((p) => rel.startsWith(p)))
-      continue;
+    if (!['apps/', 'tests/', '.github/', 'docs/'].some((p) => rel.startsWith(p))) continue;
     const p = join(root, rel);
     if (!existsSync(p)) {
       mkdirSync(dirname(p), { recursive: true });
@@ -46,7 +45,11 @@ function prepare(root: string, ops: any[]): string[] {
     }
   }
   const added: string[] = [];
-  for (const op of ops) {
+  for (const original of ops) {
+    const op = {
+      ...original,
+      file: original.file.replace(/^pipeline\/fixture-path\.py$/, 'apps/etl/src/fixture-path.ts'),
+    };
     const p = safePath(root, op.file);
     mkdirSync(dirname(p), { recursive: true });
     if (op.op === 'set') {
@@ -85,7 +88,7 @@ function prepare(root: string, ops: any[]): string[] {
 }
 /** The frozen corpus predates TypeScript producers. Before REGISTRY runs, each retired `python -m`
  * producer, parser or layer is replaced by a stand-in TypeScript path that exists exactly when the
- * donor module existed. Each prototype `historical_producer` becomes a historical producer at the
+ * donor module was tracked in the frozen corpus. Each prototype `historical_producer` becomes a historical producer at the
  * corpus baseline commit. The oracle's messages get the same replacement, and every other registry
  * rule is still compared with the donor. */
 const BASELINE = '05d6f6eeca9991468f3c94c3c9c26e87d5b0fae0';
@@ -97,10 +100,9 @@ function modernize(root: string, trackedPaths: Set<string>): [string, string][] 
       const module = /^python -m (budget_pipeline(?:\.\w+)+)(?: .*)?$/.exec(command)?.[1];
       if (!module) return command;
       const donorPath = `pipeline/${module.replaceAll('.', '/')}.py`,
-        donor = join(root, donorPath),
         path = `packages/wave14/${module.replaceAll('.', '/')}.ts`;
       if (trackedPaths.has(donorPath)) trackedPaths.add(path);
-      if (existsSync(donor)) {
+      if (trackedPaths.has(donorPath)) {
         mkdirSync(dirname(join(root, path)), { recursive: true });
         writeFileSync(join(root, path), '');
       }
@@ -142,7 +144,7 @@ function modernExpectation(expected: any, renamed: [string, string][]): any {
   const text = (message: string) =>
     renamed.reduce(
       (m, [from, to]) => m.replaceAll(` ${from} does not exist`, ` ${to} does not exist`),
-      message,
+      message.replaceAll('pipeline/fixture-path.py', 'apps/etl/src/fixture-path.ts'),
     );
   return { ...expected, errors: expected.errors.map(text) };
 }

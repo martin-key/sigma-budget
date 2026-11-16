@@ -12,8 +12,6 @@ import {
 import { existsSync } from 'node:fs';
 import { resolve, join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
-import { execFile } from 'node:child_process';
-import { promisify } from 'node:util';
 import {
   buildRelease,
   reproduceRelease,
@@ -60,8 +58,7 @@ export const PRODUCTION_USAGE = `Usage: budget <command> [options] (alias: budge
   freshness (existing options)
   --root defaults to this checkout of the repository, whatever the current folder; --json emits machine-readable results.
   Release operator receipts go to <root>/work/ts-operator-receipts unless --receipts names another directory.
-New production builds are offline Node and require an explicit date. ./budget and budget-ts use this Node dispatcher; historical packages use ./budget-python.
-Historical manifests: budget-ts reproduce --manifest FILE --historical-python --env local|docker
+New production builds are offline Node and require an explicit date. ./budget and budget-ts use this Node dispatcher.
 No restore subcommand: use the existing documented restore procedure/protocol.`;
 export interface ProductionCliDependencies {
   root?: string;
@@ -75,7 +72,6 @@ const boolean = new Set([
   '--json',
   '--site',
   '--skip-published',
-  '--historical-python',
   '--resume',
   '--check-drift',
   '--replace',
@@ -344,8 +340,6 @@ export async function productionCli(
             '--inputs',
             '--out',
             '--skip-published',
-            '--historical-python',
-            '--env',
           ],
     );
     let release: string, location;
@@ -373,33 +367,10 @@ export async function productionCli(
     }
     const executorInfo = location.manifest.processing.executor as any;
     if (executorInfo?.runtime !== 'node-export/1') {
-      if (command !== 'reproduce' || !m.has('--historical-python'))
-        throw new ReleaseError(
-          2,
-          'Historical manifest: use ./budget-python or explicit --historical-python replay',
-        );
-      const python =
-        process.env.PYTHON312 ??
-        (existsSync(join(root, 'tmp/venv-data/bin/python'))
-          ? join(root, 'tmp/venv-data/bin/python')
-          : 'python3.12');
-      const result = await promisify(execFile)(
-        python,
-        [
-          '-m',
-          'budget_pipeline.cli',
-          'reproduce',
-          ...pass(['--historical-python', '--out', '--inputs', '--release']),
-        ],
-        {
-          cwd: root,
-          env: { ...process.env, PYTHONPATH: join(root, 'pipeline'), PYTHONDONTWRITEBYTECODE: '1' },
-          timeout: 300000,
-          maxBuffer: 1024 * 1024,
-        },
+      throw new ReleaseError(
+        2,
+        `Historical manifest: check out the commit ${location.manifest.processing.code.commit} in processing.code.commit to replay it`,
       );
-      out(result.stdout);
-      return 0;
     }
     let source = inputs;
     if (location.remote && m.has('--skip-published')) {

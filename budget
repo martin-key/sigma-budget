@@ -1,5 +1,5 @@
 #!/bin/sh
-# Production Node CLI. Historical Python packages use ./budget-python explicitly.
+# Production Node CLI.
 set -eu
 root=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 if ! command -v node >/dev/null 2>&1 || ! node -e 'process.exit(Number(process.versions.node.split(".")[0]) >= 24 ? 0 : 1)' 2>/dev/null; then

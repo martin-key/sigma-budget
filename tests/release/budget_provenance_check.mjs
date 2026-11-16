@@ -49,7 +49,7 @@ async function request(candidate, id) {
   return { status: response.status, body };
 }
 const fixtures = JSON.parse(
-  fs.readFileSync(new URL('../pipeline/fixtures/budget_2027_api_responses.json', import.meta.url)),
+  fs.readFileSync(new URL('./fixtures/budget_2027_api_responses.json', import.meta.url)),
 );
 let checks = 0;
 for (const fixture of fixtures) {

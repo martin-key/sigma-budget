@@ -461,11 +461,7 @@ export function validateRegistry(root: string, options: RegistryOptions = {}): R
       `${f} belongs to ${!o.length ? 'no dataset' : `${o.length} datasets (${o.join(', ')})`}`,
     );
   for (const rel of tracked) {
-    if (
-      !['pipeline/', 'apps/', 'tests/', '.github/'].some((p) => rel.startsWith(p)) ||
-      rel === 'pipeline/budget_pipeline/validate/registry.py'
-    )
-      continue;
+    if (!['apps/', 'tests/', '.github/'].some((p) => rel.startsWith(p))) continue;
     try {
       const text = new TextDecoder('utf-8', { fatal: true }).decode(
         readFileSync(safePath(root, rel)),

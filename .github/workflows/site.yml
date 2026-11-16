@@ -75,7 +75,7 @@ jobs:
         run: pnpm test -- --coverage
       - name: Node tests leave protected inputs unchanged
         if: always()
-        run: test -z "$(git status --porcelain -- data packages/ingest/test/fixtures packages/ingest/test/expected tests/pipeline/fixtures apps/web/app/routes/__fixtures__)"
+        run: test -z "$(git status --porcelain -- data packages/ingest/test/fixtures packages/ingest/test/expected apps/web/app/routes/__fixtures__)"
       - name: Check every mandatory parity report
         if: always()
         run: node scripts/check-parity-reports.mjs
@@ -151,17 +151,10 @@ jobs:
           if-no-files-found: error
 
   build:
-    needs: [node-inputs]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      # The complete legacy unittest suite still re-decodes independent PDF references and checks live site content.
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
-        with:
-          python-version: '3.12'
-          cache: pip
-          cache-dependency-path: tests/requirements-dev.lock
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -169,17 +162,9 @@ jobs:
           cache: pnpm
       - name: Install tools
         run: |
-          python -m pip install --require-hashes -r tests/requirements-dev.lock -r pipeline/requirements.lock
-          python -m pip install --no-deps -e pipeline
           pnpm install --frozen-lockfile
       - name: Install the Chromium of the pinned Playwright
         run: bash scripts/ci-install-browser.sh
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
-        with:
-          name: registered-node-input-archive
-          path: ${{ runner.temp }}/registered-node-input-archive
-      - name: Restore the four pinned programme originals for independent checks
-        run: node scripts/restore-programme-test-inputs.mjs "$RUNNER_TEMP/registered-node-input-archive/registered-node-inputs.tar.gz"
       - name: Check repository formatting
         run: pnpm format:check
       - name: TypeScript
@@ -192,8 +177,6 @@ jobs:
         run: node packages/ingest/dist/validate/cli.js --live --only REGISTRY
       - name: Check committed annual provenance API responses and membership
         run: node tests/release/budget_provenance_check.mjs
-      - name: All pipeline regressions, independent PDF references and live site content
-        run: python -m unittest discover -s tests/pipeline -t .
       - name: Compatibility of code and data (stage E)
         run: node tests/release/compat_check.mjs
       - name: Build the Worker for staging and check every screen
@@ -287,17 +270,6 @@ jobs:
       - run: node tests/release/release_check.mjs
       - run: node tests/release/restore_drill.mjs
 
-  data-image:
-    # the pinned environment of the data processing (pipeline/Dockerfile): it must build from its digest and hash-locked
-    # dependencies. Running it needs the raw files: the ones from minfin.bg are in the repository, the rest are downloaded
-    # (docs/data-sources.md).
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - run: docker build -t sigma-budget-data pipeline
-      - run: docker run --rm -v "$PWD":/repo:ro sigma-budget-data python -m budget_pipeline.environment
-
   required-validation:
     if: ${{ always() }}
     needs:
@@ -307,7 +279,6 @@ jobs:
         build,
         check,
         release,
-        data-image,
         common-parity,
         aggregation-parity,
         catalog-parity,
@@ -667,7 +638,7 @@ jobs:
         run: node scripts/node-candidate-site-acceptance.mjs "$RUNNER_TEMP/node-acceptance/candidate" "$RUNNER_TEMP/node-site"
       - name: Protected checkout state
         if: always()
-        run: test -z "$(git status --porcelain -- data packages/ingest/test/fixtures tests/pipeline/fixtures)"
+        run: test -z "$(git status --porcelain -- data packages/ingest/test/fixtures)"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
