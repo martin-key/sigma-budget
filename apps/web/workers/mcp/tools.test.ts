@@ -176,6 +176,18 @@ describe('get_data', () => {
       file_url: ORIGIN + '/data/execution.json',
     });
   });
+  it('cites the publication of a period, not the meta of the file', async () => {
+    const { out } = await run('get_data', {
+      slug: 'outlook',
+      path: '/byPeriod/2027.draft/series/balance',
+    });
+    expect(out.period).toMatchObject({ key: '2027.draft', year: 2027, status: 'draft' });
+    expect(out.sources.map((s: Out) => s.id)).toEqual(['budget2027']);
+    expect(out.value).toMatchObject({ unit: 'млн. €', provenance: expect.any(String) });
+    const whole = (await run('get_data', { slug: 'outlook', path: '/years' })).out;
+    expect(whole.period).toBeUndefined();
+    expect(whole.sources.map((s: Out) => s.id)).toEqual(whole.meta.source);
+  });
   it('pages an array', async () => {
     const first = (await run('get_data', { slug: 'execution', path: '/rows', limit: 5 })).out;
     expect(first.value).toHaveLength(5);
