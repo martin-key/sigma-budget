@@ -1,7 +1,7 @@
 // S12 for the framework periods (2027.draft, 2028.forecast, 2029.forecast): the measures of tables II-7 and II-8 of the АСБП 2027–2029,
 // laid out like the 2026 measures: the sums first, then one list per kind and one by law, each measure a card with its own title, its
 // effect in 2027, 2028 and 2029 and the paragraph of the motives that explains it. The amounts and blanks are the release's
-// (budget2027.json forecast.II_7 / II_8); titles, plain sentences and quotes are the checked companion in ../measures-2027.js.
+// (budget2027.json forecast.II_7 / II_8); titles, plain sentences and quotes are the checked companion in the release’s measures2027.json.
 // Every effect cell keeps the id the search links to (s12-II_7-<row>-<year index>); the printed table with the provenance of every cell
 // stays as the CSV of each list, folded under the cards.
 import { html } from '../html.js';

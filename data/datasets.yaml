@@ -747,7 +747,7 @@ datasets:
   status: real
   files: [data/release/schema.json]
   producer: packages/dataset-schema/src/index.ts
-  inputs: [dataset-contracts]
+  inputs: [wg]
   schema: docs/data-spec.md
   scope: Публикувани JSON файлове
   rebuild: ./budget build

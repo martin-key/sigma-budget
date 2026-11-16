@@ -1,5 +1,5 @@
 import { afterEach, expect, it } from 'vitest';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { parseHTML } from 'linkedom';
 import { provideScope } from '../../client/env.js';
 import { parse } from '../../client/data.js';
@@ -21,9 +21,7 @@ const forecast = JSON.parse(read('data/inputs/budget_forecast_2027.json'));
 const annex3 = (label: string) =>
   forecast.tables.annex3_mln.rows.find((r: any) => r.label === label).values;
 const doc = release('budget2027');
-const texts = existsSync(new URL('../../../../data/release/measures2027.json', import.meta.url))
-  ? release('measures2027')
-  : JSON.parse(read('data/inputs/measures_2027.json'));
+const texts = release('measures2027');
 const { MEASURES_2027 } = texts;
 
 afterEach(() => provideScope(() => null));

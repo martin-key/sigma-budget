@@ -1,8 +1,7 @@
 import { isPublishedDataset } from '@sigma-budget/dataset-schema';
 /** Independent ports of the Python CORE and CATALOG validation groups. */
-import { readFileSync } from 'node:fs';
 import { Check, fmt, gzipSize, isnum, pyRepr as baseRepr, pyTruth } from './checks.js';
-import { Context, files, safePath } from './context.js';
+import { Context } from './context.js';
 import { pythonNumberAt } from '../common/numbers.js';
 import { catalogDecimalText, catalogIntegerRepr, catalogIntegerText } from './catalog-integer.js';
 import { pythonKeys } from './ordered-json.js';
@@ -892,22 +891,6 @@ function schema(obj: any): any[] {
         ? { key, type, length: len(v, kind(v, obj, key)) }
         : { key, type };
     });
-}
-function pageNeeds(ctx: Context): Record<string, string[]> {
-  const result: Record<string, string[]> = {};
-  for (const path of files(ctx.root, 'apps/web/client/pages')
-    .filter((p) => /^s\d\d-.*\.js$/.test(p))
-    .sort()) {
-    const text = readFileSync(safePath(ctx.root, `apps/web/client/pages/${path}`), 'utf8');
-    const match = /export const needs\s*=\s*\[([^\]]*)\]/.exec(text);
-    if (match)
-      result[path.slice(0, 3).toUpperCase()] = match[1]!
-        .split(',')
-        .map(strip)
-        .filter(Boolean)
-        .map((s) => s.replace(/^['"]+|['"]+$/g, ''));
-  }
-  return result;
 }
 export function catalog(ctx: Context): Check {
   const c = new Check('CATALOG'),

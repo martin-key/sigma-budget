@@ -175,7 +175,7 @@ export function envelope(ctx: Context): Check {
   }
   for (const [pid, b] of Object.entries(core.pending) as [string, any][]) {
     c.ok(b.status === 'pending' && b.id === pid, `core.pending.${pid}: bad status or id`);
-    for (const k of ['title', 'reason', 'expected', 'source', 'screens'])
+    for (const k of ['title', 'reason', 'expected', 'source'])
       c.ok(truth(b[k]), `core.pending.${pid}: ${k} missing`);
   }
   c.fact(`${ctx.jsonFiles().length} json files (${counts.real} real, ${counts.mock} mock)`);

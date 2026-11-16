@@ -20,7 +20,7 @@ async function check(value: any) {
   await writeFile(join(temp, 'data/release/guide.json'), JSON.stringify(value));
   return guideGroup.run(new Context(root, '2026-11-14', 'data/release', temp));
 }
-it('checks the committed guide against the current route catalogue with a non-zero count', async () => {
+it('checks the committed guide against the authored editorial links with a non-zero count', async () => {
   const result = await check(guide);
   expect(result.n).toBeGreaterThan(0);
   expect(result.problems).toEqual([]);
