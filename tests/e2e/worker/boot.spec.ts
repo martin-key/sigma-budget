@@ -52,6 +52,8 @@ for (const [route, screen] of [
   ['/proverka', 'S35'],
   ['/zakon', 'S14'],
   ['/novo', 'S16'],
+  ['/poveritelnost', 'S36'],
+  ['/usloviya', 'S37'],
 ]) {
   test(`isolated screen ${screen}`, async ({ browser, siteURL }) => {
     const context = await browser.newContext(contextOptions);

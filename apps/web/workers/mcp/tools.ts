@@ -324,12 +324,28 @@ async function getData(ctx: Ctx, args: Args) {
   }
   const meta = metaOf(file);
   const value = resolve(file, path);
+  // a period of byPeriod (outlook, revenue, expenditure) has its own publication: its numbers come from sourceRefs, not from the file's meta
+  const periodKey = /^\/byPeriod\/([^/]+)/.exec(path)?.[1]?.replace(/~1/g, '/').replace(/~0/g, '~');
+  const period = periodKey
+    ? ((file as { byPeriod?: Record<string, Json> }).byPeriod?.[periodKey] ?? null)
+    : null;
+  const cited = period?.sourceRefs ?? meta.source;
   return fit(value, offset, limit, (p) => ({
     ...head,
     ...(part ? { part } : {}),
     path: path || '/',
     meta,
-    sources: sources(c, meta.source),
+    ...(period
+      ? {
+          period: {
+            key: period.periodKey ?? periodKey,
+            year: period.year,
+            status: period.status,
+            publication: period.publication,
+          },
+        }
+      : {}),
+    sources: sources(c, cited),
     file_url: fileUrl(ctx, name!),
     value: p.value,
     ...(p.page ? { page: p.page } : {}),

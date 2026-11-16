@@ -135,10 +135,21 @@ describe('the footer', () => {
     for (const doc of [footer(), legacyFooter()]) {
       const fine = doc.querySelector('.fine')!;
       const items = [...fine.children].map((c) => c.textContent?.replace(/\s+/g, ' ').trim());
-      expect(items.slice(-4)).toEqual([
+      expect(items.slice(-6)).toEqual([
         ...FOOTER_NOTES,
+        'Поверителност',
+        'Условия за ползване',
         'Отворен код (друг сайт, в нов раздел)',
         'СИГМА — обществени поръчки (друг сайт, в нов раздел)',
+      ]);
+      expect(
+        [...fine.querySelectorAll('a[data-route]')].map((a) => [
+          a.getAttribute('data-route'),
+          a.getAttribute('href'),
+        ]),
+      ).toEqual([
+        ['S36', '/poveritelnost'],
+        ['S37', '/usloviya'],
       ]);
       const code = fine.querySelector('a.code-link')!;
       expect(code.getAttribute('href')).toBe('https://github.com/midt-bg/sigma-budget');

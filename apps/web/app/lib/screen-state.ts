@@ -2,7 +2,7 @@ import type { EditorialCore } from './editorial-types';
 import type { TextView } from '../components/TextState';
 import type { ReleaseIdentity } from './release-types';
 export interface EditorialScreenModel {
-  screen: 'S30';
+  screen: 'S30' | 'S36' | 'S37';
   view?: TextView;
   params: Record<string, string>;
   query: Record<string, string>;

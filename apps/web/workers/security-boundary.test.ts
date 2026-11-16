@@ -229,3 +229,24 @@ it('takes POST only on /mcp, with the finalized headers of a non-public-data rou
     expect(r.headers.get('Allow'), `${method} ${path}`).toBe(allow);
   }
 });
+
+it("serves OpenAI's domain-check token as plain text, and 404 without one", async () => {
+  const path = 'https://budget.example/.well-known/openai-apps-challenge';
+  const base = { ENVIRONMENT: 'local', ASSETS: { fetch: async () => new Response('asset') } };
+  const set = await app.fetch(
+    new Request(path),
+    { ...base, OPENAI_APPS_CHALLENGE: ' token-123 \n' } as unknown as Env,
+    {} as ExecutionContext,
+  );
+  expect(set.status).toBe(200);
+  expect(set.headers.get('Content-Type')).toBe('text/plain; charset=utf-8');
+  expect(await set.text()).toBe('token-123');
+  const unset = await app.fetch(new Request(path), base as unknown as Env, {} as ExecutionContext);
+  expect(unset.status).toBe(404);
+  const post = await app.fetch(
+    new Request(path, { method: 'POST' }),
+    { ...base, OPENAI_APPS_CHALLENGE: 'token-123' } as unknown as Env,
+    {} as ExecutionContext,
+  );
+  expect(post.status).toBe(405);
+});

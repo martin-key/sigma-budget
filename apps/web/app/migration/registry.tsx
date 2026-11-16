@@ -3,11 +3,13 @@ import { MigratedScreen as S25 } from './screen-S25';
 import { MigratedScreen as S35 } from './screen-S35';
 import { MigratedScreen as S14 } from './screen-S14';
 import { MigratedScreen as S16 } from './screen-S16';
+import { MigratedScreen as S36 } from './screen-S36';
+import { MigratedScreen as S37 } from './screen-S37';
 import type { TextScreenModel, Navigation } from '../lib/screen-state';
 export { textModel, textMetadata } from '../lib/screens/text';
 export const migrated = (id: string): id is TextScreenModel['screen'] =>
-  ['S30', 'S25', 'S35', 'S14', 'S16'].includes(id);
-const screens = { S30, S25, S35, S14, S16 };
+  ['S30', 'S25', 'S35', 'S14', 'S16', 'S36', 'S37'].includes(id);
+const screens = { S30, S25, S35, S14, S16, S36, S37 };
 export function MigratedScreen(props: { model: TextScreenModel; navigation: Navigation }) {
   const Screen = screens[props.model.screen];
   return <Screen {...props} />;

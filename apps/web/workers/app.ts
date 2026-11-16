@@ -2,6 +2,7 @@ import { screenCacheKey } from '../app/lib/cache';
 // The Worker of the site (docs/adr/0002-react-router-ssr.md). Every response crosses the security finalizer;
 // static files are fetched through ASSETS, while the Worker handles:
 //   /admin/*                            the operator API (apps/web/workers/api/admin.js), behind Cloudflare Access and checked again there
+//   /.well-known/openai-apps-challenge  the token of OpenAI's domain check (OPENAI_APPS_CHALLENGE), else 404
 //   /mcp, /mcp/                         the MCP server for AI assistants (apps/web/workers/mcp/handler.ts): POST of JSON-RPC, read-only
 //   anything else but GET and HEAD      405: the public routes never write
 //   /api/releases*, /data/releases/*    the public, read-only release API (apps/web/workers/api/api.js)
@@ -192,6 +193,21 @@ function documentHeaders(
   return new Response(res.body, { status: res.status, statusText: res.statusText, headers: h });
 }
 
+/** the domain check of OpenAI's plugin directory (docs/openai-plugin.md): the token the portal gives, as plain text and nothing else; 404
+ *  while no token is set (OPENAI_APPS_CHALLENGE in apps/web/wrangler.jsonc) */
+const OPENAI_CHALLENGE = '/.well-known/openai-apps-challenge';
+function openaiChallenge(env: Env): Response {
+  const token = (env.OPENAI_APPS_CHALLENGE || '').trim();
+  return new Response(token || 'Not found\n', {
+    status: token ? 200 : 404,
+    headers: {
+      'Content-Type': 'text/plain; charset=utf-8',
+      'Cache-Control': 'no-store',
+      'X-Content-Type-Options': 'nosniff',
+    },
+  });
+}
+
 async function dispatch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
   const url = new URL(request.url);
   if (url.pathname.startsWith('/admin/')) return adminApi(request, env, url);
@@ -199,6 +215,7 @@ async function dispatch(request: Request, env: Env, ctx: ExecutionContext): Prom
   if (request.method !== 'GET' && request.method !== 'HEAD') {
     return new Response('Method not allowed', { status: 405, headers: { Allow: 'GET, HEAD' } });
   }
+  if (url.pathname === OPENAI_CHALLENGE) return openaiChallenge(env);
   if (RELEASES.test(url.pathname)) {
     // A local candidate build uses only its packaged release metadata, even
     // when local registry bindings contain another release.

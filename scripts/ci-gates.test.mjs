@@ -133,7 +133,9 @@ test('merged boot and route modules remain inside formatting and production cove
   const modules = [
     'client/chrome-boot.js',
     'app/migration/screens.ts',
-    ...['S14', 'S16', 'S25', 'S30', 'S35'].map((id) => `app/migration/screen-${id}.tsx`),
+    ...['S14', 'S16', 'S25', 'S30', 'S35', 'S36', 'S37'].map(
+      (id) => `app/migration/screen-${id}.tsx`,
+    ),
   ];
   for (const file of modules) {
     assert.ok(
