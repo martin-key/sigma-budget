@@ -21,7 +21,7 @@ const root = resolve(import.meta.dirname, '../../../..'),
   inputs = sources.map((source) => {
     const path = 'data/originals/program_budgets/' + source.file;
     mkdirSync(dirname(join(prepared, path)), { recursive: true });
-    cpSync(join(root, path), join(prepared, path));
+    cpSync(join(process.env.BUDGET_BUILD_ACCEPTED_INPUTS ?? root, path), join(prepared, path));
     return {
       path,
       sha256: source.sourceSha256,

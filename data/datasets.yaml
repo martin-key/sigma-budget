@@ -385,6 +385,7 @@ datasets:
   - packages/ingest/src/build/aggregation-layers.ts
   inputs:
   - data/inputs/editorial/glossary.json
+  - data/inputs/editorial/routes.json
   schema: docs/data-spec.md
   scope: editorial
   rebuild: ./budget build
@@ -399,6 +400,7 @@ datasets:
   producer: packages/ingest/src/build/editorial.ts
   inputs:
   - data/inputs/editorial/guide.json
+  - data/inputs/editorial/routes.json
   schema: docs/data-spec.md
   scope: editorial
   rebuild: ./budget build
@@ -745,7 +747,7 @@ datasets:
   status: real
   files: [data/release/schema.json]
   producer: packages/dataset-schema/src/index.ts
-  inputs: []
+  inputs: [dataset-contracts]
   schema: docs/data-spec.md
   scope: Публикувани JSON файлове
   rebuild: ./budget build
