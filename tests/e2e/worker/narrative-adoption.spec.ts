@@ -61,10 +61,8 @@ test('feed and law interactions preserve fixtures, metadata and focus', async ({
   await page.locator('[data-query="vid=law"]').click();
   await expect(page).toHaveURL(/vid=law/);
   await expect(page.locator('[data-query="vid=law"]')).toHaveAttribute('aria-pressed', 'true');
-  expect(
-    await page.evaluate('document.activeElement?.dataset.query'),
-    'feed filter retains focus',
-  ).toBe('vid=law');
+  // The list is redrawn after the address changes; focus returns to the filter once that is done.
+  await expect(page.locator('[data-query="vid=law"]'), 'feed filter retains focus').toBeFocused();
   await page.locator('#s16-b-summary [data-src]').click();
   const inputs = JSON.parse(fixture('narrative-inputs.json'));
   const sources: string[] = inputs.feed.highlights.planBasis.source;
@@ -155,9 +153,7 @@ test('feed and law interactions preserve fixtures, metadata and focus', async ({
       await page.locator(kpis).evaluateAll(text),
       'GDP percentages equal independent main fixture',
     ).toEqual(await expected.locator(kpis).evaluateAll(text));
-    expect(await page.evaluate('document.activeElement.id'), 'unit switch retains focus').toBe(
-      's14-unit-pct',
-    );
+    await expect(page.locator('#s14-unit-pct'), 'unit switch retains focus').toBeFocused();
     await page.goto(siteURL + '/zakon?to=s14-t-chl1-redove');
     await page.waitForSelector('article[data-ready="1"]');
     expect(
