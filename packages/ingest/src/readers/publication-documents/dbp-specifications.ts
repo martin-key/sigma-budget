@@ -1,5 +1,5 @@
 // Transcribed from extract/dbp2027.py declarations, not expectedfigures.json.
-// Regenerate: test/publication-documents-generate-dbp.py <immutable donor>.
+// This table is maintained by hand in this file.
 import { pythonFloatSum } from '../../common/numbers.js';
 export const dbpSpecifications = [
   {

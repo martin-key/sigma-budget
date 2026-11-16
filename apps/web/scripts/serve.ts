@@ -1,4 +1,4 @@
-/** Browser-only composition; plain Python file serving or the serve.py path fallback. No data is copied. */
+/** Browser-only composition with a Node static server and path fallback. No data is copied. */
 import { createServer } from 'node:http';
 import {
   existsSync,

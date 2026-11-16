@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, globSync, readFileSync } from 'node:fs';
+import { globSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 const workflow = readFileSync('.github/workflows/site.yml', 'utf8');
 test('one Node suite command and explicit deploy barrier', () => {
@@ -43,14 +43,6 @@ test('all retained provenance and browser commands stay in CI', () => {
       `${path}: a browser setup outside the checked retry wrapper`,
     );
   }
-  // the Python browser checks that remain run on the browser build the npm Playwright installs: both stay on one version
-  const lock = 'tests/requirements-dev.lock';
-  if (existsSync(lock))
-    assert.equal(
-      readFileSync(lock, 'utf8').match(/^playwright==(\S+)/m)?.[1],
-      JSON.parse(readFileSync('package.json', 'utf8')).devDependencies['@playwright/test'],
-      'the Python and the npm Playwright must share one Chromium build',
-    );
 });
 
 test('committed release checks use Node after authenticating the input snapshot', () => {
@@ -58,11 +50,6 @@ test('committed release checks use Node after authenticating the input snapshot'
     'yaml',
   );
   const jobs = parse(workflow).jobs;
-  for (const name of ['node-import']) {
-    const job = jobs[name];
-    assert.ok(!job.steps.some((step) => /setup-(python|uv)@/.test(step.uses ?? '')));
-    assert.ok(!job.steps.some((step) => /\b(python[\d.]*|pip\d*|uv)\b/.test(step.run ?? '')));
-  }
   const steps = jobs['node-import'].steps;
   const compile = steps.findIndex(
     (step) => step.run === 'pnpm --filter @sigma-budget/etl... build',
@@ -213,27 +200,6 @@ test('coverage CI checks the target baseline with history and env refs before ru
   assert.ok(gate < job.steps.findIndex((step) => step.run === 'pnpm test -- --coverage'));
 });
 
-test('the Node suites run without a Python interpreter', () => {
-  const { parse } = createRequire(new URL('../packages/ingest/package.json', import.meta.url))(
-    'yaml',
-  );
-  const job = parse(workflow).jobs.coverage;
-  assert.ok(!job.steps.some((step) => /setup-(python|uv)@/.test(step.uses ?? '')));
-  assert.ok(!job.steps.some((step) => /\b(python[\d.]*|pip\d*|uv)\b/.test(step.run ?? '')));
-  for (const name of [job, ...job.steps].flatMap((part) => Object.keys(part.env ?? {})))
-    assert.ok(!name.startsWith('PYTHON'), `coverage still sets ${name}`);
-  const turbo = JSON.parse(readFileSync('turbo.json', 'utf8'));
-  for (const name of [
-    ...(turbo.globalEnv ?? []),
-    ...(turbo.globalPassThroughEnv ?? []),
-    ...Object.values(turbo.tasks ?? {}).flatMap((task) => [
-      ...(task.env ?? []),
-      ...(task.passThroughEnv ?? []),
-    ]),
-  ])
-    assert.ok(!name.startsWith('PYTHON'), `Turbo still passes ${name}`);
-});
-
 test('every browser spec stays formatted, typechecked and strict in the independent e2e gate', async () => {
   const { getFileInfo } = await import('prettier');
   const { matchesGlob } = await import('node:path');
@@ -285,7 +251,7 @@ test('failed e2e diagnostics are uploaded before any later test invocation can c
   assert.equal(artifact.uses, 'actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9');
   assert.equal(artifact.if, 'failure()');
   assert.equal(artifact.with.path, 'tmp/e2e-results');
-  // Python can fail before Playwright produces any files.
+  // Browser setup can fail before Playwright produces any files.
   assert.equal(artifact.with['if-no-files-found'], 'ignore');
   for (const step of steps.filter((step) => step.run?.includes('pnpm test:e2e'))) {
     assert.equal(

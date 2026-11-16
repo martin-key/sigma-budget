@@ -8,7 +8,7 @@ import { annualGap } from '../ui/annual.js';
 // `kfp` and core.kpis.debt give the 2026 plan shares of БВП for the „Защо БВП е важен“ block. Every figure on the screen is read or computed
 // from those files. The local year switch uses the same period as the shell. The block „От какво е съставена
 // икономиката“ has its own year switch (?sy=): shares of gross value added by branch (ten branches; manufacturing is shown inside industry); the
-// branches add up to the gross value added, which together with the taxes on products less subsidies gives БВП (checked by tools/gva_sectors.py).
+// branches add up to the gross value added, which together with the taxes on products less subsidies gives БВП.
 import { html, esc } from '../html.js';
 import { block } from '../ui/block.js';
 import { kpi, kpiGrid } from '../ui/kpi.js';

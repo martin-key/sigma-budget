@@ -1,4 +1,4 @@
-// Shared screen catalogue: edit routes.json. Both the web app and the Python pipeline
+// Shared screen catalogue: edit routes.json. Both the web app and the data pipeline
 // apply the defaults below. Legacy pages and React route modules consume the same metadata.
 // The legacy facade exposes ROUTES as window.__ROUTES__ for browser checks.
 import catalogue from './routes.json' with { type: 'json' };

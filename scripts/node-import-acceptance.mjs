@@ -43,13 +43,12 @@ const common = {
   executor,
   maxObjectBytes: 67108864,
 };
-// Exercise the normal entry without an available historical Python producer.
+// Exercise the normal CLI entry.
 const cliOptions = {
   cwd: root,
   encoding: 'utf8',
   timeout: 300000,
   maxBuffer: 1024 * 1024,
-  env: { ...process.env, PYTHON312: join(out, 'no-python-producer') },
 };
 // Exercise owned generation first, before spending time on repeated normal builds.
 const generationInputs = join(out, 'generation-inputs'),
@@ -319,7 +318,7 @@ const report = {
   inputs: first.manifest.inputs.length,
   doubleBuild: 'all package bytes identical',
   reproduce: 'all package bytes and ID identical',
-  defaultCli: 'validate and reproduce pass; all package bytes identical; Python unavailable',
+  defaultCli: 'validate and reproduce pass; all package bytes identical',
   controls,
   historicalReconstruction: 'unverified',
 };

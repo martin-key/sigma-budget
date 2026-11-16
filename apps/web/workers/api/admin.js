@@ -338,7 +338,7 @@ async function seal(env, op, who) {
       already: true,
     });
   }
-  // the structural checks once more, on the stored manifest (the server does not repeat the Python processing: section 7.2, step 4)
+  // the structural checks once more, on the stored manifest (the server does not repeat the data processing: section 7.2, step 4)
   const m = JSON.parse(
     new TextDecoder().decode(await (await env.OBJECTS.get(objectKey(o.release_id))).arrayBuffer()),
   );

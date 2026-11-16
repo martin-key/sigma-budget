@@ -67,7 +67,7 @@ type PdfEvidence = {
   programNames: Record<string, string[]>;
   rowLabels: Record<string, string[]>;
 };
-// Data is produced by Python's pinned source parsers. Runtime checks at the boundaries
+// Data is produced by the pinned source readers. Runtime checks at the boundaries
 // still reject missing budgets, cells and duplicate source keys.
 export interface ProgrammeLawArticle extends LawArticleEvidence {
   policiesKind?: string | null;

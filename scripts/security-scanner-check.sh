@@ -43,10 +43,6 @@ unsafe bad.js 'eval(input);'
 unsafe bad.js 'new Function(input);'
 unsafe bad.js "import * as cp from 'node:child_process'; cp.exec(input);"
 unsafe bad.js 'db.prepare(`SELECT ${input}`);'
-unsafe bad.py 'import pickle
-pickle.loads(payload)'
-unsafe bad.py 'import subprocess
-subprocess.run(command, shell=True)'
 
 printf '%s' "const key = '2028.forecast'; const laterKey = '2029.forecast';" >"$target/safe.js"
 scan

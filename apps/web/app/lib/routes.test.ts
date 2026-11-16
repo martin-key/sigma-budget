@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { GROUPS, ROUTES } from './routes';
 
 describe('shared route catalogue', () => {
-  it('loads identically through Vite and native Node TypeScript imports used by Python checks', () => {
+  it('loads identically through Vite and native Node TypeScript imports', () => {
     const source = new URL('./routes.ts', import.meta.url).href;
     const result = execFileSync(
       process.execPath,

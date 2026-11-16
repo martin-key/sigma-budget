@@ -86,8 +86,7 @@ function serial(value: unknown): string {
     ) + '\n'
   );
 }
-/** Offline preparation only. It does not replace Python's production defaults,
- * shared graph, registries, pins, existing extracts or the retained July summary. */
+/** Offline preparation of fiscal source documents from an authenticated snapshot. */
 export async function prepareFiscalDocuments(options: FiscalPreparationOptions) {
   const out = await validateFiscalDestination(options),
     reader = await SnapshotReader.open({

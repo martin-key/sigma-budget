@@ -1,11 +1,3 @@
-# Python
-__pycache__/
-*.py[cod]
-tmp/venv/
-tmp/venv-data/
-venv/
-.pytest_cache/
-
 # Node (не е нужен за приложението, но може да се ползва за инструменти)
 node_modules/
 
@@ -71,8 +63,6 @@ apps/etl/environments.local.json
 .wrangler/
 # Локалните бележки и разписките на операторските команди (apps/etl/src/release-operator.ts: work/ts-operator-receipts)
 /work/
-
-*.egg-info/
 
 # Turbo task cache (в корена и във всеки workspace)
 .turbo/

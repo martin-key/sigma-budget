@@ -1,6 +1,0 @@
-# Проверките, валидаторът и сглобяването на сайта в tools/. Python 3.12+ (screens.py).
-#   python3 -m venv tmp/venv && tmp/venv/bin/pip install --require-hashes -r tests/requirements-dev.lock   (the lock of this file, with hashes)
-#   PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers tmp/venv/bin/python -m playwright install chromium
-playwright==1.64.1
-xlrd==2.0.2
-pyyaml==6.0.3

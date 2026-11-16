@@ -5,7 +5,7 @@
 // packages/ingest/src/validate/measures-2027-text.test.ts checks every entry against the pinned PDF and the release: the quote is verbatim on its pages,
 // `starts` begins the printed row, `tablePage` is the page of the row's cells in budget2027-provenance.json, a named law is in the quote
 // or the row, and every number in `name` and `text` appears in the quote or the printed row.
-// The module has no imports. The retained Python suite also runs test_measures_2027_text.py with its separate fitz read.
+// The module has no imports.
 
 /** full names of the laws as the motives spell them (pp. 44–49) */
 export const LAWS = Object.freeze({

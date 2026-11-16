@@ -1,8 +1,7 @@
 // Block: the frame of every data block (plan 4.0): one heading, scope chip + status pill, source, share, content, footnote.
 //   block({id, title, level, sub, scope, status, mock, why, source, asOf, share, tools, body, foot, report, cls, flat, quiet})
 // - status 'real' (default) | 'partial' | 'forecast' | 'mock' | 'pending' | 'text' | false (no status); mock:true ≡ status:'mock'
-//   'text': words only, no number of the data (a definition, a guide's checklist, the visitor's own inputs): no pill, and
-//   tests/e2e/screens.py fails such a block that shows a chart, a table, a KPI or a sourced number.
+//   'text': words only, no number of the data (a definition, a guide's checklist, the visitor's own inputs): no pill.
 //   pill:false keeps the status and its data-block-status but shows no pill (a note under the figures: it cites real numbers);
 //   a 'text' block has no „Намерих грешка“ link unless report is set
 // - a mock block is hatched on its top edge, says „Примерни данни“ (pill + note with `why`) and, while „Само официални данни“ is on,

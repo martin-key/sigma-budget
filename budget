@@ -12,7 +12,7 @@ if ! command -v pnpm >/dev/null 2>&1; then
 fi
 cd "$root"
 # Turbo rebuilds changed source and reuses cached workspace build outputs;
-# the launcher never installs dependencies or falls back to a Python producer.
+# the launcher never installs dependencies.
 if ! pnpm exec turbo run build --filter=@sigma-budget/etl... >&2; then
   echo "budget: build failed; run pnpm install --frozen-lockfile and resolve the build error" >&2
   exit 2

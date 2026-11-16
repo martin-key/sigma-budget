@@ -2670,7 +2670,7 @@ h4.block-title {
   }
 } /* wide screens: the note sits beside the switch (one row), and only drops below it when it does not fit */
 
-/* ==== forced colours: state markers (Windows High Contrast and alike); check_mock.py verifies this block ====
+/* ==== forced colours: state markers (Windows High Contrast and alike) ====
    The mode replaces every background, border and box-shadow colour with its own palette, so a pressed / selected / checked / current state that
    differs only by colour vanishes. System colour keywords survive the mode: the marked state is drawn with the pair Highlight / HighlightText.
    A page-local control with such a state needs the same rule next to its own CSS (DEV_GUIDE section 14). ==== */

@@ -75,7 +75,7 @@ export const json = (body, status = 200, extra = {}) =>
     },
   });
 
-/** the structural checks of a manifest the server can make itself (section 7.2, step 4): it does not repeat the Python processing */
+/** the structural checks of a manifest the server can make itself (section 7.2, step 4): it does not repeat the data processing */
 export function checkManifest(m, env) {
   const problems = [];
   const need = (cond, msg) => {

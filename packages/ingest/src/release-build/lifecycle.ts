@@ -512,7 +512,7 @@ export async function checkReleaseDirectory(options: {
   await checkNodeReceipt(pkg.root, pkg.manifest, pkg.manifestBytes);
   return pkg;
 }
-/** Exact Node replay. Historical Python releases remain supported by Python cmd_reproduce only. */
+/** Exact Node replay; historical releases require their recorded runtime and code. */
 export async function reproduceRelease(options: ReproduceOptions): Promise<BuildReleaseResult> {
   const outputRoot = await preflightDestination(options.outputRoot, [
     options.repositoryRoot,
