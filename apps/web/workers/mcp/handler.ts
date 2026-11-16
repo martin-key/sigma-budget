@@ -1,7 +1,7 @@
 // POST /mcp: the MCP server of the site (docs/approach-specification.md, section 9.2), for AI assistants such as Claude and ChatGPT. It is the
 // Streamable HTTP transport of MCP without sessions: every request is one JSON-RPC message and every answer is one JSON body (no event stream).
 // Everything is read-only and public, so there is no sign-in; a client gets an Mcp-Session-Id that is kept nowhere and only keys its rate
-// limit (apps/web/workers/release-rate-limit.ts rateLimitMcp). The tools are in apps/web/workers/mcp/tools.ts.
+// limit, behind a ceiling per address (apps/web/workers/release-rate-limit.ts rateLimitMcp). The tools are in apps/web/workers/mcp/tools.ts.
 //   initialize · notifications/* (202) · ping · tools/list · tools/call     anything else -32601; a batch -32600
 //   GET, DELETE and other methods 405 (no server-sent events); no CORS: the assistants call from their servers, as the other public routes
 // The log has the tool, the outcome and the time of a call, never its arguments: they can carry what a person typed.
@@ -55,6 +55,31 @@ const newSession = () => {
 const isObject = (v: unknown): v is Record<string, unknown> =>
   !!v && typeof v === 'object' && !Array.isArray(v);
 
+/** the body, read as a stream and dropped at MAX_BODY: a body without Content-Length (chunked) is never held whole; null when it is too big */
+async function readBody(request: Request): Promise<Uint8Array | null> {
+  if (!request.body) return new Uint8Array();
+  const reader = request.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > MAX_BODY) {
+      await reader.cancel().catch(() => {});
+      return null;
+    }
+    chunks.push(value);
+  }
+  const out = new Uint8Array(size);
+  let at = 0;
+  for (const c of chunks) {
+    out.set(c, at);
+    at += c.byteLength;
+  }
+  return out;
+}
+
 export async function mcp(request: Request, env: Env, url: URL): Promise<Response> {
   if (request.method !== 'POST')
     return new Response('Method not allowed: MCP takes POST.\n', {
@@ -86,8 +111,8 @@ export async function mcp(request: Request, env: Env, url: URL): Promise<Respons
       { 'Retry-After': '60' },
     );
 
-  const raw = await request.arrayBuffer();
-  if (raw.byteLength > MAX_BODY) return error(null, -32600, 'Request too large', 413);
+  const raw = await readBody(request);
+  if (!raw) return error(null, -32600, 'Request too large', 413);
   let msg: unknown;
   try {
     msg = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(raw));

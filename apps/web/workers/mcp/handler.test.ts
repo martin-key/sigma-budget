@@ -153,54 +153,122 @@ describe('the protocol', () => {
 });
 
 describe('the rate limit', () => {
-  const limiter = (success: boolean) => {
-    const limit = vi.fn(async () => ({ success }));
+  const keys = (limit: ReturnType<typeof vi.fn>) =>
+    limit.mock.calls.map((c) => (c as unknown as [{ key: string }])[0].key);
+  const limiters = (address = true, session = true) => {
+    const ceiling = vi.fn(async () => ({ success: address }));
+    const share = vi.fn(async () => ({ success: session }));
     return {
-      limit,
-      env: { ENVIRONMENT: 'production', RELEASE_RATE_LIMITER: { limit } } as unknown as Env,
+      ceiling,
+      share,
+      env: {
+        ENVIRONMENT: 'production',
+        MCP_RATE_LIMITER: { limit: ceiling },
+        RELEASE_RATE_LIMITER: { limit: share },
+      } as unknown as Env,
     };
   };
-  it('keys a client by its session, else by its address', async () => {
-    const { limit, env } = limiter(true);
+  it('limits the address first, then the session, else the address again', async () => {
+    const { ceiling, share, env } = limiters();
     const req = new Request(URL_, { headers: { 'CF-Connecting-IP': '192.0.2.1' } });
     expect(await rateLimitMcp(req, env, 'b'.repeat(32))).toBeNull();
     expect(await rateLimitMcp(req, env, null)).toBeNull();
     expect(await rateLimitMcp(new Request(URL_), env, null)).toBeNull();
-    expect(limit.mock.calls.map((c) => (c as unknown as [{ key: string }])[0].key)).toEqual([
-      'mcp:' + 'b'.repeat(32),
-      'mcp:192.0.2.1',
-      'mcp:unknown-client',
-    ]);
+    expect(keys(ceiling)).toEqual(['mcp:192.0.2.1', 'mcp:192.0.2.1', 'mcp:unknown-client']);
+    expect(keys(share)).toEqual(['mcp:' + 'b'.repeat(32), 'mcp:192.0.2.1', 'mcp:unknown-client']);
   });
-  it('answers 429 over the limit, before reading the body', async () => {
-    const { env } = limiter(false);
-    const res = await send(post(rpc('ping')), env);
-    expect(res.status).toBe(429);
-    expect(res.headers.get('Retry-After')).toBe('60');
-    expect(((await res.json()) as any).error.code).toBe(-32000);
+  it('keeps a client that makes up a new session for every call under the ceiling of its address', async () => {
+    let left = 3;
+    const ceiling = vi.fn(async () => ({ success: left-- > 0 }));
+    const share = vi.fn(async () => ({ success: true }));
+    const env = {
+      ENVIRONMENT: 'production',
+      MCP_RATE_LIMITER: { limit: ceiling },
+      RELEASE_RATE_LIMITER: { limit: share },
+    } as unknown as Env;
+    const statuses = [];
+    for (let i = 0; i < 5; i++) {
+      const session = i.toString(16).padStart(32, 'c');
+      statuses.push(
+        (
+          await send(
+            post(rpc('ping'), { 'Mcp-Session-Id': session, 'CF-Connecting-IP': '192.0.2.9' }),
+            env,
+          )
+        ).status,
+      );
+    }
+    expect(statuses).toEqual([200, 200, 200, 429, 429]);
+    expect(share).toHaveBeenCalledTimes(3); // a call over the ceiling never reaches the session
+  });
+  it('answers 429 over either limit, before reading the body', async () => {
+    for (const env of [limiters(false).env, limiters(true, false).env]) {
+      const res = await send(post(rpc('ping')), env);
+      expect(res.status).toBe(429);
+      expect(res.headers.get('Retry-After')).toBe('60');
+      expect(((await res.json()) as any).error.code).toBe(-32000);
+    }
   });
   it('fails closed in production and open elsewhere', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const broken = { limit: async () => Promise.reject(new Error('down')) };
+    const working = { limit: vi.fn(async () => ({ success: false })) };
     const req = new Request(URL_);
-    expect(await rateLimitMcp(req, { ENVIRONMENT: 'production' } as Env, null)).toBe(503);
-    expect(await rateLimitMcp(req, local, null)).toBeNull();
+    const env = (o: Record<string, unknown>) => o as unknown as Env;
+    expect(await rateLimitMcp(req, env({ ENVIRONMENT: 'production' }), null)).toBe(503);
     expect(
       await rateLimitMcp(
         req,
-        { ENVIRONMENT: 'production', RELEASE_RATE_LIMITER: broken } as unknown as Env,
+        env({ ENVIRONMENT: 'production', RELEASE_RATE_LIMITER: working }),
+        null,
+      ),
+    ).toBe(503); // the ceiling is missing
+    expect(
+      await rateLimitMcp(
+        req,
+        env({ ENVIRONMENT: 'production', MCP_RATE_LIMITER: broken, RELEASE_RATE_LIMITER: working }),
         null,
       ),
     ).toBe(503);
+    expect(await rateLimitMcp(req, local, null)).toBeNull();
+    // elsewhere a missing or failing binding is skipped, and the one that works still limits
+    expect(
+      await rateLimitMcp(req, env({ ENVIRONMENT: 'staging', RELEASE_RATE_LIMITER: working }), null),
+    ).toBe(429);
     expect(
       await rateLimitMcp(
         req,
-        { ENVIRONMENT: 'staging', RELEASE_RATE_LIMITER: broken } as unknown as Env,
+        env({ ENVIRONMENT: 'staging', MCP_RATE_LIMITER: broken, RELEASE_RATE_LIMITER: broken }),
         null,
       ),
     ).toBeNull();
     expect(warn).toHaveBeenCalledWith('release_rate_limit_unavailable');
-    const res = await send(post(rpc('ping')), { ENVIRONMENT: 'production' } as Env);
+    const res = await send(post(rpc('ping')), env({ ENVIRONMENT: 'production' }));
     expect(res.status).toBe(503);
   });
+});
+
+it('stops reading a body without Content-Length at the limit', async () => {
+  let pulls = 0;
+  const chunk = new Uint8Array(16 * 1024).fill(0x20);
+  const body = new ReadableStream<Uint8Array>({
+    pull(controller) {
+      pulls++;
+      controller.enqueue(chunk); // an endless body: only the limit ends it
+    },
+  });
+  const req = new Request(URL_, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body,
+    duplex: 'half',
+  } as RequestInit);
+  expect(req.headers.has('Content-Length')).toBe(false);
+  const res = await send(req);
+  expect(res.status).toBe(413);
+  expect(pulls).toBeLessThan(MAX_BODY / chunk.byteLength + 4);
+  const empty = await send(
+    new Request(URL_, { method: 'POST', headers: { 'Content-Type': 'application/json' } }),
+  );
+  expect(empty.status).toBe(400); // no body: not one JSON-RPC message
 });

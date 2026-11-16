@@ -38,23 +38,34 @@ export async function rateLimitReleaseRead(
   );
 }
 
-/** MCP calls (apps/web/workers/mcp/handler.ts) use the same limiter under their own key: the session the server gave the client, else its
- * address. The assistants call from a few shared addresses of their providers, so the address alone would make all their users one client.
- * Like release reads it fails closed in production (the tools read the registry). Returns the status to answer with, or null. */
+/** MCP calls (apps/web/workers/mcp/handler.ts) are limited twice. First the address, on its own binding MCP_RATE_LIMITER with a higher ceiling:
+ * the assistants call from a few shared addresses of their providers, so the ceiling is per address and not per person. Then the session
+ * the server gave the client (else the address) on RELEASE_RATE_LIMITER: the share of one conversation. A session is not verified, so a
+ * client that makes up a new one for every call gets new session buckets but stays under the ceiling of its address. Like release reads,
+ * a missing or failing binding fails closed in production (the tools read the registry). Returns the status to answer with, or null. */
 export async function rateLimitMcp(
   request: Request,
-  env: Pick<Env, 'RELEASE_RATE_LIMITER' | 'ENVIRONMENT'>,
+  env: Pick<Env, 'RELEASE_RATE_LIMITER' | 'MCP_RATE_LIMITER' | 'ENVIRONMENT'>,
   session: string | null,
 ): Promise<429 | 503 | null> {
   const closed = env.ENVIRONMENT === 'production' ? 503 : null;
-  if (!env.RELEASE_RATE_LIMITER) return closed;
-  const client = session || request.headers.get('CF-Connecting-IP')?.trim() || 'unknown-client';
-  try {
-    return (await env.RELEASE_RATE_LIMITER.limit({ key: 'mcp:' + client })).success ? null : 429;
-  } catch {
-    console.warn('release_rate_limit_unavailable');
-    return closed;
+  const address = request.headers.get('CF-Connecting-IP')?.trim() || 'unknown-client';
+  for (const [binding, key] of [
+    [env.MCP_RATE_LIMITER, 'mcp:' + address],
+    [env.RELEASE_RATE_LIMITER, 'mcp:' + (session || address)],
+  ] as const) {
+    if (!binding) {
+      if (closed) return closed;
+      continue;
+    }
+    try {
+      if (!(await binding.limit({ key })).success) return 429;
+    } catch {
+      console.warn('release_rate_limit_unavailable');
+      if (closed) return closed;
+    }
   }
+  return null;
 }
 
 /** Uncached screen renders use the same per-client limiter under their own key, so a burst of new search
