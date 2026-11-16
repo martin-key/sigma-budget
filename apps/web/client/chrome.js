@@ -164,6 +164,8 @@ export function footerHtml(o = {}) {
       <span>Данни от официални източници. Законопроектите, прогнозите и отчетите са обозначени.</span>
       <span>Речникът и поясненията са редакционни текстове, а не официални данни.</span>
       <span>Без бисквитки и проследяване.</span>
+      <span><a href="${navHref('S36')}" data-route="S36">Поверителност</a></span>
+      <span><a href="${navHref('S37')}" data-route="S37">Условия за ползване</a></span>
       <span>${codeLink('code-link')}</span>
       <span>${sigmaLink('sister-link')}</span>
     </div>

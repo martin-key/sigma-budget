@@ -44,6 +44,11 @@ export const FOOTER_NOTES = [
   'Речникът и поясненията са редакционни текстове, а не официални данни.',
   'Без бисквитки и проследяване.',
 ];
+// the legal pages (S36, S37, client/legal.js) follow the notes, before the open code link
+export const FOOTER_LEGAL = [
+  ['S36', '/poveritelnost', 'Поверителност'],
+  ['S37', '/usloviya', 'Условия за ползване'],
+] as const;
 export function currentFooter(html: string) {
   const entry = /<li><a href="\/za-proekta" data-route="S26"[^>]*>За проекта<\/a><\/li>/;
   const sigma = /(\s*)(<span><a class="sister-link")/;
@@ -55,6 +60,10 @@ export function currentFooter(html: string) {
       sigma,
       (_, space: string, link: string) =>
         FOOTER_NOTES.map((note) => `${space}<span>${note}</span>`).join('') +
+        FOOTER_LEGAL.map(
+          ([id, path, label]) =>
+            `${space}<span><a href="${path}" data-route="${id}">${label}</a></span>`,
+        ).join('') +
         `${space}<span><a class="code-link" href="https://github.com/midt-bg/sigma-budget" target="_blank" rel="noopener">Отворен код<span class="sr-only"> (друг сайт, в нов раздел)</span></a></span>` +
         space +
         link,

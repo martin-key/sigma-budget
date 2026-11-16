@@ -4,7 +4,7 @@
 
 Новият код е TypeScript. Workspace-ът е описан в [README](../README.md); общите правила са в [AGENTS.md](../AGENTS.md). За обработката на данни `./budget` стартира Node CLI в `apps/etl/` и пакетите за обработка в `packages/ingest/`. Python пътят е исторически и референтен.
 
-Маршрутите са в `apps/web/app/routes.ts`. Мигрираните екрани S25, S35, S14 и S16 имат отделни route модули, а S30 използва `not-found.tsx`. Модулите използват loader, headers и компоненти; моделите и React представянето се свързват чрез `apps/web/app/migration/registry.tsx`. За нова работа следвай съществуващите модули и тестовете им. Останалите маршрути използват общия `screen.tsx` и стария renderer.
+Маршрутите са в `apps/web/app/routes.ts`. Мигрираните екрани S25, S35, S14, S16, S36 и S37 имат отделни route модули, а S30 използва `not-found.tsx`. Модулите използват loader, headers и компоненти; моделите и React представянето се свързват чрез `apps/web/app/migration/registry.tsx`. За нова работа следвай съществуващите модули и тестовете им. Останалите маршрути използват общия `screen.tsx` и стария renderer.
 
 ## Поддръжка на старите екрани
 
@@ -908,6 +908,8 @@ export const styles = ['s06-prihodi'];       // зарежда css/pages/s06-pri
 | S35 | `proverka`      | `#/proverka`                          | `pages/s35-proverka.js`                  | Проверка на данните      | ref            | none                  | S24,S25       | `#/proverka`                                                |
 | S26 | `za-proekta`    | — (оттеглен, без адрес)               | —                                        | За проекта               | ref            | none                  |               | —                                                           |
 | S27 | `vrazka`        | `#/vrazka`                            | `pages/s27-vrazka.js`                    | Обратна връзка           | ref            | none                  | S01           | `#/vrazka`                                                  |
+| S36 | `poveritelnost` | `#/poveritelnost`                     | `pages/s36-poveritelnost.js`             | Поверителност            | ref            | none                  | S01           | `#/poveritelnost`                                           |
+| S37 | `usloviya`      | `#/usloviya`                          | `pages/s37-usloviya.js`                  | Условия за ползване      | ref            | none                  | S01           | `#/usloviya`                                                |
 | S28 | `tarsene`       | `#/tarsene`                           | `pages/s28-tarsene.js`                   | Търсене                  | util           | none                  | S02,S01       | `#/tarsene` `#/tarsene?q=%D0%94%D0%94%D0%A1`                |
 | S29 | `embed`         | `#/embed/:chart`                      | `pages/s29-embed.js`                     | Вграден изглед           | util           | none                  |               | `#/embed/selftest` `#/embed/neznajna.grafika`               |
 | S30 | `ne-e-namereno` | `#(404)`                              | `pages/s30-404.js`                       | Няма такава страница     | util           | none                  |               |                                                             |

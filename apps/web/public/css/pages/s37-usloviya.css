@@ -1,0 +1,18 @@
+/* S37 · Условия за ползване (client/legal.js): readable prose, one column */
+.page[data-route='S37'] .legal {
+  max-width: 44rem;
+}
+.page[data-route='S37'] .legal-block + .legal-block {
+  margin-top: 2rem;
+}
+.page[data-route='S37'] .legal ul {
+  padding-left: 1.25rem;
+}
+.page[data-route='S37'] .legal li + li {
+  margin-top: 0.25rem;
+}
+.page[data-route='S37'] .legal-updated {
+  margin-top: 2rem;
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+}
