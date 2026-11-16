@@ -54,6 +54,25 @@ describe('the protocol', () => {
     expect(res.status).toBe(200);
     expect(((await res.json()) as any).result.protocolVersion).toBe(PROTOCOL_VERSIONS[0]);
   });
+  it('refuses an unknown version on every message after initialize, notifications and responses too', async () => {
+    const newer = { 'MCP-Protocol-Version': '2026-07-28' };
+    for (const body of [
+      rpc('tools/list'),
+      { jsonrpc: '2.0', method: 'notifications/initialized' },
+      { jsonrpc: '2.0', id: 7, result: {} },
+    ]) {
+      const res = await send(post(body, newer));
+      expect(res.status, JSON.stringify(body)).toBe(400);
+      expect(((await res.json()) as any).error.code).toBe(-32600);
+    }
+    const agreed = await send(
+      post(
+        { jsonrpc: '2.0', method: 'notifications/initialized' },
+        { 'MCP-Protocol-Version': '2025-11-25' },
+      ),
+    );
+    expect(agreed.status).toBe(202);
+  });
   it('answers an unknown version with the newest one and keeps a valid session', async () => {
     const session = 'a'.repeat(32);
     const res = await send(
