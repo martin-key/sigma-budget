@@ -1,4 +1,5 @@
 // Presentation projections of the keyed annual DTO. Legacy column arrays are historical input only.
+import { date } from './format.js';
 import { FRAMEWORK } from './budget-2027.js';
 import { PERIODS, selectPeriod } from './periods.js';
 const value = (cell) => cell?.value ?? null;
@@ -44,8 +45,7 @@ export function annualView(dataset, kind, outlook, key) {
             revenue: 'Приходи на КФП 2027–2029',
             expenditure: 'Разходи на КФП 2027–2029',
           }[kind],
-          sourceNote:
-            'МФ, АСБП 2027–2029, публикация от 06.11.2026. Проект за 2027 и прогнози за 2028–2029.',
+          sourceNote: `МФ, АСБП 2027–2029, публикация от ${date(selectPeriod(dataset, key).publication)}. Проект за 2027 и прогнози за 2028–2029.`,
         }
       : {}),
     source: FRAMEWORK.includes(key)
@@ -139,6 +139,16 @@ export function annualView(dataset, kind, outlook, key) {
     return {
       ...row,
       mln: chartSeries(at, (i) => row.mln?.[i]),
+      provenance: records.map((p) =>
+        p.legacy
+          ? null
+          : physical(
+              p,
+              p.status === 'law'
+                ? 'annex1_execution2026.r' + lawRows[row.id]
+                : 'annex3_mln.r' + (ordinal + (kind === 'revenue' ? 0 : 31)),
+            )?.provenance || '',
+      ),
       pctGdp: chartSeries(
         (p) => {
           const id = 'annex3_mln.r' + (ordinal + (kind === 'revenue' ? 0 : 31));

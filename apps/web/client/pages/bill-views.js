@@ -1,6 +1,6 @@
 // The existing block, table, chart and sharing components, fed only by the November publication.
 import { html } from '../html.js';
-import { num, money } from '../format.js';
+import { num, money, date, plural } from '../format.js';
 import { block } from '../ui/block.js';
 import { dataTable, updateRows, tableData } from '../ui/table.js';
 import { chart } from '../ui/chart.js';
@@ -29,7 +29,7 @@ const source = ['budget2027'];
 export const gap = (title, text) => emptyState({ title, text });
 export const publication = (doc) =>
   html`<p>
-      МФ, 06.11.2026. Проектът за 2027 г. не е приет закон. Прогнозите са за 2028–2029 г. Сумите и
+      МФ, ${date(doc.publication)}. Проектът за 2027 г. не е приет закон. Прогнозите са за 2028–2029 г. Сумите и
       празните клетки следват съответната таблица.
     </p>
     <p>
@@ -517,7 +517,7 @@ export function municipalityView(ctx) {
     { key: 'origin', label: 'Връзка към произхода', csvOnly: true },
   ];
   return {
-    lede: 'Трансферите към всички 265 общини по чл. 52 от проекта за 2027 г. Делегираните дейности са разпределени по чл. 53; не са допълнителен трансфер.',
+    lede: `Трансферите към всички ${plural(doc.municipal.art52.length, 'община', 'общини')} по чл. 52 от проекта за 2027 г. Делегираните дейности са разпределени по чл. 53; не са допълнителен трансфер.`,
     body: html`${totals()}${base(
       ctx,
       's20-list-2027',
@@ -643,7 +643,7 @@ export function debtView(ctx) {
         );
   const maastricht = ctx.query.obhvat === 'maastricht';
   return {
-    lede: 'Прогноза на МФ от 06.11.2026: държавен дълг по ЗДД за 2027–2029 и отделно предложените граници на законопроекта за 2027 г.',
+    lede: `Прогноза на МФ от ${date(doc.publication)}: държавен дълг по ЗДД за 2027–2029 и отделно предложените граници на законопроекта за 2027 г.`,
     body: html`${field({
       id: 's17-scope',
       label: 'Обхват на дълга',

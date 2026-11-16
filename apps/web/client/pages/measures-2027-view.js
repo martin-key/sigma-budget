@@ -5,7 +5,7 @@
 // Every effect cell keeps the id the search links to (s12-II_7-<row>-<year index>); the printed table with the provenance of every cell
 // stays as the CSV of each list, folded under the cards.
 import { html } from '../html.js';
-import { num, plural, NBSP, DASH } from '../format.js';
+import { num, plural, date, NBSP, DASH } from '../format.js';
 import { block } from '../ui/block.js';
 import { kpi, kpiGrid } from '../ui/kpi.js';
 import { dataTable, tableData } from '../ui/table.js';
@@ -354,7 +354,7 @@ export function measuresView(ctx) {
         kind: 'info',
         id: 's12-27-stage',
         title: 'Числата са по законопроекта, не по приет закон',
-        body: html`<p>Мерките са от таблици II-7 и II-8 на АСБП 2027–2029, публикувани от МФ на 06.11.2026. Народното събрание още не е приело бюджета.</p>`,
+        body: html`<p>Мерките са от таблици II-7 и II-8 на АСБП 2027–2029, публикувани от МФ на ${date(doc.publication)}. Народното събрание още не е приело бюджета.</p>`,
       })}
       ${sums(doc, totalOf(doc, 'II_7'), totalOf(doc, 'II_8'), counts)}
       ${howTo(doc)}

@@ -148,6 +148,8 @@ function cardSpend(ctx, O, X, Y) {
 function cardAgencies(ctx, O, M) {
   if (ctx.period.key === '2027.draft') {
     const items = institutions(ctx.data.budget2027),
+      articles = items.map((i) => i.article).sort((a, b) => a - b),
+      articleRange = `${articles[0]}–${articles.at(-1)}`,
       top = items
         .filter((i) => cellValue(i.expenditure) !== null)
         .sort((a, b) => b.expenditure.value - a.expenditure.value)[0];
@@ -156,7 +158,7 @@ function cardAgencies(ctx, O, M) {
       q: 'Кой харчи парите?',
       href: ctx.href('S10', {}, { per: '2027.draft' }),
       text: top
-        ? `${top.name}. Общо ${items.length} бюджета по чл. 2–48 от основния проект.`
+        ? `${top.name}. Общо ${items.length} бюджета по чл. ${articleRange} от основния проект.`
         : 'Това издание няма ведомствените бюджети за 2027 г.',
       kpi: {
         label: 'Най-голям ведомствен бюджет · проект 2027',
