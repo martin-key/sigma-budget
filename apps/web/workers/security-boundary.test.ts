@@ -1,20 +1,16 @@
+import { readFileSync } from 'node:fs';
 import { expect, it, vi } from 'vitest';
 vi.mock('react-router', () => ({ createRequestHandler: () => async () => new Response('page') }));
 vi.mock('./release-data', () => ({
-  usesRegistry: vi.fn(async () => false),
   releaseData: vi.fn(async () => ({
     releaseId: 'test',
     dataBase: '/data/',
     load: async () => null,
-    file: async () => null,
   })),
-  candidateReleaseId: vi.fn(() => null),
-  noRegistry: () => false,
 }));
 import app from './app';
-import { candidateReleaseId, usesRegistry, releaseData } from './release-data';
 
-it('finalizes actual dispatch early returns, resource fallbacks, admin auth and exceptions', async () => {
+it('finalizes actual dispatch early returns, resource fallbacks, unknown paths and exceptions', async () => {
   const ctx = { waitUntil: vi.fn() } as unknown as ExecutionContext;
   const env = {
     ENVIRONMENT: 'local',
@@ -22,8 +18,8 @@ it('finalizes actual dispatch early returns, resource fallbacks, admin auth and 
   } as unknown as Env;
   for (const [path, method, status] of [
     ['/', 'POST', 405],
-    ['/admin/operations', 'GET', 503],
-    ['/api/releases', 'GET', 503],
+    ['/admin/operations', 'GET', 404],
+    ['/api/releases', 'GET', 404],
     ['/api/releases/%ZZ', 'GET', 400],
     ['/data/core.json', 'GET', 200],
     ['/missing', 'GET', 200],
@@ -51,12 +47,9 @@ it('finalizes actual dispatch early returns, resource fallbacks, admin auth and 
   expect(await failure.text()).not.toContain('private details');
 });
 
-it('rate-limits the actual public API before D1 or R2 reads', async () => {
-  const prepare = vi.fn();
+it('rate-limits the actual public API before asset reads', async () => {
   const env = {
     ENVIRONMENT: 'production',
-    DB: { prepare },
-    OBJECTS: {},
     RELEASE_RATE_LIMITER: { limit: async () => ({ success: false }) },
   } as unknown as Env;
   const res = await app.fetch(
@@ -66,10 +59,9 @@ it('rate-limits the actual public API before D1 or R2 reads', async () => {
   );
   expect(res.status).toBe(429);
   expect(res.headers.get('Access-Control-Allow-Origin')).toBe('*');
-  expect(prepare).not.toHaveBeenCalled();
 });
 
-it('does not charge bundled static files to the registry read limiter', async () => {
+it('does not charge bundled static files to the release read limiter', async () => {
   const limit = vi.fn(async () => ({ success: false }));
   const env = {
     ENVIRONMENT: 'production',
@@ -86,31 +78,13 @@ it('does not charge bundled static files to the registry read limiter', async ()
   expect(limit).not.toHaveBeenCalled();
 });
 
-it('limits stable registry data before loading the manifest or file', async () => {
-  vi.mocked(usesRegistry).mockResolvedValueOnce(true);
-  vi.mocked(releaseData).mockClear();
-  const env = {
-    ENVIRONMENT: 'production',
-    RELEASE_RATE_LIMITER: { limit: async () => ({ success: false }) },
-  } as unknown as Env;
-  const res = await app.fetch(
-    new Request('https://budget.example/data/core.json'),
-    env,
-    {} as ExecutionContext,
-  );
-  expect(res.status).toBe(429);
-  expect(releaseData).not.toHaveBeenCalled();
-});
-
 it.each(['manifest.json', 'data/core.json'])(
   'does not limit packaged release %s, with or without a binding',
   async (file) => {
     const path = `/data/releases/${'a'.repeat(64)}/${file}`;
     for (const binding of [undefined, { limit: vi.fn(async () => ({ success: false })) }]) {
-      const prepare = vi.fn();
       const env = {
         ENVIRONMENT: 'production',
-        DB: { prepare },
         RELEASE_RATE_LIMITER: binding,
         ASSETS: { fetch: async () => new Response('packaged') },
       } as unknown as Env;
@@ -124,51 +98,13 @@ it.each(['manifest.json', 'data/core.json'])(
         expect(await res.text()).toBe('packaged');
       }
       if (binding) expect(binding.limit).not.toHaveBeenCalled();
-      expect(prepare).not.toHaveBeenCalled();
     }
   },
 );
-it('candidate release assets and API errors do not touch the registry or limiter', async () => {
-  vi.mocked(candidateReleaseId).mockReturnValue('a'.repeat(64));
-  try {
-    const limit = vi.fn(async () => ({ success: false }));
-    const prepare = vi.fn();
-    const env = {
-      ENVIRONMENT: 'production',
-      DB: { prepare },
-      RELEASE_RATE_LIMITER: { limit },
-      ASSETS: { fetch: async () => new Response('candidate') },
-    } as unknown as Env;
-    for (const file of ['manifest.json', 'data/core.json']) {
-      const res = await app.fetch(
-        new Request(`https://budget.example/data/releases/${'a'.repeat(64)}/${file}`),
-        env,
-        {} as ExecutionContext,
-      );
-      expect(res.status).toBe(200);
-      expect(await res.text()).toBe('candidate');
-    }
-    expect(
-      (
-        await app.fetch(
-          new Request('https://budget.example/api/releases'),
-          env,
-          {} as ExecutionContext,
-        )
-      ).status,
-    ).toBe(404);
-    expect(limit).not.toHaveBeenCalled();
-    expect(prepare).not.toHaveBeenCalled();
-  } finally {
-    vi.mocked(candidateReleaseId).mockReturnValue(null);
-  }
-});
-it('unknown packaged files still charge the limiter before any registry read', async () => {
-  const prepare = vi.fn();
+it('unknown packaged files still charge the limiter before any API read', async () => {
   const limit = vi.fn(async () => ({ success: false }));
   const env = {
     ENVIRONMENT: 'production',
-    DB: { prepare },
     RELEASE_RATE_LIMITER: { limit },
     ASSETS: { fetch: async () => new Response(null, { status: 404 }) },
   } as unknown as Env;
@@ -179,7 +115,75 @@ it('unknown packaged files still charge the limiter before any registry read', a
   );
   expect(res.status).toBe(429);
   expect(limit).toHaveBeenCalledOnce();
-  expect(prepare).not.toHaveBeenCalled();
+});
+
+it('answers current with the release published in the build for GET and HEAD', async () => {
+  const bytes = readFileSync(
+    new URL('../../../data/release/releases/current.json', import.meta.url),
+  );
+  const pointer = JSON.parse(bytes.toString());
+  const env = {
+    ENVIRONMENT: 'local',
+    ASSETS: { fetch: async () => new Response(bytes) },
+  } as unknown as Env;
+  for (const method of ['GET', 'HEAD']) {
+    const res = await app.fetch(
+      new Request('https://budget.example/api/releases/current', { method }),
+      env,
+      {} as ExecutionContext,
+    );
+    expect(res.status).toBe(200);
+    expect(res.headers.get('X-Release-Id')).toBe(pointer.release_id);
+    expect(res.headers.get('Cache-Control')).toBe('no-store');
+    expect(res.headers.get('Access-Control-Allow-Origin')).toBe('*');
+    if (method === 'GET')
+      expect(await res.json()).toEqual({
+        ...pointer,
+        manifest: `/data/releases/${pointer.release_id}/manifest.json`,
+      });
+    else expect(await res.text()).toBe('');
+  }
+});
+
+it('serves current manifest outputs from packaged bytes with HEAD and conditional reads', async () => {
+  const id = 'b'.repeat(64),
+    digest = 'c'.repeat(64);
+  const fetch = vi.fn(async (request: Request) => {
+    const path = new URL(request.url).pathname;
+    if (path === '/data/releases/current.json') return Response.json({ release_id: id });
+    if (path === `/data/releases/${id}/manifest.json`)
+      return Response.json({
+        outputs: [{ path: 'data/core.json', sha256: digest }],
+        inputs: [{ path: 'data/originals/source.pdf' }],
+      });
+    if (path === '/data/core.json')
+      return new Response(request.method === 'HEAD' ? null : 'published bytes', {
+        headers: { 'Content-Type': 'application/json', ETag: '"asset-tag"' },
+      });
+    return new Response(null, { status: 404 });
+  });
+  const env = { ASSETS: { fetch }, ENVIRONMENT: 'local' } as unknown as Env;
+  const visit = (path: string, init?: RequestInit) =>
+    app.fetch(new Request('https://budget.example' + path, init), env, {} as ExecutionContext);
+  const path = `/data/releases/${id}/data/core.json`;
+  const res = await visit(path);
+  expect(res.status).toBe(200);
+  expect(await res.text()).toBe('published bytes');
+  expect(res.headers.get('X-Release-Id')).toBe(id);
+  expect(res.headers.get('ETag')).toBe(`"${digest}"`);
+  expect(res.headers.get('Cache-Control')).toContain('immutable');
+  expect(res.headers.get('Access-Control-Allow-Origin')).toBe('*');
+  const head = await visit(path, { method: 'HEAD' });
+  expect(head.status).toBe(200);
+  expect(await head.text()).toBe('');
+  expect((await visit(path, { headers: { 'If-None-Match': `"${digest}"` } })).status).toBe(304);
+  expect((await visit(`/data/releases/${id}/data/%ZZ`)).status).toBe(400);
+  for (const unknown of [
+    `/data/releases/${'a'.repeat(64)}/data/core.json`,
+    `/data/releases/${id}/data/missing.json`,
+    `/data/releases/${id}/data/originals/source.pdf`,
+  ])
+    expect((await visit(unknown)).status).toBe(404);
 });
 
 it('takes POST only on /mcp, with the finalized headers of a non-public-data route', async () => {

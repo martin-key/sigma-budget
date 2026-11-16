@@ -9,7 +9,7 @@
 //
 // How it works. `react-router build` writes build/client (the files of web assets/, served as they are) and build/server (the Worker that
 // draws every screen from the current release, apps/web/workers/app.ts). The files that depend on this build are stamped in build/client
-// (the RSS links, the service worker's cache name). Then the built Worker runs under `wrangler dev` with an empty registry, so it draws the
+// (the RSS links, the service worker's cache name). Then the built Worker runs under `wrangler dev`, so it draws the
 // screens from the data built from git, and headless Chromium crawls it from the start page: every screen it reaches through a link is
 // checked twice, as the server sends it (a finished screen in the HTML itself, for crawlers and the first paint: data-view="ready", an h1, a
 // description, the canonical link) and as the browser shows it once the app has taken over. Last, sitemap.xml, robots.txt, llms.txt,
@@ -34,6 +34,8 @@ import { chromium, type Browser, type BrowserContext } from '@playwright/test';
 import { ROUTES } from '../app/lib/routes.ts';
 import {
   checkArtifact,
+  checkPublishedOutputs,
+  preservePublishedOutputs,
   checkPage,
   normPath,
   pyCompare,
@@ -300,7 +302,7 @@ function fail(message: string): never {
   process.exit(1);
 }
 
-/** the built Worker under wrangler dev, with an empty registry (the screens come from the data built from git) */
+/** the built Worker under wrangler dev (the screens come from the packaged release) */
 async function startWorker(
   built: string,
   origin: string,
@@ -448,7 +450,8 @@ async function main(): Promise<void> {
   const buildVars = (JSON.parse(readText(built)) as { vars?: Record<string, unknown> }).vars ?? {};
   const environment = 'ENVIRONMENT' in buildVars ? buildVars.ENVIRONMENT : 'production';
   a.noindex = a.noindex || environment !== 'production' || buildVars.NOINDEX === '1';
-  // СЕБРА: on disk for phase 2, used by no screen and not in the catalog
+  preservePublishedOutputs(out);
+  // СЕБРА is available by its manifest path, outside the public catalog.
   rmSync(join(out, 'data', 'sebra.json'), { force: true });
 
   const core = JSON.parse(readFileSync(join(ROOT, 'data', 'release', 'core.json'), 'utf8')) as {
@@ -502,6 +505,7 @@ async function main(): Promise<void> {
 
   const paths = writeExtras(out, crawl.pages, origin, lastmod, routes, a.noindex);
   checkArtifact(out, a.noindex);
+  checkPublishedOutputs(out);
   const dt = (Date.now() - t0) / 1000;
   console.log(
     `\n${Object.keys(crawl.pages).length} screens checked (${paths.length} in the sitemap) in ${dt.toFixed(0)} s → ${out}`,

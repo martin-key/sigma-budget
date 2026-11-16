@@ -8,7 +8,6 @@
 // that the build copies from apps/web/public/index.html; the development server answers it with apps/web/public/index.html): the router builds the screen from the address and the copies in the cache. The shell is
 // stored on install, so the fallback is there whatever page the visitor landed on (before, landing on /prihodi left /razhodi and / without a copy:
 // a network error offline). It is the bare shell, not the start page the server drew, so no other screen's text stands under the address.
-// V7-2: operator pages (/admin) and no-store answers are never kept, so nothing private outlives a sign-out; the new name drops older copies.
 // V7-3: the head of the shell names the icons of СИГМА and no longer the old SVG icon. The shell is stored only on install, so the name changes
 // with it: an installed copy takes the new shell and drops the pages kept with the old head.
 const CACHE = 'bns-v7-3'; // its own cache name per address scheme (a v6 copy holds hash-era pages); the old cache is deleted on activate
@@ -35,7 +34,6 @@ self.addEventListener('fetch', (e) => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
-  if (url.pathname === '/admin' || url.pathname.startsWith('/admin/')) return; // straight to the network, never cached
   e.respondWith(
     (async () => {
       try {

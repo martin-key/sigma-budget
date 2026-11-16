@@ -242,30 +242,47 @@ describe('get_data', () => {
   });
 });
 
-describe('explain_number without a registry', () => {
-  it('finds the cell of a monthly value', async () => {
+describe('explain_number', () => {
+  it('finds the cell of a monthly value and checks its original against the manifest', async () => {
     const { out } = await run('explain_number', { record: 'data/2026-09/kfp/rev' });
-    expect(out).toMatchObject({ verified: false, sheet: 'стартова', cell: 'B11', unit: 'млн. €' });
+    expect(out).toMatchObject({ verified: true, sheet: 'стартова', cell: 'B11', unit: 'млн. €' });
     expect(typeof out.value).toBe('string');
     expect(out.original).toMatchObject({
       asOf: '2026-09-30',
       sha256: expect.stringMatching(/^[0-9a-f]{64}$/),
     });
+    expect(out.source).toMatchObject({
+      path: expect.stringMatching(/^data\/originals\//),
+      page: expect.stringMatching(/^https:\/\//),
+    });
     const monthly = (await run('explain_number', { record: 'monthly/2026-09/kfp/rev' })).out;
     expect(monthly.rule).toBeTruthy();
+    expect(monthly.from).toEqual(['data/2026-09/kfp/rev', 'data/2026-08/kfp/rev']);
     expect(monthly.cell).toBeUndefined();
   });
-  it('finds the page of a cell of the bill', async () => {
+  it('finds the page of a cell of the bill and its archive in the manifest', async () => {
     const id = '7a83fb6508cd980457389efa'; // budget2027.json /budgets/bill/1/rows/0/cell
     const { out } = await run('explain_number', { record: 'budget2027/' + id });
     expect(out).toMatchObject({
-      verified: false,
+      verified: true,
       value: 30942719.3,
       unit: 'хил. €',
       provenance: id,
     });
     expect(out.page).toBeDefined();
     expect(out.document).toMatchObject({ archive: expect.any(String) });
+    expect(out.source.path).toBe(out.document.archive);
+  });
+  it('says unverified when the release has no manifest', async () => {
+    const bare = diskRelease({
+      releaseId: 'no-manifest',
+      async load(name) {
+        if (name === 'release/manifest') throw new PendingError(name);
+        return diskRelease().load(name);
+      },
+    });
+    const { out } = await run('explain_number', { record: 'data/2026-09/kfp/rev' }, diskCtx(bare));
+    expect(out).toMatchObject({ verified: false, cell: 'B11', source: null });
   });
   it('explains a record that is not one', async () => {
     await fails('explain_number', { record: 'rev' }, /data\/2026-09\/kfp\/rev/);

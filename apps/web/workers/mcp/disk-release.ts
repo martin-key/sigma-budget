@@ -11,9 +11,15 @@ export function diskRelease(over: Partial<ReleaseData> = {}): ReleaseData {
   return {
     releaseId: 'disk',
     dataBase: '/data/',
-    file: async () => null,
     async load(name) {
-      const file = new URL(name + '.json', ROOT);
+      // release/manifest is the manifest of the current release, as apps/web/workers/release-data.ts serves it
+      const file =
+        name === 'release/manifest'
+          ? new URL(
+              `releases/${JSON.parse(readFileSync(new URL('releases/current.json', ROOT), 'utf8')).release_id}/manifest.json`,
+              ROOT,
+            )
+          : new URL(name + '.json', ROOT);
       if (!existsSync(file)) throw new PendingError(name);
       return parse(name, readFileSync(file, 'utf8'));
     },

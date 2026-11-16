@@ -10,11 +10,10 @@ import {
   ReleaseError,
   SHA256,
   type PackageOptions,
-  type ReleaseFile,
   type ReleaseManifest,
 } from './types.js';
 
-// The path, MIME and size contract of workers/api/store.js; no data registry here.
+// The release package path, MIME and size contract.
 const SEG = '[\\p{L}\\p{N}._\\-]+(?: [\\p{L}\\p{N}._\\-]+)*';
 const SAFE_PATH = new RegExp(`^(?!.*(?:^|/)\\.\\.?(?:/|$))(?=.{1,300}$)${SEG}(?:/${SEG})*$`, 'u');
 const MIMES = new Set([
@@ -130,26 +129,11 @@ export function parseManifest(
     throw new ReleaseError(2, 'Manifest must list a validation report');
   return manifest;
 }
-export interface LocalObject {
-  path: string;
-  sha256: string;
-  bytes: number;
-  role: 'manifest' | 'input' | 'output';
-}
 export interface ReleasePackage {
   root: string;
-  originals: string;
   releaseId: string;
   manifestBytes: Buffer;
   manifest: ReleaseManifest;
-  objects: Map<string, LocalObject>;
-  maxObjectBytes: number;
-}
-export async function checkedBytes(object: LocalObject, limit: number): Promise<Buffer> {
-  const bytes = await readSafeBytes(object.path, limit);
-  if (bytes.length !== object.bytes || sha256(bytes) !== object.sha256)
-    throw new ReleaseError(2, 'Local object differs from its manifest');
-  return bytes;
 }
 /** Offline: every declared input/output, build receipt, validation and package membership. */
 export async function preflightRelease(options: PackageOptions): Promise<ReleasePackage> {
@@ -170,26 +154,12 @@ export async function preflightRelease(options: PackageOptions): Promise<Release
   for (const path of await listFiles(root))
     if (!allowed.has(path))
       throw new ReleaseError(2, 'Package contains a file absent from its manifest');
-  const objects = new Map<string, LocalObject>();
-  objects.set(releaseId, {
-    path: join(root, 'manifest.json'),
-    bytes: manifestBytes.length,
-    sha256: releaseId,
-    role: 'manifest',
-  });
   for (const role of ['inputs', 'outputs'] as const) {
     for (const f of manifest[role]) {
       const path = join(role === 'outputs' ? root : originals, f.path);
       const facts = await fileFacts(path, f.bytes);
       if (facts.bytes !== f.bytes || facts.sha256 !== f.sha256)
         throw new ReleaseError(2, `${f.path}: bytes or SHA-256 differ from manifest`);
-      if (!objects.has(f.sha256))
-        objects.set(f.sha256, {
-          path,
-          bytes: f.bytes,
-          sha256: f.sha256,
-          role: role === 'inputs' ? 'input' : 'output',
-        });
     }
   }
   const validation = parseJson(await readSafeBytes(join(root, 'validation.json'), maxObjectBytes));
@@ -212,7 +182,5 @@ export async function preflightRelease(options: PackageOptions): Promise<Release
     receipt,
     await readSafeBytes(join(root, 'validation.json'), maxObjectBytes),
   );
-  return { root, originals, releaseId, manifestBytes, manifest, objects, maxObjectBytes };
+  return { root, releaseId, manifestBytes, manifest };
 }
-export const fileUrlPath = (file: ReleaseFile) =>
-  file.path.split('/').map(encodeURIComponent).join('/');

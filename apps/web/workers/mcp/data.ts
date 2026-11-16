@@ -1,5 +1,5 @@
 // The release the MCP tools read (apps/web/workers/mcp/handler.ts): the files of the current release, exactly as the screens get them
-// (apps/web/workers/release-data.ts: the registry, else the static files of the build), parsed once per isolate and release, and the
+// (apps/web/workers/release-data.ts: the release packaged with the build), parsed once per isolate and release, and the
 // addresses a tool answer links to, so the model can cite the page and the file of every number.
 import { internal } from '../../client/loc.js';
 import { href } from '../../client/routes.js';
@@ -47,7 +47,7 @@ export const screenUrl = (
   params: Record<string, string> = {},
   query: Record<string, string> = {},
 ) => ctx.origin + href(id, params, query);
-/** the address of a file of this very release (/data/releases/<id>/data/<name>.json from the registry, else /data/<name>.json) */
+/** the address of a data file of the release on the site (/data/<name>.json) */
 export const fileUrl = (ctx: Ctx, name: string) =>
   ctx.origin + (ctx.data.dataBase || '/data/') + name + '.json';
 

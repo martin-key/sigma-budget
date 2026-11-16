@@ -6,7 +6,6 @@
     "build": "echo \"Development artifact only; use pnpm -w build:release for deployment.\" && react-router build",
     "typecheck": "react-router typegen && tsc",
     "dev": "wrangler dev -c build/server/wrangler.json",
-    "registry:local": "wrangler d1 migrations apply DB --local",
     "test": "vitest run"
   },
   "devDependencies": {

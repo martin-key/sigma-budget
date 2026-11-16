@@ -4,13 +4,7 @@ interface Env {
   RELEASE_RATE_LIMITER?: RateLimit;
   /** the ceiling of MCP calls per address (apps/web/workers/release-rate-limit.ts rateLimitMcp) */
   MCP_RATE_LIMITER?: RateLimit;
-  DB: D1Database;
-  OBJECTS: R2Bucket;
   ENVIRONMENT: string;
-  ACCESS_ISSUER: string;
-  ACCESS_AUD: string;
-  SERVICE_TOKENS: string;
-  OPERATORS?: string;
   /** the public address of the site (canonical links, the sitemap); empty: the address of the request */
   SITE_ORIGIN?: string;
   /** the address of the original СИГМА (docs/approach-specification.md, section 2.2) */

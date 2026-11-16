@@ -233,8 +233,7 @@ try {
   for (const name of ['prepare-annual', 'prepare-execution', 'prepare-documents']) {
     assert.equal(command(name, []).status, 1, name);
   }
-  assert.equal(command('release-operator', ['preflight']).status, 2);
-  checks.push('All four compiled CLI argument guards, stale pin and existing-output safety');
+  checks.push('All three compiled CLI argument guards, stale pin and existing-output safety');
   report.annualReceipt = receipt;
   report.outputs = outputHashes;
   report.boundaries = {

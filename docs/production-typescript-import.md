@@ -37,17 +37,16 @@ New Node candidates require complete executed validation and a receipt binding t
 
 ## Normal command map
 
-| Command                                                | Implementation and semantics                                                                                                                                                                  |
-| ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `build`                                                | Registered offline source assembly, existing graph, complete validation and release-build packaging; optional explicit local `--site` installation.                                           |
-| `validate --release/--site`                            | Recorded-date, recorded-code numerical replay and package verification.                                                                                                                       |
-| `reproduce --manifest/--current`                       | Local manifest or existing public Worker/static current protocol, authenticated input/output bytes and exact replay. Explicit `--skip-published` omits published-output retrieval/comparison. |
-| `collect`, `refetch`, `import-source`                  | Source-client immutable acquisition/versioned snapshots and receipts. KFP imports bind the real workbook decoder automatically. Acquisition output is a separate new directory.               |
-| `source-status`, `drift`, `freshness`                  | Local source/pin/freshness diagnostics and reviewed drift.                                                                                                                                    |
-| `status`, `upload`, `publish`, `rollback`, `preflight` | Existing release-client protocol, named environment, guarded credentials, stable request IDs, CAS, resumable uploads, lost-response/readback behavior. No remote operation is implicit.       |
-| `prepare`                                              | Offline actual fiscal, annual and publication reader preparation, including nested ZIP/7z archives, in separate owned output directories.                                                     |
+| Command                               | Implementation and semantics                                                                                                                                                                  |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `build`                               | Registered offline source assembly, existing graph, complete validation and release-build packaging; optional explicit local `--site` installation.                                           |
+| `validate --release/--site`           | Recorded-date, recorded-code numerical replay and package verification.                                                                                                                       |
+| `reproduce --manifest/--current`      | Local manifest or existing public Worker/static current protocol, authenticated input/output bytes and exact replay. Explicit `--skip-published` omits published-output retrieval/comparison. |
+| `collect`, `refetch`, `import-source` | Source-client immutable acquisition/versioned snapshots and receipts. KFP imports bind the real workbook decoder automatically. Acquisition output is a separate new directory.               |
+| `source-status`, `drift`, `freshness` | Local source/pin/freshness diagnostics and reviewed drift.                                                                                                                                    |
+| `prepare`                             | Offline actual fiscal, annual and publication reader preparation, including nested ZIP/7z archives, in separate owned output directories.                                                     |
 
-There is no `restore` subcommand. The existing operator procedure and protocol restore scenarios remain in `docs/operator-guide.md`, `tests/release/release_check.mjs` and `tests/release/restore_drill.mjs`, which drive this TypeScript operator.
+There is no release publishing or restore subcommand. Data ship with the code through a reviewed PR.
 
 ## Finite required acceptance and CI inputs
 

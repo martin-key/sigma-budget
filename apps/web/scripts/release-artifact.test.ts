@@ -1,10 +1,13 @@
 // Release postprocessing, independent of the browser crawl (build-release.ts).
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
+import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   checkArtifact,
+  checkPublishedOutputs,
+  preservePublishedOutputs,
   checkPage,
   cleanText,
   gzSize,
@@ -50,6 +53,49 @@ const page = (o: Partial<PageInfo> = {}): PageInfo => ({
 const routes = [{ id: 'S01', pattern: '/', nav: true }];
 
 describe('the deploy artifact', () => {
+  it('rejects missing or changed output bytes and preserves omitted outputs in the archive', () => {
+    const sha = (bytes: Buffer | string) => createHash('sha256').update(bytes).digest('hex');
+    const sebra = Buffer.from('{"rows":[]}\n');
+    const core = Buffer.from('{"value":42}\n');
+    const output = (path: string, bytes: Buffer) => ({ path, sha256: sha(bytes) });
+    const manifest = JSON.stringify({
+      outputs: [output('data/sebra.json', sebra), output('data/core.json', core)],
+    });
+    // the release id is the SHA-256 of its manifest
+    const id = sha(manifest);
+    const archive = join(out, 'data/releases', id);
+    mkdirSync(archive, { recursive: true });
+    writeFileSync(join(out, 'data/releases/current.json'), JSON.stringify({ release_id: id }));
+    writeFileSync(join(archive, 'manifest.json'), manifest);
+    writeFileSync(join(out, 'data/sebra.json'), sebra);
+    writeFileSync(join(out, 'data/core.json'), core);
+    preservePublishedOutputs(out);
+    rmSync(join(out, 'data/sebra.json'));
+    expect(() => checkPublishedOutputs(out)).not.toThrow();
+    expect(readFileSync(join(archive, 'data/sebra.json'))).toEqual(sebra);
+    writeFileSync(join(out, 'data/core.json'), 'changed');
+    expect(() => checkPublishedOutputs(out)).toThrow('sha256 mismatch: data/core.json');
+    rmSync(join(out, 'data/core.json'));
+    expect(() => checkPublishedOutputs(out)).toThrow('missing: data/core.json');
+    writeFileSync(join(out, 'data/core.json'), core);
+    writeFileSync(join(archive, 'data/sebra.json'), 'changed archive');
+    expect(() => checkPublishedOutputs(out)).toThrow('sha256 mismatch: data/sebra.json');
+    // a release the Worker could not serve does not pass: no outputs, or a pointer it would not accept
+    const empty = JSON.stringify({ outputs: [] });
+    mkdirSync(join(out, 'data/releases', sha(empty)), { recursive: true });
+    writeFileSync(join(out, 'data/releases', sha(empty), 'manifest.json'), empty);
+    writeFileSync(
+      join(out, 'data/releases/current.json'),
+      JSON.stringify({ release_id: sha(empty) }),
+    );
+    expect(() => checkPublishedOutputs(out)).toThrow('lists no outputs');
+    writeFileSync(
+      join(out, 'data/releases/current.json'),
+      JSON.stringify({ release_id: 'notahexid' }),
+    );
+    expect(() => checkPublishedOutputs(out)).toThrow('invalid release_id');
+  });
+
   it('production and noindex', () => {
     const pages = { '/': page() };
     writeExtras(out, pages, 'https://example.test', '2026-11-11', routes);
@@ -188,6 +234,11 @@ describe('the deploy artifact', () => {
         1,
       ) + '\n',
     );
+    const id = 'd'.repeat(64);
+    mkdirSync(join(out, 'data/releases'), { recursive: true });
+    writeFileSync(join(out, 'data/releases/current.json'), JSON.stringify({ release_id: id }));
+    const originalFeed = read('data/feed.xml'),
+      originalCatalog = read('data/catalog.json');
     stampFiles(out, 'https://example.test', 'v1', 'abc1234');
     const feed = read('data/feed.xml');
     expect(feed).toBe(
@@ -197,6 +248,11 @@ describe('the deploy artifact', () => {
     expect(read('data/catalog.json')).toBe(
       `{"datasets":[{"file":"data/feed.xml","bytes":${raw.length},"gzipBytes":${gzSize(raw)}},{"file":"data/core.json","bytes":7}]}`,
     );
+    expect(read(`data/releases/${id}/data/feed.xml`)).toBe(originalFeed);
+    expect(read(`data/releases/${id}/data/catalog.json`)).toBe(originalCatalog);
+    stampFiles(out, 'https://other.test', 'v2', 'def5678');
+    expect(read(`data/releases/${id}/data/feed.xml`)).toBe(originalFeed);
+    expect(read(`data/releases/${id}/data/catalog.json`)).toBe(originalCatalog);
     expect(read('sw.js')).toBe('self.x = 1;\n'); // nothing to stamp: the file is left as it is
   });
 

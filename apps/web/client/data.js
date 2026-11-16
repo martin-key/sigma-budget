@@ -54,14 +54,10 @@ const ADAPT = { execution: execNumbers };
 /** the JSON of a data file as the pages read it: the same in the browser and on the server (apps/web/workers/release-data.ts) */
 export const parse = (name, text) => (ADAPT[name] ? ADAPT[name](text) : JSON.parse(text));
 
-/* One release for the whole visit (docs/approach-specification.md, section 7.3; docs/adr/0002-react-router-ssr.md): a page drawn by the
-   server names its release (<meta name="release-id">) and where its files are (<meta name="data-base">: /data/releases/<id>/data/ when
-   it comes from the registry). Every file the browser loads afterwards comes from there, so a release published in the middle of a visit
-   does not mix with the one on the screen. Without the tags (the static site) the files are the site's own data/. */
+/* The page names its packaged release and data base in meta tags. Without tags,
+   the static/offline shell reads its own data files. */
 const metaOf = (n) =>
   typeof document === 'undefined' ? '' : document.querySelector(`meta[name="${n}"]`)?.content || '';
-/** the visit's release comes from a registry (it has a journal and a public API); false for the static site and for a Worker without one */
-export const fromRegistry = () => !!pinnedBase()?.startsWith('/data/releases/');
 export const pinnedBase = () => {
   const b = serverScope()?.dataBase || metaOf('data-base');
   return /^\/data\/(releases\/[0-9a-f]{64}\/data\/)?$/.test(b) ? b : null;
@@ -88,12 +84,6 @@ function fetchJson(name) {
     return id.then((i) =>
       fetchFile(name, new URL(`/data/releases/${i}/${RELEASE_FILE[name]}`, location.origin)),
     );
-  }
-  if (name === 'release/journal') {
-    // the registry's public journal; no registry, no journal (nothing to ask for)
-    return fromRegistry()
-      ? fetchFile(name, new URL('/api/releases?limit=50', location.origin))
-      : Promise.reject(new PendingError(name));
   }
   return fetchFile(
     name,

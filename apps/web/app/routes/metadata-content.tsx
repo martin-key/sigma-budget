@@ -1,6 +1,6 @@
 import { glossaryTree } from '../components/GlossaryText';
 import { compactText, fixFiles } from '../components/ScreenTree';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { PageFrame } from '../components/PageFrame';
 import type { MetadataModel } from '../lib/screens/metadata-types';
 import type { Navigation } from '../lib/screen-state';
@@ -16,10 +16,8 @@ export function MetadataContent({
   navigation: Navigation;
   render: typeof ContentRenderer;
 }) {
-  const root = useRef<HTMLDivElement>(null),
-    [newer, setNewer] = useState('');
+  const root = useRef<HTMLDivElement>(null);
   const content = render({
-    newer,
     origin: model.release.origin,
     dataBase: model.release.dataBase,
     data: model.documents,
@@ -28,21 +26,6 @@ export function MetadataContent({
     failed: model.failed,
     fileMeta: model.fileMeta,
   });
-  useEffect(() => {
-    if (model.screen !== 'S35' || !model.registry) return;
-    const ctl = new AbortController();
-    fetch('/api/releases/current', { cache: 'no-store', signal: ctl.signal })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((value) => {
-        const c = value as { release_id: string; revision: number } | null;
-        if (c && /^[0-9a-f]{64}$/.test(c.release_id) && c.release_id !== model.release.id)
-          setNewer(
-            `Има по-ново издание: ${c.release_id.slice(0, 12)} (ревизия ${c.revision}). Презареди страницата, за да го видиш.`,
-          );
-      })
-      .catch(() => {});
-    return () => ctl.abort();
-  }, [model]);
   useEffect(() => {
     const title = root.current?.querySelector('.s25-set-t')?.textContent;
     if (title) navigation.announce(`Показан е наборът: ${title}.`);

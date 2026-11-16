@@ -3,7 +3,6 @@
 // of a file and the provenance of a number. Every answer names the release and links to the page and the file it comes from.
 import { screenOf, MAX_QUERY } from '../../client/searchlib.js';
 import { PendingError } from '../../client/data.js';
-import { publicApi } from '../api/api.js';
 import {
   catalog,
   core,
@@ -362,28 +361,29 @@ const EXECUTION_RECORD = /^(data|monthly)\/(\d{4})-(\d{2})\/(kfp|nat|eu)\/([a-z.
 const recordHelp =
   'Записът е `budget2027/<номер>` (полето `provenance` на клетка) или `<data|monthly>/<ГГГГ-ММ>/<kfp|nat|eu>/<ред>`, например data/2026-09/kfp/rev.';
 
+type ManifestInput = { path: string; sha256: string; url?: string; page?: string; source?: string };
+/** the inputs of the release's manifest by SHA-256: an original is verified when the release lists it with the same hash */
+async function inputsOf(ctx: Ctx): Promise<Map<string, ManifestInput>> {
+  try {
+    const m = await load<{ inputs?: ManifestInput[] }>(ctx, 'release/manifest');
+    return new Map((m.inputs || []).map((i) => [i.sha256, i]));
+  } catch (e) {
+    if (e instanceof PendingError) return new Map();
+    throw e;
+  }
+}
+/** where an original comes from: its path in the release and the official address (the site does not serve the originals) */
+const sourceOf = (i: ManifestInput | undefined) =>
+  i
+    ? { path: i.path, ...(i.url ? { url: i.url } : {}), ...(i.page ? { page: i.page } : {}) }
+    : null;
+
+/** the provenance of a number from the provenance files of the release packaged with the site, each original checked against its manifest */
 async function explainNumber(ctx: Ctx, args: Args) {
   const record = text(args, 'record', { max: 120, required: true });
   if (!BUDGET_RECORD.test(record) && !EXECUTION_RECORD.test(record)) throw new ArgError(recordHelp);
   const rid = ctx.data.releaseId;
-  if (ctx.data.dataBase.startsWith('/data/releases/')) {
-    // the registry: the public API checks the record against the manifest of the release (apps/web/workers/api/api.js provenance)
-    const url = new URL(`/api/releases/${rid}/provenance/${record}`, ctx.origin);
-    const res = (await publicApi(new Request(url), ctx.env, url)) as Response;
-    const body = (await res.json()) as Json;
-    if (res.status === 404 || res.status === 400)
-      throw new ArgError(String(body.error || recordHelp));
-    if (!res.ok) throw new Error(`provenance ${res.status}`);
-    const original = body.original as Json | undefined;
-    return {
-      ...body,
-      verified: true,
-      ...(original?.download
-        ? { original: { ...original, download: ctx.origin + String(original.download) } }
-        : {}),
-    };
-  }
-  // no registry (a local or a new environment): the provenance files of the release, not checked against a manifest
+  const inputs = await inputsOf(ctx);
   const b = BUDGET_RECORD.exec(record);
   if (b) {
     const p = await load<{ documents?: Record<string, Json>; entries?: Record<string, Json> }>(
@@ -399,13 +399,16 @@ async function explainNumber(ctx: Ctx, args: Args) {
     } catch {
       cell = undefined;
     }
+    const document = p.documents?.[String(entry.document)];
+    const archive = inputs.get(String(document?.archiveSha256 ?? ''));
     return {
       release_id: rid,
       record,
-      verified: false,
+      verified: !!archive && archive.path === document?.archive,
       ...(cell && typeof cell === 'object' ? (cell as Json) : {}),
       ...entry,
-      document: p.documents?.[String(entry.document)],
+      document,
+      source: sourceOf(archive),
     };
   }
   const [, block, y, mm, col, row] = EXECUTION_RECORD.exec(record)!;
@@ -425,19 +428,32 @@ async function explainNumber(ctx: Ctx, args: Args) {
   const value = series?.[Number(mm) - 1];
   if (value === undefined)
     throw new ArgError('Тази стойност я няма в изпълнението на това издание.');
+  if (block === 'monthly')
+    return {
+      release_id: rid,
+      record,
+      value,
+      unit: ex.contract?.money?.unit,
+      rule: p.rules?.monthly,
+      from: [
+        `data/${y}-${mm}/${col}/${row}`,
+        Number(mm) > 1
+          ? `data/${y}-${String(Number(mm) - 1).padStart(2, '0')}/${col}/${row}`
+          : null,
+      ].filter(Boolean),
+    };
+  const original = p.originals?.[`${y}-${mm}`];
+  const input = inputs.get(String(original?.sha256 ?? ''));
   return {
     release_id: rid,
     record,
-    verified: false,
+    verified: !!input,
     value,
     unit: ex.contract?.money?.unit,
-    ...(block === 'monthly'
-      ? { rule: p.rules?.monthly }
-      : {
-          sheet: p.sheet,
-          cell: p.columns?.[col!] && p.rows?.[row!] ? p.columns[col!]! + p.rows[row!] : null,
-          original: p.originals?.[`${y}-${mm}`],
-        }),
+    sheet: p.sheet,
+    cell: p.columns?.[col!] && p.rows?.[row!] ? p.columns[col!]! + p.rows[row!] : null,
+    original,
+    source: sourceOf(input),
   };
 }
 

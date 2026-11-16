@@ -51,7 +51,7 @@ drift --snapshot SNAPSHOT/snapshot.json [--review REVIEW_JSON]
 
 `--attempts`, `--timeout-ms`, `--max-bytes` and `--max-decoded-bytes` override finite acquisition limits. Errors and results have stable functional exit meanings: 0 successful operation, 1 drift/review pending or status problems, 2 invalid command/input, 3 unavailable acquisition/incomplete snapshot. `collect --check-drift` prioritizes unavailable sources over drift. `refetch` prioritizes changed bytes over unavailable responses.
 
-The root CLI uses `source-status` for original-file status and `status --environment NAME` for release-server status; `refetch --manifest/--current` resolves remote manifests before calling this client.
+The root CLI uses `source-status` for original-file status; release-server status and operator publishing commands have been removed. `refetch --manifest/--current` resolves remote manifests before calling this client.
 
 ## Immutable bytes, checkpoints and review
 

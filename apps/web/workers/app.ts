@@ -1,34 +1,19 @@
 import { screenCacheKey } from '../app/lib/cache';
-// The Worker of the site (docs/adr/0002-react-router-ssr.md). Every response crosses the security finalizer;
-// static files are fetched through ASSETS, while the Worker handles:
-//   /admin/*                            the operator API (apps/web/workers/api/admin.js), behind Cloudflare Access and checked again there
+// The site renders screens and serves the release packaged with the build. Besides the screens and the data files the Worker answers
 //   /.well-known/openai-apps-challenge  the token of OpenAI's domain check (OPENAI_APPS_CHALLENGE), else 404
 //   /mcp, /mcp/                         the MCP server for AI assistants (apps/web/workers/mcp/handler.ts): POST of JSON-RPC, read-only
-//   anything else but GET and HEAD      405: the public routes never write
-//   /api/releases*, /data/releases/*    the public, read-only release API (apps/web/workers/api/api.js)
-//   /data/<file>                        the stable address of a data file: the file of the current release (registry), else the static one
-//                                       (apps/web/wrangler.jsonc assets.run_worker_first sends these here before the static files)
-//   every screen                        React Router: the screen drawn from the current release (app/), one scope per request
-// The registry is D1 (binding DB), the objects are R2 (binding OBJECTS): docs/release.md.
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { createRequestHandler } from 'react-router';
-import { adminApi } from './api/admin.js';
 import { publicApi } from './api/api.js';
 import { mcp } from './mcp/handler';
 import { provideScope } from '../client/env.js';
 import { requestState } from '../client/store.js';
 import { screenSearch } from '../app/lib/query-params';
-import {
-  releaseData,
-  noRegistry,
-  candidateReleaseId,
-  usesRegistry,
-  type ReleaseData,
-} from './release-data';
+import { releaseData, type ReleaseData } from './release-data';
 import { inFlight, claim, withinCap } from './render-gate';
 import { finalizeResponse } from '../app/lib/security';
 import { rateLimitReleaseRead, rateLimitRender } from './release-rate-limit';
-import { bundledFeed, withFeedOrigin } from './feed';
+import { bundledFeed } from './feed';
 
 declare module 'react-router' {
   interface AppLoadContext {
@@ -104,7 +89,7 @@ function encoded(request: Request, res: Response): Response {
   return new Response(res.body, { status: res.status, statusText: res.statusText, headers: h });
 }
 
-/** the registry (D1, R2) cannot be read right now, or the isolate sheds a render: a 503 that says when to come back, as in СИГМА (a
+/** The assets cannot be read right now, or the isolate sheds a render: a 503 that says when to come back, as in СИГМА (a
  *  crawler backs off on it, where a 500 reads as a broken page), and that nothing keeps */
 function unavailable(
   message = 'Данните не могат да бъдат прочетени в момента. Опитайте отново след малко.',
@@ -120,55 +105,11 @@ function unavailable(
   });
 }
 
-/** a static file when there is one, else the answer the Worker already has */
-async function fallback(request: Request, env: Env, res: Response): Promise<Response> {
-  const file = await env.ASSETS.fetch(request);
-  return file.status === 404 ? res : file;
-}
-
-/* data/feed.xml of a release links to a placeholder host (packages/ingest/src/build/aggregation-feed.ts: a reserved name that never resolves), as the hash
-   addresses of the prototype. apps/web/scripts/release-artifact.ts writes the site's origin into the static copy (stampFiles); the stable address of a
-   registry release gets the same links here. The file of the release itself (/data/releases/<id>/data/feed.xml) keeps its bytes. */
-const FEED = 'data/feed.xml';
-
-/** /data/<file>: from the current release when there is a registry, so the stable addresses follow a new release without a deploy */
-async function dataFile(
-  request: Request,
-  env: Env,
-  url: URL,
-  data: ReleaseData,
-  origin: string,
-): Promise<Response> {
-  const path = url.pathname.slice(1);
-  let f: Awaited<ReturnType<ReleaseData['file']>>;
-  try {
-    f = path.includes('..') ? null : await data.file(path);
-  } catch (e) {
-    console.error(e);
-    return unavailable();
-  } // R2 cannot be read right now: not the static file instead
-  if (!f)
-    return path === FEED
-      ? encoded(request, await bundledFeed(request, env.ASSETS, origin, data.releaseId))
-      : env.ASSETS.fetch(request);
-  if (path === FEED) {
-    const o = await withFeedOrigin(f.bytes, origin);
-    f = { ...f, bytes: o.bytes, sha256: o.tag };
-  }
-  const etag = `"${f.sha256}"`;
-  const headers = {
-    'Content-Type':
-      f.mime +
-      (/^text\/|json|xml/.test(f.mime) && !/charset/.test(f.mime) ? '; charset=utf-8' : ''),
-    'Cache-Control': 'public, max-age=300, must-revalidate, no-transform',
-    ETag: etag,
-    'X-Release-Id': data.releaseId,
-    'Access-Control-Allow-Origin': '*',
-    'X-Content-Type-Options': 'nosniff',
-  };
-  if ((request.headers.get('If-None-Match') || '').replace(/^W\//, '') === etag)
-    return new Response(null, { status: 304, headers });
-  return encoded(request, new Response(request.method === 'HEAD' ? null : f.bytes, { headers }));
+/** Stable data addresses retain the build's asset headers and feed origin. */
+async function dataFile(request: Request, env: Env, data: ReleaseData, origin: string) {
+  return new URL(request.url).pathname === '/data/feed.xml'
+    ? encoded(request, await bundledFeed(request, env.ASSETS, origin, data.releaseId))
+    : env.ASSETS.fetch(request);
 }
 
 /* the headers that build/client/_headers (apps/web/scripts/release-artifact.ts) gives the static files, for the documents the Worker draws. no-transform: a zone
@@ -208,48 +149,110 @@ function openaiChallenge(env: Env): Response {
   });
 }
 
+interface CurrentOutputs {
+  id: string;
+  hashes: Map<string, string>;
+}
+// A deploy's assets are immutable; share both the first load and its result across requests.
+const outputMaps = new WeakMap<Fetcher, Promise<CurrentOutputs | null>>();
+function currentOutputs(assets: Fetcher, url: URL): Promise<CurrentOutputs | null> {
+  let pending = outputMaps.get(assets);
+  if (!pending) {
+    pending = (async () => {
+      const pointer = await assets.fetch(new Request(new URL('/data/releases/current.json', url)));
+      if (!pointer.ok) return null;
+      const current = await pointer.json<{ release_id: string }>().catch(() => null);
+      if (!current || !/^[a-f0-9]{64}$/.test(current.release_id)) return null;
+      const manifest = await assets.fetch(
+        new Request(new URL(`/data/releases/${current.release_id}/manifest.json`, url)),
+      );
+      if (!manifest.ok) return null;
+      const data = await manifest.json<{ outputs: { path: string; sha256: string }[] }>();
+      return {
+        id: current.release_id,
+        hashes: new Map(data.outputs.map((f) => [f.path, f.sha256])),
+      };
+    })().then(
+      (outputs) => {
+        // keep only a loaded map: a failed read is tried again on the next request
+        if (!outputs) outputMaps.delete(assets);
+        return outputs;
+      },
+      (error) => {
+        outputMaps.delete(assets);
+        throw error;
+      },
+    );
+    outputMaps.set(assets, pending);
+  }
+  return pending;
+}
+
+/** Only current manifest outputs have archive download addresses; source inputs never do. */
+async function currentOutput(
+  request: Request,
+  env: Env,
+  url: URL,
+  archive: Response,
+): Promise<Response | null> {
+  const match = /^\/data\/releases\/([a-f0-9]{64})\/(.+)$/.exec(url.pathname);
+  if (!match) return archive.status !== 404 ? archive : null;
+  let path: string;
+  try {
+    path = decodeURIComponent(match[2]);
+  } catch {
+    return null;
+  }
+  const current = await currentOutputs(env.ASSETS, url);
+  if (!current) return archive.status !== 404 ? archive : null;
+  const hash = match[1] === current.id ? current.hashes.get(path) : undefined;
+  if (!hash) return !path.startsWith('data/') && archive.status !== 404 ? archive : null;
+  // The asset's own validator describes the stable (possibly host-stamped) copy.
+  // Archive URLs always use the original output hash from the manifest.
+  const headers = new Headers({
+    ETag: `"${hash}"`,
+    'X-Release-Id': current.id,
+    'Cache-Control': 'public, max-age=31536000, immutable, no-transform',
+  });
+  if (
+    request.headers
+      .get('If-None-Match')
+      ?.split(',')
+      .some((tag) => tag.trim().replace(/^W\//, '') === `"${hash}"` || tag.trim() === '*')
+  )
+    return new Response(null, { status: 304, headers });
+  const sourceRequest = new Request(
+    archive.status === 304 ? url : new URL('/' + path, url),
+    request,
+  );
+  sourceRequest.headers.delete('If-None-Match');
+  const asset =
+    archive.status !== 404 && archive.status !== 304
+      ? archive
+      : await env.ASSETS.fetch(sourceRequest);
+  if (asset.status === 404) return null;
+  const combined = new Headers(asset.headers);
+  headers.forEach((value, name) => combined.set(name, value));
+  return encoded(request, new Response(asset.body, { status: asset.status, headers: combined }));
+}
+
 async function dispatch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
   const url = new URL(request.url);
-  if (url.pathname.startsWith('/admin/')) return adminApi(request, env, url);
+  if (url.pathname.startsWith('/admin/')) return new Response('Not found', { status: 404 });
   if (url.pathname === '/mcp' || url.pathname === '/mcp/') return mcp(request, env, url); // the address as people paste it, with or without the slash
   if (request.method !== 'GET' && request.method !== 'HEAD') {
     return new Response('Method not allowed', { status: 405, headers: { Allow: 'GET, HEAD' } });
   }
   if (url.pathname === OPENAI_CHALLENGE) return openaiChallenge(env);
   if (RELEASES.test(url.pathname)) {
-    // A local candidate build uses only its packaged release metadata, even
-    // when local registry bindings contain another release.
-    if (candidateReleaseId()) {
-      return url.pathname.startsWith('/data/releases/')
-        ? env.ASSETS.fetch(request)
-        : Response.json({ error: 'local candidate has no release registry' }, { status: 404 });
-    }
-    // Packaged release resources are immutable build assets, not registry reads.
-    // Check the asset before charging the registry limiter (including 304/HEAD).
-    if (/^\/data\/releases\/[a-f0-9]{64}\/.+/.test(url.pathname)) {
+    if (url.pathname.startsWith('/data/releases/')) {
       const asset = await env.ASSETS.fetch(request);
-      if (asset.status === 200 || asset.status === 206 || asset.status === 304) return asset;
+      const output = await currentOutput(request, env, url, asset);
+      if (output) return output;
     }
     const limited = await rateLimitReleaseRead(request, env);
     if (limited) return limited;
-    // the registry's releases; a release that was published with the site (data/release/releases/) is one of the static files. An
-    // environment without a registry (no D1 tables: a local check, a new environment) answers as one where the release is unknown
-    let res: Response;
-    try {
-      res = await publicApi(request, env, url);
-    } catch (e) {
-      if (!noRegistry(env, e)) {
-        console.error(e);
-        return unavailable();
-      }
-      res = Response.json(
-        { error: 'no release registry in this environment' },
-        { status: 404, headers: { 'Cache-Control': 'no-store' } },
-      );
-    }
-    return res.status === 404 && url.pathname.startsWith('/data/releases/')
-      ? fallback(request, env, res)
-      : res;
+    return publicApi(request, env, url);
   }
 
   // Route static assets through the finalizer too: runtime noindex applies to every response.
@@ -262,16 +265,12 @@ async function dispatch(request: Request, env: Env, ctx: ExecutionContext): Prom
   const sigmaUrl = env.SIGMA_URL || '';
   let data: ReleaseData;
   try {
-    if (DATA_FILE.test(url.pathname) && (await usesRegistry(env))) {
-      const limited = await rateLimitReleaseRead(request, env);
-      if (limited) return limited;
-    }
     data = await releaseData(env, url.origin);
   } catch (e) {
     console.error(e);
     return unavailable();
-  } // RegistryError: D1 or R2 cannot be read right now
-  if (DATA_FILE.test(url.pathname)) return dataFile(request, env, url, data, origin);
+  }
+  if (DATA_FILE.test(url.pathname)) return dataFile(request, env, data, origin);
   const release = {
     id: data.releaseId,
     dataBase: data.dataBase,

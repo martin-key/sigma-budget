@@ -1,12 +1,10 @@
+import { publicApi } from './api/api.js';
 import { describe, expect, it, vi } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { resolve } from 'node:path';
 import { CSP, finalizeResponse, staticResponseHeaders } from '../app/lib/security';
 import { rateLimitReleaseRead } from './release-rate-limit';
-import { publicApi } from './api/api.js';
-import { operator } from './api/access.js';
-import { adminApi } from './api/admin.js';
 
 const root = resolve(import.meta.dirname, '../../..');
 const local = { ENVIRONMENT: 'local' };
@@ -143,77 +141,6 @@ describe('SECURITY-05–06 response policy', () => {
   });
 });
 
-describe('SECURITY-07 parameter validation precedes storage', () => {
-  it.each([
-    '?limit=1.5',
-    '?limit=0',
-    '?limit=101',
-    '?limit=',
-    '?limit=1&limit=2',
-    '?before=Infinity',
-    '?before=-1',
-    '?before=9007199254740992',
-    '/%ZZ',
-  ])('returns JSON 400 for %s', async (suffix) => {
-    const req = request('/api/releases' + suffix);
-    const res = await publicApi(req, {}, new URL(req.url));
-    expect(res.status).toBe(400);
-    expect(await res.json()).toHaveProperty('error');
-  });
-  it('passes safe integer boundaries to bound D1 parameters', async () => {
-    const all = vi.fn(async () => ({ results: [] }));
-    const bind = vi.fn(() => ({ all }));
-    const env = { DB: { prepare: () => ({ bind }) }, OBJECTS: {} };
-    const req = request('/api/releases?limit=100&before=9007199254740991');
-    expect((await publicApi(req, env, new URL(req.url))).status).toBe(200);
-    expect(bind).toHaveBeenCalledWith(Number.MAX_SAFE_INTEGER, 100);
-  });
-});
-
-describe('SECURITY-08 malformed Access JWTs', () => {
-  const env = { ACCESS_ISSUER: 'https://access.example', ACCESS_AUD: 'test', DB: {}, OBJECTS: {} };
-  const encode = (v: unknown) => Buffer.from(JSON.stringify(v)).toString('base64url');
-  it.each([null, [], 'text', 42, {}, { alg: 'RS256', kid: 1 }])(
-    'rejects header %j',
-    async (header) => {
-      const req = new Request('https://budget.example/admin/operations', {
-        headers: { 'Cf-Access-Jwt-Assertion': `${encode(header)}.${encode({})}.AA` },
-      });
-      expect((await operator(req, env)).status).toBe(401);
-      expect((await adminApi(req, env, new URL(req.url))).status).toBe(401);
-    },
-  );
-  it.each([null, [], {}, { iss: 'x', aud: [], exp: '9999999999' }])(
-    'rejects claims %j',
-    async (claims) => {
-      const req = new Request('https://budget.example/admin/operations', {
-        headers: {
-          'Cf-Access-Jwt-Assertion': `${encode({ alg: 'RS256', kid: 'x' })}.${encode(claims)}.AA`,
-        },
-      });
-      expect((await operator(req, env)).status).toBe(401);
-    },
-  );
-  it('rejects malformed signature encoding before certificate lookup', async () => {
-    const req = new Request('https://budget.example/admin/operations', {
-      headers: {
-        'Cf-Access-Jwt-Assertion': `${encode({ alg: 'RS256', kid: 'x' })}.${encode({ iss: env.ACCESS_ISSUER, aud: 'test', exp: 9999999999 })}.Z`,
-      },
-    });
-    expect((await operator(req, { ...env, ACCESS_JWKS: 'invalid' })).status).toBe(401);
-  });
-  it('sanitizes unavailable certificate verification', async () => {
-    const req = new Request('https://budget.example/admin/operations', {
-      headers: {
-        'Cf-Access-Jwt-Assertion': `${encode({ alg: 'RS256', kid: 'x' })}.${encode({ iss: env.ACCESS_ISSUER, aud: 'test', exp: 9999999999 })}.AA`,
-      },
-    });
-    const res = await adminApi(req, { ...env, ACCESS_JWKS: 'invalid' }, new URL(req.url));
-    expect(res.status).toBe(503);
-    expect(await res.json()).toEqual({ error: 'Access verification unavailable' });
-  });
-});
-
 describe('SECURITY-09 release rate limit', () => {
   it('allows, denies, and shares a client key across paths', async () => {
     const limit = vi.fn(async () => ({ success: true }));
@@ -273,8 +200,6 @@ describe('SECURITY-09 release rate limit', () => {
     expect(config.vars.SITE_ORIGIN).toBe('https://sigma-budget.midt.bg');
     expect(config.vars.FEEDBACK_EMAIL).toBe('contact@midt.government.bg');
     expect(config.vars.NOINDEX).toBe('');
-    expect(config.d1_databases[0].database_name).toBe('sigma-budget-registry');
-    expect(config.r2_buckets[0].bucket_name).toBe('sigma-budget-objects');
     expect(config.env).not.toHaveProperty('production');
     expect(text).not.toContain('WORKER_VERSION');
   });
@@ -329,5 +254,23 @@ describe('SECURITY-09 release rate limit', () => {
         })
       )?.status,
     ).toBe(503);
+  });
+});
+describe('SECURITY-07 parameter validation precedes storage', () => {
+  it.each([
+    '?limit=1.5',
+    '?limit=0',
+    '?limit=101',
+    '?limit=',
+    '?limit=1&limit=2',
+    '?before=Infinity',
+    '?before=-1',
+    '?before=9007199254740992',
+    '/%ZZ',
+  ])('returns JSON 400 for %s', async (suffix) => {
+    const req = request('/api/releases' + suffix);
+    const res = await publicApi(req, {}, new URL(req.url));
+    expect(res.status).toBe(400);
+    expect(await res.json()).toHaveProperty('error');
   });
 });

@@ -959,7 +959,7 @@ AI асистентите (Claude, ChatGPT) четат данните през `
 - **Логовете** имат само името на инструмента, изхода, времето и размера. Аргументите не се логват, защото носят текст от потребителя.
 - **Локална проверка**: `pnpm build`, после `pnpm dev -- --port 8814` и
   `curl -s -X POST http://127.0.0.1:8814/mcp -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'`.
-  Без регистър `explain_number` чете файловете за произход на изданието и отговаря с `verified: false`. С регистър проверката минава през публичния API и манифеста (`tests/release/release_check.mjs`).
+  `explain_number` чете файловете за произход на включеното издание и сверява оригинала с манифеста му (`release/manifest`): `verified: true`, когато изданието го изброява със същия SHA-256; `source` дава официалния адрес, защото сайтът не обслужва оригиналите.
 
 ---
 
@@ -1159,3 +1159,7 @@ S12 чете проверените откъси направо от `measures`;
 S18 запазва отделни състояния за невалиден вход, липсващ вход и дата без проверени ставки. Грешката остава до полето с `aria-invalid`. Референтните цени се показват с десетична запетая и подходяща точност; до първата редакция сметката използва стойността от източника. След редакция използва въведената цена.
 
 Проверките на списъците, CSV, споделените мерни единици и навигацията са в `tests/e2e/worker/public-bill-lists.spec.ts`, `share-units.spec.ts` и `react-bridge.spec.ts`. Job `check` ги изпълнява с `E2E_WORKER_URL=http://127.0.0.1:8814 pnpm test:e2e --project=worker public-bill-lists.spec.ts share-units.spec.ts react-bridge.spec.ts`. `apps/web/scripts/hrefs.test.ts` проверява адресите в хранилището чрез web Vitest suite. `node apps/web/scripts/make-images.ts` генерира social card и app icons; байтовете зависят от Chromium и шрифтовете.
+
+## Издание с кода
+
+SSR и публичните файлове използват само `data/release/`, включително цялата `releases/`. Ново издание се пренася от `midt-bg/sigma-budget-data` чрез PR. Merge към `main` публикува staging, а таг `vX.Y.Z` публикува production след одобрение. `/api/releases/current` назовава включеното издание; `/admin/*` връща `404`. Подробности: [процедура за издание](operator-guide.md).

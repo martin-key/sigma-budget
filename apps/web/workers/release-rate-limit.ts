@@ -42,7 +42,7 @@ export async function rateLimitReleaseRead(
  * the assistants call from a few shared addresses of their providers, so the ceiling is per address and not per person. Then the session
  * the server gave the client (else the address) on RELEASE_RATE_LIMITER: the share of one conversation. A session is not verified, so a
  * client that makes up a new one for every call gets new session buckets but stays under the ceiling of its address. Like release reads,
- * a missing or failing binding fails closed in production (the tools read the registry). Returns the status to answer with, or null. */
+ * a missing or failing binding fails closed in production. Returns the status to answer with, or null. */
 export async function rateLimitMcp(
   request: Request,
   env: Pick<Env, 'RELEASE_RATE_LIMITER' | 'MCP_RATE_LIMITER' | 'ENVIRONMENT'>,
