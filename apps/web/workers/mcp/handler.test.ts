@@ -124,7 +124,7 @@ describe('the protocol', () => {
   });
   it('says the data cannot be read when the release cannot', async () => {
     const error = vi.spyOn(console, 'error').mockImplementation(() => {});
-    vi.mocked(releaseData).mockRejectedValueOnce(new Error('D1 down'));
+    vi.mocked(releaseData).mockRejectedValueOnce(new Error('Asset unavailable'));
     const res = await send(post(rpc('tools/call', { name: 'about_data', arguments: {} })));
     const { result } = (await res.json()) as any;
     expect(result.isError).toBe(true);
