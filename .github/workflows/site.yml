@@ -256,13 +256,13 @@ jobs:
       - name: Old addresses
         run: pnpm test:e2e --project=static redirects.spec.ts
       - name: Tax calculator
-        run: python -m tests.e2e.calc_check
+        run: pnpm test:e2e --project=static calc.spec.ts
       - name: Sharing and export
-        run: python -m tests.e2e.share_check
+        run: pnpm test:e2e --project=static share.spec.ts
       - name: Acceptance figures
-        run: python -m tests.e2e.accept
+        run: pnpm test:e2e --project=static accept.spec.ts overlap.spec.ts
       - name: Motion
-        run: python -m tests.e2e.motion
+        run: pnpm test:e2e --project=static motion.spec.ts
       # A failed test step prevents subsequent default-success test steps from
       # running, so a later Playwright invocation cannot clean its failure traces.
       - name: Upload failed Playwright traces and screenshots

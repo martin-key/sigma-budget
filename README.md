@@ -72,15 +72,15 @@ Playwright Test конфигурацията е в `tests/e2e/playwright.config.
 
 ```bash
 PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers E2E_WORKER_URL=http://127.0.0.1:8814 pnpm test:e2e
-# Само старите hash адреси, без Worker:
+# Статичните проверки, без Worker:
 PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers pnpm test:e2e --project=static
 # Самостоятелен статичен сървър с path fallback:
 node apps/web/scripts/serve.ts --port 8000
 ```
 
-Проектът `worker` включва `boot.spec.ts`, `security-headers.spec.ts`, `narrative-adoption.spec.ts` и `period-matrix.spec.ts`. Проектът `static` изпълнява `redirects.spec.ts` върху автоматично сглобените symlinks в `tmp/static-site`. Данните се четат от `data/release`, JavaScript - от `apps/web/build/client/js`; необходим е предварителен build. `serve.py` и `static_assets.py` остават за все още непренесените Python проверки.
+Проектът `worker` включва `boot.spec.ts`, `security-headers.spec.ts`, `narrative-adoption.spec.ts` и `period-matrix.spec.ts`. Проектът `static` изпълнява `redirects.spec.ts`, `calc.spec.ts`, `share.spec.ts`, `accept.spec.ts`, `overlap.spec.ts` и `motion.spec.ts` върху автоматично сглобените symlinks в `tmp/static-site`. Данните се четат от `data/release`, JavaScript - от `apps/web/build/client/js`; необходим е предварителен build.
 
-Останалите браузърни проверки са `calc_check.py`, `share_check.py`, `accept.py` и `motion.py` в `tests/e2e/`. Те използват временния статичен сайт. `overlap.py` проверява припокриванията. Очакваните числа се четат от текущите данни чрез `expect.py`. Интеграционните проверки `node tests/release/release_check.mjs` и `node tests/release/restore_drill.mjs` изискват Node, pnpm и инсталираните зависимости; Worker-ът се пуска от самите проверки.
+Калкулаторът, споделянето, приемните числа, layout/keyboard матрицата, движението и припокриванията се проверяват с Playwright Test. Например `pnpm test:e2e --project=static calc.spec.ts` или `pnpm test:e2e --project=static accept.spec.ts overlap.spec.ts`. Независимите очаквания в `tests/e2e/expected.ts` използват release данните; заплатните изчисления са в цели центове, а процентните ставки - в базисни точки. Browser probes са типизирани функции, подавани директно на Playwright. При отказ се запазват traces.
 
 ## Данни и издания
 

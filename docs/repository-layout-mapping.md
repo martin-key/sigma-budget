@@ -36,7 +36,6 @@
 | `tools/data/requirements.txt`        | `pipeline/requirements.txt`                               |
 | `tools/environments.json`            | `pipeline/environments.json`                              |
 | `tools/mock/accept_v5.py`            | `reference/mock/accept_v5.py`                             |
-| `tools/mock/accept_v6.py`            | `tests/e2e/accept.py`                                     |
 | `tools/mock/apply_v6_glue.py`        | `pipeline/budget_pipeline/build/apply_sources.py`         |
 | `tools/mock/forecast_tables.py`      | `pipeline/budget_pipeline/build/forecast_tables.py`       |
 | `tools/mock/budgets.py`              | `pipeline/budget_pipeline/build/budgets.py`               |
@@ -62,7 +61,6 @@
 | `tools/mock/search.py`               | `pipeline/budget_pipeline/build/search.py`                |
 | `tools/mock/editorial.py`            | `pipeline/budget_pipeline/build/editorial.py`             |
 | `tools/mock/calc_check_v5.py`        | `reference/mock/calc_check_v5.py`                         |
-| `tools/mock/calc_check_v6.py`        | `tests/e2e/calc_check.py`                                 |
 | `tools/mock/catalog_definitions.py`  | `pipeline/budget_pipeline/build/catalog_definitions.py`   |
 | `tools/mock/catalog_refresh_v5.py`   | `pipeline/budget_pipeline/build/catalog_refresh.py`       |
 | `tools/mock/check_mock.py`           | `reference/mock/check_mock.py`                            |
@@ -77,7 +75,6 @@
 | `tools/mock/diff_routes_v5_v6.py`    | `reference/mock/diff_routes_v5_v6.py`                     |
 | `tools/mock/data_io.py`              | `pipeline/budget_pipeline/build/data_io.py`               |
 | `tools/mock/exec_contract.py`        | `pipeline/budget_pipeline/validate/execution_contract.py` |
-| `tools/mock/expect_v6.py`            | `tests/e2e/expect.py`                                     |
 | `tools/mock/bill.py`                 | `pipeline/budget_pipeline/extract/bill.py`                |
 | `tools/mock/dbp2027.py`              | `pipeline/budget_pipeline/extract/dbp2027.py`             |
 | `tools/mock/kfp_full.py`             | `pipeline/budget_pipeline/extract/kfp_full.py`            |
@@ -92,8 +89,6 @@
 | `tools/mock/mock_content.py`         | `pipeline/budget_pipeline/build/example_text.py`          |
 | `tools/mock/mock_labels.py`          | `pipeline/budget_pipeline/build/measure_labels.py`        |
 | `tools/mock/mock_lib.py`             | `pipeline/budget_pipeline/build/example_support.py`       |
-| `tools/mock/motion_v6.py`            | `tests/e2e/motion.py`                                     |
-| `tools/mock/overlap_v6.py`           | `tests/e2e/overlap.py`                                    |
 | `tools/mock/perf_v6.py`              | `tests/e2e/perf.py` (премахнат)                           |
 | `tools/mock/png_probe_v5.py`         | `reference/mock/png_probe_v5.py`                          |
 | `tools/mock/png_probe_v6.py`         | `tests/e2e/png_probe.py` (премахнат)                      |
@@ -104,7 +99,6 @@
 | `tools/mock/redirects_v6.py`         | `tests/e2e/static/redirects.spec.ts` (пренесен)           |
 | `tools/mock/run_all.sh`              | `pipeline/budget_pipeline/build/run_all.sh`               |
 | `tools/mock/share_check_v5.py`       | `reference/mock/share_check_v5.py`                        |
-| `tools/mock/share_check_v6.py`       | `tests/e2e/share_check.py`                                |
 | `tools/mock/shot_v5.py`              | `reference/mock/shot_v5.py`                               |
 | `tools/mock/shot_v6.py`              | `tests/e2e/shot.py` (премахнат)                           |
 | `tools/mock/shots_v2.py`             | `reference/mock/shots_v2.py`                              |

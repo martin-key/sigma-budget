@@ -1,4 +1,10 @@
-import { test as base, expect, type BrowserContextOptions } from '@playwright/test';
+import {
+  test as base,
+  expect,
+  type BrowserContext,
+  type Page,
+  type BrowserContextOptions,
+} from '@playwright/test';
 import { staticRoot, startStaticServer } from '../../apps/web/scripts/serve.ts';
 export const test = base.extend<{}, { siteURL: string }>({
   siteURL: [
@@ -42,4 +48,10 @@ export function gate() {
       return released;
     },
   };
+}
+
+export async function enableHashRoutes(target: BrowserContext | Page) {
+  await target.addInitScript(() => {
+    window.__HASH_ROUTES__ = true;
+  });
 }

@@ -1,4 +1,4 @@
-import { test, expect } from '../fixtures.ts';
+import { test, expect, enableHashRoutes } from '../fixtures.ts';
 test.use({ serviceWorkers: 'block' });
 const CASES: [string, string, string, Record<string, string>, string[]][] = [
   ['#/deystvie?tab=otkrij', 'S01', '/', {}, ['tab']],
@@ -105,7 +105,7 @@ const CASES: [string, string, string, Record<string, string>, string[]][] = [
 test.use({ viewport: { width: 1280, height: 900 }, reducedMotion: 'reduce' });
 test('retired addresses preserve query context', async ({ context, siteURL }) => {
   test.setTimeout(300_000); // All 24 original eight-second readiness failures can be reported.
-  await context.addInitScript('window.__HASH_ROUTES__ = true');
+  await enableHashRoutes(context);
   for (const [old, sid, path, want, gone] of CASES)
     await test.step(old, async () => {
       const page = await context.newPage();

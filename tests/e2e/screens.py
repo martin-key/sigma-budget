@@ -308,7 +308,7 @@ class Worker:
         o = dict(viewport={'width': extra.get('w', c['w']), 'height': extra.get('h', c['h'])}, color_scheme=c['scheme'],
                  has_touch=c['touch'], locale='bg-BG', timezone_id='Europe/Sofia', service_workers=extra.get('sw', 'block'),
                  accept_downloads=True, permissions=['clipboard-read', 'clipboard-write'])
-        if extra.get('reduced_motion') or not extra.get('motion'):          # Current (26.10): the checks run with the motion switched off (the final state at once); tests/e2e/motion.py drives the motion itself
+        if extra.get('reduced_motion') or not extra.get('motion'):          # Current (26.10): the checks run with the motion switched off (the final state at once); tests/e2e/static/motion.spec.ts checks the visible motion results
             o['reduced_motion'] = 'reduce'
         ctx = self.browser.new_context(**o)
         ctx.add_init_script(INIT_JS)
