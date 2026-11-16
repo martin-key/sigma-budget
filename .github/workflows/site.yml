@@ -245,6 +245,8 @@ jobs:
           for i in $(seq 1 60); do curl -sf -o /dev/null http://127.0.0.1:8814/robots.txt && break; sleep 1; done
           python -m tests.e2e.screens --url http://127.0.0.1:8814/
           python -m tests.e2e.visual_audit --url http://127.0.0.1:8814/
+      - name: Screen audits, states, variants and checker self-test (Playwright Test)
+        run: E2E_WORKER_URL=http://127.0.0.1:8814 pnpm test:e2e --project=worker screens-base.spec.ts screens-demo.spec.ts screens-variants.spec.ts screens-selftest.spec.ts
       - name: Early boot, server DOM adoption and cross-origin security (Playwright Test)
         run: E2E_WORKER_URL=http://127.0.0.1:8814 pnpm test:e2e --project=worker boot.spec.ts narrative-adoption.spec.ts security-headers.spec.ts
       - name: Annual periods, aliases, SSR notices and stored preferences
