@@ -1,13 +1,6 @@
 {
   "baseline": "810b0f9fef7bc444f88f43182c7278fe7039c236",
   "inputs": {
-    "donor/checks.py": "25d7d0e984c5214efb2786f0f72f50cd6666b5f4565802fbb998d1cd52cc0567",
-    "donor/fiscal.py": "b47769a9a99163adf1000c3fbd7c9892e3b7823809f17ec78a935563d643d5b5",
-    "donor/law.py": "de4dbeb83fa6b429b9dc97179f06d18057ebb60191617a1178e58e996b2a1d38",
-    "donor/budgets.py": "afbabe24c96182801efc1df1c0b8d4dd6ad69ddbdcf615fe029e2901cf0c53ef",
-    "donor/catalog.py": "f656945429bec45296ec95519be2a187d14f4fabda5ff4a1ee91a9baa9dc53e6",
-    "donor/execution_contract.py": "ffa32a7c6ee3a1ef661294049f77d8797a2e5dbc7fe4e160d7ebc5e7b5e70e5f",
-    "donor/routes.py": "9a3394ed319834cf97cc85afc6aadbb501957c76b579faafa3f83008a4455c3f",
     "corpus/apps/web/app/lib/routes.json": "d41a55e3a68f3d92192df348518c4e98e0289ea604f67b045b9fbc4c3c003f7f",
     "corpus/data/release/outlook.json": "739f52dd3970505e39e819edb412ed4c189f3a15ca70d2124e32ff6c01aea5b5",
     "corpus/data/release/revenue.json": "304117c59f0e2f661abf8f207b2599fa912ebdcd6036c000b46aab60cd4a15ef",

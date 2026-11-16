@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { expect, it } from 'vitest';
 import { catalogUrlName, primaryFiles, type CatalogPrimaryInput } from './catalog-primary.js';
-// Outputs of the Python donor, frozen once with Python 3.12 (see each file's `command`).
+// Frozen expected URL names and filesystem facts.
 const frozen = (name: string) =>
   JSON.parse(
     readFileSync(new URL(`../../test/expected/catalog-primary/${name}`, import.meta.url), 'utf8'),
@@ -66,7 +66,7 @@ it('uses observed size, omits absent optional KFP bytes, rejects corrupt manifes
     sha256: c,
   });
 });
-it('matches the unchanged Python donor over a real synthetic filesystem', () => {
+it('matches the expected facts over a synthetic filesystem', () => {
   const { sample } = frozen('synthetic-primary.json');
   const actual = primaryFiles({
     ...sample,

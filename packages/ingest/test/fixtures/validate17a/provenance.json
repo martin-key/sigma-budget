@@ -1,7 +1,6 @@
 {
   "base": "8b68ae1bd5617152dc45c6ed168f788345a27ec5",
   "buildDate": "2026-11-08",
-  "python": "3.12",
   "note": "Exact Git-exported bytes; capture does not establish historical original acquisition. No live input is read.",
   "inputs": {
     "corpus/apps/web/app/lib/routes.json": "d41a55e3a68f3d92192df348518c4e98e0289ea604f67b045b9fbc4c3c003f7f",
@@ -103,13 +102,7 @@
     "corpus/data/release/rates.json": "da07795aba9d5bc3ce0235d348206d281a0890d77f247f9e397155f8e9768003",
     "corpus/data/release/revenue.json": "304117c59f0e2f661abf8f207b2599fa912ebdcd6036c000b46aab60cd4a15ef",
     "corpus/data/release/search-index.json": "0942ddf2918ac0b8a9c8124964aefcddb3478a59d1be798a551431ec71e83efd",
-    "corpus/data/release/sebra.json": "72590501d820063981f5e360b871fe592477be02e9429705f332ab3eee176c8b",
-    "donor/budget_pipeline/routes.py": "9a3394ed319834cf97cc85afc6aadbb501957c76b579faafa3f83008a4455c3f",
-    "donor/budget_pipeline/validate/catalog.py": "f656945429bec45296ec95519be2a187d14f4fabda5ff4a1ee91a9baa9dc53e6",
-    "donor/budget_pipeline/validate/checks.py": "25d7d0e984c5214efb2786f0f72f50cd6666b5f4565802fbb998d1cd52cc0567",
-    "donor/budget_pipeline/validate/components.py": "5bac6fde1850421a87310bd337c9849b936962f044d3dab22598e5005e3dc60e",
-    "donor/budget_pipeline/validate/execution_contract.py": "ffa32a7c6ee3a1ef661294049f77d8797a2e5dbc7fe4e160d7ebc5e7b5e70e5f",
-    "donor/budget_pipeline/validate/search_feed.py": "b473784911c4a709720a2d57b7b4556eecd993bffb09fbc78c4b023bac69773a"
+    "corpus/data/release/sebra.json": "72590501d820063981f5e360b871fe592477be02e9429705f332ab3eee176c8b"
   },
   "casesSha256": "d9ac1121abe749089f07560ff0fbbc60822faec691e903bd1cea2f7089ef492b",
   "oracleSha256": "abf32465cfb0da34d652e1a4f2b786458084d8763f3c84e989066d81bd60ab60"

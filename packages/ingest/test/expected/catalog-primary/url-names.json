@@ -1,11 +1,9 @@
 {
-  "capturedWith": "Python 3.12.14",
-  "command": "urllib.parse.unquote(url.split('?')[0].rsplit('/', 1)[-1])",
   "urls": [
     "https://x/%D0%B0%20b.pdf?q=%20",
     "https://x/a%2Fb",
     "https://x/%ff%ZZ",
     "https://x/кирилица+test?q=1"
   ],
-  "names": ["а b.pdf", "a/b", "\ufffd%ZZ", "кирилица+test"]
+  "names": ["а b.pdf", "a/b", "�%ZZ", "кирилица+test"]
 }

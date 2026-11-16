@@ -1,12 +1,9 @@
 {
-  "python": "3.12",
-  "generatorSha256": "5efe731619331990acfd8ba757dd82724a1f25424660009b37ba5d52179b6e7a",
   "inputs": {
-    "generate_oracle.py": "a834a8b2d739eb87e8918f08d8fd7e8c81fbcccf81a7a0609f9746cba3cee354",
-    "provenance.json": "04b585d13e68c4ad8eafbc56977ee0163539b70e4702e9695405909d88628fe1",
-    "reader/provenance.json": "45fb4b9c792da4e2e1af215fc37bcfcc8ee6655b0ae840775f85a5296ab66e92",
-    "boundaries/provenance.json": "0d1f3deff69c28864c42212873f524f19fb942a6a495874921f0a733801e55bd",
-    "containers/provenance.json": "70176ba848542df8e146cefa1e94a71509fd1ce7b5629130a52579f2b31642ab"
+    "provenance.json": "b99aaf1754f4d6ab8b052cb9c291827a8ce488996dfad5b1bbe0678eb74af30f",
+    "reader/provenance.json": "129a4592123c32a8d9a908e2d029344f98dcc6dd8a55968c82e0380044d6052c",
+    "boundaries/provenance.json": "d7a26e21750b7f07ac65e0fa941b61d6a67fb7afcd36cf3196df48f798a37c61",
+    "containers/provenance.json": "cd899a05809a67e15a6ce5ebc43f99c3fb88d9b59f60f48fd33be6bafbb25a58"
   },
   "outputs": {
     "cases.json": "25f88b086a3d42df461d19db929f10c57edbf9f65966cecf3fd851b7c173750d",

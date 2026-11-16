@@ -65,10 +65,11 @@ function update(file: string, op: (d: any) => void) {
 function normal(s: string): string {
   return s.replace(/(-?\d+)\.0(?!\d)/g, '$1').replaceAll('null', 'None');
 }
-describe('Python 3.12 pinned donor baseline and finite independent mutations', () => {
-  it('authenticates frozen donor/data bytes and pinned original dependencies', () => {
-    for (const [rel, digest] of Object.entries(manifest.frozen))
+describe('pinned inputs and independent mutations', () => {
+  it('authenticates DATA bytes and original dependencies', () => {
+    for (const [rel, digest] of Object.entries(manifest.frozen)) {
       expect(sha256(readFileSync(join(fixture, rel))), rel).toBe(digest);
+    }
     for (const [rel, digest] of Object.entries(manifest.requiredInputs))
       expect(sha256(readFileSync(requiredInput(rel))), rel).toBe(digest);
     expect(manifest.repositoryBaseline).toBe('3424bc998c726d6d511d4284295c54c50c42d099');
@@ -96,7 +97,7 @@ describe('Python 3.12 pinned donor baseline and finite independent mutations', (
           expect(c.warnings).toEqual(expected.warnings);
           expect(c.facts).toEqual(expect.arrayContaining(expected.facts));
         } else {
-          // Integrity coverage adds checks to the unchanged donor contract rules.
+          // Integrity coverage adds checks to the unchanged reference contract rules.
           expect(c.n).toBeGreaterThanOrEqual(expected.n);
           for (const problem of expected.problems)
             expect(c.problems.map(normal)).toContain(normal(problem));
@@ -153,7 +154,7 @@ describe('independent execution inventory and physical row coverage', () => {
       },
     ],
     [
-      'coordinated historical-year deletion',
+      'coordinated archived-year deletion',
       (ex, p) => {
         delete ex.data['2024'];
         delete ex.monthly['2024'];
@@ -480,7 +481,7 @@ it('recomputes NAP funds and effects through a captured-reader test double', () 
   const good = rates(context(), reader);
   expect(calls).toBe(1);
   expect(good.problems).toEqual([]);
-  // A coordinated change preserves the donor's civil-servant total and deltas.
+  // A coordinated change preserves the reference's civil-servant total and deltas.
   update('rates.json', (r) => {
     for (const id of ['civil-servant-employee-share', 'civil-servant-employer-share']) {
       const x = r.changes.find((x: any) => x.id === id),

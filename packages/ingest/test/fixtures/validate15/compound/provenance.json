@@ -1,5 +1,4 @@
 {
-  "python": "3.12",
   "hashSeeds": [
     0,
     1,
@@ -13,9 +12,7 @@
   "inputs": {
     "cases.json": "07b5de88ff452a52e0d218b47fbec6dcabed3f66aefd008aabe900fb9b995d24",
     "keys.json": "cce2fd9a184ae815286f4b752a9f5d8e787e3e93d6a97d9241c85f503fd549f4",
-    "generate_oracle.py": "17af02b0860f8f17d9e5022da3610b1c9748de6e45d5de2b149a09b9b108d473",
-    "../generate_oracle.py": "9d286f1f29fc5c2dba412c9c7ac792bf71ffc1326884ed18707eeaff0e83ab7d",
-    "../provenance.json": "89d2a989401c41670609120a3149e53f00e5197eeae6bc338cbf0d5ed6b888ae",
+    "../provenance.json": "f44e3b6e9272be95d294661272f15a018d46dd79a3c7f1ee160e75b382619d03",
     "../cases.json": "ce1c9df9e38a1adfe7206cbd1f7abdad145ba75827782f22d80a0084ecd28f66",
     "../oracle.json": "5cf5dbc36ae8d7a57c7d5c7c7496c0361fd9e098ef3da00373e008928847222d",
     "../sum-cases.json": "fbc3b13f5a306614c9a2d0a1788c1729646a5113e7a46e20d383e82fff15e4d3",

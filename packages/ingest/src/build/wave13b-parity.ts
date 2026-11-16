@@ -5,12 +5,11 @@ import { compare, equal, type Difference } from '../parity/compare.js';
 import { auditCatalogMetadata } from './catalog-metadata.js';
 import type { Wave13bInput } from './wave13b.js';
 
-const PROOF_HASH = '6035f035deaf1aaadb4b60c82e4c4941e8a6989d442aa8f4aca5beea9199f800';
+const PROOF_HASH = '3dc84951061b7c3d725b75b67fc48224d8b57ceb402589b7ab31a53d17095209';
 const sha = (data: Uint8Array) => createHash('sha256').update(data).digest('hex');
 export interface ArtifactEvidence {
   file: string;
   dataset: string;
-  producer: string;
   stage: string;
   mode: string;
   parityEligible: boolean;

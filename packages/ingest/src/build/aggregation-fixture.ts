@@ -8,7 +8,7 @@ import { editorialSiteName } from './aggregation-rss.js';
 import { buildFeed, type FeedInput } from './aggregation-feed.js';
 import { buildSearch, orderedKeysFromJson, type SearchInput } from './aggregation-search.js';
 import { projectAggregation } from './aggregation-layers.js';
-const INVENTORY_HASH = 'b450559cff13d366b3a314b053a389f710b96b9e3ab03a35d67db8daca714b46';
+const INVENTORY_HASH = '0604e945068d31bc8c771121d220acdbce51aaade9894de502c2f9b18e557655';
 /** Read hash-pinned dependency bytes only; published and oracle snapshots are never builder inputs. */
 export async function loadAggregationFixture(fixture: string, buildDate: string) {
   const root = resolve(fixture);

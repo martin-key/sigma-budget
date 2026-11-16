@@ -1,6 +1,4 @@
 {
-  "capturedWith": "Python 3.12.14",
-  "command": "python3.12 test/fixtures/catalog/synthetic_primary.py",
   "sample": {
     "manifest": {
       "nap/a.pdf": {

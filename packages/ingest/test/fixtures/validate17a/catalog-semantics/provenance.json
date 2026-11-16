@@ -1,10 +1,7 @@
 {
-  "python": "3.12",
-  "generatorSha256": "c95877879262a124eca046543fcb39b6d29cc149a89e9b4ee6a45a26c41890bb",
   "inputs": {
-    "generate_oracle.py": "a834a8b2d739eb87e8918f08d8fd7e8c81fbcccf81a7a0609f9746cba3cee354",
-    "provenance.json": "04b585d13e68c4ad8eafbc56977ee0163539b70e4702e9695405909d88628fe1",
-    "iterators/provenance.json": "f75ddf9a9a63be877db645baeb6f58b16af2ae41812f1c49ab5a0123626c3d38",
+    "provenance.json": "b99aaf1754f4d6ab8b052cb9c291827a8ce488996dfad5b1bbe0678eb74af30f",
+    "iterators/provenance.json": "37b2a4f9880f763ae107dabb871107eb200eaf7770c09e00b25dc0121cc7d3b5",
     "integer/data.json": "c1f1d5a7addb1344ab45991c17a5b3d077bd43ab2c3c91b0fdad5bed9d8276b4"
   },
   "outputs": {

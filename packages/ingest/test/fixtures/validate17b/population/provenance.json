@@ -1,11 +1,8 @@
 {
-  "python": "3.12",
-  "generatorSha256": "aa3addf26843ac5e2176b749e39bd096722918e1ee8d92b93af87a11f4fd740c",
   "inputs": {
-    "generate.py": "caedf9367ad7af9516431a626f25e9c1cffe75e4f7bb1a0c9a08243b7b0a2499",
-    "provenance.json": "7027604265ca1f579fdf9d9adac74e45151e933868cc4ae27670f1233c5b94f8",
+    "provenance.json": "cfbd143aac25e61108ed18efb794993ed18dcb220f9b6e40da3033389e9fb1b6",
     "oracle.json": "cb34fe3c72ab292c02430e9539ef8a89e9725f184ec5ce10f6f11a4dda0160c1",
-    "extra-provenance.json": "99c40900fb2188ffe4b4458af737880d34d0e21cecc2f74685c8dd1ac708b77b"
+    "extra-provenance.json": "5ac25d2cdcad405ba00c4471ac074260fde27910290183933bf0b3cb6a662630"
   },
   "outputs": {
     "mutations/population-0.json": "07e710563242088c3c6988bff82b0807b876a9c3b7bd45d4f680ec42d869043d",

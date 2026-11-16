@@ -8,7 +8,7 @@ import { buildCatalog, type CatalogOwner } from './catalog-build.js';
 import type { CatalogFileFact } from './catalog-primary.js';
 import { projectCatalog } from './catalog-layers.js';
 
-const INVENTORY_HASH = '789cb9701a78700f20a7d49a5fc5b321e743df176de93512798541eefb934b68';
+const INVENTORY_HASH = '97c4263491006a5cc3e17160f14758aef4e1e401a8767882833993b2eb9bf112';
 /** Load only pinned input and owner-stage captures. Oracles are not builder inputs. */
 export async function loadCatalogFixture(path: string, buildDate: string) {
   const root = resolve(path);

@@ -115,11 +115,13 @@ published files at `3424bc998c726d6d511d4284295c54c50c42d099` (build date
 from `b81203662a904c3dd6583d8277e92ae7f6e8fcd8` on `2026-11-10`.
 The candidate manifest SHA-256 is
 `f6e78e74fba37602840310934821f4a6d95872a0d19af2512ba4763fefe5ca0b`.
+The frozen inputs and expected outputs are described in the fixture README.
+
 The snapshots are test evidence, not newly acquired original sources. All donor,
 snapshot, oracle, generator and case hashes are in `provenance.json`.
 
-The independent Python 3.12 oracle imports only the frozen validator and checks
-modules. It never imports the TypeScript code or any production builder. Its
+The historical Python 3.12 oracle imported only the frozen validator and checks
+modules. It never imported the TypeScript code or any production builder. Its
 95 scenarios contain six baselines, 88 failing functional mutations and one
 accepted within-precision control. The TypeScript tests compare status, true
 check counts, problem counts, warnings and facts wherever the donor completes.
@@ -128,10 +130,9 @@ requiring identical exception prose. Diagnostic wording is retained for useful
 explanations, not tested through an unbounded exception-string sweep.
 
 ```sh
-python3.12 packages/ingest/test/fixtures/debt-local-validation/generate_oracle.py --check
 pnpm --filter @sigma-budget/ingest... build
 pnpm --filter @sigma-budget/ingest typecheck
-PYTHON312=python3.12 DEBT_LOCAL_REAL_CANDIDATE=/tmp/pr40-independent-acceptance1/candidate \
+DEBT_LOCAL_REAL_CANDIDATE=/tmp/pr40-independent-acceptance1/candidate \
   pnpm --filter @sigma-budget/ingest test
 pnpm exec prettier --check packages/ingest/src/validate/debt-local*.ts \
   packages/ingest/src/validate/debt-local/index.ts \

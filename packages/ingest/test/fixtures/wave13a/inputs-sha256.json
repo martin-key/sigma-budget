@@ -6,7 +6,6 @@
   "fiscal/donor/revenue.json": "8406a8784c5cd736b3b4801a929a28334ad2aceac138bb59101e9db3c8f9262f",
   "fiscal/donor/expenditure.json": "11e9a05bd3f67d933b32f50d4b0f7c7c87863709e935bde9eb3025db5ac4d019",
   "law/oracle.json": "fde32fd3a62f29c953a452e3e4bb68e10c7e6a7f4265b4a01fcf64d652e9f8d0",
-  "wave13a/law-donor.py": "ecdbc2fffd48630c9b2de59e0495966c30557ebc32ff5f0190ae6ef149eaee6a",
   "wave13a/published/outlook.json": "739f52dd3970505e39e819edb412ed4c189f3a15ca70d2124e32ff6c01aea5b5",
   "wave13a/published/revenue.json": "304117c59f0e2f661abf8f207b2599fa912ebdcd6036c000b46aab60cd4a15ef",
   "wave13a/published/expenditure.json": "e2f30abd6158a6cee1746fc54a0bf12d334a4e867c68e3a6ffbf8f05c8e0cb7f",

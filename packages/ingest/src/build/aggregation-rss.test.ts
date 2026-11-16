@@ -8,30 +8,26 @@ const fixture = resolve(import.meta.dirname, '../../test/fixtures/aggregation-rs
 const siteName = editorialSiteName(
   JSON.parse(readFileSync(resolve(fixture, '../aggregation/inputs/glossary.json'), 'utf8')),
 );
-// `generate_oracle.py --check` (Python 3.12) confirmed once that the frozen donor regenerates every
-// oracle byte for byte; these hashes pin exactly the donor, cases and oracles it confirmed.
-const donorCheck = JSON.parse(
+const checksums = JSON.parse(
   readFileSync(
     resolve(import.meta.dirname, '../../test/expected/aggregation-rss/donor-check.json'),
     'utf8',
   ),
 ) as {
-  donorSha256: string;
   casesSha256: string;
   oracles: { case: string; sha256: string }[];
 };
-const oracleSha256 = new Map(donorCheck.oracles.map((o) => [o.case, o.sha256]));
+const oracleSha256 = new Map(checksums.oracles.map((o) => [o.case, o.sha256]));
 const sha256 = (file: string) => createHash('sha256').update(readFileSync(file)).digest('hex');
 const cases = JSON.parse(readFileSync(join(fixture, 'cases.json'), 'utf8')) as Record<
   string,
   { base: string; feed: RssFeed }
 >;
 
-describe('RSS donor serializer', () => {
-  it('uses the donor, cases and oracles confirmed by the Python donor check', () => {
-    expect(sha256(join(fixture, 'donor/feed.py'))).toBe(donorCheck.donorSha256);
-    expect(sha256(join(fixture, 'cases.json'))).toBe(donorCheck.casesSha256);
-    expect(donorCheck.oracles.map((o) => o.case).sort()).toEqual(Object.keys(cases).sort());
+describe('RSS serializer', () => {
+  it('authenticates the cases and expected XML bytes', () => {
+    expect(sha256(join(fixture, 'cases.json'))).toBe(checksums.casesSha256);
+    expect(checksums.oracles.map((o) => o.case).sort()).toEqual(Object.keys(cases).sort());
   });
   it.each(Object.entries(cases))(
     'matches Python UTF-8 bytes and XML semantics: %s',
@@ -64,7 +60,7 @@ describe('RSS donor serializer', () => {
   });
 });
 
-it('derives historical and current product names from their editorial inputs', () => {
+it('derives archived and current product names from their editorial inputs', () => {
   const current = JSON.parse(
     readFileSync(resolve(import.meta.dirname, '../../../../data/inputs/glossary.json'), 'utf8'),
   );

@@ -1,5 +1,4 @@
 {
-  "python": "3.12.14",
   "indirectOriginals": {
     "prices": {
       "path": "data/originals/ec-oil/weekly-prices-2026-11-02.xlsx",

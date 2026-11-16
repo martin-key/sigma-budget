@@ -18,7 +18,7 @@ import {
 } from '@sigma-budget/ingest';
 
 const ROOT = fileURLToPath(new URL('../../../', import.meta.url));
-const INVENTORY_HASH = '93a0dda20cb3175a700c1c33df11d8829b7abd1a8f96452ded70cd91fbccfb3e';
+const INVENTORY_HASH = 'fef9b28cfd8e661ff8f6366170a6ecc2da085899f9f1065df21acb7bac6191c9';
 /** Test-only candidate, with independent publication preservation and synthetic transform lanes. */
 export async function dbpGvaBuildCli(args: string[]): Promise<number> {
   const flags: Record<string, string> = {};

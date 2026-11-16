@@ -13,7 +13,7 @@ import { orderedKeysFromJson } from './aggregation-search.js';
 import type { Wave13bInput } from './wave13b.js';
 
 // This inventory contains reader inputs and explicitly frozen-only artifacts, never
-// the donor or expected output of a stage with an eligible TypeScript producer.
+// the reference or expected output of a stage with an eligible TypeScript producer.
 export const WAVE13B_INPUTS = [
   'wave13b/legal-evidence.json',
   'wave13b/releases-current.json',
@@ -80,7 +80,7 @@ export const WAVE13B_INPUTS = [
   'catalog/inputs/datasets.yaml',
   'catalog/inputs/routes.json',
 ] as const;
-const MANIFEST_HASH = 'ae366137b0d93cccedbaec72de496437cd018674ae2b2d22f04eac94c7dd2eb5';
+const MANIFEST_HASH = '0207d76d54d583ac20411efe935a95ad3be0dd7059b46280a19e484efdc4a0fe';
 const sha = (data: Uint8Array) => createHash('sha256').update(data).digest('hex');
 
 export async function loadWave13bFixture(path: string): Promise<Wave13bInput> {

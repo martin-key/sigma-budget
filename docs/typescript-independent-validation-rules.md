@@ -38,7 +38,7 @@ Without the law PDF reader, CONTRACT records that it authenticated archive/membe
 
 New fixture family: `packages/ingest/test/fixtures/independent-rules/`. Older fixtures are unchanged. `manifest.json` names repository baseline `3424bc998c726d6d511d4284295c54c50c42d099`, the accepted Python candidate built from `b81203662a904c3dd6583d8277e92ae7f6e8fcd8`, build date **2026-11-10**, candidate manifest/receipt hashes, every copied dataset/donor hash and every required original/input pin. Copied snapshots are preserved evidence, not newly acquired originals.
 
-The nine frozen Python donor/dependency files retain their exact bytes. Python **3.12.14** generated `oracle.json` for the baseline and 25 finite mutations. Regeneration uses `generate-oracle.py --repo <read-only-repository>` in the existing Python 3.12 data environment, with `PYTHONDONTWRITEBYTECODE=1`; all mutable inputs are copied into its own temporary root. The baseline's raw donor problems are empty, so accepted and raw outcomes coincide for these four groups; no new accepted exceptions are added.
+Frozen inputs and expected outputs remain checked by the TypeScript tests. The validation data checksums authenticate the bytes used by those tests.
 
 | Group      | Frozen Python baseline checks | TypeScript baseline checks |
 | ---------- | ----------------------------: | -------------------------: |

@@ -1,8 +1,4 @@
 {
-  "capturedWith": "Python 3.12.14",
-  "donor": "pipeline/budget_pipeline/sources/boundaries.py: fetch_csv() and fetch_geometry() with _open replaced by the synthetic raw CSV and GeoJSON that reducers.test.ts reconstructs from test/fixtures/debt-local/inputs/data/cache/gisco_lau_bg.json",
-  "serialization": "json.dumps(rows, ensure_ascii=False), last stdout line, UTF-8, no trailing newline",
-  "fullRows": "the donor output equals json.dumps of `items` in test/fixtures/debt-local/inputs/data/cache/gisco_lau_bg.json; when the hash differs, diff the rows against that file",
   "rows": 265,
   "outputSha256": "c881833762342d5dad91d0fe687b3716d43fabad0c5e9f25343d1f44144bee9a"
 }

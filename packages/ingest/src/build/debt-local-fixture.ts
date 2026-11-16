@@ -7,7 +7,7 @@ import { buildDebt, type DebtInput } from './debt.js';
 import { buildMunicipalities, type MunicipalityInput } from './municipalities.js';
 import { buildSebra, type SebraEvidence } from './sebra.js';
 
-const provenanceSha256 = 'cd079c17f85e7ddef38b02f5eac1b8164547c58a4a61e51afdfd462d6688fcdf';
+const provenanceSha256 = '597270dee1f0ccee2428bfef0252d0cfb04f8f1d20f1d5ba09286c38f650f4d3';
 export async function loadDebtLocalFixture(path: string, buildDate: string) {
   const root = resolve(path);
   if ((await realpath(root)) !== root) throw new Error('Symlink in TS07 fixture root');

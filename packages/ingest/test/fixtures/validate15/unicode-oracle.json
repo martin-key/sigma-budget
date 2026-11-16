@@ -1,7 +1,6 @@
 {
   "python": "3.12",
   "unicode": "15.0.0",
-  "donorSha256": "25d7d0e984c5214efb2786f0f72f50cd6666b5f4565802fbb998d1cd52cc0567",
   "planes": [
     {
       "plane": 0,

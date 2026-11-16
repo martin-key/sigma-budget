@@ -5,7 +5,6 @@
   "buildDate": "2026-11-10",
   "candidateManifestSha256": "f6e78e74fba37602840310934821f4a6d95872a0d19af2512ba4763fefe5ca0b",
   "candidateReceiptSha256": "c1624cb6b44bfc9aaf08215ab2233eda851ef5a2572c78c32e95cca4f1271390",
-  "python": "3.12.14",
   "frozen": {
     "data/components.json": "20db9f59d3deae26fa896c218047f43b8d26205f90b0d7108d7bde0dc5a10ad2",
     "data/core.json": "74ea4231923f72cb3864bd64652baf522c7a84b88a43c43746c13aead450af90",
@@ -17,24 +16,11 @@
     "data/municipalities.json": "bf7cd41c5113910634b788144fc2463cdc6324a33eef278ab9c62996a62e560e",
     "data/outlook.json": "9f72f949c8fdda96417f227fc6e499b030c2522fae82524199177884484b0481",
     "data/rates.json": "00143b2525d5f9cad58f7ad90dd632b47c4df586f329991aed73e307305c4cfa",
-    "donor/budget_pipeline/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "donor/budget_pipeline/build/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "donor/budget_pipeline/build/annual_periods.py": "3a036c4d9e999897dc4737340da72772a27b8c1e40e3c5bff4f5b678d11a41cb",
-    "donor/budget_pipeline/build/data_io.py": "b827a40fe5c979f2cf0d689766fedc355fddeb8c897460578d6aeb26364b9d68",
-    "donor/budget_pipeline/build/execution_law.py": "3d4fd3da440a832dc3ba3aaa3cb6687e7e320a48784e411f0f1ee10493b68bf3",
-    "donor/budget_pipeline/extract/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "donor/budget_pipeline/extract/indirect_tax_evidence.py": "62650741265a8111f580cabd07fa25e71550e260559a870100afd26071984b28",
-    "donor/budget_pipeline/validate/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "donor/budget_pipeline/validate/checks.py": "25d7d0e984c5214efb2786f0f72f50cd6666b5f4565802fbb998d1cd52cc0567",
-    "donor/budget_pipeline/validate/components.py": "5bac6fde1850421a87310bd337c9849b936962f044d3dab22598e5005e3dc60e",
-    "donor/budget_pipeline/validate/execution.py": "03b1686fd7f067a9f0e1cea7729b924d46461c72f4d4341b4b422638d40003c0",
-    "donor/budget_pipeline/validate/execution_contract.py": "ffa32a7c6ee3a1ef661294049f77d8797a2e5dbc7fe4e160d7ebc5e7b5e70e5f",
-    "donor/budget_pipeline/validate/indirect_taxes.py": "038fedc70e8ffd575654c4a886ff8c9d675d3477bdef5e9764ec04d8cb074cea",
     "source-captures/nap.pdf": "b0a02141c14d4358f656711edcf0a7ae52b5f02a50c465f31ba97b542219e3f4",
     "source-captures/nap-rows.json": "bbe121cab612bca72ca204f1893b8aa463bd099fb39dbfb8e544d77b17ce1666",
     "cases.json": "aebede9d99e0303a62164beb751492d5177989d32aff5064cbcb9fe387e14821",
     "oracle.json": "9ab79455d450b58deb9c3bfd96d4663d4c6268a7768741a3782b664670bb01db",
-    "actual-evidence.json": "3205add07911aedacebae9d74719f5c1c9aebc73a93e1f13642137ad7eec5f2c"
+    "actual-evidence.json": "7b4f29e41e4343acc253698cb2765fc3c31a2dbe065232c16eba1c3101d6eefc"
   },
   "requiredInputs": {
     "data/originals.sha256": "ee84ff944f953496b81cbe9a6a49bb8a614d686ecf8ee1c13f1cb3f7c188ec97",

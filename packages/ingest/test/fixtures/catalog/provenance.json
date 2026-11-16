@@ -2,7 +2,7 @@
   "baseline": "2c26950ab11195c7390580a605ce3c376ddbc116",
   "buildDate": "2026-11-08",
   "files": {
-    "README.md": "0d161ed76937321fd5479912c660c9deecf3f592a22f2f4735c7df0faa871934",
+    "README.md": "b5873c6f18dafcedddb96addd2bca44958dbfd795dce4443d9488d9a1ad0292d",
     "cases/inputs/bool.json": "f4965c818f2f436604819b9da649e659d8ef46c35311d0194fc5a1520b93f6d5",
     "cases/inputs/exp.json": "ae8839929397297e2d3a13777a2215a16d431ba2034ddb36d73fc98c82c54f01",
     "cases/inputs/float.json": "9c570205dbf4e9cdb13b486b067b4b3f98b12b10c5946c691c6ea34b5eb517f9",
@@ -30,21 +30,10 @@
     "cases/serialized/revenue.json": "e68c07cbfbf7175e78f293a406df1239c122b94f095a19c45b0a0acd3de65744",
     "cases/serialized/yearexp.json": "5628723a9f8dce172ad582bc2469a6f06259261559ba623ec5f1025c66b3417f",
     "cases/serialized/yearfloat.json": "5628723a9f8dce172ad582bc2469a6f06259261559ba623ec5f1025c66b3417f",
-    "donor/budget_pipeline/build/active_data.py": "81f1ccbe6bfba7dd5b7718ccb786ca13396925b159777179d9778b6196a8aa97",
-    "donor/budget_pipeline/build/apply_sources.py": "85c440fadf503b821ffa7e698ae4f3297a9d3a03ac516fd75db41b9a0945c110",
-    "donor/budget_pipeline/build/catalog.py": "d3a88431190a559e0ee9345e569c78bd11d4bf4aeda4b88571e0f09c4d79a440",
-    "donor/budget_pipeline/build/catalog_definitions.py": "977312f85f6573612fce4b010f8d3325b64f210f2bf2a99f145a83b66f104892",
-    "donor/budget_pipeline/build/catalog_refresh.py": "3c1a38e10e73bc89ad197fa2cea3024697a0f656b357c5876ac00f0548e5ab9b",
-    "donor/budget_pipeline/build/data_io.py": "b827a40fe5c979f2cf0d689766fedc355fddeb8c897460578d6aeb26364b9d68",
-    "donor/budget_pipeline/build/definitions.py": "12ef622fd7515f520949a7c5ad446c407f8e5a96270824c1389f09e1f6e18437",
-    "donor/budget_pipeline/build/wording.py": "e351379a75b9220a073fc6c68684bc961a311cccaa7f8337003fdba109145942",
-    "donor/budget_pipeline/routes.py": "9a3394ed319834cf97cc85afc6aadbb501957c76b579faafa3f83008a4455c3f",
-    "donor/budget_pipeline/validate/execution_contract.py": "ffa32a7c6ee3a1ef661294049f77d8797a2e5dbc7fe4e160d7ebc5e7b5e70e5f",
     "final-owners/core.json": "1c2def567178597447860ec815c7fa31152610dfe8e38b26c74d9f397d60a065",
     "final-owners/feed.json": "f983f07942f3acf929d927f8cfedecfb8a0b430fa34662541e76b46187469270",
     "final-owners/feed.xml": "274c4662d938394e847ac519ff83f702806e301000dd62ea396145f20cfa5399",
     "final-owners/search-index.json": "0942ddf2918ac0b8a9c8124964aefcddb3478a59d1be798a551431ec71e83efd",
-    "generate_oracle.py": "44cf0fbadc1cbabb17a5cda9a98c1f53761416ac870909115b41c199b126f857",
     "inputs/authored.json": "9024cd6ac44b7b4c0690f763ca85e2bbc030c154352290901ce08888fe17b204",
     "inputs/datasets.yaml": "7a5dacf63fd371dfeef5d3c22bc1dcfc5a39cf5716ac8022598002953914a14a",
     "inputs/file-facts.json": "e1e30adc135787523ee41bf1fcf15948a2f9251c30ff272ce58bfa3834829c31",
@@ -124,7 +113,6 @@
     "owners/revenue.json": "304117c59f0e2f661abf8f207b2599fa912ebdcd6036c000b46aab60cd4a15ef",
     "owners/search-index.json": "37c7cd17148a607f7edd77647ee730a6f1eb9c97bd0544ddd41517184e31859a",
     "owners/sebra.json": "72590501d820063981f5e360b871fe592477be02e9429705f332ab3eee176c8b",
-    "policy.json": "8d6b79d8dbd05197eca0d0bb021023cb169f5146a4ab56de973a9af58bbf719b",
-    "synthetic_primary.py": "bf9d010d9c7757f4d094c357a1d498deaecca44cbbf5071d0973ebb55070658a"
+    "policy.json": "8d6b79d8dbd05197eca0d0bb021023cb169f5146a4ab56de973a9af58bbf719b"
   }
 }

@@ -1,7 +1,5 @@
 {
   "baseline": "05d6f6eeca9991468f3c94c3c9c26e87d5b0fae0",
-  "python": "3.12",
-  "description": "Frozen release and input file bytes, registry YAML, pins and route catalogue from baseline. The tracked path list captures existence only: test harness materializes empty placeholders for code/docs and replays synthetic path leaks. Historical originals are not restored; INPUTS intentionally reports them absent. Donor files are byte-identical baseline copies. Only catalog imports and annual module dependencies are stubbed; the donor period literal is read from the frozen original.",
   "inputs": {
     "cases.json": "aa66e449309d7e52b72f7e120e526775f75e118fbc67cffdde2da996eafadf0d",
     "corpus/apps/web/app/lib/routes.json": "07c6aaeae1a8d9da5e853f886be1ee3949e78c3eadb871a0da0a8a460fa5b765",
@@ -113,16 +111,8 @@
     "corpus/data/release/search-index.json": "980fa5cebdc624e30ffe745d0fb731cebe5e350c497f2a8c7a853724b54530c4",
     "corpus/data/release/sebra.json": "72590501d820063981f5e360b871fe592477be02e9429705f332ab3eee176c8b",
     "corpus/data/sources.yaml": "957d4ea0ed0354b006ebc00abcb6fe6df7a4c6637b9c5def8f7c9171c5516f7a",
-    "donor/annual_periods.py": "3a036c4d9e999897dc4737340da72772a27b8c1e40e3c5bff4f5b678d11a41cb",
-    "donor/checks.py": "25d7d0e984c5214efb2786f0f72f50cd6666b5f4565802fbb998d1cd52cc0567",
-    "donor/datasets.py": "02234d24a03c387690d03b714eb7d413d334726951bcfa0034bc0a6325778790",
-    "donor/foundations.py": "c7b713c7c45798c528c0ba5e082b2127347a63ab6bed5bd50dd32ae7c59c452b",
-    "donor/registry.py": "0cf9fbf594f875d199d04469a39a04cb8745707bfb194ee888d1bc8e26317b39",
-    "donor/routes.py": "9a3394ed319834cf97cc85afc6aadbb501957c76b579faafa3f83008a4455c3f",
-    "execution_contract.py": "ffa32a7c6ee3a1ef661294049f77d8797a2e5dbc7fe4e160d7ebc5e7b5e70e5f",
     "tracked-paths.json": "932a51f7b506deabfbf863ebd6ccaab84757caa330f756266ec9b447d89a4f0e",
-    "code-path-capture.json": "8cd40d7fcaa3a75c650adbf438bfefe701c6163a75324397d6c532bbd05bb134",
-    "generate_groups_oracle.py": "9e691ed35713b8be3108da185ecdfde523ed1d3bd63d1196aec24bd2866f3154"
+    "code-path-capture.json": "8cd40d7fcaa3a75c650adbf438bfefe701c6163a75324397d6c532bbd05bb134"
   },
   "oracleSha256": "f5b5a69955ed3ed192558b2fa9f81ae16bbcfd126b7d70f8a2fb34f64dc623e8",
   "helpersOracleSha256": "87d02c92ad41e0e0554b6b311c68dbe8d12706ab64d69a46c94964726e1b6be6"

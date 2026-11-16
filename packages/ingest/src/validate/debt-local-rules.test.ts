@@ -64,12 +64,13 @@ function withContext(label: string, ops: Op[], fn: (c: Context) => void) {
 }
 
 describe('independent frozen Python 3.12 DEBT/MUNIC/SEBRA validation', () => {
-  it('pins the named baseline, donor functions, cases and available original bytes', () => {
+  it('pins the baseline, cases and available original bytes', () => {
     expect(sha(readFileSync(join(fixture, 'provenance.json')))).toBe(
-      '7b536856d288b4da8f8d2a62951d803fa3f8e639fd17cb637406ca6583a5b251',
+      'e3c842d31be2293b5f7b32cf41778061047d2cef1aaf2801712ec02e7c9cd674',
     );
-    for (const [file, hash] of Object.entries(provenance.pins))
+    for (const [file, hash] of Object.entries(provenance.pins)) {
       expect(sha(readFileSync(join(fixture, file))), file).toBe(hash);
+    }
     for (const pin of provenance.availableOriginals)
       expect(sha(readFileSync(join(repo, pin.path))), pin.path).toBe(pin.sha256);
     expect(debtLocalGroups.map((g) => g.name)).toEqual(['DEBT', 'MUNIC', 'SEBRA']);
@@ -101,7 +102,7 @@ describe('independent frozen Python 3.12 DEBT/MUNIC/SEBRA validation', () => {
     });
   });
   it.skipIf(!process.env.DEBT_LOCAL_REAL_CANDIDATE)(
-    'runs all three donor and additional safety groups over the actual supplied candidate when explicitly provided',
+    'runs all three reference and additional safety groups over the actual supplied candidate when explicitly provided',
     () => {
       const candidate = process.env.DEBT_LOCAL_REAL_CANDIDATE!;
       expect(existsSync(join(candidate, 'manifest.json'))).toBe(true);
@@ -125,14 +126,14 @@ describe('independent frozen Python 3.12 DEBT/MUNIC/SEBRA validation', () => {
   );
 });
 
-describe('additional safety is distinct from donor parity', () => {
+describe('additional safety is distinct from reference parity', () => {
   for (const label of ['published', 'candidate'])
     it(`${label}: full current geometry and all numeric/calendar checks`, () =>
       withContext(label, [], (ctx) => {
         for (const c of [debtSafety(ctx), municipalSafety(ctx), sebraSafety(ctx)])
           expect(c.problems).toEqual([]);
       }));
-  it('rejects null per-capita values that the donor omits', () =>
+  it('rejects null per-capita values that the reference omits', () =>
     withContext(
       'candidate',
       [
@@ -148,7 +149,7 @@ describe('additional safety is distinct from donor parity', () => {
         expect(municipalSafety(ctx).problems).toHaveLength(1);
       },
     ));
-  it('rejects null quarterly percentage values that the donor only length-checks', () =>
+  it('rejects null quarterly percentage values that the reference only length-checks', () =>
     withContext(
       'candidate',
       [
@@ -164,7 +165,7 @@ describe('additional safety is distinct from donor parity', () => {
         expect(debtSafety(ctx).problems).toHaveLength(1);
       },
     ));
-  it('rejects impossible Gregorian dates that match the donor regex', () =>
+  it('rejects impossible Gregorian dates that match the reference regex', () =>
     withContext(
       'candidate',
       [
@@ -180,7 +181,7 @@ describe('additional safety is distinct from donor parity', () => {
         expect(sebraSafety(ctx).problems).toHaveLength(1);
       },
     ));
-  it('rejects in-country self-crossing topology that passes donor bounding-box checks', () =>
+  it('rejects in-country self-crossing topology that passes reference bounding-box checks', () =>
     withContext(
       'candidate',
       [
@@ -207,7 +208,7 @@ describe('additional safety is distinct from donor parity', () => {
         expect(municipalSafety(ctx).problems).toHaveLength(1);
       },
     ));
-  it('does not broaden the pinned historical SZR36 exception', () =>
+  it('does not broaden the pinned archived SZR36 exception', () =>
     withContext('candidate', [], (ctx) => {
       const geo = ctx.get('geo/obshtini.json'),
         feature = geo.features.find((f: any) => f.properties.id === 'SZR36');

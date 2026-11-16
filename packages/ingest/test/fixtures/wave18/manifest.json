@@ -1,8 +1,6 @@
 {
   "base": "027a262288c0b0ca4b188482a8b8da43bb378047",
   "buildDate": "2026-11-08",
-  "python": "3.12",
-  "xlrd": "2.0.2",
   "sha256": {
     "data/inputs/budget_bill_2027.json": "ecb9e854f1998d1d89eee1c30da84cfbb44f3dec3ca64c022b774f1be60361d3",
     "data/inputs/budget_forecast_2027.json": "15f9fda9484633efa58a57122382184dc4fe2572e72de8a20863347053d0ff70",
@@ -44,13 +42,7 @@
     "data/release/execution.json": "e9c75d84bb575c3a0287c0a7a56828b473bd53498336ce6d45cfbc6333533200",
     "data/release/expenditure.json": "e2f30abd6158a6cee1746fc54a0bf12d334a4e867c68e3a6ffbf8f05c8e0cb7f",
     "data/release/outlook.json": "739f52dd3970505e39e819edb412ed4c189f3a15ca70d2124e32ff6c01aea5b5",
-    "data/release/revenue.json": "304117c59f0e2f661abf8f207b2599fa912ebdcd6036c000b46aab60cd4a15ef",
-    "pipeline/budget_pipeline/build/annual_periods.py": "3a036c4d9e999897dc4737340da72772a27b8c1e40e3c5bff4f5b678d11a41cb",
-    "pipeline/budget_pipeline/build/data_io.py": "b827a40fe5c979f2cf0d689766fedc355fddeb8c897460578d6aeb26364b9d68",
-    "pipeline/budget_pipeline/build/execution_law.py": "3d4fd3da440a832dc3ba3aaa3cb6687e7e320a48784e411f0f1ee10493b68bf3",
-    "pipeline/budget_pipeline/validate/checks.py": "25d7d0e984c5214efb2786f0f72f50cd6666b5f4565802fbb998d1cd52cc0567",
-    "pipeline/budget_pipeline/validate/execution_contract.py": "ffa32a7c6ee3a1ef661294049f77d8797a2e5dbc7fe4e160d7ebc5e7b5e70e5f",
-    "pipeline/budget_pipeline/validate/execution_reports.py": "63c04bec1c3ada4a97962a2dcdb51709d60e4264a83e1d4865735b64f833948c"
+    "data/release/revenue.json": "304117c59f0e2f661abf8f207b2599fa912ebdcd6036c000b46aab60cd4a15ef"
   },
   "capturesSha256": "26892a8df87fafe59e5902063662380cab51f096a87e15a78cf4320b126fb9cb"
 }

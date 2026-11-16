@@ -4,7 +4,7 @@ import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { parsePythonJson } from '../common/numbers.js';
 import { buildWave13a, type LegacyOwners, type Wave13aOutputs } from './wave13a.js';
 import type { BillExtraction, Extraction } from './annual-lineage.js';
-const manifestHash = '3e8b1ed66d5f3aeb221bda7cf9a56e880d632ceb96d68929f76434996660b2e2';
+const manifestHash = 'bfaea5b3dd4ccf3f4de9693cd86630dff64d96bad977bf6d8b6477fd60c0c9f6';
 const required = [
   'fiscal/inputs/data/inputs/budget_forecast_2027.json',
   'fiscal/inputs/data/inputs/budget_bill_2027.json',
@@ -13,7 +13,6 @@ const required = [
   'fiscal/donor/revenue.json',
   'fiscal/donor/expenditure.json',
   'law/oracle.json',
-  'wave13a/law-donor.py',
   ...['outlook', 'revenue', 'expenditure', 'budget2027', 'budget2027-provenance', 'law'].map(
     (n) => `wave13a/published/${n}.json`,
   ),
@@ -46,8 +45,8 @@ export async function loadWave13aFixture(base: string, buildDate: string): Promi
   if (Object.keys(hashes).sort().join('\n') !== required.slice().sort().join('\n'))
     throw new Error('Incomplete fixture inventory');
   const content = new Map<string, Buffer>();
-  // Published snapshots are oracle targets and are never read by the builder.
-  for (const name of required.filter((name) => !name.startsWith('wave13a/published/'))) {
+  // Authenticate all files; the builder uses only the explicitly selected inputs.
+  for (const name of required) {
     const data = await read(name);
     if (sha(data) !== hashes[name]) throw new Error(`Fixture checksum mismatch: ${name}`);
     content.set(name, data);
