@@ -397,7 +397,7 @@ sources:
   access: generated
   acquisition: generated
   format: pdf, txt, JSON Schema draft 2020-12
-  parser: packages/ingest/src/build/editorial.ts
+  parser: packages/dataset-schema/src/index.ts
   live: false
   files: []
   limitations:
