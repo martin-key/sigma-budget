@@ -1,4 +1,4 @@
-/** Scoped offline diagnostic; production validation remains Python. */
+/** Scoped diagnostic entry point. Complete production rules run in production/validation.ts. */
 import { existsSync, lstatSync, realpathSync } from 'node:fs';
 import { isAbsolute, relative, resolve, sep } from 'node:path';
 import { captureInputPaths, Context, safePath } from './context.js';

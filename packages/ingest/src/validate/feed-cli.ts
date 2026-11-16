@@ -1,4 +1,4 @@
-/** Offline diagnostic only; production validation remains Python. */
+/** Scoped diagnostic entry point. Complete production rules run in production/validation.ts. */
 import { existsSync, lstatSync, readFileSync, realpathSync } from 'node:fs';
 import { dirname, isAbsolute, relative, resolve, sep } from 'node:path';
 import { parseYaml } from '../io/registry.js';

@@ -461,19 +461,23 @@ function notesBlock(ctx, M) {
 
 // ── page contract ──────────────────────────────────────────────────────────────────────────────────────
 function ledeOf(ctx, M) {
-  const what = FN_WHAT[M.id] ?? '';
+  const what = M.id === 'drugi' ? '' : (FN_WHAT[M.id] ?? '');
   if (M.sel < 0 || !ok(M.val))
     return `За ${yr(ctx.period?.year)} няма разбивка по функции в избрания запис. ${what}`.trim();
   const v = money(M.val, { d: 1 }),
     y = yr(M.year),
-    what1 = lower(M.short);
+    what1 = M.id === 'drugi' ? `функция „${M.name}“` : lower(M.short);
   const pg = ok(M.pgSel) ? `, или ${pct(M.pgSel, 1)} от БВП` : '';
   const first =
     {
-      prelim: `Според програмата за ${y} за ${what1} са предвидени ${v}${pg}.`,
-      plan: `Държавата планира да похарчи ${v} за ${what1} през ${y}${pg}.`,
-      forecast: `Според прогнозата за ${what1} през ${y} ще бъдат похарчени ${v}${pg}.`,
-    }[M.kinds[M.sel]] ?? `За ${what1} през ${y} са ${v}${pg}.`;
+      prelim: `Според предварителния отчет разходите по КФП за ${what1} през ${y} са ${v}${pg}.`,
+      actual: `Разходите по КФП за ${what1} през ${y} са ${v}${pg}.`,
+      plan: `Планираните разходи по КФП за ${what1} през ${y} са ${v}${pg}.`,
+      draft: `Според разчетите към законопроекта за ${y} разходите по КФП за ${what1} са ${v}${pg}.`,
+      expected: `Очакваните разходи по КФП за ${what1} през ${y} са ${v}${pg}.`,
+      law: `Според разчетите към закона за ${y} разходите по КФП за ${what1} са ${v}${pg}.`,
+      forecast: `Прогнозните разходи по КФП за ${what1} през ${y} са ${v}${pg}.`,
+    }[M.kinds[M.sel]] ?? `Разходите по КФП за ${what1} през ${y} са ${v}${pg}.`;
   return `${first} ${what}`.trim();
 }
 
@@ -483,16 +487,12 @@ export function crumbs(ctx) {
 }
 
 export function render(ctx) {
-  if (
-    ctx.params?.fn &&
-    !ctx.data.expenditure.functions.items.some((item) => item.id === ctx.params.fn)
-  )
-    ctx.notFound();
+  const fn = ctx.data.expenditure.functions.items.find((item) => item.id === ctx.params.fn);
+  if (ctx.params?.fn && !fn) ctx.notFound();
   if (selectPeriod(ctx.annualRaw?.expenditure, ctx.period.key).gaps?.functions)
     return {
-      title:
-        ctx.data.expenditure.functions.items.find((item) => item.id === ctx.params.fn)?.name ||
-        'Функция',
+      title: fn?.name || 'Функция',
+      lede: `За ${yr(ctx.period.year)} няма разбивка по функции в избрания запис. ${FN_WHAT[fn?.id] ?? ''}`.trim(),
       body: annualGap(ctx, ctx.annualRaw.expenditure, ['functions']),
     };
   const M = modelOf(ctx, true);

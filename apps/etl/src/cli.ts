@@ -59,6 +59,7 @@ try {
   else if (
     [
       'validate',
+      'check-site',
       'reproduce',
       'collect',
       'refetch',

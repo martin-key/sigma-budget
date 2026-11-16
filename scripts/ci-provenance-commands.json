@@ -3,9 +3,6 @@
     "python -m pip install --require-hashes -r tests/requirements-dev.lock -r pipeline/requirements.lock",
     "python -m pip install --no-deps -e pipeline",
     "pnpm exec playwright install --with-deps chromium",
-    "python -m unittest discover -s tests/pipeline -t .",
-    "python -m budget_pipeline.extract.budget_forecast_2027 --check",
-    "python -m budget_pipeline.extract.budget_bill_2027 --check",
     "python -m pip install --require-hashes -r tests/requirements-dev.lock -r pipeline/requirements.lock",
     "python -m pip install --no-deps -e pipeline",
     "pnpm exec playwright install --with-deps chromium",
@@ -15,6 +12,9 @@
     "E2E_WORKER_URL=http://127.0.0.1:8814 pnpm test:e2e --project=worker period-matrix.spec.ts",
     "pnpm test:e2e --project=static redirects.spec.ts",
     "node tests/release/compat_check.mjs --env-url \"$STAGING_ORIGIN\"",
-    "pnpm exec playwright install --with-deps chromium"
+    "pnpm exec playwright install --with-deps chromium",
+    "node tests/release/budget_provenance_check.mjs",
+    "./budget check-site --inputs \"$RUNNER_TEMP/registered-node-inputs\"",
+    "python -m unittest discover -s tests/pipeline -t ."
   ]
 }

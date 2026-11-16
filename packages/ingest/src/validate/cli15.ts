@@ -1,4 +1,4 @@
-/** Explicit offline Wave15 validation. Production validation remains Python. */
+/** Scoped diagnostic entry point. Complete production rules run in production/validation.ts. */
 import { realpathSync } from 'node:fs';
 import { isAbsolute, relative, resolve, sep } from 'node:path';
 import { captureInputPaths, Context } from './context.js';

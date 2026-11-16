@@ -31,6 +31,20 @@ def main():
                 page.locator('article[data-ready="1"]').wait_for()
 
             go('/merki')
+            # The longer law-index label and its count wrap at both narrow phone widths.
+            for width in (320, 390):
+                page.set_viewport_size({'width': width, 'height': 844})
+                for key in ('prihodni', 'razhodni', 'zakoni'):
+                    tab = page.locator(f'[role="tab"][data-key="{key}"]')
+                    tab.click()
+                    expect(tab).to_have_attribute('aria-selected', 'true')
+                    assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+                    for button in page.locator('#s12-27-lists [role="tab"]').all():
+                        assert button.evaluate('(e) => e.scrollWidth <= e.clientWidth + 1')
+                expect(page.locator('[role="tab"][data-key="zakoni"]')).to_contain_text('Мерки по закони')
+                expect(page.locator('#s12-27-zakoni')).to_contain_text(
+                    'Мерките от таблици II-7 и II-8 са подредени по закона, когато мотивите посочват такъв.')
+            page.locator('[role="tab"][data-key="prihodni"]').click()
             cards = page.locator('[role="tabpanel"]:not([hidden]) .m27-card')
             assert cards.count() > 0
             # The printed table is the folded expert view; the cards carry every value.

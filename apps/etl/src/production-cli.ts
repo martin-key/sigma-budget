@@ -1,4 +1,14 @@
-import { readFile, writeFile, mkdir, mkdtemp, rm, cp, lstat, rename } from 'node:fs/promises';
+import {
+  readFile,
+  writeFile,
+  mkdir,
+  mkdtemp,
+  rm,
+  cp,
+  lstat,
+  rename,
+  readdir,
+} from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { resolve, join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -10,8 +20,16 @@ import {
   checkReleaseDirectory,
   preflightDestination,
   ReproductionDifference,
+  exportCommit,
+  prepareInputs,
+  stageInputs,
 } from '@sigma-budget/ingest/release-build';
-import { productionExecutor, decodeKfp } from '@sigma-budget/ingest/production';
+import {
+  productionExecutor,
+  decodeKfp,
+  loadProduction,
+  validateProduction,
+} from '@sigma-budget/ingest/production';
 import {
   canonicalJson,
   ReleaseError,
@@ -30,6 +48,7 @@ import { locateManifest, materializeRemote, getBytes } from './manifest-location
 export const PRODUCTION_USAGE = `Usage: budget <command> [options] (alias: budget-ts)
   build --commit COMMIT --inputs SNAPSHOT --out NEW_DIRECTORY --build-date YYYY-MM-DD [--site]
   validate --release CANDIDATE | --site [--inputs SNAPSHOT]
+  check-site --inputs SNAPSHOT
   reproduce --manifest FILE_OR_URL | --current SITE [--originals SNAPSHOT] [--out NEW_DIRECTORY] [--skip-published]
   collect [--seed SNAPSHOT] --out NEW_SNAPSHOT [--check-drift] [--summary FILE]
   refetch --manifest FILE_OR_URL | --current SITE --out NEW_SNAPSHOT
@@ -264,6 +283,52 @@ export async function productionCli(
       );
       return 0;
     }
+    if (command === 'check-site') {
+      allowed(['--inputs']);
+      const inputs = resolve(required('--inputs'));
+      const work = await freshTemp();
+      const release = await sitePackage(root, join(work, 'site-package'));
+      const exported = join(work, 'export');
+      const code = await exportCommit(root, 'HEAD', exported);
+      const prepared = await prepareInputs(exported, inputs);
+      await stageInputs(prepared, exported);
+      const pkg = await checkReleaseDirectory({
+        releaseRoot: release,
+        inputRoot: exported,
+        maxObjectBytes: 67108864,
+      });
+      const date = (pkg.manifest.processing.parameters as { build_date?: string } | undefined)
+        ?.build_date;
+      if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date))
+        throw new ReleaseError(2, 'Recorded build date missing');
+      const scratch = join(work, 'scratch');
+      await mkdir(scratch);
+      const require = createRequire(join(root, 'packages/ingest/package.json'));
+      await cp(dirname(require.resolve('7z-wasm')), join(scratch, '7z'), { recursive: true });
+      await writeFile(
+        join(scratch, 'exported-paths.json'),
+        JSON.stringify([
+          ...new Set([...Object.keys(code.files), ...prepared.inputs.map((f) => f.path)]),
+        ]),
+      );
+      const context = {
+        exportRoot: exported,
+        candidateRoot: release,
+        scratchRoot: scratch,
+        commit: code.commit,
+        buildDate: date,
+        inputs: prepared.inputs,
+      };
+      const validation = validateProduction(context, await loadProduction(context));
+      out(
+        JSON.stringify({
+          release_id: pkg.releaseId,
+          verdict: 'committed site validated',
+          ...validation,
+        }),
+      );
+      return 0;
+    }
     if (command !== 'validate' && command !== 'reproduce')
       throw new ReleaseError(2, PRODUCTION_USAGE);
     allowed(
@@ -423,7 +488,7 @@ export async function productionCli(
     if (temporary) await rm(temporary, { recursive: true, force: true });
   }
 }
-async function sitePackage(root: string, out: string) {
+export async function sitePackage(root: string, out: string) {
   const data = join(root, 'data/release'),
     pointer = JSON.parse(await readFile(join(data, 'releases/current.json'), 'utf8'));
   if (
@@ -435,6 +500,19 @@ async function sitePackage(root: string, out: string) {
     location = await locateManifest({ manifest: join(metadata, 'manifest.json') });
   if (location.releaseId !== pointer.release_id)
     throw new ReleaseError(2, 'Site identity mismatch');
+  // Inspect the checkout before selecting outputs: package replay cannot see files
+  // omitted by this copy. Historical release metadata is intentionally retained.
+  const listed = new Set(location.manifest.outputs.map((o) => o.path));
+  async function inventory(directory: string, prefix = 'data/') {
+    for (const entry of await readdir(directory, { withFileTypes: true })) {
+      const path = prefix + entry.name;
+      if (path === 'data/releases' && entry.isDirectory()) continue;
+      if (entry.isDirectory()) await inventory(join(directory, entry.name), path + '/');
+      else if (!entry.isFile() || !listed.has(path))
+        throw new ReleaseError(2, 'Site contains an unlisted or unsafe file: ' + path);
+    }
+  }
+  await inventory(data);
   await mkdir(out);
   for (const o of location.manifest.outputs) {
     const p = join(out, o.path);

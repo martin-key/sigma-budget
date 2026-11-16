@@ -42,18 +42,21 @@ python3 -m apps.web.scripts.serve
 
 ```bash
 uv venv tmp/venv --python 3.12
-uv pip install --python tmp/venv/bin/python --require-hashes -r tests/requirements-dev.lock
+uv pip install --python tmp/venv/bin/python --require-hashes -r tests/requirements-dev.lock -r pipeline/requirements.lock
 uv pip install --python tmp/venv/bin/python --no-deps -e pipeline
 PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers pnpm exec playwright install chromium # същата версия на Playwright като в tests/requirements-dev.lock: един Chromium и за Python проверките
-uv venv tmp/venv-data --python 3.12
-uv pip install --python tmp/venv-data/bin/python --require-hashes -r pipeline/requirements.lock
-uv pip install --python tmp/venv-data/bin/python --no-deps -e pipeline
 
 pnpm typecheck
-pnpm --filter @sigma-budget/ingest build
+pnpm --filter @sigma-budget/etl... build
 node packages/ingest/dist/validate/cli.js --live --only REGISTRY
-./budget-python validate --site # историческата публикувана снимка е неизменна
-python -m budget_pipeline.validate.datasets
+# Одобреният входен архив се придобива според „Входове за pnpm test“ в docs/dev-guide.md.
+# Възстановяването изисква нова директория извън хранилището и удостоверява архива и входовете.
+node scripts/restore-node-input-cache.mjs /path/to/registered-node-inputs.tar.gz /tmp/registered-node-inputs
+./budget check-site --inputs /tmp/registered-node-inputs
+# Пълният Python regression suite още пази независимите PDFMiner проверки и действащо съдържание:
+node scripts/restore-programme-test-inputs.mjs /path/to/registered-node-inputs.tar.gz
+tmp/venv/bin/python -m unittest discover -s tests/pipeline -t .
+node tests/release/budget_provenance_check.mjs
 node tests/release/compat_check.mjs
 pnpm --filter @sigma-budget/web test # и списъците на заявките на екраните (app/lib/query-lists.test.ts)
 PLAYWRIGHT_BROWSERS_PATH=$PWD/tmp/pw-browsers pnpm build:release --env staging --noindex

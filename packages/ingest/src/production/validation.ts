@@ -28,6 +28,7 @@ import { debtLocalSafetyGroups } from '../validate/debt-local-safety.js';
 import { independentRuleGroups, type ExecutionLawTable } from '../validate/independent-rules.js';
 import { readNapRows } from '../readers/fiscal-documents/nap.js';
 import { validateRegistry } from '../validate/registry.js';
+import { guideGroup } from '../validate/guide.js';
 import {
   REQUIRED_VALIDATION_GROUPS,
   type ValidationGroup,
@@ -214,7 +215,10 @@ export function validateProduction(
           c.get(`ministries/${code}.json`),
           join(sourceRoot, 'data/originals/program_budgets', reference.file),
         );
-        check.ok(true, `Every programme cell for ${code} equals independent PDFMiner decoding`);
+        check.ok(
+          true,
+          `Every programme cell for ${code} equals the committed PDFMiner reference, bound to the pinned PDF bytes`,
+        );
       }
       const debt = c.get('debt-issues.json');
       check.ok(
@@ -225,7 +229,10 @@ export function validateProduction(
         debt,
         join(sourceRoot, 'data/originals/debt/Bulletin_GovDebt_09-2026_bg.pdf'),
       );
-      check.ok(true, 'every debt table cell equals independent PDFMiner extraction');
+      check.ok(
+        true,
+        'every debt table cell equals the committed PDFMiner reference, bound to the pinned PDF bytes',
+      );
       for (const finding of debt.validation) {
         check.fact(finding.check + ': ' + finding.outcome + ' — ' + finding.reason);
         check.warn(finding.check + ': ' + finding.outcome + ' — ' + finding.reason);
@@ -235,6 +242,7 @@ export function validateProduction(
   };
   const groups: Group<Context>[] = [
     budgetTables,
+    guideGroup,
     ...sourceGroups,
     ...foundationGroups,
     ...wave15Groups,
@@ -307,6 +315,7 @@ export function validateProduction(
     ...REQUIRED_VALIDATION_GROUPS,
     'REGISTRY',
     'BUDGET-TABLES',
+    'GUIDE',
     ...debtLocalSafetyGroups.map((g) => g.name),
     ...sourceGroups.map((g) => g.name),
   ];
