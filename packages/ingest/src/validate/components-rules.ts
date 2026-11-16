@@ -74,10 +74,14 @@ export function components(ctx: Context): Check {
     'pending is P02 in meta and at the top',
   );
   c.ok(me.asOf === '2026-07-31' && me.retrieved === ctx.buildDate, 'meta asOf / retrieved');
-  c.ok(
-    equal(dig(core, 'pending', 'P02'), d.monthlyByBudget),
-    'core.pending.P02 equals components.monthlyByBudget',
-  );
+  const pending = dig(core, 'pending', 'P02');
+  // Historical core envelopes include screens; current core publishes only the data contract.
+  const monthly = keys(pending).includes('screens')
+    ? d.monthlyByBudget
+    : Object.fromEntries(
+        Object.entries(d.monthlyByBudget ?? {}).filter(([key]) => key !== 'screens'),
+      );
+  c.ok(equal(pending, monthly), 'core.pending.P02 equals components.monthlyByBudget');
   const b = d.budgets;
   ordered(c, b, budgetKeys, `budgets keys ${pyRepr(keys(b))}`);
   for (const k of budgetKeys) {
